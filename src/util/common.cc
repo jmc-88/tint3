@@ -31,35 +31,41 @@
 #include "../server.h"
 
 
-void copy_file(const char *pathSrc, const char *pathDest)
-{
-    FILE *fileSrc, *fileDest;
+void copy_file(const char* pathSrc, const char* pathDest) {
+    FILE* fileSrc, *fileDest;
     char line[100];
     int  nb;
 
     fileSrc = fopen(pathSrc, "rb");
-    if (fileSrc == NULL) return;
+
+    if (fileSrc == NULL) {
+        return;
+    }
 
     fileDest = fopen(pathDest, "wb");
-    if (fileDest == NULL) return;
+
+    if (fileDest == NULL) {
+        return;
+    }
 
     while ((nb = fread(line, 1, 100, fileSrc)) > 0)
-        if ( nb != fwrite(line, 1, nb, fileDest))
+        if ( nb != fwrite(line, 1, nb, fileDest)) {
             printf("Error while copying file %s to %s\n", pathSrc, pathDest);
+        }
 
     fclose (fileDest);
     fclose (fileSrc);
 }
 
 
-int parse_line(char *line, char **key, char **value)
-{
+int parse_line(char* line, char** key, char** value) {
     /* Skip useless lines */
     if ((line[0] == '#') || (line[0] == '\n')) {
         return 0;
     }
 
     char* a;
+
     if (!(a = strchr(line, '='))) {
         return 0;
     }
@@ -71,6 +77,7 @@ int parse_line(char *line, char **key, char **value)
 
     /* overwrite '\n' with '\0' if '\n' present */
     char* b;
+
     if ((b = strchr (a, '\n'))) {
         b[0] = '\0';
     }
@@ -83,16 +90,16 @@ int parse_line(char *line, char **key, char **value)
 }
 
 
-void tint_exec(const char *command)
-{
+void tint_exec(const char* command) {
     if (command) {
         pid_t pid;
         pid = fork();
+
         if (pid == 0) {
             // change for the fork the signal mask
-//          sigset_t sigset;
-//          sigprocmask(SIG_SETMASK, &sigset, 0);
-//          sigprocmask(SIG_UNBLOCK, &sigset, 0);
+            //          sigset_t sigset;
+            //          sigprocmask(SIG_SETMASK, &sigset, 0);
+            //          sigprocmask(SIG_UNBLOCK, &sigset, 0);
             execl("/bin/sh", "/bin/sh", "-c", command, NULL);
             _exit(0);
         }
@@ -100,49 +107,53 @@ void tint_exec(const char *command)
 }
 
 
-int hex_char_to_int (char c)
-{
+int hex_char_to_int (char c) {
     int r;
 
-    if (c >= '0' && c <= '9')  r = c - '0';
-    else if (c >= 'a' && c <= 'f')  r = c - 'a' + 10;
-    else if (c >= 'A' && c <= 'F')  r = c - 'A' + 10;
-    else  r = 0;
+    if (c >= '0' && c <= '9') {
+        r = c - '0';
+    } else if (c >= 'a' && c <= 'f') {
+        r = c - 'a' + 10;
+    } else if (c >= 'A' && c <= 'F') {
+        r = c - 'A' + 10;
+    } else {
+        r = 0;
+    }
 
     return r;
 }
 
 
-int hex_to_rgb (char *hex, int *r, int *g, int *b)
-{
+int hex_to_rgb (char* hex, int* r, int* g, int* b) {
     int len;
 
-    if (hex == NULL || hex[0] != '#') return (0);
+    if (hex == NULL || hex[0] != '#') {
+        return (0);
+    }
 
     len = strlen (hex);
+
     if (len == 3 + 1) {
         *r = hex_char_to_int (hex[1]);
         *g = hex_char_to_int (hex[2]);
         *b = hex_char_to_int (hex[3]);
-    }
-    else if (len == 6 + 1) {
+    } else if (len == 6 + 1) {
         *r = hex_char_to_int (hex[1]) * 16 + hex_char_to_int (hex[2]);
         *g = hex_char_to_int (hex[3]) * 16 + hex_char_to_int (hex[4]);
         *b = hex_char_to_int (hex[5]) * 16 + hex_char_to_int (hex[6]);
-    }
-    else if (len == 12 + 1) {
+    } else if (len == 12 + 1) {
         *r = hex_char_to_int (hex[1]) * 16 + hex_char_to_int (hex[2]);
         *g = hex_char_to_int (hex[5]) * 16 + hex_char_to_int (hex[6]);
         *b = hex_char_to_int (hex[9]) * 16 + hex_char_to_int (hex[10]);
+    } else {
+        return 0;
     }
-    else return 0;
 
     return 1;
 }
 
 
-void get_color (char *hex, double *rgb)
-{
+void get_color (char* hex, double* rgb) {
     int r, g, b;
     hex_to_rgb (hex, &r, &g, &b);
 
@@ -152,13 +163,21 @@ void get_color (char *hex, double *rgb)
 }
 
 
-void extract_values (char *value, char **value1, char **value2, char **value3)
-{
-    if (*value1) free(*value1);
-    if (*value2) free(*value2);
-    if (*value3) free(*value3);
+void extract_values (char* value, char** value1, char** value2, char** value3) {
+    if (*value1) {
+        free(*value1);
+    }
+
+    if (*value2) {
+        free(*value2);
+    }
+
+    if (*value3) {
+        free(*value3);
+    }
 
     char* b = 0;
+
     if ((b = strchr(value, ' '))) {
         b[0] = '\0';
         b++;
@@ -166,19 +185,21 @@ void extract_values (char *value, char **value1, char **value2, char **value3)
         *value2 = 0;
         *value3 = 0;
     }
+
     *value1 = strdup(value);
     g_strstrip(*value1);
 
     char* c = 0;
+
     if (b) {
         if ((c = strchr(b, ' '))) {
             c[0] = '\0';
             c++;
-        }
-        else {
+        } else {
             c = 0;
             *value3 = 0;
         }
+
         *value2 = strdup(b);
         g_strstrip(*value2);
     }
@@ -190,8 +211,8 @@ void extract_values (char *value, char **value1, char **value2, char **value3)
 }
 
 
-void adjust_asb(DATA32 *data, int w, int h, int alpha, float satur, float bright)
-{
+void adjust_asb(DATA32* data, int w, int h, int alpha, float satur,
+                float bright) {
     unsigned int x, y;
     unsigned int a, r, g, b, argb;
     unsigned long id;
@@ -200,52 +221,87 @@ void adjust_asb(DATA32 *data, int w, int h, int alpha, float satur, float bright
     float hue, saturation, brightness;
     float redc, greenc, bluec;
 
-    for(y = 0; y < h; y++) {
-        for(id = y * w, x = 0; x < w; x++, id++) {
+    for (y = 0; y < h; y++) {
+        for (id = y * w, x = 0; x < w; x++, id++) {
             argb = data[id];
             a = (argb >> 24) & 0xff;
+
             // transparent => nothing to do.
-            if (a == 0) continue;
+            if (a == 0) {
+                continue;
+            }
+
             r = (argb >> 16) & 0xff;
             g = (argb >> 8) & 0xff;
             b = (argb) & 0xff;
 
             // convert RGB to HSB
             cmax = (r > g) ? r : g;
-            if (b > cmax) cmax = b;
+
+            if (b > cmax) {
+                cmax = b;
+            }
+
             cmin = (r < g) ? r : g;
-            if (b < cmin) cmin = b;
+
+            if (b < cmin) {
+                cmin = b;
+            }
+
             brightness = ((float)cmax) / 255.0f;
-            if (cmax != 0)
+
+            if (cmax != 0) {
                 saturation = ((float)(cmax - cmin)) / ((float)cmax);
-            else
+            } else {
                 saturation = 0;
-            if (saturation == 0)
+            }
+
+            if (saturation == 0) {
                 hue = 0;
-            else {
+            } else {
                 redc = ((float)(cmax - r)) / ((float)(cmax - cmin));
                 greenc = ((float)(cmax - g)) / ((float)(cmax - cmin));
                 bluec = ((float)(cmax - b)) / ((float)(cmax - cmin));
-                if (r == cmax)
+
+                if (r == cmax) {
                     hue = bluec - greenc;
-                else if (g == cmax)
+                } else if (g == cmax) {
                     hue = 2.0f + redc - bluec;
-                else
+                } else {
                     hue = 4.0f + greenc - redc;
+                }
+
                 hue = hue / 6.0f;
-                if (hue < 0)
+
+                if (hue < 0) {
                     hue = hue + 1.0f;
+                }
             }
 
             // adjust
             saturation += satur;
-            if (saturation < 0.0) saturation = 0.0;
-            if (saturation > 1.0) saturation = 1.0;
+
+            if (saturation < 0.0) {
+                saturation = 0.0;
+            }
+
+            if (saturation > 1.0) {
+                saturation = 1.0;
+            }
+
             brightness += bright;
-            if (brightness < 0.0) brightness = 0.0;
-            if (brightness > 1.0) brightness = 1.0;
-            if (alpha != 100)
-                a = (a * alpha)/100;
+
+            if (brightness < 0.0) {
+                brightness = 0.0;
+            }
+
+            if (brightness > 1.0) {
+                brightness = 1.0;
+            }
+
+            if (alpha != 100) {
+                a = (a * alpha) / 100;
+            }
 
             // convert HSB to RGB
             if (saturation == 0) {
@@ -256,37 +312,43 @@ void adjust_asb(DATA32 *data, int w, int h, int alpha, float satur, float bright
                 p = brightness * (1.0f - saturation);
                 q = brightness * (1.0f - saturation * f);
                 t = brightness * (1.0f - (saturation * (1.0f - f)));
+
                 switch ((int) h2) {
-                case 0:
-                    r = (int)(brightness * 255.0f + 0.5f);
-                    g = (int)(t * 255.0f + 0.5f);
-                    b = (int)(p * 255.0f + 0.5f);
-                    break;
-                case 1:
-                    r = (int)(q * 255.0f + 0.5f);
-                    g = (int)(brightness * 255.0f + 0.5f);
-                    b = (int)(p * 255.0f + 0.5f);
-                    break;
-                case 2:
-                    r = (int)(p * 255.0f + 0.5f);
-                    g = (int)(brightness * 255.0f + 0.5f);
-                    b = (int)(t * 255.0f + 0.5f);
-                    break;
-                case 3:
-                    r = (int)(p * 255.0f + 0.5f);
-                    g = (int)(q * 255.0f + 0.5f);
-                    b = (int)(brightness * 255.0f + 0.5f);
-                    break;
-                case 4:
-                    r = (int)(t * 255.0f + 0.5f);
-                    g = (int)(p * 255.0f + 0.5f);
-                    b = (int)(brightness * 255.0f + 0.5f);
-                    break;
-                case 5:
-                    r = (int)(brightness * 255.0f + 0.5f);
-                    g = (int)(p * 255.0f + 0.5f);
-                    b = (int)(q * 255.0f + 0.5f);
-                    break;
+                    case 0:
+                        r = (int)(brightness * 255.0f + 0.5f);
+                        g = (int)(t * 255.0f + 0.5f);
+                        b = (int)(p * 255.0f + 0.5f);
+                        break;
+
+                    case 1:
+                        r = (int)(q * 255.0f + 0.5f);
+                        g = (int)(brightness * 255.0f + 0.5f);
+                        b = (int)(p * 255.0f + 0.5f);
+                        break;
+
+                    case 2:
+                        r = (int)(p * 255.0f + 0.5f);
+                        g = (int)(brightness * 255.0f + 0.5f);
+                        b = (int)(t * 255.0f + 0.5f);
+                        break;
+
+                    case 3:
+                        r = (int)(p * 255.0f + 0.5f);
+                        g = (int)(q * 255.0f + 0.5f);
+                        b = (int)(brightness * 255.0f + 0.5f);
+                        break;
+
+                    case 4:
+                        r = (int)(t * 255.0f + 0.5f);
+                        g = (int)(p * 255.0f + 0.5f);
+                        b = (int)(brightness * 255.0f + 0.5f);
+                        break;
+
+                    case 5:
+                        r = (int)(brightness * 255.0f + 0.5f);
+                        g = (int)(p * 255.0f + 0.5f);
+                        b = (int)(q * 255.0f + 0.5f);
+                        break;
                 }
             }
 
@@ -300,36 +362,45 @@ void adjust_asb(DATA32 *data, int w, int h, int alpha, float satur, float bright
 }
 
 
-void createHeuristicMask(DATA32* data, int w, int h)
-{
+void createHeuristicMask(DATA32* data, int w, int h) {
     // first we need to find the mask color, therefore we check all 4 edge pixel and take the color which
     // appears most often (we only need to check three edges, the 4th is implicitly clear)
-    unsigned int topLeft = data[0], topRight = data[w-1], bottomLeft = data[w*h-w], bottomRight = data[w*h-1];
-    int max = (topLeft == topRight) + (topLeft == bottomLeft) + (topLeft == bottomRight);
+    unsigned int topLeft = data[0], topRight = data[w - 1],
+                 bottomLeft = data[w * h - w], bottomRight = data[w * h - 1];
+    int max = (topLeft == topRight) + (topLeft == bottomLeft) +
+              (topLeft == bottomRight);
     int maskPos = 0;
-    if ( max < (topRight == topLeft) + (topRight == bottomLeft) + (topRight == bottomRight) ) {
-        max = (topRight == topLeft) + (topRight == bottomLeft) + (topRight == bottomRight);
-        maskPos = w-1;
+
+    if ( max < (topRight == topLeft) + (topRight == bottomLeft) +
+         (topRight == bottomRight) ) {
+        max = (topRight == topLeft) + (topRight == bottomLeft) +
+              (topRight == bottomRight);
+        maskPos = w - 1;
     }
-    if ( max < (bottomLeft == topRight) + (bottomLeft == topLeft) + (bottomLeft == bottomRight) )
-        maskPos = w*h-w;
+
+    if ( max < (bottomLeft == topRight) + (bottomLeft == topLeft) +
+         (bottomLeft == bottomRight) ) {
+        maskPos = w * h - w;
+    }
 
     // now mask out every pixel which has the same color as the edge pixels
     unsigned char* udata = (unsigned char*)data;
-    unsigned char b = udata[4*maskPos];
-    unsigned char g = udata[4*maskPos+1];
-    unsigned char r = udata[4*maskPos+1];
+    unsigned char b = udata[4 * maskPos];
+    unsigned char g = udata[4 * maskPos + 1];
+    unsigned char r = udata[4 * maskPos + 1];
     int i;
-    for (i=0; i<h*w; ++i) {
-        if ( b-udata[0] == 0 && g-udata[1] == 0 && r-udata[2] == 0 )
+
+    for (i = 0; i < h * w; ++i) {
+        if ( b - udata[0] == 0 && g - udata[1] == 0 && r - udata[2] == 0 ) {
             udata[3] = 0;
+        }
+
         udata += 4;
     }
 }
 
 
-void render_image(Drawable d, int x, int y, int w, int h)
-{
+void render_image(Drawable d, int x, int y, int w, int h) {
     // in real_transparency mode imlib_render_image_on_drawable does not the right thing, because
     // the operation is IMLIB_OP_COPY, but we would need IMLIB_OP_OVER (which does not exist)
     // Therefore we have to do it with the XRender extension (i.e. copy what imlib is doing internally)
@@ -338,10 +409,14 @@ void render_image(Drawable d, int x, int y, int w, int h)
     imlib_context_set_drawable(pmap_tmp);
     imlib_context_set_blend(0);
     imlib_render_image_on_drawable(0, 0);
-    Picture pict_image = XRenderCreatePicture(server.dsp, pmap_tmp, XRenderFindStandardFormat(server.dsp, PictStandardARGB32), 0, 0);
-    Picture pict_drawable = XRenderCreatePicture(server.dsp, d, XRenderFindVisualFormat(server.dsp, server.visual), 0, 0);
-    XRenderComposite(server.dsp, PictOpIn, pict_image, None, pict_image, 0, 0, 0, 0, 0, 0, w, h);
-    XRenderComposite(server.dsp, PictOpOver, pict_image, None, pict_drawable, 0, 0, 0, 0, x, y, w, h);
+    Picture pict_image = XRenderCreatePicture(server.dsp, pmap_tmp,
+                         XRenderFindStandardFormat(server.dsp, PictStandardARGB32), 0, 0);
+    Picture pict_drawable = XRenderCreatePicture(server.dsp, d,
+                            XRenderFindVisualFormat(server.dsp, server.visual), 0, 0);
+    XRenderComposite(server.dsp, PictOpIn, pict_image, None, pict_image, 0, 0, 0, 0,
+                     0, 0, w, h);
+    XRenderComposite(server.dsp, PictOpOver, pict_image, None, pict_drawable, 0, 0,
+                     0, 0, x, y, w, h);
     imlib_context_set_blend(1);
     XFreePixmap(server.dsp, pmap_tmp);
     XRenderFreePicture(server.dsp, pict_image);

@@ -28,236 +28,242 @@
 
 #include "xsettings-common.h"
 
-XSettingsSetting *
-xsettings_setting_copy (XSettingsSetting *setting)
-{
-  XSettingsSetting* result = (XSettingsSetting*) malloc(sizeof *result);
+XSettingsSetting*
+xsettings_setting_copy (XSettingsSetting* setting) {
+    XSettingsSetting* result = (XSettingsSetting*) malloc(sizeof * result);
 
-  if (!result) {
-    return NULL;
-  }
-
-  size_t str_len = strlen(setting->name);
-  result->name = (char*) malloc(str_len + 1);
-  if (!result->name) {
-    goto err;
-  }
-
-  memcpy (result->name, setting->name, str_len + 1);
-  result->type = setting->type;
-
-  switch (setting->type)
-    {
-    case XSETTINGS_TYPE_INT:
-      result->data.v_int = setting->data.v_int;
-      break;
-    case XSETTINGS_TYPE_COLOR:
-      result->data.v_color = setting->data.v_color;
-      break;
-    case XSETTINGS_TYPE_STRING:
-      str_len = strlen (setting->data.v_string);
-      result->data.v_string = (char*) malloc(str_len + 1);
-      if (!result->data.v_string)
-    goto err;
-
-      memcpy (result->data.v_string, setting->data.v_string, str_len + 1);
-      break;
-
-      default: break;
+    if (!result) {
+        return NULL;
     }
 
-  result->last_change_serial = setting->last_change_serial;
+    size_t str_len = strlen(setting->name);
+    result->name = (char*) malloc(str_len + 1);
 
-  return result;
+    if (!result->name) {
+        goto err;
+    }
 
- err:
-  if (result->name) {
-    free(result->name);
-  }
-  free(result);
-  return NULL;
+    memcpy (result->name, setting->name, str_len + 1);
+    result->type = setting->type;
+
+    switch (setting->type) {
+        case XSETTINGS_TYPE_INT:
+            result->data.v_int = setting->data.v_int;
+            break;
+
+        case XSETTINGS_TYPE_COLOR:
+            result->data.v_color = setting->data.v_color;
+            break;
+
+        case XSETTINGS_TYPE_STRING:
+            str_len = strlen (setting->data.v_string);
+            result->data.v_string = (char*) malloc(str_len + 1);
+
+            if (!result->data.v_string) {
+                goto err;
+            }
+
+            memcpy (result->data.v_string, setting->data.v_string, str_len + 1);
+            break;
+
+        default:
+            break;
+    }
+
+    result->last_change_serial = setting->last_change_serial;
+
+    return result;
+
+err:
+
+    if (result->name) {
+        free(result->name);
+    }
+
+    free(result);
+    return NULL;
 }
 
-XSettingsList *
-xsettings_list_copy (XSettingsList *list)
-{
-  XSettingsList *new_list = NULL;
-  XSettingsList *old_iter = list;
-  XSettingsList *new_iter = NULL;
+XSettingsList*
+xsettings_list_copy (XSettingsList* list) {
+    XSettingsList* new_list = NULL;
+    XSettingsList* old_iter = list;
+    XSettingsList* new_iter = NULL;
 
-  while (old_iter)
-    {
-      XSettingsList *new_node = (XSettingsList*) malloc(sizeof *new_node);
-      if (!new_node) goto error;
+    while (old_iter) {
+        XSettingsList* new_node = (XSettingsList*) malloc(sizeof * new_node);
 
-      new_node->setting = xsettings_setting_copy (old_iter->setting);
-      if (!new_node->setting)
-    {
-      free(new_node);
-      goto error;
+        if (!new_node) {
+            goto error;
+        }
+
+        new_node->setting = xsettings_setting_copy (old_iter->setting);
+
+        if (!new_node->setting) {
+            free(new_node);
+            goto error;
+        }
+
+        if (new_iter) {
+            new_iter->next = new_node;
+        } else {
+            new_list = new_node;
+        }
+
+        new_iter = new_node;
+        old_iter = old_iter->next;
     }
 
-      if (new_iter)
-    new_iter->next = new_node;
-      else
-    new_list = new_node;
+    return new_list;
 
-      new_iter = new_node;
-      old_iter = old_iter->next;
-    }
-
-  return new_list;
-
- error:
-  xsettings_list_free(new_list);
-  return NULL;
+error:
+    xsettings_list_free(new_list);
+    return NULL;
 }
 
 int
-xsettings_setting_equal (XSettingsSetting *setting_a,
-             XSettingsSetting *setting_b)
-{
-  if (setting_a->type != setting_b->type)
-    return 0;
-
-  if (strcmp (setting_a->name, setting_b->name) != 0)
-    return 0;
-
-  switch (setting_a->type)
-    {
-    case XSETTINGS_TYPE_INT:
-      return setting_a->data.v_int == setting_b->data.v_int;
-    case XSETTINGS_TYPE_COLOR:
-      return (setting_a->data.v_color.red == setting_b->data.v_color.red &&
-          setting_a->data.v_color.green == setting_b->data.v_color.green &&
-          setting_a->data.v_color.blue == setting_b->data.v_color.blue &&
-          setting_a->data.v_color.alpha == setting_b->data.v_color.alpha);
-    case XSETTINGS_TYPE_STRING:
-      return strcmp (setting_a->data.v_string, setting_b->data.v_string) == 0;
-    default:
-      break;
+xsettings_setting_equal (XSettingsSetting* setting_a,
+                         XSettingsSetting* setting_b) {
+    if (setting_a->type != setting_b->type) {
+        return 0;
     }
 
-  return 0;
+    if (strcmp (setting_a->name, setting_b->name) != 0) {
+        return 0;
+    }
+
+    switch (setting_a->type) {
+        case XSETTINGS_TYPE_INT:
+            return setting_a->data.v_int == setting_b->data.v_int;
+
+        case XSETTINGS_TYPE_COLOR:
+            return (setting_a->data.v_color.red == setting_b->data.v_color.red &&
+                    setting_a->data.v_color.green == setting_b->data.v_color.green &&
+                    setting_a->data.v_color.blue == setting_b->data.v_color.blue &&
+                    setting_a->data.v_color.alpha == setting_b->data.v_color.alpha);
+
+        case XSETTINGS_TYPE_STRING:
+            return strcmp (setting_a->data.v_string, setting_b->data.v_string) == 0;
+
+        default:
+            break;
+    }
+
+    return 0;
 }
 
 void
-xsettings_setting_free (XSettingsSetting *setting)
-{
-  if (setting->type == XSETTINGS_TYPE_STRING) {
-    free(setting->data.v_string);
-  }
+xsettings_setting_free (XSettingsSetting* setting) {
+    if (setting->type == XSETTINGS_TYPE_STRING) {
+        free(setting->data.v_string);
+    }
 
-  if (setting->name) {
-    free(setting->name);
-  }
+    if (setting->name) {
+        free(setting->name);
+    }
 
-  free(setting);
+    free(setting);
 }
 
 void
-xsettings_list_free (XSettingsList *list)
-{
-  while (list)
-    {
-      XSettingsList *next = list->next;
+xsettings_list_free (XSettingsList* list) {
+    while (list) {
+        XSettingsList* next = list->next;
 
-      xsettings_setting_free (list->setting);
-      free (list);
+        xsettings_setting_free (list->setting);
+        free (list);
 
-      list = next;
+        list = next;
     }
 }
 
 XSettingsResult
-xsettings_list_insert (XSettingsList    **list,
-               XSettingsSetting  *setting)
-{
-  XSettingsList* last = NULL;
-  XSettingsList* node = (XSettingsList*) malloc(sizeof *node);
-  if (!node) {
-    return XSETTINGS_NO_MEM;
-  }
-  node->setting = setting;
+xsettings_list_insert (XSettingsList**    list,
+                       XSettingsSetting*  setting) {
+    XSettingsList* last = NULL;
+    XSettingsList* node = (XSettingsList*) malloc(sizeof * node);
 
-  XSettingsList* iter = *list;
-  while (iter)
-    {
-      int cmp = strcmp (setting->name, iter->setting->name);
-
-      if (cmp < 0)
-    break;
-      else if (cmp == 0)
-    {
-      free (node);
-      return XSETTINGS_DUPLICATE_ENTRY;
+    if (!node) {
+        return XSETTINGS_NO_MEM;
     }
 
-      last = iter;
-      iter = iter->next;
+    node->setting = setting;
+
+    XSettingsList* iter = *list;
+
+    while (iter) {
+        int cmp = strcmp (setting->name, iter->setting->name);
+
+        if (cmp < 0) {
+            break;
+        } else if (cmp == 0) {
+            free (node);
+            return XSETTINGS_DUPLICATE_ENTRY;
+        }
+
+        last = iter;
+        iter = iter->next;
     }
 
-  if (last) {
-    last->next = node;
-  } else {
-    *list = node;
-  }
+    if (last) {
+        last->next = node;
+    } else {
+        *list = node;
+    }
 
-  node->next = iter;
-  return XSETTINGS_SUCCESS;
+    node->next = iter;
+    return XSETTINGS_SUCCESS;
 }
 
 XSettingsResult
-xsettings_list_delete (XSettingsList **list,
-               const char     *name)
-{
-  XSettingsList *iter;
-  XSettingsList *last = NULL;
+xsettings_list_delete (XSettingsList** list,
+                       const char*     name) {
+    XSettingsList* iter;
+    XSettingsList* last = NULL;
 
-  iter = *list;
-  while (iter)
-    {
-      if (strcmp (name, iter->setting->name) == 0)
-    {
-      if (last)
-        last->next = iter->next;
-      else
-        *list = iter->next;
+    iter = *list;
 
-      xsettings_setting_free (iter->setting);
-      free (iter);
+    while (iter) {
+        if (strcmp (name, iter->setting->name) == 0) {
+            if (last) {
+                last->next = iter->next;
+            } else {
+                *list = iter->next;
+            }
 
-      return XSETTINGS_SUCCESS;
+            xsettings_setting_free (iter->setting);
+            free (iter);
+
+            return XSETTINGS_SUCCESS;
+        }
+
+        last = iter;
+        iter = iter->next;
     }
 
-      last = iter;
-      iter = iter->next;
-    }
-
-  return XSETTINGS_FAILED;
+    return XSETTINGS_FAILED;
 }
 
-XSettingsSetting *
-xsettings_list_lookup (XSettingsList *list,
-               const char    *name)
-{
-  XSettingsList *iter;
+XSettingsSetting*
+xsettings_list_lookup (XSettingsList* list,
+                       const char*    name) {
+    XSettingsList* iter;
 
-  iter = list;
-  while (iter)
-    {
-      if (strcmp (name, iter->setting->name) == 0)
-    return iter->setting;
+    iter = list;
 
-      iter = iter->next;
+    while (iter) {
+        if (strcmp (name, iter->setting->name) == 0) {
+            return iter->setting;
+        }
+
+        iter = iter->next;
     }
 
-  return NULL;
+    return NULL;
 }
 
 char
-xsettings_byte_order (void)
-{
-  CARD32 myint = 0x01020304;
-  return (*(char *)&myint == 1) ? MSBFirst : LSBFirst;
+xsettings_byte_order (void) {
+    CARD32 myint = 0x01020304;
+    return (*(char*)&myint == 1) ? MSBFirst : LSBFirst;
 }

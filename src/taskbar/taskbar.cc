@@ -39,19 +39,22 @@
 */
 GHashTable* win_to_task_table;
 
-Task *task_active;
-Task *task_drag;
+Task* task_active;
+Task* task_drag;
 int taskbar_enabled;
 
-guint win_hash(gconstpointer key) { return (guint)*((Window*)key); }
-gboolean win_compare(gconstpointer a, gconstpointer b) { return (*((Window*)a) == *((Window*)b)); }
+guint win_hash(gconstpointer key) {
+    return (guint) * ((Window*)key);
+}
+gboolean win_compare(gconstpointer a, gconstpointer b) {
+    return (*((Window*)a) == *((Window*)b));
+}
 void free_ptr_array(gpointer data) {
     g_ptr_array_free(static_cast<GPtrArray*>(data), 1);
 }
 
 
-void default_taskbar()
-{
+void default_taskbar() {
     win_to_task_table = 0;
     urgent_timeout = 0;
     urgent_list = 0;
@@ -59,23 +62,30 @@ void default_taskbar()
     default_taskbarname();
 }
 
-void cleanup_taskbar()
-{
+void cleanup_taskbar() {
     cleanup_taskbarname();
+
     if (win_to_task_table) {
         g_hash_table_foreach(win_to_task_table, taskbar_remove_task, 0);
     }
+
     for (int i = 0 ; i < nb_panel; ++i) {
         Panel* panel = &panel1[i];
+
         for (int j = 0 ; j < panel->nb_desktop ; ++j) {
             Taskbar* tskbar = &panel->taskbar[j];
+
             for (int k = 0; k < TASKBAR_STATE_COUNT; ++k) {
-                if (tskbar->state_pix[k]) XFreePixmap(server.dsp, tskbar->state_pix[k]);
+                if (tskbar->state_pix[k]) {
+                    XFreePixmap(server.dsp, tskbar->state_pix[k]);
+                }
             }
+
             free_area (&tskbar->area);
             // remove taskbar from the panel
             panel->area.list = g_slist_remove(panel->area.list, tskbar);
         }
+
         if (panel->taskbar) {
             free(panel->taskbar);
             panel->taskbar = 0;
@@ -89,10 +99,10 @@ void cleanup_taskbar()
 }
 
 
-void init_taskbar()
-{
+void init_taskbar() {
     if (win_to_task_table == 0) {
-        win_to_task_table = g_hash_table_new_full(win_hash, win_compare, free, free_ptr_array);
+        win_to_task_table = g_hash_table_new_full(win_hash, win_compare, free,
+                            free_ptr_array);
     }
 
     task_active = 0;
@@ -100,21 +110,27 @@ void init_taskbar()
 }
 
 
-void init_taskbar_panel(void *p)
-{
-    Panel *panel =(Panel*)p;
+void init_taskbar_panel(void* p) {
+    Panel* panel = (Panel*)p;
     int j;
 
     if (panel->g_taskbar.background[TASKBAR_NORMAL] == 0) {
-        panel->g_taskbar.background[TASKBAR_NORMAL] = &g_array_index(backgrounds, Background, 0);
-        panel->g_taskbar.background[TASKBAR_ACTIVE] = &g_array_index(backgrounds, Background, 0);
+        panel->g_taskbar.background[TASKBAR_NORMAL] = &g_array_index(backgrounds,
+                Background, 0);
+        panel->g_taskbar.background[TASKBAR_ACTIVE] = &g_array_index(backgrounds,
+                Background, 0);
     }
+
     if (panel->g_taskbar.background_name[TASKBAR_NORMAL] == 0) {
-        panel->g_taskbar.background_name[TASKBAR_NORMAL] = &g_array_index(backgrounds, Background, 0);
-        panel->g_taskbar.background_name[TASKBAR_ACTIVE] = &g_array_index(backgrounds, Background, 0);
+        panel->g_taskbar.background_name[TASKBAR_NORMAL] = &g_array_index(backgrounds,
+                Background, 0);
+        panel->g_taskbar.background_name[TASKBAR_ACTIVE] = &g_array_index(backgrounds,
+                Background, 0);
     }
-    if (panel->g_task.area.bg == 0)
+
+    if (panel->g_task.area.bg == 0) {
         panel->g_task.area.bg = &g_array_index(backgrounds, Background, 0);
+    }
 
     // taskbar name
     panel->g_taskbar.area_name.panel = panel;
@@ -134,15 +150,19 @@ void init_taskbar_panel(void *p)
     panel->g_taskbar.area._on_change_layout = on_change_taskbar;
     panel->g_taskbar.area.resize = 1;
     panel->g_taskbar.area.on_screen = 1;
+
     if (panel_horizontal) {
-        panel->g_taskbar.area.posy = panel->area.bg->border.width + panel->area.paddingy;
-        panel->g_taskbar.area.height = panel->area.height - (2 * panel->g_taskbar.area.posy);
+        panel->g_taskbar.area.posy = panel->area.bg->border.width +
+                                     panel->area.paddingy;
+        panel->g_taskbar.area.height = panel->area.height - (2 *
+                                       panel->g_taskbar.area.posy);
         panel->g_taskbar.area_name.posy = panel->g_taskbar.area.posy;
         panel->g_taskbar.area_name.height = panel->g_taskbar.area.height;
-    }
-    else {
-        panel->g_taskbar.area.posx = panel->area.bg->border.width + panel->area.paddingy;
-        panel->g_taskbar.area.width = panel->area.width - (2 * panel->g_taskbar.area.posx);
+    } else {
+        panel->g_taskbar.area.posx = panel->area.bg->border.width +
+                                     panel->area.paddingy;
+        panel->g_taskbar.area.width = panel->area.width - (2 *
+                                      panel->g_taskbar.area.posx);
         panel->g_taskbar.area_name.posx = panel->g_taskbar.area.posx;
         panel->g_taskbar.area_name.width = panel->g_taskbar.area.width;
     }
@@ -154,141 +174,197 @@ void init_taskbar_panel(void *p)
     panel->g_task.area._on_change_layout = on_change_task;
     panel->g_task.area.resize = 1;
     panel->g_task.area.on_screen = 1;
-    if ((panel->g_task.config_asb_mask & (1<<TASK_NORMAL)) == 0) {
+
+    if ((panel->g_task.config_asb_mask & (1 << TASK_NORMAL)) == 0) {
         panel->g_task.alpha[TASK_NORMAL] = 100;
         panel->g_task.saturation[TASK_NORMAL] = 0;
         panel->g_task.brightness[TASK_NORMAL] = 0;
     }
-    if ((panel->g_task.config_asb_mask & (1<<TASK_ACTIVE)) == 0) {
+
+    if ((panel->g_task.config_asb_mask & (1 << TASK_ACTIVE)) == 0) {
         panel->g_task.alpha[TASK_ACTIVE] = panel->g_task.alpha[TASK_NORMAL];
         panel->g_task.saturation[TASK_ACTIVE] = panel->g_task.saturation[TASK_NORMAL];
         panel->g_task.brightness[TASK_ACTIVE] = panel->g_task.brightness[TASK_NORMAL];
     }
-    if ((panel->g_task.config_asb_mask & (1<<TASK_ICONIFIED)) == 0) {
+
+    if ((panel->g_task.config_asb_mask & (1 << TASK_ICONIFIED)) == 0) {
         panel->g_task.alpha[TASK_ICONIFIED] = panel->g_task.alpha[TASK_NORMAL];
-        panel->g_task.saturation[TASK_ICONIFIED] = panel->g_task.saturation[TASK_NORMAL];
-        panel->g_task.brightness[TASK_ICONIFIED] = panel->g_task.brightness[TASK_NORMAL];
+        panel->g_task.saturation[TASK_ICONIFIED] =
+            panel->g_task.saturation[TASK_NORMAL];
+        panel->g_task.brightness[TASK_ICONIFIED] =
+            panel->g_task.brightness[TASK_NORMAL];
     }
-    if ((panel->g_task.config_asb_mask & (1<<TASK_URGENT)) == 0) {
+
+    if ((panel->g_task.config_asb_mask & (1 << TASK_URGENT)) == 0) {
         panel->g_task.alpha[TASK_URGENT] = panel->g_task.alpha[TASK_ACTIVE];
         panel->g_task.saturation[TASK_URGENT] = panel->g_task.saturation[TASK_ACTIVE];
         panel->g_task.brightness[TASK_URGENT] = panel->g_task.brightness[TASK_ACTIVE];
     }
-    if ((panel->g_task.config_font_mask & (1<<TASK_NORMAL)) == 0) panel->g_task.font[TASK_NORMAL] = (Color){{0, 0, 0}, 0};
-    if ((panel->g_task.config_font_mask & (1<<TASK_ACTIVE)) == 0) panel->g_task.font[TASK_ACTIVE] = panel->g_task.font[TASK_NORMAL];
-    if ((panel->g_task.config_font_mask & (1<<TASK_ICONIFIED)) == 0) panel->g_task.font[TASK_ICONIFIED] = panel->g_task.font[TASK_NORMAL];
-    if ((panel->g_task.config_font_mask & (1<<TASK_URGENT)) == 0) panel->g_task.font[TASK_URGENT] = panel->g_task.font[TASK_ACTIVE];
-    if ((panel->g_task.config_background_mask & (1<<TASK_NORMAL)) == 0) panel->g_task.background[TASK_NORMAL] = &g_array_index(backgrounds, Background, 0);
-    if ((panel->g_task.config_background_mask & (1<<TASK_ACTIVE)) == 0) panel->g_task.background[TASK_ACTIVE] = panel->g_task.background[TASK_NORMAL];
-    if ((panel->g_task.config_background_mask & (1<<TASK_ICONIFIED)) == 0) panel->g_task.background[TASK_ICONIFIED] = panel->g_task.background[TASK_NORMAL];
-    if ((panel->g_task.config_background_mask & (1<<TASK_URGENT)) == 0) panel->g_task.background[TASK_URGENT] = panel->g_task.background[TASK_ACTIVE];
+
+    if ((panel->g_task.config_font_mask & (1 << TASK_NORMAL)) == 0)
+        panel->g_task.font[TASK_NORMAL] = (Color) {
+        {0, 0, 0}, 0
+    };
+
+    if ((panel->g_task.config_font_mask & (1 << TASK_ACTIVE)) == 0) {
+        panel->g_task.font[TASK_ACTIVE] = panel->g_task.font[TASK_NORMAL];
+    }
+
+    if ((panel->g_task.config_font_mask & (1 << TASK_ICONIFIED)) == 0) {
+        panel->g_task.font[TASK_ICONIFIED] = panel->g_task.font[TASK_NORMAL];
+    }
+
+    if ((panel->g_task.config_font_mask & (1 << TASK_URGENT)) == 0) {
+        panel->g_task.font[TASK_URGENT] = panel->g_task.font[TASK_ACTIVE];
+    }
+
+    if ((panel->g_task.config_background_mask & (1 << TASK_NORMAL)) == 0) {
+        panel->g_task.background[TASK_NORMAL] = &g_array_index(backgrounds, Background,
+                                                0);
+    }
+
+    if ((panel->g_task.config_background_mask & (1 << TASK_ACTIVE)) == 0) {
+        panel->g_task.background[TASK_ACTIVE] = panel->g_task.background[TASK_NORMAL];
+    }
+
+    if ((panel->g_task.config_background_mask & (1 << TASK_ICONIFIED)) == 0) {
+        panel->g_task.background[TASK_ICONIFIED] =
+            panel->g_task.background[TASK_NORMAL];
+    }
+
+    if ((panel->g_task.config_background_mask & (1 << TASK_URGENT)) == 0) {
+        panel->g_task.background[TASK_URGENT] = panel->g_task.background[TASK_ACTIVE];
+    }
 
     if (panel_horizontal) {
-        panel->g_task.area.posy = panel->g_taskbar.area.posy + panel->g_taskbar.background[TASKBAR_NORMAL]->border.width + panel->g_taskbar.area.paddingy;
+        panel->g_task.area.posy = panel->g_taskbar.area.posy +
+                                  panel->g_taskbar.background[TASKBAR_NORMAL]->border.width +
+                                  panel->g_taskbar.area.paddingy;
         panel->g_task.area.height = panel->area.height - (2 * panel->g_task.area.posy);
-    }
-    else {
-        panel->g_task.area.posx = panel->g_taskbar.area.posx + panel->g_taskbar.background[TASKBAR_NORMAL]->border.width + panel->g_taskbar.area.paddingy;
+    } else {
+        panel->g_task.area.posx = panel->g_taskbar.area.posx +
+                                  panel->g_taskbar.background[TASKBAR_NORMAL]->border.width +
+                                  panel->g_taskbar.area.paddingy;
         panel->g_task.area.width = panel->area.width - (2 * panel->g_task.area.posx);
         panel->g_task.area.height = panel->g_task.maximum_height;
     }
 
-    for (j=0; j<TASK_STATE_COUNT; ++j) {
-        if (panel->g_task.background[j] == 0)
+    for (j = 0; j < TASK_STATE_COUNT; ++j) {
+        if (panel->g_task.background[j] == 0) {
             panel->g_task.background[j] = &g_array_index(backgrounds, Background, 0);
-        if (panel->g_task.background[j]->border.rounded > panel->g_task.area.height/2) {
-            printf("task%sbackground_id has a too large rounded value. Please fix your tint3rc\n", j==0 ? "_" : j==1 ? "_active_" : j==2 ? "_iconified_" : "_urgent_");
+        }
+
+        if (panel->g_task.background[j]->border.rounded > panel->g_task.area.height /
+            2) {
+            printf("task%sbackground_id has a too large rounded value. Please fix your tint3rc\n",
+                   j == 0 ? "_" : j == 1 ? "_active_" : j == 2 ? "_iconified_" : "_urgent_");
             g_array_append_val(backgrounds, *panel->g_task.background[j]);
-            panel->g_task.background[j] = &g_array_index(backgrounds, Background, backgrounds->len-1);
-            panel->g_task.background[j]->border.rounded = panel->g_task.area.height/2;
+            panel->g_task.background[j] = &g_array_index(backgrounds, Background,
+                                          backgrounds->len - 1);
+            panel->g_task.background[j]->border.rounded = panel->g_task.area.height / 2;
         }
     }
 
     // compute vertical position : text and icon
     int height_ink, height;
-    get_text_size(panel->g_task.font_desc, &height_ink, &height, panel->area.height, "TAjpg", 5);
+    get_text_size(panel->g_task.font_desc, &height_ink, &height, panel->area.height,
+                  "TAjpg", 5);
 
-    if (!panel->g_task.maximum_width && panel_horizontal)
+    if (!panel->g_task.maximum_width && panel_horizontal) {
         panel->g_task.maximum_width = server.monitor[panel->monitor].width;
-
-    panel->g_task.text_posx = panel->g_task.background[0]->border.width + panel->g_task.area.paddingxlr;
-    panel->g_task.text_height = panel->g_task.area.height - (2 * panel->g_task.area.paddingy);
-    if (panel->g_task.icon) {
-        panel->g_task.icon_size1 = panel->g_task.area.height - (2 * panel->g_task.area.paddingy);
-        panel->g_task.text_posx += panel->g_task.icon_size1;
-        panel->g_task.icon_posy = (panel->g_task.area.height - panel->g_task.icon_size1) / 2;
     }
+
+    panel->g_task.text_posx = panel->g_task.background[0]->border.width +
+                              panel->g_task.area.paddingxlr;
+    panel->g_task.text_height = panel->g_task.area.height -
+                                (2 * panel->g_task.area.paddingy);
+
+    if (panel->g_task.icon) {
+        panel->g_task.icon_size1 = panel->g_task.area.height - (2 *
+                                   panel->g_task.area.paddingy);
+        panel->g_task.text_posx += panel->g_task.icon_size1;
+        panel->g_task.icon_posy = (panel->g_task.area.height -
+                                   panel->g_task.icon_size1) / 2;
+    }
+
     //printf("monitor %d, task_maximum_width %d\n", panel->monitor, panel->g_task.maximum_width);
 
-    Taskbar *tskbar;
+    Taskbar* tskbar;
     panel->nb_desktop = server.nb_desktop;
     panel->taskbar = (Taskbar*) calloc(server.nb_desktop, sizeof(Taskbar));
-    for (j=0 ; j < panel->nb_desktop ; j++) {
+
+    for (j = 0 ; j < panel->nb_desktop ; j++) {
         tskbar = &panel->taskbar[j];
         memcpy(&tskbar->area, &panel->g_taskbar.area, sizeof(Area));
         tskbar->desktop = j;
-        if (j == server.desktop)
+
+        if (j == server.desktop) {
             tskbar->area.bg = panel->g_taskbar.background[TASKBAR_ACTIVE];
-        else
+        } else {
             tskbar->area.bg = panel->g_taskbar.background[TASKBAR_NORMAL];
+        }
     }
+
     init_taskbarname_panel(panel);
 }
 
 
-void taskbar_remove_task(gpointer key, gpointer value, gpointer user_data)
-{
+void taskbar_remove_task(gpointer key, gpointer value, gpointer user_data) {
     remove_task(task_get_task(*static_cast<Window*>(key)));
 }
 
 
-Task* task_get_task (Window win)
-{
+Task* task_get_task (Window win) {
     GPtrArray* task_group = task_get_tasks(win);
+
     if (task_group) {
         return static_cast<Task*>(g_ptr_array_index(task_group, 0));
     }
+
     return 0;
 }
 
 
-GPtrArray* task_get_tasks(Window win)
-{
+GPtrArray* task_get_tasks(Window win) {
     if (win_to_task_table && taskbar_enabled) {
         return static_cast<GPtrArray*>(g_hash_table_lookup(win_to_task_table, &win));
     }
+
     return 0;
 }
 
 
-void task_refresh_tasklist ()
-{
+void task_refresh_tasklist () {
     if (!taskbar_enabled) {
         return;
     }
 
     int num_results;
     Window* win = static_cast<Window*>(server_get_property(
-                server.root_win,
-                server.atom._NET_CLIENT_LIST,
-                XA_WINDOW,
-                &num_results));
+                                           server.root_win,
+                                           server.atom._NET_CLIENT_LIST,
+                                           XA_WINDOW,
+                                           &num_results));
+
     if (!win) {
         return;
     }
 
     GList* win_list = g_hash_table_get_keys(win_to_task_table);
     int i;
+
     for (GList* it = win_list; it; it = it->next) {
         for (i = 0; i < num_results; i++) {
             if (*static_cast<Window*>(it->data) == win[i]) {
                 break;
             }
         }
+
         if (i == num_results) {
             taskbar_remove_task(it->data, 0, 0);
         }
     }
+
     g_list_free(win_list);
 
     // Add any new
@@ -302,16 +378,15 @@ void task_refresh_tasklist ()
 }
 
 
-void draw_taskbar (void *obj, cairo_t *c)
-{
+void draw_taskbar (void* obj, cairo_t* c) {
     Taskbar* taskbar = static_cast<Taskbar*>(obj);
-    int state = (taskbar->desktop == server.desktop ? TASKBAR_ACTIVE : TASKBAR_NORMAL);
+    int state = (taskbar->desktop == server.desktop ? TASKBAR_ACTIVE :
+                 TASKBAR_NORMAL);
     taskbar->state_pix[state] = taskbar->area.pix;
 }
 
 
-int resize_taskbar(void *obj)
-{
+int resize_taskbar(void* obj) {
     Taskbar* taskbar = static_cast<Taskbar*>(obj);
     Panel* panel = static_cast<Panel*>(taskbar->area.panel);
     int text_width;
@@ -322,23 +397,29 @@ int resize_taskbar(void *obj)
 
         text_width = panel->g_task.maximum_width;
         GSList* l = taskbar->area.list;
+
         if (taskbarname_enabled) {
             l = l->next;
         }
+
         if (l != NULL) {
-            text_width = ((Task *)l->data)->area.width;
+            text_width = ((Task*)l->data)->area.width;
         }
-        taskbar->text_width = text_width - panel->g_task.text_posx - panel->g_task.area.bg->border.width - panel->g_task.area.paddingx;
+
+        taskbar->text_width = text_width - panel->g_task.text_posx -
+                              panel->g_task.area.bg->border.width - panel->g_task.area.paddingx;
     } else {
         resize_by_layout(obj, panel->g_task.maximum_height);
-        taskbar->text_width = taskbar->area.width - (2 * panel->g_taskbar.area.paddingy) - panel->g_task.text_posx -    panel->g_task.area.bg->border.width - panel->g_task.area.paddingx;
+        taskbar->text_width = taskbar->area.width - (2 * panel->g_taskbar.area.paddingy)
+                              - panel->g_task.text_posx -    panel->g_task.area.bg->border.width -
+                              panel->g_task.area.paddingx;
     }
+
     return 0;
 }
 
 
-void on_change_taskbar(void *obj)
-{
+void on_change_taskbar(void* obj) {
     Taskbar* tskbar = static_cast<Taskbar*>(obj);
 
     // reset Pixmap when position/size changed
@@ -346,57 +427,70 @@ void on_change_taskbar(void *obj)
         if (tskbar->state_pix[k]) {
             XFreePixmap(server.dsp, tskbar->state_pix[k]);
         }
+
         tskbar->state_pix[k] = 0;
     }
+
     tskbar->area.pix = 0;
     tskbar->area.redraw = 1;
 }
 
 
-void set_taskbar_state(Taskbar *tskbar, int state)
-{
+void set_taskbar_state(Taskbar* tskbar, int state) {
     tskbar->area.bg = panel1[0].g_taskbar.background[state];
     tskbar->area.pix = tskbar->state_pix[state];
+
     if (taskbarname_enabled) {
         tskbar->bar_name.area.bg = panel1[0].g_taskbar.background_name[state];
         tskbar->bar_name.area.pix = tskbar->bar_name.state_pix[state];
     }
+
     if (panel_mode != MULTI_DESKTOP) {
         tskbar->area.on_screen = (state == TASKBAR_NORMAL ? 0 : 1);
     }
+
     if (tskbar->area.on_screen == 1) {
-        if (tskbar->state_pix[state] == 0)
+        if (tskbar->state_pix[state] == 0) {
             tskbar->area.redraw = 1;
-        if (taskbarname_enabled && tskbar->bar_name.state_pix[state] == 0)
+        }
+
+        if (taskbarname_enabled && tskbar->bar_name.state_pix[state] == 0) {
             tskbar->bar_name.area.redraw = 1;
-        if (panel_mode == MULTI_DESKTOP && panel1[0].g_taskbar.background[TASKBAR_NORMAL] != panel1[0].g_taskbar.background[TASKBAR_ACTIVE]) {
-            GSList *l = tskbar->area.list;
+        }
+
+        if (panel_mode == MULTI_DESKTOP
+            && panel1[0].g_taskbar.background[TASKBAR_NORMAL] !=
+            panel1[0].g_taskbar.background[TASKBAR_ACTIVE]) {
+            GSList* l = tskbar->area.list;
+
             if (taskbarname_enabled) {
                 l = l->next;
             }
+
             for (; l ; l = l->next) {
                 set_task_redraw(static_cast<Task*>(l->data));
             }
         }
     }
+
     panel_refresh = 1;
 }
 
 
-void visible_taskbar(void *p)
-{
+void visible_taskbar(void* p) {
     Panel* panel = static_cast<Panel*>(p);
 
     for (int j = 0 ; j < panel->nb_desktop ; j++) {
         Taskbar* taskbar = &panel->taskbar[j];
+
         if (panel_mode != MULTI_DESKTOP && taskbar->desktop != server.desktop) {
             // SINGLE_DESKTOP and not current desktop
             taskbar->area.on_screen = 0;
-        }
-        else {
+        } else {
             taskbar->area.on_screen = 1;
         }
     }
+
     panel_refresh = 1;
 }
 

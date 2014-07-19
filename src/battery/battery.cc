@@ -42,8 +42,8 @@
 #include "../server.h"
 #include "../util/window.h"
 
-PangoFontDescription *bat1_font_desc;
-PangoFontDescription *bat2_font_desc;
+PangoFontDescription* bat1_font_desc;
+PangoFontDescription* bat2_font_desc;
 struct batstate battery_state;
 int battery_enabled;
 int percentage_hide;
@@ -54,40 +54,44 @@ static char buf_bat_time[20];
 
 int8_t battery_low_status;
 unsigned char battery_low_cmd_send;
-char *battery_low_cmd;
-char *path_energy_now;
-char *path_energy_full;
-char *path_current_now;
-char *path_status;
+char* battery_low_cmd;
+char* path_energy_now;
+char* path_energy_full;
+char* path_current_now;
+char* path_status;
 
 #if defined(__OpenBSD__) || defined(__NetBSD__)
 int apm_fd;
 #endif
 
-void update_batterys(void* arg)
-{
+void update_batterys(void* arg) {
     int old_percentage = battery_state.percentage;
     int16_t old_hours = battery_state.time.hours;
     int8_t old_minutes = battery_state.time.minutes;
 
     update_battery();
-    if (old_percentage == battery_state.percentage && old_hours == battery_state.time.hours && old_minutes == battery_state.time.minutes)
+
+    if (old_percentage == battery_state.percentage
+        && old_hours == battery_state.time.hours
+        && old_minutes == battery_state.time.minutes) {
         return;
+    }
 
     int i;
-    for (i=0 ; i < nb_panel ; i++) {
+
+    for (i = 0 ; i < nb_panel ; i++) {
         if (battery_state.percentage >= percentage_hide) {
             if (panel1[i].battery.area.on_screen == 1) {
                 hide(&panel1[i].battery.area);
                 panel_refresh = 1;
             }
-        }
-        else {
+        } else {
             if (panel1[i].battery.area.on_screen == 0) {
                 show(&panel1[i].battery.area);
                 panel_refresh = 1;
             }
         }
+
         if (panel1[i].battery.area.on_screen == 1) {
             panel1[i].battery.area.resize = 1;
             panel_refresh = 1;
@@ -95,8 +99,7 @@ void update_batterys(void* arg)
     }
 }
 
-void default_battery()
-{
+void default_battery() {
     battery_enabled = 0;
     percentage_hide = 101;
     battery_low_cmd_send = 0;
@@ -116,30 +119,57 @@ void default_battery()
 #endif
 }
 
-void cleanup_battery()
-{
-    if (bat1_font_desc) pango_font_description_free(bat1_font_desc);
-    if (bat2_font_desc) pango_font_description_free(bat2_font_desc);
-    if (path_energy_now) g_free(path_energy_now);
-    if (path_energy_full) g_free(path_energy_full);
-    if (path_current_now) g_free(path_current_now);
-    if (path_status) g_free(path_status);
-    if (battery_low_cmd) g_free(battery_low_cmd);
-    if (battery_timeout) stop_timeout(battery_timeout);
+void cleanup_battery() {
+    if (bat1_font_desc) {
+        pango_font_description_free(bat1_font_desc);
+    }
+
+    if (bat2_font_desc) {
+        pango_font_description_free(bat2_font_desc);
+    }
+
+    if (path_energy_now) {
+        g_free(path_energy_now);
+    }
+
+    if (path_energy_full) {
+        g_free(path_energy_full);
+    }
+
+    if (path_current_now) {
+        g_free(path_current_now);
+    }
+
+    if (path_status) {
+        g_free(path_status);
+    }
+
+    if (battery_low_cmd) {
+        g_free(battery_low_cmd);
+    }
+
+    if (battery_timeout) {
+        stop_timeout(battery_timeout);
+    }
 
 #if defined(__OpenBSD__) || defined(__NetBSD__)
-    if ((apm_fd != -1) && (close(apm_fd) == -1))
+
+    if ((apm_fd != -1) && (close(apm_fd) == -1)) {
         warn("cannot close /dev/apm");
+    }
+
 #endif
 }
 
 
-void init_battery()
-{
-    if (!battery_enabled) return;
+void init_battery() {
+    if (!battery_enabled) {
+        return;
+    }
 
 #if defined(__OpenBSD__) || defined(__NetBSD__)
     apm_fd = open("/dev/apm", O_RDONLY);
+
     if (apm_fd < 0) {
         warn("init_battery: failed to open /dev/apm.");
         battery_enabled = 0;
@@ -148,53 +178,64 @@ void init_battery()
 
 #elif !defined(__FreeBSD__)
     // check battery
-    GDir *directory = 0;
-    GError *error = NULL;
-    const char *entryname;
-    char *battery_dir = 0;
+    GDir* directory = 0;
+    GError* error = NULL;
+    const char* entryname;
+    char* battery_dir = 0;
 
     directory = g_dir_open("/sys/class/power_supply", 0, &error);
-    if (error)
-        g_error_free(error);
-    else {
-        while ((entryname=g_dir_read_name(directory))) {
-            if (strncmp(entryname,"AC", 2) == 0) continue;
 
-            char *path1 = g_build_filename("/sys/class/power_supply", entryname, "present", NULL);
+    if (error) {
+        g_error_free(error);
+    } else {
+        while ((entryname = g_dir_read_name(directory))) {
+            if (strncmp(entryname, "AC", 2) == 0) {
+                continue;
+            }
+
+            char* path1 = g_build_filename("/sys/class/power_supply", entryname, "present",
+                                           NULL);
+
             if (g_file_test (path1, G_FILE_TEST_EXISTS)) {
                 g_free(path1);
                 battery_dir = g_build_filename("/sys/class/power_supply", entryname, NULL);
                 break;
             }
+
             g_free(path1);
         }
     }
-    if (directory)
+
+    if (directory) {
         g_dir_close(directory);
+    }
+
     if (!battery_dir) {
         fprintf(stderr, "ERROR: battery applet can't found power_supply\n");
         default_battery();
         return;
     }
 
-    char *path1 = g_build_filename(battery_dir, "energy_now", NULL);
+    char* path1 = g_build_filename(battery_dir, "energy_now", NULL);
+
     if (g_file_test (path1, G_FILE_TEST_EXISTS)) {
         path_energy_now = g_build_filename(battery_dir, "energy_now", NULL);
         path_energy_full = g_build_filename(battery_dir, "energy_full", NULL);
-    }
-    else {
-        char *path2 = g_build_filename(battery_dir, "charge_now", NULL);
+    } else {
+        char* path2 = g_build_filename(battery_dir, "charge_now", NULL);
+
         if (g_file_test (path2, G_FILE_TEST_EXISTS)) {
             path_energy_now = g_build_filename(battery_dir, "charge_now", NULL);
             path_energy_full = g_build_filename(battery_dir, "charge_full", NULL);
-        }
-        else {
+        } else {
             fprintf(stderr, "ERROR: can't found energy_* or charge_*\n");
         }
+
         g_free(path2);
     }
 
     path_current_now = g_build_filename(battery_dir, "power_now", NULL);
+
     if (!g_file_test (path_current_now, G_FILE_TEST_EXISTS)) {
         g_free(path_current_now);
         path_current_now = g_build_filename(battery_dir, "current_now", NULL);
@@ -204,16 +245,18 @@ void init_battery()
         path_status = g_build_filename(battery_dir, "status", NULL);
 
         // check file
-        FILE *fp1, *fp2, *fp3, *fp4;
+        FILE* fp1, *fp2, *fp3, *fp4;
         fp1 = fopen(path_energy_now, "r");
         fp2 = fopen(path_energy_full, "r");
         fp3 = fopen(path_current_now, "r");
         fp4 = fopen(path_status, "r");
+
         if (fp1 == NULL || fp2 == NULL || fp3 == NULL || fp4 == NULL) {
             cleanup_battery();
             default_battery();
             fprintf(stderr, "ERROR: battery applet can't open energy_now\n");
         }
+
         fclose(fp1);
         fclose(fp2);
         fclose(fp3);
@@ -224,21 +267,23 @@ void init_battery()
     g_free(battery_dir);
 #endif
 
-    if (battery_enabled && battery_timeout==0)
+    if (battery_enabled && battery_timeout == 0) {
         battery_timeout = add_timeout(10, 10000, update_batterys, 0);
+    }
 }
 
 
-void init_battery_panel(void *p)
-{
-    Panel *panel = (Panel*)p;
-    Battery *battery = &panel->battery;
+void init_battery_panel(void* p) {
+    Panel* panel = (Panel*)p;
+    Battery* battery = &panel->battery;
 
-    if (!battery_enabled)
+    if (!battery_enabled) {
         return;
+    }
 
-    if (battery->area.bg == 0)
+    if (battery->area.bg == 0) {
         battery->area.bg = &g_array_index(backgrounds, Background, 0);
+    }
 
     battery->area.parent = p;
     battery->area.panel = p;
@@ -253,7 +298,7 @@ void init_battery_panel(void *p)
 void update_battery() {
 #if !defined(__OpenBSD__) && !defined(__NetBSD__) && !defined(__FreeBSD__)
     // unused on OpenBSD, silence compiler warnings
-    FILE *fp;
+    FILE* fp;
     char tmp[25];
     int64_t current_now = 0;
 #endif
@@ -267,50 +312,59 @@ void update_battery() {
 
 #if defined(__OpenBSD__) || defined(__NetBSD__)
     struct apm_power_info info;
-    if (ioctl(apm_fd, APM_IOC_GETPOWER, &(info)) < 0)
+
+    if (ioctl(apm_fd, APM_IOC_GETPOWER, &(info)) < 0) {
         warn("power update: APM_IOC_GETPOWER");
+    }
 
     // best attempt at mapping to linux battery states
     battery_state.state = BATTERY_UNKNOWN;
+
     switch (info.battery_state) {
         case APM_BATT_CHARGING:
             battery_state.state = BATTERY_CHARGING;
             break;
+
         default:
             battery_state.state = BATTERY_DISCHARGING;
             break;
     }
 
-    if (info.battery_life == 100)
+    if (info.battery_life == 100) {
         battery_state.state = BATTERY_FULL;
+    }
 
     // no mapping for openbsd really
     energy_full = 0;
     energy_now = 0;
 
-    if (info.minutes_left != -1)
+    if (info.minutes_left != -1) {
         seconds = info.minutes_left * 60;
-    else
+    } else {
         seconds = -1;
+    }
 
     new_percentage = info.battery_life;
 
 #elif defined(__FreeBSD__)
     len = sizeof(sysctl_out);
 
-    if (sysctlbyname("hw.acpi.battery.state", &sysctl_out, &len, NULL, 0) != 0)
+    if (sysctlbyname("hw.acpi.battery.state", &sysctl_out, &len, NULL, 0) != 0) {
         fprintf(stderr, "power update: no such sysctl");
+    }
 
     // attemp to map the battery state to linux
     battery_state.state = BATTERY_UNKNOWN;
 
-    switch(sysctl_out) {
+    switch (sysctl_out) {
         case 1:
             battery_state.state = BATTERY_DISCHARGING;
             break;
+
         case 2:
             battery_state.state = BATTERY_CHARGING;
             break;
+
         default:
             battery_state.state = BATTERY_FULL;
             break;
@@ -320,63 +374,94 @@ void update_battery() {
     energy_full = 0;
     energy_now = 0;
 
-    if (sysctlbyname("hw.acpi.battery.time", &sysctl_out, &len, NULL, 0) != 0)
+    if (sysctlbyname("hw.acpi.battery.time", &sysctl_out, &len, NULL, 0) != 0) {
         seconds = -1;
-    else
+    } else {
         seconds = sysctl_out * 60;
+    }
 
     // charging or error
-    if (seconds < 0)
+    if (seconds < 0) {
         seconds = 0;
+    }
 
-    if (sysctlbyname("hw.acpi.battery.life", &sysctl_out, &len, NULL, 0) != 0)
+    if (sysctlbyname("hw.acpi.battery.life", &sysctl_out, &len, NULL, 0) != 0) {
         new_percentage = -1;
-    else
+    } else {
         new_percentage = sysctl_out;
+    }
 
 #else
     fp = fopen(path_status, "r");
-    if(fp != NULL) {
+
+    if (fp != NULL) {
         if (fgets(tmp, sizeof tmp, fp)) {
             battery_state.state = BATTERY_UNKNOWN;
-            if(strcasecmp(tmp, "Charging\n")==0) battery_state.state = BATTERY_CHARGING;
-            if(strcasecmp(tmp, "Discharging\n")==0) battery_state.state = BATTERY_DISCHARGING;
-            if(strcasecmp(tmp, "Full\n")==0) battery_state.state = BATTERY_FULL;
+
+            if (strcasecmp(tmp, "Charging\n") == 0) {
+                battery_state.state = BATTERY_CHARGING;
+            }
+
+            if (strcasecmp(tmp, "Discharging\n") == 0) {
+                battery_state.state = BATTERY_DISCHARGING;
+            }
+
+            if (strcasecmp(tmp, "Full\n") == 0) {
+                battery_state.state = BATTERY_FULL;
+            }
         }
+
         fclose(fp);
     }
 
     fp = fopen(path_energy_now, "r");
-    if(fp != NULL) {
-        if (fgets(tmp, sizeof tmp, fp)) energy_now = atoi(tmp);
+
+    if (fp != NULL) {
+        if (fgets(tmp, sizeof tmp, fp)) {
+            energy_now = atoi(tmp);
+        }
+
         fclose(fp);
     }
 
     fp = fopen(path_energy_full, "r");
-    if(fp != NULL) {
-        if (fgets(tmp, sizeof tmp, fp)) energy_full = atoi(tmp);
+
+    if (fp != NULL) {
+        if (fgets(tmp, sizeof tmp, fp)) {
+            energy_full = atoi(tmp);
+        }
+
         fclose(fp);
     }
 
     fp = fopen(path_current_now, "r");
-    if(fp != NULL) {
-        if (fgets(tmp, sizeof tmp, fp)) current_now = atoi(tmp);
+
+    if (fp != NULL) {
+        if (fgets(tmp, sizeof tmp, fp)) {
+            current_now = atoi(tmp);
+        }
+
         fclose(fp);
     }
 
-    if(current_now > 0) {
-        switch(battery_state.state) {
+    if (current_now > 0) {
+        switch (battery_state.state) {
             case BATTERY_CHARGING:
                 seconds = 3600 * (energy_full - energy_now) / current_now;
                 break;
+
             case BATTERY_DISCHARGING:
                 seconds = 3600 * energy_now / current_now;
                 break;
+
             default:
                 seconds = 0;
                 break;
         }
-    } else seconds = 0;
+    } else {
+        seconds = 0;
+    }
+
 #endif
 
     battery_state.time.hours = seconds / 3600;
@@ -385,30 +470,33 @@ void update_battery() {
     seconds -= 60 * battery_state.time.minutes;
     battery_state.time.seconds = seconds;
 
-    if(energy_full > 0)
-        new_percentage = (energy_now*100)/energy_full;
+    if (energy_full > 0) {
+        new_percentage = (energy_now * 100) / energy_full;
+    }
 
-    if(battery_low_status > new_percentage && battery_state.state == BATTERY_DISCHARGING && !battery_low_cmd_send) {
+    if (battery_low_status > new_percentage
+        && battery_state.state == BATTERY_DISCHARGING && !battery_low_cmd_send) {
         tint_exec(battery_low_cmd);
         battery_low_cmd_send = 1;
     }
-    if(battery_low_status < new_percentage && battery_state.state == BATTERY_CHARGING && battery_low_cmd_send) {
+
+    if (battery_low_status < new_percentage
+        && battery_state.state == BATTERY_CHARGING && battery_low_cmd_send) {
         battery_low_cmd_send = 0;
     }
 
     battery_state.percentage = new_percentage;
 
     // clamp percentage to 100 in case battery is misreporting that its current charge is more than its max
-    if(battery_state.percentage > 100) {
+    if (battery_state.percentage > 100) {
         battery_state.percentage = 100;
     }
 }
 
 
-void draw_battery (void *obj, cairo_t *c)
-{
+void draw_battery (void* obj, cairo_t* c) {
     Battery* battery = static_cast<Battery*>(obj);
-    PangoLayout *layout;
+    PangoLayout* layout;
 
     layout = pango_cairo_create_layout (c);
 
@@ -418,7 +506,8 @@ void draw_battery (void *obj, cairo_t *c)
     pango_layout_set_alignment(layout, PANGO_ALIGN_CENTER);
     pango_layout_set_text(layout, buf_bat_percentage, strlen(buf_bat_percentage));
 
-    cairo_set_source_rgba(c, battery->font.color[0], battery->font.color[1], battery->font.color[2], battery->font.alpha);
+    cairo_set_source_rgba(c, battery->font.color[0], battery->font.color[1],
+                          battery->font.color[2], battery->font.alpha);
 
     pango_cairo_update_layout(c, layout);
     cairo_move_to(c, 0, battery->bat1_posy);
@@ -437,8 +526,7 @@ void draw_battery (void *obj, cairo_t *c)
 }
 
 
-int resize_battery(void *obj)
-{
+int resize_battery(void* obj) {
     Battery* battery = static_cast<Battery*>(obj);
     Panel* panel = static_cast<Panel*>(battery->area.panel);
     int bat_percentage_height, bat_percentage_width, bat_percentage_height_ink;
@@ -447,35 +535,50 @@ int resize_battery(void *obj)
 
     battery->area.redraw = 1;
 
-    snprintf(buf_bat_percentage, sizeof(buf_bat_percentage), "%d%%", battery_state.percentage);
-    if(battery_state.state == BATTERY_FULL) {
+    snprintf(buf_bat_percentage, sizeof(buf_bat_percentage), "%d%%",
+             battery_state.percentage);
+
+    if (battery_state.state == BATTERY_FULL) {
         strcpy(buf_bat_time, "Full");
     } else {
-        snprintf(buf_bat_time, sizeof(buf_bat_time), "%02d:%02d", battery_state.time.hours, battery_state.time.minutes);
+        snprintf(buf_bat_time, sizeof(buf_bat_time), "%02d:%02d",
+                 battery_state.time.hours, battery_state.time.minutes);
     }
-    get_text_size2(bat1_font_desc, &bat_percentage_height_ink, &bat_percentage_height, &bat_percentage_width, panel->area.height, panel->area.width, buf_bat_percentage, strlen(buf_bat_percentage));
-    get_text_size2(bat2_font_desc, &bat_time_height_ink, &bat_time_height, &bat_time_width, panel->area.height, panel->area.width, buf_bat_time, strlen(buf_bat_time));
+
+    get_text_size2(bat1_font_desc, &bat_percentage_height_ink,
+                   &bat_percentage_height, &bat_percentage_width, panel->area.height,
+                   panel->area.width, buf_bat_percentage, strlen(buf_bat_percentage));
+    get_text_size2(bat2_font_desc, &bat_time_height_ink, &bat_time_height,
+                   &bat_time_width, panel->area.height, panel->area.width, buf_bat_time,
+                   strlen(buf_bat_time));
 
     if (panel_horizontal) {
-        int new_size = (bat_percentage_width > bat_time_width) ? bat_percentage_width : bat_time_width;
-        new_size += (2*battery->area.paddingxlr) + (2*battery->area.bg->border.width);
-        if (new_size > battery->area.width || new_size < (battery->area.width-2)) {
+        int new_size = (bat_percentage_width > bat_time_width) ? bat_percentage_width :
+                       bat_time_width;
+        new_size += (2 * battery->area.paddingxlr) + (2 *
+                    battery->area.bg->border.width);
+
+        if (new_size > battery->area.width || new_size < (battery->area.width - 2)) {
             // we try to limit the number of resize
             battery->area.width =  new_size;
-            battery->bat1_posy = (battery->area.height - bat_percentage_height - bat_time_height)/2;
+            battery->bat1_posy = (battery->area.height - bat_percentage_height -
+                                  bat_time_height) / 2;
             battery->bat2_posy = battery->bat1_posy + bat_percentage_height;
             ret = 1;
         }
-    }
-    else {
-        int new_size = bat_percentage_height + bat_time_height + (2 * (battery->area.paddingxlr + battery->area.bg->border.width));
-        if (new_size > battery->area.height || new_size < (battery->area.height-2)) {
+    } else {
+        int new_size = bat_percentage_height + bat_time_height + (2 *
+                       (battery->area.paddingxlr + battery->area.bg->border.width));
+
+        if (new_size > battery->area.height || new_size < (battery->area.height - 2)) {
             battery->area.height =  new_size;
-            battery->bat1_posy = (battery->area.height - bat_percentage_height - bat_time_height - 2)/2;
+            battery->bat1_posy = (battery->area.height - bat_percentage_height -
+                                  bat_time_height - 2) / 2;
             battery->bat2_posy = battery->bat1_posy + bat_percentage_height + 2;
             ret = 1;
         }
     }
+
     return ret;
 }
 

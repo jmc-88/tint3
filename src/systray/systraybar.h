@@ -16,33 +16,32 @@
 #include <X11/extensions/Xdamage.h>
 
 // XEMBED messages
-#define XEMBED_EMBEDDED_NOTIFY		0
+#define XEMBED_EMBEDDED_NOTIFY      0
 // Flags for _XEMBED_INFO
-#define XEMBED_MAPPED		(1 << 0)
+#define XEMBED_MAPPED       (1 << 0)
 
 
 typedef struct {
-	// always start with area
-	Area area;
+    // always start with area
+    Area area;
 
-	GSList *list_icons;
-	int sort;
-	int alpha, saturation, brightness;
-	int icon_size, icons_per_column, icons_per_row, marging;
+    GSList* list_icons;
+    int sort;
+    int alpha, saturation, brightness;
+    int icon_size, icons_per_column, icons_per_row, marging;
 } Systraybar;
 
 
-typedef struct
-{
-	Window id;
-	Window tray_id;
-	int x, y;
-	int width, height;
-	// TODO: manage icon's show/hide
-	int hide;
-	int depth;
-	Damage damage;
-	timeout* render_timeout;
+typedef struct {
+    Window id;
+    Window tray_id;
+    int x, y;
+    int width, height;
+    // TODO: manage icon's show/hide
+    int hide;
+    int depth;
+    Damage damage;
+    timeout* render_timeout;
 } TrayWindow;
 
 
@@ -61,21 +60,21 @@ void cleanup_systray();
 
 // initialize protocol and panel position
 void init_systray();
-void init_systray_panel(void *p);
+void init_systray_panel(void* p);
 
-void draw_systray(void *obj, cairo_t *c);
-int  resize_systray(void *obj);
-void on_change_systray(void *obj);
+void draw_systray(void* obj, cairo_t* c);
+int  resize_systray(void* obj);
+void on_change_systray(void* obj);
 
 
 // systray protocol
 // many tray icon doesn't manage stop/restart of the systray manager
 void start_net();
 void stop_net();
-void net_message(XClientMessageEvent *e);
+void net_message(XClientMessageEvent* e);
 
 gboolean add_icon(Window id);
-void remove_icon(TrayWindow *traywin);
+void remove_icon(TrayWindow* traywin);
 
 void refresh_systray_icon();
 void systray_render_icon(TrayWindow* traywin);

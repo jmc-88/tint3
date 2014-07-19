@@ -46,10 +46,12 @@ void cleanup_timeout();
   * 'interval_msec'. '_callback' is the callback function when the timer reaches the timeout.
   * returns a pointer to the timeout, which is needed for stopping it again
 **/
-timeout* add_timeout(int value_msec, int interval_msec, void (*_callback)(void*), void* arg);
+timeout* add_timeout(int value_msec, int interval_msec,
+                     void (*_callback)(void*), void* arg);
 
 /** changes timeout 't'. If timeout 't' does not exist, nothing happens **/
-void change_timeout(timeout* t, int value_msec, int interval_msec, void (*_callback)(void*), void* arg);
+void change_timeout(timeout* t, int value_msec, int interval_msec,
+                    void (*_callback)(void*), void* arg);
 
 /** stops the timeout 't' **/
 void stop_timeout(timeout* t);

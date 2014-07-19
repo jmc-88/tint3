@@ -69,13 +69,13 @@
  *
  ************************************************************/
 
-void init_rendering(void *obj, int pos)
-{
+void init_rendering(void* obj, int pos) {
     Area* a = static_cast<Area*>(obj);
 
     // initialize fixed position/size
     for (GSList* l = a->list; l ; l = l->next) {
         Area* child = static_cast<Area*>(l->data);
+
         if (panel_horizontal) {
             child->posy = pos + a->bg->border.width + a->paddingy;
             child->height = a->height - (2 * (a->bg->border.width + a->paddingy));
@@ -89,8 +89,7 @@ void init_rendering(void *obj, int pos)
 }
 
 
-void rendering(void *obj)
-{
+void rendering(void* obj) {
     Panel* panel = static_cast<Panel*>(obj);
 
     size_by_content(&panel->area);
@@ -100,8 +99,7 @@ void rendering(void *obj)
 }
 
 
-void size_by_content (Area *a)
-{
+void size_by_content (Area* a) {
     // don't resize hidden objects
     if (!a->on_screen) {
         return;
@@ -114,6 +112,7 @@ void size_by_content (Area *a)
 
     // calculate area's size
     a->on_changed = 0;
+
     if (a->resize && a->size_mode == SIZE_BY_CONTENT) {
         a->resize = 0;
 
@@ -128,24 +127,29 @@ void size_by_content (Area *a)
 }
 
 
-void size_by_layout (Area *a, int pos, int level)
-{
+void size_by_layout (Area* a, int pos, int level) {
     // don't resize hiden objects
-    if (!a->on_screen) return;
+    if (!a->on_screen) {
+        return;
+    }
 
     // parent node is resized before its children
     // calculate area's size
-    GSList *l;
+    GSList* l;
+
     if (a->resize && a->size_mode == SIZE_BY_LAYOUT) {
         a->resize = 0;
 
         if (a->_resize) {
             a->_resize(a);
+
             // resize childs with SIZE_BY_LAYOUT
             for (l = a->list; l ; l = l->next) {
-                Area *child = ((Area*)l->data);
-                if (child->size_mode == SIZE_BY_LAYOUT && child->list)
+                Area* child = ((Area*)l->data);
+
+                if (child->size_mode == SIZE_BY_LAYOUT && child->list) {
                     child->resize = 1;
+                }
             }
         }
     }
@@ -153,11 +157,14 @@ void size_by_layout (Area *a, int pos, int level)
     // update position of childs
     pos += a->paddingxlr + a->bg->border.width;
     int i = 0;
+
     for (l = a->list; l ; l = l->next) {
         Area* child = static_cast<Area*>(l->data);
+
         if (!child->on_screen) {
             continue;
         }
+
         i++;
 
         if (panel_horizontal) {
@@ -178,7 +185,7 @@ void size_by_layout (Area *a, int pos, int level)
         int k;
         for (k=0 ; k < level ; k++) printf("  ");
         printf("tree level %d, object %d, pos %d, %s\n", level, i, pos, (child->size_mode == SIZE_BY_LAYOUT) ? "SIZE_BY_LAYOUT" : "SIZE_BY_CONTENT");*/
-        size_by_layout(child, pos, level+1);
+        size_by_layout(child, pos, level + 1);
 
         if (panel_horizontal) {
             pos += child->width + a->paddingx;
@@ -190,16 +197,19 @@ void size_by_layout (Area *a, int pos, int level)
     if (a->on_changed) {
         // pos/size changed
         a->redraw = 1;
-        if (a->_on_change_layout)
+
+        if (a->_on_change_layout) {
             a->_on_change_layout (a);
+        }
     }
 }
 
 
-void refresh (Area *a)
-{
+void refresh (Area* a) {
     // don't draw and resize hide objects
-    if (!a->on_screen) return;
+    if (!a->on_screen) {
+        return;
+    }
 
     // don't draw transparent objects (without foreground and without background)
     if (a->redraw) {
@@ -207,7 +217,7 @@ void refresh (Area *a)
         // force redraw of child
         //GSList *l;
         //for (l = a->list ; l ; l = l->next)
-            //((Area*)l->data)->redraw = 1;
+        //((Area*)l->data)->redraw = 1;
 
         //printf("draw area posx %d, width %d\n", a->posx, a->width);
         draw(a);
@@ -219,9 +229,9 @@ void refresh (Area *a)
     }
 
     XCopyArea(
-            server.dsp, a->pix,
-            static_cast<Panel*>(a->panel)->temp_pmap, server.gc, 0, 0,
-            a->width, a->height, a->posx, a->posy);
+        server.dsp, a->pix,
+        static_cast<Panel*>(a->panel)->temp_pmap, server.gc, 0, 0,
+        a->width, a->height, a->posx, a->posy);
 
     // and then refresh child object
     for (GSList* l = a->list; l ; l = l->next) {
@@ -230,32 +240,39 @@ void refresh (Area *a)
 }
 
 
-int resize_by_layout(void *obj, int maximum_size)
-{
-    Area *child, *a = (Area*)obj;
-    int size, nb_by_content=0, nb_by_layout=0;
+int resize_by_layout(void* obj, int maximum_size) {
+    Area* child, *a = (Area*)obj;
+    int size, nb_by_content = 0, nb_by_layout = 0;
 
     if (panel_horizontal) {
         // detect free size for SIZE_BY_LAYOUT's Area
         size = a->width - (2 * (a->paddingxlr + a->bg->border.width));
-        GSList *l;
+        GSList* l;
+
         for (l = a->list ; l ; l = l->next) {
             child = (Area*)l->data;
+
             if (child->on_screen && child->size_mode == SIZE_BY_CONTENT) {
                 size -= child->width;
                 nb_by_content++;
             }
-            if (child->on_screen && child->size_mode == SIZE_BY_LAYOUT)
-                nb_by_layout++;
-        }
-        //printf("  resize_by_layout Deb %d, %d\n", nb_by_content, nb_by_layout);
-        if (nb_by_content+nb_by_layout)
-            size -= ((nb_by_content+nb_by_layout-1) * a->paddingx);
 
-        int width=0, modulo=0, old_width;
+            if (child->on_screen && child->size_mode == SIZE_BY_LAYOUT) {
+                nb_by_layout++;
+            }
+        }
+
+        //printf("  resize_by_layout Deb %d, %d\n", nb_by_content, nb_by_layout);
+        if (nb_by_content + nb_by_layout) {
+            size -= ((nb_by_content + nb_by_layout - 1) * a->paddingx);
+        }
+
+        int width = 0, modulo = 0, old_width;
+
         if (nb_by_layout) {
             width = size / nb_by_layout;
             modulo = size % nb_by_layout;
+
             if (width > maximum_size && maximum_size != 0) {
                 width = maximum_size;
                 modulo = 0;
@@ -265,38 +282,49 @@ int resize_by_layout(void *obj, int maximum_size)
         // resize SIZE_BY_LAYOUT objects
         for (l = a->list ; l ; l = l->next) {
             child = (Area*)l->data;
+
             if (child->on_screen && child->size_mode == SIZE_BY_LAYOUT) {
                 old_width = child->width;
                 child->width = width;
+
                 if (modulo) {
                     child->width++;
                     modulo--;
                 }
-                if (child->width != old_width)
+
+                if (child->width != old_width) {
                     child->on_changed = 1;
+                }
             }
         }
-    }
-    else {
+    } else {
         // detect free size for SIZE_BY_LAYOUT's Area
         size = a->height - (2 * (a->paddingxlr + a->bg->border.width));
-        GSList *l;
+        GSList* l;
+
         for (l = a->list ; l ; l = l->next) {
             child = (Area*)l->data;
+
             if (child->on_screen && child->size_mode == SIZE_BY_CONTENT) {
                 size -= child->height;
                 nb_by_content++;
             }
-            if (child->on_screen && child->size_mode == SIZE_BY_LAYOUT)
-                nb_by_layout++;
-        }
-        if (nb_by_content+nb_by_layout)
-            size -= ((nb_by_content+nb_by_layout-1) * a->paddingx);
 
-        int height=0, modulo=0, old_height;
+            if (child->on_screen && child->size_mode == SIZE_BY_LAYOUT) {
+                nb_by_layout++;
+            }
+        }
+
+        if (nb_by_content + nb_by_layout) {
+            size -= ((nb_by_content + nb_by_layout - 1) * a->paddingx);
+        }
+
+        int height = 0, modulo = 0, old_height;
+
         if (nb_by_layout) {
             height = size / nb_by_layout;
             modulo = size % nb_by_layout;
+
             if (height > maximum_size && maximum_size != 0) {
                 height = maximum_size;
                 modulo = 0;
@@ -306,24 +334,28 @@ int resize_by_layout(void *obj, int maximum_size)
         // resize SIZE_BY_LAYOUT objects
         for (l = a->list ; l ; l = l->next) {
             child = (Area*)l->data;
+
             if (child->on_screen && child->size_mode == SIZE_BY_LAYOUT) {
                 old_height = child->height;
                 child->height = height;
+
                 if (modulo) {
                     child->height++;
                     modulo--;
                 }
-                if (child->height != old_height)
+
+                if (child->height != old_height) {
                     child->on_changed = 1;
+                }
             }
         }
     }
+
     return 0;
 }
 
 
-void set_redraw(Area *a)
-{
+void set_redraw(Area* a) {
     a->redraw = 1;
 
     for (GSList* l = a->list ; l ; l = l->next) {
@@ -331,12 +363,12 @@ void set_redraw(Area *a)
     }
 }
 
-void hide(Area *a)
-{
+void hide(Area* a) {
     Area* parent = static_cast<Area*>(a->parent);
 
     a->on_screen = 0;
     parent->resize = 1;
+
     if (panel_horizontal) {
         a->width = 0;
     } else {
@@ -344,47 +376,56 @@ void hide(Area *a)
     }
 }
 
-void show(Area *a)
-{
-    Area *parent = (Area*)a->parent;
+void show(Area* a) {
+    Area* parent = (Area*)a->parent;
 
     a->on_screen = 1;
     parent->resize = 1;
     a->resize = 1;
 }
 
-void draw (Area *a)
-{
-    if (a->pix) XFreePixmap (server.dsp, a->pix);
-    a->pix = XCreatePixmap (server.dsp, server.root_win, a->width, a->height, server.depth);
+void draw (Area* a) {
+    if (a->pix) {
+        XFreePixmap (server.dsp, a->pix);
+    }
+
+    a->pix = XCreatePixmap (server.dsp, server.root_win, a->width, a->height,
+                            server.depth);
 
     // add layer of root pixmap (or clear pixmap if real_transparency==true)
-    if (server.real_transparency)
-        clear_pixmap(a->pix, 0 ,0, a->width, a->height);
-    XCopyArea (server.dsp, ((Panel *)a->panel)->temp_pmap, a->pix, server.gc, a->posx, a->posy, a->width, a->height, 0, 0);
+    if (server.real_transparency) {
+        clear_pixmap(a->pix, 0 , 0, a->width, a->height);
+    }
 
-    cairo_surface_t *cs;
-    cairo_t *c;
+    XCopyArea (server.dsp, ((Panel*)a->panel)->temp_pmap, a->pix, server.gc,
+               a->posx, a->posy, a->width, a->height, 0, 0);
 
-    cs = cairo_xlib_surface_create (server.dsp, a->pix, server.visual, a->width, a->height);
+    cairo_surface_t* cs;
+    cairo_t* c;
+
+    cs = cairo_xlib_surface_create (server.dsp, a->pix, server.visual, a->width,
+                                    a->height);
     c = cairo_create (cs);
 
     draw_background (a, c);
 
-    if (a->_draw_foreground)
+    if (a->_draw_foreground) {
         a->_draw_foreground(a, c);
+    }
 
     cairo_destroy (c);
     cairo_surface_destroy (cs);
 }
 
 
-void draw_background (Area *a, cairo_t *c)
-{
+void draw_background (Area* a, cairo_t* c) {
     if (a->bg->back.alpha > 0.0) {
         //printf("    draw_background (%d %d) RGBA (%lf, %lf, %lf, %lf)\n", a->posx, a->posy, pix->back.color[0], pix->back.color[1], pix->back.color[2], pix->back.alpha);
-        draw_rect(c, a->bg->border.width, a->bg->border.width, a->width-(2.0 * a->bg->border.width), a->height-(2.0*a->bg->border.width), a->bg->border.rounded - a->bg->border.width/1.571);
-        cairo_set_source_rgba(c, a->bg->back.color[0], a->bg->back.color[1], a->bg->back.color[2], a->bg->back.alpha);
+        draw_rect(c, a->bg->border.width, a->bg->border.width,
+                  a->width - (2.0 * a->bg->border.width), a->height - (2.0 * a->bg->border.width),
+                  a->bg->border.rounded - a->bg->border.width / 1.571);
+        cairo_set_source_rgba(c, a->bg->back.color[0], a->bg->back.color[1],
+                              a->bg->back.color[2], a->bg->back.alpha);
         cairo_fill(c);
     }
 
@@ -392,7 +433,9 @@ void draw_background (Area *a, cairo_t *c)
         cairo_set_line_width (c, a->bg->border.width);
 
         // draw border inside (x, y, width, height)
-        draw_rect(c, a->bg->border.width/2.0, a->bg->border.width/2.0, a->width - a->bg->border.width, a->height - a->bg->border.width, a->bg->border.rounded);
+        draw_rect(c, a->bg->border.width / 2.0, a->bg->border.width / 2.0,
+                  a->width - a->bg->border.width, a->height - a->bg->border.width,
+                  a->bg->border.rounded);
         /*
         // convert : radian = degre * M_PI/180
         // definir le degrade dans un carre de (0,0) (100,100)
@@ -429,7 +472,8 @@ void draw_background (Area *a, cairo_t *c)
         cairo_pattern_add_color_stop_rgba (linpat, 1, a->border.color[0], a->border.color[1], a->border.color[2], 0);
         cairo_set_source (c, linpat);
         */
-        cairo_set_source_rgba (c, a->bg->border.color[0], a->bg->border.color[1], a->bg->border.color[2], a->bg->border.alpha);
+        cairo_set_source_rgba (c, a->bg->border.color[0], a->bg->border.color[1],
+                               a->bg->border.color[2], a->bg->border.alpha);
 
         cairo_stroke (c);
         //cairo_pattern_destroy (linpat);
@@ -437,9 +481,8 @@ void draw_background (Area *a, cairo_t *c)
 }
 
 
-void remove_area (Area *a)
-{
-    Area *parent = (Area*)a->parent;
+void remove_area (Area* a) {
+    Area* parent = (Area*)a->parent;
 
     parent->list = g_slist_remove(parent->list, a);
     set_redraw (parent);
@@ -447,9 +490,8 @@ void remove_area (Area *a)
 }
 
 
-void add_area (Area *a)
-{
-    Area *parent = (Area*)a->parent;
+void add_area (Area* a) {
+    Area* parent = (Area*)a->parent;
 
     parent->list = g_slist_append(parent->list, a);
     set_redraw (parent);
@@ -457,8 +499,7 @@ void add_area (Area *a)
 }
 
 
-void free_area(Area *a)
-{
+void free_area(Area* a) {
     for (GSList* l0 = a->list; l0 ; l0 = l0->next) {
         free_area(static_cast<Area*>(l0->data));
     }
@@ -475,30 +516,29 @@ void free_area(Area *a)
 }
 
 
-void draw_rect(cairo_t *c, double x, double y, double w, double h, double r)
-{
+void draw_rect(cairo_t* c, double x, double y, double w, double h, double r) {
     if (r > 0.0) {
         double c1 = 0.55228475 * r;
 
-        cairo_move_to(c, x+r, y);
-        cairo_rel_line_to(c, w-2*r, 0);
+        cairo_move_to(c, x + r, y);
+        cairo_rel_line_to(c, w - 2 * r, 0);
         cairo_rel_curve_to(c, c1, 0.0, r, c1, r, r);
-        cairo_rel_line_to(c, 0, h-2*r);
-        cairo_rel_curve_to(c, 0.0, c1, c1-r, r, -r, r);
-        cairo_rel_line_to (c, -w +2*r, 0);
+        cairo_rel_line_to(c, 0, h - 2 * r);
+        cairo_rel_curve_to(c, 0.0, c1, c1 - r, r, -r, r);
+        cairo_rel_line_to (c, -w + 2 * r, 0);
         cairo_rel_curve_to (c, -c1, 0, -r, -c1, -r, -r);
         cairo_rel_line_to (c, 0, -h + 2 * r);
         cairo_rel_curve_to (c, 0, -c1, r - c1, -r, r, -r);
-    }
-    else
+    } else {
         cairo_rectangle(c, x, y, w, h);
+    }
 }
 
 
-void clear_pixmap(Pixmap p, int x, int y, int w, int h)
-{
-    Picture pict = XRenderCreatePicture(server.dsp, p, XRenderFindVisualFormat(server.dsp, server.visual), 0, 0);
-    XRenderColor col = { .red=0, .green=0, .blue=0, .alpha=0 };
+void clear_pixmap(Pixmap p, int x, int y, int w, int h) {
+    Picture pict = XRenderCreatePicture(server.dsp, p,
+                                        XRenderFindVisualFormat(server.dsp, server.visual), 0, 0);
+    XRenderColor col = { .red = 0, .green = 0, .blue = 0, .alpha = 0 };
     XRenderFillRectangle(server.dsp, PictOpSrc, pict, &col, x, y, w, h);
     XRenderFreePicture(server.dsp, pict);
 }
