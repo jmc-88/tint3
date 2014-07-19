@@ -250,13 +250,12 @@ void tooltip_update()
 }
 
 
-void tooltip_trigger_hide(Tooltip* tooltip)
+void tooltip_trigger_hide()
 {
 	if (g_tooltip.mapped) {
 		tooltip_copy_text(0);
 		start_hide_timeout();
-	}
-	else {
+	} else {
 		// tooltip not visible yet, but maybe a timeout is still pending
 		stop_tooltip_timeout();
 	}

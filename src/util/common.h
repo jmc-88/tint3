@@ -29,7 +29,21 @@ FXint fxmalloc(void** ptr,unsigned long size){
 */
 
 // mouse actions
-enum { NONE=0, CLOSE, TOGGLE, ICONIFY, SHADE, TOGGLE_ICONIFY, MAXIMIZE_RESTORE, MAXIMIZE, RESTORE, DESKTOP_LEFT, DESKTOP_RIGHT, NEXT_TASK, PREV_TASK };
+enum {
+    NONE = 0,
+    CLOSE,
+    TOGGLE,
+    ICONIFY,
+    SHADE,
+    TOGGLE_ICONIFY,
+    MAXIMIZE_RESTORE,
+    MAXIMIZE,
+    RESTORE,
+    DESKTOP_LEFT,
+    DESKTOP_RIGHT,
+    NEXT_TASK,
+    PREV_TASK
+};
 
 #define ALLDESKTOP  0xFFFFFFFF
 
@@ -38,7 +52,7 @@ enum { NONE=0, CLOSE, TOGGLE, ICONIFY, SHADE, TOGGLE_ICONIFY, MAXIMIZE_RESTORE, 
 void copy_file(const char *pathSrc, const char *pathDest);
 
 // extract key = value
-int parse_line (const char *line, char **key, char **value);
+int parse_line(char *line, char **key, char **value);
 
 // execute a command by calling fork
 void tint_exec(const char* command);
@@ -49,7 +63,7 @@ int hex_char_to_int (char c);
 int hex_to_rgb (char *hex, int *r, int *g, int *b);
 void get_color (char *hex, double *rgb);
 
-void extract_values (const char *value, char **value1, char **value2, char **value3);
+void extract_values(char *value, char **value1, char **value2, char **value3);
 
 // adjust Alpha/Saturation/Brightness on an ARGB icon
 // alpha from 0 to 100, satur from 0 to 1, bright from 0 to 1.

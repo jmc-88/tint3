@@ -42,26 +42,25 @@ include_directories( ${PROJECT_BINARY_DIR}
                      ${IMLIB2_INCLUDE_DIRS}
 		     ${SN_INCLUDE_DIRS} )
 
-set( SOURCES src/config.c
-             src/panel.c
-             src/server.c
-             src/tint.c
-             src/clock/clock.c
-             src/systray/systraybar.c
-             src/launcher/launcher.c
-             src/launcher/xsettings-client.c
-             src/launcher/xsettings-common.c
-             src/taskbar/task.c
-             src/taskbar/taskbar.c
-             src/taskbar/taskbarname.c
-             src/tooltip/tooltip.c
-             src/util/area.c
-             src/util/common.c
-             src/util/timer.c
-             src/util/window.c )
+set( SOURCES src/config.cc
+             src/panel.cc
+             src/server.cc
+             src/tint.cc
+             src/clock/clock.cc
+             src/systray/systraybar.cc
+             src/launcher/launcher.cc
+             src/launcher/xsettings-client.cc
+             src/launcher/xsettings-common.cc
+             src/taskbar/task.cc
+             src/taskbar/taskbar.cc
+             src/taskbar/taskbarname.cc
+             src/tooltip/tooltip.cc
+             src/util/area.cc
+             src/util/common.cc
+             src/util/timer.cc
+             src/util/window.cc )
 
 option( ENABLE_BATTERY "Enable battery status plugin" ON )
-option( ENABLE_TINT2CONF "Enable tint2conf build, a GTK+2 theme switcher for tint2" ON )
 option( ENABLE_EXAMPLES "Install additional tin2rc examples" OFF )
 option( ENABLE_SN "Startup notification support" ON )
 if( ENABLE_SN )
@@ -71,7 +70,7 @@ if( ENABLE_SN )
 endif( ENABLE_SN)
 
 if( ENABLE_BATTERY )
-  set( SOURCES ${SOURCES} src/battery/battery.c )
+  set( SOURCES ${SOURCES} src/battery/battery.cc )
   add_definitions( -DENABLE_BATTERY )
 endif( ENABLE_BATTERY )
 
@@ -79,12 +78,6 @@ set( MANDIR share/man CACHE PATH "Directory for man pages" )
 set( DATADIR share CACHE PATH "Directory for shared data" )
 set( SYSCONFDIR /etc CACHE PATH "Directory for configuration files" )
 set( DOCDIR share/doc/tint2 CACHE PATH "Directory for documentation files" )
-
-if( ENABLE_TINT2CONF )
-  add_definitions( -DHAVE_VERSION_H )
-  add_subdirectory( src/tint2conf )
-  add_dependencies( tint2conf version )
-endif( ENABLE_TINT2CONF )
 
 add_custom_target( version ALL "${PROJECT_SOURCE_DIR}/get_svnrev.sh" "\"${PROJECT_SOURCE_DIR}\"" )
 

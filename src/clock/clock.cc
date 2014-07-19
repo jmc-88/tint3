@@ -165,24 +165,24 @@ void init_clock_panel(void *p)
 }
 
 
-void draw_clock (void *obj, cairo_t *c)
+void draw_clock(void *obj, cairo_t *c)
 {
-	Clock *clock = obj;
-	PangoLayout *layout;
+	Clock* clock = static_cast<Clock*>(obj);
+	PangoLayout* layout;
 
-	layout = pango_cairo_create_layout (c);
+	layout = pango_cairo_create_layout(c);
 
 	// draw layout
-	pango_layout_set_font_description (layout, time1_font_desc);
-	pango_layout_set_width (layout, clock->area.width * PANGO_SCALE);
-	pango_layout_set_alignment (layout, PANGO_ALIGN_CENTER);
-	pango_layout_set_text (layout, buf_time, strlen(buf_time));
+	pango_layout_set_font_description(layout, time1_font_desc);
+	pango_layout_set_width(layout, clock->area.width * PANGO_SCALE);
+	pango_layout_set_alignment(layout, PANGO_ALIGN_CENTER);
+	pango_layout_set_text(layout, buf_time, strlen(buf_time));
 
-	cairo_set_source_rgba (c, clock->font.color[0], clock->font.color[1], clock->font.color[2], clock->font.alpha);
+	cairo_set_source_rgba(c, clock->font.color[0], clock->font.color[1], clock->font.color[2], clock->font.alpha);
 
-	pango_cairo_update_layout (c, layout);
-	cairo_move_to (c, 0, clock->time1_posy);
-	pango_cairo_show_layout (c, layout);
+	pango_cairo_update_layout(c, layout);
+	cairo_move_to(c, 0, clock->time1_posy);
+	pango_cairo_show_layout(c, layout);
 
 	if (time2_format) {
 		pango_layout_set_font_description (layout, time2_font_desc);
@@ -201,8 +201,8 @@ void draw_clock (void *obj, cairo_t *c)
 
 int resize_clock (void *obj)
 {
-	Clock *clock = obj;
-	Panel *panel = clock->area.panel;
+	Clock* clock = static_cast<Clock*>(obj);
+	Panel* panel = static_cast<Panel*>(clock->area.panel);
 	int time_height_ink, time_height, time_width, date_height_ink, date_height, date_width, ret = 0;
 
 	clock->area.redraw = 1;
