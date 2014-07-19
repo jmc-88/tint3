@@ -59,9 +59,9 @@ void tint_exec(const char* command);
 
 
 // conversion
-int hex_char_to_int (char c);
-int hex_to_rgb (char* hex, int* r, int* g, int* b);
-void get_color (char* hex, double* rgb);
+int hex_char_to_int(char c);
+int hex_to_rgb(char* hex, int* r, int* g, int* b);
+void get_color(char* hex, double* rgb);
 
 void extract_values(char* value, char** value1, char** value2, char** value3);
 

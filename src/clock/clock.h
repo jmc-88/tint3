@@ -47,9 +47,9 @@ void cleanup_clock();
 void init_clock();
 void init_clock_panel(void* panel);
 
-void draw_clock (void* obj, cairo_t* c);
+void draw_clock(void* obj, cairo_t* c);
 
-int  resize_clock (void* obj);
+int  resize_clock(void* obj);
 
 void clock_action(int button);
 

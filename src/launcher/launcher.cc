@@ -330,14 +330,14 @@ void draw_launcher_icon(void* obj, cairo_t* c) {
     LauncherIcon* launcherIcon = (LauncherIcon*)obj;
     Imlib_Image icon_scaled = launcherIcon->icon_scaled;
     // Render
-    imlib_context_set_image (icon_scaled);
+    imlib_context_set_image(icon_scaled);
 
     if (server.real_transparency) {
         render_image(launcherIcon->area.pix, 0, 0, imlib_image_get_width(),
-                     imlib_image_get_height() );
+                     imlib_image_get_height());
     } else {
         imlib_context_set_drawable(launcherIcon->area.pix);
-        imlib_render_image_on_drawable (0, 0);
+        imlib_render_image_on_drawable(0, 0);
     }
 }
 
@@ -345,10 +345,10 @@ Imlib_Image scale_icon(Imlib_Image original, int icon_size) {
     Imlib_Image icon_scaled;
 
     if (original) {
-        imlib_context_set_image (original);
+        imlib_context_set_image(original);
         icon_scaled = imlib_create_cropped_scaled_image(0, 0, imlib_image_get_width(),
                       imlib_image_get_height(), icon_size, icon_size);
-        imlib_context_set_image (icon_scaled);
+        imlib_context_set_image(icon_scaled);
         imlib_image_set_has_alpha(1);
         DATA32* data = imlib_image_get_data();
         adjust_asb(data, icon_size, icon_size, launcher_alpha,
@@ -356,7 +356,7 @@ Imlib_Image scale_icon(Imlib_Image original, int icon_size) {
         imlib_image_put_back_data(data);
     } else {
         icon_scaled = imlib_create_image(icon_size, icon_size);
-        imlib_context_set_image (icon_scaled);
+        imlib_context_set_image(icon_scaled);
         imlib_context_set_color(255, 255, 255, 255);
         imlib_image_fill_rectangle(0, 0, icon_size, icon_size);
     }
@@ -381,7 +381,7 @@ void launcher_action(LauncherIcon* icon, XEvent* evt) {
     ctx = sn_launcher_context_new(server.sn_dsp, server.screen);
     sn_launcher_context_set_name(ctx, icon->icon_tooltip);
     sn_launcher_context_set_description(ctx, "Application launched from tint3");
-    sn_launcher_context_set_binary_name (ctx, icon->cmd);
+    sn_launcher_context_set_binary_name(ctx, icon->cmd);
 
     // Get a timestamp from the X event
     if (evt->type == ButtonPress || evt->type == ButtonRelease) {
@@ -401,23 +401,23 @@ void launcher_action(LauncherIcon* icon, XEvent* evt) {
         fprintf(stderr, "Could not fork\n");
     } else if (pid == 0) {
 #if HAVE_SN
-        sn_launcher_context_setup_child_process (ctx);
+        sn_launcher_context_setup_child_process(ctx);
 #endif // HAVE_SN
         // Allow children to exist after parent destruction
-        setsid ();
+        setsid();
         // Run the command
         execl("/bin/sh", "/bin/sh", "-c", icon->cmd, NULL);
 
         fprintf(stderr, "Failed to execlp %s\n", icon->cmd);
 #if HAVE_SN
-        sn_launcher_context_unref (ctx);
+        sn_launcher_context_unref(ctx);
 #endif // HAVE_SN
         _exit(1);
     }
 
 #if HAVE_SN
     else {
-        g_tree_insert (server.pids, GINT_TO_POINTER (pid), ctx);
+        g_tree_insert(server.pids, GINT_TO_POINTER(pid), ctx);
     }
 
 #endif // HAVE_SN
@@ -611,7 +611,7 @@ int launcher_read_desktop_file(const char* path, DesktopEntry* entry) {
         }
     }
 
-    fclose (fp);
+    fclose(fp);
     // From this point:
     // entry->name, entry->icon, entry->exec will never be empty strings (can be NULL though)
 
@@ -655,15 +655,15 @@ IconTheme* load_theme(char* name) {
                                  NULL);
 
     if (!g_file_test(file_name, G_FILE_TEST_EXISTS)) {
-        g_free (file_name);
+        g_free(file_name);
         file_name = g_build_filename("/usr/share/icons", name, "index.theme", NULL);
 
         if (!g_file_test(file_name, G_FILE_TEST_EXISTS)) {
-            g_free (file_name);
+            g_free(file_name);
             file_name = g_build_filename("/usr/share/pixmaps", name, "index.theme", NULL);
 
             if (!g_file_test(file_name, G_FILE_TEST_EXISTS)) {
-                g_free (file_name);
+                g_free(file_name);
                 file_name = NULL;
             }
         }
@@ -678,7 +678,7 @@ IconTheme* load_theme(char* name) {
         return NULL;
     }
 
-    g_free (file_name);
+    g_free(file_name);
 
     theme = (IconTheme*) malloc(sizeof(IconTheme));
     memset(&theme, 0, sizeof(IconTheme));

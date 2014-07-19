@@ -59,14 +59,14 @@ void cleanup_taskbar();
 void init_taskbar();
 void init_taskbar_panel(void* p);
 
-void draw_taskbar (void* obj, cairo_t* c);
+void draw_taskbar(void* obj, cairo_t* c);
 void taskbar_remove_task(gpointer key, gpointer value, gpointer user_data);
-Task* task_get_task (Window win);
+Task* task_get_task(Window win);
 GPtrArray* task_get_tasks(Window win);
-void task_refresh_tasklist ();
+void task_refresh_tasklist();
 
 int  resize_taskbar(void* obj);
-void on_change_taskbar (void* obj);
+void on_change_taskbar(void* obj);
 void set_taskbar_state(Taskbar* tskbar, int state);
 
 // show/hide taskbar according to current desktop

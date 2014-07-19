@@ -44,7 +44,7 @@ const char* task_get_tooltip(void* obj) {
 }
 
 
-Task* add_task (Window win) {
+Task* add_task(Window win) {
     if (!win) {
         return 0;
     }
@@ -56,7 +56,7 @@ Task* add_task (Window win) {
     int monitor;
 
     if (nb_panel > 1) {
-        monitor = window_get_monitor (win);
+        monitor = window_get_monitor(win);
 
         if (monitor >= nb_panel) {
             monitor = 0;
@@ -67,7 +67,7 @@ Task* add_task (Window win) {
 
     Task new_tsk;
     new_tsk.win = win;
-    new_tsk.desktop = window_get_desktop (win);
+    new_tsk.desktop = window_get_desktop(win);
     new_tsk.area.panel = &panel1[monitor];
     new_tsk.current_state = window_is_iconified(win) ? TASK_ICONIFIED : TASK_NORMAL;
 
@@ -85,8 +85,8 @@ Task* add_task (Window win) {
     get_icon(&new_tsk);
 
     //printf("task %s : desktop %d, monitor %d\n", new_tsk->title, desktop, monitor);
-    XSelectInput (server.dsp, new_tsk.win,
-                  PropertyChangeMask | StructureNotifyMask);
+    XSelectInput(server.dsp, new_tsk.win,
+                 PropertyChangeMask | StructureNotifyMask);
 
     GPtrArray* task_group = g_ptr_array_new();
     Taskbar* tskbar;
@@ -144,7 +144,7 @@ Task* add_task (Window win) {
 }
 
 
-void remove_task (Task* tsk) {
+void remove_task(Task* tsk) {
     if (!tsk) {
         return;
     }
@@ -155,7 +155,7 @@ void remove_task (Task* tsk) {
     // even with task_on_all_desktop and with task_on_all_panel
     //printf("remove_task %s %d\n", tsk->title, tsk->desktop);
     if (tsk->title) {
-        free (tsk->title);
+        free(tsk->title);
     }
 
     int k;
@@ -266,7 +266,7 @@ int get_title(Task* tsk) {
 }
 
 
-void get_icon (Task* tsk) {
+void get_icon(Task* tsk) {
     Panel* panel = static_cast<Panel*>(tsk->area.panel);
 
     if (!panel->g_task.icon) {
@@ -294,7 +294,7 @@ void get_icon (Task* tsk) {
     if (data) {
         // get ARGB icon
         int w, h;
-        gulong* tmp_data = get_best_icon(data, get_icon_count (data, i), i, &w, &h,
+        gulong* tmp_data = get_best_icon(data, get_icon_count(data, i), i, &w, &h,
                                          panel->g_task.icon_size1);
 #ifdef __x86_64__
         DATA32 icon_data[w * h];
@@ -304,9 +304,9 @@ void get_icon (Task* tsk) {
             icon_data[i] =  tmp_data[i];
         }
 
-        img = imlib_create_image_using_copied_data (w, h, icon_data);
+        img = imlib_create_image_using_copied_data(w, h, icon_data);
 #else
-        img = imlib_create_image_using_data (w, h, (DATA32*)tmp_data);
+        img = imlib_create_image_using_data(w, h, (DATA32*)tmp_data);
 #endif
     } else {
         // get Pixmap icon
@@ -372,7 +372,7 @@ void get_icon (Task* tsk) {
     }
 
     if (data) {
-        XFree (data);
+        XFree(data);
     }
 
     GPtrArray* task_group = task_get_tasks(tsk->win);
@@ -394,7 +394,7 @@ void get_icon (Task* tsk) {
 }
 
 
-void draw_task_icon (Task* tsk, int text_width) {
+void draw_task_icon(Task* tsk, int text_width) {
     if (tsk->icon[tsk->current_state] == 0) {
         return;
     }
@@ -414,19 +414,19 @@ void draw_task_icon (Task* tsk, int text_width) {
     }
 
     // Render
-    imlib_context_set_image (tsk->icon[tsk->current_state]);
+    imlib_context_set_image(tsk->icon[tsk->current_state]);
 
     if (server.real_transparency) {
         render_image(tsk->area.pix, pos_x, panel->g_task.icon_posy,
-                     imlib_image_get_width(), imlib_image_get_height() );
+                     imlib_image_get_width(), imlib_image_get_height());
     } else {
         imlib_context_set_drawable(tsk->area.pix);
-        imlib_render_image_on_drawable (pos_x, panel->g_task.icon_posy);
+        imlib_render_image_on_drawable(pos_x, panel->g_task.icon_posy);
     }
 }
 
 
-void draw_task (void* obj, cairo_t* c) {
+void draw_task(void* obj, cairo_t* c) {
     Task* tsk = static_cast<Task*>(obj);
     tsk->state_pix[tsk->current_state] = tsk->area.pix;
     PangoLayout* layout;
@@ -437,8 +437,8 @@ void draw_task (void* obj, cairo_t* c) {
 
     if (panel->g_task.text) {
         /* Layout */
-        layout = pango_cairo_create_layout (c);
-        pango_layout_set_font_description (layout, panel->g_task.font_desc);
+        layout = pango_cairo_create_layout(c);
+        pango_layout_set_font_description(layout, panel->g_task.font_desc);
         pango_layout_set_text(layout, tsk->title, -1);
 
         /* Drawing width and Cut text */
@@ -447,49 +447,49 @@ void draw_task (void* obj, cairo_t* c) {
                                ((Taskbar*)tsk->area.parent)->text_width * PANGO_SCALE);
         pango_layout_set_height(layout, panel->g_task.text_height * PANGO_SCALE);
         pango_layout_set_wrap(layout, PANGO_WRAP_CHAR);
-        pango_layout_set_ellipsize (layout, PANGO_ELLIPSIZE_END);
+        pango_layout_set_ellipsize(layout, PANGO_ELLIPSIZE_END);
 
         /* Center text */
         if (panel->g_task.centered) {
-            pango_layout_set_alignment (layout, PANGO_ALIGN_CENTER);
+            pango_layout_set_alignment(layout, PANGO_ALIGN_CENTER);
         } else {
-            pango_layout_set_alignment (layout, PANGO_ALIGN_LEFT);
+            pango_layout_set_alignment(layout, PANGO_ALIGN_LEFT);
         }
 
-        pango_layout_get_pixel_size (layout, &width, &height);
+        pango_layout_get_pixel_size(layout, &width, &height);
 
         config_text = &panel->g_task.font[tsk->current_state];
-        cairo_set_source_rgba (c, config_text->color[0], config_text->color[1],
-                               config_text->color[2], config_text->alpha);
+        cairo_set_source_rgba(c, config_text->color[0], config_text->color[1],
+                              config_text->color[2], config_text->alpha);
 
-        pango_cairo_update_layout (c, layout);
+        pango_cairo_update_layout(c, layout);
         double text_posy = (panel->g_task.area.height - height) / 2.0;
-        cairo_move_to (c, panel->g_task.text_posx, text_posy);
-        pango_cairo_show_layout (c, layout);
+        cairo_move_to(c, panel->g_task.text_posx, text_posy);
+        pango_cairo_show_layout(c, layout);
 
         if (panel->g_task.font_shadow) {
-            cairo_set_source_rgba (c, 0.0, 0.0, 0.0, 0.5);
-            pango_cairo_update_layout (c, layout);
-            cairo_move_to (c, panel->g_task.text_posx + 1, text_posy + 1);
-            pango_cairo_show_layout (c, layout);
+            cairo_set_source_rgba(c, 0.0, 0.0, 0.0, 0.5);
+            pango_cairo_update_layout(c, layout);
+            cairo_move_to(c, panel->g_task.text_posx + 1, text_posy + 1);
+            pango_cairo_show_layout(c, layout);
         }
 
-        g_object_unref (layout);
+        g_object_unref(layout);
     }
 
     if (panel->g_task.icon) {
-        draw_task_icon (tsk, width);
+        draw_task_icon(tsk, width);
     }
 }
 
 
-void on_change_task (void* obj) {
+void on_change_task(void* obj) {
     Task* tsk = static_cast<Task*>(obj);
     Panel* panel = (Panel*)tsk->area.panel;
 
     long value[] = { panel->posx + tsk->area.posx, panel->posy + tsk->area.posy, tsk->area.width, tsk->area.height };
-    XChangeProperty (server.dsp, tsk->win, server.atom._NET_WM_ICON_GEOMETRY,
-                     XA_CARDINAL, 32, PropModeReplace, (unsigned char*)value, 4);
+    XChangeProperty(server.dsp, tsk->win, server.atom._NET_WM_ICON_GEOMETRY,
+                    XA_CARDINAL, 32, PropModeReplace, (unsigned char*)value, 4);
 
     // reset Pixmap when position/size changed
     set_task_redraw(tsk);
@@ -693,7 +693,7 @@ void add_urgent(Task* tsk) {
     }
 
     // some programs set urgency hint although they are active
-    if ( task_active && task_active->win == tsk->win ) {
+    if (task_active && task_active->win == tsk->win) {
         return;
     }
 

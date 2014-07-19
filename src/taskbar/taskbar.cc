@@ -81,7 +81,7 @@ void cleanup_taskbar() {
                 }
             }
 
-            free_area (&tskbar->area);
+            free_area(&tskbar->area);
             // remove taskbar from the panel
             panel->area.list = g_slist_remove(panel->area.list, tskbar);
         }
@@ -314,7 +314,7 @@ void taskbar_remove_task(gpointer key, gpointer value, gpointer user_data) {
 }
 
 
-Task* task_get_task (Window win) {
+Task* task_get_task(Window win) {
     GPtrArray* task_group = task_get_tasks(win);
 
     if (task_group) {
@@ -334,7 +334,7 @@ GPtrArray* task_get_tasks(Window win) {
 }
 
 
-void task_refresh_tasklist () {
+void task_refresh_tasklist() {
     if (!taskbar_enabled) {
         return;
     }
@@ -369,7 +369,7 @@ void task_refresh_tasklist () {
 
     // Add any new
     for (i = 0; i < num_results; i++) {
-        if (!task_get_task (win[i])) {
+        if (!task_get_task(win[i])) {
             add_task(win[i]);
         }
     }
@@ -378,7 +378,7 @@ void task_refresh_tasklist () {
 }
 
 
-void draw_taskbar (void* obj, cairo_t* c) {
+void draw_taskbar(void* obj, cairo_t* c) {
     Taskbar* taskbar = static_cast<Taskbar*>(obj);
     int state = (taskbar->desktop == server.desktop ? TASKBAR_ACTIVE :
                  TASKBAR_NORMAL);

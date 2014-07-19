@@ -18,8 +18,8 @@ void default_config();
 // freed memory
 void cleanup_config();
 
-int  config_read_file (const char* path);
-int  config_read ();
+int  config_read_file(const char* path);
+int  config_read();
 
 #endif
 

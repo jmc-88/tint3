@@ -11,6 +11,7 @@ indent-col1-comments
 min-conditional-indent=0
 break-blocks
 pad-oper
+unpad-paren
 pad-header
 align-pointer=type
 align-reference=type

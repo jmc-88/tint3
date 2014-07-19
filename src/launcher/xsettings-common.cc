@@ -29,7 +29,7 @@
 #include "xsettings-common.h"
 
 XSettingsSetting*
-xsettings_setting_copy (XSettingsSetting* setting) {
+xsettings_setting_copy(XSettingsSetting* setting) {
     XSettingsSetting* result = (XSettingsSetting*) malloc(sizeof * result);
 
     if (!result) {
@@ -43,7 +43,7 @@ xsettings_setting_copy (XSettingsSetting* setting) {
         goto err;
     }
 
-    memcpy (result->name, setting->name, str_len + 1);
+    memcpy(result->name, setting->name, str_len + 1);
     result->type = setting->type;
 
     switch (setting->type) {
@@ -56,14 +56,14 @@ xsettings_setting_copy (XSettingsSetting* setting) {
             break;
 
         case XSETTINGS_TYPE_STRING:
-            str_len = strlen (setting->data.v_string);
+            str_len = strlen(setting->data.v_string);
             result->data.v_string = (char*) malloc(str_len + 1);
 
             if (!result->data.v_string) {
                 goto err;
             }
 
-            memcpy (result->data.v_string, setting->data.v_string, str_len + 1);
+            memcpy(result->data.v_string, setting->data.v_string, str_len + 1);
             break;
 
         default:
@@ -85,7 +85,7 @@ err:
 }
 
 XSettingsList*
-xsettings_list_copy (XSettingsList* list) {
+xsettings_list_copy(XSettingsList* list) {
     XSettingsList* new_list = NULL;
     XSettingsList* old_iter = list;
     XSettingsList* new_iter = NULL;
@@ -97,7 +97,7 @@ xsettings_list_copy (XSettingsList* list) {
             goto error;
         }
 
-        new_node->setting = xsettings_setting_copy (old_iter->setting);
+        new_node->setting = xsettings_setting_copy(old_iter->setting);
 
         if (!new_node->setting) {
             free(new_node);
@@ -122,13 +122,13 @@ error:
 }
 
 int
-xsettings_setting_equal (XSettingsSetting* setting_a,
-                         XSettingsSetting* setting_b) {
+xsettings_setting_equal(XSettingsSetting* setting_a,
+                        XSettingsSetting* setting_b) {
     if (setting_a->type != setting_b->type) {
         return 0;
     }
 
-    if (strcmp (setting_a->name, setting_b->name) != 0) {
+    if (strcmp(setting_a->name, setting_b->name) != 0) {
         return 0;
     }
 
@@ -143,7 +143,7 @@ xsettings_setting_equal (XSettingsSetting* setting_a,
                     setting_a->data.v_color.alpha == setting_b->data.v_color.alpha);
 
         case XSETTINGS_TYPE_STRING:
-            return strcmp (setting_a->data.v_string, setting_b->data.v_string) == 0;
+            return strcmp(setting_a->data.v_string, setting_b->data.v_string) == 0;
 
         default:
             break;
@@ -153,7 +153,7 @@ xsettings_setting_equal (XSettingsSetting* setting_a,
 }
 
 void
-xsettings_setting_free (XSettingsSetting* setting) {
+xsettings_setting_free(XSettingsSetting* setting) {
     if (setting->type == XSETTINGS_TYPE_STRING) {
         free(setting->data.v_string);
     }
@@ -166,20 +166,20 @@ xsettings_setting_free (XSettingsSetting* setting) {
 }
 
 void
-xsettings_list_free (XSettingsList* list) {
+xsettings_list_free(XSettingsList* list) {
     while (list) {
         XSettingsList* next = list->next;
 
-        xsettings_setting_free (list->setting);
-        free (list);
+        xsettings_setting_free(list->setting);
+        free(list);
 
         list = next;
     }
 }
 
 XSettingsResult
-xsettings_list_insert (XSettingsList**    list,
-                       XSettingsSetting*  setting) {
+xsettings_list_insert(XSettingsList**    list,
+                      XSettingsSetting*  setting) {
     XSettingsList* last = NULL;
     XSettingsList* node = (XSettingsList*) malloc(sizeof * node);
 
@@ -192,12 +192,12 @@ xsettings_list_insert (XSettingsList**    list,
     XSettingsList* iter = *list;
 
     while (iter) {
-        int cmp = strcmp (setting->name, iter->setting->name);
+        int cmp = strcmp(setting->name, iter->setting->name);
 
         if (cmp < 0) {
             break;
         } else if (cmp == 0) {
-            free (node);
+            free(node);
             return XSETTINGS_DUPLICATE_ENTRY;
         }
 
@@ -216,23 +216,23 @@ xsettings_list_insert (XSettingsList**    list,
 }
 
 XSettingsResult
-xsettings_list_delete (XSettingsList** list,
-                       const char*     name) {
+xsettings_list_delete(XSettingsList** list,
+                      const char*     name) {
     XSettingsList* iter;
     XSettingsList* last = NULL;
 
     iter = *list;
 
     while (iter) {
-        if (strcmp (name, iter->setting->name) == 0) {
+        if (strcmp(name, iter->setting->name) == 0) {
             if (last) {
                 last->next = iter->next;
             } else {
                 *list = iter->next;
             }
 
-            xsettings_setting_free (iter->setting);
-            free (iter);
+            xsettings_setting_free(iter->setting);
+            free(iter);
 
             return XSETTINGS_SUCCESS;
         }
@@ -245,14 +245,14 @@ xsettings_list_delete (XSettingsList** list,
 }
 
 XSettingsSetting*
-xsettings_list_lookup (XSettingsList* list,
-                       const char*    name) {
+xsettings_list_lookup(XSettingsList* list,
+                      const char*    name) {
     XSettingsList* iter;
 
     iter = list;
 
     while (iter) {
-        if (strcmp (name, iter->setting->name) == 0) {
+        if (strcmp(name, iter->setting->name) == 0) {
             return iter->setting;
         }
 
@@ -263,7 +263,7 @@ xsettings_list_lookup (XSettingsList* list,
 }
 
 char
-xsettings_byte_order (void) {
+xsettings_byte_order(void) {
     CARD32 myint = 0x01020304;
     return (*(char*)&myint == 1) ? MSBFirst : LSBFirst;
 }

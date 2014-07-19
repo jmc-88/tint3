@@ -49,12 +49,12 @@ void copy_file(const char* pathSrc, const char* pathDest) {
     }
 
     while ((nb = fread(line, 1, 100, fileSrc)) > 0)
-        if ( nb != fwrite(line, 1, nb, fileDest)) {
+        if (nb != fwrite(line, 1, nb, fileDest)) {
             printf("Error while copying file %s to %s\n", pathSrc, pathDest);
         }
 
-    fclose (fileDest);
-    fclose (fileSrc);
+    fclose(fileDest);
+    fclose(fileSrc);
 }
 
 
@@ -78,7 +78,7 @@ int parse_line(char* line, char** key, char** value) {
     /* overwrite '\n' with '\0' if '\n' present */
     char* b;
 
-    if ((b = strchr (a, '\n'))) {
+    if ((b = strchr(a, '\n'))) {
         b[0] = '\0';
     }
 
@@ -107,7 +107,7 @@ void tint_exec(const char* command) {
 }
 
 
-int hex_char_to_int (char c) {
+int hex_char_to_int(char c) {
     int r;
 
     if (c >= '0' && c <= '9') {
@@ -124,27 +124,27 @@ int hex_char_to_int (char c) {
 }
 
 
-int hex_to_rgb (char* hex, int* r, int* g, int* b) {
+int hex_to_rgb(char* hex, int* r, int* g, int* b) {
     int len;
 
     if (hex == NULL || hex[0] != '#') {
         return (0);
     }
 
-    len = strlen (hex);
+    len = strlen(hex);
 
     if (len == 3 + 1) {
-        *r = hex_char_to_int (hex[1]);
-        *g = hex_char_to_int (hex[2]);
-        *b = hex_char_to_int (hex[3]);
+        *r = hex_char_to_int(hex[1]);
+        *g = hex_char_to_int(hex[2]);
+        *b = hex_char_to_int(hex[3]);
     } else if (len == 6 + 1) {
-        *r = hex_char_to_int (hex[1]) * 16 + hex_char_to_int (hex[2]);
-        *g = hex_char_to_int (hex[3]) * 16 + hex_char_to_int (hex[4]);
-        *b = hex_char_to_int (hex[5]) * 16 + hex_char_to_int (hex[6]);
+        *r = hex_char_to_int(hex[1]) * 16 + hex_char_to_int(hex[2]);
+        *g = hex_char_to_int(hex[3]) * 16 + hex_char_to_int(hex[4]);
+        *b = hex_char_to_int(hex[5]) * 16 + hex_char_to_int(hex[6]);
     } else if (len == 12 + 1) {
-        *r = hex_char_to_int (hex[1]) * 16 + hex_char_to_int (hex[2]);
-        *g = hex_char_to_int (hex[5]) * 16 + hex_char_to_int (hex[6]);
-        *b = hex_char_to_int (hex[9]) * 16 + hex_char_to_int (hex[10]);
+        *r = hex_char_to_int(hex[1]) * 16 + hex_char_to_int(hex[2]);
+        *g = hex_char_to_int(hex[5]) * 16 + hex_char_to_int(hex[6]);
+        *b = hex_char_to_int(hex[9]) * 16 + hex_char_to_int(hex[10]);
     } else {
         return 0;
     }
@@ -153,9 +153,9 @@ int hex_to_rgb (char* hex, int* r, int* g, int* b) {
 }
 
 
-void get_color (char* hex, double* rgb) {
+void get_color(char* hex, double* rgb) {
     int r, g, b;
-    hex_to_rgb (hex, &r, &g, &b);
+    hex_to_rgb(hex, &r, &g, &b);
 
     rgb[0] = (r / 255.0);
     rgb[1] = (g / 255.0);
@@ -163,7 +163,7 @@ void get_color (char* hex, double* rgb) {
 }
 
 
-void extract_values (char* value, char** value1, char** value2, char** value3) {
+void extract_values(char* value, char** value1, char** value2, char** value3) {
     if (*value1) {
         free(*value1);
     }
@@ -371,15 +371,15 @@ void createHeuristicMask(DATA32* data, int w, int h) {
               (topLeft == bottomRight);
     int maskPos = 0;
 
-    if ( max < (topRight == topLeft) + (topRight == bottomLeft) +
-         (topRight == bottomRight) ) {
+    if (max < (topRight == topLeft) + (topRight == bottomLeft) +
+        (topRight == bottomRight)) {
         max = (topRight == topLeft) + (topRight == bottomLeft) +
               (topRight == bottomRight);
         maskPos = w - 1;
     }
 
-    if ( max < (bottomLeft == topRight) + (bottomLeft == topLeft) +
-         (bottomLeft == bottomRight) ) {
+    if (max < (bottomLeft == topRight) + (bottomLeft == topLeft) +
+        (bottomLeft == bottomRight)) {
         maskPos = w * h - w;
     }
 
@@ -391,7 +391,7 @@ void createHeuristicMask(DATA32* data, int w, int h) {
     int i;
 
     for (i = 0; i < h * w; ++i) {
-        if ( b - udata[0] == 0 && g - udata[1] == 0 && r - udata[2] == 0 ) {
+        if (b - udata[0] == 0 && g - udata[1] == 0 && r - udata[2] == 0) {
             udata[3] = 0;
         }
 

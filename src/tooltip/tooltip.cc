@@ -113,8 +113,8 @@ void tooltip_trigger_show(Area* area, Panel* p, XEvent* e) {
 void tooltip_show(void* arg) {
     int mx, my;
     Window w;
-    XTranslateCoordinates( server.dsp, server.root_win, g_tooltip.panel->main_win,
-                           x, y, &mx, &my, &w);
+    XTranslateCoordinates(server.dsp, server.root_win, g_tooltip.panel->main_win,
+                          x, y, &mx, &my, &w);
     Area* area;
 
     if (!panel_horizontal) {
@@ -179,9 +179,9 @@ void tooltip_adjust_geometry() {
     int screen_height = server.monitor[panel->monitor].y +
                         server.monitor[panel->monitor].height;
 
-    if ( x + width <= screen_width && y + height <= screen_height
-         && x >= server.monitor[panel->monitor].x
-         && y >= server.monitor[panel->monitor].y ) {
+    if (x + width <= screen_width && y + height <= screen_height
+        && x >= server.monitor[panel->monitor].x
+        && y >= server.monitor[panel->monitor].y) {
         return;    // no adjustment needed
     }
 
@@ -213,8 +213,8 @@ void tooltip_adjust_geometry() {
             width;
     }
 
-    if ( y + height > server.monitor[panel->monitor].y +
-         server.monitor[panel->monitor].height) {
+    if (y + height > server.monitor[panel->monitor].y +
+        server.monitor[panel->monitor].height) {
         y = server.monitor[panel->monitor].y + server.monitor[panel->monitor].height -
             height;
     }
@@ -293,11 +293,11 @@ void tooltip_update() {
     // I do not know why this is the right way, but with the below cairo_move_to it seems to be centered (horiz. and vert.)
     cairo_move_to(c, -r1.x / 2 + g_tooltip.bg->border.width + g_tooltip.paddingx,
                   -r1.y / 2 + g_tooltip.bg->border.width + g_tooltip.paddingy);
-    pango_cairo_show_layout (c, layout);
+    pango_cairo_show_layout(c, layout);
 
-    g_object_unref (layout);
-    cairo_destroy (c);
-    cairo_surface_destroy (cs);
+    g_object_unref(layout);
+    cairo_destroy(c);
+    cairo_surface_destroy(cs);
 }
 
 

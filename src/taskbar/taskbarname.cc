@@ -100,7 +100,7 @@ void cleanup_taskbarname() {
                 g_free(tskbar->bar_name.name);
             }
 
-            free_area (&tskbar->bar_name.area);
+            free_area(&tskbar->bar_name.area);
 
             for (k = 0; k < TASKBAR_STATE_COUNT; ++k) {
                 if (tskbar->bar_name.state_pix[k]) {
@@ -127,19 +127,19 @@ void draw_taskbarname(void* obj, cairo_t* c) {
 
     // draw content
     PangoLayout* layout = pango_cairo_create_layout(c);
-    pango_layout_set_font_description (layout, taskbarname_font_desc);
-    pango_layout_set_width (layout, taskbar_name->area.width * PANGO_SCALE);
-    pango_layout_set_alignment (layout, PANGO_ALIGN_CENTER);
-    pango_layout_set_text (layout, taskbar_name->name, strlen(taskbar_name->name));
+    pango_layout_set_font_description(layout, taskbarname_font_desc);
+    pango_layout_set_width(layout, taskbar_name->area.width * PANGO_SCALE);
+    pango_layout_set_alignment(layout, PANGO_ALIGN_CENTER);
+    pango_layout_set_text(layout, taskbar_name->name, strlen(taskbar_name->name));
 
-    cairo_set_source_rgba (c, config_text->color[0], config_text->color[1],
-                           config_text->color[2], config_text->alpha);
+    cairo_set_source_rgba(c, config_text->color[0], config_text->color[1],
+                          config_text->color[2], config_text->alpha);
 
-    pango_cairo_update_layout (c, layout);
-    cairo_move_to (c, 0, taskbar_name->posy);
-    pango_cairo_show_layout (c, layout);
+    pango_cairo_update_layout(c, layout);
+    cairo_move_to(c, 0, taskbar_name->posy);
+    pango_cairo_show_layout(c, layout);
 
-    g_object_unref (layout);
+    g_object_unref(layout);
     //printf("draw_taskbarname %s ******************************\n", taskbar_name->name);
 }
 

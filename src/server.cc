@@ -32,83 +32,83 @@
 
 Server_global server;
 
-void server_catch_error (Display* d, XErrorEvent* ev) {}
+void server_catch_error(Display* d, XErrorEvent* ev) {}
 
-void server_init_atoms () {
-    server.atom._XROOTPMAP_ID = XInternAtom (server.dsp, "_XROOTPMAP_ID", False);
-    server.atom._XROOTMAP_ID = XInternAtom (server.dsp, "_XROOTMAP_ID", False);
-    server.atom._NET_CURRENT_DESKTOP = XInternAtom (server.dsp,
+void server_init_atoms() {
+    server.atom._XROOTPMAP_ID = XInternAtom(server.dsp, "_XROOTPMAP_ID", False);
+    server.atom._XROOTMAP_ID = XInternAtom(server.dsp, "_XROOTMAP_ID", False);
+    server.atom._NET_CURRENT_DESKTOP = XInternAtom(server.dsp,
                                        "_NET_CURRENT_DESKTOP", False);
-    server.atom._NET_NUMBER_OF_DESKTOPS = XInternAtom (server.dsp,
+    server.atom._NET_NUMBER_OF_DESKTOPS = XInternAtom(server.dsp,
                                           "_NET_NUMBER_OF_DESKTOPS", False);
-    server.atom._NET_DESKTOP_NAMES = XInternAtom (server.dsp, "_NET_DESKTOP_NAMES",
+    server.atom._NET_DESKTOP_NAMES = XInternAtom(server.dsp, "_NET_DESKTOP_NAMES",
                                      False);
-    server.atom._NET_DESKTOP_GEOMETRY = XInternAtom (server.dsp,
+    server.atom._NET_DESKTOP_GEOMETRY = XInternAtom(server.dsp,
                                         "_NET_DESKTOP_GEOMETRY", False);
-    server.atom._NET_DESKTOP_VIEWPORT = XInternAtom (server.dsp,
+    server.atom._NET_DESKTOP_VIEWPORT = XInternAtom(server.dsp,
                                         "_NET_DESKTOP_VIEWPORT", False);
-    server.atom._NET_ACTIVE_WINDOW = XInternAtom (server.dsp, "_NET_ACTIVE_WINDOW",
+    server.atom._NET_ACTIVE_WINDOW = XInternAtom(server.dsp, "_NET_ACTIVE_WINDOW",
                                      False);
-    server.atom._NET_WM_WINDOW_TYPE = XInternAtom (server.dsp,
+    server.atom._NET_WM_WINDOW_TYPE = XInternAtom(server.dsp,
                                       "_NET_WM_WINDOW_TYPE", False);
-    server.atom._NET_WM_STATE_SKIP_PAGER = XInternAtom (server.dsp,
+    server.atom._NET_WM_STATE_SKIP_PAGER = XInternAtom(server.dsp,
                                            "_NET_WM_STATE_SKIP_PAGER", False);
-    server.atom._NET_WM_STATE_SKIP_TASKBAR = XInternAtom (server.dsp,
+    server.atom._NET_WM_STATE_SKIP_TASKBAR = XInternAtom(server.dsp,
             "_NET_WM_STATE_SKIP_TASKBAR", False);
-    server.atom._NET_WM_STATE_STICKY = XInternAtom (server.dsp,
+    server.atom._NET_WM_STATE_STICKY = XInternAtom(server.dsp,
                                        "_NET_WM_STATE_STICKY", False);
-    server.atom._NET_WM_STATE_DEMANDS_ATTENTION = XInternAtom (server.dsp,
+    server.atom._NET_WM_STATE_DEMANDS_ATTENTION = XInternAtom(server.dsp,
             "_NET_WM_STATE_DEMANDS_ATTENTION", False);
-    server.atom._NET_WM_WINDOW_TYPE_DOCK = XInternAtom (server.dsp,
+    server.atom._NET_WM_WINDOW_TYPE_DOCK = XInternAtom(server.dsp,
                                            "_NET_WM_WINDOW_TYPE_DOCK", False);
-    server.atom._NET_WM_WINDOW_TYPE_DESKTOP = XInternAtom (server.dsp,
+    server.atom._NET_WM_WINDOW_TYPE_DESKTOP = XInternAtom(server.dsp,
             "_NET_WM_WINDOW_TYPE_DESKTOP", False);
-    server.atom._NET_WM_WINDOW_TYPE_TOOLBAR = XInternAtom (server.dsp,
+    server.atom._NET_WM_WINDOW_TYPE_TOOLBAR = XInternAtom(server.dsp,
             "_NET_WM_WINDOW_TYPE_TOOLBAR", False);
-    server.atom._NET_WM_WINDOW_TYPE_MENU = XInternAtom (server.dsp,
+    server.atom._NET_WM_WINDOW_TYPE_MENU = XInternAtom(server.dsp,
                                            "_NET_WM_WINDOW_TYPE_MENU", False);
-    server.atom._NET_WM_WINDOW_TYPE_SPLASH = XInternAtom (server.dsp,
+    server.atom._NET_WM_WINDOW_TYPE_SPLASH = XInternAtom(server.dsp,
             "_NET_WM_WINDOW_TYPE_SPLASH", False);
-    server.atom._NET_WM_WINDOW_TYPE_DIALOG = XInternAtom (server.dsp,
+    server.atom._NET_WM_WINDOW_TYPE_DIALOG = XInternAtom(server.dsp,
             "_NET_WM_WINDOW_TYPE_DIALOG", False);
-    server.atom._NET_WM_WINDOW_TYPE_NORMAL = XInternAtom (server.dsp,
+    server.atom._NET_WM_WINDOW_TYPE_NORMAL = XInternAtom(server.dsp,
             "_NET_WM_WINDOW_TYPE_NORMAL", False);
-    server.atom._NET_WM_DESKTOP = XInternAtom (server.dsp, "_NET_WM_DESKTOP",
+    server.atom._NET_WM_DESKTOP = XInternAtom(server.dsp, "_NET_WM_DESKTOP",
                                   False);
-    server.atom.WM_STATE = XInternAtom (server.dsp, "WM_STATE", False);
-    server.atom._NET_WM_STATE = XInternAtom (server.dsp, "_NET_WM_STATE", False);
-    server.atom._NET_WM_STATE_MAXIMIZED_VERT = XInternAtom (server.dsp,
+    server.atom.WM_STATE = XInternAtom(server.dsp, "WM_STATE", False);
+    server.atom._NET_WM_STATE = XInternAtom(server.dsp, "_NET_WM_STATE", False);
+    server.atom._NET_WM_STATE_MAXIMIZED_VERT = XInternAtom(server.dsp,
             "_NET_WM_STATE_MAXIMIZED_VERT", False);
-    server.atom._NET_WM_STATE_MAXIMIZED_HORZ = XInternAtom (server.dsp,
+    server.atom._NET_WM_STATE_MAXIMIZED_HORZ = XInternAtom(server.dsp,
             "_NET_WM_STATE_MAXIMIZED_HORZ", False);
-    server.atom._NET_WM_STATE_SHADED = XInternAtom (server.dsp,
+    server.atom._NET_WM_STATE_SHADED = XInternAtom(server.dsp,
                                        "_NET_WM_STATE_SHADED", False);
-    server.atom._NET_WM_STATE_HIDDEN = XInternAtom (server.dsp,
+    server.atom._NET_WM_STATE_HIDDEN = XInternAtom(server.dsp,
                                        "_NET_WM_STATE_HIDDEN", False);
-    server.atom._NET_WM_STATE_BELOW = XInternAtom (server.dsp,
+    server.atom._NET_WM_STATE_BELOW = XInternAtom(server.dsp,
                                       "_NET_WM_STATE_BELOW", False);
-    server.atom._NET_WM_STATE_ABOVE = XInternAtom (server.dsp,
+    server.atom._NET_WM_STATE_ABOVE = XInternAtom(server.dsp,
                                       "_NET_WM_STATE_ABOVE", False);
-    server.atom._NET_WM_STATE_MODAL = XInternAtom (server.dsp,
+    server.atom._NET_WM_STATE_MODAL = XInternAtom(server.dsp,
                                       "_NET_WM_STATE_MODAL", False);
-    server.atom._NET_CLIENT_LIST = XInternAtom (server.dsp, "_NET_CLIENT_LIST",
+    server.atom._NET_CLIENT_LIST = XInternAtom(server.dsp, "_NET_CLIENT_LIST",
                                    False);
-    server.atom._NET_WM_VISIBLE_NAME = XInternAtom (server.dsp,
+    server.atom._NET_WM_VISIBLE_NAME = XInternAtom(server.dsp,
                                        "_NET_WM_VISIBLE_NAME", False);
-    server.atom._NET_WM_NAME = XInternAtom (server.dsp, "_NET_WM_NAME", False);
-    server.atom._NET_WM_STRUT = XInternAtom (server.dsp, "_NET_WM_STRUT", False);
-    server.atom._NET_WM_ICON = XInternAtom (server.dsp, "_NET_WM_ICON", False);
+    server.atom._NET_WM_NAME = XInternAtom(server.dsp, "_NET_WM_NAME", False);
+    server.atom._NET_WM_STRUT = XInternAtom(server.dsp, "_NET_WM_STRUT", False);
+    server.atom._NET_WM_ICON = XInternAtom(server.dsp, "_NET_WM_ICON", False);
     server.atom._NET_WM_ICON_GEOMETRY = XInternAtom(server.dsp,
-                                        "_NET_WM_ICON_GEOMETRY", False );
-    server.atom._NET_CLOSE_WINDOW = XInternAtom (server.dsp, "_NET_CLOSE_WINDOW",
+                                        "_NET_WM_ICON_GEOMETRY", False);
+    server.atom._NET_CLOSE_WINDOW = XInternAtom(server.dsp, "_NET_CLOSE_WINDOW",
                                     False);
-    server.atom.UTF8_STRING = XInternAtom (server.dsp, "UTF8_STRING", False);
-    server.atom._NET_SUPPORTING_WM_CHECK = XInternAtom (server.dsp,
+    server.atom.UTF8_STRING = XInternAtom(server.dsp, "UTF8_STRING", False);
+    server.atom._NET_SUPPORTING_WM_CHECK = XInternAtom(server.dsp,
                                            "_NET_SUPPORTING_WM_CHECK", False);
-    server.atom._NET_WM_CM_S0 = XInternAtom (server.dsp, "_NET_WM_CM_S0", False);
-    server.atom._NET_SUPPORTING_WM_CHECK = XInternAtom (server.dsp, "_NET_WM_NAME",
+    server.atom._NET_WM_CM_S0 = XInternAtom(server.dsp, "_NET_WM_CM_S0", False);
+    server.atom._NET_SUPPORTING_WM_CHECK = XInternAtom(server.dsp, "_NET_WM_NAME",
                                            False);
-    server.atom._NET_WM_STRUT_PARTIAL = XInternAtom (server.dsp,
+    server.atom._NET_WM_STRUT_PARTIAL = XInternAtom(server.dsp,
                                         "_NET_WM_STRUT_PARTIAL", False);
     server.atom.WM_NAME = XInternAtom(server.dsp, "WM_NAME", False);
     server.atom.__SWM_VROOT = XInternAtom(server.dsp, "__SWM_VROOT", False);
@@ -175,7 +175,7 @@ void cleanup_server() {
 }
 
 
-void send_event32 (Window win, Atom at, long data1, long data2, long data3) {
+void send_event32(Window win, Atom at, long data1, long data2, long data3) {
     XEvent event;
 
     event.xclient.type = ClientMessage;
@@ -197,7 +197,7 @@ void send_event32 (Window win, Atom at, long data1, long data2, long data3) {
 }
 
 
-int get_property32 (Window win, Atom at, Atom type) {
+int get_property32(Window win, Atom at, Atom type) {
     Atom type_ret;
     int format_ret = 0, data = 0;
     unsigned long nitems_ret = 0;
@@ -214,14 +214,14 @@ int get_property32 (Window win, Atom at, Atom type) {
 
     if (result == Success && prop_value) {
         data = ((gulong*)prop_value)[0];
-        XFree (prop_value);
+        XFree(prop_value);
     }
 
     return data;
 }
 
 
-void* server_get_property (Window win, Atom at, Atom type, int* num_results) {
+void* server_get_property(Window win, Atom at, Atom type, int* num_results) {
     Atom type_ret;
     int format_ret = 0;
     unsigned long nitems_ret = 0;
@@ -324,7 +324,7 @@ void get_monitors() {
 
         if (res && res->ncrtc >= nbmonitor) {
             // use xrandr to identify monitors (does not work with proprietery nvidia drivers)
-            printf("xRandr: Found crtc's: %d\n", res->ncrtc );
+            printf("xRandr: Found crtc's: %d\n", res->ncrtc);
             server.monitor = (Monitor*) calloc(res->ncrtc, sizeof(Monitor));
 
             for (i = 0; i < res->ncrtc; ++i) {
@@ -401,8 +401,8 @@ next:
         server.nb_monitor = 1;
         server.monitor = (Monitor*) calloc(server.nb_monitor, sizeof(Monitor));
         server.monitor[0].x = server.monitor[0].y = 0;
-        server.monitor[0].width = DisplayWidth (server.dsp, server.screen);
-        server.monitor[0].height = DisplayHeight (server.dsp, server.screen);
+        server.monitor[0].width = DisplayWidth(server.dsp, server.screen);
+        server.monitor[0].height = DisplayHeight(server.dsp, server.screen);
         server.monitor[0].names = 0;
     }
 }
@@ -459,7 +459,7 @@ void server_init_visual() {
         }
     }
 
-    XFree (xvi);
+    XFree(xvi);
 
     // check composite manager
     server.composite_manager = XGetSelectionOwner(server.dsp,
@@ -482,8 +482,8 @@ void server_init_visual() {
     if (visual && server.composite_manager != None && snapshot_path == 0) {
         XSetWindowAttributes attrs;
         attrs.event_mask = StructureNotifyMask;
-        XChangeWindowAttributes (server.dsp, server.composite_manager, CWEventMask,
-                                 &attrs);
+        XChangeWindowAttributes(server.dsp, server.composite_manager, CWEventMask,
+                                &attrs);
 
         server.real_transparency = 1;
         server.depth = 32;

@@ -198,7 +198,7 @@ void init_panel() {
             p->monitor = i;
         }
 
-        if ( p->area.bg == 0 ) {
+        if (p->area.bg == 0) {
             p->area.bg = &g_array_index(backgrounds, Background, 0);
         }
 
@@ -275,7 +275,7 @@ void init_panel() {
 
         if (snapshot_path == 0) {
             // if we are not in 'snapshot' mode then map new panel
-            XMapWindow (server.dsp, p->main_win);
+            XMapWindow(server.dsp, p->main_win);
         }
 
         if (panel_autohide) {
@@ -467,10 +467,10 @@ void update_strut(Panel* p) {
     }
 
     // Old specification : fluxbox need _NET_WM_STRUT.
-    XChangeProperty (server.dsp, p->main_win, server.atom._NET_WM_STRUT,
-                     XA_CARDINAL, 32, PropModeReplace, (unsigned char*) &struts, 4);
-    XChangeProperty (server.dsp, p->main_win, server.atom._NET_WM_STRUT_PARTIAL,
-                     XA_CARDINAL, 32, PropModeReplace, (unsigned char*) &struts, 12);
+    XChangeProperty(server.dsp, p->main_win, server.atom._NET_WM_STRUT,
+                    XA_CARDINAL, 32, PropModeReplace, (unsigned char*) &struts, 4);
+    XChangeProperty(server.dsp, p->main_win, server.atom._NET_WM_STRUT_PARTIAL,
+                    XA_CARDINAL, 32, PropModeReplace, (unsigned char*) &struts, 12);
 }
 
 
@@ -517,7 +517,7 @@ void set_panel_items_order(Panel* p) {
 
 
 void set_panel_properties(Panel* p) {
-    XStoreName (server.dsp, p->main_win, "tint3");
+    XStoreName(server.dsp, p->main_win, "tint3");
 
     gsize len;
     gchar* name = g_locale_to_utf8("tint3", -1, NULL, &len, NULL);
@@ -530,13 +530,13 @@ void set_panel_properties(Panel* p) {
 
     // Dock
     long val = server.atom._NET_WM_WINDOW_TYPE_DOCK;
-    XChangeProperty (server.dsp, p->main_win, server.atom._NET_WM_WINDOW_TYPE,
-                     XA_ATOM, 32, PropModeReplace, (unsigned char*) &val, 1);
+    XChangeProperty(server.dsp, p->main_win, server.atom._NET_WM_WINDOW_TYPE,
+                    XA_ATOM, 32, PropModeReplace, (unsigned char*) &val, 1);
 
     // Sticky and below other window
     val = ALLDESKTOP;
-    XChangeProperty (server.dsp, p->main_win, server.atom._NET_WM_DESKTOP,
-                     XA_CARDINAL, 32, PropModeReplace, (unsigned char*) &val, 1);
+    XChangeProperty(server.dsp, p->main_win, server.atom._NET_WM_DESKTOP,
+                    XA_CARDINAL, 32, PropModeReplace, (unsigned char*) &val, 1);
     Atom state[4];
     state[0] = server.atom._NET_WM_STATE_SKIP_PAGER;
     state[1] = server.atom._NET_WM_STATE_SKIP_TASKBAR;
@@ -544,8 +544,8 @@ void set_panel_properties(Panel* p) {
     state[3] = panel_layer == BOTTOM_LAYER ? server.atom._NET_WM_STATE_BELOW :
                server.atom._NET_WM_STATE_ABOVE;
     int nb_atoms = panel_layer == NORMAL_LAYER ? 3 : 4;
-    XChangeProperty (server.dsp, p->main_win, server.atom._NET_WM_STATE, XA_ATOM,
-                     32, PropModeReplace, (unsigned char*) state, nb_atoms);
+    XChangeProperty(server.dsp, p->main_win, server.atom._NET_WM_STATE, XA_ATOM,
+                    32, PropModeReplace, (unsigned char*) state, nb_atoms);
 
     // Unfocusable
     XWMHints wmhints;
@@ -596,11 +596,11 @@ void set_panel_properties(Panel* p) {
 
 void set_panel_background(Panel* p) {
     if (p->area.pix) {
-        XFreePixmap (server.dsp, p->area.pix);
+        XFreePixmap(server.dsp, p->area.pix);
     }
 
-    p->area.pix = XCreatePixmap (server.dsp, server.root_win, p->area.width,
-                                 p->area.height, server.depth);
+    p->area.pix = XCreatePixmap(server.dsp, server.root_win, p->area.width,
+                                p->area.height, server.depth);
 
     int xoff = 0, yoff = 0;
 
@@ -633,12 +633,12 @@ void set_panel_background(Panel* p) {
     // draw background panel
     cairo_surface_t* cs;
     cairo_t* c;
-    cs = cairo_xlib_surface_create (server.dsp, p->area.pix, server.visual,
-                                    p->area.width, p->area.height);
-    c = cairo_create (cs);
+    cs = cairo_xlib_surface_create(server.dsp, p->area.pix, server.visual,
+                                   p->area.width, p->area.height);
+    c = cairo_create(cs);
     draw_background(&p->area, c);
-    cairo_destroy (c);
-    cairo_surface_destroy (cs);
+    cairo_destroy(c);
+    cairo_surface_destroy(cs);
 
     if (panel_autohide) {
         if (p->hidden_pixmap) {
@@ -709,7 +709,7 @@ Panel* get_panel(Window win) {
 }
 
 
-Taskbar* click_taskbar (Panel* panel, int x, int y) {
+Taskbar* click_taskbar(Panel* panel, int x, int y) {
     Taskbar* tskbar;
     int i;
 
@@ -737,7 +737,7 @@ Taskbar* click_taskbar (Panel* panel, int x, int y) {
 }
 
 
-Task* click_task (Panel* panel, int x, int y) {
+Task* click_task(Panel* panel, int x, int y) {
     Taskbar* tskbar = click_taskbar(panel, x, y);
 
     if (tskbar) {
@@ -768,7 +768,7 @@ Task* click_task (Panel* panel, int x, int y) {
 }
 
 
-Launcher* click_launcher (Panel* panel, int x, int y) {
+Launcher* click_launcher(Panel* panel, int x, int y) {
     Launcher* launcher = &panel->launcher;
 
     if (panel_horizontal) {
@@ -787,7 +787,7 @@ Launcher* click_launcher (Panel* panel, int x, int y) {
 }
 
 
-LauncherIcon* click_launcher_icon (Panel* panel, int x, int y) {
+LauncherIcon* click_launcher_icon(Panel* panel, int x, int y) {
     Launcher* launcher = click_launcher(panel, x, y);
     GSList* l0;
 

@@ -80,21 +80,21 @@ struct _XSettingsSetting {
     unsigned long last_change_serial;
 };
 
-XSettingsSetting* xsettings_setting_copy  (XSettingsSetting* setting);
-void              xsettings_setting_free  (XSettingsSetting* setting);
-int               xsettings_setting_equal (XSettingsSetting* setting_a,
+XSettingsSetting* xsettings_setting_copy(XSettingsSetting* setting);
+void              xsettings_setting_free(XSettingsSetting* setting);
+int               xsettings_setting_equal(XSettingsSetting* setting_a,
         XSettingsSetting* setting_b);
 
-void              xsettings_list_free   (XSettingsList*     list);
-XSettingsList*    xsettings_list_copy   (XSettingsList*     list);
-XSettingsResult   xsettings_list_insert (XSettingsList**    list,
-        XSettingsSetting*  setting);
-XSettingsSetting* xsettings_list_lookup (XSettingsList*     list,
-        const char*        name);
-XSettingsResult   xsettings_list_delete (XSettingsList**    list,
-        const char*        name);
+void              xsettings_list_free(XSettingsList*     list);
+XSettingsList*    xsettings_list_copy(XSettingsList*     list);
+XSettingsResult   xsettings_list_insert(XSettingsList**    list,
+                                        XSettingsSetting*  setting);
+XSettingsSetting* xsettings_list_lookup(XSettingsList*     list,
+                                        const char*        name);
+XSettingsResult   xsettings_list_delete(XSettingsList**    list,
+                                        const char*        name);
 
-char xsettings_byte_order (void);
+char xsettings_byte_order(void);
 
 #define XSETTINGS_PAD(n,m) ((n + m - 1) & (~(m-1)))
 

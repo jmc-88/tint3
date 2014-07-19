@@ -196,7 +196,7 @@ void init_battery() {
             char* path1 = g_build_filename("/sys/class/power_supply", entryname, "present",
                                            NULL);
 
-            if (g_file_test (path1, G_FILE_TEST_EXISTS)) {
+            if (g_file_test(path1, G_FILE_TEST_EXISTS)) {
                 g_free(path1);
                 battery_dir = g_build_filename("/sys/class/power_supply", entryname, NULL);
                 break;
@@ -218,13 +218,13 @@ void init_battery() {
 
     char* path1 = g_build_filename(battery_dir, "energy_now", NULL);
 
-    if (g_file_test (path1, G_FILE_TEST_EXISTS)) {
+    if (g_file_test(path1, G_FILE_TEST_EXISTS)) {
         path_energy_now = g_build_filename(battery_dir, "energy_now", NULL);
         path_energy_full = g_build_filename(battery_dir, "energy_full", NULL);
     } else {
         char* path2 = g_build_filename(battery_dir, "charge_now", NULL);
 
-        if (g_file_test (path2, G_FILE_TEST_EXISTS)) {
+        if (g_file_test(path2, G_FILE_TEST_EXISTS)) {
             path_energy_now = g_build_filename(battery_dir, "charge_now", NULL);
             path_energy_full = g_build_filename(battery_dir, "charge_full", NULL);
         } else {
@@ -236,7 +236,7 @@ void init_battery() {
 
     path_current_now = g_build_filename(battery_dir, "power_now", NULL);
 
-    if (!g_file_test (path_current_now, G_FILE_TEST_EXISTS)) {
+    if (!g_file_test(path_current_now, G_FILE_TEST_EXISTS)) {
         g_free(path_current_now);
         path_current_now = g_build_filename(battery_dir, "current_now", NULL);
     }
@@ -494,11 +494,11 @@ void update_battery() {
 }
 
 
-void draw_battery (void* obj, cairo_t* c) {
+void draw_battery(void* obj, cairo_t* c) {
     Battery* battery = static_cast<Battery*>(obj);
     PangoLayout* layout;
 
-    layout = pango_cairo_create_layout (c);
+    layout = pango_cairo_create_layout(c);
 
     // draw layout
     pango_layout_set_font_description(layout, bat1_font_desc);

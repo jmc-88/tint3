@@ -231,21 +231,21 @@ void draw_clock(void* obj, cairo_t* c) {
     pango_cairo_show_layout(c, layout);
 
     if (time2_format) {
-        pango_layout_set_font_description (layout, time2_font_desc);
+        pango_layout_set_font_description(layout, time2_font_desc);
         pango_layout_set_indent(layout, 0);
-        pango_layout_set_text (layout, buf_date, strlen(buf_date));
-        pango_layout_set_width (layout, clock->area.width * PANGO_SCALE);
+        pango_layout_set_text(layout, buf_date, strlen(buf_date));
+        pango_layout_set_width(layout, clock->area.width * PANGO_SCALE);
 
-        pango_cairo_update_layout (c, layout);
-        cairo_move_to (c, 0, clock->time2_posy);
-        pango_cairo_show_layout (c, layout);
+        pango_cairo_update_layout(c, layout);
+        cairo_move_to(c, 0, clock->time2_posy);
+        pango_cairo_show_layout(c, layout);
     }
 
-    g_object_unref (layout);
+    g_object_unref(layout);
 }
 
 
-int resize_clock (void* obj) {
+int resize_clock(void* obj) {
     Clock* clock = static_cast<Clock*>(obj);
     Panel* panel = static_cast<Panel*>(clock->area.panel);
     int time_height_ink, time_height, time_width, date_height_ink, date_height,

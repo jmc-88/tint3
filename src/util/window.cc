@@ -37,41 +37,41 @@
 
 
 
-void set_active (Window win) {
-    send_event32 (win, server.atom._NET_ACTIVE_WINDOW, 2, CurrentTime, 0);
+void set_active(Window win) {
+    send_event32(win, server.atom._NET_ACTIVE_WINDOW, 2, CurrentTime, 0);
 }
 
 
-void set_desktop (int desktop) {
-    send_event32 (server.root_win, server.atom._NET_CURRENT_DESKTOP, desktop, 0, 0);
+void set_desktop(int desktop) {
+    send_event32(server.root_win, server.atom._NET_CURRENT_DESKTOP, desktop, 0, 0);
 }
 
 
-void windows_set_desktop (Window win, int desktop) {
-    send_event32 (win, server.atom._NET_WM_DESKTOP, desktop, 2, 0);
+void windows_set_desktop(Window win, int desktop) {
+    send_event32(win, server.atom._NET_WM_DESKTOP, desktop, 2, 0);
 }
 
 
-void set_close (Window win) {
-    send_event32 (win, server.atom._NET_CLOSE_WINDOW, 0, 2, 0);
+void set_close(Window win) {
+    send_event32(win, server.atom._NET_CLOSE_WINDOW, 0, 2, 0);
 }
 
 
-void window_toggle_shade (Window win) {
-    send_event32 (win, server.atom._NET_WM_STATE, 2,
-                  server.atom._NET_WM_STATE_SHADED, 0);
+void window_toggle_shade(Window win) {
+    send_event32(win, server.atom._NET_WM_STATE, 2,
+                 server.atom._NET_WM_STATE_SHADED, 0);
 }
 
 
-void window_maximize_restore (Window win) {
-    send_event32 (win, server.atom._NET_WM_STATE, 2,
-                  server.atom._NET_WM_STATE_MAXIMIZED_VERT, 0);
-    send_event32 (win, server.atom._NET_WM_STATE, 2,
-                  server.atom._NET_WM_STATE_MAXIMIZED_HORZ, 0);
+void window_maximize_restore(Window win) {
+    send_event32(win, server.atom._NET_WM_STATE, 2,
+                 server.atom._NET_WM_STATE_MAXIMIZED_VERT, 0);
+    send_event32(win, server.atom._NET_WM_STATE, 2,
+                 server.atom._NET_WM_STATE_MAXIMIZED_HORZ, 0);
 }
 
 
-int window_is_hidden (Window win) {
+int window_is_hidden(Window win) {
     int count;
     Atom* at = static_cast<Atom*>(server_get_property(
                                       win, server.atom._NET_WM_STATE, XA_ATOM, &count));
@@ -87,8 +87,8 @@ int window_is_hidden (Window win) {
         // do not add transient_for windows if the transient window is already in the taskbar
         Window window = win;
 
-        while ( XGetTransientForHint(server.dsp, window, &window) ) {
-            if ( task_get_tasks(window) ) {
+        while (XGetTransientForHint(server.dsp, window, &window)) {
+            if (task_get_tasks(window)) {
                 XFree(at);
                 return 1;
             }
@@ -126,12 +126,12 @@ int window_is_hidden (Window win) {
 }
 
 
-int window_get_desktop (Window win) {
+int window_get_desktop(Window win) {
     return get_property32(win, server.atom._NET_WM_DESKTOP, XA_CARDINAL);
 }
 
 
-int window_get_monitor (Window win) {
+int window_get_monitor(Window win) {
     int i, x, y;
     Window src;
 
@@ -216,7 +216,7 @@ int server_get_number_of_desktop() {
 }
 
 
-GSList* server_get_name_of_desktop () {
+GSList* server_get_name_of_desktop() {
     int count;
     gchar* data_ptr = static_cast<gchar*>(server_get_property(
             server.root_win,
@@ -243,25 +243,25 @@ GSList* server_get_name_of_desktop () {
 }
 
 
-int server_get_current_desktop () {
+int server_get_current_desktop() {
     return get_property32(server.root_win, server.atom._NET_CURRENT_DESKTOP,
                           XA_CARDINAL);
 }
 
 
-Window window_get_active () {
+Window window_get_active() {
     return get_property32(server.root_win, server.atom._NET_ACTIVE_WINDOW,
                           XA_WINDOW);
 }
 
 
-int window_is_active (Window win) {
+int window_is_active(Window win) {
     return (win == get_property32(server.root_win, server.atom._NET_ACTIVE_WINDOW,
                                   XA_WINDOW));
 }
 
 
-int get_icon_count (gulong* data, int num) {
+int get_icon_count(gulong* data, int num) {
     int count, pos, w, h;
 
     count = 0;
@@ -283,8 +283,8 @@ int get_icon_count (gulong* data, int num) {
 }
 
 
-gulong* get_best_icon (gulong* data, int icon_count, int num, int* iw, int* ih,
-                       int best_icon_size) {
+gulong* get_best_icon(gulong* data, int icon_count, int num, int* iw, int* ih,
+                      int best_icon_size) {
     int width[icon_count], height[icon_count], pos, i, w, h;
     gulong* icon_data[icon_count];
 
@@ -339,26 +339,26 @@ void get_text_size(PangoFontDescription* font, int* height_ink, int* height,
                    int panel_height, char* text, int len) {
     PangoRectangle rect_ink, rect;
 
-    Pixmap pmap = XCreatePixmap (server.dsp, server.root_win, panel_height,
-                                 panel_height, server.depth);
+    Pixmap pmap = XCreatePixmap(server.dsp, server.root_win, panel_height,
+                                panel_height, server.depth);
 
-    cairo_surface_t* cs = cairo_xlib_surface_create (server.dsp, pmap,
+    cairo_surface_t* cs = cairo_xlib_surface_create(server.dsp, pmap,
                           server.visual, panel_height, panel_height);
-    cairo_t* c = cairo_create (cs);
+    cairo_t* c = cairo_create(cs);
 
-    PangoLayout* layout = pango_cairo_create_layout (c);
-    pango_layout_set_font_description (layout, font);
-    pango_layout_set_text (layout, text, len);
+    PangoLayout* layout = pango_cairo_create_layout(c);
+    pango_layout_set_font_description(layout, font);
+    pango_layout_set_text(layout, text, len);
 
     pango_layout_get_pixel_extents(layout, &rect_ink, &rect);
     *height_ink = rect_ink.height;
     *height = rect.height;
     //printf("dimension : %d - %d\n", rect_ink.height, rect.height);
 
-    g_object_unref (layout);
-    cairo_destroy (c);
-    cairo_surface_destroy (cs);
-    XFreePixmap (server.dsp, pmap);
+    g_object_unref(layout);
+    cairo_destroy(c);
+    cairo_surface_destroy(cs);
+    XFreePixmap(server.dsp, pmap);
 }
 
 
@@ -366,16 +366,16 @@ void get_text_size2(PangoFontDescription* font, int* height_ink, int* height,
                     int* width, int panel_height, int panel_with, char* text, int len) {
     PangoRectangle rect_ink, rect;
 
-    Pixmap pmap = XCreatePixmap (server.dsp, server.root_win, panel_height,
-                                 panel_height, server.depth);
+    Pixmap pmap = XCreatePixmap(server.dsp, server.root_win, panel_height,
+                                panel_height, server.depth);
 
-    cairo_surface_t* cs = cairo_xlib_surface_create (server.dsp, pmap,
+    cairo_surface_t* cs = cairo_xlib_surface_create(server.dsp, pmap,
                           server.visual, panel_height, panel_with);
-    cairo_t* c = cairo_create (cs);
+    cairo_t* c = cairo_create(cs);
 
-    PangoLayout* layout = pango_cairo_create_layout (c);
-    pango_layout_set_font_description (layout, font);
-    pango_layout_set_text (layout, text, len);
+    PangoLayout* layout = pango_cairo_create_layout(c);
+    pango_layout_set_font_description(layout, font);
+    pango_layout_set_text(layout, text, len);
 
     pango_layout_get_pixel_extents(layout, &rect_ink, &rect);
     *height_ink = rect_ink.height;
@@ -383,10 +383,10 @@ void get_text_size2(PangoFontDescription* font, int* height_ink, int* height,
     *width = rect.width;
     //printf("dimension : %d - %d\n", rect_ink.height, rect.height);
 
-    g_object_unref (layout);
-    cairo_destroy (c);
-    cairo_surface_destroy (cs);
-    XFreePixmap (server.dsp, pmap);
+    g_object_unref(layout);
+    cairo_destroy(c);
+    cairo_surface_destroy(cs);
+    XFreePixmap(server.dsp, pmap);
 }
 
 

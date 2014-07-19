@@ -99,7 +99,7 @@ void rendering(void* obj) {
 }
 
 
-void size_by_content (Area* a) {
+void size_by_content(Area* a) {
     // don't resize hidden objects
     if (!a->on_screen) {
         return;
@@ -127,7 +127,7 @@ void size_by_content (Area* a) {
 }
 
 
-void size_by_layout (Area* a, int pos, int level) {
+void size_by_layout(Area* a, int pos, int level) {
     // don't resize hiden objects
     if (!a->on_screen) {
         return;
@@ -199,13 +199,13 @@ void size_by_layout (Area* a, int pos, int level) {
         a->redraw = 1;
 
         if (a->_on_change_layout) {
-            a->_on_change_layout (a);
+            a->_on_change_layout(a);
         }
     }
 }
 
 
-void refresh (Area* a) {
+void refresh(Area* a) {
     // don't draw and resize hide objects
     if (!a->on_screen) {
         return;
@@ -384,41 +384,41 @@ void show(Area* a) {
     a->resize = 1;
 }
 
-void draw (Area* a) {
+void draw(Area* a) {
     if (a->pix) {
-        XFreePixmap (server.dsp, a->pix);
+        XFreePixmap(server.dsp, a->pix);
     }
 
-    a->pix = XCreatePixmap (server.dsp, server.root_win, a->width, a->height,
-                            server.depth);
+    a->pix = XCreatePixmap(server.dsp, server.root_win, a->width, a->height,
+                           server.depth);
 
     // add layer of root pixmap (or clear pixmap if real_transparency==true)
     if (server.real_transparency) {
         clear_pixmap(a->pix, 0 , 0, a->width, a->height);
     }
 
-    XCopyArea (server.dsp, ((Panel*)a->panel)->temp_pmap, a->pix, server.gc,
-               a->posx, a->posy, a->width, a->height, 0, 0);
+    XCopyArea(server.dsp, ((Panel*)a->panel)->temp_pmap, a->pix, server.gc,
+              a->posx, a->posy, a->width, a->height, 0, 0);
 
     cairo_surface_t* cs;
     cairo_t* c;
 
-    cs = cairo_xlib_surface_create (server.dsp, a->pix, server.visual, a->width,
-                                    a->height);
-    c = cairo_create (cs);
+    cs = cairo_xlib_surface_create(server.dsp, a->pix, server.visual, a->width,
+                                   a->height);
+    c = cairo_create(cs);
 
-    draw_background (a, c);
+    draw_background(a, c);
 
     if (a->_draw_foreground) {
         a->_draw_foreground(a, c);
     }
 
-    cairo_destroy (c);
-    cairo_surface_destroy (cs);
+    cairo_destroy(c);
+    cairo_surface_destroy(cs);
 }
 
 
-void draw_background (Area* a, cairo_t* c) {
+void draw_background(Area* a, cairo_t* c) {
     if (a->bg->back.alpha > 0.0) {
         //printf("    draw_background (%d %d) RGBA (%lf, %lf, %lf, %lf)\n", a->posx, a->posy, pix->back.color[0], pix->back.color[1], pix->back.color[2], pix->back.alpha);
         draw_rect(c, a->bg->border.width, a->bg->border.width,
@@ -430,7 +430,7 @@ void draw_background (Area* a, cairo_t* c) {
     }
 
     if (a->bg->border.width > 0 && a->bg->border.alpha > 0.0) {
-        cairo_set_line_width (c, a->bg->border.width);
+        cairo_set_line_width(c, a->bg->border.width);
 
         // draw border inside (x, y, width, height)
         draw_rect(c, a->bg->border.width / 2.0, a->bg->border.width / 2.0,
@@ -472,29 +472,29 @@ void draw_background (Area* a, cairo_t* c) {
         cairo_pattern_add_color_stop_rgba (linpat, 1, a->border.color[0], a->border.color[1], a->border.color[2], 0);
         cairo_set_source (c, linpat);
         */
-        cairo_set_source_rgba (c, a->bg->border.color[0], a->bg->border.color[1],
-                               a->bg->border.color[2], a->bg->border.alpha);
+        cairo_set_source_rgba(c, a->bg->border.color[0], a->bg->border.color[1],
+                              a->bg->border.color[2], a->bg->border.alpha);
 
-        cairo_stroke (c);
+        cairo_stroke(c);
         //cairo_pattern_destroy (linpat);
     }
 }
 
 
-void remove_area (Area* a) {
+void remove_area(Area* a) {
     Area* parent = (Area*)a->parent;
 
     parent->list = g_slist_remove(parent->list, a);
-    set_redraw (parent);
+    set_redraw(parent);
 
 }
 
 
-void add_area (Area* a) {
+void add_area(Area* a) {
     Area* parent = (Area*)a->parent;
 
     parent->list = g_slist_append(parent->list, a);
-    set_redraw (parent);
+    set_redraw(parent);
 
 }
 
@@ -525,10 +525,10 @@ void draw_rect(cairo_t* c, double x, double y, double w, double h, double r) {
         cairo_rel_curve_to(c, c1, 0.0, r, c1, r, r);
         cairo_rel_line_to(c, 0, h - 2 * r);
         cairo_rel_curve_to(c, 0.0, c1, c1 - r, r, -r, r);
-        cairo_rel_line_to (c, -w + 2 * r, 0);
-        cairo_rel_curve_to (c, -c1, 0, -r, -c1, -r, -r);
-        cairo_rel_line_to (c, 0, -h + 2 * r);
-        cairo_rel_curve_to (c, 0, -c1, r - c1, -r, r, -r);
+        cairo_rel_line_to(c, -w + 2 * r, 0);
+        cairo_rel_curve_to(c, -c1, 0, -r, -c1, -r, -r);
+        cairo_rel_line_to(c, 0, -h + 2 * r);
+        cairo_rel_curve_to(c, 0, -c1, r - c1, -r, r, -r);
     } else {
         cairo_rectangle(c, x, y, w, h);
     }

@@ -198,7 +198,7 @@ int resize_systray(void* obj) {
 }
 
 
-void on_change_systray (void* obj) {
+void on_change_systray(void* obj) {
     // here, systray.area.posx/posy are defined by rendering engine. so we can calculate position of tray icon.
     Systraybar* sysbar = static_cast<Systraybar*>(obj);
     Panel* panel = static_cast<Panel*>(sysbar->area.panel);
@@ -627,7 +627,7 @@ void systray_render_icon_now(void* t) {
     TrayWindow* traywin = static_cast<TrayWindow*>(t);
     traywin->render_timeout = 0;
 
-    if ( traywin->width == 0 || traywin->height == 0 ) {
+    if (traywin->width == 0 || traywin->height == 0) {
         // reschedule rendering since the geometry information has not yet been processed (can happen on slow cpu)
         systray_render_icon(traywin);
         return;

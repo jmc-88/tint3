@@ -66,21 +66,21 @@ typedef struct {
 } Task;
 
 
-Task* add_task (Window win);
-void remove_task (Task* tsk);
+Task* add_task(Window win);
+void remove_task(Task* tsk);
 
-void draw_task (void* obj, cairo_t* c);
-void on_change_task (void* obj);
+void draw_task(void* obj, cairo_t* c);
+void on_change_task(void* obj);
 
-void get_icon (Task* tsk);
+void get_icon(Task* tsk);
 int  get_title(Task* tsk);
 void active_task();
 void set_task_state(Task* tsk, int state);
 void set_task_redraw(Task* tsk);
 
 Task* find_active_task(Task* current_task, Task* active_task);
-Task* next_task (Task* tsk);
-Task* prev_task (Task* tsk);
+Task* next_task(Task* tsk);
+Task* prev_task(Task* tsk);
 
 void add_urgent(Task* tsk);
 void del_urgent(Task* tsk);

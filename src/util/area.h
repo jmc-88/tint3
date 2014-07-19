@@ -92,28 +92,28 @@ typedef struct {
 void init_rendering(void* obj, int pos);
 
 void rendering(void* obj);
-void size_by_content (Area* a);
-void size_by_layout (Area* a, int pos, int level);
+void size_by_content(Area* a);
+void size_by_layout(Area* a, int pos, int level);
 // draw background and foreground
-void refresh (Area* a);
+void refresh(Area* a);
 
 // generic resize for SIZE_BY_LAYOUT objects
 int resize_by_layout(void* obj, int maximum_size);
 
 // set 'redraw' on an area and childs
-void set_redraw (Area* a);
+void set_redraw(Area* a);
 
 // hide/unhide area
 void hide(Area* a);
 void show(Area* a);
 
 // draw pixmap
-void draw (Area* a);
-void draw_background (Area* a, cairo_t* c);
+void draw(Area* a);
+void draw_background(Area* a, cairo_t* c);
 
-void remove_area (Area* a);
-void add_area (Area* a);
-void free_area (Area* a);
+void remove_area(Area* a);
+void add_area(Area* a);
+void free_area(Area* a);
 
 // draw rounded rectangle
 void draw_rect(cairo_t* c, double x, double y, double w, double h, double r);

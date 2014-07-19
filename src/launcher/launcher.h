@@ -77,7 +77,7 @@ void cleanup_launcher();
 void cleanup_launcher_theme(Launcher* launcher);
 
 int  resize_launcher(void* obj);
-void draw_launcher (void* obj, cairo_t* c);
+void draw_launcher(void* obj, cairo_t* c);
 
 // Populates the list_themes list
 void launcher_load_themes(Launcher* launcher);

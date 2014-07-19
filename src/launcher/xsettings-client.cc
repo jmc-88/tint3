@@ -45,8 +45,8 @@ struct _XSettingsClient {
 };
 
 
-void xsettings_notify_cb (const char* name, XSettingsAction action,
-                          XSettingsSetting* setting, void* data) {
+void xsettings_notify_cb(const char* name, XSettingsAction action,
+                         XSettingsSetting* setting, void* data) {
     //printf("xsettings_notify_cb\n");
     if ((action == XSETTINGS_ACTION_NEW || action == XSETTINGS_ACTION_CHANGED)
         && name != NULL && setting != NULL) {
@@ -76,7 +76,7 @@ void xsettings_notify_cb (const char* name, XSettingsAction action,
 }
 
 
-static void notify_changes (XSettingsClient* client, XSettingsList* old_list) {
+static void notify_changes(XSettingsClient* client, XSettingsList* old_list) {
     XSettingsList* old_iter = old_list;
     XSettingsList* new_iter = client->settings;
 
@@ -88,7 +88,7 @@ static void notify_changes (XSettingsClient* client, XSettingsList* old_list) {
         int cmp;
 
         if (old_iter && new_iter) {
-            cmp = strcmp (old_iter->setting->name, new_iter->setting->name);
+            cmp = strcmp(old_iter->setting->name, new_iter->setting->name);
         } else if (old_iter) {
             cmp = -1;
         } else {
@@ -96,16 +96,16 @@ static void notify_changes (XSettingsClient* client, XSettingsList* old_list) {
         }
 
         if (cmp < 0) {
-            client->notify (old_iter->setting->name, XSETTINGS_ACTION_DELETED, NULL,
-                            client->cb_data);
+            client->notify(old_iter->setting->name, XSETTINGS_ACTION_DELETED, NULL,
+                           client->cb_data);
         } else if (cmp == 0) {
-            if (!xsettings_setting_equal (old_iter->setting, new_iter->setting)) {
-                client->notify (old_iter->setting->name, XSETTINGS_ACTION_CHANGED,
-                                new_iter->setting, client->cb_data);
+            if (!xsettings_setting_equal(old_iter->setting, new_iter->setting)) {
+                client->notify(old_iter->setting->name, XSETTINGS_ACTION_CHANGED,
+                               new_iter->setting, client->cb_data);
             }
         } else {
-            client->notify (new_iter->setting->name, XSETTINGS_ACTION_NEW,
-                            new_iter->setting, client->cb_data);
+            client->notify(new_iter->setting->name, XSETTINGS_ACTION_NEW,
+                           new_iter->setting, client->cb_data);
         }
 
         if (old_iter) {
@@ -119,7 +119,7 @@ static void notify_changes (XSettingsClient* client, XSettingsList* old_list) {
 }
 
 
-static int ignore_errors (Display* display, XErrorEvent* event) {
+static int ignore_errors(Display* display, XErrorEvent* event) {
     return True;
 }
 
@@ -127,10 +127,10 @@ static char local_byte_order = '\0';
 
 #define BYTES_LEFT(buffer) ((buffer)->data + (buffer)->len - (buffer)->pos)
 
-static XSettingsResult fetch_card16 (XSettingsBuffer* buffer, CARD16* result) {
+static XSettingsResult fetch_card16(XSettingsBuffer* buffer, CARD16* result) {
     CARD16 x;
 
-    if (BYTES_LEFT (buffer) < 2) {
+    if (BYTES_LEFT(buffer) < 2) {
         return XSETTINGS_ACCESS;
     }
 
@@ -147,12 +147,12 @@ static XSettingsResult fetch_card16 (XSettingsBuffer* buffer, CARD16* result) {
 }
 
 
-static XSettingsResult fetch_ushort (XSettingsBuffer* buffer,
-                                     unsigned short*  result) {
+static XSettingsResult fetch_ushort(XSettingsBuffer* buffer,
+                                    unsigned short*  result) {
     CARD16 x;
     XSettingsResult r;
 
-    r = fetch_card16 (buffer, &x);
+    r = fetch_card16(buffer, &x);
 
     if (r == XSETTINGS_SUCCESS) {
         *result = x;
@@ -162,10 +162,10 @@ static XSettingsResult fetch_ushort (XSettingsBuffer* buffer,
 }
 
 
-static XSettingsResult fetch_card32 (XSettingsBuffer* buffer, CARD32* result) {
+static XSettingsResult fetch_card32(XSettingsBuffer* buffer, CARD32* result) {
     CARD32 x;
 
-    if (BYTES_LEFT (buffer) < 4) {
+    if (BYTES_LEFT(buffer) < 4) {
         return XSETTINGS_ACCESS;
     }
 
@@ -181,8 +181,8 @@ static XSettingsResult fetch_card32 (XSettingsBuffer* buffer, CARD32* result) {
     return XSETTINGS_SUCCESS;
 }
 
-static XSettingsResult fetch_card8 (XSettingsBuffer* buffer, CARD8* result) {
-    if (BYTES_LEFT (buffer) < 1) {
+static XSettingsResult fetch_card8(XSettingsBuffer* buffer, CARD8* result) {
+    if (BYTES_LEFT(buffer) < 1) {
         return XSETTINGS_ACCESS;
     }
 
@@ -194,7 +194,7 @@ static XSettingsResult fetch_card8 (XSettingsBuffer* buffer, CARD8* result) {
 
 #define XSETTINGS_PAD(n,m) ((n + m - 1) & (~(m-1)))
 
-static XSettingsList* parse_settings (unsigned char* data, size_t len) {
+static XSettingsList* parse_settings(unsigned char* data, size_t len) {
     XSettingsBuffer buffer;
     XSettingsResult result = XSETTINGS_SUCCESS;
     XSettingsList* settings = NULL;
@@ -203,29 +203,29 @@ static XSettingsList* parse_settings (unsigned char* data, size_t len) {
     CARD32 i;
     XSettingsSetting* setting = NULL;
 
-    local_byte_order = xsettings_byte_order ();
+    local_byte_order = xsettings_byte_order();
 
     buffer.pos = buffer.data = data;
     buffer.len = len;
 
-    result = fetch_card8 (&buffer, (CARD8*)&buffer.byte_order);
+    result = fetch_card8(&buffer, (CARD8*)&buffer.byte_order);
 
     if (buffer.byte_order != MSBFirst && buffer.byte_order != LSBFirst) {
-        fprintf (stderr, "Invalid byte order %x in XSETTINGS property\n",
-                 buffer.byte_order);
+        fprintf(stderr, "Invalid byte order %x in XSETTINGS property\n",
+                buffer.byte_order);
         result = XSETTINGS_FAILED;
         goto out;
     }
 
     buffer.pos += 3;
 
-    result = fetch_card32 (&buffer, &serial);
+    result = fetch_card32(&buffer, &serial);
 
     if (result != XSETTINGS_SUCCESS) {
         goto out;
     }
 
-    result = fetch_card32 (&buffer, &n_entries);
+    result = fetch_card32(&buffer, &n_entries);
 
     if (result != XSETTINGS_SUCCESS) {
         goto out;
@@ -237,7 +237,7 @@ static XSettingsList* parse_settings (unsigned char* data, size_t len) {
         CARD32 v_int;
         size_t pad_len;
 
-        result = fetch_card8 (&buffer, &type);
+        result = fetch_card8(&buffer, &type);
 
         if (result != XSETTINGS_SUCCESS) {
             goto out;
@@ -245,7 +245,7 @@ static XSettingsList* parse_settings (unsigned char* data, size_t len) {
 
         buffer.pos += 1;
 
-        result = fetch_card16 (&buffer, &name_len);
+        result = fetch_card16(&buffer, &name_len);
 
         if (result != XSETTINGS_SUCCESS) {
             goto out;
@@ -253,7 +253,7 @@ static XSettingsList* parse_settings (unsigned char* data, size_t len) {
 
         pad_len = XSETTINGS_PAD(name_len, 4);
 
-        if (BYTES_LEFT (&buffer) < pad_len) {
+        if (BYTES_LEFT(&buffer) < pad_len) {
             result = XSETTINGS_ACCESS;
             goto out;
         }
@@ -274,11 +274,11 @@ static XSettingsList* parse_settings (unsigned char* data, size_t len) {
             goto out;
         }
 
-        memcpy (setting->name, buffer.pos, name_len);
+        memcpy(setting->name, buffer.pos, name_len);
         setting->name[name_len] = '\0';
         buffer.pos += pad_len;
 
-        result = fetch_card32 (&buffer, &v_int);
+        result = fetch_card32(&buffer, &v_int);
 
         if (result != XSETTINGS_SUCCESS) {
             goto out;
@@ -288,7 +288,7 @@ static XSettingsList* parse_settings (unsigned char* data, size_t len) {
 
         switch (type) {
             case XSETTINGS_TYPE_INT:
-                result = fetch_card32 (&buffer, &v_int);
+                result = fetch_card32(&buffer, &v_int);
 
                 if (result != XSETTINGS_SUCCESS) {
                     goto out;
@@ -298,16 +298,16 @@ static XSettingsList* parse_settings (unsigned char* data, size_t len) {
                 break;
 
             case XSETTINGS_TYPE_STRING:
-                result = fetch_card32 (&buffer, &v_int);
+                result = fetch_card32(&buffer, &v_int);
 
                 if (result != XSETTINGS_SUCCESS) {
                     goto out;
                 }
 
-                pad_len = XSETTINGS_PAD (v_int, 4);
+                pad_len = XSETTINGS_PAD(v_int, 4);
 
                 if (v_int + 1 == 0 || /* Guard against wrap-around */
-                    BYTES_LEFT (&buffer) < pad_len) {
+                    BYTES_LEFT(&buffer) < pad_len) {
                     result = XSETTINGS_ACCESS;
                     goto out;
                 }
@@ -325,25 +325,25 @@ static XSettingsList* parse_settings (unsigned char* data, size_t len) {
                 break;
 
             case XSETTINGS_TYPE_COLOR:
-                result = fetch_ushort (&buffer, &setting->data.v_color.red);
+                result = fetch_ushort(&buffer, &setting->data.v_color.red);
 
                 if (result != XSETTINGS_SUCCESS) {
                     goto out;
                 }
 
-                result = fetch_ushort (&buffer, &setting->data.v_color.green);
+                result = fetch_ushort(&buffer, &setting->data.v_color.green);
 
                 if (result != XSETTINGS_SUCCESS) {
                     goto out;
                 }
 
-                result = fetch_ushort (&buffer, &setting->data.v_color.blue);
+                result = fetch_ushort(&buffer, &setting->data.v_color.blue);
 
                 if (result != XSETTINGS_SUCCESS) {
                     goto out;
                 }
 
-                result = fetch_ushort (&buffer, &setting->data.v_color.alpha);
+                result = fetch_ushort(&buffer, &setting->data.v_color.alpha);
 
                 if (result != XSETTINGS_SUCCESS) {
                     goto out;
@@ -358,7 +358,7 @@ static XSettingsList* parse_settings (unsigned char* data, size_t len) {
 
         setting->type = static_cast<XSettingsType>(type);
 
-        result = xsettings_list_insert (&settings, setting);
+        result = xsettings_list_insert(&settings, setting);
 
         if (result != XSETTINGS_SUCCESS) {
             goto out;
@@ -380,7 +380,7 @@ out:
                 break;
 
             case XSETTINGS_DUPLICATE_ENTRY:
-                fprintf (stderr, "Duplicate XSETTINGS entry for '%s'\n", setting->name);
+                fprintf(stderr, "Duplicate XSETTINGS entry for '%s'\n", setting->name);
 
             case XSETTINGS_FAILED:
             case XSETTINGS_SUCCESS:
@@ -389,10 +389,10 @@ out:
         }
 
         if (setting) {
-            xsettings_setting_free (setting);
+            xsettings_setting_free(setting);
         }
 
-        xsettings_list_free (settings);
+        xsettings_list_free(settings);
         settings = NULL;
     }
 
@@ -400,7 +400,7 @@ out:
 }
 
 
-static void read_settings (XSettingsClient* client) {
+static void read_settings(XSettingsClient* client) {
     Atom type;
     int format;
     unsigned long n_items;
@@ -408,61 +408,61 @@ static void read_settings (XSettingsClient* client) {
     unsigned char* data;
     int result;
 
-    int (*old_handler) (Display*, XErrorEvent*);
+    int (*old_handler)(Display*, XErrorEvent*);
 
     XSettingsList* old_list = client->settings;
     client->settings = NULL;
 
-    old_handler = XSetErrorHandler (ignore_errors);
-    result = XGetWindowProperty (client->display, client->manager_window,
-                                 server.atom._XSETTINGS_SETTINGS, 0, LONG_MAX, False,
-                                 server.atom._XSETTINGS_SETTINGS, &type, &format, &n_items, &bytes_after, &data);
-    XSetErrorHandler (old_handler);
+    old_handler = XSetErrorHandler(ignore_errors);
+    result = XGetWindowProperty(client->display, client->manager_window,
+                                server.atom._XSETTINGS_SETTINGS, 0, LONG_MAX, False,
+                                server.atom._XSETTINGS_SETTINGS, &type, &format, &n_items, &bytes_after, &data);
+    XSetErrorHandler(old_handler);
 
     if (result == Success && type == server.atom._XSETTINGS_SETTINGS) {
         if (format != 8) {
-            fprintf (stderr, "Invalid format for XSETTINGS property %d", format);
+            fprintf(stderr, "Invalid format for XSETTINGS property %d", format);
         } else {
-            client->settings = parse_settings (data, n_items);
+            client->settings = parse_settings(data, n_items);
         }
 
-        XFree (data);
+        XFree(data);
     }
 
-    notify_changes (client, old_list);
-    xsettings_list_free (old_list);
+    notify_changes(client, old_list);
+    xsettings_list_free(old_list);
 }
 
 
-static void check_manager_window (XSettingsClient* client) {
+static void check_manager_window(XSettingsClient* client) {
     if (client->manager_window && client->watch) {
-        client->watch (client->manager_window, False, 0, client->cb_data);
+        client->watch(client->manager_window, False, 0, client->cb_data);
     }
 
-    XGrabServer (client->display);
+    XGrabServer(client->display);
 
-    client->manager_window = XGetSelectionOwner (server.dsp,
+    client->manager_window = XGetSelectionOwner(server.dsp,
                              server.atom._XSETTINGS_SCREEN);
 
     if (client->manager_window) {
-        XSelectInput (server.dsp, client->manager_window,
-                      PropertyChangeMask | StructureNotifyMask);
+        XSelectInput(server.dsp, client->manager_window,
+                     PropertyChangeMask | StructureNotifyMask);
     }
 
-    XUngrabServer (client->display);
-    XFlush (client->display);
+    XUngrabServer(client->display);
+    XFlush(client->display);
 
     if (client->manager_window && client->watch) {
-        client->watch (client->manager_window, True,
-                       PropertyChangeMask | StructureNotifyMask, client->cb_data);
+        client->watch(client->manager_window, True,
+                      PropertyChangeMask | StructureNotifyMask, client->cb_data);
     }
 
-    read_settings (client);
+    read_settings(client);
 }
 
 
-XSettingsClient* xsettings_client_new (Display* display, int screen,
-                                       XSettingsNotifyFunc notify, XSettingsWatchFunc watch, void* cb_data) {
+XSettingsClient* xsettings_client_new(Display* display, int screen,
+                                      XSettingsNotifyFunc notify, XSettingsWatchFunc watch, void* cb_data) {
     XSettingsClient* client = (XSettingsClient*) malloc(sizeof * client);
 
     if (!client) {
@@ -479,15 +479,15 @@ XSettingsClient* xsettings_client_new (Display* display, int screen,
     client->settings = NULL;
 
     if (client->watch) {
-        client->watch(RootWindow (display, screen), True, StructureNotifyMask,
+        client->watch(RootWindow(display, screen), True, StructureNotifyMask,
                       client->cb_data);
     }
 
-    check_manager_window (client);
+    check_manager_window(client);
 
     if (client->manager_window == None) {
         printf("NO XSETTINGS manager, tint3 use config 'launcher_icon_theme'.\n");
-        free (client);
+        free(client);
         return NULL;
     }
 
@@ -495,27 +495,27 @@ XSettingsClient* xsettings_client_new (Display* display, int screen,
 }
 
 
-void xsettings_client_destroy (XSettingsClient* client) {
+void xsettings_client_destroy(XSettingsClient* client) {
     if (client->watch) {
-        client->watch (RootWindow (client->display, client->screen), False, 0,
-                       client->cb_data);
+        client->watch(RootWindow(client->display, client->screen), False, 0,
+                      client->cb_data);
     }
 
     if (client->manager_window && client->watch) {
-        client->watch (client->manager_window, False, 0, client->cb_data);
+        client->watch(client->manager_window, False, 0, client->cb_data);
     }
 
-    xsettings_list_free (client->settings);
-    free (client);
+    xsettings_list_free(client->settings);
+    free(client);
 }
 
 
-XSettingsResult xsettings_client_get_setting (XSettingsClient* client,
+XSettingsResult xsettings_client_get_setting(XSettingsClient* client,
         const char* name, XSettingsSetting** setting) {
-    XSettingsSetting* search = xsettings_list_lookup (client->settings, name);
+    XSettingsSetting* search = xsettings_list_lookup(client->settings, name);
 
     if (search) {
-        *setting = xsettings_setting_copy (search);
+        *setting = xsettings_setting_copy(search);
         return *setting ? XSETTINGS_SUCCESS : XSETTINGS_NO_MEM;
     } else {
         return XSETTINGS_NO_ENTRY;
@@ -523,24 +523,24 @@ XSettingsResult xsettings_client_get_setting (XSettingsClient* client,
 }
 
 
-Bool xsettings_client_process_event (XSettingsClient* client, XEvent* xev) {
+Bool xsettings_client_process_event(XSettingsClient* client, XEvent* xev) {
     /* The checks here will not unlikely cause us to reread
     * the properties from the manager window a number of
     * times when the manager changes from A->B. But manager changes
     * are going to be pretty rare.
     */
-    if (xev->xany.window == RootWindow (server.dsp, server.screen)) {
+    if (xev->xany.window == RootWindow(server.dsp, server.screen)) {
         if (xev->xany.type == ClientMessage
             && xev->xclient.message_type == server.atom.MANAGER) {
-            check_manager_window (client);
+            check_manager_window(client);
             return True;
         }
     } else if (xev->xany.window == client->manager_window) {
         if (xev->xany.type == DestroyNotify) {
-            check_manager_window (client);
+            check_manager_window(client);
             return True;
         } else if (xev->xany.type == PropertyNotify) {
-            read_settings (client);
+            read_settings(client);
             return True;
         }
     }
