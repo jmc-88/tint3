@@ -112,12 +112,19 @@ void init(int argc, char* argv[]) {
 
     // Set signal handler
     signal_pending = 0;
-    struct sigaction sa = { .sa_handler = signal_handler };
-    struct sigaction sa_chld = { .sa_handler = SIG_DFL, .sa_flags = SA_NOCLDWAIT };
+
+    struct sigaction sa;
+    memset(&sa, 0, sizeof(sa));
+    sa.sa_handler = signal_handler;
     sigaction(SIGUSR1, &sa, 0);
     sigaction(SIGINT, &sa, 0);
     sigaction(SIGTERM, &sa, 0);
     sigaction(SIGHUP, &sa, 0);
+
+    struct sigaction sa_chld;
+    memset(&sa_chld, 0, sizeof(sa_chld));
+    sa_chld.sa_handler = SIG_DFL;
+    sa_chld.sa_flags = SA_NOCLDWAIT;
     sigaction(SIGCHLD, &sa_chld, 0);
 
     // BSD does not support pselect(), therefore we have to use select and hope that we do not
@@ -278,18 +285,18 @@ void cleanup() {
 void get_snapshot(const char* path) {
     Panel* panel = &panel1[0];
 
-    if (panel->area.width > server.monitor[0].width) {
-        panel->area.width = server.monitor[0].width;
+    if (panel->width > server.monitor[0].width) {
+        panel->width = server.monitor[0].width;
     }
 
-    panel->temp_pmap = XCreatePixmap(server.dsp, server.root_win, panel->area.width,
-                                     panel->area.height, server.depth);
+    panel->temp_pmap = XCreatePixmap(server.dsp, server.root_win, panel->width,
+                                     panel->height, server.depth);
     rendering(panel);
 
     Imlib_Image img = NULL;
     imlib_context_set_drawable(panel->temp_pmap);
-    img = imlib_create_image_from_drawable(0, 0, 0, panel->area.width,
-                                           panel->area.height, 0);
+    img = imlib_create_image_from_drawable(0, 0, 0, panel->width,
+                                           panel->height, 0);
 
     imlib_context_set_image(img);
 
@@ -490,7 +497,7 @@ void event_button_motion_notify(XEvent* e) {
     Task* event_task = click_task(panel, e->xbutton.x, e->xbutton.y);
 
     // If the event takes place on the same taskbar as the task being dragged
-    if (event_taskbar == task_drag->area.parent) {
+    if (event_taskbar == (Taskbar*)task_drag->area.parent) {
         // Swap the task_drag with the task on the event's location (if they differ)
         if (event_task && event_task != task_drag) {
             GSList* drag_iter = g_slist_find(event_taskbar->area.list, task_drag);
@@ -523,7 +530,7 @@ void event_button_motion_notify(XEvent* e) {
         }
 
         // Move task to other desktop (but avoid the 'Window desktop changed' code in 'event_property_notify')
-        task_drag->area.parent = event_taskbar;
+        task_drag->area.parent = reinterpret_cast<Area*>(event_taskbar);
         task_drag->desktop = event_taskbar->desktop;
 
         windows_set_desktop(task_drag->win, event_taskbar->desktop);
@@ -714,7 +721,7 @@ void event_property_notify(XEvent* e) {
                 init_taskbar_panel(&panel1[i]);
                 set_panel_items_order(&panel1[i]);
                 visible_taskbar(&panel1[i]);
-                panel1[i].area.resize = 1;
+                panel1[i].resize = 1;
             }
 
             task_refresh_tasklist();
@@ -1246,11 +1253,11 @@ start:
                         XFreePixmap(server.dsp, panel->temp_pmap);
                     }
 
-                    panel->temp_pmap = XCreatePixmap(server.dsp, server.root_win, panel->area.width,
-                                                     panel->area.height, server.depth);
+                    panel->temp_pmap = XCreatePixmap(server.dsp, server.root_win, panel->width,
+                                                     panel->height, server.depth);
                     rendering(panel);
                     XCopyArea(server.dsp, panel->temp_pmap, panel->main_win, server.gc, 0, 0,
-                              panel->area.width, panel->area.height, 0, 0);
+                              panel->width, panel->height, 0, 0);
                 }
             }
 

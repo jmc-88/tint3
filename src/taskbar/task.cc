@@ -35,7 +35,7 @@
 #include "timer.h"
 #include "util/window.h"
 
-timeout* urgent_timeout;
+Timeout* urgent_timeout;
 GSList* urgent_list;
 
 const char* task_get_tooltip(void* obj) {
@@ -101,7 +101,7 @@ Task* add_task(Window win) {
         tskbar = &panel1[monitor].taskbar[j];
         new_tsk2 = (Task*) malloc(sizeof(Task));
         memcpy(&new_tsk2->area, &panel1[monitor].g_task.area, sizeof(Area));
-        new_tsk2->area.parent = tskbar;
+        new_tsk2->area.parent = reinterpret_cast<Area*>(tskbar);
         new_tsk2->win = new_tsk.win;
         new_tsk2->desktop = new_tsk.desktop;
         new_tsk2->current_state =
@@ -177,7 +177,7 @@ void remove_task(Task* tsk) {
 
     for (int i = 0; i < task_group->len; ++i) {
         Task* tsk2 = static_cast<Task*>(g_ptr_array_index(task_group, i));
-        Taskbar* tskbar = static_cast<Taskbar*>(tsk2->area.parent);
+        Taskbar* tskbar = reinterpret_cast<Taskbar*>(tsk2->area.parent);
         tskbar->area.list = g_slist_remove(tskbar->area.list, tsk2);
         tskbar->area.resize = 1;
 
@@ -515,7 +515,7 @@ Task* find_active_task(Task* current_task, Task* active_task) {
         return active_task;
     }
 
-    Taskbar* tskbar = static_cast<Taskbar*>(current_task->area.parent);
+    Taskbar* tskbar = reinterpret_cast<Taskbar*>(current_task->area.parent);
     GSList* l0 = static_cast<GSList*>(tskbar->area.list);
 
     if (taskbarname_enabled) {
@@ -538,7 +538,7 @@ Task* next_task(Task* tsk) {
         return 0;
     }
 
-    Taskbar* tskbar = static_cast<Taskbar*>(tsk->area.parent);
+    Taskbar* tskbar = reinterpret_cast<Taskbar*>(tsk->area.parent);
     GSList* l0 = static_cast<GSList*>(tskbar->area.list);
 
     if (taskbarname_enabled) {
@@ -564,7 +564,7 @@ Task* prev_task(Task* tsk) {
         return 0;
     }
 
-    Taskbar* tskbar = static_cast<Taskbar*>(tsk->area.parent);
+    Taskbar* tskbar = reinterpret_cast<Taskbar*>(tsk->area.parent);
     Task* tsk2 = 0;
 
     GSList* l0 = static_cast<GSList*>(tskbar->area.list);

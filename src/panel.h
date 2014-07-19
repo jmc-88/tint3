@@ -14,15 +14,18 @@
 #include <pango/pangocairo.h>
 #include <sys/time.h>
 
-#include "common.h"
-#include "clock.h"
-#include "task.h"
-#include "taskbar.h"
-#include "systraybar.h"
-#include "launcher.h"
+#include <vector>
+
+#include "clock/clock.h"
+#include "launcher/launcher.h"
+#include "util/area.h"
+#include "util/common.h"
+#include "systray/systraybar.h"
+#include "taskbar/task.h"
+#include "taskbar/taskbar.h"
 
 #ifdef ENABLE_BATTERY
-#include "battery.h"
+#include "battery/battery.h"
 #endif
 
 
@@ -64,17 +67,14 @@ extern char* panel_items_order;
 
 extern int  max_tick_urgent;
 
-extern GArray* backgrounds;
+extern std::vector<Background*> backgrounds;
 
 extern Imlib_Image default_icon;
 
 
 // tint3 use one panel per monitor and one taskbar per desktop.
-typedef struct {
-    // always start with area
-    // area.list own all objects of the panel according to config file
-    Area area;
-
+class Panel : public Area {
+public:
     // --------------------------------------------------
     // panel
     Window main_win;
@@ -116,8 +116,8 @@ typedef struct {
     int is_hidden;
     int hidden_width, hidden_height;
     Pixmap hidden_pixmap;
-    timeout* autohide_timeout;
-} Panel;
+    Timeout* autohide_timeout;
+};
 
 
 extern Panel panel_config;

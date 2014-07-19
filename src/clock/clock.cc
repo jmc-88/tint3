@@ -47,7 +47,7 @@ static char buf_time[256];
 static char buf_date[256];
 static char buf_tooltip[512];
 int clock_enabled;
-static timeout* clock_timeout;
+static Timeout* clock_timeout;
 
 
 void default_clock() {
@@ -186,11 +186,11 @@ void init_clock_panel(void* p) {
     Clock* clock = &panel->clock;
 
     if (clock->area.bg == 0) {
-        clock->area.bg = &g_array_index(backgrounds, Background, 0);
+        clock->area.bg = backgrounds.front();
     }
 
-    clock->area.parent = p;
-    clock->area.panel = p;
+    clock->area.parent = static_cast<Area*>(p);
+    clock->area.panel = static_cast<Panel*>(p);
     clock->area._draw_foreground = draw_clock;
     clock->area.size_mode = SIZE_BY_CONTENT;
     clock->area._resize = resize_clock;
@@ -257,13 +257,13 @@ int resize_clock(void* obj) {
     strftime(buf_time, sizeof(buf_time), time1_format,
              clock_gettime_for_tz(time1_timezone));
     get_text_size2(time1_font_desc, &time_height_ink, &time_height, &time_width,
-                   panel->area.height, panel->area.width, buf_time, strlen(buf_time));
+                   panel->height, panel->width, buf_time, strlen(buf_time));
 
     if (time2_format) {
         strftime(buf_date, sizeof(buf_date), time2_format,
                  clock_gettime_for_tz(time2_timezone));
         get_text_size2(time2_font_desc, &date_height_ink, &date_height, &date_width,
-                       panel->area.height, panel->area.width, buf_date, strlen(buf_date));
+                       panel->height, panel->width, buf_date, strlen(buf_date));
     }
 
     if (panel_horizontal) {

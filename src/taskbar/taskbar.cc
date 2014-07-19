@@ -83,7 +83,7 @@ void cleanup_taskbar() {
 
             free_area(&tskbar->area);
             // remove taskbar from the panel
-            panel->area.list = g_slist_remove(panel->area.list, tskbar);
+            panel->list = g_slist_remove(panel->list, tskbar);
         }
 
         if (panel->taskbar) {
@@ -115,21 +115,17 @@ void init_taskbar_panel(void* p) {
     int j;
 
     if (panel->g_taskbar.background[TASKBAR_NORMAL] == 0) {
-        panel->g_taskbar.background[TASKBAR_NORMAL] = &g_array_index(backgrounds,
-                Background, 0);
-        panel->g_taskbar.background[TASKBAR_ACTIVE] = &g_array_index(backgrounds,
-                Background, 0);
+        panel->g_taskbar.background[TASKBAR_NORMAL] = backgrounds.front();
+        panel->g_taskbar.background[TASKBAR_ACTIVE] = backgrounds.front();
     }
 
     if (panel->g_taskbar.background_name[TASKBAR_NORMAL] == 0) {
-        panel->g_taskbar.background_name[TASKBAR_NORMAL] = &g_array_index(backgrounds,
-                Background, 0);
-        panel->g_taskbar.background_name[TASKBAR_ACTIVE] = &g_array_index(backgrounds,
-                Background, 0);
+        panel->g_taskbar.background_name[TASKBAR_NORMAL] = backgrounds.front();
+        panel->g_taskbar.background_name[TASKBAR_ACTIVE] = backgrounds.front();
     }
 
     if (panel->g_task.area.bg == 0) {
-        panel->g_task.area.bg = &g_array_index(backgrounds, Background, 0);
+        panel->g_task.area.bg = backgrounds.front();
     }
 
     // taskbar name
@@ -152,16 +148,16 @@ void init_taskbar_panel(void* p) {
     panel->g_taskbar.area.on_screen = 1;
 
     if (panel_horizontal) {
-        panel->g_taskbar.area.posy = panel->area.bg->border.width +
-                                     panel->area.paddingy;
-        panel->g_taskbar.area.height = panel->area.height - (2 *
+        panel->g_taskbar.area.posy = panel->bg->border.width +
+                                     panel->paddingy;
+        panel->g_taskbar.area.height = panel->height - (2 *
                                        panel->g_taskbar.area.posy);
         panel->g_taskbar.area_name.posy = panel->g_taskbar.area.posy;
         panel->g_taskbar.area_name.height = panel->g_taskbar.area.height;
     } else {
-        panel->g_taskbar.area.posx = panel->area.bg->border.width +
-                                     panel->area.paddingy;
-        panel->g_taskbar.area.width = panel->area.width - (2 *
+        panel->g_taskbar.area.posx = panel->bg->border.width +
+                                     panel->paddingy;
+        panel->g_taskbar.area.width = panel->width - (2 *
                                       panel->g_taskbar.area.posx);
         panel->g_taskbar.area_name.posx = panel->g_taskbar.area.posx;
         panel->g_taskbar.area_name.width = panel->g_taskbar.area.width;
@@ -219,8 +215,7 @@ void init_taskbar_panel(void* p) {
     }
 
     if ((panel->g_task.config_background_mask & (1 << TASK_NORMAL)) == 0) {
-        panel->g_task.background[TASK_NORMAL] = &g_array_index(backgrounds, Background,
-                                                0);
+        panel->g_task.background[TASK_NORMAL] = backgrounds.front();
     }
 
     if ((panel->g_task.config_background_mask & (1 << TASK_ACTIVE)) == 0) {
@@ -240,34 +235,33 @@ void init_taskbar_panel(void* p) {
         panel->g_task.area.posy = panel->g_taskbar.area.posy +
                                   panel->g_taskbar.background[TASKBAR_NORMAL]->border.width +
                                   panel->g_taskbar.area.paddingy;
-        panel->g_task.area.height = panel->area.height - (2 * panel->g_task.area.posy);
+        panel->g_task.area.height = panel->height - (2 * panel->g_task.area.posy);
     } else {
         panel->g_task.area.posx = panel->g_taskbar.area.posx +
                                   panel->g_taskbar.background[TASKBAR_NORMAL]->border.width +
                                   panel->g_taskbar.area.paddingy;
-        panel->g_task.area.width = panel->area.width - (2 * panel->g_task.area.posx);
+        panel->g_task.area.width = panel->width - (2 * panel->g_task.area.posx);
         panel->g_task.area.height = panel->g_task.maximum_height;
     }
 
     for (j = 0; j < TASK_STATE_COUNT; ++j) {
         if (panel->g_task.background[j] == 0) {
-            panel->g_task.background[j] = &g_array_index(backgrounds, Background, 0);
+            panel->g_task.background[j] = backgrounds.front();
         }
 
         if (panel->g_task.background[j]->border.rounded > panel->g_task.area.height /
             2) {
             printf("task%sbackground_id has a too large rounded value. Please fix your tint3rc\n",
                    j == 0 ? "_" : j == 1 ? "_active_" : j == 2 ? "_iconified_" : "_urgent_");
-            g_array_append_val(backgrounds, *panel->g_task.background[j]);
-            panel->g_task.background[j] = &g_array_index(backgrounds, Background,
-                                          backgrounds->len - 1);
+            /* backgrounds.push_back(*panel->g_task.background[j]); */
+            /* panel->g_task.background[j] = backgrounds.back(); */
             panel->g_task.background[j]->border.rounded = panel->g_task.area.height / 2;
         }
     }
 
     // compute vertical position : text and icon
     int height_ink, height;
-    get_text_size(panel->g_task.font_desc, &height_ink, &height, panel->area.height,
+    get_text_size(panel->g_task.font_desc, &height_ink, &height, panel->height,
                   "TAjpg", 5);
 
     if (!panel->g_task.maximum_width && panel_horizontal) {

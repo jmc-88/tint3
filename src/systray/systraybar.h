@@ -41,7 +41,7 @@ typedef struct {
     int hide;
     int depth;
     Damage damage;
-    timeout* render_timeout;
+    Timeout* render_timeout;
 } TrayWindow;
 
 

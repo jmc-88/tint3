@@ -74,7 +74,7 @@ Panel panel_config;
 Panel* panel1;
 int  nb_panel;
 
-GArray* backgrounds;
+std::vector<Background*> backgrounds;
 
 Imlib_Image default_icon;
 
@@ -95,14 +95,13 @@ void default_panel() {
     panel_layer = BOTTOM_LAYER;  // default is bottom layer
     wm_menu = 0;
     max_tick_urgent = 14;
-    backgrounds = g_array_new(0, 0, sizeof(Background));
 
     memset(&panel_config, 0, sizeof(Panel));
 
     // append full transparency background
-    Background transparent_bg;
-    memset(&transparent_bg, 0, sizeof(Background));
-    g_array_append_val(backgrounds, transparent_bg);
+    auto transparent_bg = static_cast<Background*>(
+            calloc(1, sizeof(Background)));
+    backgrounds.push_back(transparent_bg);
 }
 
 void cleanup_panel() {
@@ -123,7 +122,7 @@ void cleanup_panel() {
     for (i = 0 ; i < nb_panel ; i++) {
         p = &panel1[i];
 
-        free_area(&p->area);
+        free_area(p);
 
         if (p->temp_pmap) {
             XFreePixmap(server.dsp, p->temp_pmap);
@@ -144,10 +143,6 @@ void cleanup_panel() {
 
     if (panel1) {
         delete[] panel1;
-    }
-
-    if (backgrounds) {
-        g_array_free(backgrounds, 1);
     }
 
     if (panel_config.g_task.font_desc) {
@@ -198,16 +193,16 @@ void init_panel() {
             p->monitor = i;
         }
 
-        if (p->area.bg == 0) {
-            p->area.bg = &g_array_index(backgrounds, Background, 0);
+        if (p->bg == 0) {
+            p->bg = backgrounds.front();
         }
 
-        p->area.parent = p;
-        p->area.panel = p;
-        p->area.on_screen = 1;
-        p->area.resize = 1;
-        p->area.size_mode = SIZE_BY_LAYOUT;
-        p->area._resize = resize_panel;
+        p->parent = p;
+        p->panel = p;
+        p->on_screen = 1;
+        p->resize = 1;
+        p->size_mode = SIZE_BY_LAYOUT;
+        p->_resize = resize_panel;
         init_panel_size_and_position(p);
 
         // add childs according to panel_items
@@ -242,12 +237,18 @@ void init_panel() {
 
         set_panel_items_order(p);
 
-        // catch some events
-        XSetWindowAttributes att = { .colormap = server.colormap, .background_pixel = 0, .border_pixel = 0 };
-        unsigned long mask = CWEventMask | CWColormap | CWBackPixel | CWBorderPixel;
-        p->main_win = XCreateWindow(server.dsp, server.root_win, p->posx, p->posy,
-                                    p->area.width, p->area.height, 0, server.depth, InputOutput, server.visual,
-                                    mask, &att);
+        {
+            // catch some events
+            XSetWindowAttributes attr;
+            attr.colormap = server.colormap;
+            attr.background_pixel = 0;
+            attr.border_pixel = 0;
+
+            unsigned long mask = CWEventMask | CWColormap | CWBackPixel | CWBorderPixel;
+            p->main_win = XCreateWindow(server.dsp, server.root_win, p->posx, p->posy,
+                    p->width, p->height, 0, server.depth, InputOutput, server.visual,
+                    mask, &attr);
+        }
 
         long event_mask = ExposureMask | ButtonPressMask | ButtonReleaseMask |
                           ButtonMotionMask;
@@ -261,15 +262,18 @@ void init_panel() {
             event_mask |= LeaveWindowMask | EnterWindowMask;
         }
 
-        XSetWindowAttributes attributes = { .event_mask = event_mask };
-        XChangeWindowAttributes(server.dsp, p->main_win, CWEventMask, &attributes);
+        {
+            XSetWindowAttributes attr;
+            attr.event_mask = event_mask;
+            XChangeWindowAttributes(server.dsp, p->main_win, CWEventMask, &attr);
+        }
 
         if (!server.gc) {
             XGCValues  gcv;
             server.gc = XCreateGC(server.dsp, p->main_win, 0, &gcv);
         }
 
-        //printf("panel %d : %d, %d, %d, %d\n", i, p->posx, p->posy, p->area.width, p->area.height);
+        //printf("panel %d : %d, %d, %d, %d\n", i, p->posx, p->posy, p->width, p->height);
         set_panel_properties(p);
         set_panel_background(p);
 
@@ -294,52 +298,52 @@ void init_panel_size_and_position(Panel* panel) {
     // detect panel size
     if (panel_horizontal) {
         if (panel->pourcentx) {
-            panel->area.width = (float)server.monitor[panel->monitor].width *
-                                panel->area.width / 100;
+            panel->width = (float)server.monitor[panel->monitor].width *
+                                panel->width / 100;
         }
 
         if (panel->pourcenty) {
-            panel->area.height = (float)server.monitor[panel->monitor].height *
-                                 panel->area.height / 100;
+            panel->height = (float)server.monitor[panel->monitor].height *
+                                 panel->height / 100;
         }
 
-        if (panel->area.width + panel->marginx > server.monitor[panel->monitor].width) {
-            panel->area.width = server.monitor[panel->monitor].width - panel->marginx;
+        if (panel->width + panel->marginx > server.monitor[panel->monitor].width) {
+            panel->width = server.monitor[panel->monitor].width - panel->marginx;
         }
 
-        if (panel->area.bg->border.rounded > panel->area.height / 2) {
+        if (panel->bg->border.rounded > panel->height / 2) {
             printf("panel_background_id rounded is too big... please fix your tint3rc\n");
-            g_array_append_val(backgrounds, *panel->area.bg);
-            panel->area.bg = &g_array_index(backgrounds, Background, backgrounds->len - 1);
-            panel->area.bg->border.rounded = panel->area.height / 2;
+            /* backgrounds.push_back(*panel->bg); */
+            /* panel->bg = backgrounds.back(); */
+            panel->bg->border.rounded = panel->height / 2;
         }
     } else {
-        int old_panel_height = panel->area.height;
+        int old_panel_height = panel->height;
 
         if (panel->pourcentx) {
-            panel->area.height = (float)server.monitor[panel->monitor].height *
-                                 panel->area.width / 100;
+            panel->height = (float)server.monitor[panel->monitor].height *
+                                 panel->width / 100;
         } else {
-            panel->area.height = panel->area.width;
+            panel->height = panel->width;
         }
 
         if (panel->pourcenty) {
-            panel->area.width = (float)server.monitor[panel->monitor].width *
+            panel->width = (float)server.monitor[panel->monitor].width *
                                 old_panel_height / 100;
         } else {
-            panel->area.width = old_panel_height;
+            panel->width = old_panel_height;
         }
 
-        if (panel->area.height + panel->marginy >
+        if (panel->height + panel->marginy >
             server.monitor[panel->monitor].height) {
-            panel->area.height = server.monitor[panel->monitor].height - panel->marginy;
+            panel->height = server.monitor[panel->monitor].height - panel->marginy;
         }
 
-        if (panel->area.bg->border.rounded > panel->area.width / 2) {
+        if (panel->bg->border.rounded > panel->width / 2) {
             printf("panel_background_id rounded is too big... please fix your tint3rc\n");
-            g_array_append_val(backgrounds, *panel->area.bg);
-            panel->area.bg = &g_array_index(backgrounds, Background, backgrounds->len - 1);
-            panel->area.bg->border.rounded = panel->area.width / 2;
+            /* backgrounds.push_back(*panel->bg); */
+            /* panel->bg = backgrounds.back(); */
+            panel->bg->border.rounded = panel->width / 2;
         }
     }
 
@@ -349,11 +353,11 @@ void init_panel_size_and_position(Panel* panel) {
     } else {
         if (panel_position & RIGHT) {
             panel->posx = server.monitor[panel->monitor].x +
-                          server.monitor[panel->monitor].width - panel->area.width - panel->marginx;
+                          server.monitor[panel->monitor].width - panel->width - panel->marginx;
         } else {
             if (panel_horizontal) {
                 panel->posx = server.monitor[panel->monitor].x + ((
-                                  server.monitor[panel->monitor].width - panel->area.width) / 2);
+                                  server.monitor[panel->monitor].width - panel->width) / 2);
             } else {
                 panel->posx = server.monitor[panel->monitor].x + panel->marginx;
             }
@@ -365,26 +369,26 @@ void init_panel_size_and_position(Panel* panel) {
     } else {
         if (panel_position & BOTTOM) {
             panel->posy = server.monitor[panel->monitor].y +
-                          server.monitor[panel->monitor].height - panel->area.height - panel->marginy;
+                          server.monitor[panel->monitor].height - panel->height - panel->marginy;
         } else {
             panel->posy = server.monitor[panel->monitor].y + ((
-                              server.monitor[panel->monitor].height - panel->area.height) / 2);
+                              server.monitor[panel->monitor].height - panel->height) / 2);
         }
     }
 
     // autohide or strut_policy=minimum
-    int diff = (panel_horizontal ? panel->area.height : panel->area.width) -
+    int diff = (panel_horizontal ? panel->height : panel->width) -
                panel_autohide_height;
 
     if (panel_horizontal) {
-        panel->hidden_width = panel->area.width;
-        panel->hidden_height = panel->area.height - diff;
+        panel->hidden_width = panel->width;
+        panel->hidden_height = panel->height - diff;
     } else {
-        panel->hidden_width = panel->area.width - diff;
-        panel->hidden_height = panel->area.height;
+        panel->hidden_width = panel->width - diff;
+        panel->hidden_height = panel->height;
     }
 
-    // printf("panel : posx %d, posy %d, width %d, height %d\n", panel->posx, panel->posy, panel->area.width, panel->area.height);
+    // printf("panel : posx %d, posy %d, width %d, height %d\n", panel->posx, panel->posy, panel->width, panel->height);
 }
 
 
@@ -427,7 +431,7 @@ void update_strut(Panel* p) {
     long   struts [12] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
     if (panel_horizontal) {
-        int height = p->area.height + p->marginy;
+        int height = p->height + p->marginy;
 
         if (panel_strut_policy == STRUT_MINIMUM
             || (panel_strut_policy == STRUT_FOLLOW_SIZE && p->is_hidden)) {
@@ -437,16 +441,16 @@ void update_strut(Panel* p) {
         if (panel_position & TOP) {
             struts[2] = height + monitor.y;
             struts[8] = p->posx;
-            // p->area.width - 1 allowed full screen on monitor 2
-            struts[9] = p->posx + p->area.width - 1;
+            // p->width - 1 allowed full screen on monitor 2
+            struts[9] = p->posx + p->width - 1;
         } else {
             struts[3] = height + screen_height - monitor.y - monitor.height;
             struts[10] = p->posx;
-            // p->area.width - 1 allowed full screen on monitor 2
-            struts[11] = p->posx + p->area.width - 1;
+            // p->width - 1 allowed full screen on monitor 2
+            struts[11] = p->posx + p->width - 1;
         }
     } else {
-        int width = p->area.width + p->marginx;
+        int width = p->width + p->marginx;
 
         if (panel_strut_policy == STRUT_MINIMUM
             || (panel_strut_policy == STRUT_FOLLOW_SIZE && p->is_hidden)) {
@@ -456,13 +460,13 @@ void update_strut(Panel* p) {
         if (panel_position & LEFT) {
             struts[0] = width + monitor.x;
             struts[4] = p->posy;
-            // p->area.width - 1 allowed full screen on monitor 2
-            struts[5] = p->posy + p->area.height - 1;
+            // p->width - 1 allowed full screen on monitor 2
+            struts[5] = p->posy + p->height - 1;
         } else {
             struts[1] = width + screen_width - monitor.x - monitor.width;
             struts[6] = p->posy;
-            // p->area.width - 1 allowed full screen on monitor 2
-            struts[7] = p->posy + p->area.height - 1;
+            // p->width - 1 allowed full screen on monitor 2
+            struts[7] = p->posy + p->height - 1;
         }
     }
 
@@ -477,26 +481,26 @@ void update_strut(Panel* p) {
 void set_panel_items_order(Panel* p) {
     int k, j;
 
-    if (p->area.list) {
-        g_slist_free(p->area.list);
-        p->area.list = 0;
+    if (p->list) {
+        g_slist_free(p->list);
+        p->list = 0;
     }
 
     for (k = 0 ; k < strlen(panel_items_order) ; k++) {
         if (panel_items_order[k] == 'L') {
-            p->area.list = g_slist_append(p->area.list, &p->launcher);
+            p->list = g_slist_append(p->list, &p->launcher);
         }
 
         if (panel_items_order[k] == 'T') {
             for (j = 0 ; j < p->nb_desktop ; j++) {
-                p->area.list = g_slist_append(p->area.list, &p->taskbar[j]);
+                p->list = g_slist_append(p->list, &p->taskbar[j]);
             }
         }
 
 #ifdef ENABLE_BATTERY
 
         if (panel_items_order[k] == 'B') {
-            p->area.list = g_slist_append(p->area.list, &p->battery);
+            p->list = g_slist_append(p->list, &p->battery);
         }
 
 #endif
@@ -504,15 +508,15 @@ void set_panel_items_order(Panel* p) {
         if (panel_items_order[k] == 'S' && p == panel1) {
             // TODO : check systray is only on 1 panel
             // at the moment only on panel1[0] allowed
-            p->area.list = g_slist_append(p->area.list, &systray);
+            p->list = g_slist_append(p->list, &systray);
         }
 
         if (panel_items_order[k] == 'C') {
-            p->area.list = g_slist_append(p->area.list, &p->clock);
+            p->list = g_slist_append(p->list, &p->clock);
         }
     }
 
-    init_rendering(&p->area, 0);
+    init_rendering(p, 0);
 }
 
 
@@ -575,14 +579,14 @@ void set_panel_properties(Panel* p) {
 
     // Fixed position and non-resizable window
     // Allow panel move and resize when tint3 reload config file
-    int minwidth = panel_autohide ? p->hidden_width : p->area.width;
-    int minheight = panel_autohide ? p->hidden_height : p->area.height;
+    int minwidth = panel_autohide ? p->hidden_width : p->width;
+    int minheight = panel_autohide ? p->hidden_height : p->height;
     XSizeHints size_hints;
     size_hints.flags = PPosition | PMinSize | PMaxSize;
     size_hints.min_width = minwidth;
-    size_hints.max_width = p->area.width;
+    size_hints.max_width = p->width;
     size_hints.min_height = minheight;
-    size_hints.max_height = p->area.height;
+    size_hints.max_height = p->height;
     XSetWMNormalHints(server.dsp, p->main_win, &size_hints);
 
     // Set WM_CLASS
@@ -595,26 +599,26 @@ void set_panel_properties(Panel* p) {
 
 
 void set_panel_background(Panel* p) {
-    if (p->area.pix) {
-        XFreePixmap(server.dsp, p->area.pix);
+    if (p->pix) {
+        XFreePixmap(server.dsp, p->pix);
     }
 
-    p->area.pix = XCreatePixmap(server.dsp, server.root_win, p->area.width,
-                                p->area.height, server.depth);
+    p->pix = XCreatePixmap(server.dsp, server.root_win, p->width,
+                                p->height, server.depth);
 
     int xoff = 0, yoff = 0;
 
     if (panel_horizontal && panel_position & BOTTOM) {
-        yoff = p->area.height - p->hidden_height;
+        yoff = p->height - p->hidden_height;
     } else if (!panel_horizontal && panel_position & RIGHT) {
-        xoff = p->area.width - p->hidden_width;
+        xoff = p->width - p->hidden_width;
     }
 
     if (server.real_transparency) {
-        clear_pixmap(p->area.pix, 0, 0, p->area.width, p->area.height);
+        clear_pixmap(p->pix, 0, 0, p->width, p->height);
     } else {
         get_root_pixmap();
-        // copy background (server.root_pmap) in panel.area.pix
+        // copy background (server.root_pmap) in panel.pix
         Window dummy;
         int  x, y;
         XTranslateCoordinates(server.dsp, p->main_win, server.root_win, 0, 0, &x, &y,
@@ -626,17 +630,17 @@ void set_panel_background(Panel* p) {
         }
 
         XSetTSOrigin(server.dsp, server.gc, -x, -y);
-        XFillRectangle(server.dsp, p->area.pix, server.gc, 0, 0, p->area.width,
-                       p->area.height);
+        XFillRectangle(server.dsp, p->pix, server.gc, 0, 0, p->width,
+                       p->height);
     }
 
     // draw background panel
     cairo_surface_t* cs;
     cairo_t* c;
-    cs = cairo_xlib_surface_create(server.dsp, p->area.pix, server.visual,
-                                   p->area.width, p->area.height);
+    cs = cairo_xlib_surface_create(server.dsp, p->pix, server.visual,
+                                   p->width, p->height);
     c = cairo_create(cs);
-    draw_background(&p->area, c);
+    draw_background(p, c);
     cairo_destroy(c);
     cairo_surface_destroy(cs);
 
@@ -647,7 +651,7 @@ void set_panel_background(Panel* p) {
 
         p->hidden_pixmap = XCreatePixmap(server.dsp, server.root_win, p->hidden_width,
                                          p->hidden_height, server.depth);
-        XCopyArea(server.dsp, p->area.pix, p->hidden_pixmap, server.gc, xoff, yoff,
+        XCopyArea(server.dsp, p->pix, p->hidden_pixmap, server.gc, xoff, yoff,
                   p->hidden_width, p->hidden_height, 0, 0);
     }
 
@@ -655,7 +659,7 @@ void set_panel_background(Panel* p) {
     GSList* l0;
     Area* a;
 
-    for (l0 = p->area.list; l0 ; l0 = l0->next) {
+    for (l0 = p->list; l0 ; l0 = l0->next) {
         a = static_cast<Area*>(l0->data);
         set_redraw(a);
     }
@@ -812,13 +816,13 @@ LauncherIcon* click_launcher_icon(Panel* panel, int x, int y) {
 
 int click_padding(Panel* panel, int x, int y) {
     if (panel_horizontal) {
-        if (x < panel->area.paddingxlr
-            || x > panel->area.width - panel->area.paddingxlr) {
+        if (x < panel->paddingxlr
+            || x > panel->width - panel->paddingxlr) {
             return 1;
         }
     } else {
-        if (y < panel->area.paddingxlr
-            || y > panel->area.height - panel->area.paddingxlr) {
+        if (y < panel->paddingxlr
+            || y > panel->height - panel->paddingxlr) {
             return 1;
         }
     }
@@ -847,7 +851,7 @@ int click_clock(Panel* panel, int x, int y) {
 
 
 Area* click_area(Panel* panel, int x, int y) {
-    Area* result = &panel->area;
+    Area* result = panel;
     Area* new_result = result;
 
     do {
@@ -892,19 +896,19 @@ void autohide_show(void* p) {
 
     if (panel_horizontal) {
         if (panel_position & TOP) {
-            XResizeWindow(server.dsp, panel->main_win, panel->area.width,
-                          panel->area.height);
+            XResizeWindow(server.dsp, panel->main_win, panel->width,
+                          panel->height);
         } else {
             XMoveResizeWindow(server.dsp, panel->main_win, panel->posx, panel->posy,
-                              panel->area.width, panel->area.height);
+                              panel->width, panel->height);
         }
     } else {
         if (panel_position & LEFT) {
-            XResizeWindow(server.dsp, panel->main_win, panel->area.width,
-                          panel->area.height);
+            XResizeWindow(server.dsp, panel->main_win, panel->width,
+                          panel->height);
         } else {
             XMoveResizeWindow(server.dsp, panel->main_win, panel->posx, panel->posy,
-                              panel->area.width, panel->area.height);
+                              panel->width, panel->height);
         }
     }
 
@@ -924,7 +928,7 @@ void autohide_hide(void* p) {
     }
 
     XUnmapSubwindows(server.dsp, panel->main_win);  // systray windows
-    int diff = (panel_horizontal ? panel->area.height : panel->area.width) -
+    int diff = (panel_horizontal ? panel->height : panel->width) -
                panel_autohide_height;
 
     //printf("autohide_hide : diff %d, w %d, h %d\n", diff, panel->hidden_width, panel->hidden_height);

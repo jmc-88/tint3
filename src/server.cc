@@ -251,7 +251,10 @@ void* server_get_property(Window win, Atom at, Atom type, int* num_results) {
 
 void get_root_pixmap() {
     Pixmap ret = None;
-    Atom pixmap_atoms[] = { server.atom._XROOTPMAP_ID, server.atom._XROOTMAP_ID };
+    Atom pixmap_atoms[] = {
+        server.atom._XROOTPMAP_ID,
+        server.atom._XROOTMAP_ID
+    };
     int i;
 
     for (i = 0; i < sizeof(pixmap_atoms) / sizeof(Atom); ++i) {
@@ -433,15 +436,14 @@ void get_desktops() {
 
 void server_init_visual() {
     // inspired by freedesktops fdclock ;)
-    XVisualInfo* xvi;
-    XVisualInfo templ = {
-        .screen = server.screen,
-        .depth = 32,
-        .c_class = TrueColor
-    };
+    XVisualInfo templ;
+    templ.screen = server.screen;
+    templ.depth = 32;
+    templ.c_class = TrueColor;
+
     int nvi;
-    xvi = XGetVisualInfo(server.dsp,
-                         VisualScreenMask | VisualDepthMask | VisualClassMask, &templ, &nvi);
+    auto xvi = XGetVisualInfo(server.dsp,
+            VisualScreenMask | VisualDepthMask | VisualClassMask, &templ, &nvi);
 
     Visual* visual = 0;
 

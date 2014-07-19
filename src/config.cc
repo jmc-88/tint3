@@ -37,19 +37,19 @@
 
 #include "server.h"
 #include "panel.h"
-#include "task.h"
-#include "taskbar.h"
-#include "taskbarname.h"
 #include "systraybar.h"
-#include "launcher.h"
 #include "clock.h"
 #include "config.h"
-#include "window.h"
-#include "tooltip.h"
-#include "timer.h"
+#include "launcher/launcher.h"
+#include "taskbar/task.h"
+#include "taskbar/taskbar.h"
+#include "taskbar/taskbarname.h"
+#include "tooltip/tooltip.h"
+#include "util/window.h"
+#include "util/timer.h"
 
 #ifdef ENABLE_BATTERY
-#include "battery.h"
+#include "battery/battery.h"
 #endif
 
 // global path
@@ -175,14 +175,13 @@ void add_entry(char* key, char* value) {
     /* Background and border */
     if (strcmp(key, "rounded") == 0) {
         // 'rounded' is the first parameter => alloc a new background
-        Background bg;
-        bg.border.rounded = atoi(value);
-        g_array_append_val(backgrounds, bg);
+        auto bg = new Background();
+        bg->border.rounded = atoi(value);
+        backgrounds.push_back(bg);
     } else if (strcmp(key, "border_width") == 0) {
-        g_array_index(backgrounds, Background,
-                      backgrounds->len - 1).border.width = atoi(value);
+        backgrounds.back()->border.width = atoi(value);
     } else if (strcmp(key, "background_color") == 0) {
-        Background* bg = &g_array_index(backgrounds, Background, backgrounds->len - 1);
+        auto bg = backgrounds.back();
         extract_values(value, &value1, &value2, &value3);
         get_color(value1, bg->back.color);
 
@@ -192,7 +191,7 @@ void add_entry(char* key, char* value) {
             bg->back.alpha = 0.5;
         }
     } else if (strcmp(key, "border_color") == 0) {
-        Background* bg = &g_array_index(backgrounds, Background, backgrounds->len - 1);
+        auto bg = backgrounds.back();
         extract_values(value, &value1, &value2, &value3);
         get_color(value1, bg->border.color);
 
@@ -216,11 +215,11 @@ void add_entry(char* key, char* value) {
             panel_config.pourcentx = 1;
         }
 
-        panel_config.area.width = atoi(value1);
+        panel_config.width = atoi(value1);
 
-        if (panel_config.area.width == 0) {
+        if (panel_config.width == 0) {
             // full width mode
-            panel_config.area.width = 100;
+            panel_config.width = 100;
             panel_config.pourcentx = 1;
         }
 
@@ -230,7 +229,7 @@ void add_entry(char* key, char* value) {
                 panel_config.pourcenty = 1;
             }
 
-            panel_config.area.height = atoi(value2);
+            panel_config.height = atoi(value2);
         }
     } else if (strcmp(key, "panel_items") == 0) {
         new_config_file = 1;
@@ -274,14 +273,14 @@ void add_entry(char* key, char* value) {
         }
     } else if (strcmp(key, "panel_padding") == 0) {
         extract_values(value, &value1, &value2, &value3);
-        panel_config.area.paddingxlr = panel_config.area.paddingx = atoi(value1);
+        panel_config.paddingxlr = panel_config.paddingx = atoi(value1);
 
         if (value2) {
-            panel_config.area.paddingy = atoi(value2);
+            panel_config.paddingy = atoi(value2);
         }
 
         if (value3) {
-            panel_config.area.paddingx = atoi(value3);
+            panel_config.paddingx = atoi(value3);
         }
     } else if (strcmp(key, "panel_position") == 0) {
         extract_values(value, &value1, &value2, &value3);
@@ -323,8 +322,8 @@ void add_entry(char* key, char* value) {
         panel_config.g_task.font_shadow = atoi(value);
     } else if (strcmp(key, "panel_background_id") == 0) {
         int id = atoi(value);
-        id = (id < backgrounds->len && id >= 0) ? id : 0;
-        panel_config.area.bg = &g_array_index(backgrounds, Background, id);
+        id = (id >= 0 && id < backgrounds.size()) ? id : 0;
+        panel_config.bg = backgrounds[id];
     } else if (strcmp(key, "wm_menu") == 0) {
         wm_menu = atoi(value);
     } else if (strcmp(key, "panel_dock") == 0) {
@@ -397,8 +396,8 @@ void add_entry(char* key, char* value) {
     } else if (strcmp(key, "battery_background_id") == 0) {
 #ifdef ENABLE_BATTERY
         int id = atoi(value);
-        id = (id < backgrounds->len && id >= 0) ? id : 0;
-        panel_config.battery.area.bg = &g_array_index(backgrounds, Background, id);
+        id = (id >= 0 && id < backgrounds.size()) ? id : 0;
+        panel_config.battery.area.bg = backgrounds[id];
 #endif
     } else if (strcmp(key, "battery_hide") == 0) {
 #ifdef ENABLE_BATTERY
@@ -468,8 +467,8 @@ void add_entry(char* key, char* value) {
         }
     } else if (strcmp(key, "clock_background_id") == 0) {
         int id = atoi(value);
-        id = (id < backgrounds->len && id >= 0) ? id : 0;
-        panel_config.clock.area.bg = &g_array_index(backgrounds, Background, id);
+        id = (id >= 0 && id < backgrounds.size()) ? id : 0;
+        panel_config.clock.area.bg = backgrounds[id];
     } else if (strcmp(key, "clock_tooltip") == 0) {
         if (strlen(value) > 0) {
             time_tooltip_format = strdup(value);
@@ -509,9 +508,8 @@ void add_entry(char* key, char* value) {
         }
     } else if (strcmp(key, "taskbar_background_id") == 0) {
         int id = atoi(value);
-        id = (id < backgrounds->len && id >= 0) ? id : 0;
-        panel_config.g_taskbar.background[TASKBAR_NORMAL] = &g_array_index(backgrounds,
-                Background, id);
+        id = (id >= 0 && id < backgrounds.size()) ? id : 0;
+        panel_config.g_taskbar.background[TASKBAR_NORMAL] = backgrounds[id];
 
         if (panel_config.g_taskbar.background[TASKBAR_ACTIVE] == 0) {
             panel_config.g_taskbar.background[TASKBAR_ACTIVE] =
@@ -519,9 +517,8 @@ void add_entry(char* key, char* value) {
         }
     } else if (strcmp(key, "taskbar_active_background_id") == 0) {
         int id = atoi(value);
-        id = (id < backgrounds->len && id >= 0) ? id : 0;
-        panel_config.g_taskbar.background[TASKBAR_ACTIVE] = &g_array_index(backgrounds,
-                Background, id);
+        id = (id >= 0 && id < backgrounds.size()) ? id : 0;
+        panel_config.g_taskbar.background[TASKBAR_ACTIVE] = backgrounds[id];
     } else if (strcmp(key, "taskbar_name") == 0) {
         taskbarname_enabled = atoi(value);
     } else if (strcmp(key, "taskbar_name_padding") == 0) {
@@ -530,9 +527,8 @@ void add_entry(char* key, char* value) {
             panel_config.g_taskbar.area_name.paddingx = atoi(value1);
     } else if (strcmp(key, "taskbar_name_background_id") == 0) {
         int id = atoi(value);
-        id = (id < backgrounds->len && id >= 0) ? id : 0;
-        panel_config.g_taskbar.background_name[TASKBAR_NORMAL] = &g_array_index(
-                    backgrounds, Background, id);
+        id = (id >= 0 && id < backgrounds.size()) ? id : 0;
+        panel_config.g_taskbar.background_name[TASKBAR_NORMAL] = backgrounds[id];
 
         if (panel_config.g_taskbar.background_name[TASKBAR_ACTIVE] == 0) {
             panel_config.g_taskbar.background_name[TASKBAR_ACTIVE] =
@@ -540,9 +536,8 @@ void add_entry(char* key, char* value) {
         }
     } else if (strcmp(key, "taskbar_name_active_background_id") == 0) {
         int id = atoi(value);
-        id = (id < backgrounds->len && id >= 0) ? id : 0;
-        panel_config.g_taskbar.background_name[TASKBAR_ACTIVE] = &g_array_index(
-                    backgrounds, Background, id);
+        id = (id >= 0 && id < backgrounds.size()) ? id : 0;
+        panel_config.g_taskbar.background_name[TASKBAR_ACTIVE] = backgrounds[id];
     } else if (strcmp(key, "taskbar_name_font") == 0) {
         taskbarname_font_desc = pango_font_description_from_string(value);
     } else if (strcmp(key, "taskbar_name_font_color") == 0) {
@@ -626,9 +621,8 @@ void add_entry(char* key, char* value) {
         int status = get_task_status(split[1]);
         g_strfreev(split);
         int id = atoi(value);
-        id = (id < backgrounds->len && id >= 0) ? id : 0;
-        panel_config.g_task.background[status] = &g_array_index(backgrounds, Background,
-                id);
+        id = (id >= 0 && id < backgrounds.size()) ? id : 0;
+        panel_config.g_task.background[status] = backgrounds[id];
         panel_config.g_task.config_background_mask |= (1 << status);
 
         if (status == TASK_NORMAL) {
@@ -666,8 +660,8 @@ void add_entry(char* key, char* value) {
         }
     } else if (strcmp(key, "systray_background_id") == 0) {
         int id = atoi(value);
-        id = (id < backgrounds->len && id >= 0) ? id : 0;
-        systray.area.bg = &g_array_index(backgrounds, Background, id);
+        id = (id >= 0 && id < backgrounds.size()) ? id : 0;
+        systray.area.bg = backgrounds[id];
     } else if (strcmp(key, "systray_sort") == 0) {
         if (strcmp(value, "descending") == 0) {
             systray.sort = -1;
@@ -702,8 +696,8 @@ void add_entry(char* key, char* value) {
         }
     } else if (strcmp(key, "launcher_background_id") == 0) {
         int id = atoi(value);
-        id = (id < backgrounds->len && id >= 0) ? id : 0;
-        panel_config.launcher.area.bg = &g_array_index(backgrounds, Background, id);
+        id = (id >= 0 && id < backgrounds.size()) ? id : 0;
+        panel_config.launcher.area.bg = backgrounds[id];
     } else if (strcmp(key, "launcher_icon_size") == 0) {
         launcher_max_icon_size = atoi(value);
     } else if (strcmp(key, "launcher_item_app") == 0) {
@@ -743,8 +737,8 @@ void add_entry(char* key, char* value) {
         }
     } else if (strcmp(key, "tooltip_background_id") == 0) {
         int id = atoi(value);
-        id = (id < backgrounds->len && id >= 0) ? id : 0;
-        g_tooltip.bg = &g_array_index(backgrounds, Background, id);
+        id = (id >= 0 && id < backgrounds.size()) ? id : 0;
+        g_tooltip.bg = backgrounds[id];
     } else if (strcmp(key, "tooltip_font_color") == 0) {
         extract_values(value, &value1, &value2, &value3);
         get_color(value1, g_tooltip.font_color.color);

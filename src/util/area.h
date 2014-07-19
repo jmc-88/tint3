@@ -49,7 +49,9 @@ typedef struct {
 // SIZE_BY_CONTENT objects : clock, battery, launcher, systray
 enum { SIZE_BY_LAYOUT, SIZE_BY_CONTENT };
 
-typedef struct {
+class Panel;
+class Area {
+public:
     // coordinate relative to panel window
     int posx, posy;
     // width and height including border
@@ -73,9 +75,9 @@ typedef struct {
     // paddingx = horizontal padding between childs
     int paddingxlr, paddingx, paddingy;
     // parent Area
-    void* parent;
+    Area* parent;
     // panel
-    void* panel;
+    Panel* panel;
 
     // each object can overwrite following function
     void (*_draw_foreground)(void* obj, cairo_t* c);
@@ -86,7 +88,7 @@ typedef struct {
     int on_changed;
     void (*_on_change_layout)(void* obj);
     const char* (*_get_tooltip_text)(void* obj);
-} Area;
+};
 
 // on startup, initialize fixed pos/size
 void init_rendering(void* obj, int pos);

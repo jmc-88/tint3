@@ -68,7 +68,7 @@ void init_tooltip() {
     }
 
     if (g_tooltip.bg == 0) {
-        g_tooltip.bg = &g_array_index(backgrounds, Background, 0);
+        g_tooltip.bg = backgrounds.front();
     }
 
     XSetWindowAttributes attr;
@@ -155,9 +155,9 @@ void tooltip_update_geometry() {
     if (panel_horizontal && panel_position & BOTTOM) {
         y = panel->posy - height;
     } else if (panel_horizontal && panel_position & TOP) {
-        y = panel->posy + panel->area.height;
+        y = panel->posy + panel->height;
     } else if (panel_position & LEFT) {
-        x = panel->posx + panel->area.width;
+        x = panel->posx + panel->width;
     } else {
         x = panel->posx - width;
     }
@@ -188,23 +188,13 @@ void tooltip_adjust_geometry() {
     if (panel_horizontal) {
         min_x = 0;
         max_width = server.monitor[panel->monitor].width;
-        max_height = server.monitor[panel->monitor].height - panel->area.height;
-
-        if (panel_position & BOTTOM) {
-            min_y = 0;
-        } else {
-            min_y = panel->area.height;
-        }
+        max_height = server.monitor[panel->monitor].height - panel->height;
+        min_y = (panel_position & BOTTOM) ? 0 : panel->height;
     } else {
-        max_width = server.monitor[panel->monitor].width - panel->area.width;
+        max_width = server.monitor[panel->monitor].width - panel->width;
         min_y = 0;
         max_height = server.monitor[panel->monitor].height;
-
-        if (panel_position & LEFT) {
-            min_x = panel->area.width;
-        } else {
-            min_x = 0;
-        }
+        min_x = (panel_position & LEFT) ? panel->width : 0;
     }
 
     if (x + width > server.monitor[panel->monitor].x +

@@ -76,11 +76,11 @@ void init_launcher() {
 
 
 void init_launcher_panel(void* p) {
-    Panel* panel = (Panel*)p;
+    Panel* panel = static_cast<Panel*>(p);
     Launcher* launcher = &panel->launcher;
 
-    launcher->area.parent = p;
-    launcher->area.panel = p;
+    launcher->area.parent = static_cast<Area*>(p);
+    launcher->area.panel = panel;
     launcher->area._draw_foreground = NULL;
     launcher->area.size_mode = SIZE_BY_CONTENT;
     launcher->area._resize = resize_launcher;
@@ -88,7 +88,7 @@ void init_launcher_panel(void* p) {
     launcher->area.redraw = 1;
 
     if (launcher->area.bg == 0) {
-        launcher->area.bg = &g_array_index(backgrounds, Background, 0);
+        launcher->area.bg = backgrounds.front();
     }
 
     // check consistency
@@ -862,14 +862,14 @@ void launcher_load_icons(Launcher* launcher) {
         if (entry.exec) {
             LauncherIcon* launcherIcon = (LauncherIcon*) malloc(sizeof(LauncherIcon));
             memset(&launcherIcon, 0, sizeof(LauncherIcon));
-            launcherIcon->area.parent = launcher;
+            launcherIcon->area.parent = reinterpret_cast<Area*>(launcher);
             launcherIcon->area.panel = launcher->area.panel;
             launcherIcon->area._draw_foreground = draw_launcher_icon;
             launcherIcon->area.size_mode = SIZE_BY_CONTENT;
             launcherIcon->area._resize = NULL;
             launcherIcon->area.resize = 0;
             launcherIcon->area.redraw = 1;
-            launcherIcon->area.bg = &g_array_index(backgrounds, Background, 0);
+            launcherIcon->area.bg = backgrounds.front();
             launcherIcon->area.on_screen = 1;
             launcherIcon->area._on_change_layout = launcher_icon_on_change_layout;
 

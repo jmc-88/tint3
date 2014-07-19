@@ -47,7 +47,7 @@ PangoFontDescription* bat2_font_desc;
 struct batstate battery_state;
 int battery_enabled;
 int percentage_hide;
-static timeout* battery_timeout;
+static Timeout* battery_timeout;
 
 static char buf_bat_percentage[10];
 static char buf_bat_time[20];
@@ -274,7 +274,7 @@ void init_battery() {
 
 
 void init_battery_panel(void* p) {
-    Panel* panel = (Panel*)p;
+    Panel* panel = static_cast<Panel*>(p);
     Battery* battery = &panel->battery;
 
     if (!battery_enabled) {
@@ -282,11 +282,11 @@ void init_battery_panel(void* p) {
     }
 
     if (battery->area.bg == 0) {
-        battery->area.bg = &g_array_index(backgrounds, Background, 0);
+        battery->area.bg = backgrounds.front();
     }
 
-    battery->area.parent = p;
-    battery->area.panel = p;
+    battery->area.parent = panel;
+    battery->area.panel = panel;
     battery->area._draw_foreground = draw_battery;
     battery->area.size_mode = SIZE_BY_CONTENT;
     battery->area._resize = resize_battery;
@@ -546,10 +546,10 @@ int resize_battery(void* obj) {
     }
 
     get_text_size2(bat1_font_desc, &bat_percentage_height_ink,
-                   &bat_percentage_height, &bat_percentage_width, panel->area.height,
-                   panel->area.width, buf_bat_percentage, strlen(buf_bat_percentage));
+                   &bat_percentage_height, &bat_percentage_width, panel->height,
+                   panel->width, buf_bat_percentage, strlen(buf_bat_percentage));
     get_text_size2(bat2_font_desc, &bat_time_height_ink, &bat_time_height,
-                   &bat_time_width, panel->area.height, panel->area.width, buf_bat_time,
+                   &bat_time_width, panel->height, panel->width, buf_bat_time,
                    strlen(buf_bat_time));
 
     if (panel_horizontal) {

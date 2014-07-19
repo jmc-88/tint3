@@ -20,7 +20,7 @@
 
 #include "task.h"
 #include "panel.h"
-#include "timer.h"
+#include "util/timer.h"
 
 
 typedef struct {
@@ -36,7 +36,7 @@ typedef struct {
     PangoFontDescription* font_desc;
     Color font_color;
     Background* bg;
-    timeout* timeout;
+    Timeout* timeout;
 } Tooltip;
 
 extern Tooltip g_tooltip;

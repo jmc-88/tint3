@@ -90,12 +90,11 @@ void init_rendering(void* obj, int pos) {
 
 
 void rendering(void* obj) {
-    Panel* panel = static_cast<Panel*>(obj);
+    Area* panel = static_cast<Area*>(obj);
 
-    size_by_content(&panel->area);
-    size_by_layout(&panel->area, 0, 1);
-
-    refresh(&panel->area);
+    size_by_content(panel);
+    size_by_layout(panel, 0, 1);
+    refresh(panel);
 }
 
 

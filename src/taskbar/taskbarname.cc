@@ -57,7 +57,7 @@ void init_taskbarname_panel(void* p) {
     for (int j = 0; j < panel->nb_desktop; ++j) {
         Taskbar* tskbar = &panel->taskbar[j];
         memcpy(&tskbar->bar_name.area, &panel->g_taskbar.area_name, sizeof(Area));
-        tskbar->bar_name.area.parent = tskbar;
+        tskbar->bar_name.area.parent = reinterpret_cast<Area*>(tskbar);
 
         if (j == server.desktop) {
             tskbar->bar_name.area.bg = panel->g_taskbar.background_name[TASKBAR_ACTIVE];
@@ -116,7 +116,7 @@ void cleanup_taskbarname() {
 
 void draw_taskbarname(void* obj, cairo_t* c) {
     Taskbarname* taskbar_name = static_cast<Taskbarname*>(obj);
-    Taskbar* taskbar = static_cast<Taskbar*>(taskbar_name->area.parent);
+    Taskbar* taskbar = reinterpret_cast<Taskbar*>(taskbar_name->area.parent);
     Color* config_text = (taskbar->desktop == server.desktop)
                          ? &taskbarname_active_font
                          : &taskbarname_font;
@@ -155,7 +155,7 @@ int resize_taskbarname(void* obj) {
     get_text_size2(
         taskbarname_font_desc,
         &name_height_ink, &name_height, &name_width,
-        panel->area.height, panel->area.width, taskbar_name->name,
+        panel->height, panel->width, taskbar_name->name,
         strlen(taskbar_name->name));
 
     if (panel_horizontal) {

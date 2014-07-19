@@ -24,8 +24,17 @@
 extern GSList* timeout_list;
 extern struct timeval next_timeout;
 
+struct _multi_timeout;
+typedef struct _multi_timeout MultiTimeout;
 
-typedef struct _timeout timeout;
+typedef struct {
+    int interval_msec;
+    struct timespec timeout_expires;
+    void (*_callback)(void*);
+    void* arg;
+    MultiTimeout* multi_timeout;
+} Timeout;
+
 
 
 // timer functions
@@ -46,15 +55,15 @@ void cleanup_timeout();
   * 'interval_msec'. '_callback' is the callback function when the timer reaches the timeout.
   * returns a pointer to the timeout, which is needed for stopping it again
 **/
-timeout* add_timeout(int value_msec, int interval_msec,
+Timeout* add_timeout(int value_msec, int interval_msec,
                      void (*_callback)(void*), void* arg);
 
 /** changes timeout 't'. If timeout 't' does not exist, nothing happens **/
-void change_timeout(timeout* t, int value_msec, int interval_msec,
+void change_timeout(Timeout* t, int value_msec, int interval_msec,
                     void (*_callback)(void*), void* arg);
 
 /** stops the timeout 't' **/
-void stop_timeout(timeout* t);
+void stop_timeout(Timeout* t);
 
 /** update_next_timeout updates next_timeout to the value, when the next installed timeout will expire **/
 void update_next_timeout();

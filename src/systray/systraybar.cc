@@ -95,11 +95,11 @@ void init_systray() {
 
 
 void init_systray_panel(void* p) {
-    systray.area.parent = p;
-    systray.area.panel = p;
+    systray.area.parent = static_cast<Area*>(p);
+    systray.area.panel = static_cast<Panel*>(p);
 
     if (systray.area.bg == 0) {
-        systray.area.bg = &g_array_index(backgrounds, Background, 0);
+        systray.area.bg = backgrounds.front();
     }
 
     GSList* l;
@@ -203,7 +203,7 @@ void on_change_systray(void* obj) {
     Systraybar* sysbar = static_cast<Systraybar*>(obj);
     Panel* panel = static_cast<Panel*>(sysbar->area.panel);
     int i, posx, posy;
-    int start = panel->area.bg->border.width + panel->area.paddingy +
+    int start = panel->bg->border.width + panel->paddingy +
                 systray.area.bg->border.width + systray.area.paddingy + sysbar->marging / 2;
 
     if (panel_horizontal) {
