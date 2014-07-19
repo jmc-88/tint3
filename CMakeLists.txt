@@ -1,4 +1,4 @@
-project( tint2 )
+project( tint3 )
 cmake_minimum_required( VERSION 2.6 )
 
 include( FindPkgConfig )
@@ -14,7 +14,7 @@ pkg_check_modules( SN libstartup-notification-1.0>=0.12 )
 find_library( RT_LIBRARY rt )
 
 if( NOT X11_FOUND OR NOT PANGOCAIRO_FOUND OR NOT PANGO_FOUND OR NOT CAIRO_FOUND OR NOT GLIB2_FOUND OR NOT GOBJECT2_FOUND OR NOT IMLIB2_FOUND )
-  message( FATAL_ERROR "Not all dependencies fulfilled. See http://code.google.com/p/tint2/wiki/Install" )
+    message( FATAL_ERROR "Not all dependencies are satisfied. See README.source." )
 endif( NOT X11_FOUND OR NOT PANGOCAIRO_FOUND OR NOT PANGO_FOUND OR NOT CAIRO_FOUND OR NOT GLIB2_FOUND OR NOT GOBJECT2_FOUND OR NOT IMLIB2_FOUND )
 
 string( REPLACE ";" " " FLAGS_REPLACED "${IMLIB2_LDFLAGS}" )
@@ -40,7 +40,7 @@ include_directories( ${PROJECT_BINARY_DIR}
                      ${GLIB2_INCLUDE_DIRS}
                      ${GOBJECT2_INCLUDE_DIRS}
                      ${IMLIB2_INCLUDE_DIRS}
-		     ${SN_INCLUDE_DIRS} )
+             ${SN_INCLUDE_DIRS} )
 
 set( SOURCES src/config.cc
              src/panel.cc
@@ -77,7 +77,7 @@ endif( ENABLE_BATTERY )
 set( MANDIR share/man CACHE PATH "Directory for man pages" )
 set( DATADIR share CACHE PATH "Directory for shared data" )
 set( SYSCONFDIR /etc CACHE PATH "Directory for configuration files" )
-set( DOCDIR share/doc/tint2 CACHE PATH "Directory for documentation files" )
+set( DOCDIR share/doc/tint3 CACHE PATH "Directory for documentation files" )
 
 add_custom_target( version ALL "${PROJECT_SOURCE_DIR}/get_svnrev.sh" "\"${PROJECT_SOURCE_DIR}\"" )
 
@@ -88,30 +88,30 @@ link_directories( ${X11_LIBRARY_DIRS}
                   ${GLIB2_LIBRARY_DIRS}
                   ${GOBJECT2_LIBRARY_DIRS}
                   ${IMLIB2_LIBRARY_DIRS}
-		  ${SN_LIBRARY_DIRS} )
-add_executable(tint2 ${SOURCES})
-target_link_libraries( tint2 ${X11_LIBRARIES}
+          ${SN_LIBRARY_DIRS} )
+add_executable(tint3 ${SOURCES})
+target_link_libraries( tint3 ${X11_LIBRARIES}
                              ${PANGOCAIRO_LIBRARIES}
                              ${PANGO_LIBRARIES}
                              ${CAIRO_LIBRARIES}
                              ${GLIB2_LIBRARIES}
                              ${GOBJECT2_LIBRARIES}
                              ${IMLIB2_LIBRARIES}
-			     ${SN_LIBRARIES} )
+                 ${SN_LIBRARIES} )
 if( RT_LIBRARY )
-  target_link_libraries( tint2 ${RT_LIBRARY} )
+  target_link_libraries( tint3 ${RT_LIBRARY} )
 endif( RT_LIBRARY )
 
-add_dependencies( tint2 version )
-set_target_properties( tint2 PROPERTIES COMPILE_FLAGS "-Wall -pthread" )
-set_target_properties(tint2 PROPERTIES LINK_FLAGS "-pthread" )
+add_dependencies( tint3 version )
+set_target_properties(tint3 PROPERTIES COMPILE_FLAGS "-Wall -pthread")
+set_target_properties(tint3 PROPERTIES LINK_FLAGS "-pthread")
 
-install( TARGETS tint2 DESTINATION bin )
-install( FILES sample/tint2rc DESTINATION ${SYSCONFDIR}/xdg/tint2 )
-install( FILES default_icon.png DESTINATION ${DATADIR}/tint2 )
+install( TARGETS tint3 DESTINATION bin )
+install( FILES sample/tint3rc DESTINATION ${SYSCONFDIR}/xdg/tint3 )
+install( FILES default_icon.png DESTINATION ${DATADIR}/tint3 )
 install( FILES AUTHORS ChangeLog README DESTINATION ${DOCDIR} )
-install( FILES doc/tint2.1 DESTINATION ${MANDIR}/man1 )
+install( FILES doc/tint3.1 DESTINATION ${MANDIR}/man1 )
 if( ENABLE_EXAMPLES )
-  file( GLOB SAMPLEFILES sample/*.tint2rc )
+  file( GLOB SAMPLEFILES sample/*.tint3rc )
   install( FILES ${SAMPLEFILES} DESTINATION ${DOCDIR}/examples )
 endif( ENABLE_EXAMPLES )

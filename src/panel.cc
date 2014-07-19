@@ -34,7 +34,7 @@
 
 namespace {
 
-static char kClassHintName[]  = "tint2";
+static char kClassHintName[]  = "tint3";
 static char kClassHintClass[] = "Tint2";
 
 }
@@ -139,7 +139,7 @@ void init_panel()
 
     if (panel_config.monitor > (server.nb_monitor-1)) {
         // server.nb_monitor minimum value is 1 (see get_monitors())
-        fprintf(stderr, "warning : monitor not found. tint2 default to all monitors.\n");
+        fprintf(stderr, "warning : monitor not found. tint3 default to all monitors.\n");
         panel_config.monitor = 0;
     }
 
@@ -163,7 +163,7 @@ void init_panel()
         memcpy(&panel1[i], &panel_config, sizeof(Panel));
     }
 
-    fprintf(stderr, "tint2 : nb monitor %d, nb monitor used %d, nb desktop %d\n", server.nb_monitor, nb_panel, server.nb_desktop);
+    fprintf(stderr, "tint3 : nb monitor %d, nb monitor used %d, nb desktop %d\n", server.nb_monitor, nb_panel, server.nb_desktop);
     for (i=0 ; i < nb_panel ; i++) {
         p = &panel1[i];
 
@@ -249,7 +249,7 @@ void init_panel_size_and_position(Panel *panel)
         if (panel->area.width + panel->marginx > server.monitor[panel->monitor].width)
             panel->area.width = server.monitor[panel->monitor].width - panel->marginx;
         if (panel->area.bg->border.rounded > panel->area.height/2) {
-            printf("panel_background_id rounded is too big... please fix your tint2rc\n");
+            printf("panel_background_id rounded is too big... please fix your tint3rc\n");
             g_array_append_val(backgrounds, *panel->area.bg);
             panel->area.bg = &g_array_index(backgrounds, Background, backgrounds->len-1);
             panel->area.bg->border.rounded = panel->area.height/2;
@@ -268,7 +268,7 @@ void init_panel_size_and_position(Panel *panel)
         if (panel->area.height + panel->marginy > server.monitor[panel->monitor].height)
             panel->area.height = server.monitor[panel->monitor].height - panel->marginy;
         if (panel->area.bg->border.rounded > panel->area.width/2) {
-            printf("panel_background_id rounded is too big... please fix your tint2rc\n");
+            printf("panel_background_id rounded is too big... please fix your tint3rc\n");
             g_array_append_val(backgrounds, *panel->area.bg);
             panel->area.bg = &g_array_index(backgrounds, Background, backgrounds->len-1);
             panel->area.bg->border.rounded = panel->area.width/2;
@@ -428,10 +428,10 @@ void set_panel_items_order(Panel *p)
 
 void set_panel_properties(Panel *p)
 {
-    XStoreName (server.dsp, p->main_win, "tint2");
+    XStoreName (server.dsp, p->main_win, "tint3");
 
     gsize len;
-    gchar *name = g_locale_to_utf8("tint2", -1, NULL, &len, NULL);
+    gchar *name = g_locale_to_utf8("tint3", -1, NULL, &len, NULL);
     if (name != NULL) {
         XChangeProperty(server.dsp, p->main_win, server.atom._NET_WM_NAME, server.atom.UTF8_STRING, 8, PropModeReplace, (unsigned char *) name, (int) len);
         g_free(name);
@@ -475,7 +475,7 @@ void set_panel_properties(Panel *p)
     update_strut(p);
 
     // Fixed position and non-resizable window
-    // Allow panel move and resize when tint2 reload config file
+    // Allow panel move and resize when tint3 reload config file
     int minwidth = panel_autohide ? p->hidden_width : p->area.width;
     int minheight = panel_autohide ? p->hidden_height : p->area.height;
     XSizeHints size_hints;

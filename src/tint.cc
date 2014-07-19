@@ -86,11 +86,11 @@ void init (int argc, char *argv[])
     // read options
     for (i = 1; i < argc; ++i) {
         if (!strcmp(argv[i], "-h") || !strcmp(argv[i], "--help"))   {
-            printf("Usage: tint2 [-c] <config_file>\n");
+            printf("Usage: tint3 [-c] <config_file>\n");
             exit(0);
         }
         if (!strcmp(argv[i], "-v") || !strcmp(argv[i], "--version"))    {
-            printf("tint2 version %s\n", VERSION_STRING);
+            printf("tint3 version %s\n", VERSION_STRING);
             exit(0);
         }
         if (!strcmp(argv[i], "-c")) {
@@ -181,7 +181,7 @@ void init_X11()
 {
     server.dsp = XOpenDisplay (NULL);
     if (!server.dsp) {
-        fprintf(stderr, "tint2 exit : could not open display.\n");
+        fprintf(stderr, "tint3 exit : could not open display.\n");
         exit(0);
     }
     server_init_atoms ();
@@ -224,7 +224,7 @@ void init_X11()
     data_dirs = g_get_system_data_dirs ();
     int i;
     for (i = 0; data_dirs[i] != NULL; i++)  {
-        path = g_build_filename(data_dirs[i], "tint2", "default_icon.png", NULL);
+        path = g_build_filename(data_dirs[i], "tint3", "default_icon.png", NULL);
         if (g_file_test (path, G_FILE_TEST_EXISTS))
             default_icon = imlib_load_image(path);
         g_free(path);
@@ -348,7 +348,7 @@ void window_action (Task *tsk, int action)
 }
 
 
-int tint2_handles_click(Panel* panel, XButtonEvent* e)
+int tint3_handles_click(Panel* panel, XButtonEvent* e)
 {
     Task* task = click_task(panel, e->x, e->y);
     if (task) {
@@ -406,7 +406,7 @@ void event_button_press (XEvent *e)
     if (!panel) return;
 
 
-    if (wm_menu && !tint2_handles_click(panel, &e->xbutton) ) {
+    if (wm_menu && !tint3_handles_click(panel, &e->xbutton) ) {
         forward_click(e);
         return;
     }
@@ -478,7 +478,7 @@ void event_button_release (XEvent *e)
     Panel *panel = get_panel(e->xany.window);
     if (!panel) return;
 
-    if (wm_menu && !tint2_handles_click(panel, &e->xbutton)) {
+    if (wm_menu && !tint3_handles_click(panel, &e->xbutton)) {
         forward_click(e);
         if (panel_layer == BOTTOM_LAYER)
             XLowerWindow (server.dsp, panel->main_win);
@@ -1030,12 +1030,14 @@ start:
     init_X11();
 
     i = 0;
-    if (config_path)
-        i = config_read_file (config_path);
-    else
-        i = config_read ();
+    if (config_path) {
+        i = config_read_file(config_path);
+    } else {
+        i = config_read();
+    }
+
     if (!i) {
-        fprintf(stderr, "usage: tint2 [-c] <config_file>\n");
+        fprintf(stderr, "usage: tint3 [-c] <config_file>\n");
         cleanup();
         exit(1);
     }
@@ -1087,7 +1089,7 @@ start:
             panel = (Panel*)systray.area.panel;
             if (refresh_systray && panel && !panel->is_hidden) {
                 refresh_systray = 0;
-                // tint2 doen't draw systray icons. it just redraw background.
+                // tint3 doen't draw systray icons. it just redraw background.
                 XSetWindowBackgroundPixmap (server.dsp, panel->main_win, panel->temp_pmap);
                 // force icon's refresh
                 refresh_systray_icon();
@@ -1350,7 +1352,7 @@ start:
         if (signal_pending) {
             cleanup();
             if (signal_pending == SIGUSR1) {
-                // restart tint2
+                // restart tint3
                 // SIGUSR1 used when : user's signal, composite manager stop/start or xrandr
                 FD_CLR (x11_fd, &fdset); // not sure if needed
                 goto start;

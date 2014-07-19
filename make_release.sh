@@ -7,7 +7,7 @@ if [[ $# -ne 1 ]]; then
   exit
 fi
 
-DIR=tint2-${1}
+DIR=tint3-${1}
 echo "Making release ${DIR}"
 rm -Rf ${DIR}
 svn export . ${DIR} > /dev/null

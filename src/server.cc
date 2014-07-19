@@ -209,7 +209,7 @@ void get_root_pixmap()
     server.root_pmap = ret;
 
     if (server.root_pmap == None)
-        fprintf(stderr, "tint2 : pixmap background detection failed\n");
+        fprintf(stderr, "tint3 : pixmap background detection failed\n");
     else {
         XGCValues  gcv;
         gcv.ts_x_origin = 0;
@@ -354,7 +354,7 @@ void get_desktops()
     }
     if (server.nb_desktop == 0) {
         server.nb_desktop = 1;
-        fprintf(stderr, "warning : WM doesn't respect NETWM specs. tint2 default to 1 desktop.\n");
+        fprintf(stderr, "warning : WM doesn't respect NETWM specs. tint3 default to 1 desktop.\n");
     }
 }
 

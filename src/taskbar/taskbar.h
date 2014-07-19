@@ -27,7 +27,7 @@ typedef struct {
 	int  posy;
 } Taskbarname;
 
-// tint2 use one taskbar per desktop.
+// tint3 use one taskbar per desktop.
 typedef struct {
 	// always start with area
 	Area area;

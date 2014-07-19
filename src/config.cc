@@ -228,7 +228,7 @@ void add_entry (char *key, char *value)
 #ifdef ENABLE_BATTERY
                 battery_enabled = 1;
 #else
-                fprintf(stderr, "tint2 is build without battery support\n");
+                fprintf(stderr, "tint3 is build without battery support\n");
 #endif
             }
             if (panel_items_order[j] == 'S') {
@@ -603,7 +603,7 @@ void add_entry (char *key, char *value)
         panel_config.launcher.list_apps = g_slist_append(panel_config.launcher.list_apps, app);
     }
     else if (strcmp(key, "launcher_icon_theme") == 0) {
-        // if XSETTINGS manager running, tint2 use it.
+        // if XSETTINGS manager running, tint3 use it.
         if (!icon_theme_name)
             icon_theme_name = strdup(value);
     }
@@ -709,7 +709,7 @@ void add_entry (char *key, char *value)
         }
     }
     else
-        fprintf(stderr, "tint2 : invalid option \"%s\",\n  upgrade tint2 or correct your config file\n", key);
+        fprintf(stderr, "tint3 : invalid option \"%s\",\n  upgrade tint3 or correct your config file\n", key);
 
     if (value1) free (value1);
     if (value2) free (value2);
@@ -724,8 +724,8 @@ int config_read ()
     gint i;
 
     // follow XDG specification
-    // check tint2rc in user directory
-    path1 = g_build_filename (g_get_user_config_dir(), "tint2", "tint2rc", NULL);
+    // check tint3rc in user directory
+    path1 = g_build_filename (g_get_user_config_dir(), "tint3", "tint3rc", NULL);
     if (g_file_test (path1, G_FILE_TEST_EXISTS)) {
         i = config_read_file (path1);
         config_path = strdup(path1);
@@ -734,11 +734,11 @@ int config_read ()
     }
     g_free(path1);
 
-    // copy tint2rc from system directory to user directory
+    // copy tint3rc from system directory to user directory
     char *path2 = 0;
     system_dirs = g_get_system_config_dirs();
     for (i = 0; system_dirs[i]; i++) {
-        path2 = g_build_filename(system_dirs[i], "tint2", "tint2rc", NULL);
+        path2 = g_build_filename(system_dirs[i], "tint3", "tint3rc", NULL);
 
         if (g_file_test(path2, G_FILE_TEST_EXISTS)) break;
         g_free (path2);
@@ -747,11 +747,11 @@ int config_read ()
 
     if (path2) {
         // copy file in user directory (path1)
-        char *dir = g_build_filename (g_get_user_config_dir(), "tint2", NULL);
+        char *dir = g_build_filename (g_get_user_config_dir(), "tint3", NULL);
         if (!g_file_test (dir, G_FILE_TEST_IS_DIR)) g_mkdir(dir, 0777);
         g_free(dir);
 
-        path1 = g_build_filename (g_get_user_config_dir(), "tint2", "tint2rc", NULL);
+        path1 = g_build_filename (g_get_user_config_dir(), "tint3", "tint3rc", NULL);
         copy_file(path2, path1);
         g_free(path2);
 
@@ -795,6 +795,4 @@ int config_read_file (const char *path)
 
     return 1;
 }
-
-
 

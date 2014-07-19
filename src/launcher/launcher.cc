@@ -70,7 +70,7 @@ void default_launcher()
 void init_launcher()
 {
     if (launcher_enabled) {
-        // if XSETTINGS manager running, tint2 read the icon_theme_name.
+        // if XSETTINGS manager running, tint3 read the icon_theme_name.
         xsettings_client = xsettings_client_new(server.dsp, server.screen, xsettings_notify_cb, NULL, NULL);
     }
 }
@@ -344,7 +344,7 @@ void launcher_action(LauncherIcon *icon, XEvent* evt)
 
         ctx = sn_launcher_context_new(server.sn_dsp, server.screen);
         sn_launcher_context_set_name(ctx, icon->icon_tooltip);
-        sn_launcher_context_set_description(ctx, "Application launched from tint2");
+        sn_launcher_context_set_description(ctx, "Application launched from tint3");
         sn_launcher_context_set_binary_name (ctx, icon->cmd);
         // Get a timestamp from the X event
         if (evt->type == ButtonPress || evt->type == ButtonRelease) {
@@ -355,7 +355,7 @@ void launcher_action(LauncherIcon *icon, XEvent* evt)
             free(cmd);
             return;
         }
-        sn_launcher_context_initiate(ctx, "tint2", icon->cmd, time);
+        sn_launcher_context_initiate(ctx, "tint3", icon->cmd, time);
 #endif /* HAVE_SN */
     pid_t pid;
     pid = fork();

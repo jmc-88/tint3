@@ -33,12 +33,12 @@
  * !!! This design is experimental and not yet fully implemented !!!!!!!!!!!!!
  *
  * DATA ORGANISATION :
- * Areas in tint2 are similar to widgets in a GUI.
+ * Areas in tint3 are similar to widgets in a GUI.
  * All graphical objects (panel, taskbar, task, systray, clock, ...) 'inherit' an abstract class 'Area'.
  * This class 'Area' manage the background, border, size, position and padding.
  * Area is at the begining of each object (&object == &area).
  *
- * tint2 define one panel per monitor. And each panel have a tree of Area.
+ * tint3 define one panel per monitor. And each panel have a tree of Area.
  * The root of the tree is Panel.Area. And task, clock, systray, taskbar,... are nodes.
  *
  * The tree give the localisation of each object :

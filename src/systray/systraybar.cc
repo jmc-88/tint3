@@ -249,7 +249,7 @@ void start_net()
         _NET_WM_PID = XInternAtom(server.dsp, "_NET_WM_PID", True);
         int ret = XGetWindowProperty(server.dsp, win, _NET_WM_PID, 0, 1024, False, AnyPropertyType, &actual_type, &actual_format, &nitems, &bytes_after, &prop);
 
-        fprintf(stderr, "tint2 : another systray is running");
+        fprintf(stderr, "tint3 : another systray is running");
         if (ret == Success && prop) {
             pid = prop[1] * 256;
             pid += prop[0];
@@ -262,7 +262,7 @@ void start_net()
     // init systray protocol
     net_sel_win = XCreateSimpleWindow(server.dsp, server.root_win, -1, -1, 1, 1, 0, 0, 0);
 
-    // v0.3 trayer specification. tint2 always horizontal.
+    // v0.3 trayer specification. tint3 always horizontal.
     // Vertical panel will draw the systray horizontal.
     long orient = 0;
     XChangeProperty(server.dsp, net_sel_win, server.atom._NET_SYSTEM_TRAY_ORIENTATION, XA_CARDINAL, 32, PropModeReplace, (unsigned char *) &orient, 1);
@@ -276,11 +276,11 @@ void start_net()
     XSetSelectionOwner(server.dsp, server.atom._NET_SYSTEM_TRAY_SCREEN, net_sel_win, CurrentTime);
     if (XGetSelectionOwner(server.dsp, server.atom._NET_SYSTEM_TRAY_SCREEN) != net_sel_win) {
         stop_net();
-        fprintf(stderr, "tint2 : can't get systray manager\n");
+        fprintf(stderr, "tint3 : can't get systray manager\n");
         return;
     }
 
-    //fprintf(stderr, "tint2 : systray started\n");
+    //fprintf(stderr, "tint3 : systray started\n");
     XClientMessageEvent ev;
     ev.type = ClientMessage;
     ev.window = server.root_win;
@@ -297,7 +297,7 @@ void start_net()
 
 void stop_net()
 {
-    //fprintf(stderr, "tint2 : systray stopped\n");
+    //fprintf(stderr, "tint3 : systray stopped\n");
     if (systray.list_icons) {
         // remove_icon change systray.list_icons
         while(systray.list_icons)
@@ -381,7 +381,7 @@ gboolean add_icon(Window id)
     XSync(server.dsp, False);
     XSetErrorHandler(old);
     if (error != FALSE) {
-        fprintf(stderr, "tint2 : not icon_swallow\n");
+        fprintf(stderr, "tint3 : not icon_swallow\n");
         XDestroyWindow(server.dsp, parent_window);
         return FALSE;
     }
@@ -403,7 +403,7 @@ gboolean add_icon(Window id)
                 XFree(data);
             }
         } else {
-            fprintf(stderr, "tint2 : xembed error\n");
+            fprintf(stderr, "tint3 : xembed error\n");
             XDestroyWindow(server.dsp, parent_window);
             return FALSE;
         }
@@ -619,7 +619,7 @@ void systray_render_icon(TrayWindow* traywin)
     }
     else {
         // comment by andreas: I'm still not sure, what exactly we need to do here... Somehow trayicons which do not
-        // offer the same depth as tint2 does, need to draw a background pixmap, but this cannot be done with
+        // offer the same depth as tint3 does, need to draw a background pixmap, but this cannot be done with
         // XCopyArea... So we actually need XRenderComposite???
 //          Pixmap pix = XCreatePixmap(server.dsp, server.root_win, traywin->width, traywin->height, server.depth);
 //          XCopyArea(server.dsp, panel->temp_pmap, pix, server.gc, traywin->x, traywin->y, traywin->width, traywin->height, 0, 0);
