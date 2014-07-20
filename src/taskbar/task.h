@@ -48,10 +48,8 @@ public:
 
 
 
-typedef struct {
-    // always start with area
-    Area area;
-
+class Task : public Area {
+public:
     // TODO: group task with list of windows here
     Window win;
     int  desktop;
@@ -62,7 +60,7 @@ typedef struct {
     unsigned int icon_height;
     char* title;
     int urgent_tick;
-} Task;
+};
 
 
 Task* add_task(Window win);

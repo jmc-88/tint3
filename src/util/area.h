@@ -52,6 +52,8 @@ enum { SIZE_BY_LAYOUT, SIZE_BY_CONTENT };
 class Panel;
 class Area {
 public:
+    Area& clone(Area const&);
+
     // coordinate relative to panel window
     int posx, posy;
     // width and height including border

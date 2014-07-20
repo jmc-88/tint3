@@ -497,7 +497,7 @@ void event_button_motion_notify(XEvent* e) {
     Task* event_task = click_task(panel, e->xbutton.x, e->xbutton.y);
 
     // If the event takes place on the same taskbar as the task being dragged
-    if (event_taskbar == (Taskbar*)task_drag->area.parent) {
+    if (event_taskbar == (Taskbar*)task_drag->parent) {
         // Swap the task_drag with the task on the event's location (if they differ)
         if (event_task && event_task != task_drag) {
             GSList* drag_iter = g_slist_find(event_taskbar->area.list, task_drag);
@@ -517,7 +517,7 @@ void event_button_motion_notify(XEvent* e) {
             return;
         }
 
-        Taskbar* drag_taskbar = (Taskbar*)task_drag->area.parent;
+        Taskbar* drag_taskbar = (Taskbar*)task_drag->parent;
         drag_taskbar->area.list = g_slist_remove(drag_taskbar->area.list, task_drag);
 
         if (event_taskbar->area.posx > drag_taskbar->area.posx
@@ -530,7 +530,7 @@ void event_button_motion_notify(XEvent* e) {
         }
 
         // Move task to other desktop (but avoid the 'Window desktop changed' code in 'event_property_notify')
-        task_drag->area.parent = reinterpret_cast<Area*>(event_taskbar);
+        task_drag->parent = reinterpret_cast<Area*>(event_taskbar);
         task_drag->desktop = event_taskbar->desktop;
 
         windows_set_desktop(task_drag->win, event_taskbar->desktop);
@@ -757,7 +757,7 @@ void event_property_notify(XEvent* e) {
                         Task* tsk = static_cast<Task*>(l->data);
 
                         if (tsk->desktop == ALLDESKTOP) {
-                            tsk->area.on_screen = 0;
+                            tsk->on_screen = 0;
                             tskbar->area.resize = 1;
                             panel_refresh = 1;
                         }
@@ -775,7 +775,7 @@ void event_property_notify(XEvent* e) {
                     Task* tsk = static_cast<Task*>(l->data);
 
                     if (tsk->desktop == ALLDESKTOP) {
-                        tsk->area.on_screen = 1;
+                        tsk->on_screen = 1;
                         tskbar->area.resize = 1;
                     }
                 }
@@ -940,7 +940,7 @@ void event_configure_notify(Window win) {
         return;
     }
 
-    Panel* p = static_cast<Panel*>(tsk->area.panel);
+    Panel* p = tsk->panel;
 
     if (p->monitor != window_get_monitor(win)) {
         remove_task(tsk);

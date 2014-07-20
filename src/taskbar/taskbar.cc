@@ -397,7 +397,7 @@ int resize_taskbar(void* obj) {
         }
 
         if (l != NULL) {
-            text_width = ((Task*)l->data)->area.width;
+            text_width = ((Task*)l->data)->width;
         }
 
         taskbar->text_width = text_width - panel->g_task.text_posx -

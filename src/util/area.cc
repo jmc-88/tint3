@@ -29,6 +29,11 @@
 #include "panel.h"
 #include "../server.h"
 
+Area& Area::clone(Area const& other) {
+    *this = other;
+    return *this;
+}
+
 /************************************************************
  * !!! This design is experimental and not yet fully implemented !!!!!!!!!!!!!
  *

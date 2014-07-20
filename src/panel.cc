@@ -755,13 +755,13 @@ Task* click_task(Panel* panel, int x, int y) {
             Task* tsk = static_cast<Task*>(l0->data);
 
             if (panel_horizontal) {
-                if (tsk->area.on_screen && x >= tsk->area.posx
-                    && x <= (tsk->area.posx + tsk->area.width)) {
+                if (tsk->on_screen && x >= tsk->posx
+                    && x <= (tsk->posx + tsk->width)) {
                     return tsk;
                 }
             } else {
-                if (tsk->area.on_screen && y >= tsk->area.posy
-                    && y <= (tsk->area.posy + tsk->area.height)) {
+                if (tsk->on_screen && y >= tsk->posy
+                    && y <= (tsk->posy + tsk->height)) {
                     return tsk;
                 }
             }
