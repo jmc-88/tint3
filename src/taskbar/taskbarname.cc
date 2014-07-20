@@ -146,7 +146,7 @@ void draw_taskbarname(void* obj, cairo_t* c) {
 
 int resize_taskbarname(void* obj) {
     Taskbarname* taskbar_name = static_cast<Taskbarname*>(obj);
-    Panel* panel = static_cast<Panel*>(taskbar_name->panel);
+    Panel* panel = taskbar_name->panel;
     int ret = 0;
 
     taskbar_name->redraw = 1;

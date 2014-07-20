@@ -386,7 +386,7 @@ void draw_taskbar(void* obj, cairo_t* c) {
 
 int resize_taskbar(void* obj) {
     Taskbar* taskbar = static_cast<Taskbar*>(obj);
-    Panel* panel = static_cast<Panel*>(taskbar->panel);
+    Panel* panel = taskbar->panel;
     int text_width;
 
     //printf("resize_taskbar %d %d\n", taskbar->posx, taskbar->posy);

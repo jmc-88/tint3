@@ -182,15 +182,15 @@ void init_clock() {
 
 
 void init_clock_panel(void* p) {
-    Panel* panel = (Panel*)p;
+    Panel* panel = static_cast<Panel*>(p);
     Clock* clock = &panel->clock;
 
     if (clock->bg == 0) {
         clock->bg = backgrounds.front();
     }
 
-    clock->parent = static_cast<Area*>(p);
-    clock->panel = static_cast<Panel*>(p);
+    clock->parent = panel;
+    clock->panel = panel;
     clock->_draw_foreground = draw_clock;
     clock->size_mode = SIZE_BY_CONTENT;
     clock->_resize = resize_clock;
@@ -247,7 +247,7 @@ void draw_clock(void* obj, cairo_t* c) {
 
 int resize_clock(void* obj) {
     Clock* clock = static_cast<Clock*>(obj);
-    Panel* panel = static_cast<Panel*>(clock->panel);
+    Panel* panel = clock->panel;
     int time_height_ink, time_height, time_width, date_height_ink, date_height,
         date_width, ret = 0;
 

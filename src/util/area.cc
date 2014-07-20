@@ -123,7 +123,7 @@ void size_by_content(Area* a) {
         if (a->_resize) {
             if (a->_resize(a)) {
                 // 'size' changed => 'resize = 1' on the parent
-                static_cast<Area*>(a->parent)->resize = 1;
+                a->parent->resize = 1;
                 a->on_changed = 1;
             }
         }
@@ -234,7 +234,7 @@ void refresh(Area* a) {
 
     XCopyArea(
         server.dsp, a->pix,
-        static_cast<Panel*>(a->panel)->temp_pmap, server.gc, 0, 0,
+        a->panel->temp_pmap, server.gc, 0, 0,
         a->width, a->height, a->posx, a->posy);
 
     // and then refresh child object
@@ -368,7 +368,7 @@ void set_redraw(Area* a) {
 }
 
 void hide(Area* a) {
-    Area* parent = static_cast<Area*>(a->parent);
+    Area* parent = a->parent;
 
     a->on_screen = 0;
     parent->resize = 1;

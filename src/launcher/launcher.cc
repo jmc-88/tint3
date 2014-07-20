@@ -79,7 +79,7 @@ void init_launcher_panel(void* p) {
     Panel* panel = static_cast<Panel*>(p);
     Launcher* launcher = &panel->launcher;
 
-    launcher->parent = static_cast<Area*>(p);
+    launcher->parent = panel;
     launcher->panel = panel;
     launcher->_draw_foreground = NULL;
     launcher->size_mode = SIZE_BY_CONTENT;
@@ -636,23 +636,17 @@ void test_launcher_read_desktop_file() {
 }
 
 //TODO Use UTF8 when parsing the file
-IconTheme* load_theme(char* name) {
+IconTheme* load_theme(char const* name) {
     // Look for name/index.theme in $HOME/.icons, /usr/share/icons, /usr/share/pixmaps (stop at the first found)
     // Parse index.theme -> list of IconThemeDir with attributes
     // Return IconTheme*
-
-    IconTheme* theme;
-    char* file_name;
-    FILE* f;
-    char* line = NULL;
-    size_t line_size;
 
     if (name == NULL) {
         return NULL;
     }
 
-    file_name = g_build_filename(g_get_home_dir(), ".icons", name, "index.theme",
-                                 NULL);
+    auto file_name = g_build_filename(g_get_home_dir(), ".icons", name, "index.theme",
+            NULL);
 
     if (!g_file_test(file_name, G_FILE_TEST_EXISTS)) {
         g_free(file_name);
@@ -673,14 +667,15 @@ IconTheme* load_theme(char* name) {
         return NULL;
     }
 
-    if ((f = fopen(file_name, "rt")) == NULL) {
+    auto f = fopen(file_name, "rt");
+    if (f == NULL) {
         fprintf(stderr, "Could not open theme '%s'\n", file_name);
         return NULL;
     }
 
     g_free(file_name);
 
-    theme = (IconTheme*) malloc(sizeof(IconTheme));
+    auto theme = (IconTheme*) malloc(sizeof(IconTheme));
     memset(&theme, 0, sizeof(IconTheme));
     theme->name = strdup(name);
     theme->list_inherits = NULL;
@@ -689,9 +684,9 @@ IconTheme* load_theme(char* name) {
     IconThemeDir* current_dir = NULL;
     int inside_header = 1;
 
+    char* line = NULL;
+    size_t line_size;
     while (getline(&line, &line_size, f) >= 0) {
-        char* key, *value;
-
         int line_len = strlen(line);
 
         if (line_len >= 1) {
@@ -705,6 +700,8 @@ IconTheme* load_theme(char* name) {
             continue;
         }
 
+        char* key;
+        char* value;
         if (inside_header) {
             if (parse_theme_line(line, &key, &value)) {
                 if (strcmp(key, "Inherits") == 0) {

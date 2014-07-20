@@ -201,7 +201,7 @@ int resize_systray(void* obj) {
 void on_change_systray(void* obj) {
     // here, systray.posx/posy are defined by rendering engine. so we can calculate position of tray icon.
     Systraybar* sysbar = static_cast<Systraybar*>(obj);
-    Panel* panel = static_cast<Panel*>(sysbar->panel);
+    Panel* panel = sysbar->panel;
     int i, posx, posy;
     int start = panel->bg->border.width + panel->paddingy +
                 systray.bg->border.width + systray.paddingy + sysbar->marging / 2;
@@ -404,7 +404,7 @@ static gint compare_traywindows(gconstpointer a, gconstpointer b) {
 gboolean add_icon(Window id) {
     TrayWindow* traywin;
     XErrorHandler old;
-    Panel* panel = static_cast<Panel*>(systray.panel);
+    Panel* panel = systray.panel;
     int hide = 0;
 
     error = FALSE;
@@ -636,7 +636,7 @@ void systray_render_icon_now(void* t) {
     // good systray icons support 32 bit depth, but some icons are still 24 bit.
     // We create a heuristic mask for these icons, i.e. we get the rgb value in the top left corner, and
     // mask out all pixel with the same rgb value
-    Panel* panel = static_cast<Panel*>(systray.panel);
+    Panel* panel = systray.panel;
 
     // Very ugly hack, but somehow imlib2 is not able to get the image from the traywindow itself,
     // so we first render the tray window onto a pixmap, and then we tell imlib2 to use this pixmap as
