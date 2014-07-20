@@ -14,14 +14,12 @@
 #include "area.h"
 
 
-typedef struct Clock {
-    // always start with area
-    Area area;
-
+class Clock : public Area {
+public:
     Color font;
     int time1_posy;
     int time2_posy;
-} Clock;
+};
 
 
 extern char* time1_format;

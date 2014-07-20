@@ -253,7 +253,7 @@ void init_panel() {
         long event_mask = ExposureMask | ButtonPressMask | ButtonReleaseMask |
                           ButtonMotionMask;
 
-        if (p->g_task.tooltip_enabled || p->clock.area._get_tooltip_text
+        if (p->g_task.tooltip_enabled || p->clock._get_tooltip_text
             || (launcher_enabled && launcher_tooltip_enabled)) {
             event_mask |= PointerMotionMask | LeaveWindowMask;
         }
@@ -835,13 +835,13 @@ int click_clock(Panel* panel, int x, int y) {
     Clock clk = panel->clock;
 
     if (panel_horizontal) {
-        if (clk.area.on_screen && x >= clk.area.posx
-            && x <= (clk.area.posx + clk.area.width)) {
+        if (clk.on_screen && x >= clk.posx
+            && x <= (clk.posx + clk.width)) {
             return TRUE;
         }
     } else {
-        if (clk.area.on_screen && y >= clk.area.posy
-            && y <= (clk.area.posy + clk.area.height)) {
+        if (clk.on_screen && y >= clk.posy
+            && y <= (clk.posy + clk.height)) {
             return TRUE;
         }
     }

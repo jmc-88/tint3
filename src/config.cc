@@ -455,20 +455,20 @@ void add_entry(char* key, char* value) {
         }
     } else if (strcmp(key, "clock_padding") == 0) {
         extract_values(value, &value1, &value2, &value3);
-        panel_config.clock.area.paddingxlr = panel_config.clock.area.paddingx = atoi(
+        panel_config.clock.paddingxlr = panel_config.clock.paddingx = atoi(
                 value1);
 
         if (value2) {
-            panel_config.clock.area.paddingy = atoi(value2);
+            panel_config.clock.paddingy = atoi(value2);
         }
 
         if (value3) {
-            panel_config.clock.area.paddingx = atoi(value3);
+            panel_config.clock.paddingx = atoi(value3);
         }
     } else if (strcmp(key, "clock_background_id") == 0) {
         int id = atoi(value);
         id = (id >= 0 && id < backgrounds.size()) ? id : 0;
-        panel_config.clock.area.bg = backgrounds[id];
+        panel_config.clock.bg = backgrounds[id];
     } else if (strcmp(key, "clock_tooltip") == 0) {
         if (strlen(value) > 0) {
             time_tooltip_format = strdup(value);
