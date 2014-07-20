@@ -400,29 +400,21 @@ void window_action(Task* tsk, int action) {
 }
 
 
-int tint3_handles_click(Panel* panel, XButtonEvent* e) {
+bool tint3_handles_click(Panel* panel, XButtonEvent* e) {
     Task* task = click_task(panel, e->x, e->y);
 
     if (task) {
-        if ((e->button == 1)
-            || (e->button == 2 && mouse_middle != 0)
-            || (e->button == 3 && mouse_right != 0)
-            || (e->button == 4 && mouse_scroll_up != 0)
-            || (e->button == 5 && mouse_scroll_down != 0)) {
-            return 1;
-        } else {
-            return 0;
-        }
+        return ((e->button == 1)
+                || (e->button == 2 && mouse_middle != 0)
+                || (e->button == 3 && mouse_right != 0)
+                || (e->button == 4 && mouse_scroll_up != 0)
+                || (e->button == 5 && mouse_scroll_down != 0));
     }
 
     LauncherIcon* icon = click_launcher_icon(panel, e->x, e->y);
 
     if (icon) {
-        if (e->button == 1) {
-            return 1;
-        } else {
-            return 0;
-        }
+        return (e->button == 1);
     }
 
     // no launcher/task clicked --> check if taskbar clicked
@@ -433,15 +425,11 @@ int tint3_handles_click(Panel* panel, XButtonEvent* e) {
     }
 
     if (click_clock(panel, e->x, e->y)) {
-        if ((e->button == 1 && clock_lclick_command) || (e->button == 3
-                && clock_rclick_command)) {
-            return 1;
-        } else {
-            return 0;
-        }
+        return ((e->button == 1 && clock_lclick_command) || (e->button == 3
+                && clock_rclick_command));
     }
 
-    return 0;
+    return false;
 }
 
 

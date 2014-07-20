@@ -35,9 +35,9 @@ int window_get_monitor(Window win);
 Window window_get_active();
 
 void get_text_size(PangoFontDescription* font, int* height_ink, int* height,
-                   int panel_height, char* text, int len);
+                   int panel_height, char const* text, int len);
 void get_text_size2(PangoFontDescription* font, int* height_ink, int* height,
-                    int* width, int panel_height, int panel_with, char* text, int len);
+                    int* width, int panel_height, int panel_with, char const* text, int len);
 
 
 #endif

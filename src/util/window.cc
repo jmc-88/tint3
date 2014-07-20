@@ -250,14 +250,13 @@ int server_get_current_desktop() {
 
 
 Window window_get_active() {
-    return get_property32(server.root_win, server.atom._NET_ACTIVE_WINDOW,
-                          XA_WINDOW);
+    return (Window) get_property32(server.root_win, server.atom._NET_ACTIVE_WINDOW,
+                                   XA_WINDOW);
 }
 
 
 int window_is_active(Window win) {
-    return (win == get_property32(server.root_win, server.atom._NET_ACTIVE_WINDOW,
-                                  XA_WINDOW));
+    return window_get_active() == win;
 }
 
 
@@ -336,23 +335,22 @@ gulong* get_best_icon(gulong* data, int icon_count, int num, int* iw, int* ih,
 
 
 void get_text_size(PangoFontDescription* font, int* height_ink, int* height,
-                   int panel_height, char* text, int len) {
-    PangoRectangle rect_ink, rect;
+                   int panel_height, char const* text, int len) {
+    auto pmap = XCreatePixmap(server.dsp, server.root_win, panel_height,
+                              panel_height, server.depth);
 
-    Pixmap pmap = XCreatePixmap(server.dsp, server.root_win, panel_height,
-                                panel_height, server.depth);
+    auto cs = cairo_xlib_surface_create(server.dsp, pmap,
+                                        server.visual, panel_height, panel_height);
+    auto c = cairo_create(cs);
 
-    cairo_surface_t* cs = cairo_xlib_surface_create(server.dsp, pmap,
-                          server.visual, panel_height, panel_height);
-    cairo_t* c = cairo_create(cs);
-
-    PangoLayout* layout = pango_cairo_create_layout(c);
+    auto layout = pango_cairo_create_layout(c);
     pango_layout_set_font_description(layout, font);
     pango_layout_set_text(layout, text, len);
 
+    PangoRectangle rect_ink, rect;
     pango_layout_get_pixel_extents(layout, &rect_ink, &rect);
-    *height_ink = rect_ink.height;
-    *height = rect.height;
+    (*height_ink) = rect_ink.height;
+    (*height) = rect.height;
     //printf("dimension : %d - %d\n", rect_ink.height, rect.height);
 
     g_object_unref(layout);
@@ -363,24 +361,23 @@ void get_text_size(PangoFontDescription* font, int* height_ink, int* height,
 
 
 void get_text_size2(PangoFontDescription* font, int* height_ink, int* height,
-                    int* width, int panel_height, int panel_with, char* text, int len) {
-    PangoRectangle rect_ink, rect;
+                    int* width, int panel_height, int panel_width, char const* text, int len) {
+    auto pmap = XCreatePixmap(server.dsp, server.root_win, panel_height,
+                              panel_height, server.depth);
 
-    Pixmap pmap = XCreatePixmap(server.dsp, server.root_win, panel_height,
-                                panel_height, server.depth);
+    auto cs = cairo_xlib_surface_create(server.dsp, pmap,
+                                        server.visual, panel_height, panel_width);
+    auto c = cairo_create(cs);
 
-    cairo_surface_t* cs = cairo_xlib_surface_create(server.dsp, pmap,
-                          server.visual, panel_height, panel_with);
-    cairo_t* c = cairo_create(cs);
-
-    PangoLayout* layout = pango_cairo_create_layout(c);
+    auto layout = pango_cairo_create_layout(c);
     pango_layout_set_font_description(layout, font);
     pango_layout_set_text(layout, text, len);
 
+    PangoRectangle rect_ink, rect;
     pango_layout_get_pixel_extents(layout, &rect_ink, &rect);
-    *height_ink = rect_ink.height;
-    *height = rect.height;
-    *width = rect.width;
+    (*height_ink) = rect_ink.height;
+    (*height) = rect.height;
+    (*width) = rect.width;
     //printf("dimension : %d - %d\n", rect_ink.height, rect.height);
 
     g_object_unref(layout);

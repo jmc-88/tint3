@@ -151,9 +151,6 @@ void cleanup_panel() {
 }
 
 void init_panel() {
-    int i, k;
-    Panel* p;
-
     if (panel_config.monitor > (server.nb_monitor - 1)) {
         // server.nb_monitor minimum value is 1 (see get_monitors())
         fprintf(stderr,
@@ -179,6 +176,8 @@ void init_panel() {
 
     panel1 = new Panel[nb_panel];
 
+    int i;
+
     for (i = 0 ; i < nb_panel ; i++) {
         memcpy(&panel1[i], &panel_config, sizeof(Panel));
     }
@@ -187,7 +186,7 @@ void init_panel() {
             server.nb_monitor, nb_panel, server.nb_desktop);
 
     for (i = 0 ; i < nb_panel ; i++) {
-        p = &panel1[i];
+        auto p = &panel1[i];
 
         if (panel_config.monitor < 0) {
             p->monitor = i;
@@ -206,7 +205,7 @@ void init_panel() {
         init_panel_size_and_position(p);
 
         // add childs according to panel_items
-        for (k = 0 ; k < strlen(panel_items_order) ; k++) {
+        for (size_t k = 0 ; k < strlen(panel_items_order) ; k++) {
             if (panel_items_order[k] == 'L') {
                 init_launcher_panel(p);
             }
@@ -479,20 +478,18 @@ void update_strut(Panel* p) {
 
 
 void set_panel_items_order(Panel* p) {
-    int k, j;
-
     if (p->list) {
         g_slist_free(p->list);
         p->list = 0;
     }
 
-    for (k = 0 ; k < strlen(panel_items_order) ; k++) {
+    for (size_t k = 0 ; k < strlen(panel_items_order) ; k++) {
         if (panel_items_order[k] == 'L') {
             p->list = g_slist_append(p->list, &p->launcher);
         }
 
         if (panel_items_order[k] == 'T') {
-            for (j = 0 ; j < p->nb_desktop ; j++) {
+            for (int j = 0 ; j < p->nb_desktop ; j++) {
                 p->list = g_slist_append(p->list, &p->taskbar[j]);
             }
         }
@@ -635,11 +632,9 @@ void set_panel_background(Panel* p) {
     }
 
     // draw background panel
-    cairo_surface_t* cs;
-    cairo_t* c;
-    cs = cairo_xlib_surface_create(server.dsp, p->pix, server.visual,
-                                   p->width, p->height);
-    c = cairo_create(cs);
+    auto cs = cairo_xlib_surface_create(server.dsp, p->pix, server.visual,
+                                        p->width, p->height);
+    auto c = cairo_create(cs);
     draw_background(p, c);
     cairo_destroy(c);
     cairo_surface_destroy(cs);
@@ -657,21 +652,17 @@ void set_panel_background(Panel* p) {
 
     // redraw panel's object
     GSList* l0;
-    Area* a;
 
     for (l0 = p->list; l0 ; l0 = l0->next) {
-        a = static_cast<Area*>(l0->data);
+        auto a = static_cast<Area*>(l0->data);
         set_redraw(a);
     }
 
     // reset task/taskbar 'state_pix'
-    int i, k;
-    Taskbar* tskbar;
+    for (int i = 0 ; i < p->nb_desktop ; i++) {
+        auto tskbar = &p->taskbar[i];
 
-    for (i = 0 ; i < p->nb_desktop ; i++) {
-        tskbar = &p->taskbar[i];
-
-        for (k = 0; k < TASKBAR_STATE_COUNT; ++k) {
+        for (int k = 0; k < TASKBAR_STATE_COUNT; ++k) {
             if (tskbar->state_pix[k]) {
                 XFreePixmap(server.dsp, tskbar->state_pix[k]);
             }
@@ -694,7 +685,7 @@ void set_panel_background(Panel* p) {
         }
 
         for (; l0 ; l0 = l0->next) {
-            set_task_redraw((Task*)l0->data);
+            set_task_redraw(static_cast<Task*>(l0->data));
         }
     }
 }

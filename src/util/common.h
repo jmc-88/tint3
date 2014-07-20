@@ -45,11 +45,10 @@ enum {
     PREV_TASK
 };
 
-#define ALLDESKTOP  0xFFFFFFFF
+extern int const ALLDESKTOP;
 
 
-// copy file source to file dest
-void copy_file(const char* pathSrc, const char* pathDest);
+bool copy_file(char const* from_path, char const* to_path);
 
 // extract key = value
 int parse_line(char* line, char** key, char** value);
@@ -67,7 +66,8 @@ void extract_values(char* value, char** value1, char** value2, char** value3);
 
 // adjust Alpha/Saturation/Brightness on an ARGB icon
 // alpha from 0 to 100, satur from 0 to 1, bright from 0 to 1.
-void adjust_asb(DATA32* data, int w, int h, int alpha, float satur,
+void adjust_asb(DATA32* data, unsigned int w, unsigned int h, int alpha,
+                float satur,
                 float bright);
 void createHeuristicMask(DATA32* data, int w, int h);
 

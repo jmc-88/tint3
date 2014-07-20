@@ -27,36 +27,37 @@
 #include <string.h>
 #include <unistd.h>
 
+#include <algorithm>
+#include <fstream>
+#include <iterator>
+
 #include "common.h"
 #include "../server.h"
 
 
-void copy_file(const char* pathSrc, const char* pathDest) {
-    FILE* fileSrc, *fileDest;
-    char line[100];
-    int  nb;
+int const ALLDESKTOP = 0xFFFFFFFF;
 
-    fileSrc = fopen(pathSrc, "rb");
 
-    if (fileSrc == NULL) {
-        return;
+bool copy_file(char const* from_path, char const* to_path) {
+    std::ifstream from(from_path);
+
+    if (!from) {
+        return false;
     }
 
-    fileDest = fopen(pathDest, "wb");
+    std::ofstream to(to_path);
 
-    if (fileDest == NULL) {
-        return;
+    if (!to) {
+        return false;
     }
 
-    while ((nb = fread(line, 1, 100, fileSrc)) > 0)
-        if (nb != fwrite(line, 1, nb, fileDest)) {
-            printf("Error while copying file %s to %s\n", pathSrc, pathDest);
-        }
+    std::istreambuf_iterator<char> begin_from(from);
+    std::istreambuf_iterator<char> end_from;
+    std::ostreambuf_iterator<char> begin_to(to);
 
-    fclose(fileDest);
-    fclose(fileSrc);
+    std::copy(begin_from, end_from, begin_to);
+    return true;
 }
-
 
 int parse_line(char* line, char** key, char** value) {
     /* Skip useless lines */
@@ -211,57 +212,50 @@ void extract_values(char* value, char** value1, char** value2, char** value3) {
 }
 
 
-void adjust_asb(DATA32* data, int w, int h, int alpha, float satur,
+void adjust_asb(DATA32* data, unsigned int w, unsigned int h, int alpha,
+                float satur,
                 float bright) {
-    unsigned int x, y;
-    unsigned int a, r, g, b, argb;
-    unsigned long id;
-    int cmax, cmin;
-    float h2, f, p, q, t;
-    float hue, saturation, brightness;
-    float redc, greenc, bluec;
+    for (unsigned int y = 0; y < h; ++y) {
+        unsigned int id = y * w;
 
-    for (y = 0; y < h; y++) {
-        for (id = y * w, x = 0; x < w; x++, id++) {
-            argb = data[id];
-            a = (argb >> 24) & 0xff;
+        for (unsigned int x = 0; x < w; ++x, ++id) {
+            unsigned int argb = data[id];
+            unsigned int a = (argb >> 24) & 0xff;
 
             // transparent => nothing to do.
             if (a == 0) {
                 continue;
             }
 
-            r = (argb >> 16) & 0xff;
-            g = (argb >> 8) & 0xff;
-            b = (argb) & 0xff;
+            unsigned int r = (argb >> 16) & 0xff;
+            unsigned int g = (argb >> 8) & 0xff;
+            unsigned int b = (argb) & 0xff;
 
             // convert RGB to HSB
-            cmax = (r > g) ? r : g;
+            auto cmax = (r > g) ? r : g;
 
             if (b > cmax) {
                 cmax = b;
             }
 
-            cmin = (r < g) ? r : g;
+            auto cmin = (r < g) ? r : g;
 
             if (b < cmin) {
                 cmin = b;
             }
 
-            brightness = ((float)cmax) / 255.0f;
+            auto hue = 0.0f;
+            auto saturation = 0.0f;
+            auto brightness = (cmax / 255.0f);
 
             if (cmax != 0) {
-                saturation = ((float)(cmax - cmin)) / ((float)cmax);
-            } else {
-                saturation = 0;
+                saturation = (static_cast<float>(cmax - cmin) / static_cast<float>(cmax));
             }
 
-            if (saturation == 0) {
-                hue = 0;
-            } else {
-                redc = ((float)(cmax - r)) / ((float)(cmax - cmin));
-                greenc = ((float)(cmax - g)) / ((float)(cmax - cmin));
-                bluec = ((float)(cmax - b)) / ((float)(cmax - cmin));
+            if (saturation != 0) {
+                auto redc = (static_cast<float>(cmax - r) / static_cast<float>(cmax - cmin));
+                auto greenc = (static_cast<float>(cmax - g) / static_cast<float>(cmax - cmin));
+                auto bluec = (static_cast<float>(cmax - b) / static_cast<float>(cmax - cmin));
 
                 if (r == cmax) {
                     hue = bluec - greenc;
@@ -307,11 +301,11 @@ void adjust_asb(DATA32* data, int w, int h, int alpha, float satur,
             if (saturation == 0) {
                 r = g = b = (int)(brightness * 255.0f + 0.5f);
             } else {
-                h2 = (hue - (int)hue) * 6.0f;
-                f = h2 - (int)(h2);
-                p = brightness * (1.0f - saturation);
-                q = brightness * (1.0f - saturation * f);
-                t = brightness * (1.0f - (saturation * (1.0f - f)));
+                float h2 = (hue - (int)hue) * 6.0f;
+                float f = h2 - (int)(h2);
+                float p = brightness * (1.0f - saturation);
+                float q = brightness * (1.0f - saturation * f);
+                float t = brightness * (1.0f - (saturation * (1.0f - f)));
 
                 switch ((int) h2) {
                     case 0:

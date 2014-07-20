@@ -153,8 +153,6 @@ void remove_task(Task* tsk) {
         return;
     }
 
-    Window win = tsk->win;
-
     // free title and icon just for the first task
     // even with task_on_all_desktop and with task_on_all_panel
     //printf("remove_task %s %d\n", tsk->title, tsk->desktop);
@@ -162,9 +160,7 @@ void remove_task(Task* tsk) {
         free(tsk->title);
     }
 
-    int k;
-
-    for (k = 0; k < TASK_STATE_COUNT; ++k) {
+    for (auto k = 0; k < TASK_STATE_COUNT; ++k) {
         if (tsk->icon[k]) {
             imlib_context_set_image(tsk->icon[k]);
             imlib_free_image();
@@ -176,12 +172,13 @@ void remove_task(Task* tsk) {
         }
     }
 
+    Window win = tsk->win;
     GPtrArray* task_group = (GPtrArray*) g_hash_table_lookup(win_to_task_table,
                             &win);
 
-    for (int i = 0; i < task_group->len; ++i) {
-        Task* tsk2 = static_cast<Task*>(g_ptr_array_index(task_group, i));
-        Taskbar* tskbar = reinterpret_cast<Taskbar*>(tsk2->parent);
+    for (size_t i = 0; i < task_group->len; ++i) {
+        auto tsk2 = static_cast<Task*>(g_ptr_array_index(task_group, i));
+        auto tskbar = reinterpret_cast<Taskbar*>(tsk2->parent);
         tskbar->list = g_slist_remove(tskbar->list, tsk2);
         tskbar->resize = 1;
 
@@ -214,14 +211,14 @@ int get_title(Task* tsk) {
     char* name = (char*) server_get_property(tsk->win,
                  server.atom._NET_WM_VISIBLE_NAME, server.atom.UTF8_STRING, 0);
 
-    if (!name || !strlen(name)) {
+    if (!name || *name == '\0') {
         name = (char*) server_get_property(tsk->win, server.atom._NET_WM_NAME,
                                            server.atom.UTF8_STRING, 0);
 
-        if (!name || !strlen(name)) {
+        if (!name || *name == '\0') {
             name = (char*) server_get_property(tsk->win, server.atom.WM_NAME, XA_STRING, 0);
 
-            if (!name || !strlen(name)) {
+            if (!name || *name == '\0') {
                 name = (char*) malloc(10);
                 strcpy(name, "Untitled");
             }
@@ -383,10 +380,9 @@ void get_icon(Task* tsk) {
 
     if (task_group) {
         for (i = 0; i < task_group->len; ++i) {
-            Task* tsk2 = static_cast<Task*>(g_ptr_array_index(task_group, i));
+            auto tsk2 = static_cast<Task*>(g_ptr_array_index(task_group, i));
             tsk2->icon_width = tsk->icon_width;
             tsk2->icon_height = tsk->icon_height;
-            int k;
 
             for (k = 0; k < TASK_STATE_COUNT; ++k) {
                 tsk2->icon[k] = tsk->icon[k];
@@ -631,10 +627,8 @@ void set_task_state(Task* tsk, int state) {
         GPtrArray* task_group = task_get_tasks(tsk->win);
 
         if (task_group) {
-            int i;
-
-            for (i = 0; i < task_group->len; ++i) {
-                Task* tsk1 = static_cast<Task*>(g_ptr_array_index(task_group, i));
+            for (size_t i = 0; i < task_group->len; ++i) {
+                auto tsk1 = static_cast<Task*>(g_ptr_array_index(task_group, i));
                 tsk1->current_state = state;
                 tsk1->bg = panel1[0].g_task.background[state];
                 tsk1->pix = tsk1->state_pix[state];
