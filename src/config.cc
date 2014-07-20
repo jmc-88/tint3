@@ -496,15 +496,15 @@ void add_entry(char* key, char* value) {
         }
     } else if (strcmp(key, "taskbar_padding") == 0) {
         extract_values(value, &value1, &value2, &value3);
-        panel_config.g_taskbar.area.paddingxlr = panel_config.g_taskbar.area.paddingx =
+        panel_config.g_taskbar.paddingxlr = panel_config.g_taskbar.paddingx =
                     atoi(value1);
 
         if (value2) {
-            panel_config.g_taskbar.area.paddingy = atoi(value2);
+            panel_config.g_taskbar.paddingy = atoi(value2);
         }
 
         if (value3) {
-            panel_config.g_taskbar.area.paddingx = atoi(value3);
+            panel_config.g_taskbar.paddingx = atoi(value3);
         }
     } else if (strcmp(key, "taskbar_background_id") == 0) {
         int id = atoi(value);

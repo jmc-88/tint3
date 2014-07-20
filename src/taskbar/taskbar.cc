@@ -138,29 +138,29 @@ void init_taskbar_panel(void* p) {
     panel->g_taskbar.area_name.on_screen = 1;
 
     // taskbar
-    panel->g_taskbar.area.parent = panel;
-    panel->g_taskbar.area.panel = panel;
-    panel->g_taskbar.area.size_mode = SIZE_BY_LAYOUT;
-    panel->g_taskbar.area._resize = resize_taskbar;
-    panel->g_taskbar.area._draw_foreground = draw_taskbar;
-    panel->g_taskbar.area._on_change_layout = on_change_taskbar;
-    panel->g_taskbar.area.resize = 1;
-    panel->g_taskbar.area.on_screen = 1;
+    panel->g_taskbar.parent = panel;
+    panel->g_taskbar.panel = panel;
+    panel->g_taskbar.size_mode = SIZE_BY_LAYOUT;
+    panel->g_taskbar._resize = resize_taskbar;
+    panel->g_taskbar._draw_foreground = draw_taskbar;
+    panel->g_taskbar._on_change_layout = on_change_taskbar;
+    panel->g_taskbar.resize = 1;
+    panel->g_taskbar.on_screen = 1;
 
     if (panel_horizontal) {
-        panel->g_taskbar.area.posy = panel->bg->border.width +
+        panel->g_taskbar.posy = panel->bg->border.width +
                                      panel->paddingy;
-        panel->g_taskbar.area.height = panel->height - (2 *
-                                       panel->g_taskbar.area.posy);
-        panel->g_taskbar.area_name.posy = panel->g_taskbar.area.posy;
-        panel->g_taskbar.area_name.height = panel->g_taskbar.area.height;
+        panel->g_taskbar.height = panel->height - (2 *
+                                       panel->g_taskbar.posy);
+        panel->g_taskbar.area_name.posy = panel->g_taskbar.posy;
+        panel->g_taskbar.area_name.height = panel->g_taskbar.height;
     } else {
-        panel->g_taskbar.area.posx = panel->bg->border.width +
+        panel->g_taskbar.posx = panel->bg->border.width +
                                      panel->paddingy;
-        panel->g_taskbar.area.width = panel->width - (2 *
-                                      panel->g_taskbar.area.posx);
-        panel->g_taskbar.area_name.posx = panel->g_taskbar.area.posx;
-        panel->g_taskbar.area_name.width = panel->g_taskbar.area.width;
+        panel->g_taskbar.width = panel->width - (2 *
+                                      panel->g_taskbar.posx);
+        panel->g_taskbar.area_name.posx = panel->g_taskbar.posx;
+        panel->g_taskbar.area_name.width = panel->g_taskbar.width;
     }
 
     // task
@@ -232,14 +232,14 @@ void init_taskbar_panel(void* p) {
     }
 
     if (panel_horizontal) {
-        panel->g_task.posy = panel->g_taskbar.area.posy +
+        panel->g_task.posy = panel->g_taskbar.posy +
                                   panel->g_taskbar.background[TASKBAR_NORMAL]->border.width +
-                                  panel->g_taskbar.area.paddingy;
+                                  panel->g_taskbar.paddingy;
         panel->g_task.height = panel->height - (2 * panel->g_task.posy);
     } else {
-        panel->g_task.posx = panel->g_taskbar.area.posx +
+        panel->g_task.posx = panel->g_taskbar.posx +
                                   panel->g_taskbar.background[TASKBAR_NORMAL]->border.width +
-                                  panel->g_taskbar.area.paddingy;
+                                  panel->g_taskbar.paddingy;
         panel->g_task.width = panel->width - (2 * panel->g_task.posx);
         panel->g_task.height = panel->g_task.maximum_height;
     }
@@ -292,7 +292,7 @@ void init_taskbar_panel(void* p) {
 
         // TODO: nuke this from planet Earth ASAP - horrible hack to mimick the
         // original memcpy() call
-        dynamic_cast<Area*>(tskbar)->clone(panel->g_taskbar.area);
+        tskbar->clone(panel->g_taskbar);
 
         tskbar->desktop = j;
 
@@ -408,8 +408,8 @@ int resize_taskbar(void* obj) {
                               panel->g_task.bg->border.width - panel->g_task.paddingx;
     } else {
         resize_by_layout(obj, panel->g_task.maximum_height);
-        taskbar->text_width = taskbar->width - (2 * panel->g_taskbar.area.paddingy)
-                              - panel->g_task.text_posx -    panel->g_task.bg->border.width -
+        taskbar->text_width = taskbar->width - (2 * panel->g_taskbar.paddingy)
+                              - panel->g_task.text_posx - panel->g_task.bg->border.width -
                               panel->g_task.paddingx;
     }
 

@@ -103,7 +103,7 @@ Task* add_task(Window win) {
 
         // TODO: nuke this from planet Earth ASAP - horrible hack to mimick the
         // original memcpy() call
-        dynamic_cast<Area*>(new_tsk2)->clone(panel1[monitor].g_task);
+        new_tsk2->clone(panel1[monitor].g_task);
 
         new_tsk2->parent = reinterpret_cast<Area*>(tskbar);
         new_tsk2->win = new_tsk.win;

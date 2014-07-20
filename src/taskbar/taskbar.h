@@ -38,13 +38,12 @@ public:
     int text_width;
 };
 
-typedef struct {
-    //always start with area
-    Area area;
+class Global_taskbar : public Area {
+public:
     Area area_name;
     Background* background[TASKBAR_STATE_COUNT];
     Background* background_name[TASKBAR_STATE_COUNT];
-} Global_taskbar;
+};
 
 
 // default global data
