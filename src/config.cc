@@ -382,7 +382,7 @@ void add_entry(char* key, char* value) {
 #ifdef ENABLE_BATTERY
         extract_values(value, &value1, &value2, &value3);
         panel_config.battery.paddingxlr = panel_config.battery.paddingx =
-                atoi(value1);
+                                              atoi(value1);
 
         if (value2) {
             panel_config.battery.paddingy = atoi(value2);
@@ -456,7 +456,7 @@ void add_entry(char* key, char* value) {
     } else if (strcmp(key, "clock_padding") == 0) {
         extract_values(value, &value1, &value2, &value3);
         panel_config.clock.paddingxlr = panel_config.clock.paddingx = atoi(
-                value1);
+                                            value1);
 
         if (value2) {
             panel_config.clock.paddingy = atoi(value2);
@@ -497,7 +497,7 @@ void add_entry(char* key, char* value) {
     } else if (strcmp(key, "taskbar_padding") == 0) {
         extract_values(value, &value1, &value2, &value3);
         panel_config.g_taskbar.paddingxlr = panel_config.g_taskbar.paddingx =
-                    atoi(value1);
+                                                atoi(value1);
 
         if (value2) {
             panel_config.g_taskbar.paddingy = atoi(value2);
@@ -582,7 +582,7 @@ void add_entry(char* key, char* value) {
     } else if (strcmp(key, "task_padding") == 0) {
         extract_values(value, &value1, &value2, &value3);
         panel_config.g_task.paddingxlr = panel_config.g_task.paddingx = atoi(
-                value1);
+                                             value1);
 
         if (value2) {
             panel_config.g_task.paddingy = atoi(value2);
@@ -685,7 +685,7 @@ void add_entry(char* key, char* value) {
     else if (strcmp(key, "launcher_padding") == 0) {
         extract_values(value, &value1, &value2, &value3);
         panel_config.launcher.paddingxlr = panel_config.launcher.paddingx =
-                atoi(value1);
+                                               atoi(value1);
 
         if (value2) {
             panel_config.launcher.paddingy = atoi(value2);

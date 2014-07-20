@@ -12,14 +12,14 @@
 #include "xsettings-client.h"
 
 class Launcher : public Area {
-public:
+  public:
     GSList* list_apps;          // List of char*, each is a path to a app.desktop file
     GSList* list_icons;         // List of LauncherIcon*
     GSList* list_themes;        // List of IconTheme*
 };
 
 class LauncherIcon : public Area {
-public:
+  public:
     Imlib_Image icon_scaled;
     Imlib_Image icon_original;
     char* cmd;

@@ -22,7 +22,7 @@
 
 
 class Systraybar : public Area {
-public:
+  public:
     GSList* list_icons;
     int sort;
     int alpha, saturation, brightness;

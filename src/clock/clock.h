@@ -15,7 +15,7 @@
 
 
 class Clock : public Area {
-public:
+  public:
     Color font;
     int time1_posy;
     int time2_posy;

@@ -19,7 +19,7 @@ extern int taskbar_enabled;
 
 
 class Taskbarname : public Area {
-public:
+  public:
     Pixmap state_pix[TASKBAR_STATE_COUNT];
 
     char* name;
@@ -28,7 +28,7 @@ public:
 
 // tint3 use one taskbar per desktop.
 class Taskbar : public Area {
-public:
+  public:
     int desktop;
     Pixmap state_pix[TASKBAR_STATE_COUNT];
 
@@ -39,7 +39,7 @@ public:
 };
 
 class Global_taskbar : public Area {
-public:
+  public:
     Area area_name;
     Background* background[TASKBAR_STATE_COUNT];
     Background* background_name[TASKBAR_STATE_COUNT];

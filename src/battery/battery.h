@@ -20,7 +20,7 @@
 
 // battery drawing parameter (per panel)
 class Battery : public Area {
-public:
+  public:
     Color font;
     int bat1_posy;
     int bat2_posy;

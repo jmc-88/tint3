@@ -177,8 +177,8 @@ int resize_systray(void* obj) {
         sysbar->icons_per_row = count / sysbar->icons_per_column +
                                 (count % sysbar->icons_per_column != 0);
         systray.width = (2 * systray.bg->border.width) +
-                             (2 * systray.paddingxlr) + (sysbar->icon_size * sysbar->icons_per_row) + ((
-                                         sysbar->icons_per_row - 1) * systray.paddingx);
+                        (2 * systray.paddingxlr) + (sysbar->icon_size * sysbar->icons_per_row) + ((
+                                    sysbar->icons_per_row - 1) * systray.paddingx);
     } else {
         int width = sysbar->width - 2 * sysbar->bg->border.width - 2 *
                     sysbar->paddingy;
@@ -190,8 +190,8 @@ int resize_systray(void* obj) {
         sysbar->icons_per_column = count / sysbar->icons_per_row +
                                    (count % sysbar->icons_per_row != 0);
         systray.height = (2 * systray.bg->border.width) +
-                              (2 * systray.paddingxlr) + (sysbar->icon_size * sysbar->icons_per_column)
-                              + ((sysbar->icons_per_column - 1) * systray.paddingx);
+                         (2 * systray.paddingxlr) + (sysbar->icon_size * sysbar->icons_per_column)
+                         + ((sysbar->icons_per_column - 1) * systray.paddingx);
     }
 
     return 1;

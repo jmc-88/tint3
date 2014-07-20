@@ -524,7 +524,7 @@ void event_button_motion_notify(XEvent* e) {
             || event_taskbar->posy > drag_taskbar->posy) {
             int i = (taskbarname_enabled) ? 1 : 0;
             event_taskbar->list = g_slist_insert(event_taskbar->list, task_drag,
-                                       i);
+                                                 i);
         } else {
             event_taskbar->list = g_slist_append(event_taskbar->list, task_drag);
         }

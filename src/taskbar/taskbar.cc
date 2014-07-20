@@ -149,16 +149,16 @@ void init_taskbar_panel(void* p) {
 
     if (panel_horizontal) {
         panel->g_taskbar.posy = panel->bg->border.width +
-                                     panel->paddingy;
+                                panel->paddingy;
         panel->g_taskbar.height = panel->height - (2 *
-                                       panel->g_taskbar.posy);
+                                  panel->g_taskbar.posy);
         panel->g_taskbar.area_name.posy = panel->g_taskbar.posy;
         panel->g_taskbar.area_name.height = panel->g_taskbar.height;
     } else {
         panel->g_taskbar.posx = panel->bg->border.width +
-                                     panel->paddingy;
+                                panel->paddingy;
         panel->g_taskbar.width = panel->width - (2 *
-                                      panel->g_taskbar.posx);
+                                 panel->g_taskbar.posx);
         panel->g_taskbar.area_name.posx = panel->g_taskbar.posx;
         panel->g_taskbar.area_name.width = panel->g_taskbar.width;
     }
@@ -233,13 +233,13 @@ void init_taskbar_panel(void* p) {
 
     if (panel_horizontal) {
         panel->g_task.posy = panel->g_taskbar.posy +
-                                  panel->g_taskbar.background[TASKBAR_NORMAL]->border.width +
-                                  panel->g_taskbar.paddingy;
+                             panel->g_taskbar.background[TASKBAR_NORMAL]->border.width +
+                             panel->g_taskbar.paddingy;
         panel->g_task.height = panel->height - (2 * panel->g_task.posy);
     } else {
         panel->g_task.posx = panel->g_taskbar.posx +
-                                  panel->g_taskbar.background[TASKBAR_NORMAL]->border.width +
-                                  panel->g_taskbar.paddingy;
+                             panel->g_taskbar.background[TASKBAR_NORMAL]->border.width +
+                             panel->g_taskbar.paddingy;
         panel->g_task.width = panel->width - (2 * panel->g_task.posx);
         panel->g_task.height = panel->g_task.maximum_height;
     }

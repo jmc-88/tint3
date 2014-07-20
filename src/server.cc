@@ -443,7 +443,7 @@ void server_init_visual() {
 
     int nvi;
     auto xvi = XGetVisualInfo(server.dsp,
-            VisualScreenMask | VisualDepthMask | VisualClassMask, &templ, &nvi);
+                              VisualScreenMask | VisualDepthMask | VisualClassMask, &templ, &nvi);
 
     Visual* visual = 0;
 

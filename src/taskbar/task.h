@@ -21,7 +21,7 @@ extern GSList* urgent_list;
 // --------------------------------------------------
 // global task parameter
 class Global_task : public Area {
-public:
+  public:
     int text;
     int icon;
     int centered;
@@ -49,7 +49,7 @@ public:
 
 
 class Task : public Area {
-public:
+  public:
     // TODO: group task with list of windows here
     Window win;
     int  desktop;

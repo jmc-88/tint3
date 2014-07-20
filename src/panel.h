@@ -74,7 +74,7 @@ extern Imlib_Image default_icon;
 
 // tint3 use one panel per monitor and one taskbar per desktop.
 class Panel : public Area {
-public:
+  public:
     // --------------------------------------------------
     // panel
     Window main_win;

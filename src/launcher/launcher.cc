@@ -251,8 +251,8 @@ int resize_launcher(void* obj) {
                       launcher->paddingx) - icon_size;
             icons_per_row = count / icons_per_column + (count % icons_per_column != 0);
             launcher->width = (2 * launcher->bg->border.width) +
-                                   (2 * launcher->paddingxlr) + (icon_size * icons_per_row) + ((
-                                               icons_per_row - 1) * launcher->paddingx);
+                              (2 * launcher->paddingxlr) + (icon_size * icons_per_row) + ((
+                                          icons_per_row - 1) * launcher->paddingx);
         }
     } else {
         if (!count) {
@@ -267,8 +267,8 @@ int resize_launcher(void* obj) {
                       icon_size;
             icons_per_column = count / icons_per_row + (count % icons_per_row != 0);
             launcher->height = (2 * launcher->bg->border.width) +
-                                    (2 * launcher->paddingxlr) + (icon_size * icons_per_column) + ((
-                                                icons_per_column - 1) * launcher->paddingx);
+                               (2 * launcher->paddingxlr) + (icon_size * icons_per_column) + ((
+                                           icons_per_column - 1) * launcher->paddingx);
         }
     }
 
@@ -316,9 +316,9 @@ int resize_launcher(void* obj) {
 void launcher_icon_on_change_layout(void* obj) {
     LauncherIcon* launcherIcon = (LauncherIcon*)obj;
     launcherIcon->posy = ((Area*)launcherIcon->parent)->posy +
-                              launcherIcon->y;
+                         launcherIcon->y;
     launcherIcon->posx = ((Area*)launcherIcon->parent)->posx +
-                              launcherIcon->x;
+                         launcherIcon->x;
 }
 
 const char* launcher_icon_get_tooltip_text(void* obj) {
@@ -645,8 +645,9 @@ IconTheme* load_theme(char const* name) {
         return NULL;
     }
 
-    auto file_name = g_build_filename(g_get_home_dir(), ".icons", name, "index.theme",
-            NULL);
+    auto file_name = g_build_filename(g_get_home_dir(), ".icons", name,
+                                      "index.theme",
+                                      NULL);
 
     if (!g_file_test(file_name, G_FILE_TEST_EXISTS)) {
         g_free(file_name);
@@ -668,6 +669,7 @@ IconTheme* load_theme(char const* name) {
     }
 
     auto f = fopen(file_name, "rt");
+
     if (f == NULL) {
         fprintf(stderr, "Could not open theme '%s'\n", file_name);
         return NULL;
@@ -686,6 +688,7 @@ IconTheme* load_theme(char const* name) {
 
     char* line = NULL;
     size_t line_size;
+
     while (getline(&line, &line_size, f) >= 0) {
         int line_len = strlen(line);
 
@@ -702,6 +705,7 @@ IconTheme* load_theme(char const* name) {
 
         char* key;
         char* value;
+
         if (inside_header) {
             if (parse_theme_line(line, &key, &value)) {
                 if (strcmp(key, "Inherits") == 0) {

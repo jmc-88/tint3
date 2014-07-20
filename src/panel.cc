@@ -100,7 +100,7 @@ void default_panel() {
 
     // append full transparency background
     auto transparent_bg = static_cast<Background*>(
-            calloc(1, sizeof(Background)));
+                              calloc(1, sizeof(Background)));
     backgrounds.push_back(transparent_bg);
 }
 
@@ -246,8 +246,8 @@ void init_panel() {
 
             unsigned long mask = CWEventMask | CWColormap | CWBackPixel | CWBorderPixel;
             p->main_win = XCreateWindow(server.dsp, server.root_win, p->posx, p->posy,
-                    p->width, p->height, 0, server.depth, InputOutput, server.visual,
-                    mask, &attr);
+                                        p->width, p->height, 0, server.depth, InputOutput, server.visual,
+                                        mask, &attr);
         }
 
         long event_mask = ExposureMask | ButtonPressMask | ButtonReleaseMask |
@@ -299,12 +299,12 @@ void init_panel_size_and_position(Panel* panel) {
     if (panel_horizontal) {
         if (panel->pourcentx) {
             panel->width = (float)server.monitor[panel->monitor].width *
-                                panel->width / 100;
+                           panel->width / 100;
         }
 
         if (panel->pourcenty) {
             panel->height = (float)server.monitor[panel->monitor].height *
-                                 panel->height / 100;
+                            panel->height / 100;
         }
 
         if (panel->width + panel->marginx > server.monitor[panel->monitor].width) {
@@ -322,14 +322,14 @@ void init_panel_size_and_position(Panel* panel) {
 
         if (panel->pourcentx) {
             panel->height = (float)server.monitor[panel->monitor].height *
-                                 panel->width / 100;
+                            panel->width / 100;
         } else {
             panel->height = panel->width;
         }
 
         if (panel->pourcenty) {
             panel->width = (float)server.monitor[panel->monitor].width *
-                                old_panel_height / 100;
+                           old_panel_height / 100;
         } else {
             panel->width = old_panel_height;
         }
@@ -604,7 +604,7 @@ void set_panel_background(Panel* p) {
     }
 
     p->pix = XCreatePixmap(server.dsp, server.root_win, p->width,
-                                p->height, server.depth);
+                           p->height, server.depth);
 
     int xoff = 0, yoff = 0;
 
