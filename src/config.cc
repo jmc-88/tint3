@@ -581,15 +581,15 @@ void add_entry(char* key, char* value) {
         }
     } else if (strcmp(key, "task_padding") == 0) {
         extract_values(value, &value1, &value2, &value3);
-        panel_config.g_task.area.paddingxlr = panel_config.g_task.area.paddingx = atoi(
+        panel_config.g_task.paddingxlr = panel_config.g_task.paddingx = atoi(
                 value1);
 
         if (value2) {
-            panel_config.g_task.area.paddingy = atoi(value2);
+            panel_config.g_task.paddingy = atoi(value2);
         }
 
         if (value3) {
-            panel_config.g_task.area.paddingx = atoi(value3);
+            panel_config.g_task.paddingx = atoi(value3);
         }
     } else if (strcmp(key, "task_font") == 0) {
         panel_config.g_task.font_desc = pango_font_description_from_string(value);
@@ -626,7 +626,7 @@ void add_entry(char* key, char* value) {
         panel_config.g_task.config_background_mask |= (1 << status);
 
         if (status == TASK_NORMAL) {
-            panel_config.g_task.area.bg = panel_config.g_task.background[TASK_NORMAL];
+            panel_config.g_task.bg = panel_config.g_task.background[TASK_NORMAL];
         }
     }
     // "tooltip" is deprecated but here for backwards compatibility

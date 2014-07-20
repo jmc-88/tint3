@@ -100,7 +100,7 @@ Task* add_task(Window win) {
 
         tskbar = &panel1[monitor].taskbar[j];
         new_tsk2 = (Task*) malloc(sizeof(Task));
-        memcpy(&new_tsk2->area, &panel1[monitor].g_task.area, sizeof(Area));
+        memcpy(&new_tsk2->area, &panel1[monitor].g_task, sizeof(Area));
         new_tsk2->area.parent = reinterpret_cast<Area*>(tskbar);
         new_tsk2->win = new_tsk.win;
         new_tsk2->desktop = new_tsk.desktop;
@@ -410,7 +410,7 @@ void draw_task_icon(Task* tsk, int text_width) {
             pos_x = (tsk->area.width - panel->g_task.icon_size1) / 2;
         }
     } else {
-        pos_x = panel->g_task.area.paddingxlr + tsk->area.bg->border.width;
+        pos_x = panel->g_task.paddingxlr + tsk->area.bg->border.width;
     }
 
     // Render
@@ -463,7 +463,7 @@ void draw_task(void* obj, cairo_t* c) {
                               config_text->color[2], config_text->alpha);
 
         pango_cairo_update_layout(c, layout);
-        double text_posy = (panel->g_task.area.height - height) / 2.0;
+        double text_posy = (panel->g_task.height - height) / 2.0;
         cairo_move_to(c, panel->g_task.text_posx, text_posy);
         pango_cairo_show_layout(c, layout);
 

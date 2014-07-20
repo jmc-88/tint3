@@ -20,9 +20,8 @@ extern GSList* urgent_list;
 
 // --------------------------------------------------
 // global task parameter
-typedef struct {
-    Area area;
-
+class Global_task : public Area {
+public:
     int text;
     int icon;
     int centered;
@@ -45,7 +44,7 @@ typedef struct {
     Color font[TASK_STATE_COUNT];
     int config_font_mask;
     int tooltip_enabled;
-} Global_task;
+};
 
 
 

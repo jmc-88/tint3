@@ -124,8 +124,8 @@ void init_taskbar_panel(void* p) {
         panel->g_taskbar.background_name[TASKBAR_ACTIVE] = backgrounds.front();
     }
 
-    if (panel->g_task.area.bg == 0) {
-        panel->g_task.area.bg = backgrounds.front();
+    if (panel->g_task.bg == 0) {
+        panel->g_task.bg = backgrounds.front();
     }
 
     // taskbar name
@@ -164,12 +164,12 @@ void init_taskbar_panel(void* p) {
     }
 
     // task
-    panel->g_task.area.panel = panel;
-    panel->g_task.area.size_mode = SIZE_BY_LAYOUT;
-    panel->g_task.area._draw_foreground = draw_task;
-    panel->g_task.area._on_change_layout = on_change_task;
-    panel->g_task.area.resize = 1;
-    panel->g_task.area.on_screen = 1;
+    panel->g_task.panel = panel;
+    panel->g_task.size_mode = SIZE_BY_LAYOUT;
+    panel->g_task._draw_foreground = draw_task;
+    panel->g_task._on_change_layout = on_change_task;
+    panel->g_task.resize = 1;
+    panel->g_task.on_screen = 1;
 
     if ((panel->g_task.config_asb_mask & (1 << TASK_NORMAL)) == 0) {
         panel->g_task.alpha[TASK_NORMAL] = 100;
@@ -232,16 +232,16 @@ void init_taskbar_panel(void* p) {
     }
 
     if (panel_horizontal) {
-        panel->g_task.area.posy = panel->g_taskbar.area.posy +
+        panel->g_task.posy = panel->g_taskbar.area.posy +
                                   panel->g_taskbar.background[TASKBAR_NORMAL]->border.width +
                                   panel->g_taskbar.area.paddingy;
-        panel->g_task.area.height = panel->height - (2 * panel->g_task.area.posy);
+        panel->g_task.height = panel->height - (2 * panel->g_task.posy);
     } else {
-        panel->g_task.area.posx = panel->g_taskbar.area.posx +
+        panel->g_task.posx = panel->g_taskbar.area.posx +
                                   panel->g_taskbar.background[TASKBAR_NORMAL]->border.width +
                                   panel->g_taskbar.area.paddingy;
-        panel->g_task.area.width = panel->width - (2 * panel->g_task.area.posx);
-        panel->g_task.area.height = panel->g_task.maximum_height;
+        panel->g_task.width = panel->width - (2 * panel->g_task.posx);
+        panel->g_task.height = panel->g_task.maximum_height;
     }
 
     for (j = 0; j < TASK_STATE_COUNT; ++j) {
@@ -249,13 +249,13 @@ void init_taskbar_panel(void* p) {
             panel->g_task.background[j] = backgrounds.front();
         }
 
-        if (panel->g_task.background[j]->border.rounded > panel->g_task.area.height /
+        if (panel->g_task.background[j]->border.rounded > panel->g_task.height /
             2) {
             printf("task%sbackground_id has a too large rounded value. Please fix your tint3rc\n",
                    j == 0 ? "_" : j == 1 ? "_active_" : j == 2 ? "_iconified_" : "_urgent_");
             /* backgrounds.push_back(*panel->g_task.background[j]); */
             /* panel->g_task.background[j] = backgrounds.back(); */
-            panel->g_task.background[j]->border.rounded = panel->g_task.area.height / 2;
+            panel->g_task.background[j]->border.rounded = panel->g_task.height / 2;
         }
     }
 
@@ -269,15 +269,15 @@ void init_taskbar_panel(void* p) {
     }
 
     panel->g_task.text_posx = panel->g_task.background[0]->border.width +
-                              panel->g_task.area.paddingxlr;
-    panel->g_task.text_height = panel->g_task.area.height -
-                                (2 * panel->g_task.area.paddingy);
+                              panel->g_task.paddingxlr;
+    panel->g_task.text_height = panel->g_task.height -
+                                (2 * panel->g_task.paddingy);
 
     if (panel->g_task.icon) {
-        panel->g_task.icon_size1 = panel->g_task.area.height - (2 *
-                                   panel->g_task.area.paddingy);
+        panel->g_task.icon_size1 = panel->g_task.height - (2 *
+                                   panel->g_task.paddingy);
         panel->g_task.text_posx += panel->g_task.icon_size1;
-        panel->g_task.icon_posy = (panel->g_task.area.height -
+        panel->g_task.icon_posy = (panel->g_task.height -
                                    panel->g_task.icon_size1) / 2;
     }
 
@@ -401,12 +401,12 @@ int resize_taskbar(void* obj) {
         }
 
         taskbar->text_width = text_width - panel->g_task.text_posx -
-                              panel->g_task.area.bg->border.width - panel->g_task.area.paddingx;
+                              panel->g_task.bg->border.width - panel->g_task.paddingx;
     } else {
         resize_by_layout(obj, panel->g_task.maximum_height);
         taskbar->text_width = taskbar->area.width - (2 * panel->g_taskbar.area.paddingy)
-                              - panel->g_task.text_posx -    panel->g_task.area.bg->border.width -
-                              panel->g_task.area.paddingx;
+                              - panel->g_task.text_posx -    panel->g_task.bg->border.width -
+                              panel->g_task.paddingx;
     }
 
     return 0;
