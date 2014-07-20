@@ -90,39 +90,43 @@ class Area {
     int on_changed;
     void (*_on_change_layout)(void* obj);
     const char* (*_get_tooltip_text)(void* obj);
+
+    void remove_area();
+    void add_area();
+
+    // set 'redraw' on an area and children
+    void set_redraw();
+
+    void size_by_content();
+    void size_by_layout(int pos, int level);
+
+    // draw background and foreground
+    void refresh();
+
+    // hide/unhide area
+    void hide();
+    void show();
+
+    void free_area();
 };
 
 // on startup, initialize fixed pos/size
 void init_rendering(void* obj, int pos);
 
 void rendering(void* obj);
-void size_by_content(Area* a);
-void size_by_layout(Area* a, int pos, int level);
-// draw background and foreground
-void refresh(Area* a);
 
 // generic resize for SIZE_BY_LAYOUT objects
 int resize_by_layout(void* obj, int maximum_size);
 
-// set 'redraw' on an area and childs
-void set_redraw(Area* a);
-
-// hide/unhide area
-void hide(Area* a);
-void show(Area* a);
-
 // draw pixmap
 void draw(Area* a);
 void draw_background(Area* a, cairo_t* c);
-
-void remove_area(Area* a);
-void add_area(Area* a);
-void free_area(Area* a);
 
 // draw rounded rectangle
 void draw_rect(cairo_t* c, double x, double y, double w, double h, double r);
 
 // clear pixmap with transparent color
 void clear_pixmap(Pixmap p, int x, int y, int w, int h);
+
 #endif
 

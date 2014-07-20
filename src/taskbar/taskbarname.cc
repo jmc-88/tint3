@@ -86,23 +86,19 @@ void init_taskbarname_panel(void* p) {
 
 
 void cleanup_taskbarname() {
-    int i, j, k;
-    Panel* panel;
-    Taskbar* tskbar;
+    for (int i = 0 ; i < nb_panel ; i++) {
+        Panel* panel = &panel1[i];
 
-    for (i = 0 ; i < nb_panel ; i++) {
-        panel = &panel1[i];
-
-        for (j = 0 ; j < panel->nb_desktop ; j++) {
-            tskbar = &panel->taskbar[j];
+        for (int j = 0 ; j < panel->nb_desktop ; j++) {
+            Taskbar* tskbar = &panel->taskbar[j];
 
             if (tskbar->bar_name.name) {
                 g_free(tskbar->bar_name.name);
             }
 
-            free_area(&tskbar->bar_name);
+            tskbar->bar_name.free_area();
 
-            for (k = 0; k < TASKBAR_STATE_COUNT; ++k) {
+            for (int k = 0; k < TASKBAR_STATE_COUNT; ++k) {
                 if (tskbar->bar_name.state_pix[k]) {
                     XFreePixmap(server.dsp, tskbar->bar_name.state_pix[k]);
                 }

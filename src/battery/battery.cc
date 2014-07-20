@@ -80,12 +80,12 @@ void update_batterys(void* arg) {
     for (int i = 0 ; i < nb_panel ; i++) {
         if (battery_state.percentage >= percentage_hide) {
             if (panel1[i].battery.on_screen == 1) {
-                hide(&panel1[i].battery);
+                panel1[i].battery.hide();
                 panel_refresh = 1;
             }
         } else {
             if (panel1[i].battery.on_screen == 0) {
-                show(&panel1[i].battery);
+                panel1[i].battery.show();
                 panel_refresh = 1;
             }
         }

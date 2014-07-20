@@ -116,13 +116,10 @@ void cleanup_panel() {
         pango_font_description_free(taskbarname_font_desc);
     }
 
-    int i;
-    Panel* p;
+    for (int i = 0 ; i < nb_panel ; i++) {
+        Panel* p = &panel1[i];
 
-    for (i = 0 ; i < nb_panel ; i++) {
-        p = &panel1[i];
-
-        free_area(p);
+        p->free_area();
 
         if (p->temp_pmap) {
             XFreePixmap(server.dsp, p->temp_pmap);
@@ -654,8 +651,7 @@ void set_panel_background(Panel* p) {
     GSList* l0;
 
     for (l0 = p->list; l0 ; l0 = l0->next) {
-        auto a = static_cast<Area*>(l0->data);
-        set_redraw(a);
+        static_cast<Area*>(l0->data)->set_redraw();
     }
 
     // reset task/taskbar 'state_pix'

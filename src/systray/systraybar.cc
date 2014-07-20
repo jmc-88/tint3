@@ -70,7 +70,7 @@ void cleanup_systray() {
     systray_enabled = 0;
     systray_max_icon_size = 0;
     systray.on_screen = 0;
-    free_area(&systray);
+    systray.free_area();
 
     if (render_background) {
         XFreePixmap(server.dsp, render_background);
@@ -102,19 +102,20 @@ void init_systray_panel(void* p) {
         systray.bg = backgrounds.front();
     }
 
-    GSList* l;
     int count = 0;
 
-    for (l = systray.list_icons; l ; l = l->next) {
-        if (!((TrayWindow*)l->data)->hide) {
+    for (auto l = systray.list_icons; l ; l = l->next) {
+        auto win = static_cast<TrayWindow*>(l->data);
+
+        if (!win->hide) {
             count++;
         }
     }
 
     if (count == 0) {
-        hide(&systray);
+        systray.hide();
     } else {
-        show(&systray);
+        systray.show();
     }
 
     refresh_systray = 0;
@@ -498,7 +499,7 @@ gboolean add_icon(Window id) {
     traywin->damage = 0;
 
     if (systray.on_screen == 0) {
-        show(&systray);
+        systray.show();
     }
 
     if (systray.sort == 3) {
@@ -569,9 +570,8 @@ void remove_icon(TrayWindow* traywin) {
 
     // check empty systray
     int count = 0;
-    GSList* l;
 
-    for (l = systray.list_icons; l ; l = l->next) {
+    for (auto l = systray.list_icons; l ; l = l->next) {
         traywin = static_cast<TrayWindow*>(l->data);
 
         if (!traywin->hide) {
@@ -580,7 +580,7 @@ void remove_icon(TrayWindow* traywin) {
     }
 
     if (count == 0) {
-        hide(&systray);
+        systray.hide();
     }
 
     // changed in systray

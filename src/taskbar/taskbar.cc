@@ -81,7 +81,7 @@ void cleanup_taskbar() {
                 }
             }
 
-            free_area(tskbar);
+            tskbar->free_area();
             // remove taskbar from the panel
             panel->list = g_slist_remove(panel->list, tskbar);
         }

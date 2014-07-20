@@ -131,11 +131,12 @@ void cleanup_launcher() {
 
 
 void cleanup_launcher_theme(Launcher* launcher) {
-    free_area(launcher);
+    launcher->free_area();
+
     GSList* l;
 
     for (l = launcher->list_icons; l ; l = l->next) {
-        LauncherIcon* launcherIcon = (LauncherIcon*)l->data;
+        auto launcherIcon = static_cast<LauncherIcon*>(l->data);
 
         if (launcherIcon) {
             free_icon(launcherIcon->icon_scaled);
@@ -152,7 +153,7 @@ void cleanup_launcher_theme(Launcher* launcher) {
     g_slist_free(launcher->list_icons);
 
     for (l = launcher->list_themes; l ; l = l->next) {
-        IconTheme* theme = (IconTheme*) l->data;
+        auto theme = static_cast<IconTheme*>(l->data);
         free_icon_theme(theme);
         free(theme);
     }
@@ -889,7 +890,7 @@ void launcher_load_icons(Launcher* launcher) {
                                              entry.exec);
             free_desktop_entry(&entry);
             launcher->list_icons = g_slist_append(launcher->list_icons, launcherIcon);
-            add_area(launcherIcon);
+            launcherIcon->add_area();
         }
 
         app = g_slist_next(app);
