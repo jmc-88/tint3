@@ -21,15 +21,13 @@
 #define XEMBED_MAPPED       (1 << 0)
 
 
-typedef struct {
-    // always start with area
-    Area area;
-
+class Systraybar : public Area {
+public:
     GSList* list_icons;
     int sort;
     int alpha, saturation, brightness;
     int icon_size, icons_per_column, icons_per_row, marging;
-} Systraybar;
+};
 
 
 typedef struct {

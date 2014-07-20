@@ -649,19 +649,19 @@ void add_entry(char* key, char* value) {
         }
 
         extract_values(value, &value1, &value2, &value3);
-        systray.area.paddingxlr = systray.area.paddingx = atoi(value1);
+        systray.paddingxlr = systray.paddingx = atoi(value1);
 
         if (value2) {
-            systray.area.paddingy = atoi(value2);
+            systray.paddingy = atoi(value2);
         }
 
         if (value3) {
-            systray.area.paddingx = atoi(value3);
+            systray.paddingx = atoi(value3);
         }
     } else if (strcmp(key, "systray_background_id") == 0) {
         int id = atoi(value);
         id = (id >= 0 && id < backgrounds.size()) ? id : 0;
-        systray.area.bg = backgrounds[id];
+        systray.bg = backgrounds[id];
     } else if (strcmp(key, "systray_sort") == 0) {
         if (strcmp(value, "descending") == 0) {
             systray.sort = -1;

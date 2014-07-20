@@ -1263,7 +1263,7 @@ start:
 
             XFlush(server.dsp);
 
-            panel = (Panel*)systray.area.panel;
+            panel = dynamic_cast<Panel*>(systray.panel);
 
             if (refresh_systray && panel && !panel->is_hidden) {
                 refresh_systray = 0;
@@ -1369,7 +1369,7 @@ start:
                             break;
                         }
 
-                        panel = (Panel*)systray.area.panel;
+                        panel = dynamic_cast<Panel*>(systray.panel);
 
                         if (e.xany.window == panel->main_win) { // reparented to us
                             break;
