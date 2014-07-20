@@ -686,7 +686,7 @@ void set_panel_background(Panel* p) {
         }
 
         tskbar->area.pix = 0;
-        tskbar->bar_name.area.pix = 0;
+        tskbar->bar_name.pix = 0;
         l0 = tskbar->area.list;
 
         if (taskbarname_enabled) {

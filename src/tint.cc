@@ -688,7 +688,7 @@ void event_property_notify(XEvent* e) {
                     if (strcmp(name, tskbar->bar_name.name) != 0) {
                         g_free(tskbar->bar_name.name);
                         tskbar->bar_name.name = name;
-                        tskbar->bar_name.area.resize = 1;
+                        tskbar->bar_name.resize = 1;
                     } else {
                         g_free(name);
                     }

@@ -18,14 +18,13 @@ extern Task* task_drag;
 extern int taskbar_enabled;
 
 
-typedef struct {
-    // always start with area
-    Area area;
+class Taskbarname : public Area {
+public:
     Pixmap state_pix[TASKBAR_STATE_COUNT];
 
     char* name;
     int  posy;
-} Taskbarname;
+};
 
 // tint3 use one taskbar per desktop.
 typedef struct {

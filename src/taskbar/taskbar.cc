@@ -435,8 +435,8 @@ void set_taskbar_state(Taskbar* tskbar, int state) {
     tskbar->area.pix = tskbar->state_pix[state];
 
     if (taskbarname_enabled) {
-        tskbar->bar_name.area.bg = panel1[0].g_taskbar.background_name[state];
-        tskbar->bar_name.area.pix = tskbar->bar_name.state_pix[state];
+        tskbar->bar_name.bg = panel1[0].g_taskbar.background_name[state];
+        tskbar->bar_name.pix = tskbar->bar_name.state_pix[state];
     }
 
     if (panel_mode != MULTI_DESKTOP) {
@@ -449,7 +449,7 @@ void set_taskbar_state(Taskbar* tskbar, int state) {
         }
 
         if (taskbarname_enabled && tskbar->bar_name.state_pix[state] == 0) {
-            tskbar->bar_name.area.redraw = 1;
+            tskbar->bar_name.redraw = 1;
         }
 
         if (panel_mode == MULTI_DESKTOP
