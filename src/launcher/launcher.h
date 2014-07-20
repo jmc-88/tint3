@@ -19,9 +19,8 @@ typedef struct Launcher {
     GSList* list_themes;        // List of IconTheme*
 } Launcher;
 
-typedef struct LauncherIcon {
-    // always start with area
-    Area area;
+class LauncherIcon : public Area {
+public:
     Imlib_Image icon_scaled;
     Imlib_Image icon_original;
     char* cmd;
@@ -31,7 +30,7 @@ typedef struct LauncherIcon {
     int icon_size;
     int is_app_desktop;
     int x, y;
-} LauncherIcon;
+};
 
 typedef struct DesktopEntry {
     char* name;

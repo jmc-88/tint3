@@ -183,12 +183,12 @@ int resize_launcher(void* obj) {
 
     // Resize icons if necessary
     for (l = launcher->list_icons; l ; l = l->next) {
-        LauncherIcon* launcherIcon = (LauncherIcon*)l->data;
+        LauncherIcon* launcherIcon = static_cast<LauncherIcon*>(l->data);
 
         if (launcherIcon->icon_size != icon_size || !launcherIcon->icon_original) {
             launcherIcon->icon_size = icon_size;
-            launcherIcon->area.width = launcherIcon->icon_size;
-            launcherIcon->area.height = launcherIcon->icon_size;
+            launcherIcon->width = launcherIcon->icon_size;
+            launcherIcon->height = launcherIcon->icon_size;
 
             // Get the path for an icon file with the new size
             char* new_icon_path = icon_path(launcher, launcherIcon->icon_name,
@@ -315,9 +315,9 @@ int resize_launcher(void* obj) {
 // in a stack; we need to layout them in a kind of table
 void launcher_icon_on_change_layout(void* obj) {
     LauncherIcon* launcherIcon = (LauncherIcon*)obj;
-    launcherIcon->area.posy = ((Area*)launcherIcon->area.parent)->posy +
+    launcherIcon->posy = ((Area*)launcherIcon->parent)->posy +
                               launcherIcon->y;
-    launcherIcon->area.posx = ((Area*)launcherIcon->area.parent)->posx +
+    launcherIcon->posx = ((Area*)launcherIcon->parent)->posx +
                               launcherIcon->x;
 }
 
@@ -333,10 +333,10 @@ void draw_launcher_icon(void* obj, cairo_t* c) {
     imlib_context_set_image(icon_scaled);
 
     if (server.real_transparency) {
-        render_image(launcherIcon->area.pix, 0, 0, imlib_image_get_width(),
+        render_image(launcherIcon->pix, 0, 0, imlib_image_get_width(),
                      imlib_image_get_height());
     } else {
-        imlib_context_set_drawable(launcherIcon->area.pix);
+        imlib_context_set_drawable(launcherIcon->pix);
         imlib_render_image_on_drawable(0, 0);
     }
 }
@@ -862,21 +862,21 @@ void launcher_load_icons(Launcher* launcher) {
         if (entry.exec) {
             LauncherIcon* launcherIcon = (LauncherIcon*) malloc(sizeof(LauncherIcon));
             memset(&launcherIcon, 0, sizeof(LauncherIcon));
-            launcherIcon->area.parent = reinterpret_cast<Area*>(launcher);
-            launcherIcon->area.panel = launcher->area.panel;
-            launcherIcon->area._draw_foreground = draw_launcher_icon;
-            launcherIcon->area.size_mode = SIZE_BY_CONTENT;
-            launcherIcon->area._resize = NULL;
-            launcherIcon->area.resize = 0;
-            launcherIcon->area.redraw = 1;
-            launcherIcon->area.bg = backgrounds.front();
-            launcherIcon->area.on_screen = 1;
-            launcherIcon->area._on_change_layout = launcher_icon_on_change_layout;
+            launcherIcon->parent = reinterpret_cast<Area*>(launcher);
+            launcherIcon->panel = launcher->area.panel;
+            launcherIcon->_draw_foreground = draw_launcher_icon;
+            launcherIcon->size_mode = SIZE_BY_CONTENT;
+            launcherIcon->_resize = NULL;
+            launcherIcon->resize = 0;
+            launcherIcon->redraw = 1;
+            launcherIcon->bg = backgrounds.front();
+            launcherIcon->on_screen = 1;
+            launcherIcon->_on_change_layout = launcher_icon_on_change_layout;
 
             if (launcher_tooltip_enabled) {
-                launcherIcon->area._get_tooltip_text = launcher_icon_get_tooltip_text;
+                launcherIcon->_get_tooltip_text = launcher_icon_get_tooltip_text;
             } else {
-                launcherIcon->area._get_tooltip_text = NULL;
+                launcherIcon->_get_tooltip_text = NULL;
             }
 
             launcherIcon->is_app_desktop = 1;
@@ -888,7 +888,7 @@ void launcher_load_icons(Launcher* launcher) {
                                              entry.exec);
             free_desktop_entry(&entry);
             launcher->list_icons = g_slist_append(launcher->list_icons, launcherIcon);
-            add_area(&launcherIcon->area);
+            add_area(launcherIcon);
         }
 
         app = g_slist_next(app);
