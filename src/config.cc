@@ -381,15 +381,15 @@ void add_entry(char* key, char* value) {
     } else if (strcmp(key, "battery_padding") == 0) {
 #ifdef ENABLE_BATTERY
         extract_values(value, &value1, &value2, &value3);
-        panel_config.battery.area.paddingxlr = panel_config.battery.area.paddingx =
+        panel_config.battery.paddingxlr = panel_config.battery.paddingx =
                 atoi(value1);
 
         if (value2) {
-            panel_config.battery.area.paddingy = atoi(value2);
+            panel_config.battery.paddingy = atoi(value2);
         }
 
         if (value3) {
-            panel_config.battery.area.paddingx = atoi(value3);
+            panel_config.battery.paddingx = atoi(value3);
         }
 
 #endif
@@ -397,7 +397,7 @@ void add_entry(char* key, char* value) {
 #ifdef ENABLE_BATTERY
         int id = atoi(value);
         id = (id >= 0 && id < backgrounds.size()) ? id : 0;
-        panel_config.battery.area.bg = backgrounds[id];
+        panel_config.battery.bg = backgrounds[id];
 #endif
     } else if (strcmp(key, "battery_hide") == 0) {
 #ifdef ENABLE_BATTERY

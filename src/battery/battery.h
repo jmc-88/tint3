@@ -19,14 +19,12 @@
 
 
 // battery drawing parameter (per panel)
-typedef struct Battery {
-    // always start with area
-    Area area;
-
+class Battery : public Area {
+public:
     Color font;
     int bat1_posy;
     int bat2_posy;
-} Battery;
+};
 
 enum chargestate {
     BATTERY_UNKNOWN,
