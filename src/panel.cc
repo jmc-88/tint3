@@ -400,13 +400,13 @@ int resize_panel(void* obj) {
         // propagate width/height on hidden taskbar
         int i, width, height;
         Panel* panel = (Panel*)obj;
-        width = panel->taskbar[server.desktop].area.width;
-        height = panel->taskbar[server.desktop].area.height;
+        width = panel->taskbar[server.desktop].width;
+        height = panel->taskbar[server.desktop].height;
 
         for (i = 0 ; i < panel->nb_desktop ; i++) {
-            panel->taskbar[i].area.width = width;
-            panel->taskbar[i].area.height = height;
-            panel->taskbar[i].area.resize = 1;
+            panel->taskbar[i].width = width;
+            panel->taskbar[i].height = height;
+            panel->taskbar[i].resize = 1;
         }
     }
 
@@ -685,9 +685,9 @@ void set_panel_background(Panel* p) {
             tskbar->bar_name.state_pix[k] = 0;
         }
 
-        tskbar->area.pix = 0;
+        tskbar->pix = 0;
         tskbar->bar_name.pix = 0;
-        l0 = tskbar->area.list;
+        l0 = tskbar->list;
 
         if (taskbarname_enabled) {
             l0 = l0->next;
@@ -721,8 +721,8 @@ Taskbar* click_taskbar(Panel* panel, int x, int y) {
         for (i = 0; i < panel->nb_desktop ; i++) {
             tskbar = &panel->taskbar[i];
 
-            if (tskbar->area.on_screen && x >= tskbar->area.posx
-                && x <= (tskbar->area.posx + tskbar->area.width)) {
+            if (tskbar->on_screen && x >= tskbar->posx
+                && x <= (tskbar->posx + tskbar->width)) {
                 return tskbar;
             }
         }
@@ -730,8 +730,8 @@ Taskbar* click_taskbar(Panel* panel, int x, int y) {
         for (i = 0; i < panel->nb_desktop ; i++) {
             tskbar = &panel->taskbar[i];
 
-            if (tskbar->area.on_screen && y >= tskbar->area.posy
-                && y <= (tskbar->area.posy + tskbar->area.height)) {
+            if (tskbar->on_screen && y >= tskbar->posy
+                && y <= (tskbar->posy + tskbar->height)) {
                 return tskbar;
             }
         }
@@ -745,7 +745,7 @@ Task* click_task(Panel* panel, int x, int y) {
     Taskbar* tskbar = click_taskbar(panel, x, y);
 
     if (tskbar) {
-        GSList* l0 = tskbar->area.list;
+        GSList* l0 = tskbar->list;
 
         if (taskbarname_enabled) {
             l0 = l0->next;

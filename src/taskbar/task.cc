@@ -129,8 +129,8 @@ Task* add_task(Window win) {
 
         new_tsk2->icon_width = new_tsk.icon_width;
         new_tsk2->icon_height = new_tsk.icon_height;
-        tskbar->area.list = g_slist_append(tskbar->area.list, new_tsk2);
-        tskbar->area.resize = 1;
+        tskbar->list = g_slist_append(tskbar->list, new_tsk2);
+        tskbar->resize = 1;
         g_ptr_array_add(task_group, new_tsk2);
         //printf("add_task panel %d, desktop %d, task %s\n", i, j, new_tsk2->title);
     }
@@ -182,8 +182,8 @@ void remove_task(Task* tsk) {
     for (int i = 0; i < task_group->len; ++i) {
         Task* tsk2 = static_cast<Task*>(g_ptr_array_index(task_group, i));
         Taskbar* tskbar = reinterpret_cast<Taskbar*>(tsk2->parent);
-        tskbar->area.list = g_slist_remove(tskbar->area.list, tsk2);
-        tskbar->area.resize = 1;
+        tskbar->list = g_slist_remove(tskbar->list, tsk2);
+        tskbar->resize = 1;
 
         if (tsk2 == task_active) {
             task_active = 0;
@@ -520,7 +520,7 @@ Task* find_active_task(Task* current_task, Task* active_task) {
     }
 
     Taskbar* tskbar = reinterpret_cast<Taskbar*>(current_task->parent);
-    GSList* l0 = tskbar->area.list;
+    GSList* l0 = tskbar->list;
 
     if (taskbarname_enabled) {
         l0 = l0->next;
@@ -543,7 +543,7 @@ Task* next_task(Task* tsk) {
     }
 
     Taskbar* tskbar = reinterpret_cast<Taskbar*>(tsk->parent);
-    GSList* l0 = static_cast<GSList*>(tskbar->area.list);
+    GSList* l0 = tskbar->list;
 
     if (taskbarname_enabled) {
         l0 = l0->next;
@@ -571,7 +571,7 @@ Task* prev_task(Task* tsk) {
     Taskbar* tskbar = reinterpret_cast<Taskbar*>(tsk->parent);
     Task* tsk2 = 0;
 
-    GSList* l0 = static_cast<GSList*>(tskbar->area.list);
+    GSList* l0 = tskbar->list;
 
     if (taskbarname_enabled) {
         l0 = l0->next;

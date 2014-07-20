@@ -74,7 +74,7 @@ void init_taskbarname_panel(void* p) {
         }
 
         // append the name at the beginning of taskbar
-        tskbar->area.list = g_slist_append(tskbar->area.list, &tskbar->bar_name);
+        tskbar->list = g_slist_append(tskbar->list, &tskbar->bar_name);
     }
 
     for (l = list ; l ; l = l->next) {
@@ -108,7 +108,7 @@ void cleanup_taskbarname() {
                 }
             }
 
-            tskbar->area.list = g_slist_remove(tskbar->area.list, &tskbar->bar_name);
+            tskbar->list = g_slist_remove(tskbar->list, &tskbar->bar_name);
         }
     }
 }

@@ -36,7 +36,7 @@
 #include <sys/wait.h>
 #endif
 
-#include <version.h>
+#include "version.h"
 #include "server.h"
 #include "window.h"
 #include "config.h"
@@ -500,14 +500,14 @@ void event_button_motion_notify(XEvent* e) {
     if (event_taskbar == (Taskbar*)task_drag->parent) {
         // Swap the task_drag with the task on the event's location (if they differ)
         if (event_task && event_task != task_drag) {
-            GSList* drag_iter = g_slist_find(event_taskbar->area.list, task_drag);
-            GSList* task_iter = g_slist_find(event_taskbar->area.list, event_task);
+            GSList* drag_iter = g_slist_find(event_taskbar->list, task_drag);
+            GSList* task_iter = g_slist_find(event_taskbar->list, event_task);
 
             if (drag_iter && task_iter) {
                 gpointer temp = task_iter->data;
                 task_iter->data = drag_iter->data;
                 drag_iter->data = temp;
-                event_taskbar->area.resize = 1;
+                event_taskbar->resize = 1;
                 panel_refresh = 1;
                 task_dragged = 1;
             }
@@ -518,15 +518,15 @@ void event_button_motion_notify(XEvent* e) {
         }
 
         Taskbar* drag_taskbar = (Taskbar*)task_drag->parent;
-        drag_taskbar->area.list = g_slist_remove(drag_taskbar->area.list, task_drag);
+        drag_taskbar->list = g_slist_remove(drag_taskbar->list, task_drag);
 
-        if (event_taskbar->area.posx > drag_taskbar->area.posx
-            || event_taskbar->area.posy > drag_taskbar->area.posy) {
+        if (event_taskbar->posx > drag_taskbar->posx
+            || event_taskbar->posy > drag_taskbar->posy) {
             int i = (taskbarname_enabled) ? 1 : 0;
-            event_taskbar->area.list = g_slist_insert(event_taskbar->area.list, task_drag,
+            event_taskbar->list = g_slist_insert(event_taskbar->list, task_drag,
                                        i);
         } else {
-            event_taskbar->area.list = g_slist_append(event_taskbar->area.list, task_drag);
+            event_taskbar->list = g_slist_append(event_taskbar->list, task_drag);
         }
 
         // Move task to other desktop (but avoid the 'Window desktop changed' code in 'event_property_notify')
@@ -535,8 +535,8 @@ void event_button_motion_notify(XEvent* e) {
 
         windows_set_desktop(task_drag->win, event_taskbar->desktop);
 
-        event_taskbar->area.resize = 1;
-        drag_taskbar->area.resize = 1;
+        event_taskbar->resize = 1;
+        drag_taskbar->resize = 1;
         task_dragged = 1;
         panel_refresh = 1;
     }
@@ -747,7 +747,7 @@ void event_property_notify(XEvent* e) {
 
                 if (server.nb_desktop > old_desktop) {
                     tskbar = &panel->taskbar[old_desktop];
-                    l = tskbar->area.list;
+                    l = tskbar->list;
 
                     if (taskbarname_enabled) {
                         l = l->next;
@@ -758,14 +758,14 @@ void event_property_notify(XEvent* e) {
 
                         if (tsk->desktop == ALLDESKTOP) {
                             tsk->on_screen = 0;
-                            tskbar->area.resize = 1;
+                            tskbar->resize = 1;
                             panel_refresh = 1;
                         }
                     }
                 }
 
                 tskbar = &panel->taskbar[server.desktop];
-                l = tskbar->area.list;
+                l = tskbar->list;
 
                 if (taskbarname_enabled) {
                     l = l->next;
@@ -776,7 +776,7 @@ void event_property_notify(XEvent* e) {
 
                     if (tsk->desktop == ALLDESKTOP) {
                         tsk->on_screen = 1;
-                        tskbar->area.resize = 1;
+                        tskbar->resize = 1;
                     }
                 }
             }

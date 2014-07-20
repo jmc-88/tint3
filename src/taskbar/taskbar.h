@@ -27,10 +27,8 @@ public:
 };
 
 // tint3 use one taskbar per desktop.
-typedef struct {
-    // always start with area
-    Area area;
-
+class Taskbar : public Area {
+public:
     int desktop;
     Pixmap state_pix[TASKBAR_STATE_COUNT];
 
@@ -38,7 +36,7 @@ typedef struct {
 
     // task parameters
     int text_width;
-} Taskbar;
+};
 
 typedef struct {
     //always start with area

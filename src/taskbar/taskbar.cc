@@ -81,7 +81,7 @@ void cleanup_taskbar() {
                 }
             }
 
-            free_area(&tskbar->area);
+            free_area(tskbar);
             // remove taskbar from the panel
             panel->list = g_slist_remove(panel->list, tskbar);
         }
@@ -289,13 +289,17 @@ void init_taskbar_panel(void* p) {
 
     for (j = 0 ; j < panel->nb_desktop ; j++) {
         tskbar = &panel->taskbar[j];
-        memcpy(&tskbar->area, &panel->g_taskbar.area, sizeof(Area));
+
+        // TODO: nuke this from planet Earth ASAP - horrible hack to mimick the
+        // original memcpy() call
+        dynamic_cast<Area*>(tskbar)->clone(panel->g_taskbar.area);
+
         tskbar->desktop = j;
 
         if (j == server.desktop) {
-            tskbar->area.bg = panel->g_taskbar.background[TASKBAR_ACTIVE];
+            tskbar->bg = panel->g_taskbar.background[TASKBAR_ACTIVE];
         } else {
-            tskbar->area.bg = panel->g_taskbar.background[TASKBAR_NORMAL];
+            tskbar->bg = panel->g_taskbar.background[TASKBAR_NORMAL];
         }
     }
 
@@ -376,21 +380,21 @@ void draw_taskbar(void* obj, cairo_t* c) {
     Taskbar* taskbar = static_cast<Taskbar*>(obj);
     int state = (taskbar->desktop == server.desktop ? TASKBAR_ACTIVE :
                  TASKBAR_NORMAL);
-    taskbar->state_pix[state] = taskbar->area.pix;
+    taskbar->state_pix[state] = taskbar->pix;
 }
 
 
 int resize_taskbar(void* obj) {
     Taskbar* taskbar = static_cast<Taskbar*>(obj);
-    Panel* panel = static_cast<Panel*>(taskbar->area.panel);
+    Panel* panel = static_cast<Panel*>(taskbar->panel);
     int text_width;
 
-    //printf("resize_taskbar %d %d\n", taskbar->area.posx, taskbar->area.posy);
+    //printf("resize_taskbar %d %d\n", taskbar->posx, taskbar->posy);
     if (panel_horizontal) {
         resize_by_layout(obj, panel->g_task.maximum_width);
 
         text_width = panel->g_task.maximum_width;
-        GSList* l = taskbar->area.list;
+        GSList* l = taskbar->list;
 
         if (taskbarname_enabled) {
             l = l->next;
@@ -404,7 +408,7 @@ int resize_taskbar(void* obj) {
                               panel->g_task.bg->border.width - panel->g_task.paddingx;
     } else {
         resize_by_layout(obj, panel->g_task.maximum_height);
-        taskbar->text_width = taskbar->area.width - (2 * panel->g_taskbar.area.paddingy)
+        taskbar->text_width = taskbar->width - (2 * panel->g_taskbar.area.paddingy)
                               - panel->g_task.text_posx -    panel->g_task.bg->border.width -
                               panel->g_task.paddingx;
     }
@@ -425,14 +429,14 @@ void on_change_taskbar(void* obj) {
         tskbar->state_pix[k] = 0;
     }
 
-    tskbar->area.pix = 0;
-    tskbar->area.redraw = 1;
+    tskbar->pix = 0;
+    tskbar->redraw = 1;
 }
 
 
 void set_taskbar_state(Taskbar* tskbar, int state) {
-    tskbar->area.bg = panel1[0].g_taskbar.background[state];
-    tskbar->area.pix = tskbar->state_pix[state];
+    tskbar->bg = panel1[0].g_taskbar.background[state];
+    tskbar->pix = tskbar->state_pix[state];
 
     if (taskbarname_enabled) {
         tskbar->bar_name.bg = panel1[0].g_taskbar.background_name[state];
@@ -440,12 +444,12 @@ void set_taskbar_state(Taskbar* tskbar, int state) {
     }
 
     if (panel_mode != MULTI_DESKTOP) {
-        tskbar->area.on_screen = (state == TASKBAR_NORMAL ? 0 : 1);
+        tskbar->on_screen = (state == TASKBAR_NORMAL ? 0 : 1);
     }
 
-    if (tskbar->area.on_screen == 1) {
+    if (tskbar->on_screen == 1) {
         if (tskbar->state_pix[state] == 0) {
-            tskbar->area.redraw = 1;
+            tskbar->redraw = 1;
         }
 
         if (taskbarname_enabled && tskbar->bar_name.state_pix[state] == 0) {
@@ -455,7 +459,7 @@ void set_taskbar_state(Taskbar* tskbar, int state) {
         if (panel_mode == MULTI_DESKTOP
             && panel1[0].g_taskbar.background[TASKBAR_NORMAL] !=
             panel1[0].g_taskbar.background[TASKBAR_ACTIVE]) {
-            GSList* l = tskbar->area.list;
+            GSList* l = tskbar->list;
 
             if (taskbarname_enabled) {
                 l = l->next;
@@ -479,9 +483,9 @@ void visible_taskbar(void* p) {
 
         if (panel_mode != MULTI_DESKTOP && taskbar->desktop != server.desktop) {
             // SINGLE_DESKTOP and not current desktop
-            taskbar->area.on_screen = 0;
+            taskbar->on_screen = 0;
         } else {
-            taskbar->area.on_screen = 1;
+            taskbar->on_screen = 1;
         }
     }
 
