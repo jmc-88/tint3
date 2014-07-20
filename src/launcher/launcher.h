@@ -11,13 +11,12 @@
 #include "area.h"
 #include "xsettings-client.h"
 
-typedef struct Launcher {
-    // always start with area
-    Area area;
+class Launcher : public Area {
+public:
     GSList* list_apps;          // List of char*, each is a path to a app.desktop file
     GSList* list_icons;         // List of LauncherIcon*
     GSList* list_themes;        // List of IconTheme*
-} Launcher;
+};
 
 class LauncherIcon : public Area {
 public:

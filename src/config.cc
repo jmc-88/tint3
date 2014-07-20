@@ -684,20 +684,20 @@ void add_entry(char* key, char* value) {
     /* Launcher */
     else if (strcmp(key, "launcher_padding") == 0) {
         extract_values(value, &value1, &value2, &value3);
-        panel_config.launcher.area.paddingxlr = panel_config.launcher.area.paddingx =
+        panel_config.launcher.paddingxlr = panel_config.launcher.paddingx =
                 atoi(value1);
 
         if (value2) {
-            panel_config.launcher.area.paddingy = atoi(value2);
+            panel_config.launcher.paddingy = atoi(value2);
         }
 
         if (value3) {
-            panel_config.launcher.area.paddingx = atoi(value3);
+            panel_config.launcher.paddingx = atoi(value3);
         }
     } else if (strcmp(key, "launcher_background_id") == 0) {
         int id = atoi(value);
         id = (id >= 0 && id < backgrounds.size()) ? id : 0;
-        panel_config.launcher.area.bg = backgrounds[id];
+        panel_config.launcher.bg = backgrounds[id];
     } else if (strcmp(key, "launcher_icon_size") == 0) {
         launcher_max_icon_size = atoi(value);
     } else if (strcmp(key, "launcher_item_app") == 0) {

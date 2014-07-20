@@ -776,13 +776,13 @@ Launcher* click_launcher(Panel* panel, int x, int y) {
     Launcher* launcher = &panel->launcher;
 
     if (panel_horizontal) {
-        if (launcher->area.on_screen && x >= launcher->area.posx
-            && x <= (launcher->area.posx + launcher->area.width)) {
+        if (launcher->on_screen && x >= launcher->posx
+            && x <= (launcher->posx + launcher->width)) {
             return launcher;
         }
     } else {
-        if (launcher->area.on_screen && y >= launcher->area.posy
-            && y <= (launcher->area.posy + launcher->area.height)) {
+        if (launcher->on_screen && y >= launcher->posy
+            && y <= (launcher->posy + launcher->height)) {
             return launcher;
         }
     }
@@ -800,11 +800,11 @@ LauncherIcon* click_launcher_icon(Panel* panel, int x, int y) {
         for (l0 = launcher->list_icons; l0 ; l0 = l0->next) {
             LauncherIcon* icon = static_cast<LauncherIcon*>(l0->data);
 
-            if (x >= (launcher->area.posx + icon->x)
-                && x <= (launcher->area.posx + icon->x + icon->icon_size) &&
-                y >= (launcher->area.posy + icon->y)
-                && y <= (launcher->area.posy + icon->y + icon->icon_size)) {
-                //printf("Hit rect x=%d y=%d xmax=%d ymax=%d\n", launcher->area.posx + icon->x, launcher->area.posy + icon->y, launcher->area.posx + icon->x + icon->width, launcher->area.posy + icon->y + icon->height);
+            if (x >= (launcher->posx + icon->x)
+                && x <= (launcher->posx + icon->x + icon->icon_size) &&
+                y >= (launcher->posy + icon->y)
+                && y <= (launcher->posy + icon->y + icon->icon_size)) {
+                //printf("Hit rect x=%d y=%d xmax=%d ymax=%d\n", launcher->posx + icon->x, launcher->posy + icon->y, launcher->posx + icon->x + icon->width, launcher->posy + icon->y + icon->height);
                 return icon;
             }
         }
