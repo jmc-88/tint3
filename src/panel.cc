@@ -26,6 +26,8 @@
 #include <cairo-xlib.h>
 #include <pango/pangocairo.h>
 
+#include <algorithm>
+
 #include "server.h"
 #include "config.h"
 #include "panel.h"
@@ -475,26 +477,23 @@ void update_strut(Panel* p) {
 
 
 void set_panel_items_order(Panel* p) {
-    if (p->list) {
-        g_slist_free(p->list);
-        p->list = 0;
-    }
+    p->children.clear();
 
     for (size_t k = 0 ; k < strlen(panel_items_order) ; k++) {
         if (panel_items_order[k] == 'L') {
-            p->list = g_slist_append(p->list, &p->launcher);
+            p->children.push_back(&p->launcher);
         }
 
         if (panel_items_order[k] == 'T') {
             for (int j = 0 ; j < p->nb_desktop ; j++) {
-                p->list = g_slist_append(p->list, &p->taskbar[j]);
+                p->children.push_back(&p->taskbar[j]);
             }
         }
 
 #ifdef ENABLE_BATTERY
 
         if (panel_items_order[k] == 'B') {
-            p->list = g_slist_append(p->list, &p->battery);
+            p->children.push_back(&p->battery);
         }
 
 #endif
@@ -502,11 +501,11 @@ void set_panel_items_order(Panel* p) {
         if (panel_items_order[k] == 'S' && p == panel1) {
             // TODO : check systray is only on 1 panel
             // at the moment only on panel1[0] allowed
-            p->list = g_slist_append(p->list, &systray);
+            p->children.push_back(&systray);
         }
 
         if (panel_items_order[k] == 'C') {
-            p->list = g_slist_append(p->list, &p->clock);
+            p->children.push_back(&p->clock);
         }
     }
 
@@ -648,11 +647,9 @@ void set_panel_background(Panel* p) {
     }
 
     // redraw panel's object
-    GSList* l0;
-
-    for (l0 = p->list; l0 ; l0 = l0->next) {
-        static_cast<Area*>(l0->data)->set_redraw();
-    }
+    std::for_each(p->children.begin(), p->children.end(), [](Area * child) {
+        child->set_redraw();
+    });
 
     // reset task/taskbar 'state_pix'
     for (int i = 0 ; i < p->nb_desktop ; i++) {
@@ -674,15 +671,16 @@ void set_panel_background(Panel* p) {
 
         tskbar->pix = 0;
         tskbar->bar_name.pix = 0;
-        l0 = tskbar->list;
+
+        auto begin = tskbar->children.begin();
 
         if (taskbarname_enabled) {
-            l0 = l0->next;
+            ++begin;
         }
 
-        for (; l0 ; l0 = l0->next) {
-            set_task_redraw(static_cast<Task*>(l0->data));
-        }
+        std::for_each(begin, tskbar->children.end(), [](Area * child) {
+            set_task_redraw(static_cast<Task*>(child));
+        });
     }
 }
 
@@ -732,14 +730,14 @@ Task* click_task(Panel* panel, int x, int y) {
     Taskbar* tskbar = click_taskbar(panel, x, y);
 
     if (tskbar) {
-        GSList* l0 = tskbar->list;
+        auto begin = tskbar->children.begin();
 
         if (taskbarname_enabled) {
-            l0 = l0->next;
+            ++begin;
         }
 
-        for (; l0 ; l0 = l0->next) {
-            Task* tsk = static_cast<Task*>(l0->data);
+        for (auto it = begin; it != tskbar->children.end(); ++it) {
+            auto tsk = reinterpret_cast<Task*>(*it);
 
             if (panel_horizontal) {
                 if (tsk->on_screen && x >= tsk->posx
@@ -838,23 +836,20 @@ int click_clock(Panel* panel, int x, int y) {
 
 
 Area* click_area(Panel* panel, int x, int y) {
-    Area* result = panel;
-    Area* new_result = result;
+    Area* new_result = panel;
+    Area* result;
 
     do {
         result = new_result;
-        GSList* it = result->list;
 
-        while (it) {
-            Area* a = static_cast<Area*>(it->data);
+        for (auto it = result->children.begin(); it != result->children.end(); ++it) {
+            Area* a = (*it);
 
             if (a->on_screen && x >= a->posx && x <= (a->posx + a->width)
                 && y >= a->posy && y <= (a->posy + a->height)) {
                 new_result = a;
                 break;
             }
-
-            it = it->next;
         }
     } while (new_result != result);
 

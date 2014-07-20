@@ -27,6 +27,8 @@
 #include <glib.h>
 #include <unistd.h>
 
+#include <algorithm>
+
 #include "task.h"
 #include "taskbar.h"
 #include "server.h"
@@ -129,14 +131,14 @@ Task* add_task(Window win) {
 
         new_tsk2->icon_width = new_tsk.icon_width;
         new_tsk2->icon_height = new_tsk.icon_height;
-        tskbar->list = g_slist_append(tskbar->list, new_tsk2);
+        tskbar->children.push_back(new_tsk2);
         tskbar->resize = 1;
         g_ptr_array_add(task_group, new_tsk2);
         //printf("add_task panel %d, desktop %d, task %s\n", i, j, new_tsk2->title);
     }
 
-    Window* key = (Window*) malloc(sizeof(Window));
-    *key = new_tsk.win;
+    auto key = (Window*) malloc(sizeof(Window));
+    (*key) = new_tsk.win;
     g_hash_table_insert(win_to_task_table, key, task_group);
     set_task_state(new_tsk2, new_tsk.current_state);
 
@@ -179,7 +181,15 @@ void remove_task(Task* tsk) {
     for (size_t i = 0; i < task_group->len; ++i) {
         auto tsk2 = static_cast<Task*>(g_ptr_array_index(task_group, i));
         auto tskbar = reinterpret_cast<Taskbar*>(tsk2->parent);
-        tskbar->list = g_slist_remove(tskbar->list, tsk2);
+
+        auto tsk2_iter = std::find(tskbar->children.begin(),
+                                   tskbar->children.end(),
+                                   tsk2);
+
+        if (tsk2_iter != tskbar->children.end()) {
+            tskbar->children.erase(tsk2_iter);
+        }
+
         tskbar->resize = 1;
 
         if (tsk2 == task_active) {
@@ -254,10 +264,8 @@ int get_title(Task* tsk) {
     GPtrArray* task_group = task_get_tasks(tsk->win);
 
     if (task_group) {
-        int i;
-
-        for (i = 0; i < task_group->len; ++i) {
-            Task* tsk2 = static_cast<Task*>(g_ptr_array_index(task_group, i));
+        for (size_t i = 0; i < task_group->len; ++i) {
+            auto tsk2 = static_cast<Task*>(g_ptr_array_index(task_group, i));
             tsk2->title = tsk->title;
             set_task_redraw(tsk2);
         }
@@ -516,14 +524,14 @@ Task* find_active_task(Task* current_task, Task* active_task) {
     }
 
     Taskbar* tskbar = reinterpret_cast<Taskbar*>(current_task->parent);
-    GSList* l0 = tskbar->list;
+    auto it = tskbar->children.begin();
 
     if (taskbarname_enabled) {
-        l0 = l0->next;
+        ++it;
     }
 
-    for (; l0 ; l0 = l0->next) {
-        Task* tsk = static_cast<Task*>(l0->data);
+    for (; it != tskbar->children.end(); ++it) {
+        auto tsk = static_cast<Task*>(*it);
 
         if (tsk->win == active_task->win) {
             return tsk;
@@ -534,63 +542,53 @@ Task* find_active_task(Task* current_task, Task* active_task) {
 }
 
 Task* next_task(Task* tsk) {
-    if (tsk == 0) {
-        return 0;
+    if (tsk == nullptr) {
+        return nullptr;
     }
 
-    Taskbar* tskbar = reinterpret_cast<Taskbar*>(tsk->parent);
-    GSList* l0 = tskbar->list;
+    auto tskbar = reinterpret_cast<Taskbar*>(tsk->parent);
+    auto first = tskbar->children.begin();
 
     if (taskbarname_enabled) {
-        l0 = l0->next;
+        ++first;
     }
 
-    GSList* lfirst_tsk = l0;
+    auto it = std::find(first, tskbar->children.end(), tsk);
 
-    for (; l0 ; l0 = l0->next) {
-        Task* tsk1 = static_cast<Task*>(l0->data);
-
-        if (tsk1 == tsk) {
-            l0 = (l0->next ? l0->next : lfirst_tsk);
-            return static_cast<Task*>(l0->data);
-        }
+    if (it == tskbar->children.end()) {
+        return nullptr;
     }
 
-    return 0;
+    if (++it == tskbar->children.end()) {
+        return static_cast<Task*>(*it);
+    }
+
+    return static_cast<Task*>(*first);
 }
 
 Task* prev_task(Task* tsk) {
-    if (tsk == 0) {
-        return 0;
+    if (tsk == nullptr) {
+        return nullptr;
     }
 
-    Taskbar* tskbar = reinterpret_cast<Taskbar*>(tsk->parent);
-    Task* tsk2 = 0;
-
-    GSList* l0 = tskbar->list;
+    auto tskbar = reinterpret_cast<Taskbar*>(tsk->parent);
+    auto first = tskbar->children.begin();
 
     if (taskbarname_enabled) {
-        l0 = l0->next;
+        ++first;
     }
 
-    GSList* lfirst_tsk = l0;
+    auto it = std::find(tskbar->children.begin(), tskbar->children.end(), tsk);
 
-    for (; l0 ; l0 = l0->next) {
-        Task* tsk1 = static_cast<Task*>(l0->data);
-
-        if (tsk1 == tsk) {
-            if (l0 == lfirst_tsk) {
-                l0 = g_slist_last(l0);
-                tsk2 = static_cast<Task*>(l0->data);
-            }
-
-            return tsk2;
-        }
-
-        tsk2 = tsk1;
+    if (it == tskbar->children.end()) {
+        return nullptr;
     }
 
-    return 0;
+    if (it-- == first) {
+        return static_cast<Task*>(tskbar->children.back());
+    }
+
+    return static_cast<Task*>(*it);
 }
 
 

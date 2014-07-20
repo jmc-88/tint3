@@ -26,6 +26,8 @@
 #include <glib.h>
 #include <Imlib2.h>
 
+#include <algorithm>
+
 #include "task.h"
 #include "taskbar.h"
 #include "server.h"
@@ -83,7 +85,13 @@ void cleanup_taskbar() {
 
             tskbar->free_area();
             // remove taskbar from the panel
-            panel->list = g_slist_remove(panel->list, tskbar);
+            auto it = std::find(panel->children.begin(),
+                                panel->children.end(),
+                                tskbar);
+
+            if (it != panel->children.end()) {
+                panel->children.erase(it);
+            }
         }
 
         if (panel->taskbar) {
@@ -394,14 +402,14 @@ int resize_taskbar(void* obj) {
         resize_by_layout(obj, panel->g_task.maximum_width);
 
         text_width = panel->g_task.maximum_width;
-        GSList* l = taskbar->list;
+        auto it = taskbar->children.begin();
 
         if (taskbarname_enabled) {
-            l = l->next;
+            ++it;
         }
 
-        if (l != NULL) {
-            text_width = ((Task*)l->data)->width;
+        if (it != taskbar->children.end()) {
+            text_width = static_cast<Task*>(*it)->width;
         }
 
         taskbar->text_width = text_width - panel->g_task.text_posx -
@@ -459,14 +467,14 @@ void set_taskbar_state(Taskbar* tskbar, int state) {
         if (panel_mode == MULTI_DESKTOP
             && panel1[0].g_taskbar.background[TASKBAR_NORMAL] !=
             panel1[0].g_taskbar.background[TASKBAR_ACTIVE]) {
-            GSList* l = tskbar->list;
+            auto it = tskbar->children.begin();
 
             if (taskbarname_enabled) {
-                l = l->next;
+                ++it;
             }
 
-            for (; l ; l = l->next) {
-                set_task_redraw(static_cast<Task*>(l->data));
+            for (; it != tskbar->children.end(); ++it) {
+                set_task_redraw(static_cast<Task*>(*it));
             }
         }
     }

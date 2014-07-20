@@ -26,6 +26,8 @@
 #include <glib.h>
 #include <Imlib2.h>
 
+#include <algorithm>
+
 #include "panel.h"
 #include "taskbar.h"
 #include "server.h"
@@ -74,7 +76,7 @@ void init_taskbarname_panel(void* p) {
         }
 
         // append the name at the beginning of taskbar
-        tskbar->list = g_slist_append(tskbar->list, &tskbar->bar_name);
+        tskbar->children.push_back(&tskbar->bar_name);
     }
 
     for (l = list ; l ; l = l->next) {
@@ -104,7 +106,12 @@ void cleanup_taskbarname() {
                 }
             }
 
-            tskbar->list = g_slist_remove(tskbar->list, &tskbar->bar_name);
+            auto it = std::find(tskbar->children.begin(), tskbar->children.end(),
+                                &tskbar->bar_name);
+
+            if (it != tskbar->children.end()) {
+                tskbar->children.erase(it);
+            }
         }
     }
 }

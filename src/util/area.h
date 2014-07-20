@@ -24,6 +24,8 @@
 #include <cairo.h>
 #include <cairo-xlib.h>
 
+#include <vector>
+
 
 typedef struct {
     double color[3];
@@ -61,8 +63,8 @@ class Area {
     Pixmap pix;
     Background* bg;
 
-    // list of child : Area object
-    GSList* list;
+    // list of children Area objects
+    std::vector<Area*> children;
 
     // object visible on screen.
     // An object (like systray) could be enabled but hidden (because no tray icon).

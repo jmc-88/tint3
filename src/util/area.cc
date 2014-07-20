@@ -25,6 +25,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <algorithm>
+
 #include "area.h"
 #include "panel.h"
 #include "../server.h"
@@ -78,9 +80,7 @@ void init_rendering(void* obj, int pos) {
     Area* a = static_cast<Area*>(obj);
 
     // initialize fixed position/size
-    for (GSList* l = a->list; l ; l = l->next) {
-        auto child = static_cast<Area*>(l->data);
-
+    std::for_each(a->children.begin(), a->children.end(), [&](Area * child) {
         if (panel_horizontal) {
             child->posy = pos + a->bg->border.width + a->paddingy;
             child->height = a->height - (2 * (a->bg->border.width + a->paddingy));
@@ -90,7 +90,7 @@ void init_rendering(void* obj, int pos) {
             child->width = a->width - (2 * (a->bg->border.width + a->paddingy));
             init_rendering(child, child->posx);
         }
-    }
+    });
 }
 
 
@@ -109,9 +109,9 @@ void Area::size_by_content() {
     }
 
     // children node are resized before its parent
-    for (GSList* l = list; l ; l = l->next) {
-        static_cast<Area*>(l->data)->size_by_content();
-    }
+    std::for_each(children.begin(), children.end(), [](Area * child) {
+        child->size_by_content();
+    });
 
     // calculate area's size
     on_changed = 0;
@@ -138,8 +138,6 @@ void Area::size_by_layout(int pos, int level) {
 
     // parent node is resized before its children
     // calculate area's size
-    GSList* l;
-
     if (resize && size_mode == SIZE_BY_LAYOUT) {
         resize = 0;
 
@@ -147,13 +145,11 @@ void Area::size_by_layout(int pos, int level) {
             _resize(this);
 
             // resize children with SIZE_BY_LAYOUT
-            for (l = list; l ; l = l->next) {
-                auto child = static_cast<Area*>(l->data);
-
-                if (child->size_mode == SIZE_BY_LAYOUT && child->list) {
+            std::for_each(children.begin(), children.end(), [](Area * child) {
+                if (child->size_mode == SIZE_BY_LAYOUT && child->children.size() != 0) {
                     child->resize = 1;
                 }
-            }
+            });
         }
     }
 
@@ -161,11 +157,9 @@ void Area::size_by_layout(int pos, int level) {
     pos += paddingxlr + bg->border.width;
     int i = 0;
 
-    for (l = list; l ; l = l->next) {
-        auto child = static_cast<Area*>(l->data);
-
+    std::for_each(children.begin(), children.end(), [&](Area * child) {
         if (!child->on_screen) {
-            continue;
+            return;
         }
 
         i++;
@@ -195,7 +189,7 @@ void Area::size_by_layout(int pos, int level) {
         } else {
             pos += child->height + paddingx;
         }
-    }
+    });
 
     if (on_changed) {
         // pos/size changed
@@ -237,25 +231,21 @@ void Area::refresh() {
         width, height, posx, posy);
 
     // and then refresh child object
-    for (GSList* l = list; l ; l = l->next) {
-        static_cast<Area*>(l->data)->refresh();
-    }
+    std::for_each(children.begin(), children.end(), [](Area * child) {
+        child->refresh();
+    });
 }
 
 
 int resize_by_layout(void* obj, int maximum_size) {
-    Area* a = static_cast<Area*>(obj);
-    Area* child;
+    auto a = static_cast<Area*>(obj);
     int size, nb_by_content = 0, nb_by_layout = 0;
 
     if (panel_horizontal) {
         // detect free size for SIZE_BY_LAYOUT's Area
         size = a->width - (2 * (a->paddingxlr + a->bg->border.width));
-        GSList* l;
 
-        for (l = a->list ; l ; l = l->next) {
-            child = static_cast<Area*>(l->data);
-
+        std::for_each(a->children.begin(), a->children.end(), [&](Area * child) {
             if (child->on_screen && child->size_mode == SIZE_BY_CONTENT) {
                 size -= child->width;
                 nb_by_content++;
@@ -264,7 +254,7 @@ int resize_by_layout(void* obj, int maximum_size) {
             if (child->on_screen && child->size_mode == SIZE_BY_LAYOUT) {
                 nb_by_layout++;
             }
-        }
+        });
 
         //printf("  resize_by_layout Deb %d, %d\n", nb_by_content, nb_by_layout);
         if (nb_by_content + nb_by_layout) {
@@ -284,9 +274,7 @@ int resize_by_layout(void* obj, int maximum_size) {
         }
 
         // resize SIZE_BY_LAYOUT objects
-        for (l = a->list ; l ; l = l->next) {
-            child = (Area*)l->data;
-
+        std::for_each(a->children.begin(), a->children.end(), [&](Area * child) {
             if (child->on_screen && child->size_mode == SIZE_BY_LAYOUT) {
                 old_width = child->width;
                 child->width = width;
@@ -300,15 +288,12 @@ int resize_by_layout(void* obj, int maximum_size) {
                     child->on_changed = 1;
                 }
             }
-        }
+        });
     } else {
         // detect free size for SIZE_BY_LAYOUT's Area
         size = a->height - (2 * (a->paddingxlr + a->bg->border.width));
-        GSList* l;
 
-        for (l = a->list ; l ; l = l->next) {
-            child = (Area*)l->data;
-
+        std::for_each(a->children.begin(), a->children.end(), [&](Area * child) {
             if (child->on_screen && child->size_mode == SIZE_BY_CONTENT) {
                 size -= child->height;
                 nb_by_content++;
@@ -317,7 +302,7 @@ int resize_by_layout(void* obj, int maximum_size) {
             if (child->on_screen && child->size_mode == SIZE_BY_LAYOUT) {
                 nb_by_layout++;
             }
-        }
+        });
 
         if (nb_by_content + nb_by_layout) {
             size -= ((nb_by_content + nb_by_layout - 1) * a->paddingx);
@@ -336,9 +321,7 @@ int resize_by_layout(void* obj, int maximum_size) {
         }
 
         // resize SIZE_BY_LAYOUT objects
-        for (l = a->list ; l ; l = l->next) {
-            child = static_cast<Area*>(l->data);
-
+        std::for_each(a->children.begin(), a->children.end(), [&](Area * child) {
             if (child->on_screen && child->size_mode == SIZE_BY_LAYOUT) {
                 old_height = child->height;
                 child->height = height;
@@ -352,7 +335,7 @@ int resize_by_layout(void* obj, int maximum_size) {
                     child->on_changed = 1;
                 }
             }
-        }
+        });
     }
 
     return 0;
@@ -362,9 +345,9 @@ int resize_by_layout(void* obj, int maximum_size) {
 void Area::set_redraw() {
     redraw = 1;
 
-    for (GSList* l = list ; l ; l = l->next) {
-        static_cast<Area*>(l->data)->set_redraw();
-    }
+    std::for_each(children.begin(), children.end(), [](Area * child) {
+        child->set_redraw();
+    });
 }
 
 void Area::hide() {
@@ -482,26 +465,28 @@ void draw_background(Area* a, cairo_t* c) {
 
 
 void Area::remove_area() {
-    parent->list = g_slist_remove(parent->list, this);
+    auto it = std::find(parent->children.begin(), parent->children.end(), this);
+
+    if (it != parent->children.end()) {
+        parent->children.erase(it);
+    }
+
     parent->set_redraw();
 }
 
 
 void Area::add_area() {
-    parent->list = g_slist_append(parent->list, this);
+    parent->children.push_back(this);
     parent->set_redraw();
 }
 
 
 void Area::free_area() {
-    for (GSList* l0 = list; l0 ; l0 = l0->next) {
-        static_cast<Area*>(l0->data)->free_area();
-    }
+    std::for_each(children.begin(), children.end(), [](Area * child) {
+        child->free_area();
+    });
 
-    if (list) {
-        g_slist_free(list);
-        list = nullptr;
-    }
+    children.clear();
 
     if (pix) {
         XFreePixmap(server.dsp, pix);

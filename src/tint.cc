@@ -36,6 +36,8 @@
 #include <sys/wait.h>
 #endif
 
+#include <algorithm>
+
 #include "version.h"
 #include "server.h"
 #include "window.h"
@@ -488,13 +490,12 @@ void event_button_motion_notify(XEvent* e) {
     if (event_taskbar == (Taskbar*)task_drag->parent) {
         // Swap the task_drag with the task on the event's location (if they differ)
         if (event_task && event_task != task_drag) {
-            GSList* drag_iter = g_slist_find(event_taskbar->list, task_drag);
-            GSList* task_iter = g_slist_find(event_taskbar->list, event_task);
+            auto& children = event_taskbar->children;
+            auto drag_iter = std::find(children.begin(), children.end(), task_drag);
+            auto task_iter = std::find(children.begin(), children.end(), event_task);
 
-            if (drag_iter && task_iter) {
-                gpointer temp = task_iter->data;
-                task_iter->data = drag_iter->data;
-                drag_iter->data = temp;
+            if (drag_iter != children.end() && task_iter != children.end()) {
+                std::iter_swap(drag_iter, task_iter);
                 event_taskbar->resize = 1;
                 panel_refresh = 1;
                 task_dragged = 1;
@@ -505,16 +506,23 @@ void event_button_motion_notify(XEvent* e) {
             return;
         }
 
-        Taskbar* drag_taskbar = (Taskbar*)task_drag->parent;
-        drag_taskbar->list = g_slist_remove(drag_taskbar->list, task_drag);
+        auto drag_taskbar = reinterpret_cast<Taskbar*>(task_drag->parent);
+        auto drag_taskbar_iter = std::find(
+                                     drag_taskbar->children.begin(),
+                                     drag_taskbar->children.end(),
+                                     task_drag);
+
+        if (drag_taskbar_iter != drag_taskbar->children.end()) {
+            drag_taskbar->children.erase(drag_taskbar_iter);
+        }
 
         if (event_taskbar->posx > drag_taskbar->posx
             || event_taskbar->posy > drag_taskbar->posy) {
-            int i = (taskbarname_enabled) ? 1 : 0;
-            event_taskbar->list = g_slist_insert(event_taskbar->list, task_drag,
-                                                 i);
+            auto& children = event_taskbar->children;
+            size_t i = (taskbarname_enabled) ? 1 : 0;
+            children.insert(children.begin() + i, task_drag);
         } else {
-            event_taskbar->list = g_slist_append(event_taskbar->list, task_drag);
+            event_taskbar->children.push_back(task_drag);
         }
 
         // Move task to other desktop (but avoid the 'Window desktop changed' code in 'event_property_notify')
@@ -731,18 +739,17 @@ void event_property_notify(XEvent* e) {
                 set_taskbar_state(&panel->taskbar[server.desktop], TASKBAR_ACTIVE);
                 // check ALLDESKTOP task => resize taskbar
                 Taskbar* tskbar;
-                GSList* l;
 
                 if (server.nb_desktop > old_desktop) {
                     tskbar = &panel->taskbar[old_desktop];
-                    l = tskbar->list;
+                    auto it = tskbar->children.begin();
 
                     if (taskbarname_enabled) {
-                        l = l->next;
+                        ++it;
                     }
 
-                    for (; l ; l = l->next) {
-                        Task* tsk = static_cast<Task*>(l->data);
+                    for (; it != tskbar->children.end(); ++it) {
+                        auto tsk = static_cast<Task*>(*it);
 
                         if (tsk->desktop == ALLDESKTOP) {
                             tsk->on_screen = 0;
@@ -753,14 +760,14 @@ void event_property_notify(XEvent* e) {
                 }
 
                 tskbar = &panel->taskbar[server.desktop];
-                l = tskbar->list;
+                auto it = tskbar->children.begin();
 
                 if (taskbarname_enabled) {
-                    l = l->next;
+                    ++it;
                 }
 
-                for (; l ; l = l->next) {
-                    Task* tsk = static_cast<Task*>(l->data);
+                for (; it != tskbar->children.end(); ++it) {
+                    auto tsk = static_cast<Task*>(*it);
 
                     if (tsk->desktop == ALLDESKTOP) {
                         tsk->on_screen = 1;
