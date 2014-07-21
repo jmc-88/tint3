@@ -13,6 +13,8 @@
 #include <X11/Xatom.h>
 #include <X11/extensions/Xinerama.h>
 
+#include <vector>
+
 #ifdef HAVE_SN
 #include <libsn/sn.h>
 #include <glib.h>
@@ -110,7 +112,7 @@ typedef struct {
     int nb_desktop;
     // number of monitor (without monitor included into another one)
     int nb_monitor;
-    Monitor* monitor;
+    std::vector<Monitor> monitor;
     int got_root_win;
     Visual* visual;
     Visual* visual32;

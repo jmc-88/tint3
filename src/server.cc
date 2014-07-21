@@ -26,6 +26,8 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+#include <algorithm>
+
 #include "server.h"
 #include "config.h"
 #include "util/window.h"
@@ -158,15 +160,15 @@ void cleanup_server() {
         XFreeColormap(server.dsp, server.colormap32);
     }
 
-    if (server.monitor) {
-        int i;
-
-        for (i = 0; i < server.nb_monitor; ++i)
+    if (server.monitor.size() != 0) {
+        for (int i = 0; i < server.nb_monitor; ++i) {
             if (server.monitor[i].names) {
                 g_strfreev(server.monitor[i].names);
             }
+        }
 
-        free(server.monitor);
+        // TODO: remove this when I'm done getting rid of global state...
+        server.monitor.clear();
     }
 
     if (server.gc) {
@@ -198,19 +200,18 @@ void send_event32(Window win, Atom at, long data1, long data2, long data3) {
 
 
 int get_property32(Window win, Atom at, Atom type) {
+    if (!win) {
+        return 0;
+    }
+
     Atom type_ret;
     int format_ret = 0, data = 0;
     unsigned long nitems_ret = 0;
     unsigned long bafter_ret = 0;
     unsigned char* prop_value = 0;
-    int result;
 
-    if (!win) {
-        return 0;
-    }
-
-    result = XGetWindowProperty(server.dsp, win, at, 0, 0x7fffffff, False, type,
-                                &type_ret, &format_ret, &nitems_ret, &bafter_ret, &prop_value);
+    int result = XGetWindowProperty(server.dsp, win, at, 0, 0x7fffffff, False, type,
+                                    &type_ret, &format_ret, &nitems_ret, &bafter_ret, &prop_value);
 
     if (result == Success && prop_value) {
         data = ((gulong*)prop_value)[0];
@@ -255,9 +256,8 @@ void get_root_pixmap() {
         server.atom._XROOTPMAP_ID,
         server.atom._XROOTMAP_ID
     };
-    int i;
 
-    for (i = 0; i < sizeof(pixmap_atoms) / sizeof(Atom); ++i) {
+    for (size_t i = 0; i < sizeof(pixmap_atoms) / sizeof(Atom); ++i) {
         void* res = server_get_property(server.root_win, pixmap_atoms[i], XA_PIXMAP, 0);
 
         if (res) {
@@ -271,49 +271,24 @@ void get_root_pixmap() {
 
     if (server.root_pmap == None) {
         fprintf(stderr, "tint3 : pixmap background detection failed\n");
-    } else {
-        XGCValues  gcv;
-        gcv.ts_x_origin = 0;
-        gcv.ts_y_origin = 0;
-        gcv.fill_style = FillTiled;
-        uint mask = GCTileStipXOrigin | GCTileStipYOrigin | GCFillStyle | GCTile;
-
-        gcv.tile = server.root_pmap;
-        XChangeGC(server.dsp, server.gc, mask, &gcv);
+        return;
     }
+
+    XGCValues  gcv;
+    gcv.ts_x_origin = 0;
+    gcv.ts_y_origin = 0;
+    gcv.fill_style = FillTiled;
+    uint mask = GCTileStipXOrigin | GCTileStipYOrigin | GCFillStyle | GCTile;
+
+    gcv.tile = server.root_pmap;
+    XChangeGC(server.dsp, server.gc, mask, &gcv);
 }
 
 
-int compareMonitorPos(const void* monitor1, const void* monitor2) {
-    Monitor* m1 = (Monitor*)monitor1;
-    Monitor* m2 = (Monitor*)monitor2;
-
-    if (m1->x < m2->x) {
-        return -1;
-    } else if (m1->x > m2->x) {
-        return 1;
-    } else if (m1->y < m2->y) {
-        return -1;
-    } else if (m1->y > m2->y) {
-        return 1;
-    } else {
-        return 0;
-    }
-}
-
-
-int compareMonitorIncluded(const void* monitor1, const void* monitor2) {
-    Monitor* m1 = (Monitor*)monitor1;
-    Monitor* m2 = (Monitor*)monitor2;
-
-    if (m1->x >= m2->x && m1->y >= m2->y
-        && (m1->x + m1->width) <= (m2->x + m2->width)
-        && (m1->y + m1->height) <= (m2->y + m2->height)) {
-        // m1 included inside m2
-        return 1;
-    } else {
-        return -1;
-    }
+bool monitor_includes(Monitor const& m1, Monitor const& m2) {
+    bool inside_x = (m1.x >= m2.x) && ((m1.x + m1.width) <= (m2.x + m2.width));
+    bool inside_y = (m1.y >= m2.y) && ((m1.y + m1.height) <= (m2.y + m2.height));
+    return (!inside_x || !inside_y);
 }
 
 
@@ -328,7 +303,7 @@ void get_monitors() {
         if (res && res->ncrtc >= nbmonitor) {
             // use xrandr to identify monitors (does not work with proprietery nvidia drivers)
             printf("xRandr: Found crtc's: %d\n", res->ncrtc);
-            server.monitor = (Monitor*) calloc(res->ncrtc, sizeof(Monitor));
+            server.monitor.resize(res->ncrtc);
 
             for (i = 0; i < res->ncrtc; ++i) {
                 XRRCrtcInfo* crtc_info = XRRGetCrtcInfo(server.dsp, res, res->crtcs[i]);
@@ -347,37 +322,33 @@ void get_monitors() {
                     XRRFreeOutputInfo(output_info);
                 }
 
-                server.monitor[i].names[j] = 0;
+                server.monitor[i].names[j] = nullptr;
                 XRRFreeCrtcInfo(crtc_info);
             }
 
             nbmonitor = res->ncrtc;
         } else if (info && nbmonitor > 0) {
-            server.monitor = (Monitor*) calloc(nbmonitor, sizeof(Monitor));
+            server.monitor.resize(nbmonitor);
 
-            for (i = 0 ; i < nbmonitor ; i++) {
+            for (i = 0 ; i < nbmonitor; ++i) {
                 server.monitor[i].x = info[i].x_org;
                 server.monitor[i].y = info[i].y_org;
                 server.monitor[i].width = info[i].width;
                 server.monitor[i].height = info[i].height;
-                server.monitor[i].names = 0;
+                server.monitor[i].names = nullptr;
             }
         }
 
-        // ordered monitor
-        qsort(server.monitor, nbmonitor, sizeof(Monitor), compareMonitorIncluded);
+        // order monitors
+        std::sort(server.monitor.begin(), server.monitor.end(), monitor_includes);
 
         // remove monitor included into another one
-        i = 0;
-
-        while (i < nbmonitor) {
-            for (j = 0; j < i ; j++) {
-                if (compareMonitorIncluded(&server.monitor[i], &server.monitor[j]) > 0) {
+        for (i = 0; i < nbmonitor; ++i) {
+            for (j = 0; j < i; ++j) {
+                if (!monitor_includes(server.monitor[i], server.monitor[j])) {
                     goto next;
                 }
             }
-
-            i++;
         }
 
 next:
@@ -389,9 +360,8 @@ next:
         }
 
         server.nb_monitor = i;
-        server.monitor = (Monitor*) realloc(server.monitor,
-                                            server.nb_monitor * sizeof(Monitor));
-        qsort(server.monitor, server.nb_monitor, sizeof(Monitor), compareMonitorPos);
+        server.monitor.resize(server.nb_monitor);
+        std::sort(server.monitor.begin(), server.monitor.end(), monitor_includes);
 
         if (res) {
             XRRFreeScreenResources(res);
@@ -402,7 +372,7 @@ next:
 
     if (!server.nb_monitor) {
         server.nb_monitor = 1;
-        server.monitor = (Monitor*) calloc(server.nb_monitor, sizeof(Monitor));
+        server.monitor.resize(server.nb_monitor);
         server.monitor[0].x = server.monitor[0].y = 0;
         server.monitor[0].width = DisplayWidth(server.dsp, server.screen);
         server.monitor[0].height = DisplayHeight(server.dsp, server.screen);
