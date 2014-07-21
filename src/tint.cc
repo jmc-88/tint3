@@ -293,7 +293,7 @@ void get_snapshot(const char* path) {
 
     panel->temp_pmap = XCreatePixmap(server.dsp, server.root_win, panel->width,
                                      panel->height, server.depth);
-    rendering(panel);
+    panel->render();
 
     Imlib_Image img = NULL;
     imlib_context_set_drawable(panel->temp_pmap);
@@ -1250,7 +1250,7 @@ start:
 
                     panel->temp_pmap = XCreatePixmap(server.dsp, server.root_win, panel->width,
                                                      panel->height, server.depth);
-                    rendering(panel);
+                    panel->render();
                     XCopyArea(server.dsp, panel->temp_pmap, panel->main_win, server.gc, 0, 0,
                               panel->width, panel->height, 0, 0);
                 }

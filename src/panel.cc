@@ -412,6 +412,13 @@ int resize_panel(void* obj) {
 }
 
 
+void Panel::render() {
+    size_by_content();
+    size_by_layout(0, 1);
+    refresh();
+}
+
+
 void update_strut(Panel* p) {
     if (panel_strut_policy == STRUT_NONE) {
         XDeleteProperty(server.dsp, p->main_win, server.atom._NET_WM_STRUT);
@@ -631,7 +638,7 @@ void set_panel_background(Panel* p) {
     auto cs = cairo_xlib_surface_create(server.dsp, p->pix, server.visual,
                                         p->width, p->height);
     auto c = cairo_create(cs);
-    draw_background(p, c);
+    p->draw_background(c);
     cairo_destroy(c);
     cairo_surface_destroy(cs);
 

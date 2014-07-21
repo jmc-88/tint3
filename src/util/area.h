@@ -96,6 +96,10 @@ class Area {
     void remove_area();
     void add_area();
 
+    // draw pixmap
+    void draw();
+    void draw_background(cairo_t* c);
+
     // set 'redraw' on an area and children
     void set_redraw();
 
@@ -115,14 +119,8 @@ class Area {
 // on startup, initialize fixed pos/size
 void init_rendering(void* obj, int pos);
 
-void rendering(void* obj);
-
 // generic resize for SIZE_BY_LAYOUT objects
 int resize_by_layout(void* obj, int maximum_size);
-
-// draw pixmap
-void draw(Area* a);
-void draw_background(Area* a, cairo_t* c);
 
 // draw rounded rectangle
 void draw_rect(cairo_t* c, double x, double y, double w, double h, double r);

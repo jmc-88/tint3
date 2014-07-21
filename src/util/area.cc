@@ -94,14 +94,6 @@ void init_rendering(void* obj, int pos) {
 }
 
 
-void rendering(void* obj) {
-    Area* panel = static_cast<Area*>(obj);
-    panel->size_by_content();
-    panel->size_by_layout(0, 1);
-    panel->refresh();
-}
-
-
 void Area::size_by_content() {
     // don't resize hidden objects
     if (!on_screen) {
@@ -211,13 +203,7 @@ void Area::refresh() {
     // don't draw transparent objects (without foreground and without background)
     if (redraw) {
         redraw = 0;
-        // force redraw of child
-        //GSList *l;
-        //for (l = a->list ; l ; l = l->next)
-        //((Area*)l->data)->redraw = 1;
-
-        //printf("draw area posx %d, width %d\n", a->posx, a->width);
-        draw(this);
+        draw();
     }
 
     // draw current Area
@@ -367,33 +353,33 @@ void Area::show() {
     parent->resize = 1;
 }
 
-void draw(Area* a) {
-    if (a->pix) {
-        XFreePixmap(server.dsp, a->pix);
+void Area::draw() {
+    if (pix) {
+        XFreePixmap(server.dsp, pix);
     }
 
-    a->pix = XCreatePixmap(server.dsp, server.root_win, a->width, a->height,
-                           server.depth);
+    pix = XCreatePixmap(server.dsp, server.root_win, width, height,
+                        server.depth);
 
     // add layer of root pixmap (or clear pixmap if real_transparency==true)
     if (server.real_transparency) {
-        clear_pixmap(a->pix, 0 , 0, a->width, a->height);
+        clear_pixmap(pix, 0 , 0, width, height);
     }
 
-    XCopyArea(server.dsp, ((Panel*)a->panel)->temp_pmap, a->pix, server.gc,
-              a->posx, a->posy, a->width, a->height, 0, 0);
+    XCopyArea(server.dsp, panel->temp_pmap, pix, server.gc,
+              posx, posy, width, height, 0, 0);
 
     cairo_surface_t* cs;
     cairo_t* c;
 
-    cs = cairo_xlib_surface_create(server.dsp, a->pix, server.visual, a->width,
-                                   a->height);
+    cs = cairo_xlib_surface_create(server.dsp, pix, server.visual, width,
+                                   height);
     c = cairo_create(cs);
 
-    draw_background(a, c);
+    draw_background(c);
 
-    if (a->_draw_foreground) {
-        a->_draw_foreground(a, c);
+    if (_draw_foreground) {
+        _draw_foreground(this, c);
     }
 
     cairo_destroy(c);
@@ -401,65 +387,28 @@ void draw(Area* a) {
 }
 
 
-void draw_background(Area* a, cairo_t* c) {
-    if (a->bg->back.alpha > 0.0) {
-        //printf("    draw_background (%d %d) RGBA (%lf, %lf, %lf, %lf)\n", a->posx, a->posy, pix->back.color[0], pix->back.color[1], pix->back.color[2], pix->back.alpha);
-        draw_rect(c, a->bg->border.width, a->bg->border.width,
-                  a->width - (2.0 * a->bg->border.width), a->height - (2.0 * a->bg->border.width),
-                  a->bg->border.rounded - a->bg->border.width / 1.571);
-        cairo_set_source_rgba(c, a->bg->back.color[0], a->bg->back.color[1],
-                              a->bg->back.color[2], a->bg->back.alpha);
+void Area::draw_background(cairo_t* c) {
+    if (bg->back.alpha > 0.0) {
+        //printf("    draw_background (%d %d) RGBA (%lf, %lf, %lf, %lf)\n", posx, posy, pix->back.color[0], pix->back.color[1], pix->back.color[2], pix->back.alpha);
+        draw_rect(c, bg->border.width, bg->border.width,
+                  width - (2.0 * bg->border.width), height - (2.0 * bg->border.width),
+                  bg->border.rounded - bg->border.width / 1.571);
+        cairo_set_source_rgba(c, bg->back.color[0], bg->back.color[1],
+                              bg->back.color[2], bg->back.alpha);
         cairo_fill(c);
     }
 
-    if (a->bg->border.width > 0 && a->bg->border.alpha > 0.0) {
-        cairo_set_line_width(c, a->bg->border.width);
+    if (bg->border.width > 0 && bg->border.alpha > 0.0) {
+        cairo_set_line_width(c, bg->border.width);
 
         // draw border inside (x, y, width, height)
-        draw_rect(c, a->bg->border.width / 2.0, a->bg->border.width / 2.0,
-                  a->width - a->bg->border.width, a->height - a->bg->border.width,
-                  a->bg->border.rounded);
-        /*
-        // convert : radian = degre * M_PI/180
-        // definir le degrade dans un carre de (0,0) (100,100)
-        // ensuite ce degrade est extrapoler selon le ratio width/height
-        // dans repere (0, 0) (100, 100)
-        double X0, Y0, X1, Y1, degre;
-        // x = X * (a->width / 100), y = Y * (a->height / 100)
-        double x0, y0, x1, y1;
-        X0 = 0;
-        Y0 = 100;
-        X1 = 100;
-        Y1 = 0;
-        degre = 45;
-        // et ensuite faire la changement d'unite du repere
-        // car ce qui doit reste inchangee est les traits et pas la direction
+        draw_rect(c, bg->border.width / 2.0, bg->border.width / 2.0,
+                  width - bg->border.width, height - bg->border.width,
+                  bg->border.rounded);
 
-        // il faut d'abord appliquer une rotation de 90 (et -180 si l'angle est superieur a  180)
-        // ceci peut etre applique une fois pour toute au depart
-        // ensuite calculer l'angle dans le nouveau repare
-        // puis faire une rotation de 90
-        x0 = X0 * ((double)a->width / 100);
-        x1 = X1 * ((double)a->width / 100);
-        y0 = Y0 * ((double)a->height / 100);
-        y1 = Y1 * ((double)a->height / 100);
-
-        x0 = X0 * ((double)a->height / 100);
-        x1 = X1 * ((double)a->height / 100);
-        y0 = Y0 * ((double)a->width / 100);
-        y1 = Y1 * ((double)a->width / 100);
-
-        cairo_pattern_t *linpat;
-        linpat = cairo_pattern_create_linear (x0, y0, x1, y1);
-        cairo_pattern_add_color_stop_rgba (linpat, 0, a->border.color[0], a->border.color[1], a->border.color[2], a->border.alpha);
-        cairo_pattern_add_color_stop_rgba (linpat, 1, a->border.color[0], a->border.color[1], a->border.color[2], 0);
-        cairo_set_source (c, linpat);
-        */
-        cairo_set_source_rgba(c, a->bg->border.color[0], a->bg->border.color[1],
-                              a->bg->border.color[2], a->bg->border.alpha);
-
+        cairo_set_source_rgba(c, bg->border.color[0], bg->border.color[1],
+                              bg->border.color[2], bg->border.alpha);
         cairo_stroke(c);
-        //cairo_pattern_destroy (linpat);
     }
 }
 

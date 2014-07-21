@@ -117,6 +117,8 @@ class Panel : public Area {
     int hidden_width, hidden_height;
     Pixmap hidden_pixmap;
     Timeout* autohide_timeout;
+
+    void render();
 };
 
 
