@@ -261,14 +261,12 @@ int window_is_active(Window win) {
 
 
 int get_icon_count(gulong* data, int num) {
-    int count, pos, w, h;
-
-    count = 0;
-    pos = 0;
+    int count = 0;
+    int pos = 0;
 
     while (pos + 2 < num) {
-        w = data[pos++];
-        h = data[pos++];
+        int w = data[pos++];
+        int h = data[pos++];
         pos += w * h;
 
         if (pos > num || w <= 0 || h <= 0) {
@@ -284,16 +282,16 @@ int get_icon_count(gulong* data, int num) {
 
 gulong* get_best_icon(gulong* data, int icon_count, int num, int* iw, int* ih,
                       int best_icon_size) {
-    int width[icon_count], height[icon_count], pos, i, w, h;
+    int width[icon_count];
+    int height[icon_count];
     gulong* icon_data[icon_count];
 
     /* List up icons */
-    pos = 0;
-    i = icon_count;
+    int pos = 0;
 
-    while (i--) {
-        w = data[pos++];
-        h = data[pos++];
+    for (int i = icon_count - 1; i >= 0; --i) {
+        int w = data[pos++];
+        int h = data[pos++];
 
         if (pos + w * h > num) {
             break;
@@ -309,7 +307,7 @@ gulong* get_best_icon(gulong* data, int icon_count, int num, int* iw, int* ih,
     /* Try to find exact size */
     int icon_num = -1;
 
-    for (i = 0; i < icon_count; i++) {
+    for (int i = 0; i < icon_count; i++) {
         if (width[i] == best_icon_size) {
             icon_num = i;
             break;
@@ -320,7 +318,7 @@ gulong* get_best_icon(gulong* data, int icon_count, int num, int* iw, int* ih,
     if (icon_num < 0) {
         int highest = 0;
 
-        for (i = 0; i < icon_count; i++) {
+        for (int i = 0; i < icon_count; i++) {
             if (width[i] > highest) {
                 icon_num = i;
                 highest = width[i];
@@ -328,8 +326,8 @@ gulong* get_best_icon(gulong* data, int icon_count, int num, int* iw, int* ih,
         }
     }
 
-    *iw = width[icon_num];
-    *ih = height[icon_num];
+    (*iw) = width[icon_num];
+    (*ih) = height[icon_num];
     return icon_data[icon_num];
 }
 

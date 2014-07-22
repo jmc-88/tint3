@@ -12,22 +12,6 @@
 #include <Imlib2.h>
 #include "area.h"
 
-/*
-void fxfree(void** ptr){
-  if(*ptr){
-    free(*ptr);
-    *ptr=NULL;
-    }
-  }
-FXint fxmalloc(void** ptr,unsigned long size){
-  *ptr=NULL;
-  if(size!=0){
-    if((*ptr=malloc(size))==NULL) return FALSE;
-    }
-  return TRUE;
-  }
-*/
-
 // mouse actions
 enum {
     NONE = 0,
@@ -59,8 +43,8 @@ void tint_exec(const char* command);
 
 // conversion
 int hex_char_to_int(char c);
-int hex_to_rgb(char* hex, int* r, int* g, int* b);
-void get_color(char* hex, double* rgb);
+bool hex_to_rgb(char const* hex, int* r, int* g, int* b);
+bool get_color(char const* hex, double* rgb);
 
 void extract_values(char* value, char** value1, char** value2, char** value3);
 

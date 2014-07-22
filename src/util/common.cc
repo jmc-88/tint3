@@ -91,18 +91,15 @@ int parse_line(char* line, char** key, char** value) {
 }
 
 
-void tint_exec(const char* command) {
+void tint_exec(char const* command) {
     if (command) {
-        pid_t pid;
-        pid = fork();
-
-        if (pid == 0) {
+        if (fork() == 0) {
             // change for the fork the signal mask
             //          sigset_t sigset;
             //          sigprocmask(SIG_SETMASK, &sigset, 0);
             //          sigprocmask(SIG_UNBLOCK, &sigset, 0);
-            execl("/bin/sh", "/bin/sh", "-c", command, NULL);
-            _exit(0);
+            execlp(command, command, NULL);
+            _exit(1);
         }
     }
 }
@@ -125,42 +122,43 @@ int hex_char_to_int(char c) {
 }
 
 
-int hex_to_rgb(char* hex, int* r, int* g, int* b) {
-    int len;
-
-    if (hex == NULL || hex[0] != '#') {
-        return (0);
+bool hex_to_rgb(char const* hex, int* r, int* g, int* b) {
+    if (hex == nullptr || hex[0] != '#') {
+        return false;
     }
 
-    len = strlen(hex);
+    size_t len = strlen(hex);
 
     if (len == 3 + 1) {
-        *r = hex_char_to_int(hex[1]);
-        *g = hex_char_to_int(hex[2]);
-        *b = hex_char_to_int(hex[3]);
+        (*r) = hex_char_to_int(hex[1]);
+        (*g) = hex_char_to_int(hex[2]);
+        (*b) = hex_char_to_int(hex[3]);
     } else if (len == 6 + 1) {
-        *r = hex_char_to_int(hex[1]) * 16 + hex_char_to_int(hex[2]);
-        *g = hex_char_to_int(hex[3]) * 16 + hex_char_to_int(hex[4]);
-        *b = hex_char_to_int(hex[5]) * 16 + hex_char_to_int(hex[6]);
+        (*r) = hex_char_to_int(hex[1]) * 16 + hex_char_to_int(hex[2]);
+        (*g) = hex_char_to_int(hex[3]) * 16 + hex_char_to_int(hex[4]);
+        (*b) = hex_char_to_int(hex[5]) * 16 + hex_char_to_int(hex[6]);
     } else if (len == 12 + 1) {
-        *r = hex_char_to_int(hex[1]) * 16 + hex_char_to_int(hex[2]);
-        *g = hex_char_to_int(hex[5]) * 16 + hex_char_to_int(hex[6]);
-        *b = hex_char_to_int(hex[9]) * 16 + hex_char_to_int(hex[10]);
+        (*r) = hex_char_to_int(hex[1]) * 16 + hex_char_to_int(hex[2]);
+        (*g) = hex_char_to_int(hex[5]) * 16 + hex_char_to_int(hex[6]);
+        (*b) = hex_char_to_int(hex[9]) * 16 + hex_char_to_int(hex[10]);
     } else {
-        return 0;
+        return false;
     }
 
-    return 1;
+    return true;
 }
 
 
-void get_color(char* hex, double* rgb) {
+bool get_color(char const* hex, double* rgb) {
     int r, g, b;
-    hex_to_rgb(hex, &r, &g, &b);
+    if (!hex_to_rgb(hex, &r, &g, &b)) {
+        return false;
+    }
 
     rgb[0] = (r / 255.0);
     rgb[1] = (g / 255.0);
     rgb[2] = (b / 255.0);
+    return true;
 }
 
 

@@ -1180,21 +1180,14 @@ void dnd_drop(XClientMessageEvent* e) {
 }
 
 int main(int argc, char* argv[]) {
-    XEvent e;
-    XClientMessageEvent* ev;
-    fd_set fdset;
-    int x11_fd, i;
-    Panel* panel;
-    GSList* it;
-    struct timeval* timeout;
     int hidden_dnd = 0;
+    GSList* it;
 
 start:
     init(argc, argv);
     init_X11();
 
-    i = 0;
-
+    int i;
     if (config_path) {
         i = config_read_file(config_path);
     } else {
@@ -1217,7 +1210,7 @@ start:
 
     int damage_event, damage_error;
     XDamageQueryExtension(server.dsp, &damage_event, &damage_error);
-    x11_fd = ConnectionNumber(server.dsp);
+    int x11_fd = ConnectionNumber(server.dsp);
     XSync(server.dsp, False);
 
     // XDND initialization
@@ -1232,7 +1225,9 @@ start:
     //  sigset_t empty_mask;
     //  sigemptyset(&empty_mask);
 
-    while (1) {
+    while (true) {
+        Panel* panel = nullptr;
+
         if (panel_refresh) {
             panel_refresh = 0;
 
@@ -1258,7 +1253,7 @@ start:
 
             XFlush(server.dsp);
 
-            panel = dynamic_cast<Panel*>(systray.panel);
+            panel = systray.panel;
 
             if (refresh_systray && panel && !panel->is_hidden) {
                 refresh_systray = 0;
@@ -1271,19 +1266,20 @@ start:
 
         // thanks to AngryLlama for the timer
         // Create a File Description Set containing x11_fd
+        fd_set fdset;
         FD_ZERO(&fdset);
         FD_SET(x11_fd, &fdset);
         update_next_timeout();
 
+        struct timeval* timeout = nullptr;
         if (next_timeout.tv_sec >= 0 && next_timeout.tv_usec >= 0) {
             timeout = &next_timeout;
-        } else {
-            timeout = 0;
         }
 
         // Wait for X Event or a Timer
         if (select(x11_fd + 1, &fdset, 0, 0, timeout) > 0) {
             while (XPending(server.dsp)) {
+                XEvent e;
                 XNextEvent(server.dsp, &e);
 #if HAVE_SN
                 sn_display_process_event(server.sn_dsp, &e);
@@ -1313,6 +1309,7 @@ start:
                     }
                 }
 
+                XClientMessageEvent* ev;
                 switch (e.type) {
                     case ButtonPress:
                         tooltip_hide(0);
