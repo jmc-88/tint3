@@ -1188,6 +1188,7 @@ start:
     init_X11();
 
     int i;
+
     if (config_path) {
         i = config_read_file(config_path);
     } else {
@@ -1272,6 +1273,7 @@ start:
         update_next_timeout();
 
         struct timeval* timeout = nullptr;
+
         if (next_timeout.tv_sec >= 0 && next_timeout.tv_usec >= 0) {
             timeout = &next_timeout;
         }
@@ -1310,6 +1312,7 @@ start:
                 }
 
                 XClientMessageEvent* ev;
+
                 switch (e.type) {
                     case ButtonPress:
                         tooltip_hide(0);

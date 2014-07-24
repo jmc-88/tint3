@@ -64,7 +64,9 @@ char* path_status;
 int apm_fd;
 #endif
 
-void update_batterys(void* arg) {
+namespace {
+
+void update_batteries(void* arg) {
     int old_percentage = battery_state.percentage;
     int16_t old_hours = battery_state.time.hours;
     int8_t old_minutes = battery_state.time.minutes;
@@ -96,6 +98,8 @@ void update_batterys(void* arg) {
         }
     }
 }
+
+} // namespace
 
 void default_battery() {
     battery_enabled = 0;
@@ -243,11 +247,10 @@ void init_battery() {
         path_status = g_build_filename(battery_dir, "status", NULL);
 
         // check file
-        FILE* fp1, *fp2, *fp3, *fp4;
-        fp1 = fopen(path_energy_now, "r");
-        fp2 = fopen(path_energy_full, "r");
-        fp3 = fopen(path_current_now, "r");
-        fp4 = fopen(path_status, "r");
+        FILE* fp1 = fopen(path_energy_now, "r");
+        FILE* fp2 = fopen(path_energy_full, "r");
+        FILE* fp3 = fopen(path_current_now, "r");
+        FILE* fp4 = fopen(path_status, "r");
 
         if (fp1 == NULL || fp2 == NULL || fp3 == NULL || fp4 == NULL) {
             cleanup_battery();
@@ -255,10 +258,21 @@ void init_battery() {
             fprintf(stderr, "ERROR: battery applet can't open energy_now\n");
         }
 
-        fclose(fp1);
-        fclose(fp2);
-        fclose(fp3);
-        fclose(fp4);
+        if (fp1) {
+            fclose(fp1);
+        }
+
+        if (fp2) {
+            fclose(fp2);
+        }
+
+        if (fp3) {
+            fclose(fp3);
+        }
+
+        if (fp4) {
+            fclose(fp4);
+        }
     }
 
     g_free(path1);
@@ -266,7 +280,7 @@ void init_battery() {
 #endif
 
     if (battery_enabled && battery_timeout == 0) {
-        battery_timeout = add_timeout(10, 10000, update_batterys, 0);
+        battery_timeout = add_timeout(10, 10000, update_batteries, 0);
     }
 }
 

@@ -36,7 +36,7 @@ struct _multi_timeout {
 typedef struct {
     GSList* timeout_list;
     Timeout* parent_timeout;
-} multi_timeout_handler;
+} MultiTimeoutHandler;
 
 void add_timeout_intern(int value_msec, int interval_msec,
                         void(*_callback)(void*), void* arg, Timeout* t);
@@ -47,11 +47,11 @@ int timespec_subtract(struct timespec* result, struct timespec* x,
 struct timespec add_msec_to_timespec(struct timespec ts, int msec);
 
 
-int align_with_existing_timeouts(Timeout* t);
+bool align_with_existing_timeouts(Timeout* t);
 void create_multi_timeout(Timeout* t1, Timeout* t2);
 void append_multi_timeout(Timeout* t1, Timeout* t2);
-int calc_multi_timeout_interval(multi_timeout_handler* mth);
-void update_multi_timeout_values(multi_timeout_handler* mth);
+int calc_multi_timeout_interval(MultiTimeoutHandler* mth);
+void update_multi_timeout_values(MultiTimeoutHandler* mth);
 void callback_multi_timeout(void* mth);
 void remove_from_multi_timeout(Timeout* t);
 void stop_multi_timeout(Timeout* t);
@@ -63,14 +63,14 @@ void default_timeout() {
 
 void cleanup_timeout() {
     while (timeout_list) {
-        Timeout* t = static_cast<Timeout*>(timeout_list->data);
+        auto t = static_cast<Timeout*>(timeout_list->data);
 
         if (t->multi_timeout) {
             stop_multi_timeout(t);
         }
 
-        free(t);
         timeout_list = g_slist_remove(timeout_list, t);
+        delete t;
     }
 
     if (multi_timeouts) {
@@ -93,7 +93,7 @@ void cleanup_timeout() {
 
 Timeout* add_timeout(int value_msec, int interval_msec,
                      void (*_callback)(void*), void* arg) {
-    Timeout* t = (Timeout*) malloc(sizeof(Timeout));
+    auto t = new Timeout();
     t->multi_timeout = 0;
     add_timeout_intern(value_msec, interval_msec, _callback, arg, t);
     return t;
@@ -109,20 +109,18 @@ void change_timeout(Timeout* t, int value_msec, int interval_msec,
     }
 
     if (t->multi_timeout) {
-        remove_from_multi_timeout(static_cast<Timeout*>(t));
+        remove_from_multi_timeout(t);
     } else {
         timeout_list = g_slist_remove(timeout_list, t);
     }
 
-    add_timeout_intern(
-        value_msec, interval_msec, _callback, arg,
-        static_cast<Timeout*>(t));
+    add_timeout_intern(value_msec, interval_msec, _callback, arg, t);
 }
 
 
 void update_next_timeout() {
     if (timeout_list) {
-        Timeout* t = static_cast<Timeout*>(timeout_list->data);
+        auto t = static_cast<Timeout*>(timeout_list->data);
         struct timespec cur_time;
         struct timespec next_timeout2 = { .tv_sec = next_timeout.tv_sec, .tv_nsec = next_timeout.tv_usec * 1000 };
         clock_gettime(CLOCK_MONOTONIC, &cur_time);
@@ -145,7 +143,7 @@ void callback_timeout_expired() {
         struct timespec cur_time;
         clock_gettime(CLOCK_MONOTONIC, &cur_time);
 
-        Timeout* t = static_cast<Timeout*>(timeout_list->data);
+        auto t = static_cast<Timeout*>(timeout_list->data);
 
         if (compare_timespecs(&t->timeout_expires, &cur_time) > 0) {
             return;
@@ -161,7 +159,7 @@ void callback_timeout_expired() {
             if (t->interval_msec > 0) {
                 add_timeout_intern(t->interval_msec, t->interval_msec, t->_callback, t->arg, t);
             } else {
-                free(t);
+                delete t;
             }
         }
     }
@@ -172,11 +170,11 @@ void stop_timeout(Timeout* t) {
     // if not in the list, it was deleted in callback_timeout_expired
     if (g_slist_find(timeout_list, t) || g_hash_table_lookup(multi_timeouts, t)) {
         if (t->multi_timeout) {
-            remove_from_multi_timeout((Timeout*)t);
+            remove_from_multi_timeout(t);
         }
 
         timeout_list = g_slist_remove(timeout_list, t);
-        free((void*)t);
+        delete t;
     }
 }
 
@@ -190,7 +188,7 @@ void add_timeout_intern(int value_msec, int interval_msec,
     clock_gettime(CLOCK_MONOTONIC, &cur_time);
     t->timeout_expires = add_msec_to_timespec(cur_time, value_msec);
 
-    int can_align = 0;
+    bool can_align = false;
 
     if (interval_msec > 0 && !t->multi_timeout) {
         can_align = align_with_existing_timeouts(t);
@@ -261,9 +259,9 @@ struct timespec add_msec_to_timespec(struct timespec ts, int msec) {
 }
 
 
-int align_with_existing_timeouts(Timeout* t) {
+bool align_with_existing_timeouts(Timeout* t) {
     for (GSList* it = timeout_list; it; it = it->next) {
-        Timeout* t2 = static_cast<Timeout*>(it->data);
+        auto t2 = static_cast<Timeout*>(it->data);
 
         if (t2->interval_msec > 0) {
             if (t->interval_msec % t2->interval_msec == 0
@@ -272,29 +270,27 @@ int align_with_existing_timeouts(Timeout* t) {
                     multi_timeouts = g_hash_table_new(0, 0);
                 }
 
-                if (!t->multi_timeout && !t2->multi_timeout)
+                if (!t->multi_timeout && !t2->multi_timeout) {
                     // both timeouts can be aligned, but there is no multi timeout for them
-                {
                     create_multi_timeout(t, t2);
-                } else
+                } else {
                     // there is already a multi timeout, so we append the new timeout to the multi timeout
-                {
                     append_multi_timeout(t, t2);
                 }
 
-                return 1;
+                return true;
             }
         }
     }
 
-    return 0;
+    return false;
 }
 
 
-int calc_multi_timeout_interval(multi_timeout_handler* mth) {
+int calc_multi_timeout_interval(MultiTimeoutHandler* mth) {
     GSList* it = mth->timeout_list;
 
-    Timeout* t = static_cast<Timeout*>(it->data);
+    auto t = static_cast<Timeout*>(it->data);
     int min_interval = t->interval_msec;
 
     for (it = it->next; it; it = it->next) {
@@ -310,11 +306,10 @@ int calc_multi_timeout_interval(multi_timeout_handler* mth) {
 
 
 void create_multi_timeout(Timeout* t1, Timeout* t2) {
-    MultiTimeout* mt1 = (MultiTimeout*) malloc(sizeof(MultiTimeout));
-    MultiTimeout* mt2 = (MultiTimeout*) malloc(sizeof(MultiTimeout));
-    multi_timeout_handler* mth = (multi_timeout_handler*) malloc(sizeof(
-                                     multi_timeout_handler));
-    Timeout* real_timeout = (Timeout*) malloc(sizeof(Timeout));
+    auto mt1 = new MultiTimeout();
+    auto mt2 = new MultiTimeout();
+    auto mth = new MultiTimeoutHandler();
+    auto real_timeout = new Timeout();
 
     mth->timeout_list = 0;
     mth->timeout_list = g_slist_prepend(mth->timeout_list, t1);
@@ -341,14 +336,14 @@ void create_multi_timeout(Timeout* t1, Timeout* t2) {
 void append_multi_timeout(Timeout* t1, Timeout* t2) {
     if (t2->multi_timeout) {
         // swap t1 and t2 such that t1 is the multi timeout
-        Timeout* tmp = t2;
+        auto tmp = t2;
         t2 = t1;
         t1 = tmp;
     }
 
-    MultiTimeout* mt = (MultiTimeout*) malloc(sizeof(MultiTimeout));
-    multi_timeout_handler* mth = static_cast<multi_timeout_handler*>(
-                                     g_hash_table_lookup(multi_timeouts, t1));
+    auto mt = new MultiTimeout();
+    auto mth = static_cast<MultiTimeoutHandler*>(
+                   g_hash_table_lookup(multi_timeouts, t1));
 
     mth->timeout_list = g_slist_prepend(mth->timeout_list, t2);
     g_hash_table_insert(multi_timeouts, t2, mth);
@@ -359,20 +354,20 @@ void append_multi_timeout(Timeout* t1, Timeout* t2) {
 }
 
 
-void update_multi_timeout_values(multi_timeout_handler* mth) {
+void update_multi_timeout_values(MultiTimeoutHandler* mth) {
     int interval = calc_multi_timeout_interval(mth);
     int next_timeout_msec = interval;
 
     struct timespec cur_time;
     clock_gettime(CLOCK_MONOTONIC, &cur_time);
 
-    GSList* it = mth->timeout_list;
-    struct timespec diff_time;
-
-    while (it) {
-        Timeout* t = static_cast<Timeout*>(it->data);
+    for (GSList* it = mth->timeout_list; it; it = it->next) {
+        auto t = static_cast<Timeout*>(it->data);
         t->multi_timeout->count_to_expiration = t->interval_msec / interval;
+
+        struct timespec diff_time;
         timespec_subtract(&diff_time, &t->timeout_expires, &cur_time);
+
         int msec_to_expiration = diff_time.tv_sec * 1000 + diff_time.tv_nsec / 1000000;
         int count_left = msec_to_expiration / interval + (msec_to_expiration % interval
                          != 0);
@@ -382,8 +377,6 @@ void update_multi_timeout_values(multi_timeout_handler* mth) {
         if (msec_to_expiration < next_timeout_msec) {
             next_timeout_msec = msec_to_expiration;
         }
-
-        it = it->next;
     }
 
     mth->parent_timeout->interval_msec = interval;
@@ -397,11 +390,11 @@ void callback_multi_timeout(void* arg) {
     struct timespec cur_time;
     clock_gettime(CLOCK_MONOTONIC, &cur_time);
 
-    multi_timeout_handler* mth = static_cast<multi_timeout_handler*>(arg);
+    auto mth = static_cast<MultiTimeoutHandler*>(arg);
     GSList* it = mth->timeout_list;
 
     while (it) {
-        Timeout* t = static_cast<Timeout*>(it->data);
+        auto t = static_cast<Timeout*>(it->data);
 
         if (++t->multi_timeout->current_count >=
             t->multi_timeout->count_to_expiration) {
@@ -416,24 +409,24 @@ void callback_multi_timeout(void* arg) {
 
 
 void remove_from_multi_timeout(Timeout* t) {
-    multi_timeout_handler* mth = static_cast<multi_timeout_handler*>(
-                                     g_hash_table_lookup(multi_timeouts, t));
+    auto mth = static_cast<MultiTimeoutHandler*>(
+                   g_hash_table_lookup(multi_timeouts, t));
     g_hash_table_remove(multi_timeouts, t);
 
     mth->timeout_list = g_slist_remove(mth->timeout_list, t);
-    free(t->multi_timeout);
+    delete t->multi_timeout;
     t->multi_timeout = 0;
 
     if (g_slist_length(mth->timeout_list) == 1) {
-        Timeout* last_timeout = static_cast<Timeout*>(mth->timeout_list->data);
+        auto last_timeout = static_cast<Timeout*>(mth->timeout_list->data);
         mth->timeout_list = g_slist_remove(mth->timeout_list, last_timeout);
-        free(last_timeout->multi_timeout);
+        delete last_timeout->multi_timeout;
         last_timeout->multi_timeout = 0;
         g_hash_table_remove(multi_timeouts, last_timeout);
         g_hash_table_remove(multi_timeouts, mth->parent_timeout);
         mth->parent_timeout->multi_timeout = 0;
         stop_timeout(mth->parent_timeout);
-        free(mth);
+        delete mth;
 
         struct timespec cur_time, diff_time;
         clock_gettime(CLOCK_MONOTONIC, &cur_time);
@@ -448,17 +441,17 @@ void remove_from_multi_timeout(Timeout* t) {
 
 
 void stop_multi_timeout(Timeout* t) {
-    multi_timeout_handler* mth = static_cast<multi_timeout_handler*>(
-                                     g_hash_table_lookup(multi_timeouts, t));
+    auto mth = static_cast<MultiTimeoutHandler*>(
+                   g_hash_table_lookup(multi_timeouts, t));
     g_hash_table_remove(multi_timeouts, mth->parent_timeout);
 
     while (mth->timeout_list) {
-        Timeout* t1 = static_cast<Timeout*>(mth->timeout_list->data);
+        auto t1 = static_cast<Timeout*>(mth->timeout_list->data);
         mth->timeout_list = g_slist_remove(mth->timeout_list, t1);
         g_hash_table_remove(multi_timeouts, t1);
-        free(t1->multi_timeout);
-        free(t1);
+        delete t1->multi_timeout;
+        delete t1;
     }
 
-    free(mth);
+    delete mth;
 }

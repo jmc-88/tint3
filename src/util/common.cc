@@ -151,6 +151,7 @@ bool hex_to_rgb(char const* hex, int* r, int* g, int* b) {
 
 bool get_color(char const* hex, double* rgb) {
     int r, g, b;
+
     if (!hex_to_rgb(hex, &r, &g, &b)) {
         return false;
     }
