@@ -20,11 +20,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "timer.h"
+#include <map>
 
-GSList* timeout_list;
-struct timeval next_timeout;
-GHashTable* multi_timeouts;
+#include "timer.h"
 
 
 // functions and structs for multi timeouts
@@ -37,6 +35,10 @@ typedef struct {
     GSList* timeout_list;
     Timeout* parent_timeout;
 } MultiTimeoutHandler;
+
+GSList* timeout_list;
+struct timeval next_timeout;
+std::map<Timeout*, MultiTimeoutHandler*> multi_timeouts;
 
 void add_timeout_intern(int value_msec, int interval_msec,
                         void(*_callback)(void*), void* arg, Timeout* t);
@@ -57,8 +59,8 @@ void remove_from_multi_timeout(Timeout* t);
 void stop_multi_timeout(Timeout* t);
 
 void default_timeout() {
-    timeout_list = 0;
-    multi_timeouts = 0;
+    timeout_list = nullptr;
+    multi_timeouts.clear();
 }
 
 void cleanup_timeout() {
@@ -73,10 +75,7 @@ void cleanup_timeout() {
         delete t;
     }
 
-    if (multi_timeouts) {
-        g_hash_table_destroy(multi_timeouts);
-        multi_timeouts = 0;
-    }
+    multi_timeouts.clear();
 }
 
 /** Implementation notes for timeouts: The timeouts are kept in a GSList sorted by their
@@ -102,8 +101,10 @@ Timeout* add_timeout(int value_msec, int interval_msec,
 
 void change_timeout(Timeout* t, int value_msec, int interval_msec,
                     void(*_callback)(void*), void* arg) {
+    bool has_multi_timeout = (multi_timeouts.find(t) != multi_timeouts.end());
+
     if (g_slist_find(timeout_list, t) == 0
-        && g_hash_table_lookup(multi_timeouts, t) == 0) {
+        && !has_multi_timeout) {
         printf("programming error: timeout already deleted...");
         return;
     }
@@ -167,8 +168,10 @@ void callback_timeout_expired() {
 
 
 void stop_timeout(Timeout* t) {
+    bool has_multi_timeout = (multi_timeouts.find(t) != multi_timeouts.end());
+
     // if not in the list, it was deleted in callback_timeout_expired
-    if (g_slist_find(timeout_list, t) || g_hash_table_lookup(multi_timeouts, t)) {
+    if (g_slist_find(timeout_list, t) || has_multi_timeout) {
         if (t->multi_timeout) {
             remove_from_multi_timeout(t);
         }
@@ -266,10 +269,6 @@ bool align_with_existing_timeouts(Timeout* t) {
         if (t2->interval_msec > 0) {
             if (t->interval_msec % t2->interval_msec == 0
                 || t2->interval_msec % t->interval_msec == 0) {
-                if (multi_timeouts == 0) {
-                    multi_timeouts = g_hash_table_new(0, 0);
-                }
-
                 if (!t->multi_timeout && !t2->multi_timeout) {
                     // both timeouts can be aligned, but there is no multi timeout for them
                     create_multi_timeout(t, t2);
@@ -316,9 +315,9 @@ void create_multi_timeout(Timeout* t1, Timeout* t2) {
     mth->timeout_list = g_slist_prepend(mth->timeout_list, t2);
     mth->parent_timeout = real_timeout;
 
-    g_hash_table_insert(multi_timeouts, t1, mth);
-    g_hash_table_insert(multi_timeouts, t2, mth);
-    g_hash_table_insert(multi_timeouts, real_timeout, mth);
+    multi_timeouts.insert(std::make_pair(t1, mth));
+    multi_timeouts.insert(std::make_pair(t2, mth));
+    multi_timeouts.insert(std::make_pair(real_timeout, mth));
 
     t1->multi_timeout = mt1;
     t2->multi_timeout = mt2;
@@ -342,11 +341,10 @@ void append_multi_timeout(Timeout* t1, Timeout* t2) {
     }
 
     auto mt = new MultiTimeout();
-    auto mth = static_cast<MultiTimeoutHandler*>(
-                   g_hash_table_lookup(multi_timeouts, t1));
+    auto mth = multi_timeouts[t1];
 
     mth->timeout_list = g_slist_prepend(mth->timeout_list, t2);
-    g_hash_table_insert(multi_timeouts, t2, mth);
+    multi_timeouts.insert(std::make_pair(t2, mth));
 
     t2->multi_timeout = mt;
 
@@ -409,9 +407,8 @@ void callback_multi_timeout(void* arg) {
 
 
 void remove_from_multi_timeout(Timeout* t) {
-    auto mth = static_cast<MultiTimeoutHandler*>(
-                   g_hash_table_lookup(multi_timeouts, t));
-    g_hash_table_remove(multi_timeouts, t);
+    auto mth = multi_timeouts[t];
+    multi_timeouts.erase(t);
 
     mth->timeout_list = g_slist_remove(mth->timeout_list, t);
     delete t->multi_timeout;
@@ -422,8 +419,8 @@ void remove_from_multi_timeout(Timeout* t) {
         mth->timeout_list = g_slist_remove(mth->timeout_list, last_timeout);
         delete last_timeout->multi_timeout;
         last_timeout->multi_timeout = 0;
-        g_hash_table_remove(multi_timeouts, last_timeout);
-        g_hash_table_remove(multi_timeouts, mth->parent_timeout);
+        multi_timeouts.erase(last_timeout);
+        multi_timeouts.erase(mth->parent_timeout);
         mth->parent_timeout->multi_timeout = 0;
         stop_timeout(mth->parent_timeout);
         delete mth;
@@ -441,14 +438,13 @@ void remove_from_multi_timeout(Timeout* t) {
 
 
 void stop_multi_timeout(Timeout* t) {
-    auto mth = static_cast<MultiTimeoutHandler*>(
-                   g_hash_table_lookup(multi_timeouts, t));
-    g_hash_table_remove(multi_timeouts, mth->parent_timeout);
+    auto mth = multi_timeouts[t];
+    multi_timeouts.erase(mth->parent_timeout);
 
     while (mth->timeout_list) {
         auto t1 = static_cast<Timeout*>(mth->timeout_list->data);
         mth->timeout_list = g_slist_remove(mth->timeout_list, t1);
-        g_hash_table_remove(multi_timeouts, t1);
+        multi_timeouts.erase(t1);
         delete t1->multi_timeout;
         delete t1;
     }
