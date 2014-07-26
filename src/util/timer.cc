@@ -20,6 +20,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include <algorithm>
+#include <list>
 #include <map>
 
 #include "timer.h"
@@ -32,7 +34,7 @@ struct _multi_timeout {
 };
 
 typedef struct {
-    GSList* timeout_list;
+    std::list<Timeout*> timeout_list;
     Timeout* parent_timeout;
 } MultiTimeoutHandler;
 
@@ -287,14 +289,10 @@ bool align_with_existing_timeouts(Timeout* t) {
 
 
 int calc_multi_timeout_interval(MultiTimeoutHandler* mth) {
-    GSList* it = mth->timeout_list;
+    auto const& front = mth->timeout_list.front();
+    int min_interval = front->interval_msec;
 
-    auto t = static_cast<Timeout*>(it->data);
-    int min_interval = t->interval_msec;
-
-    for (it = it->next; it; it = it->next) {
-        t = static_cast<Timeout*>(it->data);
-
+    for (auto const& t : mth->timeout_list) {
         if (t->interval_msec < min_interval) {
             min_interval = t->interval_msec;
         }
@@ -307,12 +305,11 @@ int calc_multi_timeout_interval(MultiTimeoutHandler* mth) {
 void create_multi_timeout(Timeout* t1, Timeout* t2) {
     auto mt1 = new MultiTimeout();
     auto mt2 = new MultiTimeout();
-    auto mth = new MultiTimeoutHandler();
     auto real_timeout = new Timeout();
 
-    mth->timeout_list = 0;
-    mth->timeout_list = g_slist_prepend(mth->timeout_list, t1);
-    mth->timeout_list = g_slist_prepend(mth->timeout_list, t2);
+    auto mth = new MultiTimeoutHandler();
+    mth->timeout_list.push_front(t1);
+    mth->timeout_list.push_front(t2);
     mth->parent_timeout = real_timeout;
 
     multi_timeouts.insert(std::make_pair(t1, mth));
@@ -340,13 +337,10 @@ void append_multi_timeout(Timeout* t1, Timeout* t2) {
         t1 = tmp;
     }
 
-    auto mt = new MultiTimeout();
     auto mth = multi_timeouts[t1];
-
-    mth->timeout_list = g_slist_prepend(mth->timeout_list, t2);
+    mth->timeout_list.push_front(t2);
     multi_timeouts.insert(std::make_pair(t2, mth));
-
-    t2->multi_timeout = mt;
+    t2->multi_timeout = new MultiTimeout();
 
     update_multi_timeout_values(mth);
 }
@@ -359,8 +353,7 @@ void update_multi_timeout_values(MultiTimeoutHandler* mth) {
     struct timespec cur_time;
     clock_gettime(CLOCK_MONOTONIC, &cur_time);
 
-    for (GSList* it = mth->timeout_list; it; it = it->next) {
-        auto t = static_cast<Timeout*>(it->data);
+    for (auto& t : mth->timeout_list) {
         t->multi_timeout->count_to_expiration = t->interval_msec / interval;
 
         struct timespec diff_time;
@@ -385,43 +378,41 @@ void update_multi_timeout_values(MultiTimeoutHandler* mth) {
 
 
 void callback_multi_timeout(void* arg) {
+    auto mth = static_cast<MultiTimeoutHandler*>(arg);
+
     struct timespec cur_time;
     clock_gettime(CLOCK_MONOTONIC, &cur_time);
 
-    auto mth = static_cast<MultiTimeoutHandler*>(arg);
-    GSList* it = mth->timeout_list;
-
-    while (it) {
-        auto t = static_cast<Timeout*>(it->data);
-
+    for (auto& t : mth->timeout_list) {
         if (++t->multi_timeout->current_count >=
             t->multi_timeout->count_to_expiration) {
             t->_callback(t->arg);
             t->multi_timeout->current_count = 0;
             t->timeout_expires = add_msec_to_timespec(cur_time, t->interval_msec);
         }
-
-        it = it->next;
     }
 }
 
 
 void remove_from_multi_timeout(Timeout* t) {
     auto mth = multi_timeouts[t];
+
     multi_timeouts.erase(t);
+    mth->timeout_list.erase(std::remove(mth->timeout_list.begin(),
+                                        mth->timeout_list.end(), t), mth->timeout_list.end());
 
-    mth->timeout_list = g_slist_remove(mth->timeout_list, t);
     delete t->multi_timeout;
-    t->multi_timeout = 0;
+    t->multi_timeout = nullptr;
 
-    if (g_slist_length(mth->timeout_list) == 1) {
-        auto last_timeout = static_cast<Timeout*>(mth->timeout_list->data);
-        mth->timeout_list = g_slist_remove(mth->timeout_list, last_timeout);
+    if (mth->timeout_list.size() == 1) {
+        auto last_timeout = mth->timeout_list.front();
+        mth->timeout_list.erase(std::remove(mth->timeout_list.begin(),
+                                            mth->timeout_list.end(), last_timeout), mth->timeout_list.end());
         delete last_timeout->multi_timeout;
-        last_timeout->multi_timeout = 0;
+        last_timeout->multi_timeout = nullptr;
         multi_timeouts.erase(last_timeout);
         multi_timeouts.erase(mth->parent_timeout);
-        mth->parent_timeout->multi_timeout = 0;
+        mth->parent_timeout->multi_timeout = nullptr;
         stop_timeout(mth->parent_timeout);
         delete mth;
 
@@ -441,9 +432,9 @@ void stop_multi_timeout(Timeout* t) {
     auto mth = multi_timeouts[t];
     multi_timeouts.erase(mth->parent_timeout);
 
-    while (mth->timeout_list) {
-        auto t1 = static_cast<Timeout*>(mth->timeout_list->data);
-        mth->timeout_list = g_slist_remove(mth->timeout_list, t1);
+    for (auto const& t1 : mth->timeout_list) {
+        mth->timeout_list.erase(std::remove(mth->timeout_list.begin(),
+                                            mth->timeout_list.end(), t1), mth->timeout_list.end());
         multi_timeouts.erase(t1);
         delete t1->multi_timeout;
         delete t1;
