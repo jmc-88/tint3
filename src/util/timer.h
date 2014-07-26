@@ -19,9 +19,6 @@
 #ifndef TIMER_H
 #define TIMER_H
 
-#include <glib.h>
-
-extern GSList* timeout_list;
 extern struct timeval next_timeout;
 
 struct _multi_timeout;

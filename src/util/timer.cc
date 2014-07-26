@@ -19,6 +19,7 @@
 #include <sys/time.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <glib.h>
 
 #include <algorithm>
 #include <list>
@@ -38,14 +39,12 @@ typedef struct {
     Timeout* parent_timeout;
 } MultiTimeoutHandler;
 
-GSList* timeout_list;
+std::list<Timeout*> timeout_list;
 struct timeval next_timeout;
 std::map<Timeout*, MultiTimeoutHandler*> multi_timeouts;
 
 void add_timeout_intern(int value_msec, int interval_msec,
                         void(*_callback)(void*), void* arg, Timeout* t);
-gint compare_timeouts(gconstpointer t1, gconstpointer t2);
-gint compare_timespecs(const struct timespec* t1, const struct timespec* t2);
 int timespec_subtract(struct timespec* result, struct timespec* x,
                       struct timespec* y);
 struct timespec add_msec_to_timespec(struct timespec ts, int msec);
@@ -60,20 +59,48 @@ void callback_multi_timeout(void* mth);
 void remove_from_multi_timeout(Timeout* t);
 void stop_multi_timeout(Timeout* t);
 
+
+namespace {
+
+int compare_timespecs(struct timespec const& t1, struct timespec const& t2) {
+    if (t1.tv_sec < t2.tv_sec) {
+        return -1;
+    }
+
+    if (t1.tv_sec == t2.tv_sec) {
+        if (t1.tv_nsec < t2.tv_nsec) {
+            return -1;
+        }
+
+        if (t1.tv_nsec == t2.tv_nsec) {
+            return 0;
+        }
+
+        return 1;
+    }
+
+    return 1;
+}
+
+bool compare_timeouts(Timeout const* t1, Timeout const* t2) {
+    return compare_timespecs(t1->timeout_expires, t2->timeout_expires);
+}
+
+} // namespace
+
 void default_timeout() {
-    timeout_list = nullptr;
+    timeout_list.clear();
     multi_timeouts.clear();
 }
 
 void cleanup_timeout() {
-    while (timeout_list) {
-        auto t = static_cast<Timeout*>(timeout_list->data);
-
+    for (auto const& t : timeout_list) {
         if (t->multi_timeout) {
             stop_multi_timeout(t);
         }
 
-        timeout_list = g_slist_remove(timeout_list, t);
+        timeout_list.erase(std::remove(timeout_list.begin(), timeout_list.end(), t),
+                           timeout_list.end());
         delete t;
     }
 
@@ -102,11 +129,14 @@ Timeout* add_timeout(int value_msec, int interval_msec,
 
 
 void change_timeout(Timeout* t, int value_msec, int interval_msec,
-                    void(*_callback)(void*), void* arg) {
+                    void (*_callback)(void*), void* arg) {
+    auto timeout_it = std::find(timeout_list.begin(),
+                                timeout_list.end(),
+                                t);
+    bool has_timeout = (timeout_it != timeout_list.end());
     bool has_multi_timeout = (multi_timeouts.find(t) != multi_timeouts.end());
 
-    if (g_slist_find(timeout_list, t) == 0
-        && !has_multi_timeout) {
+    if (!has_timeout && !has_multi_timeout) {
         printf("programming error: timeout already deleted...");
         return;
     }
@@ -114,7 +144,7 @@ void change_timeout(Timeout* t, int value_msec, int interval_msec,
     if (t->multi_timeout) {
         remove_from_multi_timeout(t);
     } else {
-        timeout_list = g_slist_remove(timeout_list, t);
+        timeout_list.erase(timeout_it);
     }
 
     add_timeout_intern(value_msec, interval_msec, _callback, arg, t);
@@ -122,10 +152,15 @@ void change_timeout(Timeout* t, int value_msec, int interval_msec,
 
 
 void update_next_timeout() {
-    if (timeout_list) {
-        auto t = static_cast<Timeout*>(timeout_list->data);
+    if (!timeout_list.empty()) {
+        auto t = timeout_list.front();
+
+        struct timespec next_timeout2 = {
+            .tv_sec = next_timeout.tv_sec,
+            .tv_nsec = next_timeout.tv_usec * 1000
+        };
+
         struct timespec cur_time;
-        struct timespec next_timeout2 = { .tv_sec = next_timeout.tv_sec, .tv_nsec = next_timeout.tv_usec * 1000 };
         clock_gettime(CLOCK_MONOTONIC, &cur_time);
 
         if (timespec_subtract(&next_timeout2, &t->timeout_expires, &cur_time)) {
@@ -142,22 +177,29 @@ void update_next_timeout() {
 
 
 void callback_timeout_expired() {
-    while (timeout_list) {
+    auto it = timeout_list.begin();
+
+    while (it != timeout_list.end()) {
+        auto t = (*it);
+
         struct timespec cur_time;
         clock_gettime(CLOCK_MONOTONIC, &cur_time);
 
-        auto t = static_cast<Timeout*>(timeout_list->data);
-
-        if (compare_timespecs(&t->timeout_expires, &cur_time) > 0) {
+        if (compare_timespecs(t->timeout_expires, cur_time) > 0) {
             return;
         }
 
         // it's time for the callback function
         t->_callback(t->arg);
 
-        if (g_slist_find(timeout_list, t)) {
-            // if _callback() calls stop_timeout(t) the timeout 't' was freed and is not in the timeout_list
-            timeout_list = g_slist_remove(timeout_list, t);
+        auto pos = std::find(timeout_list.begin(), timeout_list.end(), t);
+
+        // if _callback() calls stop_timeout(t) the timeout 't' was freed and is not in the timeout_list
+        // FIXME: make all of this less ugly
+        if (pos == timeout_list.end()) {
+            ++it;
+        } else {
+            it = timeout_list.erase(pos);
 
             if (t->interval_msec > 0) {
                 add_timeout_intern(t->interval_msec, t->interval_msec, t->_callback, t->arg, t);
@@ -170,15 +212,19 @@ void callback_timeout_expired() {
 
 
 void stop_timeout(Timeout* t) {
+    auto timeout_it = std::find(timeout_list.begin(),
+                                timeout_list.end(),
+                                t);
+    bool has_timeout = (timeout_it != timeout_list.end());
     bool has_multi_timeout = (multi_timeouts.find(t) != multi_timeouts.end());
 
     // if not in the list, it was deleted in callback_timeout_expired
-    if (g_slist_find(timeout_list, t) || has_multi_timeout) {
+    if (has_timeout || has_multi_timeout) {
         if (t->multi_timeout) {
             remove_from_multi_timeout(t);
         }
 
-        timeout_list = g_slist_remove(timeout_list, t);
+        timeout_list.erase(timeout_it);
         delete t;
     }
 }
@@ -195,35 +241,19 @@ void add_timeout_intern(int value_msec, int interval_msec,
 
     bool can_align = false;
 
-    if (interval_msec > 0 && !t->multi_timeout) {
+    if (interval_msec > 0 && t->multi_timeout == nullptr) {
         can_align = align_with_existing_timeouts(t);
     }
 
     if (!can_align) {
-        timeout_list = g_slist_insert_sorted(timeout_list, t, compare_timeouts);
-    }
-}
-
-
-gint compare_timeouts(gconstpointer t1, gconstpointer t2) {
-    return compare_timespecs(&((Timeout*)t1)->timeout_expires,
-                             &((Timeout*)t2)->timeout_expires);
-}
-
-
-gint compare_timespecs(const struct timespec* t1, const struct timespec* t2) {
-    if (t1->tv_sec < t2->tv_sec) {
-        return -1;
-    } else if (t1->tv_sec == t2->tv_sec) {
-        if (t1->tv_nsec < t2->tv_nsec) {
-            return -1;
-        } else if (t1->tv_nsec == t2->tv_nsec) {
-            return 0;
-        } else {
-            return 1;
-        }
-    } else {
-        return 1;
+        auto it = std::lower_bound(
+                      timeout_list.begin(),
+                      timeout_list.end(),
+                      t,
+        [](Timeout * t1, Timeout * t2) {
+            return (compare_timeouts(t1, t2) < 0);
+        });
+        timeout_list.insert(it, t);
     }
 }
 
@@ -265,9 +295,7 @@ struct timespec add_msec_to_timespec(struct timespec ts, int msec) {
 
 
 bool align_with_existing_timeouts(Timeout* t) {
-    for (GSList* it = timeout_list; it; it = it->next) {
-        auto t2 = static_cast<Timeout*>(it->data);
-
+    for (auto const& t2 : timeout_list) {
         if (t2->interval_msec > 0) {
             if (t->interval_msec % t2->interval_msec == 0
                 || t2->interval_msec % t->interval_msec == 0) {
@@ -322,8 +350,10 @@ void create_multi_timeout(Timeout* t1, Timeout* t2) {
     // it is already a multi_timeout (we never use it, except of checking for 0 ptr)
     real_timeout->multi_timeout = (MultiTimeout*) real_timeout;
 
-    timeout_list = g_slist_remove(timeout_list, t1);
-    timeout_list = g_slist_remove(timeout_list, t2);
+    timeout_list.erase(std::remove(timeout_list.begin(), timeout_list.end(), t1),
+                       timeout_list.end());
+    timeout_list.erase(std::remove(timeout_list.begin(), timeout_list.end(), t2),
+                       timeout_list.end());
 
     update_multi_timeout_values(mth);
 }
@@ -371,7 +401,8 @@ void update_multi_timeout_values(MultiTimeoutHandler* mth) {
     }
 
     mth->parent_timeout->interval_msec = interval;
-    timeout_list = g_slist_remove(timeout_list, mth->parent_timeout);
+    timeout_list.erase(std::remove(timeout_list.begin(), timeout_list.end(),
+                                   mth->parent_timeout), timeout_list.end());
     add_timeout_intern(next_timeout_msec, interval, callback_multi_timeout, mth,
                        mth->parent_timeout);
 }
