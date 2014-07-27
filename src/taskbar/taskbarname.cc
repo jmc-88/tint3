@@ -53,8 +53,8 @@ void init_taskbarname_panel(void* p) {
         return;
     }
 
-    GSList* list = server_get_name_of_desktop();
-    GSList* l = list;
+    auto desktop_names = server_get_desktop_names();
+    auto it = desktop_names.begin();
 
     for (int j = 0; j < panel->nb_desktop; ++j) {
         Taskbar* tskbar = &panel->taskbar[j];
@@ -68,9 +68,9 @@ void init_taskbarname_panel(void* p) {
         }
 
         // use desktop number if name is missing
-        if (l) {
-            tskbar->bar_name.name = g_strdup(static_cast<gchar const*>(l->data));
-            l = l->next;
+        if (it != desktop_names.end()) {
+            tskbar->bar_name.name = g_strdup(it->c_str());
+            ++it;
         } else {
             tskbar->bar_name.name = g_strdup_printf("%d", j + 1);
         }
@@ -78,12 +78,6 @@ void init_taskbarname_panel(void* p) {
         // append the name at the beginning of taskbar
         tskbar->children.push_back(&tskbar->bar_name);
     }
-
-    for (l = list ; l ; l = l->next) {
-        g_free(l->data);
-    }
-
-    g_slist_free(list);
 }
 
 

@@ -665,16 +665,16 @@ void event_property_notify(XEvent* e) {
                 return;
             }
 
-            GSList* list = server_get_name_of_desktop();
-            GSList* l = list;
+            auto desktop_names = server_get_desktop_names();
+            auto it = desktop_names.begin();
 
             for (i = 0; i < nb_panel; ++i) {
                 for (int j = 0; j < panel1[i].nb_desktop; ++j) {
                     gchar* name;
 
-                    if (l) {
-                        name = g_strdup(static_cast<char*>(l->data));
-                        l = l->next;
+                    if (it != desktop_names.end()) {
+                        name = g_strdup(it->c_str());
+                        ++it;
                     } else {
                         name = g_strdup_printf("%d", j + 1);
                     }
@@ -691,11 +691,6 @@ void event_property_notify(XEvent* e) {
                 }
             }
 
-            for (l = list; l; l = l->next) {
-                g_free(l->data);
-            }
-
-            g_slist_free(list);
             panel_refresh = 1;
         }
         // Change number of desktops

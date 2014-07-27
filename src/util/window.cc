@@ -216,30 +216,33 @@ int server_get_number_of_desktop() {
 }
 
 
-GSList* server_get_name_of_desktop() {
+std::vector<std::string> server_get_desktop_names() {
     int count;
-    gchar* data_ptr = static_cast<gchar*>(server_get_property(
-            server.root_win,
-            server.atom._NET_DESKTOP_NAMES,
-            server.atom.UTF8_STRING,
-            &count));
+    char* data_ptr = static_cast<char*>(server_get_property(
+                                            server.root_win,
+                                            server.atom._NET_DESKTOP_NAMES,
+                                            server.atom.UTF8_STRING,
+                                            &count));
 
-    GSList* list = 0;
+    std::vector<std::string> names;
 
-    if (data_ptr) {
-        list = g_slist_append(list, g_strdup(data_ptr));
+    // data_ptr contains strings separated by NUL characters, so we can just add
+    // one and add its length to a counter, then repeat until the data has been
+    // fully consumed
+    if (data_ptr != nullptr) {
+        names.push_back(data_ptr);
 
-        for (int j = 0; j < count - 1; j++) {
-            if (data_ptr[j] == '\0') {
-                gchar* ptr = &data_ptr[j + 1];
-                list = g_slist_append(list, g_strdup(ptr));
-            }
+        int j = (names.back().length() + 1);
+
+        while (j < count - 1) {
+            names.push_back(&data_ptr[j]);
+            j += (names.back().length() + 1);
         }
 
         XFree(data_ptr);
     }
 
-    return list;
+    return names;
 }
 
 

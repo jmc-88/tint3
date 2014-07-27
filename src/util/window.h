@@ -12,13 +12,16 @@
 #include <glib.h>
 #include <pango/pangocairo.h>
 
+#include <string>
+#include <vector>
+
 
 void set_active(Window win);
 void set_desktop(int desktop);
 void set_close(Window win);
 int server_get_current_desktop();
 int server_get_number_of_desktop();
-GSList* server_get_name_of_desktop();
+std::vector<std::string> server_get_desktop_names();
 int window_is_iconified(Window win);
 int window_is_urgent(Window win);
 int window_is_hidden(Window win);
