@@ -28,11 +28,58 @@
 #include <unistd.h>
 
 #include <algorithm>
+#include <cctype>
 #include <fstream>
 #include <iterator>
 
 #include "common.h"
 #include "../server.h"
+
+
+namespace {
+
+unsigned int hex_char_to_int(char c) {
+    c = std::tolower(c);
+
+    if (c >= '0' && c <= '9') {
+        return c - '0';
+    }
+
+    if (c >= 'a' && c <= 'f') {
+        return c - 'a' + 10;
+    }
+
+    return 0;
+}
+
+bool hex_to_rgb(char const* hex, unsigned int* r, unsigned int* g,
+                unsigned int* b) {
+    if (hex == nullptr || hex[0] != '#') {
+        return false;
+    }
+
+    size_t len = strlen(hex);
+
+    if (len == 3 + 1) {
+        (*r) = hex_char_to_int(hex[1]);
+        (*g) = hex_char_to_int(hex[2]);
+        (*b) = hex_char_to_int(hex[3]);
+    } else if (len == 6 + 1) {
+        (*r) = hex_char_to_int(hex[1]) * 16 + hex_char_to_int(hex[2]);
+        (*g) = hex_char_to_int(hex[3]) * 16 + hex_char_to_int(hex[4]);
+        (*b) = hex_char_to_int(hex[5]) * 16 + hex_char_to_int(hex[6]);
+    } else if (len == 12 + 1) {
+        (*r) = hex_char_to_int(hex[1]) * 16 + hex_char_to_int(hex[2]);
+        (*g) = hex_char_to_int(hex[5]) * 16 + hex_char_to_int(hex[6]);
+        (*b) = hex_char_to_int(hex[9]) * 16 + hex_char_to_int(hex[10]);
+    } else {
+        return false;
+    }
+
+    return true;
+}
+
+} // namespace
 
 
 int const ALLDESKTOP = 0xFFFFFFFF;
@@ -104,53 +151,8 @@ void tint_exec(char const* command) {
     }
 }
 
-
-int hex_char_to_int(char c) {
-    int r;
-
-    if (c >= '0' && c <= '9') {
-        r = c - '0';
-    } else if (c >= 'a' && c <= 'f') {
-        r = c - 'a' + 10;
-    } else if (c >= 'A' && c <= 'F') {
-        r = c - 'A' + 10;
-    } else {
-        r = 0;
-    }
-
-    return r;
-}
-
-
-bool hex_to_rgb(char const* hex, int* r, int* g, int* b) {
-    if (hex == nullptr || hex[0] != '#') {
-        return false;
-    }
-
-    size_t len = strlen(hex);
-
-    if (len == 3 + 1) {
-        (*r) = hex_char_to_int(hex[1]);
-        (*g) = hex_char_to_int(hex[2]);
-        (*b) = hex_char_to_int(hex[3]);
-    } else if (len == 6 + 1) {
-        (*r) = hex_char_to_int(hex[1]) * 16 + hex_char_to_int(hex[2]);
-        (*g) = hex_char_to_int(hex[3]) * 16 + hex_char_to_int(hex[4]);
-        (*b) = hex_char_to_int(hex[5]) * 16 + hex_char_to_int(hex[6]);
-    } else if (len == 12 + 1) {
-        (*r) = hex_char_to_int(hex[1]) * 16 + hex_char_to_int(hex[2]);
-        (*g) = hex_char_to_int(hex[5]) * 16 + hex_char_to_int(hex[6]);
-        (*b) = hex_char_to_int(hex[9]) * 16 + hex_char_to_int(hex[10]);
-    } else {
-        return false;
-    }
-
-    return true;
-}
-
-
 bool get_color(char const* hex, double* rgb) {
-    int r, g, b;
+    unsigned int r, g, b;
 
     if (!hex_to_rgb(hex, &r, &g, &b)) {
         return false;

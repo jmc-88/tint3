@@ -38,12 +38,10 @@ bool copy_file(char const* from_path, char const* to_path);
 int parse_line(char* line, char** key, char** value);
 
 // execute a command by calling fork
-void tint_exec(const char* command);
+void tint_exec(char const* command);
 
 
-// conversion
-int hex_char_to_int(char c);
-bool hex_to_rgb(char const* hex, int* r, int* g, int* b);
+// color conversion
 bool get_color(char const* hex, double* rgb);
 
 void extract_values(char* value, char** value1, char** value2, char** value3);
