@@ -27,10 +27,7 @@
 #include <string.h>
 #include <unistd.h>
 
-#include <algorithm>
 #include <cctype>
-#include <fstream>
-#include <iterator>
 
 #include "common.h"
 #include "../server.h"
@@ -84,26 +81,15 @@ bool hex_to_rgb(char const* hex, unsigned int* r, unsigned int* g,
 
 int const ALLDESKTOP = 0xFFFFFFFF;
 
+std::string GetEnvironment(std::string const& variable_name) {
+    char* value = getenv(variable_name.c_str());
+    std::string result;
 
-bool copy_file(char const* from_path, char const* to_path) {
-    std::ifstream from(from_path);
-
-    if (!from) {
-        return false;
+    if (value != nullptr) {
+        result.assign(value);
     }
 
-    std::ofstream to(to_path);
-
-    if (!to) {
-        return false;
-    }
-
-    std::istreambuf_iterator<char> begin_from(from);
-    std::istreambuf_iterator<char> end_from;
-    std::ostreambuf_iterator<char> begin_to(to);
-
-    std::copy(begin_from, end_from, begin_to);
-    return true;
+    return result;
 }
 
 int parse_line(char* line, char** key, char** value) {

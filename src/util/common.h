@@ -12,6 +12,8 @@
 #include <Imlib2.h>
 #include "area.h"
 
+#include <string>
+
 // mouse actions
 enum {
     NONE = 0,
@@ -31,8 +33,7 @@ enum {
 
 extern int const ALLDESKTOP;
 
-
-bool copy_file(char const* from_path, char const* to_path);
+std::string GetEnvironment(std::string const& variable_name);
 
 // extract key = value
 int parse_line(char* line, char** key, char** value);

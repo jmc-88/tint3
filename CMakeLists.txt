@@ -45,7 +45,8 @@ include_directories( ${PROJECT_BINARY_DIR}
     ${IMLIB2_INCLUDE_DIRS}
     ${SN_INCLUDE_DIRS} )
 
-set( SOURCES src/config.cc
+set( SOURCES
+    src/config.cc
     src/panel.cc
     src/server.cc
     src/tint.cc
@@ -60,8 +61,10 @@ set( SOURCES src/config.cc
     src/tooltip/tooltip.cc
     src/util/area.cc
     src/util/common.cc
+    src/util/fs.cc
     src/util/timer.cc
-    src/util/window.cc )
+    src/util/window.cc
+    src/util/xdg.cc )
 
 option( ENABLE_BATTERY "Enable battery status plugin" ON )
 option( ENABLE_EXAMPLES "Install additional tin2rc examples" OFF )

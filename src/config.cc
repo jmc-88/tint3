@@ -47,8 +47,10 @@
 #include "taskbar/taskbar.h"
 #include "taskbar/taskbarname.h"
 #include "tooltip/tooltip.h"
-#include "util/window.h"
+#include "util/fs.h"
 #include "util/timer.h"
+#include "util/window.h"
+#include "util/xdg.h"
 
 #ifdef ENABLE_BATTERY
 #include "battery/battery.h"
@@ -834,55 +836,44 @@ void add_entry(char* key, char* value) {
 
 
 int config_read() {
-    const gchar* const* system_dirs;
-    char* path1;
     gint i;
 
     // follow XDG specification
     // check tint3rc in user directory
-    path1 = g_build_filename(g_get_user_config_dir(), "tint3", "tint3rc", NULL);
+    std::string path1 = fs::BuildPath({
+        xdg::basedir::ConfigHome(), "tint3", "tint3rc"
+    });
 
-    if (g_file_test(path1, G_FILE_TEST_EXISTS)) {
-        i = config_read_file(path1);
-        config_path = strdup(path1);
-        g_free(path1);
+    if (fs::FileExists(path1)) {
+        i = config_read_file(path1.c_str());
+        config_path = strdup(path1.c_str());
         return i;
     }
 
-    g_free(path1);
-
     // copy tint3rc from system directory to user directory
-    char* path2 = 0;
-    system_dirs = g_get_system_config_dirs();
+    std::string path2;
 
-    for (i = 0; system_dirs[i]; i++) {
-        path2 = g_build_filename(system_dirs[i], "tint3", "tint3rc", NULL);
+    for (auto const& system_dir : xdg::basedir::ConfigDirs()) {
+        path2 = fs::BuildPath({ system_dir, "tint3", "tint3rc" });
 
-        if (g_file_test(path2, G_FILE_TEST_EXISTS)) {
+        if (fs::FileExists(path2)) {
             break;
         }
 
-        g_free(path2);
-        path2 = 0;
+        path2.clear();
     }
 
-    if (path2) {
+    if (!path2.empty()) {
         // copy file in user directory (path1)
-        char* dir = g_build_filename(g_get_user_config_dir(), "tint3", NULL);
+        std::string dir = fs::BuildPath({ xdg::basedir::ConfigHome(), "tint3" });
 
-        if (!g_file_test(dir, G_FILE_TEST_IS_DIR)) {
-            g_mkdir(dir, 0777);
-        }
+        fs::CreateDirectory(dir);
 
-        g_free(dir);
+        path1 = fs::BuildPath({ xdg::basedir::ConfigHome(), "tint3", "tint3rc" });
+        fs::CopyFile(path2, path1);
 
-        path1 = g_build_filename(g_get_user_config_dir(), "tint3", "tint3rc", NULL);
-        copy_file(path2, path1);
-        g_free(path2);
-
-        i = config_read_file(path1);
-        config_path = strdup(path1);
-        g_free(path1);
+        i = config_read_file(path1.c_str());
+        config_path = strdup(path1.c_str());
         return i;
     }
 
