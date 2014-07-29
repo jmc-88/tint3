@@ -66,7 +66,7 @@ int panel_autohide_show_timeout;
 int panel_autohide_hide_timeout;
 int panel_autohide_height;
 int panel_strut_policy;
-char* panel_items_order;
+std::string panel_items_order;
 
 int  max_tick_urgent;
 
@@ -87,7 +87,7 @@ void default_panel() {
     task_dragged = 0;
     panel_horizontal = 1;
     panel_position = CENTER;
-    panel_items_order = 0;
+    panel_items_order.clear();
     panel_autohide = 0;
     panel_autohide_show_timeout = 0;
     panel_autohide_hide_timeout = 0;
@@ -134,10 +134,6 @@ void cleanup_panel() {
         if (p->main_win) {
             XDestroyWindow(server.dsp, p->main_win);
         }
-    }
-
-    if (panel_items_order) {
-        g_free(panel_items_order);
     }
 
     if (panel1) {
@@ -203,32 +199,32 @@ void init_panel() {
         p->_resize = resize_panel;
         init_panel_size_and_position(p);
 
-        // add childs according to panel_items
-        for (size_t k = 0 ; k < strlen(panel_items_order) ; k++) {
-            if (panel_items_order[k] == 'L') {
+        // add children according to panel_items
+        for (char item : panel_items_order) {
+            if (item == 'L') {
                 init_launcher_panel(p);
             }
 
-            if (panel_items_order[k] == 'T') {
+            if (item == 'T') {
                 init_taskbar_panel(p);
             }
 
 #ifdef ENABLE_BATTERY
 
-            if (panel_items_order[k] == 'B') {
+            if (item == 'B') {
                 init_battery_panel(p);
             }
 
 #endif
 
-            if (panel_items_order[k] == 'S' && i == 0) {
+            if (item == 'S' && i == 0) {
                 // TODO : check systray is only on 1 panel
                 // at the moment only on panel1[0] allowed
                 init_systray_panel(p);
                 refresh_systray = 1;
             }
 
-            if (panel_items_order[k] == 'C') {
+            if (item == 'C') {
                 init_clock_panel(p);
             }
         }
@@ -486,12 +482,12 @@ void update_strut(Panel* p) {
 void set_panel_items_order(Panel* p) {
     p->children.clear();
 
-    for (size_t k = 0 ; k < strlen(panel_items_order) ; k++) {
-        if (panel_items_order[k] == 'L') {
+    for (char item : panel_items_order) {
+        if (item == 'L') {
             p->children.push_back(&p->launcher);
         }
 
-        if (panel_items_order[k] == 'T') {
+        if (item == 'T') {
             for (int j = 0 ; j < p->nb_desktop ; j++) {
                 p->children.push_back(&p->taskbar[j]);
             }
@@ -499,19 +495,19 @@ void set_panel_items_order(Panel* p) {
 
 #ifdef ENABLE_BATTERY
 
-        if (panel_items_order[k] == 'B') {
+        if (item == 'B') {
             p->children.push_back(&p->battery);
         }
 
 #endif
 
-        if (panel_items_order[k] == 'S' && p == panel1) {
+        if (item == 'S' && p == panel1) {
             // TODO : check systray is only on 1 panel
             // at the moment only on panel1[0] allowed
             p->children.push_back(&systray);
         }
 
-        if (panel_items_order[k] == 'C') {
+        if (item == 'C') {
             p->children.push_back(&p->clock);
         }
     }

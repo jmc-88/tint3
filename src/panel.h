@@ -14,6 +14,7 @@
 #include <pango/pangocairo.h>
 #include <sys/time.h>
 
+#include <string>
 #include <vector>
 
 #include "clock/clock.h"
@@ -63,7 +64,7 @@ extern int panel_autohide_hide_timeout;
 extern int
 panel_autohide_height;  // for vertical panels this is of course the width
 extern int panel_strut_policy;
-extern char* panel_items_order;
+extern std::string panel_items_order;
 
 extern int  max_tick_urgent;
 

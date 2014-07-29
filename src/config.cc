@@ -249,20 +249,18 @@ void add_entry(char* key, char* value) {
         }
     } else if (strcmp(key, "panel_items") == 0) {
         new_config_file = 1;
-        panel_items_order = strdup(value);
+        panel_items_order.assign(value);
 
-        size_t j;
-
-        for (j = 0 ; j < strlen(panel_items_order) ; j++) {
-            if (panel_items_order[j] == 'L') {
+        for (char item : panel_items_order) {
+            if (item == 'L') {
                 launcher_enabled = 1;
             }
 
-            if (panel_items_order[j] == 'T') {
+            if (item == 'T') {
                 taskbar_enabled = 1;
             }
 
-            if (panel_items_order[j] == 'B') {
+            if (item == 'B') {
 #ifdef ENABLE_BATTERY
                 battery_enabled = 1;
 #else
@@ -270,14 +268,14 @@ void add_entry(char* key, char* value) {
 #endif
             }
 
-            if (panel_items_order[j] == 'S') {
+            if (item == 'S') {
                 // systray disabled in snapshot mode
                 if (snapshot_path == 0) {
                     systray_enabled = 1;
                 }
             }
 
-            if (panel_items_order[j] == 'C') {
+            if (item == 'C') {
                 clock_enabled = 1;
             }
         }
@@ -427,14 +425,7 @@ void add_entry(char* key, char* value) {
     else if (strcmp(key, "time1_format") == 0) {
         if (new_config_file == 0) {
             clock_enabled = 1;
-
-            if (panel_items_order) {
-                char* tmp = g_strconcat(panel_items_order, "C", NULL);
-                g_free(panel_items_order);
-                panel_items_order = tmp;
-            } else {
-                panel_items_order = g_strdup("C");
-            }
+            panel_items_order.push_back('C');
         }
 
         if (strlen(value) > 0) {
@@ -643,14 +634,7 @@ void add_entry(char* key, char* value) {
     else if (strcmp(key, "systray_padding") == 0) {
         if (new_config_file == 0 && systray_enabled == 0) {
             systray_enabled = 1;
-
-            if (panel_items_order) {
-                char* tmp = g_strconcat(panel_items_order, "S", NULL);
-                g_free(panel_items_order);
-                panel_items_order = tmp;
-            } else {
-                panel_items_order = g_strdup("S");
-            }
+            panel_items_order.push_back('S');
         }
 
         extract_values(value, &value1, &value2, &value3);
@@ -792,13 +776,7 @@ void add_entry(char* key, char* value) {
             systray_enabled = atoi(value);
 
             if (systray_enabled) {
-                if (panel_items_order) {
-                    char* tmp = g_strconcat(panel_items_order, "S", NULL);
-                    g_free(panel_items_order);
-                    panel_items_order = tmp;
-                } else {
-                    panel_items_order = g_strdup("S");
-                }
+                panel_items_order.push_back('S');
             }
         }
     } else if (strcmp(key, "battery") == 0) {
@@ -806,13 +784,7 @@ void add_entry(char* key, char* value) {
             battery_enabled = atoi(value);
 
             if (battery_enabled) {
-                if (panel_items_order) {
-                    char* tmp = g_strconcat(panel_items_order, "B", NULL);
-                    g_free(panel_items_order);
-                    panel_items_order = tmp;
-                } else {
-                    panel_items_order = g_strdup("B");
-                }
+                panel_items_order.push_back('B');
             }
         }
     } else {
@@ -882,15 +854,18 @@ int config_read() {
 
 
 int config_read_file(const char* path) {
-    FILE* fp;
-    char line[512];
-    char* key, *value;
+    FILE* fp = fopen(path, "r");
 
-    if ((fp = fopen(path, "r")) == NULL) {
+    if (fp == NULL) {
         return 0;
     }
 
+    char line[512];
+
     while (fgets(line, sizeof(line), fp) != NULL) {
+        char* key;
+        char* value;
+
         if (parse_line(line, &key, &value)) {
             add_entry(key, value);
             free(key);
@@ -903,14 +878,7 @@ int config_read_file(const char* path) {
     // append Taskbar item
     if (new_config_file == 0) {
         taskbar_enabled = 1;
-
-        if (panel_items_order) {
-            char* tmp = g_strconcat("T", panel_items_order, NULL);
-            g_free(panel_items_order);
-            panel_items_order = tmp;
-        } else {
-            panel_items_order = g_strdup("T");
-        }
+        panel_items_order.insert(0, "T");
     }
 
     return 1;
