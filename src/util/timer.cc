@@ -212,10 +212,9 @@ void callback_timeout_expired() {
 
 
 void stop_timeout(Timeout* t) {
-    auto timeout_it = std::find(timeout_list.begin(),
-                                timeout_list.end(),
-                                t);
-    bool has_timeout = (timeout_it != timeout_list.end());
+    bool has_timeout = (std::find(timeout_list.begin(),
+                                  timeout_list.end(),
+                                  t) != timeout_list.end());
     bool has_multi_timeout = (multi_timeouts.find(t) != multi_timeouts.end());
 
     // if not in the list, it was deleted in callback_timeout_expired
@@ -224,7 +223,9 @@ void stop_timeout(Timeout* t) {
             remove_from_multi_timeout(t);
         }
 
-        timeout_list.erase(timeout_it);
+        timeout_list.erase(std::remove(timeout_list.begin(),
+                                       timeout_list.end(),
+                                       t), timeout_list.end());
         delete t;
     }
 }
