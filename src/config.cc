@@ -57,8 +57,8 @@
 #endif
 
 // global path
-char* config_path;
-char* snapshot_path;
+std::string config_path;
+std::string snapshot_path;
 
 // --------------------------------------------------
 // backward compatibility
@@ -67,19 +67,9 @@ static int new_config_file;
 
 
 void default_config() {
-    config_path = 0;
-    snapshot_path = 0;
+    config_path.clear();
+    snapshot_path.clear();
     new_config_file = 0;
-}
-
-void cleanup_config() {
-    if (config_path) {
-        g_free(config_path);
-    }
-
-    if (snapshot_path) {
-        g_free(snapshot_path);
-    }
 }
 
 
@@ -270,7 +260,7 @@ void add_entry(char* key, char* value) {
 
             if (item == 'S') {
                 // systray disabled in snapshot mode
-                if (snapshot_path == 0) {
+                if (snapshot_path.empty()) {
                     systray_enabled = 1;
                 }
             }
@@ -807,9 +797,7 @@ void add_entry(char* key, char* value) {
 }
 
 
-int config_read() {
-    gint i;
-
+bool config_read() {
     // follow XDG specification
     // check tint3rc in user directory
     std::string path1 = fs::BuildPath({
@@ -817,9 +805,8 @@ int config_read() {
     });
 
     if (fs::FileExists(path1)) {
-        i = config_read_file(path1.c_str());
-        config_path = strdup(path1.c_str());
-        return i;
+        config_path = path1;
+        return config_read_file(path1);
     }
 
     // copy tint3rc from system directory to user directory
@@ -841,23 +828,22 @@ int config_read() {
 
         fs::CreateDirectory(dir);
 
-        path1 = fs::BuildPath({ xdg::basedir::ConfigHome(), "tint3", "tint3rc" });
+        path1 = fs::BuildPath({ dir, "tint3rc" });
         fs::CopyFile(path2, path1);
 
-        i = config_read_file(path1.c_str());
-        config_path = strdup(path1.c_str());
-        return i;
+        config_path = path1;
+        return config_read_file(path1);
     }
 
     return 0;
 }
 
 
-int config_read_file(const char* path) {
-    FILE* fp = fopen(path, "r");
+bool config_read_file(std::string const& path) {
+    FILE* fp = fopen(path.c_str(), "r");
 
     if (fp == NULL) {
-        return 0;
+        return false;
     }
 
     char line[512];
@@ -881,6 +867,6 @@ int config_read_file(const char* path) {
         panel_items_order.insert(0, "T");
     }
 
-    return 1;
+    return true;
 }
 

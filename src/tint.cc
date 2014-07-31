@@ -266,7 +266,6 @@ void cleanup() {
     cleanup_battery();
 #endif
     cleanup_panel();
-    cleanup_config();
 
     if (default_icon) {
         imlib_context_set_image(default_icon);
@@ -1184,8 +1183,8 @@ start:
 
     int i;
 
-    if (config_path) {
-        i = config_read_file(config_path);
+    if (!config_path.empty()) {
+        i = config_read_file(config_path.c_str());
     } else {
         i = config_read();
     }
@@ -1198,8 +1197,8 @@ start:
 
     init_panel();
 
-    if (snapshot_path) {
-        get_snapshot(snapshot_path);
+    if (!snapshot_path.empty()) {
+        get_snapshot(snapshot_path.c_str());
         cleanup();
         exit(0);
     }

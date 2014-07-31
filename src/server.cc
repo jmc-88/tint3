@@ -451,7 +451,7 @@ void server_init_visual() {
                                             AllocNone);
     }
 
-    if (visual && server.composite_manager != None && snapshot_path == 0) {
+    if (visual && server.composite_manager != None && snapshot_path.empty()) {
         XSetWindowAttributes attrs;
         attrs.event_mask = StructureNotifyMask;
         XChangeWindowAttributes(server.dsp, server.composite_manager, CWEventMask,

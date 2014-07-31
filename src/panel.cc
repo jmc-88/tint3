@@ -271,7 +271,7 @@ void init_panel() {
         set_panel_properties(p);
         set_panel_background(p);
 
-        if (snapshot_path == 0) {
+        if (snapshot_path.empty()) {
             // if we are not in 'snapshot' mode then map new panel
             XMapWindow(server.dsp, p->main_win);
         }
