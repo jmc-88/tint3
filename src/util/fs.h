@@ -3,6 +3,7 @@
 
 #include <sys/stat.h>
 
+#include <functional>
 #include <initializer_list>
 #include <string>
 
@@ -15,6 +16,8 @@ bool DirectoryExists(std::string const& path);
 bool FileExists(std::string const& path);
 std::string HomeDirectory();
 bool IsAbsolutePath(std::string const& path);
+bool ReadFileByLine(std::string const& path,
+                    std::function<void(std::string const&)> fn);
 
 }
 

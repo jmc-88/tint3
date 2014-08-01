@@ -109,4 +109,21 @@ bool IsAbsolutePath(std::string const& path) {
     return is_absolute;
 }
 
+bool ReadFileByLine(std::string const& path,
+                    std::function<void(std::string const&)> fn) {
+    std::ifstream is(path);
+
+    if (!is.good()) {
+        return false;
+    }
+
+    while (!is.eof()) {
+        std::string line;
+        std::getline(is, line);
+        fn(line);
+    }
+
+    return true;
+}
+
 }

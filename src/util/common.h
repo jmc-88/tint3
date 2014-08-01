@@ -35,8 +35,7 @@ extern int const ALLDESKTOP;
 
 std::string GetEnvironment(std::string const& variable_name);
 
-// extract key = value
-int parse_line(char* line, char** key, char** value);
+std::string& StringTrim(std::string& str);
 
 // execute a command by calling fork
 void tint_exec(char const* command);

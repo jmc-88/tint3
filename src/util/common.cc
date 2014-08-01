@@ -92,37 +92,23 @@ std::string GetEnvironment(std::string const& variable_name) {
     return result;
 }
 
-int parse_line(char* line, char** key, char** value) {
-    /* Skip useless lines */
-    if ((line[0] == '#') || (line[0] == '\n')) {
-        return 0;
+std::string& StringTrim(std::string& str) {
+    static char const* space_chars = " \f\n\r\t\v";
+
+    auto first = str.find_first_not_of(space_chars);
+
+    if (first != std::string::npos) {
+        str.erase(0, first);
     }
 
-    char* a;
+    auto last = str.find_last_not_of(space_chars);
 
-    if (!(a = strchr(line, '='))) {
-        return 0;
+    if (last != std::string::npos) {
+        str.erase(last + 1, std::string::npos);
     }
 
-    /* overwrite '=' with '\0' */
-    a[0] = '\0';
-    *key = strdup(line);
-    a++;
-
-    /* overwrite '\n' with '\0' if '\n' present */
-    char* b;
-
-    if ((b = strchr(a, '\n'))) {
-        b[0] = '\0';
-    }
-
-    *value = strdup(a);
-
-    g_strstrip(*key);
-    g_strstrip(*value);
-    return 1;
+    return str;
 }
-
 
 void tint_exec(char const* command) {
     if (command) {
