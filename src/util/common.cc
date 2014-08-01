@@ -97,16 +97,15 @@ std::string& StringTrim(std::string& str) {
 
     auto first = str.find_first_not_of(space_chars);
 
-    if (first != std::string::npos) {
-        str.erase(0, first);
+    if (first == std::string::npos) {
+        str.clear();
+        return str;
     }
 
     auto last = str.find_last_not_of(space_chars);
 
-    if (last != std::string::npos) {
-        str.erase(last + 1, std::string::npos);
-    }
-
+    str.erase(0, first);
+    str.erase(last - first + 1, std::string::npos);
     return str;
 }
 
