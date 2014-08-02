@@ -801,42 +801,36 @@ void AddEntry(std::string const& key, char* value) {
 bool config_read() {
     // follow XDG specification
     // check tint3rc in user directory
-    std::string path1 = fs::BuildPath({
-        xdg::basedir::ConfigHome(), "tint3", "tint3rc"
+    std::string user_config_dir = fs::BuildPath({
+        xdg::basedir::ConfigHome(), "tint3"
     });
+    config_path = fs::BuildPath({ user_config_dir, "tint3rc" });
 
-    if (fs::FileExists(path1)) {
-        config_path = path1;
-        return config_read_file(path1);
+    if (fs::FileExists(config_path)) {
+        return config_read_file(config_path);
     }
 
     // copy tint3rc from system directory to user directory
-    std::string path2;
+    std::string system_config_file;
 
     for (auto const& system_dir : xdg::basedir::ConfigDirs()) {
-        path2 = fs::BuildPath({ system_dir, "tint3", "tint3rc" });
+        system_config_file = fs::BuildPath({ system_dir, "tint3", "tint3rc" });
 
-        if (fs::FileExists(path2)) {
+        if (fs::FileExists(system_config_file)) {
             break;
         }
 
-        path2.clear();
+        system_config_file.clear();
     }
 
-    if (!path2.empty()) {
-        // copy file in user directory (path1)
-        std::string dir = fs::BuildPath({ xdg::basedir::ConfigHome(), "tint3" });
-
-        fs::CreateDirectory(dir);
-
-        path1 = fs::BuildPath({ dir, "tint3rc" });
-        fs::CopyFile(path2, path1);
-
-        config_path = path1;
-        return config_read_file(path1);
+    if (!system_config_file.empty()) {
+        // copy file in user directory
+        fs::CreateDirectory(user_config_dir);
+        fs::CopyFile(system_config_file, config_path);
+        return config_read_file(config_path);
     }
 
-    return 0;
+    return false;
 }
 
 bool ParseLine(std::string const& line, std::string& key, std::string& value) {
