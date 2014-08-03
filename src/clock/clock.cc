@@ -1,6 +1,6 @@
 /**************************************************************************
 *
-* Tint2 : clock
+* Tint3 : clock
 *
 * Copyright (C) 2008 thierry lorthiois (lorthiois@bbsoft.fr) from Omega distribution
 *

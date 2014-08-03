@@ -1,6 +1,6 @@
 /**************************************************************************
 *
-* Tint2 : read/write config file
+* Tint3 : read/write config file
 *
 * Copyright (C) 2007 Pål Staurland (staura@gmail.com)
 * Modified (C) 2008 thierry lorthiois (lorthiois@bbsoft.fr) from Omega distribution

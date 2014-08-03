@@ -1,5 +1,5 @@
 /**************************************************************************
-* Tint2 : systraybar
+* Tint3 : systraybar
 *
 * Copyright (C) 2009 thierry lorthiois (lorthiois@bbsoft.fr) from Omega distribution
 * based on 'docker-1.5' from Ben Jansens.

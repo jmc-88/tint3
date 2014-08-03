@@ -1,5 +1,5 @@
 /**************************************************************************
-* Tint2 : launcher
+* Tint3 : launcher
 *
 * Copyright (C) 2010       (mrovi@interfete-web-club.com)
 *

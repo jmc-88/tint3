@@ -1,6 +1,6 @@
 /**************************************************************************
 *
-* Tint2 : battery
+* Tint3 : battery
 *
 * Copyright (C) 2009 Sebastian Reichel <elektranox@gmail.com>
 *
