@@ -148,7 +148,7 @@ void cleanup_launcher_theme(Launcher* launcher) {
 
     for (auto const& theme : launcher->list_themes) {
         free_icon_theme(theme);
-        free(theme);
+        delete theme;
     }
 
     launcher->list_icons.clear();
@@ -668,8 +668,7 @@ IconTheme* load_theme(char const* name) {
 
     g_free(file_name);
 
-    auto theme = (IconTheme*) malloc(sizeof(IconTheme));
-    memset(&theme, 0, sizeof(IconTheme));
+    auto theme = new IconTheme();
     theme->name = strdup(name);
     theme->list_inherits = nullptr;
     theme->list_directories = nullptr;
@@ -714,8 +713,7 @@ IconTheme* load_theme(char const* name) {
                     token = strtok(value, ",\n");
 
                     while (token != nullptr) {
-                        IconThemeDir* dir = (IconThemeDir*) malloc(sizeof(IconThemeDir));
-                        memset(&dir, 0, sizeof(IconThemeDir));
+                        auto dir = new IconThemeDir();
                         dir->name = strdup(token);
                         dir->max_size = dir->min_size = dir->size = -1;
                         dir->type = ICON_DIR_TYPE_THRESHOLD;
@@ -804,13 +802,13 @@ void free_icon_theme(IconTheme* theme) {
         IconThemeDir* dir = (IconThemeDir*)l_dir->data;
         free(dir->name);
         free(dir->context);
-        free(l_dir->data);
+        delete dir;
     }
 }
 
 void test_launcher_read_theme_file() {
     fprintf(stdout, "\033[1;33m");
-    IconTheme* theme = static_cast<IconTheme*>(load_theme("oxygen"));
+    auto theme = load_theme("oxygen");
 
     if (!theme) {
         printf("Could not load theme\n");
@@ -924,7 +922,7 @@ void launcher_load_themes(Launcher* launcher) {
         queue = g_slist_remove(queue, name);
 
         fprintf(stderr, " '%s',", name);
-        IconTheme* theme = load_theme(name);
+        auto theme = load_theme(name);
 
         if (theme != nullptr) {
             launcher->list_themes.push_back(theme);

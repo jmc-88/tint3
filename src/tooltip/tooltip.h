@@ -24,7 +24,7 @@
 
 
 typedef struct {
-    Area* area;    // never ever use the area attribut if you are not 100% sure that this area was not freed
+    Area* area; // never ever use the area attribute if you are not 100% sure that this area was not freed // don't you say?
     char* tooltip_text;
     Panel* panel;
     Window window;

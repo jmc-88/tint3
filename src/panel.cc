@@ -98,8 +98,6 @@ void default_panel() {
     wm_menu = 0;
     max_tick_urgent = 14;
 
-    memset(&panel_config, 0, sizeof(Panel));
-
     // append full transparency background
     auto transparent_bg = static_cast<Background*>(
                               calloc(1, sizeof(Background)));

@@ -40,7 +40,6 @@ Tooltip g_tooltip;
 void default_tooltip() {
     // give the tooltip some reasonable default values
     memset(&g_tooltip, 0, sizeof(Tooltip));
-
     g_tooltip.font_color.color[0] = 1;
     g_tooltip.font_color.color[1] = 1;
     g_tooltip.font_color.color[2] = 1;

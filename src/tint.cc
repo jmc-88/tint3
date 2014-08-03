@@ -71,7 +71,6 @@ void init(int argc, char* argv[]) {
     default_config();
     default_timeout();
     default_systray();
-    memset(&server, 0, sizeof(Server_global));
 #ifdef ENABLE_BATTERY
     default_battery();
 #endif
