@@ -40,6 +40,8 @@ class Taskbar : public TaskbarBase {
     int desktop;
     int text_width;
     Taskbarname bar_name;
+
+    Taskbar& set_state(size_t state);
 };
 
 class Global_taskbar : public TaskbarBase {
@@ -67,7 +69,6 @@ void task_refresh_tasklist();
 
 int  resize_taskbar(void* obj);
 void on_change_taskbar(void* obj);
-void set_taskbar_state(Taskbar* tskbar, size_t state);
 
 // show/hide taskbar according to current desktop
 void visible_taskbar(void* p);

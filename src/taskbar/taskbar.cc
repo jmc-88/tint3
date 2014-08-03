@@ -72,6 +72,48 @@ Taskbarname& Taskbarname::set_name(std::string const& name) {
     return (*this);
 }
 
+Taskbar& Taskbar::set_state(size_t state) {
+    bg = panel1[0].g_taskbar.background[state];
+    pix = state_pixmap(state);
+
+    if (taskbarname_enabled) {
+        bar_name.bg = panel1[0].g_taskbar.background_name[state];
+        bar_name.pix = bar_name.state_pixmap(state);
+    }
+
+    if (panel_mode != MULTI_DESKTOP) {
+        on_screen = (state == TASKBAR_NORMAL ? 0 : 1);
+    }
+
+    if (on_screen == 1) {
+        if (state_pixmap(state) == 0) {
+            redraw = 1;
+        }
+
+        if (taskbarname_enabled && bar_name.state_pixmap(state) == 0) {
+            bar_name.redraw = 1;
+        }
+
+        auto normal_bg = panel1[0].g_taskbar.background[TASKBAR_NORMAL];
+        auto active_bg = panel1[0].g_taskbar.background[TASKBAR_ACTIVE];
+
+        if (panel_mode == MULTI_DESKTOP && normal_bg != active_bg) {
+            auto it = children.begin();
+
+            if (taskbarname_enabled) {
+                ++it;
+            }
+
+            for (; it != children.end(); ++it) {
+                set_task_redraw(static_cast<Task*>(*it));
+            }
+        }
+    }
+
+    panel_refresh = 1;
+    return (*this);
+}
+
 guint win_hash(gconstpointer key) {
     return (guint) * ((Window*)key);
 }
@@ -460,47 +502,6 @@ void on_change_taskbar(void* obj) {
 
     tskbar->pix = 0;
     tskbar->redraw = 1;
-}
-
-
-void set_taskbar_state(Taskbar* tskbar, size_t state) {
-    tskbar->bg = panel1[0].g_taskbar.background[state];
-    tskbar->pix = tskbar->state_pixmap(state);
-
-    if (taskbarname_enabled) {
-        tskbar->bar_name.bg = panel1[0].g_taskbar.background_name[state];
-        tskbar->bar_name.pix = tskbar->bar_name.state_pixmap(state);
-    }
-
-    if (panel_mode != MULTI_DESKTOP) {
-        tskbar->on_screen = (state == TASKBAR_NORMAL ? 0 : 1);
-    }
-
-    if (tskbar->on_screen == 1) {
-        if (tskbar->state_pixmap(state) == 0) {
-            tskbar->redraw = 1;
-        }
-
-        if (taskbarname_enabled && tskbar->bar_name.state_pixmap(state) == 0) {
-            tskbar->bar_name.redraw = 1;
-        }
-
-        if (panel_mode == MULTI_DESKTOP
-            && panel1[0].g_taskbar.background[TASKBAR_NORMAL] !=
-            panel1[0].g_taskbar.background[TASKBAR_ACTIVE]) {
-            auto it = tskbar->children.begin();
-
-            if (taskbarname_enabled) {
-                ++it;
-            }
-
-            for (; it != tskbar->children.end(); ++it) {
-                set_task_redraw(static_cast<Task*>(*it));
-            }
-        }
-    }
-
-    panel_refresh = 1;
 }
 
 

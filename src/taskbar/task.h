@@ -46,8 +46,7 @@ class Global_task : public Area {
     int tooltip_enabled;
 };
 
-
-
+// TODO: make this inherit from a common base class that exposes state_pixmap
 class Task : public Area {
   public:
     // TODO: group task with list of windows here

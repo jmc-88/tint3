@@ -719,8 +719,8 @@ void event_property_notify(XEvent* e) {
 
             for (i = 0 ; i < nb_panel ; i++) {
                 Panel* panel = &panel1[i];
-                set_taskbar_state(&panel->taskbar[old_desktop], TASKBAR_NORMAL);
-                set_taskbar_state(&panel->taskbar[server.desktop], TASKBAR_ACTIVE);
+                panel->taskbar[old_desktop].set_state(TASKBAR_NORMAL);
+                panel->taskbar[server.desktop].set_state(TASKBAR_ACTIVE);
                 // check ALLDESKTOP task => resize taskbar
                 Taskbar* tskbar;
 
