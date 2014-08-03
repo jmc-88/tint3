@@ -49,7 +49,7 @@ void xsettings_notify_cb(const char* name, XSettingsAction action,
                          XSettingsSetting* setting, void* data) {
     //printf("xsettings_notify_cb\n");
     if ((action == XSETTINGS_ACTION_NEW || action == XSETTINGS_ACTION_CHANGED)
-        && name != NULL && setting != NULL) {
+        && name != nullptr && setting != nullptr) {
         if (!strcmp(name, "Net/IconThemeName")
             && setting->type == XSETTINGS_TYPE_STRING) {
             if (icon_theme_name) {
@@ -96,7 +96,7 @@ static void notify_changes(XSettingsClient* client, XSettingsList* old_list) {
         }
 
         if (cmp < 0) {
-            client->notify(old_iter->setting->name, XSETTINGS_ACTION_DELETED, NULL,
+            client->notify(old_iter->setting->name, XSETTINGS_ACTION_DELETED, nullptr,
                            client->cb_data);
         } else if (cmp == 0) {
             if (!xsettings_setting_equal(old_iter->setting, new_iter->setting)) {
@@ -197,11 +197,11 @@ static XSettingsResult fetch_card8(XSettingsBuffer* buffer, CARD8* result) {
 static XSettingsList* parse_settings(unsigned char* data, size_t len) {
     XSettingsBuffer buffer;
     XSettingsResult result = XSETTINGS_SUCCESS;
-    XSettingsList* settings = NULL;
+    XSettingsList* settings = nullptr;
     CARD32 serial;
     CARD32 n_entries;
     CARD32 i;
-    XSettingsSetting* setting = NULL;
+    XSettingsSetting* setting = nullptr;
 
     local_byte_order = xsettings_byte_order();
 
@@ -364,7 +364,7 @@ static XSettingsList* parse_settings(unsigned char* data, size_t len) {
             goto out;
         }
 
-        setting = NULL;
+        setting = nullptr;
     }
 
 out:
@@ -393,7 +393,7 @@ out:
         }
 
         xsettings_list_free(settings);
-        settings = NULL;
+        settings = nullptr;
     }
 
     return settings;
@@ -411,7 +411,7 @@ static void read_settings(XSettingsClient* client) {
     int (*old_handler)(Display*, XErrorEvent*);
 
     XSettingsList* old_list = client->settings;
-    client->settings = NULL;
+    client->settings = nullptr;
 
     old_handler = XSetErrorHandler(ignore_errors);
     result = XGetWindowProperty(client->display, client->manager_window,
@@ -466,7 +466,7 @@ XSettingsClient* xsettings_client_new(Display* display, int screen,
     XSettingsClient* client = (XSettingsClient*) malloc(sizeof * client);
 
     if (!client) {
-        return NULL;
+        return nullptr;
     }
 
     client->display = display;
@@ -476,7 +476,7 @@ XSettingsClient* xsettings_client_new(Display* display, int screen,
     client->cb_data = cb_data;
 
     client->manager_window = None;
-    client->settings = NULL;
+    client->settings = nullptr;
 
     if (client->watch) {
         client->watch(RootWindow(display, screen), True, StructureNotifyMask,
@@ -488,7 +488,7 @@ XSettingsClient* xsettings_client_new(Display* display, int screen,
     if (client->manager_window == None) {
         printf("NO XSETTINGS manager, tint3 use config 'launcher_icon_theme'.\n");
         free(client);
-        return NULL;
+        return nullptr;
     }
 
     return client;

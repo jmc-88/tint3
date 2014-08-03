@@ -283,7 +283,7 @@ void get_icon(Task* tsk) {
     }
 
     int i;
-    Imlib_Image img = NULL;
+    Imlib_Image img = nullptr;
     XWMHints* hints = 0;
     gulong* data = 0;
 
@@ -338,7 +338,7 @@ void get_icon(Task* tsk) {
         }
     }
 
-    if (img == NULL) {
+    if (img == nullptr) {
         imlib_context_set_image(default_icon);
         img = imlib_clone_image();
     }

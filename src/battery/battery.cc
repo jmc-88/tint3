@@ -181,7 +181,7 @@ void init_battery() {
 #elif !defined(__FreeBSD__)
     // check battery
     GDir* directory = 0;
-    GError* error = NULL;
+    GError* error = nullptr;
     const char* entryname;
     char* battery_dir = 0;
 
@@ -196,11 +196,11 @@ void init_battery() {
             }
 
             char* path1 = g_build_filename("/sys/class/power_supply", entryname, "present",
-                                           NULL);
+                                           nullptr);
 
             if (g_file_test(path1, G_FILE_TEST_EXISTS)) {
                 g_free(path1);
-                battery_dir = g_build_filename("/sys/class/power_supply", entryname, NULL);
+                battery_dir = g_build_filename("/sys/class/power_supply", entryname, nullptr);
                 break;
             }
 
@@ -218,17 +218,17 @@ void init_battery() {
         return;
     }
 
-    char* path1 = g_build_filename(battery_dir, "energy_now", NULL);
+    char* path1 = g_build_filename(battery_dir, "energy_now", nullptr);
 
     if (g_file_test(path1, G_FILE_TEST_EXISTS)) {
-        path_energy_now = g_build_filename(battery_dir, "energy_now", NULL);
-        path_energy_full = g_build_filename(battery_dir, "energy_full", NULL);
+        path_energy_now = g_build_filename(battery_dir, "energy_now", nullptr);
+        path_energy_full = g_build_filename(battery_dir, "energy_full", nullptr);
     } else {
-        char* path2 = g_build_filename(battery_dir, "charge_now", NULL);
+        char* path2 = g_build_filename(battery_dir, "charge_now", nullptr);
 
         if (g_file_test(path2, G_FILE_TEST_EXISTS)) {
-            path_energy_now = g_build_filename(battery_dir, "charge_now", NULL);
-            path_energy_full = g_build_filename(battery_dir, "charge_full", NULL);
+            path_energy_now = g_build_filename(battery_dir, "charge_now", nullptr);
+            path_energy_full = g_build_filename(battery_dir, "charge_full", nullptr);
         } else {
             fprintf(stderr, "ERROR: can't found energy_* or charge_*\n");
         }
@@ -236,15 +236,15 @@ void init_battery() {
         g_free(path2);
     }
 
-    path_current_now = g_build_filename(battery_dir, "power_now", NULL);
+    path_current_now = g_build_filename(battery_dir, "power_now", nullptr);
 
     if (!g_file_test(path_current_now, G_FILE_TEST_EXISTS)) {
         g_free(path_current_now);
-        path_current_now = g_build_filename(battery_dir, "current_now", NULL);
+        path_current_now = g_build_filename(battery_dir, "current_now", nullptr);
     }
 
     if (path_energy_now && path_energy_full) {
-        path_status = g_build_filename(battery_dir, "status", NULL);
+        path_status = g_build_filename(battery_dir, "status", nullptr);
 
         // check file
         FILE* fp1 = fopen(path_energy_now, "r");
@@ -252,7 +252,7 @@ void init_battery() {
         FILE* fp3 = fopen(path_current_now, "r");
         FILE* fp4 = fopen(path_status, "r");
 
-        if (fp1 == NULL || fp2 == NULL || fp3 == NULL || fp4 == NULL) {
+        if (fp1 == nullptr || fp2 == nullptr || fp3 == nullptr || fp4 == nullptr) {
             cleanup_battery();
             default_battery();
             fprintf(stderr, "ERROR: battery applet can't open energy_now\n");
@@ -361,7 +361,7 @@ void update_battery() {
 #elif defined(__FreeBSD__)
     len = sizeof(sysctl_out);
 
-    if (sysctlbyname("hw.acpi.battery.state", &sysctl_out, &len, NULL, 0) != 0) {
+    if (sysctlbyname("hw.acpi.battery.state", &sysctl_out, &len, nullptr, 0) != 0) {
         fprintf(stderr, "power update: no such sysctl");
     }
 
@@ -386,7 +386,7 @@ void update_battery() {
     energy_full = 0;
     energy_now = 0;
 
-    if (sysctlbyname("hw.acpi.battery.time", &sysctl_out, &len, NULL, 0) != 0) {
+    if (sysctlbyname("hw.acpi.battery.time", &sysctl_out, &len, nullptr, 0) != 0) {
         seconds = -1;
     } else {
         seconds = sysctl_out * 60;
@@ -397,7 +397,7 @@ void update_battery() {
         seconds = 0;
     }
 
-    if (sysctlbyname("hw.acpi.battery.life", &sysctl_out, &len, NULL, 0) != 0) {
+    if (sysctlbyname("hw.acpi.battery.life", &sysctl_out, &len, nullptr, 0) != 0) {
         new_percentage = -1;
     } else {
         new_percentage = sysctl_out;
@@ -406,7 +406,7 @@ void update_battery() {
 #else
     fp = fopen(path_status, "r");
 
-    if (fp != NULL) {
+    if (fp != nullptr) {
         if (fgets(tmp, sizeof tmp, fp)) {
             battery_state.state = BATTERY_UNKNOWN;
 
@@ -428,7 +428,7 @@ void update_battery() {
 
     fp = fopen(path_energy_now, "r");
 
-    if (fp != NULL) {
+    if (fp != nullptr) {
         if (fgets(tmp, sizeof tmp, fp)) {
             energy_now = atoi(tmp);
         }
@@ -438,7 +438,7 @@ void update_battery() {
 
     fp = fopen(path_energy_full, "r");
 
-    if (fp != NULL) {
+    if (fp != nullptr) {
         if (fgets(tmp, sizeof tmp, fp)) {
             energy_full = atoi(tmp);
         }
@@ -448,7 +448,7 @@ void update_battery() {
 
     fp = fopen(path_current_now, "r");
 
-    if (fp != NULL) {
+    if (fp != nullptr) {
         if (fgets(tmp, sizeof tmp, fp)) {
             current_now = atoi(tmp);
         }

@@ -33,7 +33,7 @@ xsettings_setting_copy(XSettingsSetting* setting) {
     XSettingsSetting* result = (XSettingsSetting*) malloc(sizeof * result);
 
     if (!result) {
-        return NULL;
+        return nullptr;
     }
 
     size_t str_len = strlen(setting->name);
@@ -81,14 +81,14 @@ err:
     }
 
     free(result);
-    return NULL;
+    return nullptr;
 }
 
 XSettingsList*
 xsettings_list_copy(XSettingsList* list) {
-    XSettingsList* new_list = NULL;
+    XSettingsList* new_list = nullptr;
     XSettingsList* old_iter = list;
-    XSettingsList* new_iter = NULL;
+    XSettingsList* new_iter = nullptr;
 
     while (old_iter) {
         XSettingsList* new_node = (XSettingsList*) malloc(sizeof * new_node);
@@ -118,7 +118,7 @@ xsettings_list_copy(XSettingsList* list) {
 
 error:
     xsettings_list_free(new_list);
-    return NULL;
+    return nullptr;
 }
 
 int
@@ -180,7 +180,7 @@ xsettings_list_free(XSettingsList* list) {
 XSettingsResult
 xsettings_list_insert(XSettingsList**    list,
                       XSettingsSetting*  setting) {
-    XSettingsList* last = NULL;
+    XSettingsList* last = nullptr;
     XSettingsList* node = (XSettingsList*) malloc(sizeof * node);
 
     if (!node) {
@@ -219,7 +219,7 @@ XSettingsResult
 xsettings_list_delete(XSettingsList** list,
                       const char*     name) {
     XSettingsList* iter;
-    XSettingsList* last = NULL;
+    XSettingsList* last = nullptr;
 
     iter = *list;
 
@@ -259,7 +259,7 @@ xsettings_list_lookup(XSettingsList* list,
         iter = iter->next;
     }
 
-    return NULL;
+    return nullptr;
 }
 
 char

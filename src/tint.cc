@@ -163,11 +163,11 @@ static void sigchld_handler(int sig) {
     // Wait for all dead processes
     pid_t pid;
 
-    while ((pid = waitpid(-1, NULL, WNOHANG)) > 0) {
+    while ((pid = waitpid(-1, nullptr, WNOHANG)) > 0) {
         SnLauncherContext* ctx;
         ctx = (SnLauncherContext*) g_tree_lookup(server.pids, GINT_TO_POINTER(pid));
 
-        if (ctx == NULL) {
+        if (ctx == nullptr) {
             fprintf(stderr, "Unknown child %d terminated!\n", pid);
         } else {
             g_tree_remove(server.pids, GINT_TO_POINTER(pid));
@@ -190,7 +190,7 @@ static gint cmp_ptr(gconstpointer a, gconstpointer b) {
 #endif // HAVE_SN
 
 void init_X11() {
-    server.dsp = XOpenDisplay(NULL);
+    server.dsp = XOpenDisplay(nullptr);
 
     if (!server.dsp) {
         fprintf(stderr, "tint3 exit : could not open display.\n");
@@ -239,8 +239,8 @@ void init_X11() {
     data_dirs = g_get_system_data_dirs();
     int i;
 
-    for (i = 0; data_dirs[i] != NULL; i++)  {
-        path = g_build_filename(data_dirs[i], "tint3", "default_icon.png", NULL);
+    for (i = 0; data_dirs[i] != nullptr; i++)  {
+        path = g_build_filename(data_dirs[i], "tint3", "default_icon.png", nullptr);
 
         if (g_file_test(path, G_FILE_TEST_EXISTS)) {
             default_icon = imlib_load_image(path);
@@ -292,7 +292,7 @@ void get_snapshot(const char* path) {
                                      panel->height, server.depth);
     panel->render();
 
-    Imlib_Image img = NULL;
+    Imlib_Image img = nullptr;
     imlib_context_set_drawable(panel->temp_pmap);
     img = imlib_create_image_from_drawable(0, 0, 0, panel->width,
                                            panel->height, 0);
@@ -476,7 +476,7 @@ void event_button_motion_notify(XEvent* e) {
     // Find the taskbar on the event's location
     Taskbar* event_taskbar = click_taskbar(panel, e->xbutton.x, e->xbutton.y);
 
-    if (event_taskbar == NULL) {
+    if (event_taskbar == nullptr) {
         return;
     }
 

@@ -116,7 +116,7 @@ void tint_exec(char const* command) {
             //          sigset_t sigset;
             //          sigprocmask(SIG_SETMASK, &sigset, 0);
             //          sigprocmask(SIG_UNBLOCK, &sigset, 0);
-            execlp(command, command, NULL);
+            execlp(command, command, nullptr);
             _exit(1);
         }
     }
