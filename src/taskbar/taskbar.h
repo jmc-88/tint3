@@ -17,28 +17,32 @@ extern Task* task_active;
 extern Task* task_drag;
 extern int taskbar_enabled;
 
+class TaskbarBase : public Area {
+    Pixmap state_pixmap_[TASKBAR_STATE_COUNT];
 
-class Taskbarname : public Area {
   public:
-    Pixmap state_pix[TASKBAR_STATE_COUNT];
-
-    char* name;
-    int  posy;
+    Pixmap state_pixmap(size_t i) const;
+    TaskbarBase& set_state_pixmap(size_t i, Pixmap value);
+    TaskbarBase& reset_state_pixmap(size_t i);
 };
 
-// tint3 use one taskbar per desktop.
-class Taskbar : public Area {
+class Taskbarname : public TaskbarBase {
+    std::string name_;
+
+  public:
+    std::string const& name() const;
+    Taskbarname& set_name(std::string const& name);
+};
+
+// tint3 uses one taskbar per desktop.
+class Taskbar : public TaskbarBase {
   public:
     int desktop;
-    Pixmap state_pix[TASKBAR_STATE_COUNT];
-
-    Taskbarname bar_name;
-
-    // task parameters
     int text_width;
+    Taskbarname bar_name;
 };
 
-class Global_taskbar : public Area {
+class Global_taskbar : public TaskbarBase {
   public:
     Area area_name;
     Background* background[TASKBAR_STATE_COUNT];
@@ -63,7 +67,7 @@ void task_refresh_tasklist();
 
 int  resize_taskbar(void* obj);
 void on_change_taskbar(void* obj);
-void set_taskbar_state(Taskbar* tskbar, int state);
+void set_taskbar_state(Taskbar* tskbar, size_t state);
 
 // show/hide taskbar according to current desktop
 void visible_taskbar(void* p);

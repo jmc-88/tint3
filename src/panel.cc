@@ -657,17 +657,8 @@ void set_panel_background(Panel* p) {
         auto tskbar = &p->taskbar[i];
 
         for (int k = 0; k < TASKBAR_STATE_COUNT; ++k) {
-            if (tskbar->state_pix[k]) {
-                XFreePixmap(server.dsp, tskbar->state_pix[k]);
-            }
-
-            tskbar->state_pix[k] = 0;
-
-            if (tskbar->bar_name.state_pix[k]) {
-                XFreePixmap(server.dsp, tskbar->bar_name.state_pix[k]);
-            }
-
-            tskbar->bar_name.state_pix[k] = 0;
+            tskbar->reset_state_pixmap(k);
+            tskbar->bar_name.reset_state_pixmap(k);
         }
 
         tskbar->pix = 0;

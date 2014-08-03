@@ -12,6 +12,7 @@
 #include <Imlib2.h>
 #include "area.h"
 
+#include <sstream>
 #include <string>
 
 // mouse actions
@@ -36,6 +37,13 @@ extern int const ALLDESKTOP;
 std::string GetEnvironment(std::string const& variable_name);
 
 std::string& StringTrim(std::string& str);
+
+template<typename T>
+std::string StringRepresentation(T const& value) {
+    std::ostringstream os;
+    os << value;
+    return os.str();
+}
 
 // execute a command by calling fork
 void tint_exec(std::string const& command);

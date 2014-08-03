@@ -49,6 +49,7 @@
 #include "panel.h"
 #include "tooltip.h"
 #include "timer.h"
+#include "util/common.h"
 #include "util/fs.h"
 #include "xsettings-client.h"
 
@@ -662,23 +663,19 @@ void event_property_notify(XEvent* e) {
 
             for (i = 0; i < nb_panel; ++i) {
                 for (int j = 0; j < panel1[i].nb_desktop; ++j) {
-                    gchar* name;
+                    std::string name;
 
                     if (it != desktop_names.end()) {
-                        name = g_strdup(it->c_str());
-                        ++it;
+                        name = (*it++);
                     } else {
-                        name = g_strdup_printf("%d", j + 1);
+                        name = StringRepresentation(j + 1);
                     }
 
                     Taskbar* tskbar = &panel1[i].taskbar[j];
 
-                    if (strcmp(name, tskbar->bar_name.name) != 0) {
-                        g_free(tskbar->bar_name.name);
-                        tskbar->bar_name.name = name;
+                    if (tskbar->bar_name.name() != name) {
+                        tskbar->bar_name.set_name(name);
                         tskbar->bar_name.resize = 1;
-                    } else {
-                        g_free(name);
                     }
                 }
             }

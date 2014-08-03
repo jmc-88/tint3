@@ -45,6 +45,33 @@ Task* task_active;
 Task* task_drag;
 int taskbar_enabled;
 
+Pixmap TaskbarBase::state_pixmap(size_t i) const {
+    return state_pixmap_[i];
+}
+
+TaskbarBase& TaskbarBase::set_state_pixmap(size_t i, Pixmap value) {
+    state_pixmap_[i] = value;
+    return (*this);
+}
+
+TaskbarBase& TaskbarBase::reset_state_pixmap(size_t i) {
+    if (state_pixmap_[i] != 0) {
+        XFreePixmap(server.dsp, state_pixmap_[i]);
+    }
+
+    state_pixmap_[i] = 0;
+    return (*this);
+}
+
+std::string const& Taskbarname::name() const {
+    return name_;
+}
+
+Taskbarname& Taskbarname::set_name(std::string const& name) {
+    name_.assign(name);
+    return (*this);
+}
+
 guint win_hash(gconstpointer key) {
     return (guint) * ((Window*)key);
 }
@@ -78,9 +105,7 @@ void cleanup_taskbar() {
             Taskbar* tskbar = &panel->taskbar[j];
 
             for (int k = 0; k < TASKBAR_STATE_COUNT; ++k) {
-                if (tskbar->state_pix[k]) {
-                    XFreePixmap(server.dsp, tskbar->state_pix[k]);
-                }
+                tskbar->reset_state_pixmap(k);
             }
 
             tskbar->free_area();
@@ -156,8 +181,8 @@ void init_taskbar_panel(void* p) {
     panel->g_taskbar.on_screen = 1;
 
     if (panel_horizontal) {
-        panel->g_taskbar.posy = panel->bg->border.width +
-                                panel->paddingy;
+        panel->g_taskbar.posy = (panel->bg->border.width +
+                                 panel->paddingy);
         panel->g_taskbar.height = panel->height - (2 *
                                   panel->g_taskbar.posy);
         panel->g_taskbar.area_name.posy = panel->g_taskbar.posy;
@@ -386,9 +411,9 @@ void task_refresh_tasklist() {
 
 void draw_taskbar(void* obj, cairo_t* c) {
     Taskbar* taskbar = static_cast<Taskbar*>(obj);
-    int state = (taskbar->desktop == server.desktop ? TASKBAR_ACTIVE :
-                 TASKBAR_NORMAL);
-    taskbar->state_pix[state] = taskbar->pix;
+    size_t state = (taskbar->desktop == server.desktop ? TASKBAR_ACTIVE :
+                    TASKBAR_NORMAL);
+    taskbar->set_state_pixmap(state, taskbar->pix);
 }
 
 
@@ -430,11 +455,7 @@ void on_change_taskbar(void* obj) {
 
     // reset Pixmap when position/size changed
     for (int k = 0; k < TASKBAR_STATE_COUNT; ++k) {
-        if (tskbar->state_pix[k]) {
-            XFreePixmap(server.dsp, tskbar->state_pix[k]);
-        }
-
-        tskbar->state_pix[k] = 0;
+        tskbar->reset_state_pixmap(k);
     }
 
     tskbar->pix = 0;
@@ -442,13 +463,13 @@ void on_change_taskbar(void* obj) {
 }
 
 
-void set_taskbar_state(Taskbar* tskbar, int state) {
+void set_taskbar_state(Taskbar* tskbar, size_t state) {
     tskbar->bg = panel1[0].g_taskbar.background[state];
-    tskbar->pix = tskbar->state_pix[state];
+    tskbar->pix = tskbar->state_pixmap(state);
 
     if (taskbarname_enabled) {
         tskbar->bar_name.bg = panel1[0].g_taskbar.background_name[state];
-        tskbar->bar_name.pix = tskbar->bar_name.state_pix[state];
+        tskbar->bar_name.pix = tskbar->bar_name.state_pixmap(state);
     }
 
     if (panel_mode != MULTI_DESKTOP) {
@@ -456,11 +477,11 @@ void set_taskbar_state(Taskbar* tskbar, int state) {
     }
 
     if (tskbar->on_screen == 1) {
-        if (tskbar->state_pix[state] == 0) {
+        if (tskbar->state_pixmap(state) == 0) {
             tskbar->redraw = 1;
         }
 
-        if (taskbarname_enabled && tskbar->bar_name.state_pix[state] == 0) {
+        if (taskbarname_enabled && tskbar->bar_name.state_pixmap(state) == 0) {
             tskbar->bar_name.redraw = 1;
         }
 
