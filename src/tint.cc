@@ -1356,7 +1356,7 @@ start:
                             break;
                         }
 
-                        panel = dynamic_cast<Panel*>(systray.panel);
+                        panel = systray.panel;
 
                         if (e.xany.window == panel->main_win) { // reparented to us
                             break;
