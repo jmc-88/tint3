@@ -7,6 +7,7 @@
 #ifndef LAUNCHER_H
 #define LAUNCHER_H
 
+#include <string>
 #include <vector>
 
 #include "common.h"
@@ -46,7 +47,7 @@ struct IconThemeDir {
 };
 
 struct IconTheme {
-    char* name;
+    std::string name;
     GSList* list_inherits; // each item is a char* (theme name)
     GSList* list_directories; // each item is an IconThemeDir*
 };

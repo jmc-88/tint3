@@ -29,6 +29,7 @@
 #include <libsn/sn.h>
 #endif
 
+#include <memory>
 #include <string>
 
 #include "server.h"
@@ -420,33 +421,29 @@ void launcher_action(LauncherIcon* icon, XEvent* evt) {
 
 // Splits line at first '=' and returns 1 if successful, and parts are not empty
 // key and value point to the parts
-int parse_dektop_line(char* line, char** key, char** value) {
-    char* p;
-    int found = 0;
-    *key = line;
+bool parse_desktop_line(std::string const& line, std::string& key,
+                        std::string& value) {
+    bool found = false;
 
-    for (p = line; *p; p++) {
-        if (*p == '=') {
-            *value = p + 1;
-            *p = 0;
-            found = 1;
+    for (auto it = line.cbegin(); it != line.cend(); ++it) {
+        if (*it == '=') {
+            key.assign(line.cbegin(), it);
+            value.assign(it + 1, line.cend());
+            found = true;
             break;
         }
     }
 
-    if (!found) {
-        return 0;
+    if (!found || key.empty() || value.empty()) {
+        return false;
     }
 
-    if (found && (strlen(*key) == 0 || strlen(*value) == 0)) {
-        return 0;
-    }
-
-    return 1;
+    return true;
 }
 
-int parse_theme_line(char* line, char** key, char** value) {
-    return parse_dektop_line(line, key, value);
+bool parse_theme_line(std::string const& line, std::string& key,
+                      std::string& value) {
+    return parse_desktop_line(line, key, value);
 }
 
 void expand_exec(DesktopEntry* entry, const char* path) {
@@ -520,94 +517,73 @@ void expand_exec(DesktopEntry* entry, const char* path) {
 }
 
 int launcher_read_desktop_file(const char* path, DesktopEntry* entry) {
-    FILE* fp;
-    char* line = nullptr;
-    size_t line_size;
-    char* key, *value;
-    int i;
-
     entry->name = entry->icon = entry->exec = nullptr;
 
-    if ((fp = fopen(path, "rt")) == nullptr) {
-        fprintf(stderr, "Could not open file %s\n", path);
-        return 0;
-    }
-
     gchar** languages = (gchar**)g_get_language_names();
-    // lang_index is the index of the language for the best Name key in the language vector
+    int i;
+
+    for (i = 0; languages[i]; ++i) {}
+
     // lang_index_default is a constant that encodes the Name key without a language
-    int lang_index, lang_index_default;
-#define LANG_DBG 0
-
-    if (LANG_DBG) {
-        printf("Languages:");
-    }
-
-    for (i = 0; languages[i]; i++) {
-        if (LANG_DBG) {
-            printf(" %s", languages[i]);
-        }
-    }
-
-    if (LANG_DBG) {
-        printf("\n");
-    }
-
-    lang_index_default = i;
+    int lang_index_default = i;
+    // lang_index is the index of the language for the best Name key in the language vector
     // we currently do not know about any Name key at all, so use an invalid index
-    lang_index = lang_index_default + 1;
+    int lang_index = lang_index_default + 1;
 
-    int inside_desktop_entry = 0;
+    bool inside_desktop_entry = false;
+    bool read = fs::ReadFileByLine(path, [&](std::string const & data) {
+        std::string line(data);
+        StringTrim(line);
 
-    while (getline(&line, &line_size, fp) >= 0) {
-        int len = strlen(line);
-
-        if (len == 0) {
-            continue;
+        if (line.empty()) {
+            return;
         }
-
-        line[len - 1] = '\0';
 
         if (line[0] == '[') {
-            inside_desktop_entry = (strcmp(line, "[Desktop Entry]") == 0);
+            inside_desktop_entry = (line == "[Desktop Entry]");
         }
 
-        if (inside_desktop_entry && parse_dektop_line(line, &key, &value)) {
-            if (strstr(key, "Name") == key) {
-                if (strcmp(key, "Name") == 0 && lang_index > lang_index_default) {
-                    entry->name = strdup(value);
+        std::string key, value;
+
+        if (inside_desktop_entry && parse_desktop_line(line, key, value)) {
+            if (key.substr(0, 4) == "Name") {
+                if (key == "Name" && lang_index > lang_index_default) {
+                    entry->name = strdup(value.c_str());
                     lang_index = lang_index_default;
                 } else {
                     for (i = 0; languages[i] && i < lang_index; i++) {
-                        gchar* localized_key = g_strdup_printf("Name[%s]", languages[i]);
+                        std::string localized_key;
+                        localized_key.append("Name[");
+                        localized_key.append(languages[i]);
+                        localized_key.append("]");
 
-                        if (strcmp(key, localized_key) == 0) {
+                        if (key == localized_key) {
                             if (entry->name) {
                                 free(entry->name);
                             }
 
-                            entry->name = strdup(value);
+                            entry->name = strdup(value.c_str());
                             lang_index = i;
                         }
-
-                        g_free(localized_key);
                     }
                 }
-            } else if (!entry->exec && strcmp(key, "Exec") == 0) {
-                entry->exec = strdup(value);
-            } else if (!entry->icon && strcmp(key, "Icon") == 0) {
-                entry->icon = strdup(value);
+            } else if (!entry->exec && key == "Exec") {
+                entry->exec = strdup(value.c_str());
+            } else if (!entry->icon && key == "Icon") {
+                entry->icon = strdup(value.c_str());
             }
         }
+    });
+
+    if (!read) {
+        fprintf(stderr, "Could not open file %s\n", path);
+        return 0;
     }
 
-    fclose(fp);
     // From this point:
     // entry->name, entry->icon, entry->exec will never be empty strings (can be nullptr though)
 
     expand_exec(entry, path);
-
-    free(line);
     return 1;
 }
 
@@ -655,56 +631,43 @@ IconTheme* load_theme(char const* name) {
         return nullptr;
     }
 
-    auto f = fopen(file_name.c_str(), "rt");
-
-    if (f == nullptr) {
-        fprintf(stderr, "Could not open theme '%s'\n", file_name.c_str());
-        return nullptr;
-    }
-
     auto theme = new IconTheme();
-    theme->name = strdup(name);
+    theme->name = name;
     theme->list_inherits = nullptr;
     theme->list_directories = nullptr;
 
     IconThemeDir* current_dir = nullptr;
-    int inside_header = 1;
+    bool inside_header = true;
 
-    char* line = nullptr;
-    size_t line_size;
+    bool read = fs::ReadFileByLine(file_name, [&](std::string const & data) {
+        std::string line(data);
+        StringTrim(line);
 
-    while (getline(&line, &line_size, f) >= 0) {
-        int line_len = strlen(line);
-
-        if (line_len >= 1) {
-            if (line[line_len - 1] == '\n') {
-                line[line_len - 1] = '\0';
-                line_len--;
-            }
+        if (line.empty()) {
+            return;
         }
 
-        if (line_len == 0) {
-            continue;
-        }
-
-        char* key;
-        char* value;
+        std::string key, value;
 
         if (inside_header) {
-            if (parse_theme_line(line, &key, &value)) {
-                if (strcmp(key, "Inherits") == 0) {
+            if (parse_theme_line(line, key, value)) {
+                if (key == "Inherits") {
                     // value is like oxygen,wood,default
-                    char* token;
-                    token = strtok(value, ",\n");
+                    // TODO: remove these strdup/strtok calls
+                    char* value_ptr = strdup(value.c_str());
+                    char* token = strtok(value_ptr, ",\n");
 
                     while (token != nullptr) {
                         theme->list_inherits = g_slist_append(theme->list_inherits, strdup(token));
                         token = strtok(nullptr, ",\n");
                     }
-                } else if (strcmp(key, "Directories") == 0) {
+
+                    std::free(value_ptr);
+                } else if (key == "Directories") {
                     // value is like 48x48/apps,48x48/mimetypes,32x32/apps,scalable/apps,scalable/mimetypes
-                    char* token;
-                    token = strtok(value, ",\n");
+                    // TODO: remove these strdup/strtok calls
+                    char* value_ptr = strdup(value.c_str());
+                    char* token = strtok(value_ptr, ",\n");
 
                     while (token != nullptr) {
                         auto dir = new IconThemeDir();
@@ -715,13 +678,15 @@ IconTheme* load_theme(char const* name) {
                         theme->list_directories = g_slist_append(theme->list_directories, dir);
                         token = strtok(nullptr, ",\n");
                     }
+
+                    std::free(value_ptr);
                 }
             }
         } else if (current_dir != nullptr) {
-            if (parse_theme_line(line, &key, &value)) {
-                if (strcmp(key, "Size") == 0) {
+            if (parse_theme_line(line, key, value)) {
+                if (key == "Size") {
                     // value is like 24
-                    sscanf(value, "%d", &current_dir->size);
+                    current_dir->size = std::stoi(value);
 
                     if (current_dir->max_size == -1) {
                         current_dir->max_size = current_dir->size;
@@ -730,43 +695,42 @@ IconTheme* load_theme(char const* name) {
                     if (current_dir->min_size == -1) {
                         current_dir->min_size = current_dir->size;
                     }
-                } else if (strcmp(key, "MaxSize") == 0) {
+                } else if (key == "MaxSize") {
                     // value is like 24
-                    sscanf(value, "%d", &current_dir->max_size);
-                } else if (strcmp(key, "MinSize") == 0) {
+                    current_dir->max_size = std::stoi(value);
+                } else if (key == "MinSize") {
                     // value is like 24
-                    sscanf(value, "%d", &current_dir->min_size);
-                } else if (strcmp(key, "Threshold") == 0) {
+                    current_dir->min_size = std::stoi(value);
+                } else if (key == "Threshold") {
                     // value is like 2
-                    sscanf(value, "%d", &current_dir->threshold);
-                } else if (strcmp(key, "Type") == 0) {
+                    current_dir->threshold = std::stoi(value);
+                } else if (key == "Type") {
                     // value is Fixed, Scalable or Threshold : default to scalable for unknown Type.
-                    if (strcmp(value, "Fixed") == 0) {
+                    if (value == "Fixed") {
                         current_dir->type = ICON_DIR_TYPE_FIXED;
-                    } else if (strcmp(value, "Threshold") == 0) {
+                    } else if (value == "Threshold") {
                         current_dir->type = ICON_DIR_TYPE_THRESHOLD;
                     } else {
                         current_dir->type = ICON_DIR_TYPE_SCALABLE;
                     }
-                } else if (strcmp(key, "Context") == 0) {
+                } else if (key == "Context") {
                     // usual values: Actions, Applications, Devices, FileSystems, MimeTypes
-                    current_dir->context = strdup(value);
+                    current_dir->context = strdup(value.c_str());
                 }
             }
         }
 
-        if (line[0] == '[' && line[line_len - 1] == ']'
-            && strcmp(line, "[Icon Theme]") != 0) {
-            inside_header = 0;
+        if (line[0] == '[' && line[line.length() - 1] == ']'
+            && line != "[Icon Theme]") {
+            inside_header = false;
             current_dir = nullptr;
-            line[line_len - 1] = '\0';
-            char* dir_name = line + 1;
             GSList* dir_item = theme->list_directories;
+            std::string dir_name = line.substr(1, line.length() - 2);
 
             while (dir_item != nullptr) {
                 IconThemeDir* dir = static_cast<IconThemeDir*>(dir_item->data);
 
-                if (strcmp(dir->name, dir_name) == 0) {
+                if (dir_name == dir->name) {
                     current_dir = dir;
                     break;
                 }
@@ -774,25 +738,24 @@ IconTheme* load_theme(char const* name) {
                 dir_item = g_slist_next(dir_item);
             }
         }
+    });
+
+    if (!read) {
+        fprintf(stderr, "Could not open theme '%s'\n", file_name.c_str());
+        delete theme;
+        return nullptr;
     }
 
-    fclose(f);
-    free(line);
     return theme;
 }
 
 void free_icon_theme(IconTheme* theme) {
-    free(theme->name);
-    GSList* l_inherits;
-
-    for (l_inherits = theme->list_inherits; l_inherits ;
+    for (auto l_inherits = theme->list_inherits; l_inherits ;
          l_inherits = l_inherits->next) {
         free(l_inherits->data);
     }
 
-    GSList* l_dir;
-
-    for (l_dir = theme->list_directories; l_dir ; l_dir = l_dir->next) {
+    for (auto l_dir = theme->list_directories; l_dir ; l_dir = l_dir->next) {
         IconThemeDir* dir = (IconThemeDir*)l_dir->data;
         free(dir->name);
         free(dir->context);
@@ -809,7 +772,7 @@ void test_launcher_read_theme_file() {
         return;
     }
 
-    printf("Loaded theme: %s\n", theme->name);
+    printf("Loaded theme: %s\n", theme->name.c_str());
     GSList* item = theme->list_inherits;
 
     while (item != nullptr) {
