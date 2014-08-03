@@ -35,6 +35,7 @@
 #include "panel.h"
 #include "taskbar.h"
 #include "launcher.h"
+#include "util/fs.h"
 
 int launcher_enabled;
 int launcher_max_icon_size;
@@ -47,7 +48,8 @@ XSettingsClient* xsettings_client;
 
 #define ICON_FALLBACK "application-x-executable"
 
-std::string icon_path(Launcher* launcher, const char* icon_name, int size);
+std::string icon_path(Launcher* launcher, std::string const& icon_name,
+                      int size);
 void launcher_load_themes(Launcher* launcher);
 void free_desktop_entry(DesktopEntry* entry);
 int launcher_read_desktop_file(const char* path, DesktopEntry* entry);
@@ -1005,90 +1007,45 @@ int directory_size_distance(IconThemeDir* dir, int size) {
     }
 }
 
-#define DEBUG_ICON_SEARCH 0
 // Returns the full path to an icon file (or nullptr) given the icon name
-std::string icon_path(Launcher* launcher, const char* icon_name, int size) {
-    if (icon_name == nullptr) {
-        return nullptr;
+std::string icon_path(Launcher* launcher, std::string const& icon_name,
+                      int size) {
+    if (icon_name.empty()) {
+        return std::string();
     }
 
     // If the icon_name is already a path and the file exists, return it
-    if (strstr(icon_name, "/") == icon_name) {
-        if (g_file_test(icon_name, G_FILE_TEST_EXISTS)) {
-            return strdup(icon_name);
+    if (icon_name[0] == '/') {
+        if (fs::FileExists(icon_name)) {
+            return icon_name;
         }
 
-        return nullptr;
+        return std::string();
     }
 
-    GSList* basenames = nullptr;
-    char* home_icons = g_build_filename(g_get_home_dir(), ".icons", nullptr);
-    basenames = g_slist_append(basenames, home_icons);
-    char* home_local_icons = g_build_filename(g_get_home_dir(),
-                             ".local/share/icons", nullptr);
-    basenames = g_slist_append(basenames, home_local_icons);
-    basenames = g_slist_append(basenames, (void*) "/usr/local/share/icons");
-    basenames = g_slist_append(basenames, (void*) "/usr/local/share/pixmaps");
-    basenames = g_slist_append(basenames, (void*) "/usr/share/icons");
-    basenames = g_slist_append(basenames, (void*) "/usr/share/pixmaps");
+    std::vector<std::string> basenames {
+        fs::BuildPath({ fs::HomeDirectory(), ".icons" }),
+        fs::BuildPath({ fs::HomeDirectory(), ".local", "share", "icons" }),
+        "/usr/local/share/icons",
+        "/usr/local/share/pixmaps",
+        "/usr/share/icons",
+        "/usr/share/pixmaps",
+    };
 
-    GSList* extensions = nullptr;
-    extensions = g_slist_append(extensions, (void*) ".png");
-    extensions = g_slist_append(extensions, (void*) ".xpm");
+    std::vector<std::string> extensions {
+        ".png", ".xpm"
+    };
+
     // if the icon name already contains one of the extensions (e.g. vlc.png instead of vlc) add a special entry
-    GSList* ext;
-
-    for (ext = extensions; ext; ext = g_slist_next(ext)) {
-        char* extension = (char*) ext->data;
-
-        if (strlen(icon_name) > strlen(extension) &&
-            strcmp(extension, icon_name + strlen(icon_name) - strlen(extension)) == 0) {
-            extensions = g_slist_append(extensions, (void*) "");
+    for (auto const& extension : extensions) {
+        if (icon_name.length() > extension.length() &&
+            icon_name.substr(icon_name.length() - extension.length()) == extension) {
+            extensions.push_back("");
             break;
         }
     }
 
-    // Stage 1: exact size match
-    // the theme must have a higher priority than having an exact size match, so we will just use
-    // the code that searches for the best size match (it will find the exact size match if one exists)
-    /*
-    for (theme = launcher->list_themes; theme; theme = g_slist_next(theme)) {
-        GSList *dir;
-        for (dir = ((IconTheme*)theme->data)->list_directories; dir; dir = g_slist_next(dir)) {
-            if (directory_matches_size((IconThemeDir*)dir->data, size)) {
-                GSList *base;
-                for (base = basenames; base; base = g_slist_next(base)) {
-                    GSList *ext;
-                    for (ext = extensions; ext; ext = g_slist_next(ext)) {
-                        char *base_name = (char*) base->data;
-                        char *theme_name = ((IconTheme*)theme->data)->name;
-                        char *dir_name = ((IconThemeDir*)dir->data)->name;
-                        char *extension = (char*) ext->data;
-                        char *file_name = malloc(strlen(base_name) + strlen(theme_name) +
-                            strlen(dir_name) + strlen(icon_name) + strlen(extension) + 100);
-                        // filename = directory/$(themename)/subdirectory/iconname.extension
-                        sprintf(file_name, "%s/%s/%s/%s%s", base_name, theme_name, dir_name, icon_name, extension);
-                        //printf("found exact: %s\n", file_name);
-                        //printf("checking %s\n", file_name);
-                        if (g_file_test(file_name, G_FILE_TEST_EXISTS)) {
-                            g_slist_free(basenames);
-                            g_slist_free(extensions);
-                            g_free(home_icons);
-                            g_free(home_local_icons);
-                            return file_name;
-                        } else {
-                            free(file_name);
-                            file_name = nullptr;
-                        }
-                    }
-                }
-            }
-        }
-    }
-    g_free (file_name);
-    */
-
-    // Stage 2: best size match
+    // Stage 1: best size match
     // Contrary to the freedesktop spec, we are not choosing the closest icon in size, but the next larger icon
     // otherwise the quality is usually crap (for size 22, if you can choose 16 or 32, you're better with 32)
     // We do fallback to the closest size if we cannot find a larger or equal icon
@@ -1107,44 +1064,21 @@ std::string icon_path(Launcher* launcher, const char* icon_name, int size) {
         GSList* dir;
 
         for (dir = theme->list_directories; dir; dir = g_slist_next(dir)) {
-            GSList* base;
-
-            for (base = basenames; base; base = g_slist_next(base)) {
-                GSList* ext;
-
-                for (ext = extensions; ext; ext = g_slist_next(ext)) {
-                    char* base_name = (char*) base->data;
-                    char* theme_name = theme->name;
+            for (auto const& base_name : basenames) {
+                for (auto const& extension : extensions) {
                     char* dir_name = ((IconThemeDir*)dir->data)->name;
-                    char* extension = (char*) ext->data;
-                    char* file_name = (char*) malloc(
-                                          strlen(base_name) + strlen(theme_name) +
-                                          strlen(dir_name) + strlen(icon_name)
-                                          + strlen(extension) + 100);
-                    // filename = directory/$(themename)/subdirectory/iconname.extension
-                    sprintf(file_name, "%s/%s/%s/%s%s", base_name, theme_name, dir_name, icon_name,
-                            extension);
+                    std::string icon_file_name(icon_name + extension);
+                    std::string file_name = fs::BuildPath({
+                        base_name, theme->name, dir_name, icon_file_name
+                    });
 
-                    if (DEBUG_ICON_SEARCH) {
-                        printf("checking %s\n", file_name);
-                    }
-
-                    if (g_file_test(file_name, G_FILE_TEST_EXISTS)) {
-                        if (DEBUG_ICON_SEARCH) {
-                            printf("found: %s\n", file_name);
-                        }
-
+                    if (fs::FileExists(file_name)) {
                         // Closest match
                         if (directory_size_distance((IconThemeDir*)dir->data, size) < minimal_size
                             && (!best_file_theme ? true : theme == best_file_theme)) {
                             best_file_name = file_name;
                             minimal_size = directory_size_distance((IconThemeDir*)dir->data, size);
                             best_file_theme = theme;
-
-                            if (DEBUG_ICON_SEARCH) {
-                                printf("best_file_name = %s; minimal_size = %d\n", best_file_name.c_str(),
-                                       minimal_size);
-                            }
                         }
 
                         // Next larger match
@@ -1155,76 +1089,36 @@ std::string icon_path(Launcher* launcher, const char* icon_name, int size) {
                             next_larger = file_name;
                             next_larger_size = ((IconThemeDir*)dir->data)->size;
                             next_larger_theme = theme;
-
-                            if (DEBUG_ICON_SEARCH) {
-                                printf("next_larger = %s; next_larger_size = %d\n", next_larger.c_str(),
-                                       next_larger_size);
-                            }
                         }
                     }
-
-                    free(file_name);
                 }
             }
         }
     }
 
     if (!next_larger.empty()) {
-        g_slist_free(basenames);
-        g_slist_free(extensions);
-        g_free(home_icons);
-        g_free(home_local_icons);
         return next_larger;
     }
 
     if (!best_file_name.empty()) {
-        g_slist_free(basenames);
-        g_slist_free(extensions);
-        g_free(home_icons);
-        g_free(home_local_icons);
         return best_file_name;
     }
 
-    // Stage 3: look in unthemed icons
-    {
-        GSList* base;
+    // Stage 2: look in unthemed icons
+    for (auto const& base_name : basenames) {
+        for (auto const& extension : extensions) {
+            std::string icon_file_name(icon_name + extension);
+            std::string file_name = fs::BuildPath({
+                base_name, icon_file_name
+            });
 
-        for (base = basenames; base; base = g_slist_next(base)) {
-            GSList* ext;
-
-            for (ext = extensions; ext; ext = g_slist_next(ext)) {
-                char* base_name = (char*) base->data;
-                char* extension = (char*) ext->data;
-                char* file_name = (char*) malloc(
-                                      strlen(base_name) + strlen(icon_name) +
-                                      strlen(extension) + 100);
-                // filename = directory/iconname.extension
-                sprintf(file_name, "%s/%s%s", base_name, icon_name, extension);
-
-                if (DEBUG_ICON_SEARCH) {
-                    printf("checking %s\n", file_name);
-                }
-
-                if (g_file_test(file_name, G_FILE_TEST_EXISTS)) {
-                    g_slist_free(basenames);
-                    g_slist_free(extensions);
-                    g_free(home_icons);
-                    g_free(home_local_icons);
-                    return file_name;
-                } else {
-                    free(file_name);
-                    file_name = nullptr;
-                }
+            if (fs::FileExists(file_name)) {
+                return file_name;
             }
         }
     }
 
-    fprintf(stderr, "Could not find icon %s\n", icon_name);
-
-    g_slist_free(basenames);
-    g_slist_free(extensions);
-    g_free(home_icons);
-    g_free(home_local_icons);
+    fprintf(stderr, "Could not find icon %s\n", icon_name.c_str());
     return std::string();
 }
 
