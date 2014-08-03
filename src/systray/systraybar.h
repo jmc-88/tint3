@@ -71,7 +71,7 @@ void start_net();
 void stop_net();
 void net_message(XClientMessageEvent* e);
 
-gboolean add_icon(Window id);
+bool add_icon(Window id);
 void remove_icon(TrayWindow* traywin);
 
 void refresh_systray_icon();

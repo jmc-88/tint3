@@ -370,12 +370,18 @@ void stop_net() {
 }
 
 
-gboolean error;
-int window_error_handler(Display* d, XErrorEvent* e) {
-    error = TRUE;
+// TODO: this error handling is horrible - let's move to XCB as soon as
+// possible..
+bool error = false;
 
-    if (e->error_code != BadWindow) {
-        printf("error_handler %d\n", e->error_code);
+int window_error_handler(Display* d, XErrorEvent* e) {
+    error = true;
+
+    // TODO: fix this - how large should the buffer be?
+    char error_text[512];
+
+    if (XGetErrorText(d, e->error_code, error_text, 512) == 0) {
+        printf("window_error_handler: %s\n", error_text);
     }
 
     return 0;
@@ -402,17 +408,17 @@ static gint compare_traywindows(gconstpointer a, gconstpointer b) {
 }
 
 
-gboolean add_icon(Window id) {
+bool add_icon(Window id) {
     TrayWindow* traywin;
     XErrorHandler old;
     Panel* panel = systray.panel;
     int hide = 0;
 
-    error = FALSE;
+    error = false;
     XWindowAttributes attr;
 
     if (XGetWindowAttributes(server.dsp, id, &attr) == False) {
-        return FALSE;
+        return false;
     }
 
     unsigned long mask = 0;
@@ -443,10 +449,10 @@ gboolean add_icon(Window id) {
     XSync(server.dsp, False);
     XSetErrorHandler(old);
 
-    if (error != FALSE) {
+    if (error) {
         fprintf(stderr, "tint3 : not icon_swallow\n");
         XDestroyWindow(server.dsp, parent_window);
-        return FALSE;
+        return false;
     }
 
     {
@@ -471,7 +477,7 @@ gboolean add_icon(Window id) {
         } else {
             fprintf(stderr, "tint3 : xembed error\n");
             XDestroyWindow(server.dsp, parent_window);
-            return FALSE;
+            return false;
         }
     }
 
@@ -532,7 +538,7 @@ gboolean add_icon(Window id) {
     // changed in systray
     systray.resize = 1;
     panel_refresh = 1;
-    return TRUE;
+    return true;
 }
 
 
@@ -550,7 +556,7 @@ void remove_icon(TrayWindow* traywin) {
     }
 
     // reparent to root
-    error = FALSE;
+    error = false;
     old = XSetErrorHandler(window_error_handler);
 
     if (!traywin->hide) {
