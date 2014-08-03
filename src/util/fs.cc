@@ -79,6 +79,10 @@ bool FileExists(std::string const& path) {
     return S_ISREG(info.st_mode);
 }
 
+bool FileExists(std::initializer_list<std::string> parts) {
+    return FileExists(BuildPath(parts));
+}
+
 std::string HomeDirectory() {
     std::string home = GetEnvironment("HOME");
 

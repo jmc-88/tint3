@@ -14,6 +14,8 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
+#include <string>
+
 #include "common.h"
 #include "area.h"
 
@@ -52,9 +54,11 @@ extern int battery_enabled;
 extern int percentage_hide;
 
 extern int8_t battery_low_status;
-extern char* battery_low_cmd;
-extern char* path_energy_now, *path_energy_full, *path_current_now,
-       *path_status;
+extern std::string battery_low_cmd;
+extern std::string path_energy_now;
+extern std::string path_energy_full;
+extern std::string path_current_now;
+extern std::string path_status;
 
 // default global data
 void default_battery();

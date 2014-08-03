@@ -109,14 +109,14 @@ std::string& StringTrim(std::string& str) {
     return str;
 }
 
-void tint_exec(char const* command) {
-    if (command) {
+void tint_exec(std::string const& command) {
+    if (!command.empty()) {
         if (fork() == 0) {
             // change for the fork the signal mask
             //          sigset_t sigset;
             //          sigprocmask(SIG_SETMASK, &sigset, 0);
             //          sigprocmask(SIG_UNBLOCK, &sigset, 0);
-            execlp(command, command, nullptr);
+            execlp(command.c_str(), command.c_str(), nullptr);
             _exit(1);
         }
     }

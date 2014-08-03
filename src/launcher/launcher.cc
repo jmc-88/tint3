@@ -635,38 +635,32 @@ IconTheme* load_theme(char const* name) {
         return nullptr;
     }
 
-    auto file_name = g_build_filename(g_get_home_dir(), ".icons", name,
-                                      "index.theme",
-                                      nullptr);
+    auto file_name = fs::BuildPath({
+        fs::HomeDirectory(), ".icons", name, "index.theme"
+    });
 
-    if (!g_file_test(file_name, G_FILE_TEST_EXISTS)) {
-        g_free(file_name);
-        file_name = g_build_filename("/usr/share/icons", name, "index.theme", nullptr);
+    if (!fs::FileExists(file_name)) {
+        file_name = fs::BuildPath({ "/usr/share/icons", name, "index.theme" });
 
-        if (!g_file_test(file_name, G_FILE_TEST_EXISTS)) {
-            g_free(file_name);
-            file_name = g_build_filename("/usr/share/pixmaps", name, "index.theme",
-                                         nullptr);
+        if (!fs::FileExists(file_name)) {
+            file_name = fs::BuildPath({ "/usr/share/pixmaps", name, "index.theme" });
 
-            if (!g_file_test(file_name, G_FILE_TEST_EXISTS)) {
-                g_free(file_name);
-                file_name = nullptr;
+            if (!fs::FileExists(file_name)) {
+                file_name.clear();
             }
         }
     }
 
-    if (!file_name) {
+    if (file_name.empty()) {
         return nullptr;
     }
 
-    auto f = fopen(file_name, "rt");
+    auto f = fopen(file_name.c_str(), "rt");
 
     if (f == nullptr) {
-        fprintf(stderr, "Could not open theme '%s'\n", file_name);
+        fprintf(stderr, "Could not open theme '%s'\n", file_name.c_str());
         return nullptr;
     }
-
-    g_free(file_name);
 
     auto theme = new IconTheme();
     theme->name = strdup(name);

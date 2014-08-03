@@ -40,7 +40,8 @@
 #include "timer.h"
 #include "common.h"
 #include "../server.h"
-#include "../util/window.h"
+#include "util/window.h"
+#include "util/fs.h"
 
 PangoFontDescription* bat1_font_desc;
 PangoFontDescription* bat2_font_desc;
@@ -54,11 +55,11 @@ static char buf_bat_time[20];
 
 int8_t battery_low_status;
 unsigned char battery_low_cmd_send;
-char* battery_low_cmd;
-char* path_energy_now;
-char* path_energy_full;
-char* path_current_now;
-char* path_status;
+std::string battery_low_cmd;
+std::string path_energy_now;
+std::string path_energy_full;
+std::string path_current_now;
+std::string path_status;
 
 #if defined(__OpenBSD__) || defined(__NetBSD__)
 int apm_fd;
@@ -108,11 +109,11 @@ void default_battery() {
     battery_timeout = 0;
     bat1_font_desc = 0;
     bat2_font_desc = 0;
-    battery_low_cmd = 0;
-    path_energy_now = 0;
-    path_energy_full = 0;
-    path_current_now = 0;
-    path_status = 0;
+    battery_low_cmd.clear();
+    path_energy_now.clear();
+    path_energy_full.clear();
+    path_current_now.clear();
+    path_status.clear();
     battery_state.percentage = 0;
     battery_state.time.hours = 0;
     battery_state.time.minutes = 0;
@@ -130,25 +131,11 @@ void cleanup_battery() {
         pango_font_description_free(bat2_font_desc);
     }
 
-    if (path_energy_now) {
-        g_free(path_energy_now);
-    }
-
-    if (path_energy_full) {
-        g_free(path_energy_full);
-    }
-
-    if (path_current_now) {
-        g_free(path_current_now);
-    }
-
-    if (path_status) {
-        g_free(path_status);
-    }
-
-    if (battery_low_cmd) {
-        g_free(battery_low_cmd);
-    }
+    battery_low_cmd.clear();
+    path_energy_now.clear();
+    path_energy_full.clear();
+    path_current_now.clear();
+    path_status.clear();
 
     if (battery_timeout) {
         stop_timeout(battery_timeout);
@@ -183,7 +170,7 @@ void init_battery() {
     GDir* directory = 0;
     GError* error = nullptr;
     const char* entryname;
-    char* battery_dir = 0;
+    std::string battery_dir;
 
     directory = g_dir_open("/sys/class/power_supply", 0, &error);
 
@@ -195,16 +182,12 @@ void init_battery() {
                 continue;
             }
 
-            char* path1 = g_build_filename("/sys/class/power_supply", entryname, "present",
-                                           nullptr);
+            auto sys_path = fs::BuildPath({ "/sys/class/power_supply", entryname });
 
-            if (g_file_test(path1, G_FILE_TEST_EXISTS)) {
-                g_free(path1);
-                battery_dir = g_build_filename("/sys/class/power_supply", entryname, nullptr);
+            if (fs::FileExists({ sys_path, "present" })) {
+                battery_dir = sys_path;
                 break;
             }
-
-            g_free(path1);
         }
     }
 
@@ -212,45 +195,38 @@ void init_battery() {
         g_dir_close(directory);
     }
 
-    if (!battery_dir) {
+    if (battery_dir.empty()) {
         fprintf(stderr, "ERROR: battery applet can't found power_supply\n");
         default_battery();
         return;
     }
 
-    char* path1 = g_build_filename(battery_dir, "energy_now", nullptr);
-
-    if (g_file_test(path1, G_FILE_TEST_EXISTS)) {
-        path_energy_now = g_build_filename(battery_dir, "energy_now", nullptr);
-        path_energy_full = g_build_filename(battery_dir, "energy_full", nullptr);
-    } else {
-        char* path2 = g_build_filename(battery_dir, "charge_now", nullptr);
-
-        if (g_file_test(path2, G_FILE_TEST_EXISTS)) {
-            path_energy_now = g_build_filename(battery_dir, "charge_now", nullptr);
-            path_energy_full = g_build_filename(battery_dir, "charge_full", nullptr);
-        } else {
-            fprintf(stderr, "ERROR: can't found energy_* or charge_*\n");
-        }
-
-        g_free(path2);
+    if (fs::FileExists({ battery_dir, "energy_now" })) {
+        path_energy_now = fs::BuildPath({ battery_dir, "energy_now" });
+        path_energy_full = fs::BuildPath({ battery_dir, "energy_full" });
+    }
+    else if (fs::FileExists({ battery_dir, "charge_now" })) {
+        path_energy_now = fs::BuildPath({ battery_dir, "charge_now" });
+        path_energy_full = fs::BuildPath({ battery_dir, "charge_full" });
+    }
+    else {
+        fprintf(stderr, "ERROR: can't found energy_* or charge_*\n");
     }
 
-    path_current_now = g_build_filename(battery_dir, "power_now", nullptr);
+    path_current_now = fs::BuildPath({ battery_dir, "power_now" });
 
-    if (!g_file_test(path_current_now, G_FILE_TEST_EXISTS)) {
-        g_free(path_current_now);
-        path_current_now = g_build_filename(battery_dir, "current_now", nullptr);
+    if (!fs::FileExists(path_current_now)) {
+        path_current_now = fs::BuildPath({ battery_dir, "current_now" });
     }
 
-    if (path_energy_now && path_energy_full) {
-        path_status = g_build_filename(battery_dir, "status", nullptr);
+    if (!path_energy_now.empty() && !path_energy_full.empty()) {
+        path_status = fs::BuildPath({ battery_dir, "status" });
 
         // check file
-        FILE* fp1 = fopen(path_energy_now, "r");
-        FILE* fp2 = fopen(path_energy_full, "r");
-        FILE* fp3 = fopen(path_current_now, "r");
-        FILE* fp4 = fopen(path_status, "r");
+        FILE* fp1 = fopen(path_energy_now.c_str(), "r");
+        FILE* fp2 = fopen(path_energy_full.c_str(), "r");
+        FILE* fp3 = fopen(path_current_now.c_str(), "r");
+        FILE* fp4 = fopen(path_status.c_str(), "r");
 
         if (fp1 == nullptr || fp2 == nullptr || fp3 == nullptr || fp4 == nullptr) {
             cleanup_battery();
@@ -275,8 +251,6 @@ void init_battery() {
         }
     }
 
-    g_free(path1);
-    g_free(battery_dir);
 #endif
 
     if (battery_enabled && battery_timeout == 0) {
@@ -404,7 +378,7 @@ void update_battery() {
     }
 
 #else
-    fp = fopen(path_status, "r");
+    fp = fopen(path_status.c_str(), "r");
 
     if (fp != nullptr) {
         if (fgets(tmp, sizeof tmp, fp)) {
@@ -426,7 +400,7 @@ void update_battery() {
         fclose(fp);
     }
 
-    fp = fopen(path_energy_now, "r");
+    fp = fopen(path_energy_now.c_str(), "r");
 
     if (fp != nullptr) {
         if (fgets(tmp, sizeof tmp, fp)) {
@@ -436,7 +410,7 @@ void update_battery() {
         fclose(fp);
     }
 
-    fp = fopen(path_energy_full, "r");
+    fp = fopen(path_energy_full.c_str(), "r");
 
     if (fp != nullptr) {
         if (fgets(tmp, sizeof tmp, fp)) {
@@ -446,7 +420,7 @@ void update_battery() {
         fclose(fp);
     }
 
-    fp = fopen(path_current_now, "r");
+    fp = fopen(path_current_now.c_str(), "r");
 
     if (fp != nullptr) {
         if (fgets(tmp, sizeof tmp, fp)) {

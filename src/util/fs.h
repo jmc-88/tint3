@@ -14,6 +14,7 @@ bool CopyFile(std::string const& from_path, std::string const& to_path);
 bool CreateDirectory(std::string const& path, mode_t mode = 0700);
 bool DirectoryExists(std::string const& path);
 bool FileExists(std::string const& path);
+bool FileExists(std::initializer_list<std::string> parts);
 std::string HomeDirectory();
 bool IsAbsolutePath(std::string const& path);
 bool ReadFileByLine(std::string const& path,

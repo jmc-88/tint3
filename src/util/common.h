@@ -38,7 +38,7 @@ std::string GetEnvironment(std::string const& variable_name);
 std::string& StringTrim(std::string& str);
 
 // execute a command by calling fork
-void tint_exec(char const* command);
+void tint_exec(std::string const& command);
 
 
 // color conversion

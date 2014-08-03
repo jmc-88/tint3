@@ -49,6 +49,7 @@
 #include "panel.h"
 #include "tooltip.h"
 #include "timer.h"
+#include "util/fs.h"
 #include "xsettings-client.h"
 
 // Drag and Drop state variables
@@ -233,19 +234,14 @@ void init_X11() {
     setlocale(LC_NUMERIC, "POSIX");
 
     // load default icon
-    gchar* path;
-    const gchar* const* data_dirs;
-    data_dirs = g_get_system_data_dirs();
-    int i;
+    const gchar* const* data_dirs = g_get_system_data_dirs();
 
-    for (i = 0; data_dirs[i] != nullptr; i++)  {
-        path = g_build_filename(data_dirs[i], "tint3", "default_icon.png", nullptr);
+    for (int i = 0; data_dirs[i] != nullptr; i++)  {
+        auto path = fs::BuildPath({ data_dirs[i], "tint3", "default_icon.png" });
 
-        if (g_file_test(path, G_FILE_TEST_EXISTS)) {
-            default_icon = imlib_load_image(path);
+        if (fs::FileExists(path)) {
+            default_icon = imlib_load_image(path.c_str());
         }
-
-        g_free(path);
     }
 
     // get monitor and desktop config
