@@ -29,6 +29,8 @@
 #include <libsn/sn.h>
 #endif
 
+#include <string>
+
 #include "server.h"
 #include "panel.h"
 #include "taskbar.h"
@@ -45,7 +47,7 @@ XSettingsClient* xsettings_client;
 
 #define ICON_FALLBACK "application-x-executable"
 
-char* icon_path(Launcher* launcher, const char* icon_name, int size);
+std::string icon_path(Launcher* launcher, const char* icon_name, int size);
 void launcher_load_themes(Launcher* launcher);
 void free_desktop_entry(DesktopEntry* entry);
 int launcher_read_desktop_file(const char* path, DesktopEntry* entry);
@@ -62,7 +64,7 @@ void default_launcher() {
     launcher_saturation = 0;
     launcher_brightness = 0;
     icon_theme_name = 0;
-    xsettings_client = NULL;
+    xsettings_client = nullptr;
 }
 
 
@@ -70,7 +72,7 @@ void init_launcher() {
     if (launcher_enabled) {
         // if XSETTINGS manager running, tint3 read the icon_theme_name.
         xsettings_client = xsettings_client_new(server.dsp, server.screen,
-                                                xsettings_notify_cb, NULL, NULL);
+                                                xsettings_notify_cb, nullptr, nullptr);
     }
 }
 
@@ -81,7 +83,7 @@ void init_launcher_panel(void* p) {
 
     launcher->parent = panel;
     launcher->panel = panel;
-    launcher->_draw_foreground = NULL;
+    launcher->_draw_foreground = nullptr;
     launcher->size_mode = SIZE_BY_CONTENT;
     launcher->_resize = resize_launcher;
     launcher->resize = 1;
@@ -92,7 +94,7 @@ void init_launcher_panel(void* p) {
     }
 
     // check consistency
-    if (launcher->list_apps == NULL) {
+    if (launcher->list_apps.empty()) {
         return;
     }
 
@@ -105,27 +107,23 @@ void init_launcher_panel(void* p) {
 
 
 void cleanup_launcher() {
-    int i;
-    GSList* l;
-
     if (xsettings_client) {
         xsettings_client_destroy(xsettings_client);
     }
 
-    for (i = 0 ; i < nb_panel ; i++) {
+    for (int i = 0 ; i < nb_panel ; i++) {
         Panel* panel = &panel1[i];
         Launcher* launcher = &panel->launcher;
         cleanup_launcher_theme(launcher);
     }
 
-    for (l = panel_config.launcher.list_apps; l ; l = l->next) {
-        free(l->data);
+    for (auto const& app : panel_config.launcher.list_apps) {
+        free(app);
     }
 
-    g_slist_free(panel_config.launcher.list_apps);
-    panel_config.launcher.list_apps = NULL;
+    panel_config.launcher.list_apps.clear();
     free(icon_theme_name);
-    icon_theme_name = 0;
+    icon_theme_name = nullptr;
     launcher_enabled = 0;
 }
 
@@ -133,11 +131,7 @@ void cleanup_launcher() {
 void cleanup_launcher_theme(Launcher* launcher) {
     launcher->free_area();
 
-    GSList* l;
-
-    for (l = launcher->list_icons; l ; l = l->next) {
-        auto launcherIcon = static_cast<LauncherIcon*>(l->data);
-
+    for (auto const& launcherIcon : launcher->list_icons) {
         if (launcherIcon) {
             free_icon(launcherIcon->icon_scaled);
             free_icon(launcherIcon->icon_original);
@@ -147,26 +141,22 @@ void cleanup_launcher_theme(Launcher* launcher) {
             free(launcherIcon->icon_tooltip);
         }
 
-        free(launcherIcon);
+        delete launcherIcon;
     }
 
-    g_slist_free(launcher->list_icons);
-
-    for (l = launcher->list_themes; l ; l = l->next) {
-        auto theme = static_cast<IconTheme*>(l->data);
+    for (auto const& theme : launcher->list_themes) {
         free_icon_theme(theme);
         free(theme);
     }
 
-    g_slist_free(launcher->list_themes);
-    launcher->list_icons = launcher->list_themes = NULL;
+    launcher->list_icons.clear();
+    launcher->list_themes.clear();
 }
 
 
 int resize_launcher(void* obj) {
     Launcher* launcher = static_cast<Launcher*>(obj);
-    GSList* l;
-    int count, icon_size;
+    int icon_size;
     int icons_per_column = 1, icons_per_row = 1, marging = 0;
 
     if (panel_horizontal) {
@@ -183,30 +173,28 @@ int resize_launcher(void* obj) {
     }
 
     // Resize icons if necessary
-    for (l = launcher->list_icons; l ; l = l->next) {
-        LauncherIcon* launcherIcon = static_cast<LauncherIcon*>(l->data);
-
+    for (auto& launcherIcon : launcher->list_icons) {
         if (launcherIcon->icon_size != icon_size || !launcherIcon->icon_original) {
             launcherIcon->icon_size = icon_size;
             launcherIcon->width = launcherIcon->icon_size;
             launcherIcon->height = launcherIcon->icon_size;
 
             // Get the path for an icon file with the new size
-            char* new_icon_path = icon_path(launcher, launcherIcon->icon_name,
-                                            launcherIcon->icon_size);
+            std::string new_icon_path = icon_path(launcher, launcherIcon->icon_name,
+                                                  launcherIcon->icon_size);
 
-            if (!new_icon_path) {
+            if (new_icon_path.empty()) {
                 // Draw a blank icon
                 free_icon(launcherIcon->icon_original);
-                launcherIcon->icon_original = NULL;
+                launcherIcon->icon_original = nullptr;
                 free_icon(launcherIcon->icon_scaled);
-                launcherIcon->icon_scaled = NULL;
+                launcherIcon->icon_scaled = nullptr;
                 new_icon_path = icon_path(launcher, ICON_FALLBACK, launcherIcon->icon_size);
 
-                if (new_icon_path) {
-                    launcherIcon->icon_original = imlib_load_image(new_icon_path);
-                    fprintf(stderr, "launcher.c %d: Using icon %s\n", __LINE__, new_icon_path);
-                    free(new_icon_path);
+                if (!new_icon_path.empty()) {
+                    launcherIcon->icon_original = imlib_load_image(new_icon_path.c_str());
+                    fprintf(stderr, "launcher.c %d: Using icon %s\n", __LINE__,
+                            new_icon_path.c_str());
                 }
 
                 launcherIcon->icon_scaled = scale_icon(launcherIcon->icon_original, icon_size);
@@ -214,11 +202,10 @@ int resize_launcher(void* obj) {
             }
 
             if (launcherIcon->icon_path
-                && strcmp(new_icon_path, launcherIcon->icon_path) == 0) {
+                && new_icon_path == launcherIcon->icon_path) {
                 // If it's the same file just rescale
                 free_icon(launcherIcon->icon_scaled);
                 launcherIcon->icon_scaled = scale_icon(launcherIcon->icon_original, icon_size);
-                free(new_icon_path);
                 fprintf(stderr, "launcher.c %d: Using icon %s\n", __LINE__,
                         launcherIcon->icon_path);
             } else {
@@ -226,21 +213,21 @@ int resize_launcher(void* obj) {
                 free_icon(launcherIcon->icon_original);
                 free_icon(launcherIcon->icon_scaled);
                 // Load the new file and scale
-                launcherIcon->icon_original = imlib_load_image(new_icon_path);
+                launcherIcon->icon_original = imlib_load_image(new_icon_path.c_str());
                 launcherIcon->icon_scaled = scale_icon(launcherIcon->icon_original,
                                                        launcherIcon->icon_size);
                 free(launcherIcon->icon_path);
-                launcherIcon->icon_path = new_icon_path;
+                launcherIcon->icon_path = strdup(new_icon_path.c_str());
                 fprintf(stderr, "launcher.c %d: Using icon %s\n", __LINE__,
                         launcherIcon->icon_path);
             }
         }
     }
 
-    count = g_slist_length(launcher->list_icons);
+    size_t count = launcher->list_icons.size();
 
     if (panel_horizontal) {
-        if (!count) {
+        if (count == 0) {
             launcher->width = 0;
         } else {
             int height = launcher->height - 2 * launcher->bg->border.width - 2 *
@@ -256,7 +243,7 @@ int resize_launcher(void* obj) {
                                           icons_per_row - 1) * launcher->paddingx);
         }
     } else {
-        if (!count) {
+        if (count == 0) {
             launcher->height = 0;
         } else {
             int width = launcher->width - 2 * launcher->bg->border.width - 2 *
@@ -273,9 +260,8 @@ int resize_launcher(void* obj) {
         }
     }
 
-    int i, posx, posy;
-    int start = launcher->bg->border.width + launcher->paddingy + marging
-                / 2;
+    int posx, posy;
+    int start = launcher->bg->border.width + launcher->paddingy + marging / 2;
 
     if (panel_horizontal) {
         posy = start;
@@ -285,13 +271,12 @@ int resize_launcher(void* obj) {
         posy = launcher->bg->border.width + launcher->paddingxlr;
     }
 
-    for (i = 1, l = launcher->list_icons; l ; i++, l = l->next) {
-        LauncherIcon* launcherIcon = static_cast<LauncherIcon*>(l->data);
+    int i = 1;
 
+    for (auto& launcherIcon : launcher->list_icons) {
         launcherIcon->y = posy;
         launcherIcon->x = posx;
 
-        //printf("launcher %d : %d,%d\n", i, posx, posy);
         if (panel_horizontal) {
             if (i % icons_per_column) {
                 posy += icon_size + launcher->paddingx;
@@ -307,6 +292,8 @@ int resize_launcher(void* obj) {
                 posy += (icon_size + launcher->paddingx);
             }
         }
+
+        ++i;
     }
 
     return 1;
@@ -407,7 +394,7 @@ void launcher_action(LauncherIcon* icon, XEvent* evt) {
         // Allow children to exist after parent destruction
         setsid();
         // Run the command
-        execl("/bin/sh", "/bin/sh", "-c", icon->cmd, NULL);
+        execl("/bin/sh", "/bin/sh", "-c", icon->cmd, nullptr);
 
         fprintf(stderr, "Failed to execlp %s\n", icon->cmd);
 #if HAVE_SN
@@ -500,12 +487,12 @@ void expand_exec(DesktopEntry* entry, const char* path) {
                     break;
                 }
 
-                if (*p == 'i' && entry->icon != NULL) {
+                if (*p == 'i' && entry->icon != nullptr) {
                     sprintf(q, "--icon '%s'", entry->icon);
                     q += strlen("--icon ''");
                     q += strlen(entry->icon);
                     q--; // To balance the q++ in the for
-                } else if (*p == 'c' && entry->name != NULL) {
+                } else if (*p == 'c' && entry->name != nullptr) {
                     sprintf(q, "'%s'", entry->name);
                     q += strlen("''");
                     q += strlen(entry->name);
@@ -532,14 +519,14 @@ void expand_exec(DesktopEntry* entry, const char* path) {
 
 int launcher_read_desktop_file(const char* path, DesktopEntry* entry) {
     FILE* fp;
-    char* line = NULL;
+    char* line = nullptr;
     size_t line_size;
     char* key, *value;
     int i;
 
-    entry->name = entry->icon = entry->exec = NULL;
+    entry->name = entry->icon = entry->exec = nullptr;
 
-    if ((fp = fopen(path, "rt")) == NULL) {
+    if ((fp = fopen(path, "rt")) == nullptr) {
         fprintf(stderr, "Could not open file %s\n", path);
         return 0;
     }
@@ -614,7 +601,7 @@ int launcher_read_desktop_file(const char* path, DesktopEntry* entry) {
 
     fclose(fp);
     // From this point:
-    // entry->name, entry->icon, entry->exec will never be empty strings (can be NULL though)
+    // entry->name, entry->icon, entry->exec will never be empty strings (can be nullptr though)
 
     expand_exec(entry, path);
 
@@ -642,38 +629,39 @@ IconTheme* load_theme(char const* name) {
     // Parse index.theme -> list of IconThemeDir with attributes
     // Return IconTheme*
 
-    if (name == NULL) {
-        return NULL;
+    if (name == nullptr) {
+        return nullptr;
     }
 
     auto file_name = g_build_filename(g_get_home_dir(), ".icons", name,
                                       "index.theme",
-                                      NULL);
+                                      nullptr);
 
     if (!g_file_test(file_name, G_FILE_TEST_EXISTS)) {
         g_free(file_name);
-        file_name = g_build_filename("/usr/share/icons", name, "index.theme", NULL);
+        file_name = g_build_filename("/usr/share/icons", name, "index.theme", nullptr);
 
         if (!g_file_test(file_name, G_FILE_TEST_EXISTS)) {
             g_free(file_name);
-            file_name = g_build_filename("/usr/share/pixmaps", name, "index.theme", NULL);
+            file_name = g_build_filename("/usr/share/pixmaps", name, "index.theme",
+                                         nullptr);
 
             if (!g_file_test(file_name, G_FILE_TEST_EXISTS)) {
                 g_free(file_name);
-                file_name = NULL;
+                file_name = nullptr;
             }
         }
     }
 
     if (!file_name) {
-        return NULL;
+        return nullptr;
     }
 
     auto f = fopen(file_name, "rt");
 
-    if (f == NULL) {
+    if (f == nullptr) {
         fprintf(stderr, "Could not open theme '%s'\n", file_name);
-        return NULL;
+        return nullptr;
     }
 
     g_free(file_name);
@@ -681,13 +669,13 @@ IconTheme* load_theme(char const* name) {
     auto theme = (IconTheme*) malloc(sizeof(IconTheme));
     memset(&theme, 0, sizeof(IconTheme));
     theme->name = strdup(name);
-    theme->list_inherits = NULL;
-    theme->list_directories = NULL;
+    theme->list_inherits = nullptr;
+    theme->list_directories = nullptr;
 
-    IconThemeDir* current_dir = NULL;
+    IconThemeDir* current_dir = nullptr;
     int inside_header = 1;
 
-    char* line = NULL;
+    char* line = nullptr;
     size_t line_size;
 
     while (getline(&line, &line_size, f) >= 0) {
@@ -714,16 +702,16 @@ IconTheme* load_theme(char const* name) {
                     char* token;
                     token = strtok(value, ",\n");
 
-                    while (token != NULL) {
+                    while (token != nullptr) {
                         theme->list_inherits = g_slist_append(theme->list_inherits, strdup(token));
-                        token = strtok(NULL, ",\n");
+                        token = strtok(nullptr, ",\n");
                     }
                 } else if (strcmp(key, "Directories") == 0) {
                     // value is like 48x48/apps,48x48/mimetypes,32x32/apps,scalable/apps,scalable/mimetypes
                     char* token;
                     token = strtok(value, ",\n");
 
-                    while (token != NULL) {
+                    while (token != nullptr) {
                         IconThemeDir* dir = (IconThemeDir*) malloc(sizeof(IconThemeDir));
                         memset(&dir, 0, sizeof(IconThemeDir));
                         dir->name = strdup(token);
@@ -731,11 +719,11 @@ IconTheme* load_theme(char const* name) {
                         dir->type = ICON_DIR_TYPE_THRESHOLD;
                         dir->threshold = 2;
                         theme->list_directories = g_slist_append(theme->list_directories, dir);
-                        token = strtok(NULL, ",\n");
+                        token = strtok(nullptr, ",\n");
                     }
                 }
             }
-        } else if (current_dir != NULL) {
+        } else if (current_dir != nullptr) {
             if (parse_theme_line(line, &key, &value)) {
                 if (strcmp(key, "Size") == 0) {
                     // value is like 24
@@ -776,12 +764,12 @@ IconTheme* load_theme(char const* name) {
         if (line[0] == '[' && line[line_len - 1] == ']'
             && strcmp(line, "[Icon Theme]") != 0) {
             inside_header = 0;
-            current_dir = NULL;
+            current_dir = nullptr;
             line[line_len - 1] = '\0';
             char* dir_name = line + 1;
             GSList* dir_item = theme->list_directories;
 
-            while (dir_item != NULL) {
+            while (dir_item != nullptr) {
                 IconThemeDir* dir = static_cast<IconThemeDir*>(dir_item->data);
 
                 if (strcmp(dir->name, dir_name) == 0) {
@@ -830,14 +818,14 @@ void test_launcher_read_theme_file() {
     printf("Loaded theme: %s\n", theme->name);
     GSList* item = theme->list_inherits;
 
-    while (item != NULL) {
+    while (item != nullptr) {
         printf("Inherits:%s\n", (char*)item->data);
         item = g_slist_next(item);
     }
 
     item = theme->list_directories;
 
-    while (item != NULL) {
+    while (item != nullptr) {
         IconThemeDir* dir = static_cast<IconThemeDir*>(item->data);
         printf("Dir:%s Size=%d MinSize=%d MaxSize=%d Threshold=%d Type=%s Context=%s\n",
                dir->name, dir->size, dir->min_size, dir->max_size, dir->threshold,
@@ -855,20 +843,17 @@ void test_launcher_read_theme_file() {
 // Populates the list_icons list
 void launcher_load_icons(Launcher* launcher) {
     // Load apps (.desktop style launcher items)
-    GSList* app = launcher->list_apps;
-
-    while (app != NULL) {
+    for (auto const& app : launcher->list_apps) {
         DesktopEntry entry;
-        launcher_read_desktop_file(static_cast<char*>(app->data), &entry);
+        launcher_read_desktop_file(app, &entry);
 
         if (entry.exec) {
-            LauncherIcon* launcherIcon = (LauncherIcon*) malloc(sizeof(LauncherIcon));
-            memset(&launcherIcon, 0, sizeof(LauncherIcon));
+            auto launcherIcon = new LauncherIcon();
             launcherIcon->parent = launcher;
             launcherIcon->panel = launcher->panel;
             launcherIcon->_draw_foreground = draw_launcher_icon;
             launcherIcon->size_mode = SIZE_BY_CONTENT;
-            launcherIcon->_resize = NULL;
+            launcherIcon->_resize = nullptr;
             launcherIcon->resize = 0;
             launcherIcon->redraw = 1;
             launcherIcon->bg = backgrounds.front();
@@ -878,7 +863,7 @@ void launcher_load_icons(Launcher* launcher) {
             if (launcher_tooltip_enabled) {
                 launcherIcon->_get_tooltip_text = launcher_icon_get_tooltip_text;
             } else {
-                launcherIcon->_get_tooltip_text = NULL;
+                launcherIcon->_get_tooltip_text = nullptr;
             }
 
             launcherIcon->is_app_desktop = 1;
@@ -889,11 +874,9 @@ void launcher_load_icons(Launcher* launcher) {
             launcherIcon->icon_tooltip = entry.name ? strdup(entry.name) : strdup(
                                              entry.exec);
             free_desktop_entry(&entry);
-            launcher->list_icons = g_slist_append(launcher->list_icons, launcherIcon);
+            launcher->list_icons.push_back(launcherIcon);
             launcherIcon->add_area();
         }
-
-        app = g_slist_next(app);
     }
 }
 
@@ -909,8 +892,8 @@ void launcher_load_themes(Launcher* launcher) {
         fprintf(stderr, "Loading %s. Icon theme :", icon_theme_name);
     }
 
-    GSList* queue = g_slist_append(NULL, strdup(icon_theme_name));
-    GSList* queued = g_slist_append(NULL, strdup(icon_theme_name));
+    GSList* queue = g_slist_append(nullptr, strdup(icon_theme_name));
+    GSList* queued = g_slist_append(nullptr, strdup(icon_theme_name));
 
     int hicolor_loaded = 0;
 
@@ -918,7 +901,7 @@ void launcher_load_themes(Launcher* launcher) {
         if (!queue) {
             GSList* queued_item = queued;
 
-            while (queued_item != NULL) {
+            while (queued_item != nullptr) {
                 if (strcmp(static_cast<char*>(queued_item->data), "hicolor") == 0) {
                     hicolor_loaded = 1;
                     break;
@@ -941,18 +924,18 @@ void launcher_load_themes(Launcher* launcher) {
         fprintf(stderr, " '%s',", name);
         IconTheme* theme = load_theme(name);
 
-        if (theme != NULL) {
-            launcher->list_themes = g_slist_append(launcher->list_themes, theme);
+        if (theme != nullptr) {
+            launcher->list_themes.push_back(theme);
 
             GSList* item = theme->list_inherits;
             int pos = 0;
 
-            while (item != NULL) {
+            while (item != nullptr) {
                 char* parent = static_cast<char*>(item->data);
                 int duplicate = 0;
                 GSList* queued_item = queued;
 
-                while (queued_item != NULL) {
+                while (queued_item != nullptr) {
                     if (strcmp(static_cast<char*>(queued_item->data), parent) == 0) {
                         duplicate = 1;
                         break;
@@ -1023,10 +1006,10 @@ int directory_size_distance(IconThemeDir* dir, int size) {
 }
 
 #define DEBUG_ICON_SEARCH 0
-// Returns the full path to an icon file (or NULL) given the icon name
-char* icon_path(Launcher* launcher, const char* icon_name, int size) {
-    if (icon_name == NULL) {
-        return NULL;
+// Returns the full path to an icon file (or nullptr) given the icon name
+std::string icon_path(Launcher* launcher, const char* icon_name, int size) {
+    if (icon_name == nullptr) {
+        return nullptr;
     }
 
     // If the icon_name is already a path and the file exists, return it
@@ -1035,21 +1018,21 @@ char* icon_path(Launcher* launcher, const char* icon_name, int size) {
             return strdup(icon_name);
         }
 
-        return NULL;
+        return nullptr;
     }
 
-    GSList* basenames = NULL;
-    char* home_icons = g_build_filename(g_get_home_dir(), ".icons", NULL);
+    GSList* basenames = nullptr;
+    char* home_icons = g_build_filename(g_get_home_dir(), ".icons", nullptr);
     basenames = g_slist_append(basenames, home_icons);
     char* home_local_icons = g_build_filename(g_get_home_dir(),
-                             ".local/share/icons", NULL);
+                             ".local/share/icons", nullptr);
     basenames = g_slist_append(basenames, home_local_icons);
     basenames = g_slist_append(basenames, (void*) "/usr/local/share/icons");
     basenames = g_slist_append(basenames, (void*) "/usr/local/share/pixmaps");
     basenames = g_slist_append(basenames, (void*) "/usr/share/icons");
     basenames = g_slist_append(basenames, (void*) "/usr/share/pixmaps");
 
-    GSList* extensions = NULL;
+    GSList* extensions = nullptr;
     extensions = g_slist_append(extensions, (void*) ".png");
     extensions = g_slist_append(extensions, (void*) ".xpm");
     // if the icon name already contains one of the extensions (e.g. vlc.png instead of vlc) add a special entry
@@ -1065,7 +1048,6 @@ char* icon_path(Launcher* launcher, const char* icon_name, int size) {
         }
     }
 
-    GSList* theme;
     // Stage 1: exact size match
     // the theme must have a higher priority than having an exact size match, so we will just use
     // the code that searches for the best size match (it will find the exact size match if one exists)
@@ -1096,7 +1078,7 @@ char* icon_path(Launcher* launcher, const char* icon_name, int size) {
                             return file_name;
                         } else {
                             free(file_name);
-                            file_name = NULL;
+                            file_name = nullptr;
                         }
                     }
                 }
@@ -1113,19 +1095,18 @@ char* icon_path(Launcher* launcher, const char* icon_name, int size) {
 
     // These 3 variables are used for keeping the closest size match
     int minimal_size = INT_MAX;
-    char* best_file_name = NULL;
-    GSList* best_file_theme = NULL;
+    std::string best_file_name;
+    IconTheme* best_file_theme = nullptr;
 
     // These 3 variables are used for keeping the next larger match
     int next_larger_size = -1;
-    char* next_larger = NULL;
-    GSList* next_larger_theme = NULL;
+    std::string next_larger;
+    IconTheme* next_larger_theme = nullptr;
 
-    for (theme = launcher->list_themes; theme; theme = g_slist_next(theme)) {
+    for (auto const& theme : launcher->list_themes) {
         GSList* dir;
 
-        for (dir = ((IconTheme*)theme->data)->list_directories; dir;
-             dir = g_slist_next(dir)) {
+        for (dir = theme->list_directories; dir; dir = g_slist_next(dir)) {
             GSList* base;
 
             for (base = basenames; base; base = g_slist_next(base)) {
@@ -1133,7 +1114,7 @@ char* icon_path(Launcher* launcher, const char* icon_name, int size) {
 
                 for (ext = extensions; ext; ext = g_slist_next(ext)) {
                     char* base_name = (char*) base->data;
-                    char* theme_name = ((IconTheme*)theme->data)->name;
+                    char* theme_name = theme->name;
                     char* dir_name = ((IconThemeDir*)dir->data)->name;
                     char* extension = (char*) ext->data;
                     char* file_name = (char*) malloc(
@@ -1155,18 +1136,13 @@ char* icon_path(Launcher* launcher, const char* icon_name, int size) {
 
                         // Closest match
                         if (directory_size_distance((IconThemeDir*)dir->data, size) < minimal_size
-                            && (!best_file_theme ? 1 : theme == best_file_theme)) {
-                            if (best_file_name) {
-                                free(best_file_name);
-                                best_file_name = NULL;
-                            }
-
-                            best_file_name = strdup(file_name);
+                            && (!best_file_theme ? true : theme == best_file_theme)) {
+                            best_file_name = file_name;
                             minimal_size = directory_size_distance((IconThemeDir*)dir->data, size);
                             best_file_theme = theme;
 
                             if (DEBUG_ICON_SEARCH) {
-                                printf("best_file_name = %s; minimal_size = %d\n", best_file_name,
+                                printf("best_file_name = %s; minimal_size = %d\n", best_file_name.c_str(),
                                        minimal_size);
                             }
                         }
@@ -1176,17 +1152,12 @@ char* icon_path(Launcher* launcher, const char* icon_name, int size) {
                             (next_larger_size == -1 || ((IconThemeDir*)dir->data)->size < next_larger_size)
                             &&
                             (!next_larger_theme ? 1 : theme == next_larger_theme)) {
-                            if (next_larger) {
-                                free(next_larger);
-                                next_larger = NULL;
-                            }
-
-                            next_larger = strdup(file_name);
+                            next_larger = file_name;
                             next_larger_size = ((IconThemeDir*)dir->data)->size;
                             next_larger_theme = theme;
 
                             if (DEBUG_ICON_SEARCH) {
-                                printf("next_larger = %s; next_larger_size = %d\n", next_larger,
+                                printf("next_larger = %s; next_larger_size = %d\n", next_larger.c_str(),
                                        next_larger_size);
                             }
                         }
@@ -1198,16 +1169,15 @@ char* icon_path(Launcher* launcher, const char* icon_name, int size) {
         }
     }
 
-    if (next_larger) {
+    if (!next_larger.empty()) {
         g_slist_free(basenames);
         g_slist_free(extensions);
-        free(best_file_name);
         g_free(home_icons);
         g_free(home_local_icons);
         return next_larger;
     }
 
-    if (best_file_name) {
+    if (!best_file_name.empty()) {
         g_slist_free(basenames);
         g_slist_free(extensions);
         g_free(home_icons);
@@ -1243,7 +1213,7 @@ char* icon_path(Launcher* launcher, const char* icon_name, int size) {
                     return file_name;
                 } else {
                     free(file_name);
-                    file_name = NULL;
+                    file_name = nullptr;
                 }
             }
         }
@@ -1255,6 +1225,6 @@ char* icon_path(Launcher* launcher, const char* icon_name, int size) {
     g_slist_free(extensions);
     g_free(home_icons);
     g_free(home_local_icons);
-    return NULL;
+    return std::string();
 }
 

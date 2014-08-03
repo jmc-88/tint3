@@ -83,7 +83,7 @@ Imlib_Image default_icon;
 void default_panel() {
     panel1 = 0;
     nb_panel = 0;
-    default_icon = NULL;
+    default_icon = nullptr;
     task_dragged = 0;
     panel_horizontal = 1;
     panel_position = CENTER;
@@ -520,9 +520,9 @@ void set_panel_properties(Panel* p) {
     XStoreName(server.dsp, p->main_win, "tint3");
 
     gsize len;
-    gchar* name = g_locale_to_utf8("tint3", -1, NULL, &len, NULL);
+    gchar* name = g_locale_to_utf8("tint3", -1, nullptr, &len, nullptr);
 
-    if (name != NULL) {
+    if (name != nullptr) {
         XChangeProperty(server.dsp, p->main_win, server.atom._NET_WM_NAME,
                         server.atom.UTF8_STRING, 8, PropModeReplace, (unsigned char*) name, (int) len);
         g_free(name);
@@ -725,7 +725,7 @@ Taskbar* click_taskbar(Panel* panel, int x, int y) {
         }
     }
 
-    return NULL;
+    return nullptr;
 }
 
 
@@ -756,12 +756,12 @@ Task* click_task(Panel* panel, int x, int y) {
         }
     }
 
-    return NULL;
+    return nullptr;
 }
 
 
 Launcher* click_launcher(Panel* panel, int x, int y) {
-    Launcher* launcher = &panel->launcher;
+    auto launcher = &panel->launcher;
 
     if (panel_horizontal) {
         if (launcher->on_screen && x >= launcher->posx
@@ -775,30 +775,27 @@ Launcher* click_launcher(Panel* panel, int x, int y) {
         }
     }
 
-    return NULL;
+    return nullptr;
 }
 
 
 LauncherIcon* click_launcher_icon(Panel* panel, int x, int y) {
-    Launcher* launcher = click_launcher(panel, x, y);
-    GSList* l0;
+    auto launcher = click_launcher(panel, x, y);
 
-    //printf("Click x=%d y=%d\n", x, y);
     if (launcher) {
-        for (l0 = launcher->list_icons; l0 ; l0 = l0->next) {
-            LauncherIcon* icon = static_cast<LauncherIcon*>(l0->data);
+        for (auto const& icon : launcher->list_icons) {
+            bool insideX = (x >= (launcher->posx + icon->x)
+                            && x <= (launcher->posx + icon->x + icon->icon_size));
+            bool insideY = (y >= (launcher->posy + icon->y)
+                            && y <= (launcher->posy + icon->y + icon->icon_size));
 
-            if (x >= (launcher->posx + icon->x)
-                && x <= (launcher->posx + icon->x + icon->icon_size) &&
-                y >= (launcher->posy + icon->y)
-                && y <= (launcher->posy + icon->y + icon->icon_size)) {
-                //printf("Hit rect x=%d y=%d xmax=%d ymax=%d\n", launcher->posx + icon->x, launcher->posy + icon->y, launcher->posx + icon->x + icon->width, launcher->posy + icon->y + icon->height);
+            if (insideX && insideY) {
                 return icon;
             }
         }
     }
 
-    return NULL;
+    return nullptr;
 }
 
 

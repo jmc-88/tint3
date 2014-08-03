@@ -7,16 +7,11 @@
 #ifndef LAUNCHER_H
 #define LAUNCHER_H
 
+#include <vector>
+
 #include "common.h"
 #include "area.h"
 #include "xsettings-client.h"
-
-class Launcher : public Area {
-  public:
-    GSList* list_apps;          // List of char*, each is a path to a app.desktop file
-    GSList* list_icons;         // List of LauncherIcon*
-    GSList* list_themes;        // List of IconTheme*
-};
 
 class LauncherIcon : public Area {
   public:
@@ -31,16 +26,16 @@ class LauncherIcon : public Area {
     int x, y;
 };
 
-typedef struct DesktopEntry {
+struct DesktopEntry {
     char* name;
     char* exec;
     char* icon;
-} DesktopEntry;
+};
 
 #define ICON_DIR_TYPE_SCALABLE 0
 #define ICON_DIR_TYPE_FIXED 1
 #define ICON_DIR_TYPE_THRESHOLD 2
-typedef struct IconThemeDir {
+struct IconThemeDir {
     char* name;
     int size;
     int type;
@@ -48,13 +43,20 @@ typedef struct IconThemeDir {
     int min_size;
     int threshold;
     char* context;
-} IconThemeDir;
+};
 
-typedef struct IconTheme {
+struct IconTheme {
     char* name;
     GSList* list_inherits; // each item is a char* (theme name)
     GSList* list_directories; // each item is an IconThemeDir*
-} IconTheme;
+};
+
+class Launcher : public Area {
+  public:
+    std::vector<char*> list_apps;          // paths to .desktop files
+    std::vector<LauncherIcon*> list_icons;
+    std::vector<IconTheme*> list_themes;
+};
 
 extern int launcher_enabled;
 extern int launcher_max_icon_size;

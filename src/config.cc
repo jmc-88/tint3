@@ -677,9 +677,7 @@ void AddEntry(std::string const& key, char* value) {
     } else if (key == "launcher_icon_size") {
         launcher_max_icon_size = atoi(value);
     } else if (key == "launcher_item_app") {
-        char* app = strdup(value);
-        panel_config.launcher.list_apps = g_slist_append(
-                                              panel_config.launcher.list_apps, app);
+        panel_config.launcher.list_apps.push_back(value);
     } else if (key == "launcher_icon_theme") {
         // if XSETTINGS manager running, tint3 use it.
         if (!icon_theme_name) {
