@@ -126,4 +126,4 @@ bool ReadFileByLine(std::string const& path,
     return true;
 }
 
-}
+} // namespace fs

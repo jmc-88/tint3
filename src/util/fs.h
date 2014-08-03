@@ -19,6 +19,6 @@ bool IsAbsolutePath(std::string const& path);
 bool ReadFileByLine(std::string const& path,
                     std::function<void(std::string const&)> fn);
 
-}
+} // namespace fs
 
 #endif // TINT3_FILE_H

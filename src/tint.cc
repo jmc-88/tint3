@@ -67,8 +67,6 @@ void signal_handler(int sig) {
 
 
 void init(int argc, char* argv[]) {
-    int i;
-
     // set global data
     default_config();
     default_timeout();
@@ -84,7 +82,7 @@ void init(int argc, char* argv[]) {
     default_panel();
 
     // read options
-    for (i = 1; i < argc; ++i) {
+    for (int i = 1; i < argc; ++i) {
         if (!strcmp(argv[i], "-h") || !strcmp(argv[i], "--help"))   {
             printf("Usage: tint3 [-c] <config_file>\n");
             exit(0);

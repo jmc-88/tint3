@@ -97,6 +97,6 @@ std::vector<std::string> ConfigDirs() {
     return SplitString(default_(GetEnvironment("XDG_CONFIG_DIRS")), ':');
 }
 
-} // basedir
+} // namespace basedir
 
-} // namespace
+} // namespace xdg
