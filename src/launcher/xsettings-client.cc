@@ -47,24 +47,19 @@ struct _XSettingsClient {
 
 void xsettings_notify_cb(const char* name, XSettingsAction action,
                          XSettingsSetting* setting, void* data) {
-    //printf("xsettings_notify_cb\n");
     if ((action == XSETTINGS_ACTION_NEW || action == XSETTINGS_ACTION_CHANGED)
         && name != nullptr && setting != nullptr) {
-        if (!strcmp(name, "Net/IconThemeName")
+        if (strcmp(name, "Net/IconThemeName") == 0
             && setting->type == XSETTINGS_TYPE_STRING) {
-            if (icon_theme_name) {
-                if (strcmp(icon_theme_name, setting->data.v_string) == 0) {
+            if (!icon_theme_name.empty()) {
+                if (icon_theme_name == setting->data.v_string) {
                     return;
                 }
-
-                free(icon_theme_name);
             }
 
-            icon_theme_name = strdup(setting->data.v_string);
+            icon_theme_name = setting->data.v_string;
 
-            int i;
-
-            for (i = 0 ; i < nb_panel ; i++) {
+            for (int i = 0 ; i < nb_panel ; ++i) {
                 Launcher* launcher = &panel1[i].launcher;
                 cleanup_launcher_theme(launcher);
                 launcher_load_themes(launcher);

@@ -680,8 +680,8 @@ void AddEntry(std::string const& key, char* value) {
         panel_config.launcher.list_apps.push_back(value);
     } else if (key == "launcher_icon_theme") {
         // if XSETTINGS manager running, tint3 use it.
-        if (!icon_theme_name) {
-            icon_theme_name = strdup(value);
+        if (icon_theme_name.empty()) {
+            icon_theme_name = value;
         }
     } else if (key == "launcher_icon_asb") {
         extract_values(value, &value1, &value2, &value3);

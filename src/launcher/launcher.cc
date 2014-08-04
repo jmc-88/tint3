@@ -44,7 +44,7 @@ int launcher_tooltip_enabled;
 int launcher_alpha;
 int launcher_saturation;
 int launcher_brightness;
-char* icon_theme_name;
+std::string icon_theme_name;
 XSettingsClient* xsettings_client;
 
 #define ICON_FALLBACK "application-x-executable"
@@ -66,7 +66,7 @@ void default_launcher() {
     launcher_alpha = 100;
     launcher_saturation = 0;
     launcher_brightness = 0;
-    icon_theme_name = 0;
+    icon_theme_name.clear();
     xsettings_client = nullptr;
 }
 
@@ -125,8 +125,7 @@ void cleanup_launcher() {
     }
 
     panel_config.launcher.list_apps.clear();
-    free(icon_theme_name);
-    icon_theme_name = nullptr;
+    icon_theme_name.clear();
     launcher_enabled = 0;
 }
 
@@ -820,17 +819,17 @@ void launcher_load_icons(Launcher* launcher) {
 void launcher_load_themes(Launcher* launcher) {
     // load the user theme, all the inherited themes recursively (DFS), and the hicolor theme
     // avoid inheritance loops
-    if (!icon_theme_name) {
-        fprintf(stderr, "Missing launcher theme, default to 'hicolor'.\n");
-        icon_theme_name = strdup("hicolor");
+    if (icon_theme_name.empty()) {
+        fprintf(stderr, "Missing launcher theme, defaulting to 'hicolor'.\n");
+        icon_theme_name = "hicolor";
     } else {
-        fprintf(stderr, "Loading %s. Icon theme :", icon_theme_name);
+        fprintf(stderr, "Loading %s. Icon theme:", icon_theme_name.c_str());
     }
 
-    GSList* queue = g_slist_append(nullptr, strdup(icon_theme_name));
-    GSList* queued = g_slist_append(nullptr, strdup(icon_theme_name));
+    GSList* queue = g_slist_append(nullptr, strdup(icon_theme_name.c_str()));
+    GSList* queued = g_slist_append(nullptr, strdup(icon_theme_name.c_str()));
 
-    int hicolor_loaded = 0;
+    bool hicolor_loaded = false;
 
     while (queue || !hicolor_loaded) {
         if (!queue) {
@@ -838,7 +837,7 @@ void launcher_load_themes(Launcher* launcher) {
 
             while (queued_item != nullptr) {
                 if (strcmp(static_cast<char*>(queued_item->data), "hicolor") == 0) {
-                    hicolor_loaded = 1;
+                    hicolor_loaded = true;
                     break;
                 }
 

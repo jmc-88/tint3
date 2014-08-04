@@ -422,16 +422,15 @@ void server_init_visual() {
 
     int nvi;
     auto xvi = XGetVisualInfo(server.dsp,
-                              VisualScreenMask | VisualDepthMask | VisualClassMask, &templ, &nvi);
+                              VisualScreenMask | VisualDepthMask | VisualClassMask,
+                              &templ,
+                              &nvi);
 
-    Visual* visual = 0;
+    Visual* visual = nullptr;
 
     if (xvi) {
-        int i;
-        XRenderPictFormat* format;
-
-        for (i = 0; i < nvi; i++) {
-            format = XRenderFindVisualFormat(server.dsp, xvi[i].visual);
+        for (int i = 0; i < nvi; i++) {
+            auto format = XRenderFindVisualFormat(server.dsp, xvi[i].visual);
 
             if (format->type == PictTypeDirect && format->direct.alphaMask) {
                 visual = xvi[i].visual;
