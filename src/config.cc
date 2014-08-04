@@ -357,8 +357,8 @@ void AddEntry(std::string const& key, char* value) {
     } else if (key == "battery_low_cmd") {
 #ifdef ENABLE_BATTERY
 
-        if (strlen(value) > 0) {
-            battery_low_cmd = strdup(value);
+        if (*value != '\0') {
+            battery_low_cmd = value;
         }
 
 #endif
@@ -420,22 +420,22 @@ void AddEntry(std::string const& key, char* value) {
         }
 
         if (strlen(value) > 0) {
-            time1_format = strdup(value);
+            time1_format = value;
             clock_enabled = true;
         }
     } else if (key == "time2_format") {
         if (strlen(value) > 0) {
-            time2_format = strdup(value);
+            time2_format = value;
         }
     } else if (key == "time1_font") {
         time1_font_desc = pango_font_description_from_string(value);
     } else if (key == "time1_timezone") {
         if (strlen(value) > 0) {
-            time1_timezone = strdup(value);
+            time1_timezone = value;
         }
     } else if (key == "time2_timezone") {
         if (strlen(value) > 0) {
-            time2_timezone = strdup(value);
+            time2_timezone = value;
         }
     } else if (key == "time2_font") {
         time2_font_desc = pango_font_description_from_string(value);
@@ -464,19 +464,19 @@ void AddEntry(std::string const& key, char* value) {
         panel_config.clock.bg = get_background_from_id(value);
     } else if (key == "clock_tooltip") {
         if (strlen(value) > 0) {
-            time_tooltip_format = strdup(value);
+            time_tooltip_format = value;
         }
     } else if (key == "clock_tooltip_timezone") {
         if (strlen(value) > 0) {
-            time_tooltip_timezone = strdup(value);
+            time_tooltip_timezone = value;
         }
     } else if (key == "clock_lclick_command") {
         if (strlen(value) > 0) {
-            clock_lclick_command = strdup(value);
+            clock_lclick_command = value;
         }
     } else if (key == "clock_rclick_command") {
         if (strlen(value) > 0) {
-            clock_rclick_command = strdup(value);
+            clock_rclick_command = value;
         }
     }
 
