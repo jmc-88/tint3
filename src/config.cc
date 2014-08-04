@@ -267,7 +267,7 @@ void AddEntry(std::string const& key, char* value) {
             }
 
             if (item == 'C') {
-                clock_enabled = 1;
+                clock_enabled = true;
             }
         }
     } else if (key == "panel_margin") {
@@ -415,13 +415,13 @@ void AddEntry(std::string const& key, char* value) {
     /* Clock */
     else if (key == "time1_format") {
         if (new_config_file == 0) {
-            clock_enabled = 1;
+            clock_enabled = true;
             panel_items_order.push_back('C');
         }
 
         if (strlen(value) > 0) {
             time1_format = strdup(value);
-            clock_enabled = 1;
+            clock_enabled = true;
         }
     } else if (key == "time2_format") {
         if (strlen(value) > 0) {

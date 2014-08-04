@@ -10,6 +10,9 @@
 #define CLOCK_H
 
 #include <sys/time.h>
+
+#include <string>
+
 #include "common.h"
 #include "area.h"
 
@@ -21,19 +24,17 @@ class Clock : public Area {
     int time2_posy;
 };
 
-
-extern char* time1_format;
-extern char* time1_timezone;
-extern char* time2_format;
-extern char* time2_timezone;
-extern char* time_tooltip_format;
-extern char* time_tooltip_timezone;
+extern std::string time1_format;
+extern std::string time1_timezone;
+extern std::string time2_format;
+extern std::string time2_timezone;
+extern std::string time_tooltip_format;
+extern std::string time_tooltip_timezone;
+extern std::string clock_lclick_command;
+extern std::string clock_rclick_command;
 extern PangoFontDescription* time1_font_desc;
 extern PangoFontDescription* time2_font_desc;
-extern char* clock_lclick_command;
-extern char* clock_rclick_command;
-extern int clock_enabled;
-
+extern bool clock_enabled;
 
 // default global data
 void default_clock();

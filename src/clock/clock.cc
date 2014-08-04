@@ -24,6 +24,8 @@
 #include <pango/pangocairo.h>
 #include <stdlib.h>
 
+#include <string>
+
 #include "window.h"
 #include "server.h"
 #include "panel.h"
@@ -32,37 +34,37 @@
 #include "common.h"
 
 
-char* time1_format;
-char* time1_timezone;
-char* time2_format;
-char* time2_timezone;
-char* time_tooltip_format;
-char* time_tooltip_timezone;
-char* clock_lclick_command;
-char* clock_rclick_command;
+std::string time1_format;
+std::string time1_timezone;
+std::string time2_format;
+std::string time2_timezone;
+std::string time_tooltip_format;
+std::string time_tooltip_timezone;
+std::string clock_lclick_command;
+std::string clock_rclick_command;
 struct timeval time_clock;
 PangoFontDescription* time1_font_desc;
 PangoFontDescription* time2_font_desc;
 static char buf_time[256];
 static char buf_date[256];
 static char buf_tooltip[512];
-int clock_enabled;
+bool clock_enabled;
 static Timeout* clock_timeout;
 
 
 void default_clock() {
-    clock_enabled = 0;
-    clock_timeout = 0;
-    time1_format = 0;
-    time1_timezone = 0;
-    time2_format = 0;
-    time2_timezone = 0;
-    time_tooltip_format = 0;
-    time_tooltip_timezone = 0;
-    clock_lclick_command = 0;
-    clock_rclick_command = 0;
-    time1_font_desc = 0;
-    time2_font_desc = 0;
+    clock_enabled = false;
+    clock_timeout = nullptr;
+    time1_format.clear();
+    time1_timezone.clear();
+    time2_format.clear();
+    time2_timezone.clear();
+    time_tooltip_format.clear();
+    time_tooltip_timezone.clear();
+    clock_lclick_command.clear();
+    clock_rclick_command.clear();
+    time1_font_desc = nullptr;
+    time2_font_desc = nullptr;
 }
 
 void cleanup_clock() {
@@ -74,41 +76,18 @@ void cleanup_clock() {
         pango_font_description_free(time2_font_desc);
     }
 
-    if (time1_format) {
-        g_free(time1_format);
-    }
-
-    if (time2_format) {
-        g_free(time2_format);
-    }
-
-    if (time_tooltip_format) {
-        g_free(time_tooltip_format);
-    }
-
-    if (time1_timezone) {
-        g_free(time1_timezone);
-    }
-
-    if (time2_timezone) {
-        g_free(time2_timezone);
-    }
-
-    if (time_tooltip_timezone) {
-        g_free(time_tooltip_timezone);
-    }
-
-    if (clock_lclick_command) {
-        g_free(clock_lclick_command);
-    }
-
-    if (clock_rclick_command) {
-        g_free(clock_rclick_command);
-    }
-
     if (clock_timeout) {
         stop_timeout(clock_timeout);
     }
+
+    time1_format.clear();
+    time1_timezone.clear();
+    time2_format.clear();
+    time2_timezone.clear();
+    time_tooltip_format.clear();
+    time_tooltip_timezone.clear();
+    clock_lclick_command.clear();
+    clock_rclick_command.clear();
 }
 
 
@@ -116,7 +95,7 @@ void update_clocks_sec(void* arg) {
     gettimeofday(&time_clock, 0);
     int i;
 
-    if (time1_format) {
+    if (!time1_format.empty()) {
         for (i = 0 ; i < nb_panel ; i++) {
             panel1[i].clock.resize = 1;
         }
@@ -134,7 +113,7 @@ void update_clocks_min(void* arg) {
     if (time_clock.tv_sec % 60 == 0 || time_clock.tv_sec - old_sec > 60) {
         int i;
 
-        if (time1_format) {
+        if (!time1_format.empty()) {
             for (i = 0 ; i < nb_panel ; i++) {
                 panel1[i].clock.resize = 1;
             }
@@ -144,39 +123,44 @@ void update_clocks_min(void* arg) {
     }
 }
 
-struct tm* clock_gettime_for_tz(const char* timezone) {
-    if (timezone) {
-        const char* old_tz = getenv("TZ");
-        setenv("TZ", timezone, 1);
-        struct tm* result = localtime(&time_clock.tv_sec);
-
-        if (old_tz) {
-            setenv("TZ", old_tz, 1);
-        } else {
-            unsetenv("TZ");
-        }
-
-        return result;
-    } else {
+struct tm* clock_gettime_for_tz(std::string const& timezone) {
+    if (timezone.empty()) {
         return localtime(&time_clock.tv_sec);
     }
+
+    const char* old_tz = getenv("TZ");
+    setenv("TZ", timezone.c_str(), 1);
+    struct tm* result = localtime(&time_clock.tv_sec);
+
+    if (old_tz) {
+        setenv("TZ", old_tz, 1);
+    } else {
+        unsetenv("TZ");
+    }
+
+    return result;
 }
 
 const char* clock_get_tooltip(void* obj) {
-    strftime(buf_tooltip, sizeof(buf_tooltip), time_tooltip_format,
+    strftime(buf_tooltip, sizeof(buf_tooltip), time_tooltip_format.c_str(),
              clock_gettime_for_tz(time_tooltip_timezone));
     return buf_tooltip;
 }
 
 
 void init_clock() {
-    if (time1_format && clock_timeout == 0) {
-        if (strchr(time1_format, 'S') || strchr(time1_format, 'T')
-            || strchr(time1_format, 'r')) {
-            clock_timeout = add_timeout(10, 1000, update_clocks_sec, 0);
-        } else {
-            clock_timeout = add_timeout(10, 1000, update_clocks_min, 0);
-        }
+    if (time1_format.empty() || clock_timeout != nullptr) {
+        return;
+    }
+
+    bool has_seconds_format = time1_format.find('S') != std::string::npos
+                              || time1_format.find('T') != std::string::npos
+                              || time1_format.find('r') != std::string::npos;
+
+    if (has_seconds_format) {
+        clock_timeout = add_timeout(10, 1000, update_clocks_sec, 0);
+    } else {
+        clock_timeout = add_timeout(10, 1000, update_clocks_min, 0);
     }
 }
 
@@ -196,16 +180,16 @@ void init_clock_panel(void* p) {
     clock->_resize = resize_clock;
 
     // check consistency
-    if (time1_format == 0) {
+    if (time1_format.empty()) {
         return;
     }
 
     clock->resize = 1;
     clock->on_screen = 1;
 
-    if (time_tooltip_format) {
+    if (!time_tooltip_format.empty()) {
         clock->_get_tooltip_text = clock_get_tooltip;
-        strftime(buf_tooltip, sizeof(buf_tooltip), time_tooltip_format,
+        strftime(buf_tooltip, sizeof(buf_tooltip), time_tooltip_format.c_str(),
                  clock_gettime_for_tz(time_tooltip_timezone));
     }
 }
@@ -213,9 +197,7 @@ void init_clock_panel(void* p) {
 
 void draw_clock(void* obj, cairo_t* c) {
     Clock* clock = static_cast<Clock*>(obj);
-    PangoLayout* layout;
-
-    layout = pango_cairo_create_layout(c);
+    PangoLayout* layout = pango_cairo_create_layout(c);
 
     // draw layout
     pango_layout_set_font_description(layout, time1_font_desc);
@@ -230,7 +212,7 @@ void draw_clock(void* obj, cairo_t* c) {
     cairo_move_to(c, 0, clock->time1_posy);
     pango_cairo_show_layout(c, layout);
 
-    if (time2_format) {
+    if (!time2_format.empty()) {
         pango_layout_set_font_description(layout, time2_font_desc);
         pango_layout_set_indent(layout, 0);
         pango_layout_set_text(layout, buf_date, strlen(buf_date));
@@ -254,13 +236,13 @@ int resize_clock(void* obj) {
     clock->redraw = 1;
 
     date_height = date_width = 0;
-    strftime(buf_time, sizeof(buf_time), time1_format,
+    strftime(buf_time, sizeof(buf_time), time1_format.c_str(),
              clock_gettime_for_tz(time1_timezone));
     get_text_size2(time1_font_desc, &time_height_ink, &time_height, &time_width,
                    panel->height, panel->width, buf_time, strlen(buf_time));
 
-    if (time2_format) {
-        strftime(buf_date, sizeof(buf_date), time2_format,
+    if (!time2_format.empty()) {
+        strftime(buf_date, sizeof(buf_date), time2_format.c_str(),
                  clock_gettime_for_tz(time2_timezone));
         get_text_size2(time2_font_desc, &date_height_ink, &date_height, &date_width,
                        panel->height, panel->width, buf_date, strlen(buf_date));
@@ -275,7 +257,7 @@ int resize_clock(void* obj) {
             clock->width = new_size + 1;
             clock->time1_posy = (clock->height - time_height) / 2;
 
-            if (time2_format) {
+            if (!time2_format.empty()) {
                 clock->time1_posy -= (date_height) / 2;
                 clock->time2_posy = clock->time1_posy + time_height;
             }
@@ -291,7 +273,7 @@ int resize_clock(void* obj) {
             clock->height =  new_size;
             clock->time1_posy = (clock->height - time_height) / 2;
 
-            if (time2_format) {
+            if (!time2_format.empty()) {
                 clock->time1_posy -= (date_height) / 2;
                 clock->time2_posy = clock->time1_posy + time_height;
             }
@@ -305,18 +287,9 @@ int resize_clock(void* obj) {
 
 
 void clock_action(int button) {
-    char* command = 0;
-
-    switch (button) {
-        case 1:
-            command = clock_lclick_command;
-            break;
-
-        case 3:
-            command = clock_rclick_command;
-            break;
+    if (button == 1) {
+        tint_exec(clock_lclick_command);
+    } else if (button == 2) {
+        tint_exec(clock_rclick_command);
     }
-
-    tint_exec(command);
 }
-

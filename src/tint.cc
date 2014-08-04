@@ -420,8 +420,9 @@ bool tint3_handles_click(Panel* panel, XButtonEvent* e) {
     }
 
     if (click_clock(panel, e->x, e->y)) {
-        return ((e->button == 1 && clock_lclick_command) || (e->button == 3
-                && clock_rclick_command));
+        bool clock_lclick = (e->button == 1 && !clock_lclick_command.empty());
+        bool clock_rclick = (e->button == 3 && !clock_rclick_command.empty());
+        return (clock_lclick || clock_rclick);
     }
 
     return false;
