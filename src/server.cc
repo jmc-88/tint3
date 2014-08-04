@@ -30,6 +30,7 @@
 
 #include "server.h"
 #include "config.h"
+#include "util/common.h"
 #include "util/window.h"
 
 Server_global server;
@@ -37,6 +38,8 @@ Server_global server;
 void server_catch_error(Display* d, XErrorEvent* ev) {}
 
 void server_init_atoms() {
+    std::string name;
+
     server.atom._XROOTPMAP_ID = XInternAtom(server.dsp, "_XROOTPMAP_ID", False);
     server.atom._XROOTMAP_ID = XInternAtom(server.dsp, "_XROOTMAP_ID", False);
     server.atom._NET_CURRENT_DESKTOP = XInternAtom(server.dsp,
@@ -116,16 +119,22 @@ void server_init_atoms() {
     server.atom.__SWM_VROOT = XInternAtom(server.dsp, "__SWM_VROOT", False);
     server.atom._MOTIF_WM_HINTS = XInternAtom(server.dsp, "_MOTIF_WM_HINTS", False);
     server.atom.WM_HINTS = XInternAtom(server.dsp, "WM_HINTS", False);
-    char* name = g_strdup_printf("_XSETTINGS_S%d", DefaultScreen(server.dsp));
-    server.atom._XSETTINGS_SCREEN = XInternAtom(server.dsp, name, False);
-    g_free(name);
+
+    name.assign(StringBuilder()
+                << "_XSETTINGS_S"
+                << DefaultScreen(server.dsp));
+    server.atom._XSETTINGS_SCREEN = XInternAtom(server.dsp, name.c_str(), False);
+
     server.atom._XSETTINGS_SETTINGS = XInternAtom(server.dsp, "_XSETTINGS_SETTINGS",
                                       False);
 
     // systray protocol
-    name = g_strdup_printf("_NET_SYSTEM_TRAY_S%d", DefaultScreen(server.dsp));
-    server.atom._NET_SYSTEM_TRAY_SCREEN = XInternAtom(server.dsp, name, False);
-    g_free(name);
+    name.assign(StringBuilder()
+                << "_NET_SYSTEM_TRAY_S"
+                << DefaultScreen(server.dsp));
+    server.atom._NET_SYSTEM_TRAY_SCREEN = XInternAtom(server.dsp, name.c_str(),
+                                          False);
+
     server.atom._NET_SYSTEM_TRAY_OPCODE = XInternAtom(server.dsp,
                                           "_NET_SYSTEM_TRAY_OPCODE", False);
     server.atom.MANAGER = XInternAtom(server.dsp, "MANAGER", False);

@@ -34,15 +34,28 @@ enum {
 
 extern int const ALLDESKTOP;
 
+class StringBuilder {
+    std::ostringstream ss;
+
+  public:
+    template<typename T>
+    StringBuilder& operator<<(T const& value) {
+        ss << value;
+        return (*this);
+    }
+
+    operator std::string() const {
+        return ss.str();
+    }
+};
+
 std::string GetEnvironment(std::string const& variable_name);
 
 std::string& StringTrim(std::string& str);
 
 template<typename T>
 std::string StringRepresentation(T const& value) {
-    std::ostringstream os;
-    os << value;
-    return os.str();
+    return StringBuilder() << value;
 }
 
 // execute a command by calling fork

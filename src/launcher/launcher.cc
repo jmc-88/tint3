@@ -363,30 +363,27 @@ void free_icon(Imlib_Image icon) {
 }
 
 void launcher_action(LauncherIcon* icon, XEvent* evt) {
-    char* cmd = (char*) calloc(strlen(icon->cmd) + 10, sizeof(char));
-    sprintf(cmd, "(%s&)", icon->cmd);
 #if HAVE_SN
-    SnLauncherContext* ctx;
-    Time time;
-
-    ctx = sn_launcher_context_new(server.sn_dsp, server.screen);
+    auto ctx = sn_launcher_context_new(server.sn_dsp, server.screen);
     sn_launcher_context_set_name(ctx, icon->icon_tooltip);
     sn_launcher_context_set_description(ctx, "Application launched from tint3");
     sn_launcher_context_set_binary_name(ctx, icon->cmd);
 
     // Get a timestamp from the X event
+    Time time;
+
     if (evt->type == ButtonPress || evt->type == ButtonRelease) {
         time = evt->xbutton.time;
     } else {
         fprintf(stderr, "Unknown X event: %d\n", evt->type);
-        free(cmd);
         return;
     }
 
     sn_launcher_context_initiate(ctx, "tint3", icon->cmd, time);
 #endif /* HAVE_SN */
-    pid_t pid;
-    pid = fork();
+
+    // TODO: make this use tint_exec...
+    pid_t pid = fork();
 
     if (pid < 0) {
         fprintf(stderr, "Could not fork\n");
@@ -401,6 +398,8 @@ void launcher_action(LauncherIcon* icon, XEvent* evt) {
 
         fprintf(stderr, "Failed to execlp %s\n", icon->cmd);
 #if HAVE_SN
+        // TODO: how can this not leak? On a successful execl, this line is
+        // never executed.
         sn_launcher_context_unref(ctx);
 #endif // HAVE_SN
         _exit(1);
@@ -412,7 +411,6 @@ void launcher_action(LauncherIcon* icon, XEvent* evt) {
     }
 
 #endif // HAVE_SN
-    free(cmd);
 }
 
 /***************** Freedesktop app.desktop and icon theme handling  *********************/
@@ -446,74 +444,54 @@ bool parse_theme_line(std::string const& line, std::string& key,
     return parse_desktop_line(line, key, value);
 }
 
-void expand_exec(DesktopEntry* entry, const char* path) {
+void expand_exec(DesktopEntry* entry, char const* path) {
     // Expand % in exec
     // %i -> --icon Icon
     // %c -> Name
     // %k -> path
-    if (entry->exec) {
-        size_t name_len = (entry->name ? strlen(entry->name) : 1);
-        size_t icon_len = (entry->icon ? strlen(entry->icon) : 1);
-        size_t exec_len = strlen(entry->exec);
-        char* exec2 = (char*) malloc(exec_len + name_len + icon_len + 100);
-        char* p, *q;
+    if (!entry->exec) {
+        return;
+    }
 
-        // p will never point to an escaped char
-        for (p = entry->exec, q = exec2; *p; p++, q++) {
-            *q = *p; // Copy
+    std::string exec2;
 
-            if (*p == '\\') {
-                p++, q++;
+    // p will never point to an escaped char
+    for (char const* p = entry->exec; *p != '\0'; ++p) {
+        exec2.push_back(*p);
 
-                // Copy the escaped char
-                if (*p == '%') { // For % we delete the backslash, i.e. write % over it
-                    q--;
-                }
+        if (*p == '\\') {
+            ++p;
 
-                *q = *p;
-
-                if (!*p) {
-                    break;
-                }
-
-                continue;
+            if (*p == '\0') {
+                break;
             }
 
-            if (*p == '%') {
-                p++;
+            // Copy the escaped char
+            if (*p == '%') { // For % we delete the backslash, i.e. write % over it
+                exec2[exec2.length() - 1] = '%';
+            } else {
+                exec2.push_back(*p);
+            }
+        } else if (*p == '%') {
+            ++p;
 
-                if (!*p) {
-                    break;
-                }
+            if (*p == '\0') {
+                break;
+            }
 
-                if (*p == 'i' && entry->icon != nullptr) {
-                    sprintf(q, "--icon '%s'", entry->icon);
-                    q += strlen("--icon ''");
-                    q += strlen(entry->icon);
-                    q--; // To balance the q++ in the for
-                } else if (*p == 'c' && entry->name != nullptr) {
-                    sprintf(q, "'%s'", entry->name);
-                    q += strlen("''");
-                    q += strlen(entry->name);
-                    q--; // To balance the q++ in the for
-                } else if (*p == 'c') {
-                    sprintf(q, "'%s'", path);
-                    q += strlen("''");
-                    q += strlen(path);
-                    q--; // To balance the q++ in the for
-                } else {
-                    // We don't care about other expansions
-                    q--; // Delete the last % from q
-                }
-
-                continue;
+            if (*p == 'i' && entry->icon != nullptr) {
+                exec2.append(StringBuilder()
+                             << "--icon '" << entry->icon << '\'');
+            } else if (*p == 'c' && entry->name != nullptr) {
+                exec2.append(StringBuilder() << '\'' << entry->name << '\'');
+            } else {
+                exec2.append(StringBuilder() << '\'' << path << '\'');
             }
         }
-
-        *q = '\0';
-        free(entry->exec);
-        entry->exec = exec2;
     }
+
+    std::free(entry->exec);
+    entry->exec = strdup(exec2.c_str());
 }
 
 int launcher_read_desktop_file(const char* path, DesktopEntry* entry) {
