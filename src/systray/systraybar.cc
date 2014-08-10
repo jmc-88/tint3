@@ -408,9 +408,7 @@ static gint compare_traywindows(gconstpointer a, gconstpointer b) {
 
 
 bool add_icon(Window id) {
-    TrayWindow* traywin;
-    XErrorHandler old;
-    Panel* panel = systray.panel;
+    auto panel = systray.panel;
     int hide = 0;
 
     error = false;
@@ -438,10 +436,10 @@ bool add_icon(Window id) {
         mask = CWBackPixmap;
     }
 
-    Window parent_window;
-    parent_window = XCreateWindow(server.dsp, panel->main_win, 0, 0, 30, 30, 0,
-                                  attr.depth, InputOutput, visual, mask, &set_attr);
-    old = XSetErrorHandler(window_error_handler);
+    Window parent_window = XCreateWindow(server.dsp, panel->main_win,
+                                         0, 0, 30, 30, 0,
+                                         attr.depth, InputOutput, visual, mask, &set_attr);
+    auto old = XSetErrorHandler(window_error_handler);
     XReparentWindow(server.dsp, id, parent_window, 0, 0);
     // watch for the icon trying to resize itself / closing again!
     XSelectInput(server.dsp, id, StructureNotifyMask);
@@ -496,7 +494,7 @@ bool add_icon(Window id) {
         XSendEvent(server.dsp, id, False, 0xFFFFFF, &e);
     }
 
-    traywin = g_new0(TrayWindow, 1);
+    auto traywin = new TrayWindow();
     traywin->id = parent_window;
     traywin->tray_id = id;
     traywin->hide = hide;
@@ -542,8 +540,6 @@ bool add_icon(Window id) {
 
 
 void remove_icon(TrayWindow* traywin) {
-    XErrorHandler old;
-
     // remove from our list
     systray.list_icons = g_slist_remove(systray.list_icons, traywin);
     //printf("remove_icon id %lx, %d\n", traywin->id);
@@ -556,7 +552,7 @@ void remove_icon(TrayWindow* traywin) {
 
     // reparent to root
     error = false;
-    old = XSetErrorHandler(window_error_handler);
+    auto old = XSetErrorHandler(window_error_handler);
 
     if (!traywin->hide) {
         XUnmapWindow(server.dsp, traywin->tray_id);
@@ -571,7 +567,7 @@ void remove_icon(TrayWindow* traywin) {
         stop_timeout(traywin->render_timeout);
     }
 
-    g_free(traywin);
+    delete traywin;
 
     // check empty systray
     int count = 0;
