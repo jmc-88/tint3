@@ -22,6 +22,9 @@ class Clock : public Area {
     Color font;
     int time1_posy;
     int time2_posy;
+
+    void draw_foreground(cairo_t*);
+    bool resize();
 };
 
 extern std::string time1_format;
@@ -45,10 +48,6 @@ void cleanup_clock();
 // initialize clock : y position, precision, ...
 void init_clock();
 void init_clock_panel(void* panel);
-
-void draw_clock(void* obj, cairo_t* c);
-
-int  resize_clock(void* obj);
 
 void clock_action(int button);
 

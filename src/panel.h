@@ -120,6 +120,7 @@ class Panel : public Area {
     Timeout* autohide_timeout;
 
     void render();
+    bool resize();
 };
 
 
@@ -139,7 +140,6 @@ void cleanup_panel();
 void init_panel();
 
 void init_panel_size_and_position(Panel* panel);
-int  resize_panel(void* obj);
 
 void set_panel_items_order(Panel* p);
 void set_panel_properties(Panel* p);

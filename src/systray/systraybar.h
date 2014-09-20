@@ -27,6 +27,9 @@ class Systraybar : public Area {
     int sort;
     int alpha, saturation, brightness;
     int icon_size, icons_per_column, icons_per_row, marging;
+
+    void draw_foreground(cairo_t*);
+    bool resize();
 };
 
 
@@ -60,8 +63,6 @@ void cleanup_systray();
 void init_systray();
 void init_systray_panel(void* p);
 
-void draw_systray(void* obj, cairo_t* c);
-int  resize_systray(void* obj);
 void on_change_systray(void* obj);
 
 

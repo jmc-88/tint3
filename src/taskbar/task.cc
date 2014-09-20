@@ -132,7 +132,7 @@ Task* add_task(Window win) {
         new_tsk2->icon_width = new_tsk.icon_width;
         new_tsk2->icon_height = new_tsk.icon_height;
         tskbar->children.push_back(new_tsk2);
-        tskbar->resize = 1;
+        tskbar->need_resize = true;
         g_ptr_array_add(task_group, new_tsk2);
         //printf("add_task panel %d, desktop %d, task %s\n", i, j, new_tsk2->title);
     }
@@ -190,7 +190,7 @@ void remove_task(Task* tsk) {
             tskbar->children.erase(tsk2_iter);
         }
 
-        tskbar->resize = 1;
+        tskbar->need_resize = true;
 
         if (tsk2 == task_active) {
             task_active = 0;
@@ -404,57 +404,54 @@ void get_icon(Task* tsk) {
 }
 
 
-void draw_task_icon(Task* tsk, int text_width) {
-    if (tsk->icon[tsk->current_state] == 0) {
+void Task::draw_icon(int text_width) {
+    if (icon[current_state] == 0) {
         return;
     }
 
     // Find pos
     int pos_x;
-    Panel* panel = tsk->panel;
 
     if (panel->g_task.centered) {
         if (panel->g_task.text) {
-            pos_x = (tsk->width - text_width - panel->g_task.icon_size1) / 2;
+            pos_x = (width - text_width - panel->g_task.icon_size1) / 2;
         } else {
-            pos_x = (tsk->width - panel->g_task.icon_size1) / 2;
+            pos_x = (width - panel->g_task.icon_size1) / 2;
         }
     } else {
-        pos_x = panel->g_task.paddingxlr + tsk->bg->border.width;
+        pos_x = panel->g_task.paddingxlr + bg->border.width;
     }
 
     // Render
-    imlib_context_set_image(tsk->icon[tsk->current_state]);
+    imlib_context_set_image(icon[current_state]);
 
     if (server.real_transparency) {
-        render_image(tsk->pix, pos_x, panel->g_task.icon_posy,
+        render_image(pix, pos_x, panel->g_task.icon_posy,
                      imlib_image_get_width(), imlib_image_get_height());
     } else {
-        imlib_context_set_drawable(tsk->pix);
+        imlib_context_set_drawable(pix);
         imlib_render_image_on_drawable(pos_x, panel->g_task.icon_posy);
     }
 }
 
 
-void draw_task(void* obj, cairo_t* c) {
-    Task* tsk = static_cast<Task*>(obj);
-    tsk->state_pix[tsk->current_state] = tsk->pix;
-    PangoLayout* layout;
-    Color* config_text;
-    int width = 0, height;
-    Panel* panel = tsk->panel;
-    //printf("draw_task %d %d\n", tsk->posx, tsk->posy);
+void Task::draw_foreground(cairo_t* c) {
+    state_pix[current_state] = pix;
+
+    int width = 0;
+    int height = 0;
+    //printf("draw_task %d %d\n", posx, posy);
 
     if (panel->g_task.text) {
         /* Layout */
-        layout = pango_cairo_create_layout(c);
+        PangoLayout* layout = pango_cairo_create_layout(c);
         pango_layout_set_font_description(layout, panel->g_task.font_desc);
-        pango_layout_set_text(layout, tsk->title, -1);
+        pango_layout_set_text(layout, title, -1);
 
         /* Drawing width and Cut text */
         // pango use U+22EF or U+2026
         pango_layout_set_width(layout,
-                               ((Taskbar*)tsk->parent)->text_width * PANGO_SCALE);
+                               ((Taskbar*)parent)->text_width * PANGO_SCALE);
         pango_layout_set_height(layout, panel->g_task.text_height * PANGO_SCALE);
         pango_layout_set_wrap(layout, PANGO_WRAP_CHAR);
         pango_layout_set_ellipsize(layout, PANGO_ELLIPSIZE_END);
@@ -468,7 +465,7 @@ void draw_task(void* obj, cairo_t* c) {
 
         pango_layout_get_pixel_size(layout, &width, &height);
 
-        config_text = &panel->g_task.font[tsk->current_state];
+        Color* config_text = &panel->g_task.font[current_state];
         cairo_set_source_rgba(c, config_text->color[0], config_text->color[1],
                               config_text->color[2], config_text->alpha);
 
@@ -488,7 +485,7 @@ void draw_task(void* obj, cairo_t* c) {
     }
 
     if (panel->g_task.icon) {
-        draw_task_icon(tsk, width);
+        draw_icon(width);
     }
 }
 
@@ -634,7 +631,7 @@ void set_task_state(Task* tsk, int state) {
                 tsk1->pix = tsk1->state_pix[state];
 
                 if (tsk1->state_pix[state] == 0) {
-                    tsk1->redraw = 1;
+                    tsk1->need_redraw = true;
                 }
 
                 auto it = std::find(urgent_list.begin(),
@@ -664,7 +661,7 @@ void set_task_redraw(Task* tsk) {
     }
 
     tsk->pix = 0;
-    tsk->redraw = 1;
+    tsk->need_redraw = true;
 }
 
 

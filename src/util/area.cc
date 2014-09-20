@@ -31,6 +31,9 @@
 #include "panel.h"
 #include "../server.h"
 
+Area::~Area() {
+}
+
 Area& Area::clone(Area const& other) {
     *this = other;
     return *this;
@@ -61,11 +64,11 @@ Area& Area::clone(Area const& other) {
  * - 'layering event' propagation between object
  * 1) browse tree SIZE_BY_CONTENT
  *  - resize SIZE_BY_CONTENT node : children are resized before parent
- *  - if 'size' changed then 'resize = 1' on the parent
+ *  - if 'size' changed then 'need_resize = true' on the parent
  * 2) browse tree SIZE_BY_LAYOUT and POSITION
  *  - resize SIZE_BY_LAYOUT node : parent is resized before children
  *  - calculate position (posx,posy) : parent is calculated before children
- *  - if 'position' changed then 'redraw = 1'
+ *  - if 'position' changed then 'need_redraw = 1'
  * 3) browse tree REDRAW
  *  - redraw needed objects : parent is drawn before children
  *
@@ -80,7 +83,7 @@ void init_rendering(void* obj, int pos) {
     Area* a = static_cast<Area*>(obj);
 
     // initialize fixed position/size
-    std::for_each(a->children.begin(), a->children.end(), [&](Area * child) {
+    for (auto& child : a->children) {
         if (panel_horizontal) {
             child->posy = pos + a->bg->border.width + a->paddingy;
             child->height = a->height - (2 * (a->bg->border.width + a->paddingy));
@@ -90,7 +93,7 @@ void init_rendering(void* obj, int pos) {
             child->width = a->width - (2 * (a->bg->border.width + a->paddingy));
             init_rendering(child, child->posx);
         }
-    });
+    }
 }
 
 
@@ -101,22 +104,20 @@ void Area::size_by_content() {
     }
 
     // children node are resized before its parent
-    std::for_each(children.begin(), children.end(), [](Area * child) {
+    for (auto& child : children) {
         child->size_by_content();
-    });
+    }
 
     // calculate area's size
     on_changed = 0;
 
-    if (resize && size_mode == SIZE_BY_CONTENT) {
-        resize = 0;
+    if (need_resize && size_mode == SIZE_BY_CONTENT) {
+        need_resize = false;
 
-        if (_resize) {
-            if (_resize(this)) {
-                // 'size' changed => 'resize = 1' on the parent
-                parent->resize = 1;
-                on_changed = 1;
-            }
+        if (resize()) {
+            // 'size' changed => 'need_resize = true' on the parent
+            parent->need_resize = true;
+            on_changed = 1;
         }
     }
 }
@@ -130,18 +131,16 @@ void Area::size_by_layout(int pos, int level) {
 
     // parent node is resized before its children
     // calculate area's size
-    if (resize && size_mode == SIZE_BY_LAYOUT) {
-        resize = 0;
+    if (need_resize && size_mode == SIZE_BY_LAYOUT) {
+        need_resize = false;
 
-        if (_resize) {
-            _resize(this);
+        resize();
 
-            // resize children with SIZE_BY_LAYOUT
-            std::for_each(children.begin(), children.end(), [](Area * child) {
-                if (child->size_mode == SIZE_BY_LAYOUT && child->children.size() != 0) {
-                    child->resize = 1;
-                }
-            });
+        // resize children with SIZE_BY_LAYOUT
+        for (auto& child : children) {
+            if (child->size_mode == SIZE_BY_LAYOUT && child->children.size() != 0) {
+                child->need_resize = true;
+            }
         }
     }
 
@@ -149,7 +148,7 @@ void Area::size_by_layout(int pos, int level) {
     pos += paddingxlr + bg->border.width;
     int i = 0;
 
-    std::for_each(children.begin(), children.end(), [&](Area * child) {
+    for (auto& child : children) {
         if (!child->on_screen) {
             return;
         }
@@ -181,11 +180,11 @@ void Area::size_by_layout(int pos, int level) {
         } else {
             pos += child->height + paddingx;
         }
-    });
+    }
 
     if (on_changed) {
         // pos/size changed
-        redraw = 1;
+        need_redraw = true;
 
         if (_on_change_layout) {
             _on_change_layout(this);
@@ -201,8 +200,8 @@ void Area::refresh() {
     }
 
     // don't draw transparent objects (without foreground and without background)
-    if (redraw) {
-        redraw = 0;
+    if (need_redraw) {
+        need_redraw = false;
         draw();
     }
 
@@ -217,9 +216,9 @@ void Area::refresh() {
         width, height, posx, posy);
 
     // and then refresh child object
-    std::for_each(children.begin(), children.end(), [](Area * child) {
+    for (auto& child : children) {
         child->refresh();
-    });
+    }
 }
 
 
@@ -231,7 +230,7 @@ int resize_by_layout(void* obj, int maximum_size) {
         // detect free size for SIZE_BY_LAYOUT's Area
         size = a->width - (2 * (a->paddingxlr + a->bg->border.width));
 
-        std::for_each(a->children.begin(), a->children.end(), [&](Area * child) {
+        for (auto& child : a->children) {
             if (child->on_screen && child->size_mode == SIZE_BY_CONTENT) {
                 size -= child->width;
                 nb_by_content++;
@@ -240,7 +239,7 @@ int resize_by_layout(void* obj, int maximum_size) {
             if (child->on_screen && child->size_mode == SIZE_BY_LAYOUT) {
                 nb_by_layout++;
             }
-        });
+        }
 
         //printf("  resize_by_layout Deb %d, %d\n", nb_by_content, nb_by_layout);
         if (nb_by_content + nb_by_layout) {
@@ -260,7 +259,7 @@ int resize_by_layout(void* obj, int maximum_size) {
         }
 
         // resize SIZE_BY_LAYOUT objects
-        std::for_each(a->children.begin(), a->children.end(), [&](Area * child) {
+        for (auto& child : a->children) {
             if (child->on_screen && child->size_mode == SIZE_BY_LAYOUT) {
                 old_width = child->width;
                 child->width = width;
@@ -274,12 +273,12 @@ int resize_by_layout(void* obj, int maximum_size) {
                     child->on_changed = 1;
                 }
             }
-        });
+        }
     } else {
         // detect free size for SIZE_BY_LAYOUT's Area
         size = a->height - (2 * (a->paddingxlr + a->bg->border.width));
 
-        std::for_each(a->children.begin(), a->children.end(), [&](Area * child) {
+        for (auto& child : a->children) {
             if (child->on_screen && child->size_mode == SIZE_BY_CONTENT) {
                 size -= child->height;
                 nb_by_content++;
@@ -288,7 +287,7 @@ int resize_by_layout(void* obj, int maximum_size) {
             if (child->on_screen && child->size_mode == SIZE_BY_LAYOUT) {
                 nb_by_layout++;
             }
-        });
+        }
 
         if (nb_by_content + nb_by_layout) {
             size -= ((nb_by_content + nb_by_layout - 1) * a->paddingx);
@@ -307,7 +306,7 @@ int resize_by_layout(void* obj, int maximum_size) {
         }
 
         // resize SIZE_BY_LAYOUT objects
-        std::for_each(a->children.begin(), a->children.end(), [&](Area * child) {
+        for (auto& child : a->children) {
             if (child->on_screen && child->size_mode == SIZE_BY_LAYOUT) {
                 old_height = child->height;
                 child->height = height;
@@ -321,7 +320,7 @@ int resize_by_layout(void* obj, int maximum_size) {
                     child->on_changed = 1;
                 }
             }
-        });
+        }
     }
 
     return 0;
@@ -329,16 +328,16 @@ int resize_by_layout(void* obj, int maximum_size) {
 
 
 void Area::set_redraw() {
-    redraw = 1;
+    need_redraw = true;
 
-    std::for_each(children.begin(), children.end(), [](Area * child) {
+    for (auto& child : children) {
         child->set_redraw();
-    });
+    }
 }
 
 void Area::hide() {
     on_screen = 0;
-    parent->resize = 1;
+    parent->need_resize = true;
 
     if (panel_horizontal) {
         width = 0;
@@ -349,8 +348,8 @@ void Area::hide() {
 
 void Area::show() {
     on_screen = 1;
-    resize = 1;
-    parent->resize = 1;
+    need_resize = true;
+    parent->need_resize = true;
 }
 
 void Area::draw() {
@@ -369,18 +368,13 @@ void Area::draw() {
     XCopyArea(server.dsp, panel->temp_pmap, pix, server.gc,
               posx, posy, width, height, 0, 0);
 
-    cairo_surface_t* cs;
-    cairo_t* c;
-
-    cs = cairo_xlib_surface_create(server.dsp, pix, server.visual, width,
-                                   height);
-    c = cairo_create(cs);
+    cairo_surface_t* cs = cairo_xlib_surface_create(server.dsp, pix, server.visual,
+                          width,
+                          height);
+    cairo_t* c = cairo_create(cs);
 
     draw_background(c);
-
-    if (_draw_foreground) {
-        _draw_foreground(this, c);
-    }
+    draw_foreground(c);
 
     cairo_destroy(c);
     cairo_surface_destroy(cs);
@@ -431,9 +425,9 @@ void Area::add_area() {
 
 
 void Area::free_area() {
-    std::for_each(children.begin(), children.end(), [](Area * child) {
+    for (auto& child : children) {
         child->free_area();
-    });
+    }
 
     children.clear();
 
@@ -441,6 +435,17 @@ void Area::free_area() {
         XFreePixmap(server.dsp, pix);
         pix = 0;
     }
+}
+
+
+void Area::draw_foreground(cairo_t*) {
+    /* defaults to a no-op */
+}
+
+
+bool Area::resize() {
+    /* defaults to a no-op */
+    return false;
 }
 
 

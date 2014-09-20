@@ -26,6 +26,9 @@ class Battery : public Area {
     Color font;
     int bat1_posy;
     int bat2_posy;
+
+    void draw_foreground(cairo_t*);
+    bool resize();
 };
 
 enum chargestate {
@@ -71,9 +74,5 @@ void update_battery();
 
 void init_battery();
 void init_battery_panel(void* panel);
-
-void draw_battery(void* obj, cairo_t* c);
-
-int  resize_battery(void* obj);
 
 #endif

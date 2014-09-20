@@ -25,6 +25,8 @@ class LauncherIcon : public Area {
     int icon_size;
     int is_app_desktop;
     int x, y;
+
+    void draw_foreground(cairo_t*);
 };
 
 struct DesktopEntry {
@@ -57,6 +59,8 @@ class Launcher : public Area {
     std::vector<char*> list_apps;          // paths to .desktop files
     std::vector<LauncherIcon*> list_icons;
     std::vector<IconTheme*> list_themes;
+
+    bool resize();
 };
 
 extern int launcher_enabled;
@@ -76,9 +80,6 @@ void init_launcher();
 void init_launcher_panel(void* panel);
 void cleanup_launcher();
 void cleanup_launcher_theme(Launcher* launcher);
-
-int  resize_launcher(void* obj);
-void draw_launcher(void* obj, cairo_t* c);
 
 // Populates the list_themes list
 void launcher_load_themes(Launcher* launcher);

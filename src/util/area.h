@@ -54,6 +54,8 @@ enum { SIZE_BY_LAYOUT, SIZE_BY_CONTENT };
 class Panel;
 class Area {
   public:
+    virtual ~Area();
+
     Area& clone(Area const&);
 
     // coordinate relative to panel window
@@ -72,9 +74,9 @@ class Area {
     // way to calculate the size (SIZE_BY_CONTENT or SIZE_BY_LAYOUT)
     int size_mode;
     // need to calculate position and width
-    int resize;
+    bool need_resize;
     // need redraw Pixmap
-    int redraw;
+    bool need_redraw;
     // paddingxlr = horizontal padding left/right
     // paddingx = horizontal padding between childs
     int paddingxlr, paddingx, paddingy;
@@ -83,11 +85,10 @@ class Area {
     // panel
     Panel* panel;
 
-    // each object can overwrite following function
-    void (*_draw_foreground)(void* obj, cairo_t* c);
-    // update area's content and update size (width/heith).
-    // return '1' if size changed, '0' otherwise.
-    int (*_resize)(void* obj);
+    // update area's content and update size (width/height).
+    // returns true if size changed, false otherwise.
+    virtual bool resize();
+
     // after pos/size changed, the rendering engine will call _on_change_layout(Area*)
     int on_changed;
     void (*_on_change_layout)(void* obj);
@@ -97,10 +98,11 @@ class Area {
     void add_area();
 
     // draw pixmap
-    void draw();
-    void draw_background(cairo_t* c);
+    virtual void draw();
+    virtual void draw_background(cairo_t*);
+    virtual void draw_foreground(cairo_t*);
 
-    // set 'redraw' on an area and children
+    // set 'need_redraw' on an area and children
     void set_redraw();
 
     void size_by_content();

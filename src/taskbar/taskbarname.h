@@ -18,10 +18,4 @@ void cleanup_taskbarname();
 
 void init_taskbarname_panel(void* p);
 
-void draw_taskbarname(void* obj, cairo_t* c);
-
-int  resize_taskbarname(void* obj);
-
-
 #endif
-

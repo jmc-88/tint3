@@ -58,10 +58,8 @@ void default_systray() {
     render_background = 0;
     systray.alpha = 100;
     systray.sort = 3;
-    systray._draw_foreground = draw_systray;
     systray._on_change_layout = on_change_systray;
     systray.size_mode = SIZE_BY_CONTENT;
-    systray._resize = resize_systray;
 }
 
 void cleanup_systray() {
@@ -121,7 +119,7 @@ void init_systray_panel(void* p) {
 }
 
 
-void draw_systray(void* obj, cairo_t* c) {
+void Systraybar::draw_foreground(cairo_t* /* c */) {
     if (server.real_transparency || systray.alpha != 100 || systray.brightness != 0
         || systray.saturation != 0) {
         if (render_background) {
@@ -138,27 +136,22 @@ void draw_systray(void* obj, cairo_t* c) {
 }
 
 
-int resize_systray(void* obj) {
-    Systraybar* sysbar = static_cast<Systraybar*>(obj);
-    GSList* l;
-    int count;
-
+bool Systraybar::resize() {
     if (panel_horizontal) {
-        sysbar->icon_size = sysbar->height;
+        icon_size = height;
     } else {
-        sysbar->icon_size = sysbar->width;
+        icon_size = width;
     }
 
-    sysbar->icon_size = sysbar->icon_size - (2 * sysbar->bg->border.width) -
-                        (2 * sysbar->paddingy);
+    icon_size = icon_size - (2 * bg->border.width) - (2 * paddingy);
 
-    if (systray_max_icon_size > 0 && sysbar->icon_size > systray_max_icon_size) {
-        sysbar->icon_size = systray_max_icon_size;
+    if (systray_max_icon_size > 0 && icon_size > systray_max_icon_size) {
+        icon_size = systray_max_icon_size;
     }
 
-    count = 0;
+    int count = 0;
 
-    for (l = systray.list_icons; l ; l = l->next) {
+    for (GSList* l = systray.list_icons; l ; l = l->next) {
         if (!((TrayWindow*)l->data)->hide) {
             count++;
         }
@@ -167,34 +160,24 @@ int resize_systray(void* obj) {
     //printf("count %d\n", count);
 
     if (panel_horizontal) {
-        int height = sysbar->height - 2 * sysbar->bg->border.width - 2 *
-                     sysbar->paddingy;
+        int height_ = height - 2 * bg->border.width - 2 * paddingy;
         // here icons_per_column always higher than 0
-        sysbar->icons_per_column = (height + sysbar->paddingx) /
-                                   (sysbar->icon_size + sysbar->paddingx);
-        sysbar->marging = height - (sysbar->icons_per_column - 1) *
-                          (sysbar->icon_size + sysbar->paddingx) - sysbar->icon_size;
-        sysbar->icons_per_row = count / sysbar->icons_per_column +
-                                (count % sysbar->icons_per_column != 0);
-        systray.width = (2 * systray.bg->border.width) +
-                        (2 * systray.paddingxlr) + (sysbar->icon_size * sysbar->icons_per_row) + ((
-                                    sysbar->icons_per_row - 1) * systray.paddingx);
+        icons_per_column = (height_ + paddingx) / (icon_size + paddingx);
+        marging = height_ - (icons_per_column - 1) * (icon_size + paddingx) - icon_size;
+        icons_per_row = count / icons_per_column + (count % icons_per_column != 0);
+        systray.width = (2 * systray.bg->border.width) + (2 * systray.paddingxlr) +
+                        (icon_size * icons_per_row) + ((icons_per_row - 1) * systray.paddingx);
     } else {
-        int width = sysbar->width - 2 * sysbar->bg->border.width - 2 *
-                    sysbar->paddingy;
+        int width_ = width - 2 * bg->border.width - 2 * paddingy;
         // here icons_per_row always higher than 0
-        sysbar->icons_per_row = (width + sysbar->paddingx) /
-                                (sysbar->icon_size + sysbar->paddingx);
-        sysbar->marging = width - (sysbar->icons_per_row - 1) *
-                          (sysbar->icon_size + sysbar->paddingx) - sysbar->icon_size;
-        sysbar->icons_per_column = count / sysbar->icons_per_row +
-                                   (count % sysbar->icons_per_row != 0);
-        systray.height = (2 * systray.bg->border.width) +
-                         (2 * systray.paddingxlr) + (sysbar->icon_size * sysbar->icons_per_column)
-                         + ((sysbar->icons_per_column - 1) * systray.paddingx);
+        icons_per_row = (width_ + paddingx) / (icon_size + paddingx);
+        marging = width_ - (icons_per_row - 1) * (icon_size + paddingx) - icon_size;
+        icons_per_column = count / icons_per_row + (count % icons_per_row != 0);
+        systray.height = (2 * systray.bg->border.width) + (2 * systray.paddingxlr) +
+                         (icon_size * icons_per_column) + ((icons_per_column - 1) * systray.paddingx);
     }
 
-    return 1;
+    return true;
 }
 
 
@@ -533,7 +516,7 @@ bool add_icon(Window id) {
     }
 
     // changed in systray
-    systray.resize = 1;
+    systray.need_resize = true;
     panel_refresh = 1;
     return true;
 }
@@ -585,7 +568,7 @@ void remove_icon(TrayWindow* traywin) {
     }
 
     // changed in systray
-    systray.resize = 1;
+    systray.need_resize = true;
     panel_refresh = 1;
 }
 

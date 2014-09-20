@@ -477,7 +477,7 @@ void event_button_motion_notify(XEvent* e) {
 
             if (drag_iter != children.end() && task_iter != children.end()) {
                 std::iter_swap(drag_iter, task_iter);
-                event_taskbar->resize = 1;
+                event_taskbar->need_resize = true;
                 panel_refresh = 1;
                 task_dragged = 1;
             }
@@ -512,8 +512,8 @@ void event_button_motion_notify(XEvent* e) {
 
         windows_set_desktop(task_drag->win, event_taskbar->desktop);
 
-        event_taskbar->resize = 1;
-        drag_taskbar->resize = 1;
+        event_taskbar->need_resize = true;
+        drag_taskbar->need_resize = true;
         task_dragged = 1;
         panel_refresh = 1;
     }
@@ -663,7 +663,7 @@ void event_property_notify(XEvent* e) {
 
                     if (tskbar->bar_name.name() != name) {
                         tskbar->bar_name.set_name(name);
-                        tskbar->bar_name.resize = 1;
+                        tskbar->bar_name.need_resize = true;
                     }
                 }
             }
@@ -689,7 +689,7 @@ void event_property_notify(XEvent* e) {
                 init_taskbar_panel(&panel1[i]);
                 set_panel_items_order(&panel1[i]);
                 visible_taskbar(&panel1[i]);
-                panel1[i].resize = 1;
+                panel1[i].need_resize = true;
             }
 
             task_refresh_tasklist();
@@ -725,7 +725,7 @@ void event_property_notify(XEvent* e) {
 
                         if (tsk->desktop == ALLDESKTOP) {
                             tsk->on_screen = 0;
-                            tskbar->resize = 1;
+                            tskbar->need_resize = true;
                             panel_refresh = 1;
                         }
                     }
@@ -743,7 +743,7 @@ void event_property_notify(XEvent* e) {
 
                     if (tsk->desktop == ALLDESKTOP) {
                         tsk->on_screen = 1;
-                        tskbar->resize = 1;
+                        tskbar->need_resize = true;
                     }
                 }
             }

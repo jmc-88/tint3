@@ -54,6 +54,8 @@ class Global_task : public Area {
 
 // TODO: make this inherit from a common base class that exposes state_pixmap
 class Task : public Area {
+    void draw_icon(int);
+
   public:
     // TODO: group task with list of windows here
     Window win;
@@ -65,6 +67,8 @@ class Task : public Area {
     unsigned int icon_height;
     char* title;
     int urgent_tick;
+
+    void draw_foreground(cairo_t* c);
 };
 
 extern Timeout* urgent_timeout;
@@ -73,7 +77,6 @@ extern std::list<Task*> urgent_list;
 Task* add_task(Window win);
 void remove_task(Task* tsk);
 
-void draw_task(void* obj, cairo_t* c);
 void on_change_task(void* obj);
 
 void get_icon(Task* tsk);

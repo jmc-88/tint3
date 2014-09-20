@@ -59,7 +59,7 @@ void init_taskbarname_panel(void* p) {
 
     for (int j = 0; j < panel->nb_desktop; ++j) {
         Taskbar* tskbar = &panel->taskbar[j];
-        memcpy(&tskbar->bar_name, &panel->g_taskbar.area_name, sizeof(Area));
+        tskbar->bar_name = panel->g_taskbar.area_name;
         tskbar->bar_name.parent = reinterpret_cast<Area*>(tskbar);
 
         if (j == server.desktop) {
@@ -104,72 +104,77 @@ void cleanup_taskbarname() {
     }
 }
 
+std::string const& Taskbarname::name() const {
+    return name_;
+}
 
-void draw_taskbarname(void* obj, cairo_t* c) {
-    Taskbarname* taskbar_name = static_cast<Taskbarname*>(obj);
-    Taskbar* taskbar = reinterpret_cast<Taskbar*>(taskbar_name->parent);
+Taskbarname& Taskbarname::set_name(std::string const& name) {
+    name_.assign(name);
+    return (*this);
+}
+
+void Taskbarname::draw_foreground(cairo_t* c) {
+    Taskbar* taskbar = reinterpret_cast<Taskbar*>(parent);
+
+    // TODO: the parent should return this value, without the children knowing
+    // about its internals
     Color* config_text = (taskbar->desktop == server.desktop)
                          ? &taskbarname_active_font
                          : &taskbarname_font;
 
+    // TODO: the parent should return this state, without the children knowing
+    // about its internals
     int state = (taskbar->desktop == server.desktop) ? TASKBAR_ACTIVE :
                 TASKBAR_NORMAL;
-    taskbar_name->set_state_pixmap(state, taskbar_name->pix);
+    set_state_pixmap(state, pix);
 
     // draw content
     PangoLayout* layout = pango_cairo_create_layout(c);
     pango_layout_set_font_description(layout, taskbarname_font_desc);
-    pango_layout_set_width(layout, taskbar_name->width * PANGO_SCALE);
+    pango_layout_set_width(layout, width * PANGO_SCALE);
     pango_layout_set_alignment(layout, PANGO_ALIGN_CENTER);
-    pango_layout_set_text(layout, taskbar_name->name().c_str(),
-                          taskbar_name->name().length());
+    pango_layout_set_text(layout, name_.c_str(), name_.length());
 
     cairo_set_source_rgba(c, config_text->color[0], config_text->color[1],
                           config_text->color[2], config_text->alpha);
 
     pango_cairo_update_layout(c, layout);
-    cairo_move_to(c, 0, taskbar_name->posy);
+    cairo_move_to(c, 0, posy);
     pango_cairo_show_layout(c, layout);
 
     g_object_unref(layout);
-    //printf("draw_taskbarname %s ******************************\n", taskbar_name->name);
+    //printf("draw_taskbarname %s ******************************\n", name);
 }
 
 
-int resize_taskbarname(void* obj) {
-    Taskbarname* taskbar_name = static_cast<Taskbarname*>(obj);
-    Panel* panel = taskbar_name->panel;
-    int ret = 0;
-
-    taskbar_name->redraw = 1;
+bool Taskbarname::resize() {
+    need_redraw = true;
 
     int name_height, name_width, name_height_ink;
     get_text_size2(
         taskbarname_font_desc,
         &name_height_ink, &name_height, &name_width,
-        panel->height, panel->width, taskbar_name->name().c_str(),
-        taskbar_name->name().length());
+        panel->height, panel->width, name().c_str(),
+        name().length());
 
     if (panel_horizontal) {
-        int new_size = name_width + (2 * (taskbar_name->paddingxlr +
-                                          taskbar_name->bg->border.width));
+        int new_size = name_width + (2 * (paddingxlr + bg->border.width));
 
-        if (new_size != taskbar_name->width) {
-            taskbar_name->width = new_size;
-            taskbar_name->posy = (taskbar_name->height - name_height) / 2;
-            ret = 1;
+        if (new_size != width) {
+            width = new_size;
+            posy = (height - name_height) / 2;
+            return true;
         }
     } else {
-        int new_size = name_height + (2 * (taskbar_name->paddingxlr +
-                                           taskbar_name->bg->border.width));
+        int new_size = name_height + (2 * (paddingxlr + bg->border.width));
 
-        if (new_size != taskbar_name->height) {
-            taskbar_name->height =  new_size;
-            taskbar_name->posy = (taskbar_name->height - name_height) / 2;
-            ret = 1;
+        if (new_size != height) {
+            height = new_size;
+            posy = (height - name_height) / 2;
+            return true;
         }
     }
 
-    return ret;
+    return false;
 }
 

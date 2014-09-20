@@ -63,15 +63,6 @@ TaskbarBase& TaskbarBase::reset_state_pixmap(size_t i) {
     return (*this);
 }
 
-std::string const& Taskbarname::name() const {
-    return name_;
-}
-
-Taskbarname& Taskbarname::set_name(std::string const& name) {
-    name_.assign(name);
-    return (*this);
-}
-
 Taskbar& Taskbar::set_state(size_t state) {
     bg = panel1[0].g_taskbar.background[state];
     pix = state_pixmap(state);
@@ -87,11 +78,11 @@ Taskbar& Taskbar::set_state(size_t state) {
 
     if (on_screen == 1) {
         if (state_pixmap(state) == 0) {
-            redraw = 1;
+            need_redraw = true;
         }
 
         if (taskbarname_enabled && bar_name.state_pixmap(state) == 0) {
-            bar_name.redraw = 1;
+            bar_name.need_redraw = true;
         }
 
         auto normal_bg = panel1[0].g_taskbar.background[TASKBAR_NORMAL];
@@ -206,34 +197,26 @@ void init_taskbar_panel(void* p) {
     // taskbar name
     panel->g_taskbar.area_name.panel = panel;
     panel->g_taskbar.area_name.size_mode = SIZE_BY_CONTENT;
-    panel->g_taskbar.area_name._resize = resize_taskbarname;
-    panel->g_taskbar.area_name._draw_foreground = draw_taskbarname;
     panel->g_taskbar.area_name._on_change_layout = 0;
-    panel->g_taskbar.area_name.resize = 1;
+    panel->g_taskbar.area_name.need_resize = true;
     panel->g_taskbar.area_name.on_screen = 1;
 
     // taskbar
     panel->g_taskbar.parent = panel;
     panel->g_taskbar.panel = panel;
     panel->g_taskbar.size_mode = SIZE_BY_LAYOUT;
-    panel->g_taskbar._resize = resize_taskbar;
-    panel->g_taskbar._draw_foreground = draw_taskbar;
     panel->g_taskbar._on_change_layout = on_change_taskbar;
-    panel->g_taskbar.resize = 1;
+    panel->g_taskbar.need_resize = true;
     panel->g_taskbar.on_screen = 1;
 
     if (panel_horizontal) {
-        panel->g_taskbar.posy = (panel->bg->border.width +
-                                 panel->paddingy);
-        panel->g_taskbar.height = panel->height - (2 *
-                                  panel->g_taskbar.posy);
+        panel->g_taskbar.posy = (panel->bg->border.width + panel->paddingy);
+        panel->g_taskbar.height = panel->height - (2 * panel->g_taskbar.posy);
         panel->g_taskbar.area_name.posy = panel->g_taskbar.posy;
         panel->g_taskbar.area_name.height = panel->g_taskbar.height;
     } else {
-        panel->g_taskbar.posx = panel->bg->border.width +
-                                panel->paddingy;
-        panel->g_taskbar.width = panel->width - (2 *
-                                 panel->g_taskbar.posx);
+        panel->g_taskbar.posx = panel->bg->border.width + panel->paddingy;
+        panel->g_taskbar.width = panel->width - (2 * panel->g_taskbar.posx);
         panel->g_taskbar.area_name.posx = panel->g_taskbar.posx;
         panel->g_taskbar.area_name.width = panel->g_taskbar.width;
     }
@@ -241,9 +224,8 @@ void init_taskbar_panel(void* p) {
     // task
     panel->g_task.panel = panel;
     panel->g_task.size_mode = SIZE_BY_LAYOUT;
-    panel->g_task._draw_foreground = draw_task;
     panel->g_task._on_change_layout = on_change_task;
-    panel->g_task.resize = 1;
+    panel->g_task.need_resize = true;
     panel->g_task.on_screen = 1;
 
     if ((panel->g_task.config_asb_mask & (1 << TASK_NORMAL)) == 0) {
@@ -451,44 +433,40 @@ void task_refresh_tasklist() {
 }
 
 
-void draw_taskbar(void* obj, cairo_t* c) {
-    Taskbar* taskbar = static_cast<Taskbar*>(obj);
-    size_t state = (taskbar->desktop == server.desktop ? TASKBAR_ACTIVE :
-                    TASKBAR_NORMAL);
-    taskbar->set_state_pixmap(state, taskbar->pix);
+void Taskbar::draw_foreground(cairo_t* /* c */) {
+    size_t state = (desktop == server.desktop ? TASKBAR_ACTIVE : TASKBAR_NORMAL);
+    set_state_pixmap(state, pix);
 }
 
 
-int resize_taskbar(void* obj) {
-    Taskbar* taskbar = static_cast<Taskbar*>(obj);
-    Panel* panel = taskbar->panel;
+bool TaskbarBase::resize() {
     int text_width;
 
-    //printf("resize_taskbar %d %d\n", taskbar->posx, taskbar->posy);
+    //printf("resize_taskbar %d %d\n", posx, posy);
     if (panel_horizontal) {
-        resize_by_layout(obj, panel->g_task.maximum_width);
+        resize_by_layout(this, panel->g_task.maximum_width);
 
         text_width = panel->g_task.maximum_width;
-        auto it = taskbar->children.begin();
+        auto it = children.begin();
 
         if (taskbarname_enabled) {
             ++it;
         }
 
-        if (it != taskbar->children.end()) {
+        if (it != children.end()) {
             text_width = static_cast<Task*>(*it)->width;
         }
 
-        taskbar->text_width = text_width - panel->g_task.text_posx -
-                              panel->g_task.bg->border.width - panel->g_task.paddingx;
+        text_width -= panel->g_task.text_posx -
+                      panel->g_task.bg->border.width - panel->g_task.paddingx;
     } else {
-        resize_by_layout(obj, panel->g_task.maximum_height);
-        taskbar->text_width = taskbar->width - (2 * panel->g_taskbar.paddingy)
-                              - panel->g_task.text_posx - panel->g_task.bg->border.width -
-                              panel->g_task.paddingx;
+        resize_by_layout(this, panel->g_task.maximum_height);
+        text_width = width - (2 * panel->g_taskbar.paddingy)
+                     - panel->g_task.text_posx - panel->g_task.bg->border.width -
+                     panel->g_task.paddingx;
     }
 
-    return 0;
+    return false;
 }
 
 
@@ -501,7 +479,7 @@ void on_change_taskbar(void* obj) {
     }
 
     tskbar->pix = 0;
-    tskbar->redraw = 1;
+    tskbar->need_redraw = true;
 }
 
 

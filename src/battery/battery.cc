@@ -94,7 +94,7 @@ void update_batteries(void* arg) {
         }
 
         if (panel1[i].battery.on_screen == 1) {
-            panel1[i].battery.resize = 1;
+            panel1[i].battery.need_resize = true;
             panel_refresh = 1;
         }
     }
@@ -273,11 +273,9 @@ void init_battery_panel(void* p) {
 
     battery->parent = panel;
     battery->panel = panel;
-    battery->_draw_foreground = draw_battery;
     battery->size_mode = SIZE_BY_CONTENT;
-    battery->_resize = resize_battery;
     battery->on_screen = 1;
-    battery->resize = 1;
+    battery->need_resize = true;
 }
 
 
@@ -480,46 +478,41 @@ void update_battery() {
 }
 
 
-void draw_battery(void* obj, cairo_t* c) {
-    Battery* battery = static_cast<Battery*>(obj);
-    PangoLayout* layout;
-
-    layout = pango_cairo_create_layout(c);
+void Battery::draw_foreground(cairo_t* c) {
+    PangoLayout* layout = pango_cairo_create_layout(c);
 
     // draw layout
     pango_layout_set_font_description(layout, bat1_font_desc);
-    pango_layout_set_width(layout, battery->width * PANGO_SCALE);
+    pango_layout_set_width(layout, width * PANGO_SCALE);
     pango_layout_set_alignment(layout, PANGO_ALIGN_CENTER);
     pango_layout_set_text(layout, buf_bat_percentage, strlen(buf_bat_percentage));
 
-    cairo_set_source_rgba(c, battery->font.color[0], battery->font.color[1],
-                          battery->font.color[2], battery->font.alpha);
+    cairo_set_source_rgba(c, font.color[0], font.color[1],
+                          font.color[2], font.alpha);
 
     pango_cairo_update_layout(c, layout);
-    cairo_move_to(c, 0, battery->bat1_posy);
+    cairo_move_to(c, 0, bat1_posy);
     pango_cairo_show_layout(c, layout);
 
     pango_layout_set_font_description(layout, bat2_font_desc);
     pango_layout_set_indent(layout, 0);
     pango_layout_set_text(layout, buf_bat_time, strlen(buf_bat_time));
-    pango_layout_set_width(layout, battery->width * PANGO_SCALE);
+    pango_layout_set_width(layout, width * PANGO_SCALE);
 
     pango_cairo_update_layout(c, layout);
-    cairo_move_to(c, 0, battery->bat2_posy);
+    cairo_move_to(c, 0, bat2_posy);
     pango_cairo_show_layout(c, layout);
 
     g_object_unref(layout);
 }
 
 
-int resize_battery(void* obj) {
-    Battery* battery = static_cast<Battery*>(obj);
-    Panel* panel = static_cast<Panel*>(battery->panel);
+bool Battery::resize() {
     int bat_percentage_height, bat_percentage_width, bat_percentage_height_ink;
     int bat_time_height, bat_time_width, bat_time_height_ink;
     int ret = 0;
 
-    battery->redraw = 1;
+    need_redraw = true;
 
     snprintf(buf_bat_percentage, sizeof(buf_bat_percentage), "%d%%",
              battery_state.percentage);
@@ -541,26 +534,23 @@ int resize_battery(void* obj) {
     if (panel_horizontal) {
         int new_size = (bat_percentage_width > bat_time_width) ? bat_percentage_width :
                        bat_time_width;
-        new_size += (2 * battery->paddingxlr) + (2 *
-                    battery->bg->border.width);
+        new_size += (2 * paddingxlr) + (2 * bg->border.width);
 
-        if (new_size > battery->width || new_size < (battery->width - 2)) {
+        if (new_size > width || new_size < (width - 2)) {
             // we try to limit the number of resize
-            battery->width =  new_size;
-            battery->bat1_posy = (battery->height - bat_percentage_height -
-                                  bat_time_height) / 2;
-            battery->bat2_posy = battery->bat1_posy + bat_percentage_height;
+            width = new_size;
+            bat1_posy = (height - bat_percentage_height - bat_time_height) / 2;
+            bat2_posy = bat1_posy + bat_percentage_height;
             ret = 1;
         }
     } else {
         int new_size = bat_percentage_height + bat_time_height + (2 *
-                       (battery->paddingxlr + battery->bg->border.width));
+                       (paddingxlr + bg->border.width));
 
-        if (new_size > battery->height || new_size < (battery->height - 2)) {
-            battery->height =  new_size;
-            battery->bat1_posy = (battery->height - bat_percentage_height -
-                                  bat_time_height - 2) / 2;
-            battery->bat2_posy = battery->bat1_posy + bat_percentage_height + 2;
+        if (new_size > height || new_size < (height - 2)) {
+            height = new_size;
+            bat1_posy = (height - bat_percentage_height - bat_time_height - 2) / 2;
+            bat2_posy = bat1_posy + bat_percentage_height + 2;
             ret = 1;
         }
     }

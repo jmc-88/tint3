@@ -172,7 +172,7 @@ void init_panel() {
     int i;
 
     for (i = 0 ; i < nb_panel ; i++) {
-        memcpy(&panel1[i], &panel_config, sizeof(Panel));
+        panel1[i] = panel_config;
     }
 
     fprintf(stderr, "tint3 : nb monitor %d, nb monitor used %d, nb desktop %d\n",
@@ -192,9 +192,8 @@ void init_panel() {
         p->parent = p;
         p->panel = p;
         p->on_screen = 1;
-        p->resize = 1;
+        p->need_resize = true;
         p->size_mode = SIZE_BY_LAYOUT;
-        p->_resize = resize_panel;
         init_panel_size_and_position(p);
 
         // add children according to panel_items
@@ -384,25 +383,22 @@ void init_panel_size_and_position(Panel* panel) {
 }
 
 
-int resize_panel(void* obj) {
-    resize_by_layout(obj, 0);
+bool Panel::resize() {
+    resize_by_layout(this, 0);
 
-    //printf("resize_panel\n");
     if (panel_mode != MULTI_DESKTOP && taskbar_enabled) {
         // propagate width/height on hidden taskbar
-        int i, width, height;
-        Panel* panel = (Panel*)obj;
-        width = panel->taskbar[server.desktop].width;
-        height = panel->taskbar[server.desktop].height;
+        int width = taskbar[server.desktop].width;
+        int height = taskbar[server.desktop].height;
 
-        for (i = 0 ; i < panel->nb_desktop ; i++) {
-            panel->taskbar[i].width = width;
-            panel->taskbar[i].height = height;
-            panel->taskbar[i].resize = 1;
+        for (int i = 0 ; i < nb_desktop ; ++i) {
+            taskbar[i].width = width;
+            taskbar[i].height = height;
+            taskbar[i].need_resize = true;
         }
     }
 
-    return 0;
+    return false;
 }
 
 
@@ -648,9 +644,9 @@ void set_panel_background(Panel* p) {
     }
 
     // redraw panel's object
-    std::for_each(p->children.begin(), p->children.end(), [](Area * child) {
+    for (auto& child : p->children) {
         child->set_redraw();
-    });
+    }
 
     // reset task/taskbar 'state_pix'
     for (int i = 0 ; i < p->nb_desktop ; i++) {
