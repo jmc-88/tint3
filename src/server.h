@@ -14,6 +14,7 @@
 #include <X11/extensions/Xinerama.h>
 
 #include <vector>
+#include <map>
 
 #ifdef HAVE_SN
 #include <libsn/sn.h>
@@ -124,7 +125,7 @@ typedef struct {
     Global_atom atom;
 #ifdef HAVE_SN
     SnDisplay* sn_dsp;
-    GTree* pids;
+    std::map<pid_t, SnLauncherContext*> pids;
 #endif // HAVE_SN
 } Server_global;
 

@@ -32,7 +32,6 @@
 #include <signal.h>
 
 #ifdef HAVE_SN
-#include <libsn/sn.h>
 #include <sys/wait.h>
 #endif
 
@@ -160,34 +159,22 @@ error_trap_pop(SnDisplay* display,
     --error_trap_depth;
 }
 
-static void sigchld_handler(int sig) {
+static void sigchld_handler(int /* signal */) {
     // Wait for all dead processes
     pid_t pid;
 
     while ((pid = waitpid(-1, nullptr, WNOHANG)) > 0) {
-        SnLauncherContext* ctx;
-        ctx = (SnLauncherContext*) g_tree_lookup(server.pids, GINT_TO_POINTER(pid));
+        auto it = server.pids.find(pid);
 
-        if (ctx == nullptr) {
+        if (it != server.pids.end()) {
             fprintf(stderr, "Unknown child %d terminated!\n", pid);
         } else {
-            g_tree_remove(server.pids, GINT_TO_POINTER(pid));
-            sn_launcher_context_complete(ctx);
-            sn_launcher_context_unref(ctx);
+            sn_launcher_context_complete(it->second);
+            sn_launcher_context_unref(it->second);
+            server.pids.erase(it);
         }
     }
 }
-
-static gint cmp_ptr(gconstpointer a, gconstpointer b) {
-    if (a < b) {
-        return -1;
-    } else if (a == b) {
-        return 0;
-    } else {
-        return 1;
-    }
-}
-
 #endif // HAVE_SN
 
 void init_X11() {
@@ -208,7 +195,7 @@ void init_X11() {
 #ifdef HAVE_SN
     // Initialize startup-notification
     server.sn_dsp = sn_display_new(server.dsp, error_trap_push, error_trap_pop);
-    server.pids = g_tree_new(cmp_ptr);
+
     // Setup a handler for child termination
     struct sigaction act;
     memset(&act, 0, sizeof(struct sigaction));
@@ -217,7 +204,6 @@ void init_X11() {
     if (sigaction(SIGCHLD, &act, 0)) {
         perror("sigaction");
     }
-
 #endif // HAVE_SN
 
     imlib_context_set_display(server.dsp);

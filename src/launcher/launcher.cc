@@ -406,7 +406,7 @@ void launcher_action(LauncherIcon* icon, XEvent* evt) {
 
 #if HAVE_SN
     else {
-        g_tree_insert(server.pids, GINT_TO_POINTER(pid), ctx);
+        server.pids[pid] = ctx;
     }
 
 #endif // HAVE_SN
