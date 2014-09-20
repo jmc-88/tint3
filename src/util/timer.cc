@@ -83,7 +83,7 @@ int compare_timespecs(struct timespec const& t1, struct timespec const& t2) {
 }
 
 bool compare_timeouts(Timeout const* t1, Timeout const* t2) {
-    return compare_timespecs(t1->timeout_expires, t2->timeout_expires);
+    return (compare_timespecs(t1->timeout_expires, t2->timeout_expires) < 0);
 }
 
 } // namespace
@@ -252,7 +252,7 @@ void add_timeout_intern(int value_msec, int interval_msec,
                       timeout_list.end(),
                       t,
         [](Timeout * t1, Timeout * t2) {
-            return (compare_timeouts(t1, t2) < 0);
+            return compare_timeouts(t1, t2);
         });
         timeout_list.insert(it, t);
     }
