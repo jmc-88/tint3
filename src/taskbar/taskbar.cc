@@ -128,7 +128,7 @@ void free_ptr_array(gpointer data) {
 void default_taskbar() {
     win_to_task_table = 0;
     urgent_timeout = 0;
-    urgent_list = 0;
+    urgent_list.clear();
     taskbar_enabled = 0;
     default_taskbarname();
 }

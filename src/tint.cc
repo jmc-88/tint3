@@ -204,6 +204,7 @@ void init_X11() {
     if (sigaction(SIGCHLD, &act, 0)) {
         perror("sigaction");
     }
+
 #endif // HAVE_SN
 
     imlib_context_set_display(server.dsp);
@@ -506,7 +507,7 @@ void event_button_motion_notify(XEvent* e) {
         }
 
         // Move task to other desktop (but avoid the 'Window desktop changed' code in 'event_property_notify')
-        task_drag->parent = reinterpret_cast<Area*>(event_taskbar);
+        task_drag->parent = event_taskbar;
         task_drag->desktop = event_taskbar->desktop;
 
         windows_set_desktop(task_drag->win, event_taskbar->desktop);

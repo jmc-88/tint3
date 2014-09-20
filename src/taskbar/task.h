@@ -10,13 +10,19 @@
 #include <X11/Xlib.h>
 #include <pango/pangocairo.h>
 #include <Imlib2.h>
+
+#include <list>
+
 #include "common.h"
 #include "timer.h"
 
-
-enum { TASK_NORMAL, TASK_ACTIVE, TASK_ICONIFIED, TASK_URGENT, TASK_STATE_COUNT };
-extern Timeout* urgent_timeout;
-extern GSList* urgent_list;
+enum {
+    TASK_NORMAL,
+    TASK_ACTIVE,
+    TASK_ICONIFIED,
+    TASK_URGENT,
+    TASK_STATE_COUNT
+};
 
 // --------------------------------------------------
 // global task parameter
@@ -61,6 +67,8 @@ class Task : public Area {
     int urgent_tick;
 };
 
+extern Timeout* urgent_timeout;
+extern std::list<Task*> urgent_list;
 
 Task* add_task(Window win);
 void remove_task(Task* tsk);

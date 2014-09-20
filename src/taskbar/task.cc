@@ -38,7 +38,7 @@
 #include "util/window.h"
 
 Timeout* urgent_timeout;
-GSList* urgent_list;
+std::list<Task*> urgent_list;
 
 const char* task_get_tooltip(void* obj) {
     Task* t = static_cast<Task*>(obj);
@@ -200,7 +200,11 @@ void remove_task(Task* tsk) {
             task_drag = 0;
         }
 
-        if (g_slist_find(urgent_list, tsk2)) {
+        auto it = std::find(urgent_list.begin(),
+                            urgent_list.end(),
+                            tsk2);
+
+        if (it != urgent_list.end()) {
             del_urgent(tsk2);
         }
 
@@ -282,11 +286,6 @@ void get_icon(Task* tsk) {
         return;
     }
 
-    int i;
-    Imlib_Image img = nullptr;
-    XWMHints* hints = 0;
-    gulong* data = 0;
-
     int k;
 
     for (k = 0; k < TASK_STATE_COUNT; ++k) {
@@ -297,8 +296,11 @@ void get_icon(Task* tsk) {
         }
     }
 
-    data = (gulong*) server_get_property(tsk->win, server.atom._NET_WM_ICON,
-                                         XA_CARDINAL, &i);
+    Imlib_Image img = nullptr;
+    XWMHints* hints = 0;
+    int i;
+    gulong* data = (gulong*) server_get_property(tsk->win, server.atom._NET_WM_ICON,
+                   XA_CARDINAL, &i);
 
     if (data) {
         // get ARGB icon
@@ -346,9 +348,9 @@ void get_icon(Task* tsk) {
     // transform icons
     imlib_context_set_image(img);
     imlib_image_set_has_alpha(1);
-    int w, h;
-    w = imlib_image_get_width();
-    h = imlib_image_get_height();
+
+    int w = imlib_image_get_width();
+    int h = imlib_image_get_height();
     Imlib_Image orig_image = imlib_create_cropped_scaled_image(0, 0, w, h,
                              panel->g_task.icon_size1, panel->g_task.icon_size1);
     imlib_free_image();
@@ -635,7 +637,11 @@ void set_task_state(Task* tsk, int state) {
                     tsk1->redraw = 1;
                 }
 
-                if (state == TASK_ACTIVE && g_slist_find(urgent_list, tsk1)) {
+                auto it = std::find(urgent_list.begin(),
+                                    urgent_list.end(),
+                                    tsk1);
+
+                if (state == TASK_ACTIVE && it != urgent_list.end()) {
                     del_urgent(tsk1);
                 }
             }
@@ -663,11 +669,7 @@ void set_task_redraw(Task* tsk) {
 
 
 void blink_urgent(void* arg) {
-    GSList* urgent_task = urgent_list;
-
-    while (urgent_task) {
-        Task* t = static_cast<Task*>(urgent_task->data);
-
+    for (auto& t : urgent_list) {
         if (t->urgent_tick < max_tick_urgent) {
             if (t->urgent_tick++ % 2) {
                 set_task_state(t, TASK_URGENT);
@@ -675,8 +677,6 @@ void blink_urgent(void* arg) {
                 set_task_state(t, window_is_iconified(t->win) ? TASK_ICONIFIED : TASK_NORMAL);
             }
         }
-
-        urgent_task = urgent_task->next;
     }
 
     panel_refresh = 1;
@@ -693,27 +693,30 @@ void add_urgent(Task* tsk) {
         return;
     }
 
-    tsk = task_get_task(
-              tsk->win);  // always add the first tsk for a task group (omnipresent windows)
+    // always add the first tsk for a task group (omnipresent windows)
+    tsk = task_get_task(tsk->win);
     tsk->urgent_tick = 0;
 
-    if (g_slist_find(urgent_list, tsk)) {
-        return;
-    }
+    auto it = std::find(urgent_list.begin(),
+                        urgent_list.end(),
+                        tsk);
 
-    // not yet in the list, so we have to add it
-    urgent_list = g_slist_prepend(urgent_list, tsk);
+    if (it == urgent_list.end()) {
+        // not yet in the list, so we have to add it
+        urgent_list.push_front(tsk);
 
-    if (urgent_timeout == 0) {
-        urgent_timeout = add_timeout(10, 1000, blink_urgent, 0);
+        if (urgent_timeout == 0) {
+            urgent_timeout = add_timeout(10, 1000, blink_urgent, 0);
+        }
     }
 }
 
 
 void del_urgent(Task* tsk) {
-    urgent_list = g_slist_remove(urgent_list, tsk);
+    urgent_list.erase(std::remove(urgent_list.begin(), urgent_list.end(), tsk),
+                      urgent_list.end());
 
-    if (urgent_list == 0) {
+    if (urgent_list.empty()) {
         stop_timeout(urgent_timeout);
         urgent_timeout = 0;
     }
