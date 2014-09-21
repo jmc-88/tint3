@@ -70,9 +70,9 @@ class Task : public Area {
     char* title;
     int urgent_tick;
 
-    void draw_foreground(cairo_t* c);
-    const char* get_tooltip_text();
-    void on_change_layout();
+    void DrawForeground(cairo_t* c);
+    const char* GetTooltipText();
+    void OnChangeLayout();
     Task& set_tooltip_enabled(bool);
 };
 

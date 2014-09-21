@@ -88,7 +88,7 @@ void cleanup_taskbarname() {
         for (int j = 0 ; j < panel->nb_desktop ; j++) {
             Taskbar* tskbar = &panel->taskbar[j];
 
-            tskbar->bar_name.free_area();
+            tskbar->bar_name.FreeArea();
 
             for (int k = 0; k < TASKBAR_STATE_COUNT; ++k) {
                 tskbar->bar_name.reset_state_pixmap(k);
@@ -113,7 +113,7 @@ Taskbarname& Taskbarname::set_name(std::string const& name) {
     return (*this);
 }
 
-void Taskbarname::draw_foreground(cairo_t* c) {
+void Taskbarname::DrawForeground(cairo_t* c) {
     Taskbar* taskbar = reinterpret_cast<Taskbar*>(parent);
 
     // TODO: the parent should return this value, without the children knowing
@@ -147,7 +147,7 @@ void Taskbarname::draw_foreground(cairo_t* c) {
 }
 
 
-bool Taskbarname::resize() {
+bool Taskbarname::Resize() {
     need_redraw = true;
 
     int name_height, name_width, name_height_ink;

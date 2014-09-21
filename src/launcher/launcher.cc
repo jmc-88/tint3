@@ -127,7 +127,7 @@ void cleanup_launcher() {
 
 
 void cleanup_launcher_theme(Launcher& launcher) {
-    launcher.free_area();
+    launcher.FreeArea();
 
     for (auto const& launcherIcon : launcher.list_icons) {
         if (launcherIcon) {
@@ -152,7 +152,7 @@ void cleanup_launcher_theme(Launcher& launcher) {
 }
 
 
-bool Launcher::resize() {
+bool Launcher::Resize() {
     int icons_per_column = 1, icons_per_row = 1, marging = 0;
     int icon_size;
 
@@ -292,16 +292,16 @@ bool Launcher::resize() {
 
 // Here we override the default layout of the icons; normally Area layouts its children
 // in a stack; we need to layout them in a kind of table
-void LauncherIcon::on_change_layout() {
+void LauncherIcon::OnChangeLayout() {
     posy = (parent->posy + y);
     posx = (parent->posx + x);
 }
 
-const char* LauncherIcon::get_tooltip_text() {
+const char* LauncherIcon::GetTooltipText() {
     return launcher_tooltip_enabled ? icon_tooltip : nullptr;
 }
 
-void LauncherIcon::draw_foreground(cairo_t* c) {
+void LauncherIcon::DrawForeground(cairo_t* c) {
     // Render
     imlib_context_set_image(icon_scaled);
 
@@ -783,7 +783,7 @@ void launcher_load_icons(Launcher* launcher) {
                                              entry.exec);
             free_desktop_entry(&entry);
             launcher->list_icons.push_back(launcherIcon);
-            launcherIcon->add_area();
+            launcherIcon->AddArea();
         }
     }
 }

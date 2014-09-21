@@ -40,7 +40,7 @@
 Timeout* urgent_timeout;
 std::list<Task*> urgent_list;
 
-const char* Task::get_tooltip_text() {
+const char* Task::GetTooltipText() {
     return tooltip_enabled_ ? title : nullptr;
 }
 
@@ -107,7 +107,7 @@ Task* add_task(Window win) {
 
         // TODO: nuke this from planet Earth ASAP - horrible hack to mimick the
         // original memcpy() call
-        new_tsk2->clone(panel1[monitor].g_task);
+        new_tsk2->Clone(panel1[monitor].g_task);
 
         new_tsk2->parent = reinterpret_cast<Area*>(tskbar);
         new_tsk2->win = new_tsk.win;
@@ -435,7 +435,7 @@ void Task::draw_icon(int text_width) {
 }
 
 
-void Task::draw_foreground(cairo_t* c) {
+void Task::DrawForeground(cairo_t* c) {
     state_pix[current_state] = pix;
 
     int width = 0;
@@ -490,7 +490,7 @@ void Task::draw_foreground(cairo_t* c) {
 }
 
 
-void Task::on_change_layout() {
+void Task::OnChangeLayout() {
     long value[] = {
         panel->posx + posx,
         panel->posy + posy,

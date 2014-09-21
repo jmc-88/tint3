@@ -119,7 +119,7 @@ void cleanup_panel() {
     for (int i = 0 ; i < nb_panel ; i++) {
         Panel* p = &panel1[i];
 
-        p->free_area();
+        p->FreeArea();
 
         if (p->temp_pmap) {
             XFreePixmap(server.dsp, p->temp_pmap);
@@ -383,8 +383,8 @@ void init_panel_size_and_position(Panel* panel) {
 }
 
 
-bool Panel::resize() {
-    resize_by_layout(0);
+bool Panel::Resize() {
+    ResizeByLayout(0);
 
     if (panel_mode != MULTI_DESKTOP && taskbar_enabled) {
         // propagate width/height on hidden taskbar
@@ -403,9 +403,9 @@ bool Panel::resize() {
 
 
 void Panel::render() {
-    size_by_content();
-    size_by_layout(0, 1);
-    refresh();
+    SizeByContent();
+    SizeByLayout(0, 1);
+    Refresh();
 }
 
 
@@ -506,7 +506,7 @@ void set_panel_items_order(Panel* p) {
         }
     }
 
-    p->init_rendering(0);
+    p->InitRendering(0);
 }
 
 
@@ -628,7 +628,7 @@ void set_panel_background(Panel* p) {
     auto cs = cairo_xlib_surface_create(server.dsp, p->pix, server.visual,
                                         p->width, p->height);
     auto c = cairo_create(cs);
-    p->draw_background(c);
+    p->DrawBackground(c);
     cairo_destroy(c);
     cairo_surface_destroy(cs);
 
@@ -645,7 +645,7 @@ void set_panel_background(Panel* p) {
 
     // redraw panel's object
     for (auto& child : p->children) {
-        child->set_redraw();
+        child->SetRedraw();
     }
 
     // reset task/taskbar 'state_pix'

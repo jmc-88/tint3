@@ -23,9 +23,9 @@ class Clock : public Area {
     int time1_posy;
     int time2_posy;
 
-    void draw_foreground(cairo_t*);
-    const char* get_tooltip_text();
-    bool resize();
+    void DrawForeground(cairo_t*);
+    const char* GetTooltipText();
+    bool Resize();
 };
 
 extern std::string time1_format;

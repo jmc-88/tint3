@@ -346,7 +346,7 @@ void tooltip_copy_text(Area* area) {
     free(g_tooltip.tooltip_text);
     g_tooltip.tooltip_text = 0;
 
-    const char* tooltip = area->get_tooltip_text();
+    const char* tooltip = area->GetTooltipText();
 
     if (area && tooltip != nullptr) {
         g_tooltip.tooltip_text = strdup(tooltip);

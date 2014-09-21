@@ -83,12 +83,12 @@ void update_batteries(void* arg) {
     for (int i = 0 ; i < nb_panel ; i++) {
         if (battery_state.percentage >= percentage_hide) {
             if (panel1[i].battery.on_screen == 1) {
-                panel1[i].battery.hide();
+                panel1[i].battery.Hide();
                 panel_refresh = 1;
             }
         } else {
             if (panel1[i].battery.on_screen == 0) {
-                panel1[i].battery.show();
+                panel1[i].battery.Show();
                 panel_refresh = 1;
             }
         }
@@ -478,7 +478,7 @@ void update_battery() {
 }
 
 
-void Battery::draw_foreground(cairo_t* c) {
+void Battery::DrawForeground(cairo_t* c) {
     PangoLayout* layout = pango_cairo_create_layout(c);
 
     // draw layout
@@ -507,7 +507,7 @@ void Battery::draw_foreground(cairo_t* c) {
 }
 
 
-bool Battery::resize() {
+bool Battery::Resize() {
     int bat_percentage_height, bat_percentage_width, bat_percentage_height_ink;
     int bat_time_height, bat_time_width, bat_time_height_ink;
     int ret = 0;

@@ -26,9 +26,9 @@ class LauncherIcon : public Area {
     int is_app_desktop;
     int x, y;
 
-    void draw_foreground(cairo_t*);
-    const char* get_tooltip_text();
-    void on_change_layout();
+    void DrawForeground(cairo_t*);
+    const char* GetTooltipText();
+    void OnChangeLayout();
 };
 
 struct DesktopEntry {
@@ -62,7 +62,7 @@ class Launcher : public Area {
     std::vector<LauncherIcon*> list_icons;
     std::vector<IconTheme*> list_themes;
 
-    bool resize();
+    bool Resize();
 };
 
 extern int launcher_enabled;

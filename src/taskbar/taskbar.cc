@@ -141,7 +141,7 @@ void cleanup_taskbar() {
                 tskbar->reset_state_pixmap(k);
             }
 
-            tskbar->free_area();
+            tskbar->FreeArea();
             // remove taskbar from the panel
             auto it = std::find(panel->children.begin(),
                                 panel->children.end(),
@@ -346,7 +346,7 @@ void init_taskbar_panel(void* p) {
 
         // TODO: nuke this from planet Earth ASAP - horrible hack to mimick the
         // original memcpy() call
-        tskbar->clone(panel->g_taskbar);
+        tskbar->Clone(panel->g_taskbar);
 
         tskbar->desktop = j;
 
@@ -430,18 +430,18 @@ void task_refresh_tasklist() {
 }
 
 
-void Taskbar::draw_foreground(cairo_t* /* c */) {
+void Taskbar::DrawForeground(cairo_t* /* c */) {
     size_t state = (desktop == server.desktop ? TASKBAR_ACTIVE : TASKBAR_NORMAL);
     set_state_pixmap(state, pix);
 }
 
 
-bool TaskbarBase::resize() {
+bool TaskbarBase::Resize() {
     int text_width;
 
     //printf("TaskbarBase::resize %d %d\n", posx, posy);
     if (panel_horizontal) {
-        resize_by_layout(panel->g_task.maximum_width);
+        ResizeByLayout(panel->g_task.maximum_width);
 
         text_width = panel->g_task.maximum_width;
         auto it = children.begin();
@@ -457,7 +457,7 @@ bool TaskbarBase::resize() {
         text_width -= panel->g_task.text_posx -
                       panel->g_task.bg->border.width - panel->g_task.paddingx;
     } else {
-        resize_by_layout(panel->g_task.maximum_height);
+        ResizeByLayout(panel->g_task.maximum_height);
         text_width = width - (2 * panel->g_taskbar.paddingy)
                      - panel->g_task.text_posx - panel->g_task.bg->border.width -
                      panel->g_task.paddingx;
@@ -467,7 +467,7 @@ bool TaskbarBase::resize() {
 }
 
 
-void Taskbar::on_change_layout() {
+void Taskbar::OnChangeLayout() {
     // reset Pixmap when position/size changed
     for (int k = 0; k < TASKBAR_STATE_COUNT; ++k) {
         reset_state_pixmap(k);

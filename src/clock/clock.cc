@@ -141,7 +141,7 @@ struct tm* clock_gettime_for_tz(std::string const& timezone) {
     return result;
 }
 
-const char* Clock::get_tooltip_text() {
+const char* Clock::GetTooltipText() {
     strftime(buf_tooltip, sizeof(buf_tooltip), time_tooltip_format.c_str(),
              clock_gettime_for_tz(time_tooltip_timezone));
     return buf_tooltip;
@@ -192,7 +192,7 @@ void init_clock_panel(void* p) {
 }
 
 
-void Clock::draw_foreground(cairo_t* c) {
+void Clock::DrawForeground(cairo_t* c) {
     PangoLayout* layout = pango_cairo_create_layout(c);
 
     // draw layout
@@ -223,7 +223,7 @@ void Clock::draw_foreground(cairo_t* c) {
 }
 
 
-bool Clock::resize() {
+bool Clock::Resize() {
     need_redraw = true;
 
     strftime(buf_time, sizeof(buf_time), time1_format.c_str(),

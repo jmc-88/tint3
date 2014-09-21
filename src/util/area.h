@@ -59,7 +59,7 @@ class Area {
   public:
     virtual ~Area();
 
-    Area& clone(Area const&);
+    Area& Clone(Area const&);
 
     // coordinate relative to panel window
     int posx, posy;
@@ -89,43 +89,43 @@ class Area {
     Panel* panel;
 
     // on startup, initialize fixed pos/size
-    void init_rendering(int);
+    void InitRendering(int);
 
     // update area's content and update size (width/height).
     // returns true if size changed, false otherwise.
-    virtual bool resize();
+    virtual bool Resize();
 
     // generic resize for SIZE_BY_LAYOUT objects
-    int resize_by_layout(int);
+    int ResizeByLayout(int);
 
     // after pos/size changed, the rendering engine will call on_change_layout()
     int on_changed;
-    virtual void on_change_layout();
+    virtual void OnChangeLayout();
 
-    virtual const char* get_tooltip_text();
+    virtual const char* GetTooltipText();
 
-    void remove_area();
-    void add_area();
+    void RemoveArea();
+    void AddArea();
 
     // draw pixmap
-    virtual void draw();
-    virtual void draw_background(cairo_t*);
-    virtual void draw_foreground(cairo_t*);
+    virtual void Draw();
+    virtual void DrawBackground(cairo_t*);
+    virtual void DrawForeground(cairo_t*);
 
     // set 'need_redraw' on an area and children
-    void set_redraw();
+    void SetRedraw();
 
-    void size_by_content();
-    void size_by_layout(int pos, int level);
+    void SizeByContent();
+    void SizeByLayout(int pos, int level);
 
     // draw background and foreground
-    void refresh();
+    void Refresh();
 
     // hide/unhide area
-    void hide();
-    void show();
+    void Hide();
+    void Show();
 
-    void free_area();
+    void FreeArea();
 };
 
 

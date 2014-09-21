@@ -28,9 +28,9 @@ class Systraybar : public Area {
     int alpha, saturation, brightness;
     int icon_size, icons_per_column, icons_per_row, marging;
 
-    void draw_foreground(cairo_t*);
-    void on_change_layout();
-    bool resize();
+    void DrawForeground(cairo_t*);
+    void OnChangeLayout();
+    bool Resize();
 };
 
 

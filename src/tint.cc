@@ -1306,7 +1306,7 @@ start:
                             Panel* panel = get_panel(e.xmotion.window);
                             Area* area = click_area(panel, e.xmotion.x, e.xmotion.y);
 
-                            const char* tooltip = area->get_tooltip_text();
+                            const char* tooltip = area->GetTooltipText();
 
                             if (tooltip != nullptr) {
                                 tooltip_trigger_show(area, panel, &e);

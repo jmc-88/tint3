@@ -120,7 +120,7 @@ class Panel : public Area {
     Timeout* autohide_timeout;
 
     void render();
-    bool resize();
+    bool Resize();
 };
 
 

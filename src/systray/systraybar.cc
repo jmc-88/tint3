@@ -66,7 +66,7 @@ void cleanup_systray() {
     systray_enabled = 0;
     systray_max_icon_size = 0;
     systray.on_screen = 0;
-    systray.free_area();
+    systray.FreeArea();
 
     if (render_background) {
         XFreePixmap(server.dsp, render_background);
@@ -109,16 +109,16 @@ void init_systray_panel(void* p) {
     }
 
     if (count == 0) {
-        systray.hide();
+        systray.Hide();
     } else {
-        systray.show();
+        systray.Show();
     }
 
     refresh_systray = 0;
 }
 
 
-void Systraybar::draw_foreground(cairo_t* /* c */) {
+void Systraybar::DrawForeground(cairo_t* /* c */) {
     if (server.real_transparency || systray.alpha != 100 || systray.brightness != 0
         || systray.saturation != 0) {
         if (render_background) {
@@ -135,7 +135,7 @@ void Systraybar::draw_foreground(cairo_t* /* c */) {
 }
 
 
-bool Systraybar::resize() {
+bool Systraybar::Resize() {
     if (panel_horizontal) {
         icon_size = height;
     } else {
@@ -180,7 +180,7 @@ bool Systraybar::resize() {
 }
 
 
-void Systraybar::on_change_layout() {
+void Systraybar::OnChangeLayout() {
     // here, systray.posx/posy are defined by rendering engine. so we can calculate position of tray icon.
     int i, posx, posy;
     int start = panel->bg->border.width + panel->paddingy +
@@ -482,7 +482,7 @@ bool add_icon(Window id) {
     traywin->damage = 0;
 
     if (systray.on_screen == 0) {
-        systray.show();
+        systray.Show();
     }
 
     if (systray.sort == 3) {
@@ -561,7 +561,7 @@ void remove_icon(TrayWindow* traywin) {
     }
 
     if (count == 0) {
-        systray.hide();
+        systray.Hide();
     }
 
     // changed in systray

@@ -27,8 +27,8 @@ class Battery : public Area {
     int bat1_posy;
     int bat2_posy;
 
-    void draw_foreground(cairo_t*);
-    bool resize();
+    void DrawForeground(cairo_t*);
+    bool Resize();
 };
 
 enum chargestate {
