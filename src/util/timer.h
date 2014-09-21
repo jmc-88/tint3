@@ -43,10 +43,10 @@ typedef struct {
 **/
 
 /** default global data **/
-void default_timeout();
+void DefaultTimeout();
 
 /** freed memory : stops all timeouts **/
-void cleanup_timeout();
+void CleanupTimeout();
 
 /** installs a timeout with the first timeout of 'value_msec' and then a periodic timeout with
   * 'interval_msec'. '_callback' is the callback function when the timer reaches the timeout.
@@ -66,6 +66,6 @@ void stop_timeout(Timeout* t);
 void update_next_timeout();
 
 /** Callback of all expired timeouts **/
-void callback_timeout_expired();
+void CallbackTimeoutExpired();
 
 #endif // TIMER_H

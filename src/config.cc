@@ -234,7 +234,7 @@ void AddEntry(std::string const& key, char* value) {
 
         for (char item : panel_items_order) {
             if (item == 'L') {
-                launcher_enabled = 1;
+                launcher_enabled = true;
             }
 
             if (item == 'T') {
@@ -869,7 +869,7 @@ bool ReadFile(std::string const& path) {
 
 } // namespace config
 
-void default_config() {
+void DefaultConfig() {
     config_path.clear();
     snapshot_path.clear();
     new_config_file = 0;

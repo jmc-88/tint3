@@ -60,7 +60,7 @@ class Global_taskbar : public TaskbarBase {
 
 
 // default global data
-void default_taskbar();
+void DefaultTaskbar();
 
 // freed memory
 void cleanup_taskbar();

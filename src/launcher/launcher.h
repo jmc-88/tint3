@@ -62,10 +62,18 @@ class Launcher : public Area {
     std::vector<LauncherIcon*> list_icons;
     std::vector<IconTheme*> list_themes;
 
+    void CleanupTheme();
+
+    // Populates the list_themes list
+    void LoadThemes();
+
+    // Populates the list_icons list
+    void LoadIcons();
+
     bool Resize();
 };
 
-extern int launcher_enabled;
+extern bool launcher_enabled;
 extern int launcher_max_icon_size;
 extern int launcher_tooltip_enabled;
 extern int launcher_alpha;
@@ -75,18 +83,13 @@ extern std::string icon_theme_name;   // theme name
 extern XSettingsClient* xsettings_client;
 
 // default global data
-void default_launcher();
+void DefaultLauncher();
 
 // initialize launcher : y position, precision, ...
 void init_launcher();
 void init_launcher_panel(void* panel);
-void cleanup_launcher();
-void cleanup_launcher_theme(Launcher& launcher);
+void CleanupLauncher();
 
-// Populates the list_themes list
-void launcher_load_themes(Launcher* launcher);
-// Populates the list_icons list
-void launcher_load_icons(Launcher* launcher);
 void launcher_action(LauncherIcon* icon, XEvent* e);
 
 void test_launcher_read_desktop_file();

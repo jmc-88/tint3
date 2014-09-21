@@ -67,12 +67,12 @@ int apm_fd;
 
 namespace {
 
-void update_batteries(void* arg) {
+void UpdateBatteries(void* arg) {
     int old_percentage = battery_state.percentage;
     int16_t old_hours = battery_state.time.hours;
     int8_t old_minutes = battery_state.time.minutes;
 
-    update_battery();
+    UpdateBattery();
 
     if (old_percentage == battery_state.percentage
         && old_hours == battery_state.time.hours
@@ -102,7 +102,7 @@ void update_batteries(void* arg) {
 
 } // namespace
 
-void default_battery() {
+void DefaultBattery() {
     battery_enabled = 0;
     percentage_hide = 101;
     battery_low_cmd_send = 0;
@@ -122,7 +122,7 @@ void default_battery() {
 #endif
 }
 
-void cleanup_battery() {
+void CleanupBattery() {
     if (bat1_font_desc) {
         pango_font_description_free(bat1_font_desc);
     }
@@ -197,7 +197,7 @@ void init_battery() {
 
     if (battery_dir.empty()) {
         fprintf(stderr, "ERROR: battery applet can't found power_supply\n");
-        default_battery();
+        DefaultBattery();
         return;
     }
 
@@ -229,8 +229,8 @@ void init_battery() {
         FILE* fp4 = fopen(path_status.c_str(), "r");
 
         if (fp1 == nullptr || fp2 == nullptr || fp3 == nullptr || fp4 == nullptr) {
-            cleanup_battery();
-            default_battery();
+            CleanupBattery();
+            DefaultBattery();
             fprintf(stderr, "ERROR: battery applet can't open energy_now\n");
         }
 
@@ -254,7 +254,7 @@ void init_battery() {
 #endif
 
     if (battery_enabled && battery_timeout == 0) {
-        battery_timeout = add_timeout(10, 10000, update_batteries, 0);
+        battery_timeout = add_timeout(10, 10000, UpdateBatteries, 0);
     }
 }
 
@@ -279,7 +279,7 @@ void init_battery_panel(void* p) {
 }
 
 
-void update_battery() {
+void UpdateBattery() {
 #if !defined(__OpenBSD__) && !defined(__NetBSD__) && !defined(__FreeBSD__)
     // unused on OpenBSD, silence compiler warnings
     FILE* fp;

@@ -116,7 +116,7 @@ void free_ptr_array(gpointer data) {
 }
 
 
-void default_taskbar() {
+void DefaultTaskbar() {
     win_to_task_table = 0;
     urgent_timeout = 0;
     urgent_list.clear();

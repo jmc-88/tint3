@@ -61,25 +61,25 @@ Atom dnd_atom;
 int dnd_sent_request;
 char* dnd_launcher_exec;
 
-void signal_handler(int sig) {
+void SignalHandler(int sig) {
     // signal handler is light as it should be
     signal_pending = sig;
 }
 
 
-void init(int argc, char* argv[]) {
+void Init(int argc, char* argv[]) {
     // set global data
-    default_config();
-    default_timeout();
-    default_systray();
+    DefaultConfig();
+    DefaultTimeout();
+    DefaultSystray();
 #ifdef ENABLE_BATTERY
-    default_battery();
+    DefaultBattery();
 #endif
-    default_clock();
-    default_launcher();
-    default_taskbar();
-    default_tooltip();
-    default_panel();
+    DefaultClock();
+    DefaultLauncher();
+    DefaultTaskbar();
+    DefaultTooltip();
+    DefaultPanel();
 
     // read options
     for (int i = 1; i < argc; ++i) {
@@ -115,7 +115,7 @@ void init(int argc, char* argv[]) {
 
     struct sigaction sa;
     memset(&sa, 0, sizeof(sa));
-    sa.sa_handler = signal_handler;
+    sa.sa_handler = SignalHandler;
     sigaction(SIGUSR1, &sa, 0);
     sigaction(SIGINT, &sa, 0);
     sigaction(SIGTERM, &sa, 0);
@@ -142,14 +142,14 @@ void init(int argc, char* argv[]) {
 static int error_trap_depth = 0;
 
 static void
-error_trap_push(SnDisplay* display,
-                Display*   xdisplay) {
+ErrorTrapPush(SnDisplay* display,
+              Display*   xdisplay) {
     ++error_trap_depth;
 }
 
 static void
-error_trap_pop(SnDisplay* display,
-               Display*   xdisplay) {
+ErrorTrapPop(SnDisplay* display,
+             Display*   xdisplay) {
     if (error_trap_depth == 0) {
         fprintf(stderr, "Error trap underflow!\n");
         return;
@@ -159,7 +159,7 @@ error_trap_pop(SnDisplay* display,
     --error_trap_depth;
 }
 
-static void sigchld_handler(int /* signal */) {
+static void SigchldHandler(int /* signal */) {
     // Wait for all dead processes
     pid_t pid;
 
@@ -177,7 +177,7 @@ static void sigchld_handler(int /* signal */) {
 }
 #endif // HAVE_SN
 
-void init_X11() {
+void InitX11() {
     server.dsp = XOpenDisplay(nullptr);
 
     if (!server.dsp) {
@@ -194,12 +194,12 @@ void init_X11() {
 
 #ifdef HAVE_SN
     // Initialize startup-notification
-    server.sn_dsp = sn_display_new(server.dsp, error_trap_push, error_trap_pop);
+    server.sn_dsp = sn_display_new(server.dsp, ErrorTrapPush, ErrorTrapPop);
 
     // Setup a handler for child termination
     struct sigaction act;
     memset(&act, 0, sizeof(struct sigaction));
-    act.sa_handler = sigchld_handler;
+    act.sa_handler = SigchldHandler;
 
     if (sigaction(SIGCHLD, &act, 0)) {
         perror("sigaction");
@@ -238,15 +238,15 @@ void init_X11() {
 }
 
 
-void cleanup() {
-    cleanup_systray();
-    cleanup_tooltip();
-    cleanup_clock();
-    cleanup_launcher();
+void Cleanup() {
+    CleanupSystray();
+    CleanupTooltip();
+    CleanupClock();
+    CleanupLauncher();
 #ifdef ENABLE_BATTERY
-    cleanup_battery();
+    CleanupBattery();
 #endif
-    cleanup_panel();
+    CleanupPanel();
 
     if (default_icon) {
         imlib_context_set_image(default_icon);
@@ -256,7 +256,7 @@ void cleanup() {
     imlib_context_disconnect_display();
 
     CleanupServer();
-    cleanup_timeout();
+    CleanupTimeout();
 
     if (server.dsp) {
         XCloseDisplay(server.dsp);
@@ -264,7 +264,7 @@ void cleanup() {
 }
 
 
-void get_snapshot(const char* path) {
+void GetSnapshot(const char* path) {
     Panel* panel = &panel1[0];
 
     if (panel->width > server.monitor[0].width) {
@@ -293,7 +293,7 @@ void get_snapshot(const char* path) {
 }
 
 
-void window_action(Task* tsk, int action) {
+void WindowAction(Task* tsk, int action) {
     if (!tsk) {
         return;
     }
@@ -382,7 +382,7 @@ void window_action(Task* tsk, int action) {
 }
 
 
-bool tint3_handles_click(Panel* panel, XButtonEvent* e) {
+bool Tint3HandlesClick(Panel* panel, XButtonEvent* e) {
     Task* task = click_task(panel, e->x, e->y);
 
     if (task) {
@@ -416,7 +416,7 @@ bool tint3_handles_click(Panel* panel, XButtonEvent* e) {
 }
 
 
-void forward_click(XEvent* e) {
+void ForwardClick(XEvent* e) {
     // forward the click to the desktop window (thanks conky)
     XUngrabPointer(server.dsp, e->xbutton.time);
     e->xbutton.window = server.root_win;
@@ -430,7 +430,7 @@ void forward_click(XEvent* e) {
 }
 
 
-void event_button_press(XEvent* e) {
+void EventButtonPress(XEvent* e) {
     Panel* panel = get_panel(e->xany.window);
 
     if (!panel) {
@@ -438,8 +438,8 @@ void event_button_press(XEvent* e) {
     }
 
 
-    if (wm_menu && !tint3_handles_click(panel, &e->xbutton)) {
-        forward_click(e);
+    if (wm_menu && !Tint3HandlesClick(panel, &e->xbutton)) {
+        ForwardClick(e);
         return;
     }
 
@@ -450,7 +450,7 @@ void event_button_press(XEvent* e) {
     }
 }
 
-void event_button_motion_notify(XEvent* e) {
+void EventButtonMotionNotify(XEvent* e) {
     Panel* panel = get_panel(e->xany.window);
 
     if (!panel || !task_drag) {
@@ -519,15 +519,15 @@ void event_button_motion_notify(XEvent* e) {
     }
 }
 
-void event_button_release(XEvent* e) {
+void EventButtonRelease(XEvent* e) {
     Panel* panel = get_panel(e->xany.window);
 
     if (!panel) {
         return;
     }
 
-    if (wm_menu && !tint3_handles_click(panel, &e->xbutton)) {
-        forward_click(e);
+    if (wm_menu && !Tint3HandlesClick(panel, &e->xbutton)) {
+        ForwardClick(e);
 
         if (panel_layer == BOTTOM_LAYER) {
             XLowerWindow(server.dsp, panel->main_win);
@@ -615,7 +615,7 @@ void event_button_release(XEvent* e) {
     }
 
     // action on task
-    window_action(click_task(panel, e->xbutton.x, e->xbutton.y), action);
+    WindowAction(click_task(panel, e->xbutton.x, e->xbutton.y), action);
 
     // to keep window below
     if (panel_layer == BOTTOM_LAYER) {
@@ -624,14 +624,14 @@ void event_button_release(XEvent* e) {
 }
 
 
-void event_property_notify(XEvent* e) {
+void EventPropertyNotify(XEvent* e) {
     int i;
     Task* tsk;
     Window win = e->xproperty.window;
     Atom at = e->xproperty.atom;
 
     if (xsettings_client) {
-        xsettings_client_process_event(xsettings_client, e);
+        XSettingsClientProcessEvent(xsettings_client, e);
     }
 
     if (win == server.root_win) {
@@ -859,7 +859,7 @@ void event_property_notify(XEvent* e) {
 }
 
 
-void event_expose(XEvent* e) {
+void EventExpose(XEvent* e) {
     Panel* panel;
     panel = get_panel(e->xany.window);
 
@@ -872,7 +872,7 @@ void event_expose(XEvent* e) {
 }
 
 
-void event_configure_notify(Window win) {
+void EventConfigureNotify(Window win) {
     // change in root window (xrandr)
     if (win == server.root_win) {
         signal_pending = SIGUSR1;
@@ -930,14 +930,14 @@ char const* GetAtomName(Display* disp, Atom a) {
     return XGetAtomName(disp, a);
 }
 
-typedef struct Property {
+struct Property {
     unsigned char* data;
     int format, nitems;
     Atom type;
-} Property;
+};
 
 //This fetches all the data from a property
-struct Property read_property(Display* disp, Window w, Atom property) {
+Property ReadProperty(Display* disp, Window w, Atom property) {
     Atom actual_type;
     int actual_format;
     unsigned long nitems;
@@ -979,7 +979,7 @@ struct Property read_property(Display* disp, Window w, Atom property) {
 // This function takes a list of targets which can be converted to (atom_list, nitems)
 // and a list of acceptable targets with prioritees (datatypes). It returns the highest
 // entry in datatypes which is also in atom_list: ie it finds the best match.
-Atom pick_target_from_list(Display* disp, Atom* atom_list, int nitems) {
+Atom PickTargetFromList(Display* disp, Atom* atom_list, int nitems) {
     Atom to_be_requested = None;
     int i;
 
@@ -999,7 +999,7 @@ Atom pick_target_from_list(Display* disp, Atom* atom_list, int nitems) {
 
 // Finds the best target given up to three atoms provided (any can be None).
 // Useful for part of the Xdnd protocol.
-Atom pick_target_from_atoms(Display* disp, Atom t1, Atom t2, Atom t3) {
+Atom PickTargetFromAtoms(Display* disp, Atom t1, Atom t2, Atom t3) {
     Atom atoms[3];
     int n = 0;
 
@@ -1015,11 +1015,11 @@ Atom pick_target_from_atoms(Display* disp, Atom t1, Atom t2, Atom t3) {
         atoms[n++] = t3;
     }
 
-    return pick_target_from_list(disp, atoms, n);
+    return PickTargetFromList(disp, atoms, n);
 }
 
 // Finds the best target given a local copy of a property.
-Atom pick_target_from_targets(Display* disp, Property p) {
+Atom PickTargetFromTargets(Display* disp, Property p) {
     //The list of targets is a list of atoms, so it should have type XA_ATOM
     //but it may have the type TARGETS instead.
 
@@ -1032,11 +1032,11 @@ Atom pick_target_from_targets(Display* disp, Property p) {
     } else {
         Atom* atom_list = (Atom*)p.data;
 
-        return pick_target_from_list(disp, atom_list, p.nitems);
+        return PickTargetFromList(disp, atom_list, p.nitems);
     }
 }
 
-void dnd_enter(XClientMessageEvent* e) {
+void DragAndDropEnter(XClientMessageEvent* e) {
     dnd_atom = None;
     int more_than_3 = e->data.l[1] & 1;
     dnd_source_window = e->data.l[0];
@@ -1059,21 +1059,21 @@ void dnd_enter(XClientMessageEvent* e) {
     if (more_than_3) {
         //Fetch the list of possible conversions
         //Notice the similarity to TARGETS with paste.
-        Property p = read_property(server.dsp, dnd_source_window,
-                                   server.atom.XdndTypeList);
-        dnd_atom = pick_target_from_targets(server.dsp, p);
+        Property p = ReadProperty(server.dsp, dnd_source_window,
+                                  server.atom.XdndTypeList);
+        dnd_atom = PickTargetFromTargets(server.dsp, p);
         XFree(p.data);
     } else {
         //Use the available list
-        dnd_atom = pick_target_from_atoms(server.dsp, e->data.l[2], e->data.l[3],
-                                          e->data.l[4]);
+        dnd_atom = PickTargetFromAtoms(server.dsp, e->data.l[2], e->data.l[3],
+                                       e->data.l[4]);
     }
 
     fprintf(stderr, "DnD %s:%d: Requested type = %s\n", __FILE__, __LINE__,
             GetAtomName(server.dsp, dnd_atom));
 }
 
-void dnd_position(XClientMessageEvent* e) {
+void DragAndDropPosition(XClientMessageEvent* e) {
     dnd_target_window = e->window;
     int accept = 0;
     Panel* panel = get_panel(e->window);
@@ -1090,7 +1090,7 @@ void dnd_position(XClientMessageEvent* e) {
             set_desktop(task->desktop);
         }
 
-        window_action(task, TOGGLE);
+        WindowAction(task, TOGGLE);
     } else {
         LauncherIcon* icon = click_launcher_icon(panel, mapX, mapY);
 
@@ -1125,7 +1125,7 @@ void dnd_position(XClientMessageEvent* e) {
     XSendEvent(server.dsp, e->data.l[0], False, NoEventMask, (XEvent*)&se);
 }
 
-void dnd_drop(XClientMessageEvent* e) {
+void DragAndDropDrop(XClientMessageEvent* e) {
     if (dnd_target_window && dnd_launcher_exec) {
         if (dnd_version >= 1) {
             XConvertSelection(server.dsp, server.atom.XdndSelection, XA_STRING,
@@ -1156,8 +1156,8 @@ int main(int argc, char* argv[]) {
     GSList* it;
 
 start:
-    init(argc, argv);
-    init_X11();
+    Init(argc, argv);
+    InitX11();
 
     int i;
 
@@ -1169,15 +1169,15 @@ start:
 
     if (!i) {
         fprintf(stderr, "usage: tint3 [-c] <config_file>\n");
-        cleanup();
+        Cleanup();
         exit(1);
     }
 
-    init_panel();
+    InitPanel();
 
     if (!snapshot_path.empty()) {
-        get_snapshot(snapshot_path.c_str());
-        cleanup();
+        GetSnapshot(snapshot_path.c_str());
+        Cleanup();
         exit(0);
     }
 
@@ -1288,11 +1288,11 @@ start:
                 switch (e.type) {
                     case ButtonPress:
                         TooltipHide(0);
-                        event_button_press(&e);
+                        EventButtonPress(&e);
                         break;
 
                     case ButtonRelease:
-                        event_button_release(&e);
+                        EventButtonRelease(&e);
                         break;
 
                     case MotionNotify: {
@@ -1300,7 +1300,7 @@ start:
                                                        | Button5Mask;
 
                             if (e.xmotion.state & button_mask) {
-                                event_button_motion_notify(&e);
+                                EventButtonMotionNotify(&e);
                             }
 
                             Panel* panel = get_panel(e.xmotion.window);
@@ -1322,15 +1322,15 @@ start:
                         break;
 
                     case Expose:
-                        event_expose(&e);
+                        EventExpose(&e);
                         break;
 
                     case PropertyNotify:
-                        event_property_notify(&e);
+                        EventPropertyNotify(&e);
                         break;
 
                     case ConfigureNotify:
-                        event_configure_notify(e.xconfigure.window);
+                        EventConfigureNotify(e.xconfigure.window);
                         break;
 
                     case ReparentNotify:
@@ -1388,11 +1388,11 @@ start:
                             && e.xclient.format == 32 && e.xclient.window == net_sel_win) {
                             net_message(&e.xclient);
                         } else if (e.xclient.message_type == server.atom.XdndEnter) {
-                            dnd_enter(&e.xclient);
+                            DragAndDropEnter(&e.xclient);
                         } else if (e.xclient.message_type == server.atom.XdndPosition) {
-                            dnd_position(&e.xclient);
+                            DragAndDropPosition(&e.xclient);
                         } else if (e.xclient.message_type == server.atom.XdndDrop) {
-                            dnd_drop(&e.xclient);
+                            DragAndDropDrop(&e.xclient);
                         }
 
                         break;
@@ -1412,12 +1412,12 @@ start:
                                     GetAtomName(server.dsp, e.xselection.property));
 
                             if (e.xselection.property != None && dnd_launcher_exec) {
-                                Property prop = read_property(server.dsp, dnd_target_window, dnd_selection);
+                                Property prop = ReadProperty(server.dsp, dnd_target_window, dnd_selection);
 
                                 //If we're being given a list of targets (possible conversions)
                                 if (target == server.atom.TARGETS && !dnd_sent_request) {
                                     dnd_sent_request = 1;
-                                    dnd_atom = pick_target_from_targets(server.dsp, prop);
+                                    dnd_atom = PickTargetFromTargets(server.dsp, prop);
 
                                     if (dnd_atom == None) {
                                         fprintf(stderr, "No matching datatypes.\n");
@@ -1542,10 +1542,10 @@ start:
             }
         }
 
-        callback_timeout_expired();
+        CallbackTimeoutExpired();
 
         if (signal_pending) {
-            cleanup();
+            Cleanup();
 
             if (signal_pending == SIGUSR1) {
                 // restart tint3

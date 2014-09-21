@@ -52,7 +52,7 @@ bool clock_enabled;
 static Timeout* clock_timeout;
 
 
-void default_clock() {
+void DefaultClock() {
     clock_enabled = false;
     clock_timeout = nullptr;
     time1_format.clear();
@@ -67,7 +67,7 @@ void default_clock() {
     time2_font_desc = nullptr;
 }
 
-void cleanup_clock() {
+void CleanupClock() {
     if (time1_font_desc) {
         pango_font_description_free(time1_font_desc);
     }
@@ -91,7 +91,7 @@ void cleanup_clock() {
 }
 
 
-void update_clocks_sec(void* arg) {
+void UpdateClockSeconds(void* arg) {
     gettimeofday(&time_clock, 0);
     int i;
 
@@ -104,7 +104,7 @@ void update_clocks_sec(void* arg) {
     panel_refresh = 1;
 }
 
-void update_clocks_min(void* arg) {
+void UpdateClockMinutes(void* arg) {
     // remember old_sec because after suspend/hibernate the clock should be updated directly, and not
     // on next minute change
     time_t old_sec = time_clock.tv_sec;
@@ -123,7 +123,7 @@ void update_clocks_min(void* arg) {
     }
 }
 
-struct tm* clock_gettime_for_tz(std::string const& timezone) {
+struct tm* ClockGetTimeForTimezone(std::string const& timezone) {
     if (timezone.empty()) {
         return localtime(&time_clock.tv_sec);
     }
@@ -143,7 +143,7 @@ struct tm* clock_gettime_for_tz(std::string const& timezone) {
 
 std::string Clock::GetTooltipText() {
     strftime(buf_tooltip, sizeof(buf_tooltip), time_tooltip_format.c_str(),
-             clock_gettime_for_tz(time_tooltip_timezone));
+             ClockGetTimeForTimezone(time_tooltip_timezone));
     return buf_tooltip;
 }
 
@@ -158,9 +158,9 @@ void init_clock() {
                               || time1_format.find('r') != std::string::npos;
 
     if (has_seconds_format) {
-        clock_timeout = add_timeout(10, 1000, update_clocks_sec, 0);
+        clock_timeout = add_timeout(10, 1000, UpdateClockSeconds, 0);
     } else {
-        clock_timeout = add_timeout(10, 1000, update_clocks_min, 0);
+        clock_timeout = add_timeout(10, 1000, UpdateClockMinutes, 0);
     }
 }
 
@@ -187,7 +187,7 @@ void init_clock_panel(void* p) {
 
     if (!time_tooltip_format.empty()) {
         strftime(buf_tooltip, sizeof(buf_tooltip), time_tooltip_format.c_str(),
-                 clock_gettime_for_tz(time_tooltip_timezone));
+                 ClockGetTimeForTimezone(time_tooltip_timezone));
     }
 }
 
@@ -227,7 +227,7 @@ bool Clock::Resize() {
     need_redraw = true;
 
     strftime(buf_time, sizeof(buf_time), time1_format.c_str(),
-             clock_gettime_for_tz(time1_timezone));
+             ClockGetTimeForTimezone(time1_timezone));
 
     int time_height_ink = 0, time_height = 0, time_width = 0;
     int date_height_ink = 0, date_height = 0, date_width = 0;
@@ -236,7 +236,7 @@ bool Clock::Resize() {
 
     if (!time2_format.empty()) {
         strftime(buf_date, sizeof(buf_date), time2_format.c_str(),
-                 clock_gettime_for_tz(time2_timezone));
+                 ClockGetTimeForTimezone(time2_timezone));
         get_text_size2(time2_font_desc, &date_height_ink, &date_height, &date_width,
                        panel->height, panel->width, buf_date, strlen(buf_date));
     }

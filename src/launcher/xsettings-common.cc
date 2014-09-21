@@ -29,7 +29,7 @@
 #include "xsettings-common.h"
 
 XSettingsSetting*
-xsettings_setting_copy(XSettingsSetting* setting) {
+XSettingsSettingCopy(XSettingsSetting* setting) {
     XSettingsSetting* result = (XSettingsSetting*) malloc(sizeof * result);
 
     if (!result) {
@@ -85,7 +85,7 @@ err:
 }
 
 XSettingsList*
-xsettings_list_copy(XSettingsList* list) {
+XSettingsListCopy(XSettingsList* list) {
     XSettingsList* new_list = nullptr;
     XSettingsList* old_iter = list;
     XSettingsList* new_iter = nullptr;
@@ -97,7 +97,7 @@ xsettings_list_copy(XSettingsList* list) {
             goto error;
         }
 
-        new_node->setting = xsettings_setting_copy(old_iter->setting);
+        new_node->setting = XSettingsSettingCopy(old_iter->setting);
 
         if (!new_node->setting) {
             free(new_node);
@@ -117,19 +117,19 @@ xsettings_list_copy(XSettingsList* list) {
     return new_list;
 
 error:
-    xsettings_list_free(new_list);
+    XSettingsListFree(new_list);
     return nullptr;
 }
 
-int
-xsettings_setting_equal(XSettingsSetting* setting_a,
-                        XSettingsSetting* setting_b) {
+bool
+XSettingsSettingEqual(XSettingsSetting* setting_a,
+                      XSettingsSetting* setting_b) {
     if (setting_a->type != setting_b->type) {
-        return 0;
+        return false;
     }
 
     if (strcmp(setting_a->name, setting_b->name) != 0) {
-        return 0;
+        return false;
     }
 
     switch (setting_a->type) {
@@ -149,11 +149,11 @@ xsettings_setting_equal(XSettingsSetting* setting_a,
             break;
     }
 
-    return 0;
+    return false;
 }
 
 void
-xsettings_setting_free(XSettingsSetting* setting) {
+XSettingsSettingFree(XSettingsSetting* setting) {
     if (setting->type == XSETTINGS_TYPE_STRING) {
         free(setting->data.v_string);
     }
@@ -166,11 +166,11 @@ xsettings_setting_free(XSettingsSetting* setting) {
 }
 
 void
-xsettings_list_free(XSettingsList* list) {
+XSettingsListFree(XSettingsList* list) {
     while (list) {
         XSettingsList* next = list->next;
 
-        xsettings_setting_free(list->setting);
+        XSettingsSettingFree(list->setting);
         free(list);
 
         list = next;
@@ -178,8 +178,8 @@ xsettings_list_free(XSettingsList* list) {
 }
 
 XSettingsResult
-xsettings_list_insert(XSettingsList**    list,
-                      XSettingsSetting*  setting) {
+XSettingsListInsert(XSettingsList**    list,
+                    XSettingsSetting*  setting) {
     XSettingsList* last = nullptr;
     XSettingsList* node = (XSettingsList*) malloc(sizeof * node);
 
@@ -216,8 +216,8 @@ xsettings_list_insert(XSettingsList**    list,
 }
 
 XSettingsResult
-xsettings_list_delete(XSettingsList** list,
-                      const char*     name) {
+XSettingsListDelete(XSettingsList** list,
+                    const char*     name) {
     XSettingsList* iter;
     XSettingsList* last = nullptr;
 
@@ -231,7 +231,7 @@ xsettings_list_delete(XSettingsList** list,
                 *list = iter->next;
             }
 
-            xsettings_setting_free(iter->setting);
+            XSettingsSettingFree(iter->setting);
             free(iter);
 
             return XSETTINGS_SUCCESS;
@@ -245,8 +245,8 @@ xsettings_list_delete(XSettingsList** list,
 }
 
 XSettingsSetting*
-xsettings_list_lookup(XSettingsList* list,
-                      const char*    name) {
+XSettingsListLookup(XSettingsList* list,
+                    const char*    name) {
     XSettingsList* iter;
 
     iter = list;
@@ -263,7 +263,7 @@ xsettings_list_lookup(XSettingsList* list,
 }
 
 char
-xsettings_byte_order(void) {
+XSettingsByteOrder() {
     CARD32 myint = 0x01020304;
     return (*(char*)&myint == 1) ? MSBFirst : LSBFirst;
 }

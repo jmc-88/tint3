@@ -133,14 +133,14 @@ extern int  nb_panel;
 
 
 // default global data
-void default_panel();
+void DefaultPanel();
 
 // freed memory
-void cleanup_panel();
+void CleanupPanel();
 
 // realloc panels according to number of monitor
 // use panel_config as default value
-void init_panel();
+void InitPanel();
 
 void set_panel_items_order(Panel* p);
 void set_panel_properties(Panel* p);

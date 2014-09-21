@@ -37,7 +37,7 @@ void stop_tooltip_timeout();
 Tooltip g_tooltip;
 
 
-void default_tooltip() {
+void DefaultTooltip() {
     // give the tooltip some reasonable default values
     memset(&g_tooltip, 0, sizeof(Tooltip));
     g_tooltip.font_color.color[0] = 1;
@@ -46,7 +46,7 @@ void default_tooltip() {
     g_tooltip.font_color.alpha = 1;
 }
 
-void cleanup_tooltip() {
+void CleanupTooltip() {
     stop_tooltip_timeout();
     TooltipHide(0);
     TooltipCopyText(0);

@@ -55,10 +55,10 @@ extern int systray_enabled;
 extern int systray_max_icon_size;
 
 // default global data
-void default_systray();
+void DefaultSystray();
 
 // freed memory
-void cleanup_systray();
+void CleanupSystray();
 
 // initialize protocol and panel position
 void init_systray();

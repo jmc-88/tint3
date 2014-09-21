@@ -41,10 +41,10 @@ extern PangoFontDescription* time2_font_desc;
 extern bool clock_enabled;
 
 // default global data
-void default_clock();
+void DefaultClock();
 
 // freed memory
-void cleanup_clock();
+void CleanupClock();
 
 // initialize clock : y position, precision, ...
 void init_clock();

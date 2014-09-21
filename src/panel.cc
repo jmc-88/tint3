@@ -80,7 +80,7 @@ std::vector<Background*> backgrounds;
 
 Imlib_Image default_icon;
 
-void default_panel() {
+void DefaultPanel() {
     panel1 = 0;
     nb_panel = 0;
     default_icon = nullptr;
@@ -104,7 +104,7 @@ void default_panel() {
     backgrounds.push_back(transparent_bg);
 }
 
-void cleanup_panel() {
+void CleanupPanel() {
     if (!panel1) {
         return;
     }
@@ -143,7 +143,7 @@ void cleanup_panel() {
     }
 }
 
-void init_panel() {
+void InitPanel() {
     if (panel_config.monitor > (server.nb_monitor - 1)) {
         // server.nb_monitor minimum value is 1 (see get_monitors())
         fprintf(stderr,

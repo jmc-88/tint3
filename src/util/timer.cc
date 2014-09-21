@@ -88,12 +88,12 @@ bool compare_timeouts(Timeout const* t1, Timeout const* t2) {
 
 } // namespace
 
-void default_timeout() {
+void DefaultTimeout() {
     timeout_list.clear();
     multi_timeouts.clear();
 }
 
-void cleanup_timeout() {
+void CleanupTimeout() {
     for (auto const& t : timeout_list) {
         if (t->multi_timeout) {
             stop_multi_timeout(t);
@@ -176,7 +176,7 @@ void update_next_timeout() {
 }
 
 
-void callback_timeout_expired() {
+void CallbackTimeoutExpired() {
     auto it = timeout_list.begin();
 
     while (it != timeout_list.end()) {

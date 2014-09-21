@@ -44,10 +44,10 @@ extern Tooltip g_tooltip;
 
 
 // default global data
-void default_tooltip();
+void DefaultTooltip();
 
 // freed memory
-void cleanup_tooltip();
+void CleanupTooltip();
 
 void init_tooltip();
 void TooltipUpdate();

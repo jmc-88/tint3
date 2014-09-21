@@ -38,7 +38,7 @@
 #include "launcher.h"
 #include "util/fs.h"
 
-int launcher_enabled;
+bool launcher_enabled = false;
 int launcher_max_icon_size;
 int launcher_tooltip_enabled;
 int launcher_alpha;
@@ -51,7 +51,7 @@ XSettingsClient* xsettings_client;
 
 std::string icon_path(Launcher* launcher, std::string const& icon_name,
                       int size);
-void launcher_load_themes(Launcher* launcher);
+void LauncherLoadThemes(Launcher* launcher);
 void free_desktop_entry(DesktopEntry* entry);
 int launcher_read_desktop_file(const char* path, DesktopEntry* entry);
 Imlib_Image scale_icon(Imlib_Image original, int icon_size);
@@ -59,8 +59,8 @@ void free_icon(Imlib_Image icon);
 void free_icon_theme(IconTheme* theme);
 
 
-void default_launcher() {
-    launcher_enabled = 0;
+void DefaultLauncher() {
+    launcher_enabled = false;
     launcher_max_icon_size = 0;
     launcher_tooltip_enabled = 0;
     launcher_alpha = 100;
@@ -74,8 +74,8 @@ void default_launcher() {
 void init_launcher() {
     if (launcher_enabled) {
         // if XSETTINGS manager running, tint3 read the icon_theme_name.
-        xsettings_client = xsettings_client_new(server.dsp, server.screen,
-                                                xsettings_notify_cb, nullptr, nullptr);
+        xsettings_client = XSettingsClientNew(server.dsp, server.screen,
+                                              XSettingsNotifyCallback, nullptr, nullptr);
     }
 }
 
@@ -102,18 +102,18 @@ void init_launcher_panel(void* p) {
     launcher->on_screen = 1;
     panel_refresh = 1;
 
-    launcher_load_themes(launcher);
-    launcher_load_icons(launcher);
+    launcher->LoadThemes();
+    launcher->LoadIcons();
 }
 
 
-void cleanup_launcher() {
+void CleanupLauncher() {
     if (xsettings_client) {
-        xsettings_client_destroy(xsettings_client);
+        XSettingsClientDestroy(xsettings_client);
     }
 
     for (int i = 0 ; i < nb_panel ; i++) {
-        cleanup_launcher_theme(panel1[i].launcher);
+        panel1[i].launcher.CleanupTheme();
     }
 
     for (auto const& app : panel_config.launcher.list_apps) {
@@ -122,14 +122,14 @@ void cleanup_launcher() {
 
     panel_config.launcher.list_apps.clear();
     icon_theme_name.clear();
-    launcher_enabled = 0;
+    launcher_enabled = false;
 }
 
 
-void cleanup_launcher_theme(Launcher& launcher) {
-    launcher.FreeArea();
+void Launcher::CleanupTheme() {
+    FreeArea();
 
-    for (auto const& launcherIcon : launcher.list_icons) {
+    for (auto const& launcherIcon : list_icons) {
         if (launcherIcon) {
             free_icon(launcherIcon->icon_scaled);
             free_icon(launcherIcon->icon_original);
@@ -142,13 +142,13 @@ void cleanup_launcher_theme(Launcher& launcher) {
         delete launcherIcon;
     }
 
-    for (auto const& theme : launcher.list_themes) {
+    for (auto const& theme : list_themes) {
         free_icon_theme(theme);
         delete theme;
     }
 
-    launcher.list_icons.clear();
-    launcher.list_themes.clear();
+    list_icons.clear();
+    list_themes.clear();
 }
 
 
@@ -758,16 +758,16 @@ void test_launcher_read_theme_file() {
 
 
 // Populates the list_icons list
-void launcher_load_icons(Launcher* launcher) {
+void Launcher::LoadIcons() {
     // Load apps (.desktop style launcher items)
-    for (auto const& app : launcher->list_apps) {
+    for (auto const& app : list_apps) {
         DesktopEntry entry;
         launcher_read_desktop_file(app, &entry);
 
         if (entry.exec) {
             auto launcherIcon = new LauncherIcon();
-            launcherIcon->parent = launcher;
-            launcherIcon->panel = launcher->panel;
+            launcherIcon->parent = this;
+            launcherIcon->panel = panel;
             launcherIcon->size_mode = SIZE_BY_CONTENT;
             launcherIcon->need_resize = false;
             launcherIcon->need_redraw = true;
@@ -782,7 +782,7 @@ void launcher_load_icons(Launcher* launcher) {
             launcherIcon->icon_tooltip = entry.name ? strdup(entry.name) : strdup(
                                              entry.exec);
             free_desktop_entry(&entry);
-            launcher->list_icons.push_back(launcherIcon);
+            list_icons.push_back(launcherIcon);
             launcherIcon->AddArea();
         }
     }
@@ -790,7 +790,7 @@ void launcher_load_icons(Launcher* launcher) {
 
 
 // Populates the list_themes list
-void launcher_load_themes(Launcher* launcher) {
+void Launcher::LoadThemes() {
     // load the user theme, all the inherited themes recursively (DFS), and the hicolor theme
     // avoid inheritance loops
     if (icon_theme_name.empty()) {
@@ -833,7 +833,7 @@ void launcher_load_themes(Launcher* launcher) {
         auto theme = load_theme(name);
 
         if (theme != nullptr) {
-            launcher->list_themes.push_back(theme);
+            list_themes.push_back(theme);
 
             GSList* item = theme->list_inherits;
             int pos = 0;

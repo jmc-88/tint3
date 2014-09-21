@@ -43,15 +43,15 @@ typedef void (*XSettingsNotifyFunc)(const char* name, XSettingsAction action,
 typedef void (*XSettingsWatchFunc)(Window window, Bool is_start, long mask,
                                    void* cb_data);
 
-XSettingsClient* xsettings_client_new(Display* display, int screen,
-                                      XSettingsNotifyFunc notify, XSettingsWatchFunc watch, void* cb_data);
-void xsettings_client_destroy(XSettingsClient* client);
-Bool xsettings_client_process_event(XSettingsClient* client, XEvent* xev);
+XSettingsClient* XSettingsClientNew(Display* display, int screen,
+                                    XSettingsNotifyFunc notify, XSettingsWatchFunc watch, void* cb_data);
+void XSettingsClientDestroy(XSettingsClient* client);
+Bool XSettingsClientProcessEvent(XSettingsClient* client, XEvent* xev);
 
-void xsettings_notify_cb(const char* name, XSettingsAction action,
-                         XSettingsSetting* setting, void* data);
+void XSettingsNotifyCallback(const char* name, XSettingsAction action,
+                             XSettingsSetting* setting, void* data);
 
-XSettingsResult xsettings_client_get_setting(XSettingsClient* client,
+XSettingsResult XSettingsClientGetSetting(XSettingsClient* client,
         const char* name, XSettingsSetting** setting);
 
 #ifdef __cplusplus

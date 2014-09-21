@@ -54,14 +54,14 @@ int systray_max_icon_size;
 static Pixmap render_background;
 
 
-void default_systray() {
+void DefaultSystray() {
     render_background = 0;
     systray.alpha = 100;
     systray.sort = 3;
     systray.size_mode = SIZE_BY_CONTENT;
 }
 
-void cleanup_systray() {
+void CleanupSystray() {
     stop_net();
     systray_enabled = 0;
     systray_max_icon_size = 0;

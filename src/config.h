@@ -15,7 +15,7 @@ extern std::string config_path;
 extern std::string snapshot_path;
 
 // default global data
-void default_config();
+void DefaultConfig();
 
 namespace config {
 

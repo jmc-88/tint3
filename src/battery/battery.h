@@ -64,13 +64,13 @@ extern std::string path_current_now;
 extern std::string path_status;
 
 // default global data
-void default_battery();
+void DefaultBattery();
 
 // freed memory
-void cleanup_battery();
+void CleanupBattery();
 
 // initialize clock : y position, ...
-void update_battery();
+void UpdateBattery();
 
 void init_battery();
 void init_battery_panel(void* panel);
