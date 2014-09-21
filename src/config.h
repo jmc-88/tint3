@@ -17,8 +17,12 @@ extern std::string snapshot_path;
 // default global data
 void default_config();
 
-bool config_read_file(std::string const& path);
-bool config_read();
+namespace config {
+
+bool ReadFile(std::string const& path);
+bool Read();
+
+} // namespace config
 
 #endif
 

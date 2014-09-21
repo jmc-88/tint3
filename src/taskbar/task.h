@@ -55,8 +55,9 @@ class Global_task : public Area {
 // TODO: make this inherit from a common base class that exposes state_pixmap
 class Task : public Area {
     bool tooltip_enabled_;
+    std::string title_;
 
-    void draw_icon(int);
+    void DrawIcon(int);
 
   public:
     // TODO: group task with list of windows here
@@ -67,13 +68,15 @@ class Task : public Area {
     Pixmap state_pix[TASK_STATE_COUNT];
     unsigned int icon_width;
     unsigned int icon_height;
-    char* title;
     int urgent_tick;
 
     void DrawForeground(cairo_t* c);
-    const char* GetTooltipText();
+    std::string GetTooltipText();
+    bool UpdateTitle(); // TODO: find a more descriptive name
+    std::string GetTitle() const;
+    void SetTitle(std::string const& title);
     void OnChangeLayout();
-    Task& set_tooltip_enabled(bool);
+    Task& SetTooltipEnabled(bool);
 };
 
 extern Timeout* urgent_timeout;
@@ -83,7 +86,6 @@ Task* add_task(Window win);
 void remove_task(Task* tsk);
 
 void get_icon(Task* tsk);
-int  get_title(Task* tsk);
 void active_task();
 void set_task_state(Task* tsk, int state);
 void set_task_redraw(Task* tsk);

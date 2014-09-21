@@ -437,9 +437,9 @@ void Area::DrawForeground(cairo_t*) {
 }
 
 
-const char* Area::GetTooltipText() {
+std::string Area::GetTooltipText() {
     /* defaults to a no-op */
-    return nullptr;
+    return std::string();
 }
 
 

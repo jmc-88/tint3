@@ -22,10 +22,11 @@
 #include "panel.h"
 #include "util/timer.h"
 
+#include <string>
 
 typedef struct {
     Area* area; // never ever use the area attribute if you are not 100% sure that this area was not freed // don't you say?
-    char* tooltip_text;
+    std::string tooltip_text;
     Panel* panel;
     Window window;
     int show_timeout_msec;
@@ -49,11 +50,11 @@ void default_tooltip();
 void cleanup_tooltip();
 
 void init_tooltip();
-void tooltip_trigger_show(Area* area, Panel* p, XEvent* e);
-void tooltip_show(void* /*arg*/);
-void tooltip_update();
-void tooltip_trigger_hide();
-void tooltip_hide(void* /*arg*/);
-void tooltip_copy_text(Area* area);
+void TooltipUpdate();
+void TooltipTriggerHide();
+void TooltipTriggerShow(Area* area, Panel* p, XEvent* e);
+void TooltipHide(void* /*arg*/);
+void TooltipShow(void* /*arg*/);
+void TooltipCopyText(Area* area);
 
 #endif // TOOLTIP_H

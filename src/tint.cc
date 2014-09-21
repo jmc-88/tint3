@@ -185,12 +185,12 @@ void init_X11() {
         exit(0);
     }
 
-    server_init_atoms();
+    ServerInitAtoms();
     server.screen = DefaultScreen(server.dsp);
     server.root_win = RootWindow(server.dsp, server.screen);
     server.desktop = server_get_current_desktop();
-    server_init_visual();
-    XSetErrorHandler((XErrorHandler) server_catch_error);
+    ServerInitVisual();
+    XSetErrorHandler((XErrorHandler) ServerCatchError);
 
 #ifdef HAVE_SN
     // Initialize startup-notification
@@ -233,8 +233,8 @@ void init_X11() {
     }
 
     // get monitor and desktop config
-    get_monitors();
-    get_desktops();
+    GetMonitors();
+    GetDesktops();
 }
 
 
@@ -255,7 +255,7 @@ void cleanup() {
 
     imlib_context_disconnect_display();
 
-    cleanup_server();
+    CleanupServer();
     cleanup_timeout();
 
     if (server.dsp) {
@@ -273,7 +273,7 @@ void get_snapshot(const char* path) {
 
     panel->temp_pmap = XCreatePixmap(server.dsp, server.root_win, panel->width,
                                      panel->height, server.depth);
-    panel->render();
+    panel->Render();
 
     Imlib_Image img = nullptr;
     imlib_context_set_drawable(panel->temp_pmap);
@@ -794,10 +794,10 @@ void event_property_notify(XEvent* e) {
         // Window title changed
         if (at == server.atom._NET_WM_VISIBLE_NAME || at == server.atom._NET_WM_NAME
             || at == server.atom.WM_NAME) {
-            if (get_title(tsk)) {
+            if (tsk->UpdateTitle()) {
                 if (g_tooltip.mapped && (g_tooltip.area == (Area*)tsk)) {
-                    tooltip_copy_text((Area*)tsk);
-                    tooltip_update();
+                    TooltipCopyText(tsk);
+                    TooltipUpdate();
                 }
 
                 panel_refresh = 1;
@@ -1162,9 +1162,9 @@ start:
     int i;
 
     if (!config_path.empty()) {
-        i = config_read_file(config_path.c_str());
+        i = config::ReadFile(config_path.c_str());
     } else {
-        i = config_read();
+        i = config::Read();
     }
 
     if (!i) {
@@ -1218,7 +1218,7 @@ start:
 
                     panel->temp_pmap = XCreatePixmap(server.dsp, server.root_win, panel->width,
                                                      panel->height, server.depth);
-                    panel->render();
+                    panel->Render();
                     XCopyArea(server.dsp, panel->temp_pmap, panel->main_win, server.gc, 0, 0,
                               panel->width, panel->height, 0, 0);
                 }
@@ -1287,7 +1287,7 @@ start:
 
                 switch (e.type) {
                     case ButtonPress:
-                        tooltip_hide(0);
+                        TooltipHide(0);
                         event_button_press(&e);
                         break;
 
@@ -1306,19 +1306,19 @@ start:
                             Panel* panel = get_panel(e.xmotion.window);
                             Area* area = click_area(panel, e.xmotion.x, e.xmotion.y);
 
-                            const char* tooltip = area->GetTooltipText();
+                            std::string tooltip = area->GetTooltipText();
 
-                            if (tooltip != nullptr) {
-                                tooltip_trigger_show(area, panel, &e);
+                            if (!tooltip.empty()) {
+                                TooltipTriggerShow(area, panel, &e);
                             } else {
-                                tooltip_trigger_hide();
+                                TooltipTriggerHide();
                             }
 
                             break;
                         }
 
                     case LeaveNotify:
-                        tooltip_trigger_hide();
+                        TooltipTriggerHide();
                         break;
 
                     case Expose:
@@ -1494,7 +1494,7 @@ start:
                                     strcat(cmd, "\"");
                                     strcat(cmd, "&)");
                                     fprintf(stderr, "DnD %s:%d: Running command: %s\n", __FILE__, __LINE__, cmd);
-                                    tint_exec(cmd);
+                                    TintExec(cmd);
                                     free(cmd);
 
                                     // Reply OK.

@@ -665,13 +665,13 @@ void systray_render_icon_now(void* t) {
     DATA32* data = imlib_image_get_data();
 
     if (traywin->depth == 24) {
-        createHeuristicMask(data, traywin->width, traywin->height);
+        CreateHeuristicMask(data, traywin->width, traywin->height);
     }
 
     if (systray.alpha != 100 || systray.brightness != 0
         || systray.saturation != 0) {
-        adjust_asb(data, traywin->width, traywin->height, systray.alpha,
-                   (float)systray.saturation / 100, (float)systray.brightness / 100);
+        AdjustAsb(data, traywin->width, traywin->height, systray.alpha,
+                  (float)systray.saturation / 100, (float)systray.brightness / 100);
     }
 
     imlib_image_put_back_data(data);
@@ -679,8 +679,8 @@ void systray_render_icon_now(void* t) {
               traywin->x - systray.posx, traywin->y - systray.posy, traywin->width,
               traywin->height, traywin->x - systray.posx,
               traywin->y - systray.posy);
-    render_image(systray.pix, traywin->x - systray.posx,
-                 traywin->y - systray.posy, traywin->width, traywin->height);
+    RenderImage(systray.pix, traywin->x - systray.posx,
+                traywin->y - systray.posy, traywin->width, traywin->height);
     XCopyArea(server.dsp, systray.pix, panel->main_win, server.gc,
               traywin->x - systray.posx, traywin->y - systray.posy, traywin->width,
               traywin->height, traywin->x, traywin->y);

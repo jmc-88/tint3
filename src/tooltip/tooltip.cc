@@ -48,8 +48,8 @@ void default_tooltip() {
 
 void cleanup_tooltip() {
     stop_tooltip_timeout();
-    tooltip_hide(0);
-    tooltip_copy_text(0);
+    TooltipHide(0);
+    TooltipCopyText(0);
 
     if (g_tooltip.window) {
         XDestroyWindow(server.dsp, g_tooltip.window);
@@ -88,7 +88,7 @@ void init_tooltip() {
 }
 
 
-void tooltip_trigger_show(Area* area, Panel* p, XEvent* e) {
+void TooltipTriggerShow(Area* area, Panel* p, XEvent* e) {
     // Position the tooltip in the center of the area
     x = area->posx + area->width / 2 + e->xmotion.x_root - e->xmotion.x;
     y = area->posy + area->height / 2 + e->xmotion.y_root - e->xmotion.y;
@@ -100,8 +100,8 @@ void tooltip_trigger_show(Area* area, Panel* p, XEvent* e) {
     g_tooltip.panel = p;
 
     if (g_tooltip.mapped && g_tooltip.area != area) {
-        tooltip_copy_text(area);
-        tooltip_update();
+        TooltipCopyText(area);
+        TooltipUpdate();
         stop_tooltip_timeout();
     } else if (!g_tooltip.mapped) {
         start_show_timeout();
@@ -109,7 +109,7 @@ void tooltip_trigger_show(Area* area, Panel* p, XEvent* e) {
 }
 
 
-void tooltip_show(void* arg) {
+void TooltipShow(void* arg) {
     int mx, my;
     Window w;
     XTranslateCoordinates(server.dsp, server.root_win, g_tooltip.panel->main_win,
@@ -125,10 +125,10 @@ void tooltip_show(void* arg) {
     stop_tooltip_timeout();
 
     if (!g_tooltip.mapped) {
-        tooltip_copy_text(area);
+        TooltipCopyText(area);
         g_tooltip.mapped = True;
         XMapWindow(server.dsp, g_tooltip.window);
-        tooltip_update();
+        TooltipUpdate();
         XFlush(server.dsp);
     }
 }
@@ -143,7 +143,7 @@ void tooltip_update_geometry() {
     c = cairo_create(cs);
     layout = pango_cairo_create_layout(c);
     pango_layout_set_font_description(layout, g_tooltip.font_desc);
-    pango_layout_set_text(layout, g_tooltip.tooltip_text, -1);
+    pango_layout_set_text(layout, g_tooltip.tooltip_text.c_str(), -1);
     PangoRectangle r1, r2;
     pango_layout_get_pixel_extents(layout, &r1, &r2);
     width = 2 * g_tooltip.bg->border.width + 2 * g_tooltip.paddingx + r2.width;
@@ -225,9 +225,9 @@ void tooltip_adjust_geometry() {
     }
 }
 
-void tooltip_update() {
-    if (!g_tooltip.tooltip_text) {
-        tooltip_hide(0);
+void TooltipUpdate() {
+    if (g_tooltip.tooltip_text.empty()) {
+        TooltipHide(0);
         return;
     }
 
@@ -273,7 +273,7 @@ void tooltip_update() {
     cairo_set_source_rgba(c, fc.color[0], fc.color[1], fc.color[2], fc.alpha);
     layout = pango_cairo_create_layout(c);
     pango_layout_set_font_description(layout, g_tooltip.font_desc);
-    pango_layout_set_text(layout, g_tooltip.tooltip_text, -1);
+    pango_layout_set_text(layout, g_tooltip.tooltip_text.c_str(), -1);
     PangoRectangle r1, r2;
     pango_layout_get_pixel_extents(layout, &r1, &r2);
     pango_layout_set_width(layout, width * PANGO_SCALE);
@@ -290,9 +290,9 @@ void tooltip_update() {
 }
 
 
-void tooltip_trigger_hide() {
+void TooltipTriggerHide() {
     if (g_tooltip.mapped) {
-        tooltip_copy_text(0);
+        TooltipCopyText(0);
         start_hide_timeout();
     } else {
         // tooltip not visible yet, but maybe a timeout is still pending
@@ -301,7 +301,7 @@ void tooltip_trigger_hide() {
 }
 
 
-void tooltip_hide(void* arg) {
+void TooltipHide(void* arg) {
     stop_tooltip_timeout();
 
     if (g_tooltip.mapped) {
@@ -314,10 +314,10 @@ void tooltip_hide(void* arg) {
 
 void start_show_timeout() {
     if (g_tooltip.timeout) {
-        change_timeout(g_tooltip.timeout, g_tooltip.show_timeout_msec, 0, tooltip_show,
+        change_timeout(g_tooltip.timeout, g_tooltip.show_timeout_msec, 0, TooltipShow,
                        0);
     } else {
-        g_tooltip.timeout = add_timeout(g_tooltip.show_timeout_msec, 0, tooltip_show,
+        g_tooltip.timeout = add_timeout(g_tooltip.show_timeout_msec, 0, TooltipShow,
                                         0);
     }
 }
@@ -325,10 +325,10 @@ void start_show_timeout() {
 
 void start_hide_timeout() {
     if (g_tooltip.timeout) {
-        change_timeout(g_tooltip.timeout, g_tooltip.hide_timeout_msec, 0, tooltip_hide,
+        change_timeout(g_tooltip.timeout, g_tooltip.hide_timeout_msec, 0, TooltipHide,
                        0);
     } else {
-        g_tooltip.timeout = add_timeout(g_tooltip.hide_timeout_msec, 0, tooltip_hide,
+        g_tooltip.timeout = add_timeout(g_tooltip.hide_timeout_msec, 0, TooltipHide,
                                         0);
     }
 }
@@ -342,14 +342,15 @@ void stop_tooltip_timeout() {
 }
 
 
-void tooltip_copy_text(Area* area) {
-    free(g_tooltip.tooltip_text);
-    g_tooltip.tooltip_text = 0;
+void TooltipCopyText(Area* area) {
+    g_tooltip.tooltip_text.clear();
 
-    const char* tooltip = area->GetTooltipText();
+    if (area) {
+        std::string tooltip = area->GetTooltipText();
 
-    if (area && tooltip != nullptr) {
-        g_tooltip.tooltip_text = strdup(tooltip);
+        if (!tooltip.empty()) {
+            g_tooltip.tooltip_text.assign(tooltip);
+        }
     }
 
     g_tooltip.area = area;

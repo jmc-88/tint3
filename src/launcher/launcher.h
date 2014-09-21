@@ -27,7 +27,7 @@ class LauncherIcon : public Area {
     int x, y;
 
     void DrawForeground(cairo_t*);
-    const char* GetTooltipText();
+    std::string GetTooltipText();
     void OnChangeLayout();
 };
 

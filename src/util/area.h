@@ -24,8 +24,8 @@
 #include <cairo.h>
 #include <cairo-xlib.h>
 
+#include <string>
 #include <vector>
-
 
 typedef struct {
     double color[3];
@@ -102,7 +102,7 @@ class Area {
     int on_changed;
     virtual void OnChangeLayout();
 
-    virtual const char* GetTooltipText();
+    virtual std::string GetTooltipText();
 
     void RemoveArea();
     void AddArea();
@@ -136,4 +136,3 @@ void draw_rect(cairo_t* c, double x, double y, double w, double h, double r);
 void clear_pixmap(Pixmap p, int x, int y, int w, int h);
 
 #endif
-

@@ -141,7 +141,7 @@ struct tm* clock_gettime_for_tz(std::string const& timezone) {
     return result;
 }
 
-const char* Clock::GetTooltipText() {
+std::string Clock::GetTooltipText() {
     strftime(buf_tooltip, sizeof(buf_tooltip), time_tooltip_format.c_str(),
              clock_gettime_for_tz(time_tooltip_timezone));
     return buf_tooltip;
@@ -281,8 +281,8 @@ bool Clock::Resize() {
 
 void clock_action(int button) {
     if (button == 1) {
-        tint_exec(clock_lclick_command);
+        TintExec(clock_lclick_command);
     } else if (button == 2) {
-        tint_exec(clock_rclick_command);
+        TintExec(clock_rclick_command);
     }
 }

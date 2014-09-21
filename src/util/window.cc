@@ -38,42 +38,42 @@
 
 
 void set_active(Window win) {
-    send_event32(win, server.atom._NET_ACTIVE_WINDOW, 2, CurrentTime, 0);
+    SendEvent32(win, server.atom._NET_ACTIVE_WINDOW, 2, CurrentTime, 0);
 }
 
 
 void set_desktop(int desktop) {
-    send_event32(server.root_win, server.atom._NET_CURRENT_DESKTOP, desktop, 0, 0);
+    SendEvent32(server.root_win, server.atom._NET_CURRENT_DESKTOP, desktop, 0, 0);
 }
 
 
 void windows_set_desktop(Window win, int desktop) {
-    send_event32(win, server.atom._NET_WM_DESKTOP, desktop, 2, 0);
+    SendEvent32(win, server.atom._NET_WM_DESKTOP, desktop, 2, 0);
 }
 
 
 void set_close(Window win) {
-    send_event32(win, server.atom._NET_CLOSE_WINDOW, 0, 2, 0);
+    SendEvent32(win, server.atom._NET_CLOSE_WINDOW, 0, 2, 0);
 }
 
 
 void window_toggle_shade(Window win) {
-    send_event32(win, server.atom._NET_WM_STATE, 2,
-                 server.atom._NET_WM_STATE_SHADED, 0);
+    SendEvent32(win, server.atom._NET_WM_STATE, 2,
+                server.atom._NET_WM_STATE_SHADED, 0);
 }
 
 
 void window_maximize_restore(Window win) {
-    send_event32(win, server.atom._NET_WM_STATE, 2,
-                 server.atom._NET_WM_STATE_MAXIMIZED_VERT, 0);
-    send_event32(win, server.atom._NET_WM_STATE, 2,
-                 server.atom._NET_WM_STATE_MAXIMIZED_HORZ, 0);
+    SendEvent32(win, server.atom._NET_WM_STATE, 2,
+                server.atom._NET_WM_STATE_MAXIMIZED_VERT, 0);
+    SendEvent32(win, server.atom._NET_WM_STATE, 2,
+                server.atom._NET_WM_STATE_MAXIMIZED_HORZ, 0);
 }
 
 
 int window_is_hidden(Window win) {
     int count;
-    Atom* at = static_cast<Atom*>(server_get_property(
+    Atom* at = static_cast<Atom*>(ServerGetProperty(
                                       win, server.atom._NET_WM_STATE, XA_ATOM, &count));
 
     int i;
@@ -97,7 +97,7 @@ int window_is_hidden(Window win) {
 
     XFree(at);
 
-    at = static_cast<Atom*>(server_get_property(
+    at = static_cast<Atom*>(ServerGetProperty(
                                 win, server.atom._NET_WM_WINDOW_TYPE, XA_ATOM, &count));
 
     for (i = 0; i < count; ++i) {
@@ -127,7 +127,7 @@ int window_is_hidden(Window win) {
 
 
 int window_get_desktop(Window win) {
-    return get_property32(win, server.atom._NET_WM_DESKTOP, XA_CARDINAL);
+    return GetProperty32(win, server.atom._NET_WM_DESKTOP, XA_CARDINAL);
 }
 
 
@@ -161,7 +161,7 @@ int window_is_iconified(Window win) {
     // EWMH specification : minimization of windows use _NET_WM_STATE_HIDDEN.
     // WM_STATE is not accurate for shaded window and in multi_desktop mode.
     int count;
-    Atom* at = static_cast<Atom*>(server_get_property(
+    Atom* at = static_cast<Atom*>(ServerGetProperty(
                                       win, server.atom._NET_WM_STATE, XA_ATOM, &count));
 
     for (int i = 0; i < count; i++) {
@@ -178,7 +178,7 @@ int window_is_iconified(Window win) {
 
 int window_is_urgent(Window win) {
     int count;
-    Atom* at = static_cast<Atom*>(server_get_property(
+    Atom* at = static_cast<Atom*>(ServerGetProperty(
                                       win, server.atom._NET_WM_STATE, XA_ATOM, &count));
 
     for (int i = 0; i < count; i++) {
@@ -195,7 +195,7 @@ int window_is_urgent(Window win) {
 
 int window_is_skip_taskbar(Window win) {
     int count;
-    Atom* at = static_cast<Atom*>(server_get_property(
+    Atom* at = static_cast<Atom*>(ServerGetProperty(
                                       win, server.atom._NET_WM_STATE, XA_ATOM, &count));
 
     for (int i = 0; i < count; ++i) {
@@ -211,14 +211,14 @@ int window_is_skip_taskbar(Window win) {
 
 
 int server_get_number_of_desktop() {
-    return get_property32(server.root_win, server.atom._NET_NUMBER_OF_DESKTOPS,
-                          XA_CARDINAL);
+    return GetProperty32(server.root_win, server.atom._NET_NUMBER_OF_DESKTOPS,
+                         XA_CARDINAL);
 }
 
 
 std::vector<std::string> server_get_desktop_names() {
     int count;
-    char* data_ptr = static_cast<char*>(server_get_property(
+    char* data_ptr = static_cast<char*>(ServerGetProperty(
                                             server.root_win,
                                             server.atom._NET_DESKTOP_NAMES,
                                             server.atom.UTF8_STRING,
@@ -247,14 +247,14 @@ std::vector<std::string> server_get_desktop_names() {
 
 
 int server_get_current_desktop() {
-    return get_property32(server.root_win, server.atom._NET_CURRENT_DESKTOP,
-                          XA_CARDINAL);
+    return GetProperty32(server.root_win, server.atom._NET_CURRENT_DESKTOP,
+                         XA_CARDINAL);
 }
 
 
 Window window_get_active() {
-    return (Window) get_property32(server.root_win, server.atom._NET_ACTIVE_WINDOW,
-                                   XA_WINDOW);
+    return (Window) GetProperty32(server.root_win, server.atom._NET_ACTIVE_WINDOW,
+                                  XA_WINDOW);
 }
 
 

@@ -134,22 +134,22 @@ extern Server_global server;
 
 
 // freed memory
-void cleanup_server();
+void CleanupServer();
 
-void send_event32(Window win, Atom at, long data1, long data2, long data3);
-int  get_property32(Window win, Atom at, Atom type);
-void* server_get_property(Window win, Atom at, Atom type, int* num_results);
+void SendEvent32(Window win, Atom at, long data1, long data2, long data3);
+int  GetProperty32(Window win, Atom at, Atom type);
+void* ServerGetProperty(Window win, Atom at, Atom type, int* num_results);
 Atom server_get_atom(char* atom_name);
-void server_catch_error(Display* d, XErrorEvent* ev);
-void server_init_atoms();
-void server_init_visual();
+void ServerCatchError(Display* d, XErrorEvent* ev);
+void ServerInitAtoms();
+void ServerInitVisual();
 
 // detect root background
-void get_root_pixmap();
+void GetRootPixmap();
 
 // detect monitors and desktops
-void get_monitors();
-void get_desktops();
+void GetMonitors();
+void GetDesktops();
 
 
 #endif

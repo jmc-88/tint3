@@ -119,8 +119,11 @@ class Panel : public Area {
     Pixmap hidden_pixmap;
     Timeout* autohide_timeout;
 
-    void render();
+    void Render();
     bool Resize();
+
+    // TODO: this should be private
+    void InitSizeAndPosition();
 };
 
 
@@ -138,8 +141,6 @@ void cleanup_panel();
 // realloc panels according to number of monitor
 // use panel_config as default value
 void init_panel();
-
-void init_panel_size_and_position(Panel* panel);
 
 void set_panel_items_order(Panel* p);
 void set_panel_properties(Panel* p);

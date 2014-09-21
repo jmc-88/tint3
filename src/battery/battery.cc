@@ -460,7 +460,7 @@ void update_battery() {
 
     if (battery_low_status > new_percentage
         && battery_state.state == BATTERY_DISCHARGING && !battery_low_cmd_send) {
-        tint_exec(battery_low_cmd);
+        TintExec(battery_low_cmd);
         battery_low_cmd_send = 1;
     }
 

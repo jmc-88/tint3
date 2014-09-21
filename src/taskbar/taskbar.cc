@@ -392,7 +392,7 @@ void task_refresh_tasklist() {
     }
 
     int num_results;
-    Window* win = static_cast<Window*>(server_get_property(
+    Window* win = static_cast<Window*>(ServerGetProperty(
                                            server.root_win,
                                            server.atom._NET_CLIENT_LIST,
                                            XA_WINDOW,

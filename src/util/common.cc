@@ -35,7 +35,7 @@
 
 namespace {
 
-unsigned int hex_char_to_int(char c) {
+unsigned int HexCharToInt(char c) {
     c = std::tolower(c);
 
     if (c >= '0' && c <= '9') {
@@ -49,8 +49,8 @@ unsigned int hex_char_to_int(char c) {
     return 0;
 }
 
-bool hex_to_rgb(char const* hex, unsigned int* r, unsigned int* g,
-                unsigned int* b) {
+bool HexToRgb(char const* hex, unsigned int* r, unsigned int* g,
+              unsigned int* b) {
     if (hex == nullptr || hex[0] != '#') {
         return false;
     }
@@ -58,17 +58,17 @@ bool hex_to_rgb(char const* hex, unsigned int* r, unsigned int* g,
     size_t len = strlen(hex);
 
     if (len == 3 + 1) {
-        (*r) = hex_char_to_int(hex[1]);
-        (*g) = hex_char_to_int(hex[2]);
-        (*b) = hex_char_to_int(hex[3]);
+        (*r) = HexCharToInt(hex[1]);
+        (*g) = HexCharToInt(hex[2]);
+        (*b) = HexCharToInt(hex[3]);
     } else if (len == 6 + 1) {
-        (*r) = hex_char_to_int(hex[1]) * 16 + hex_char_to_int(hex[2]);
-        (*g) = hex_char_to_int(hex[3]) * 16 + hex_char_to_int(hex[4]);
-        (*b) = hex_char_to_int(hex[5]) * 16 + hex_char_to_int(hex[6]);
+        (*r) = HexCharToInt(hex[1]) * 16 + HexCharToInt(hex[2]);
+        (*g) = HexCharToInt(hex[3]) * 16 + HexCharToInt(hex[4]);
+        (*b) = HexCharToInt(hex[5]) * 16 + HexCharToInt(hex[6]);
     } else if (len == 12 + 1) {
-        (*r) = hex_char_to_int(hex[1]) * 16 + hex_char_to_int(hex[2]);
-        (*g) = hex_char_to_int(hex[5]) * 16 + hex_char_to_int(hex[6]);
-        (*b) = hex_char_to_int(hex[9]) * 16 + hex_char_to_int(hex[10]);
+        (*r) = HexCharToInt(hex[1]) * 16 + HexCharToInt(hex[2]);
+        (*g) = HexCharToInt(hex[5]) * 16 + HexCharToInt(hex[6]);
+        (*b) = HexCharToInt(hex[9]) * 16 + HexCharToInt(hex[10]);
     } else {
         return false;
     }
@@ -109,7 +109,7 @@ std::string& StringTrim(std::string& str) {
     return str;
 }
 
-void tint_exec(std::string const& command) {
+void TintExec(std::string const& command) {
     if (!command.empty()) {
         if (fork() == 0) {
             // change for the fork the signal mask
@@ -122,10 +122,10 @@ void tint_exec(std::string const& command) {
     }
 }
 
-bool get_color(char const* hex, double* rgb) {
+bool GetColor(char const* hex, double* rgb) {
     unsigned int r, g, b;
 
-    if (!hex_to_rgb(hex, &r, &g, &b)) {
+    if (!HexToRgb(hex, &r, &g, &b)) {
         return false;
     }
 
@@ -136,7 +136,7 @@ bool get_color(char const* hex, double* rgb) {
 }
 
 
-void extract_values(char* value, char** value1, char** value2, char** value3) {
+void ExtractValues(char* value, char** value1, char** value2, char** value3) {
     if (*value1) {
         free(*value1);
     }
@@ -184,9 +184,9 @@ void extract_values(char* value, char** value1, char** value2, char** value3) {
 }
 
 
-void adjust_asb(DATA32* data, unsigned int w, unsigned int h, int alpha,
-                float satur,
-                float bright) {
+void AdjustAsb(DATA32* data, unsigned int w, unsigned int h, int alpha,
+               float satur,
+               float bright) {
     for (unsigned int y = 0; y < h; ++y) {
         unsigned int id = y * w;
 
@@ -328,23 +328,23 @@ void adjust_asb(DATA32* data, unsigned int w, unsigned int h, int alpha,
 }
 
 
-void createHeuristicMask(DATA32* data, int w, int h) {
+void CreateHeuristicMask(DATA32* data, int w, int h) {
     // first we need to find the mask color, therefore we check all 4 edge pixel and take the color which
     // appears most often (we only need to check three edges, the 4th is implicitly clear)
-    unsigned int topLeft = data[0], topRight = data[w - 1],
+    unsigned int top_left = data[0], top_right = data[w - 1],
                  bottomLeft = data[w * h - w], bottomRight = data[w * h - 1];
-    int max = (topLeft == topRight) + (topLeft == bottomLeft) +
-              (topLeft == bottomRight);
+    int max = (top_left == top_right) + (top_left == bottomLeft) +
+              (top_left == bottomRight);
     int maskPos = 0;
 
-    if (max < (topRight == topLeft) + (topRight == bottomLeft) +
-        (topRight == bottomRight)) {
-        max = (topRight == topLeft) + (topRight == bottomLeft) +
-              (topRight == bottomRight);
+    if (max < (top_right == top_left) + (top_right == bottomLeft) +
+        (top_right == bottomRight)) {
+        max = (top_right == top_left) + (top_right == bottomLeft) +
+              (top_right == bottomRight);
         maskPos = w - 1;
     }
 
-    if (max < (bottomLeft == topRight) + (bottomLeft == topLeft) +
+    if (max < (bottomLeft == top_right) + (bottomLeft == top_left) +
         (bottomLeft == bottomRight)) {
         maskPos = w * h - w;
     }
@@ -354,9 +354,8 @@ void createHeuristicMask(DATA32* data, int w, int h) {
     unsigned char b = udata[4 * maskPos];
     unsigned char g = udata[4 * maskPos + 1];
     unsigned char r = udata[4 * maskPos + 1];
-    int i;
 
-    for (i = 0; i < h * w; ++i) {
+    for (int i = 0; i < h * w; ++i) {
         if (b - udata[0] == 0 && g - udata[1] == 0 && r - udata[2] == 0) {
             udata[3] = 0;
         }
@@ -366,7 +365,7 @@ void createHeuristicMask(DATA32* data, int w, int h) {
 }
 
 
-void render_image(Drawable d, int x, int y, int w, int h) {
+void RenderImage(Drawable d, int x, int y, int w, int h) {
     // in real_transparency mode imlib_render_image_on_drawable does not the right thing, because
     // the operation is IMLIB_OP_COPY, but we would need IMLIB_OP_OVER (which does not exist)
     // Therefore we have to do it with the XRender extension (i.e. copy what imlib is doing internally)

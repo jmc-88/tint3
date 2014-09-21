@@ -67,14 +67,9 @@ std::string snapshot_path;
 static int new_config_file;
 
 
-void default_config() {
-    config_path.clear();
-    snapshot_path.clear();
-    new_config_file = 0;
-}
+namespace {
 
-
-void get_action(char* event, int* action) {
+void GetAction(char* event, int* action) {
     if (strcmp(event, "none") == 0) {
         *action = NONE;
     } else if (strcmp(event, "close") == 0) {
@@ -101,7 +96,7 @@ void get_action(char* event, int* action) {
 }
 
 
-int get_task_status(char* status) {
+int GetTaskStatus(char* status) {
     if (strcmp(status, "active") == 0) {
         return TASK_ACTIVE;
     }
@@ -117,8 +112,7 @@ int get_task_status(char* status) {
     return TASK_NORMAL;
 }
 
-
-int config_get_monitor(char* monitor) {
+int ConfigGetMonitor(char* monitor) {
     if (strcmp(monitor, "all") != 0) {
         char* endptr;
         int ret_int = strtol(monitor, &endptr, 10);
@@ -160,9 +154,7 @@ gchar** regex_split(char const* pattern, char const* string) {
                static_cast<GRegexMatchFlags>(0));
 }
 
-namespace {
-
-Background* get_background_from_id(size_t id) {
+Background* GetBackgroundFromId(size_t id) {
     try {
         return backgrounds.at(id);
     } catch (std::out_of_range) {
@@ -170,11 +162,9 @@ Background* get_background_from_id(size_t id) {
     }
 }
 
-Background* get_background_from_id(char const* id) {
-    return get_background_from_id(atoi(id));
+Background* GetBackgroundFromId(char const* id) {
+    return GetBackgroundFromId(atoi(id));
 }
-
-} // namespace
 
 void AddEntry(std::string const& key, char* value) {
     char* value1 = 0, *value2 = 0, *value3 = 0;
@@ -189,8 +179,8 @@ void AddEntry(std::string const& key, char* value) {
         backgrounds.back()->border.width = atoi(value);
     } else if (key == "background_color") {
         auto bg = backgrounds.back();
-        extract_values(value, &value1, &value2, &value3);
-        get_color(value1, bg->back.color);
+        ExtractValues(value, &value1, &value2, &value3);
+        GetColor(value1, bg->back.color);
 
         if (value2) {
             bg->back.alpha = (atoi(value2) / 100.0);
@@ -199,8 +189,8 @@ void AddEntry(std::string const& key, char* value) {
         }
     } else if (key == "border_color") {
         auto bg = backgrounds.back();
-        extract_values(value, &value1, &value2, &value3);
-        get_color(value1, bg->border.color);
+        ExtractValues(value, &value1, &value2, &value3);
+        GetColor(value1, bg->border.color);
 
         if (value2) {
             bg->border.alpha = (atoi(value2) / 100.0);
@@ -211,9 +201,9 @@ void AddEntry(std::string const& key, char* value) {
 
     /* Panel */
     else if (key == "panel_monitor") {
-        panel_config.monitor = config_get_monitor(value);
+        panel_config.monitor = ConfigGetMonitor(value);
     } else if (key == "panel_size") {
-        extract_values(value, &value1, &value2, &value3);
+        ExtractValues(value, &value1, &value2, &value3);
 
         char* b;
 
@@ -271,14 +261,14 @@ void AddEntry(std::string const& key, char* value) {
             }
         }
     } else if (key == "panel_margin") {
-        extract_values(value, &value1, &value2, &value3);
+        ExtractValues(value, &value1, &value2, &value3);
         panel_config.marginx = atoi(value1);
 
         if (value2) {
             panel_config.marginy = atoi(value2);
         }
     } else if (key == "panel_padding") {
-        extract_values(value, &value1, &value2, &value3);
+        ExtractValues(value, &value1, &value2, &value3);
         panel_config.paddingxlr = panel_config.paddingx = atoi(value1);
 
         if (value2) {
@@ -289,7 +279,7 @@ void AddEntry(std::string const& key, char* value) {
             panel_config.paddingx = atoi(value3);
         }
     } else if (key == "panel_position") {
-        extract_values(value, &value1, &value2, &value3);
+        ExtractValues(value, &value1, &value2, &value3);
 
         if (strcmp(value1, "top") == 0) {
             panel_position = TOP;
@@ -327,7 +317,7 @@ void AddEntry(std::string const& key, char* value) {
     } else if (key == "font_shadow") {
         panel_config.g_task.font_shadow = atoi(value);
     } else if (key == "panel_background_id") {
-        panel_config.bg = get_background_from_id(value);
+        panel_config.bg = GetBackgroundFromId(value);
     } else if (key == "wm_menu") {
         wm_menu = atoi(value);
     } else if (key == "panel_dock") {
@@ -372,8 +362,8 @@ void AddEntry(std::string const& key, char* value) {
 #endif
     } else if (key == "battery_font_color") {
 #ifdef ENABLE_BATTERY
-        extract_values(value, &value1, &value2, &value3);
-        get_color(value1, panel_config.battery.font.color);
+        ExtractValues(value, &value1, &value2, &value3);
+        GetColor(value1, panel_config.battery.font.color);
 
         if (value2) {
             panel_config.battery.font.alpha = (atoi(value2) / 100.0);
@@ -384,7 +374,7 @@ void AddEntry(std::string const& key, char* value) {
 #endif
     } else if (key == "battery_padding") {
 #ifdef ENABLE_BATTERY
-        extract_values(value, &value1, &value2, &value3);
+        ExtractValues(value, &value1, &value2, &value3);
         panel_config.battery.paddingxlr = panel_config.battery.paddingx =
                                               atoi(value1);
 
@@ -399,7 +389,7 @@ void AddEntry(std::string const& key, char* value) {
 #endif
     } else if (key == "battery_background_id") {
 #ifdef ENABLE_BATTERY
-        panel_config.battery.bg = get_background_from_id(value);
+        panel_config.battery.bg = GetBackgroundFromId(value);
 #endif
     } else if (key == "battery_hide") {
 #ifdef ENABLE_BATTERY
@@ -440,8 +430,8 @@ void AddEntry(std::string const& key, char* value) {
     } else if (key == "time2_font") {
         time2_font_desc = pango_font_description_from_string(value);
     } else if (key == "clock_font_color") {
-        extract_values(value, &value1, &value2, &value3);
-        get_color(value1, panel_config.clock.font.color);
+        ExtractValues(value, &value1, &value2, &value3);
+        GetColor(value1, panel_config.clock.font.color);
 
         if (value2) {
             panel_config.clock.font.alpha = (atoi(value2) / 100.0);
@@ -449,7 +439,7 @@ void AddEntry(std::string const& key, char* value) {
             panel_config.clock.font.alpha = 0.5;
         }
     } else if (key == "clock_padding") {
-        extract_values(value, &value1, &value2, &value3);
+        ExtractValues(value, &value1, &value2, &value3);
         panel_config.clock.paddingxlr = panel_config.clock.paddingx = atoi(
                                             value1);
 
@@ -461,7 +451,7 @@ void AddEntry(std::string const& key, char* value) {
             panel_config.clock.paddingx = atoi(value3);
         }
     } else if (key == "clock_background_id") {
-        panel_config.clock.bg = get_background_from_id(value);
+        panel_config.clock.bg = GetBackgroundFromId(value);
     } else if (key == "clock_tooltip") {
         if (strlen(value) > 0) {
             time_tooltip_format = value;
@@ -488,7 +478,7 @@ void AddEntry(std::string const& key, char* value) {
             panel_mode = SINGLE_DESKTOP;
         }
     } else if (key == "taskbar_padding") {
-        extract_values(value, &value1, &value2, &value3);
+        ExtractValues(value, &value1, &value2, &value3);
         panel_config.g_taskbar.paddingxlr = panel_config.g_taskbar.paddingx =
                                                 atoi(value1);
 
@@ -500,7 +490,7 @@ void AddEntry(std::string const& key, char* value) {
             panel_config.g_taskbar.paddingx = atoi(value3);
         }
     } else if (key == "taskbar_background_id") {
-        panel_config.g_taskbar.background[TASKBAR_NORMAL] = get_background_from_id(
+        panel_config.g_taskbar.background[TASKBAR_NORMAL] = GetBackgroundFromId(
                     value);
 
         if (panel_config.g_taskbar.background[TASKBAR_ACTIVE] == 0) {
@@ -508,16 +498,16 @@ void AddEntry(std::string const& key, char* value) {
                 panel_config.g_taskbar.background[TASKBAR_NORMAL];
         }
     } else if (key == "taskbar_active_background_id") {
-        panel_config.g_taskbar.background[TASKBAR_ACTIVE] = get_background_from_id(
+        panel_config.g_taskbar.background[TASKBAR_ACTIVE] = GetBackgroundFromId(
                     value);
     } else if (key == "taskbar_name") {
         taskbarname_enabled = atoi(value);
     } else if (key == "taskbar_name_padding") {
-        extract_values(value, &value1, &value2, &value3);
+        ExtractValues(value, &value1, &value2, &value3);
         panel_config.g_taskbar.area_name.paddingxlr =
             panel_config.g_taskbar.area_name.paddingx = atoi(value1);
     } else if (key == "taskbar_name_background_id") {
-        panel_config.g_taskbar.background_name[TASKBAR_NORMAL] = get_background_from_id(
+        panel_config.g_taskbar.background_name[TASKBAR_NORMAL] = GetBackgroundFromId(
                     value);
 
         if (panel_config.g_taskbar.background_name[TASKBAR_ACTIVE] == 0) {
@@ -525,13 +515,13 @@ void AddEntry(std::string const& key, char* value) {
                 panel_config.g_taskbar.background_name[TASKBAR_NORMAL];
         }
     } else if (key == "taskbar_name_active_background_id") {
-        panel_config.g_taskbar.background_name[TASKBAR_ACTIVE] = get_background_from_id(
+        panel_config.g_taskbar.background_name[TASKBAR_ACTIVE] = GetBackgroundFromId(
                     value);
     } else if (key == "taskbar_name_font") {
         taskbarname_font_desc = pango_font_description_from_string(value);
     } else if (key == "taskbar_name_font_color") {
-        extract_values(value, &value1, &value2, &value3);
-        get_color(value1, taskbarname_font.color);
+        ExtractValues(value, &value1, &value2, &value3);
+        GetColor(value1, taskbarname_font.color);
 
         if (value2) {
             taskbarname_font.alpha = (atoi(value2) / 100.0);
@@ -539,8 +529,8 @@ void AddEntry(std::string const& key, char* value) {
             taskbarname_font.alpha = 0.5;
         }
     } else if (key == "taskbar_name_active_font_color") {
-        extract_values(value, &value1, &value2, &value3);
-        get_color(value1, taskbarname_active_font.color);
+        ExtractValues(value, &value1, &value2, &value3);
+        GetColor(value1, taskbarname_active_font.color);
 
         if (value2) {
             taskbarname_active_font.alpha = (atoi(value2) / 100.0);
@@ -561,7 +551,7 @@ void AddEntry(std::string const& key, char* value) {
         panel_config.g_task.maximum_width = atoi(value);
         panel_config.g_task.maximum_height = 30;
     } else if (key == "task_maximum_size") {
-        extract_values(value, &value1, &value2, &value3);
+        ExtractValues(value, &value1, &value2, &value3);
         panel_config.g_task.maximum_width = atoi(value1);
         panel_config.g_task.maximum_height = 30;
 
@@ -569,7 +559,7 @@ void AddEntry(std::string const& key, char* value) {
             panel_config.g_task.maximum_height = atoi(value2);
         }
     } else if (key == "task_padding") {
-        extract_values(value, &value1, &value2, &value3);
+        ExtractValues(value, &value1, &value2, &value3);
         panel_config.g_task.paddingxlr = panel_config.g_task.paddingx = atoi(
                                              value1);
 
@@ -584,32 +574,32 @@ void AddEntry(std::string const& key, char* value) {
         panel_config.g_task.font_desc = pango_font_description_from_string(value);
     } else if (regex_match("task.*_font_color", key.c_str())) {
         gchar** split = regex_split("_", key.c_str());
-        int status = get_task_status(split[1]);
+        int status = GetTaskStatus(split[1]);
         g_strfreev(split);
-        extract_values(value, &value1, &value2, &value3);
+        ExtractValues(value, &value1, &value2, &value3);
         float alpha = 1;
 
         if (value2) {
             alpha = (atoi(value2) / 100.0);
         }
 
-        get_color(value1, panel_config.g_task.font[status].color);
+        GetColor(value1, panel_config.g_task.font[status].color);
         panel_config.g_task.font[status].alpha = alpha;
         panel_config.g_task.config_font_mask |= (1 << status);
     } else if (regex_match("task.*_icon_asb", key.c_str())) {
         gchar** split = regex_split("_", key.c_str());
-        int status = get_task_status(split[1]);
+        int status = GetTaskStatus(split[1]);
         g_strfreev(split);
-        extract_values(value, &value1, &value2, &value3);
+        ExtractValues(value, &value1, &value2, &value3);
         panel_config.g_task.alpha[status] = atoi(value1);
         panel_config.g_task.saturation[status] = atoi(value2);
         panel_config.g_task.brightness[status] = atoi(value3);
         panel_config.g_task.config_asb_mask |= (1 << status);
     } else if (regex_match("task.*_background_id", key.c_str())) {
         gchar** split = regex_split("_", key.c_str());
-        int status = get_task_status(split[1]);
+        int status = GetTaskStatus(split[1]);
         g_strfreev(split);
-        panel_config.g_task.background[status] = get_background_from_id(value);
+        panel_config.g_task.background[status] = GetBackgroundFromId(value);
         panel_config.g_task.config_background_mask |= (1 << status);
 
         if (status == TASK_NORMAL) {
@@ -628,7 +618,7 @@ void AddEntry(std::string const& key, char* value) {
             panel_items_order.push_back('S');
         }
 
-        extract_values(value, &value1, &value2, &value3);
+        ExtractValues(value, &value1, &value2, &value3);
         systray.paddingxlr = systray.paddingx = atoi(value1);
 
         if (value2) {
@@ -639,7 +629,7 @@ void AddEntry(std::string const& key, char* value) {
             systray.paddingx = atoi(value3);
         }
     } else if (key == "systray_background_id") {
-        systray.bg = get_background_from_id(value);
+        systray.bg = GetBackgroundFromId(value);
     } else if (key == "systray_sort") {
         if (strcmp(value, "descending") == 0) {
             systray.sort = -1;
@@ -653,7 +643,7 @@ void AddEntry(std::string const& key, char* value) {
     } else if (key == "systray_icon_size") {
         systray_max_icon_size = atoi(value);
     } else if (key == "systray_icon_asb") {
-        extract_values(value, &value1, &value2, &value3);
+        ExtractValues(value, &value1, &value2, &value3);
         systray.alpha = atoi(value1);
         systray.saturation = atoi(value2);
         systray.brightness = atoi(value3);
@@ -661,7 +651,7 @@ void AddEntry(std::string const& key, char* value) {
 
     /* Launcher */
     else if (key == "launcher_padding") {
-        extract_values(value, &value1, &value2, &value3);
+        ExtractValues(value, &value1, &value2, &value3);
         panel_config.launcher.paddingxlr = panel_config.launcher.paddingx =
                                                atoi(value1);
 
@@ -673,7 +663,7 @@ void AddEntry(std::string const& key, char* value) {
             panel_config.launcher.paddingx = atoi(value3);
         }
     } else if (key == "launcher_background_id") {
-        panel_config.launcher.bg = get_background_from_id(value);
+        panel_config.launcher.bg = GetBackgroundFromId(value);
     } else if (key == "launcher_icon_size") {
         launcher_max_icon_size = atoi(value);
     } else if (key == "launcher_item_app") {
@@ -684,7 +674,7 @@ void AddEntry(std::string const& key, char* value) {
             icon_theme_name = value;
         }
     } else if (key == "launcher_icon_asb") {
-        extract_values(value, &value1, &value2, &value3);
+        ExtractValues(value, &value1, &value2, &value3);
         launcher_alpha = atoi(value1);
         launcher_saturation = atoi(value2);
         launcher_brightness = atoi(value3);
@@ -700,7 +690,7 @@ void AddEntry(std::string const& key, char* value) {
         int timeout_msec = 1000 * atof(value);
         g_tooltip.hide_timeout_msec = timeout_msec;
     } else if (key == "tooltip_padding") {
-        extract_values(value, &value1, &value2, &value3);
+        ExtractValues(value, &value1, &value2, &value3);
 
         if (value1) {
             g_tooltip.paddingx = atoi(value1);
@@ -710,10 +700,10 @@ void AddEntry(std::string const& key, char* value) {
             g_tooltip.paddingy = atoi(value2);
         }
     } else if (key == "tooltip_background_id") {
-        g_tooltip.bg = get_background_from_id(value);
+        g_tooltip.bg = GetBackgroundFromId(value);
     } else if (key == "tooltip_font_color") {
-        extract_values(value, &value1, &value2, &value3);
-        get_color(value1, g_tooltip.font_color.color);
+        ExtractValues(value, &value1, &value2, &value3);
+        GetColor(value1, g_tooltip.font_color.color);
 
         if (value2) {
             g_tooltip.font_color.alpha = (atoi(value2) / 100.0);
@@ -726,13 +716,13 @@ void AddEntry(std::string const& key, char* value) {
 
     /* Mouse actions */
     else if (key == "mouse_middle") {
-        get_action(value, &mouse_middle);
+        GetAction(value, &mouse_middle);
     } else if (key == "mouse_right") {
-        get_action(value, &mouse_right);
+        GetAction(value, &mouse_right);
     } else if (key == "mouse_scroll_up") {
-        get_action(value, &mouse_scroll_up);
+        GetAction(value, &mouse_scroll_up);
     } else if (key == "mouse_scroll_down") {
-        get_action(value, &mouse_scroll_down);
+        GetAction(value, &mouse_scroll_down);
     }
 
     /* autohide options */
@@ -795,8 +785,27 @@ void AddEntry(std::string const& key, char* value) {
     }
 }
 
+bool ParseLine(std::string const& line, std::string& key, std::string& value) {
+    if (line.empty() || line[0] == '#') {
+        return false;
+    }
 
-bool config_read() {
+    auto equals_pos = line.find('=');
+
+    if (equals_pos == std::string::npos) {
+        return false;
+    }
+
+    StringTrim(key.assign(line, 0, equals_pos));
+    StringTrim(value.assign(line, equals_pos + 1, std::string::npos));
+    return true;
+}
+
+} // namespace
+
+namespace config {
+
+bool Read() {
     // follow XDG specification
     // check tint3rc in user directory
     std::string user_config_dir = fs::BuildPath({
@@ -805,7 +814,7 @@ bool config_read() {
     config_path = fs::BuildPath({ user_config_dir, "tint3rc" });
 
     if (fs::FileExists(config_path)) {
-        return config_read_file(config_path);
+        return config::ReadFile(config_path);
     }
 
     // copy tint3rc from system directory to user directory
@@ -825,29 +834,13 @@ bool config_read() {
         // copy file in user directory
         fs::CreateDirectory(user_config_dir);
         fs::CopyFile(system_config_file, config_path);
-        return config_read_file(config_path);
+        return config::ReadFile(config_path);
     }
 
     return false;
 }
 
-bool ParseLine(std::string const& line, std::string& key, std::string& value) {
-    if (line.empty() || line[0] == '#') {
-        return false;
-    }
-
-    auto equals_pos = line.find('=');
-
-    if (equals_pos == std::string::npos) {
-        return false;
-    }
-
-    StringTrim(key.assign(line, 0, equals_pos));
-    StringTrim(value.assign(line, equals_pos + 1, std::string::npos));
-    return true;
-}
-
-bool config_read_file(std::string const& path) {
+bool ReadFile(std::string const& path) {
     bool read = fs::ReadFileByLine(path, [](std::string const & line) {
         std::string key, value;
 
@@ -874,3 +867,10 @@ bool config_read_file(std::string const& path) {
     return true;
 }
 
+} // namespace config
+
+void default_config() {
+    config_path.clear();
+    snapshot_path.clear();
+    new_config_file = 0;
+}

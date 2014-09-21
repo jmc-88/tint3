@@ -35,9 +35,10 @@
 
 Server_global server;
 
-void server_catch_error(Display* d, XErrorEvent* ev) {}
+void ServerCatchError(Display* d, XErrorEvent* ev) {
+}
 
-void server_init_atoms() {
+void ServerInitAtoms() {
     std::string name;
 
     server.atom._XROOTPMAP_ID = XInternAtom(server.dsp, "_XROOTPMAP_ID", False);
@@ -160,7 +161,7 @@ void server_init_atoms() {
 }
 
 
-void cleanup_server() {
+void CleanupServer() {
     if (server.colormap) {
         XFreeColormap(server.dsp, server.colormap);
     }
@@ -186,7 +187,7 @@ void cleanup_server() {
 }
 
 
-void send_event32(Window win, Atom at, long data1, long data2, long data3) {
+void SendEvent32(Window win, Atom at, long data1, long data2, long data3) {
     XEvent event;
 
     event.xclient.type = ClientMessage;
@@ -208,7 +209,7 @@ void send_event32(Window win, Atom at, long data1, long data2, long data3) {
 }
 
 
-int get_property32(Window win, Atom at, Atom type) {
+int GetProperty32(Window win, Atom at, Atom type) {
     if (!win) {
         return 0;
     }
@@ -231,7 +232,7 @@ int get_property32(Window win, Atom at, Atom type) {
 }
 
 
-void* server_get_property(Window win, Atom at, Atom type, int* num_results) {
+void* ServerGetProperty(Window win, Atom at, Atom type, int* num_results) {
     Atom type_ret;
     int format_ret = 0;
     unsigned long nitems_ret = 0;
@@ -259,7 +260,7 @@ void* server_get_property(Window win, Atom at, Atom type, int* num_results) {
 }
 
 
-void get_root_pixmap() {
+void GetRootPixmap() {
     Pixmap ret = None;
     Atom pixmap_atoms[] = {
         server.atom._XROOTPMAP_ID,
@@ -267,7 +268,7 @@ void get_root_pixmap() {
     };
 
     for (size_t i = 0; i < sizeof(pixmap_atoms) / sizeof(Atom); ++i) {
-        void* res = server_get_property(server.root_win, pixmap_atoms[i], XA_PIXMAP, 0);
+        void* res = ServerGetProperty(server.root_win, pixmap_atoms[i], XA_PIXMAP, 0);
 
         if (res) {
             ret = *(static_cast<Pixmap*>(res));
@@ -294,14 +295,14 @@ void get_root_pixmap() {
 }
 
 
-bool monitor_includes(Monitor const& m1, Monitor const& m2) {
+bool MonitorIncludes(Monitor const& m1, Monitor const& m2) {
     bool inside_x = (m1.x >= m2.x) && ((m1.x + m1.width) <= (m2.x + m2.width));
     bool inside_y = (m1.y >= m2.y) && ((m1.y + m1.height) <= (m2.y + m2.height));
     return (!inside_x || !inside_y);
 }
 
 
-void get_monitors() {
+void GetMonitors() {
     int i, j, nbmonitor;
 
     if (XineramaIsActive(server.dsp)) {
@@ -349,12 +350,12 @@ void get_monitors() {
         }
 
         // order monitors
-        std::sort(server.monitor.begin(), server.monitor.end(), monitor_includes);
+        std::sort(server.monitor.begin(), server.monitor.end(), MonitorIncludes);
 
         // remove monitor included into another one
         for (i = 0; i < nbmonitor; ++i) {
             for (j = 0; j < i; ++j) {
-                if (!monitor_includes(server.monitor[i], server.monitor[j])) {
+                if (!MonitorIncludes(server.monitor[i], server.monitor[j])) {
                     goto next;
                 }
             }
@@ -370,7 +371,7 @@ next:
 
         server.nb_monitor = i;
         server.monitor.resize(server.nb_monitor);
-        std::sort(server.monitor.begin(), server.monitor.end(), monitor_includes);
+        std::sort(server.monitor.begin(), server.monitor.end(), MonitorIncludes);
 
         if (res) {
             XRRFreeScreenResources(res);
@@ -390,7 +391,7 @@ next:
 }
 
 
-void get_desktops() {
+void GetDesktops() {
     int i;
 
     // detect number of desktops
@@ -413,7 +414,7 @@ void get_desktops() {
 }
 
 
-void server_init_visual() {
+void ServerInitVisual() {
     // inspired by freedesktops fdclock ;)
     XVisualInfo templ;
     templ.screen = server.screen;

@@ -37,14 +37,20 @@
 #include "timer.h"
 #include "util/window.h"
 
+namespace {
+
+const char kUntitled[] = "Untitled";
+
+} // namespace
+
 Timeout* urgent_timeout;
 std::list<Task*> urgent_list;
 
-const char* Task::GetTooltipText() {
-    return tooltip_enabled_ ? title : nullptr;
+std::string Task::GetTooltipText() {
+    return tooltip_enabled_ ? title_ : std::string();
 }
 
-Task& Task::set_tooltip_enabled(bool is_enabled) {
+Task& Task::SetTooltipEnabled(bool is_enabled) {
     tooltip_enabled_ = is_enabled;
     return (*this);
 }
@@ -79,15 +85,12 @@ Task* add_task(Window win) {
 
     // allocate only one title and one icon
     // even with task_on_all_desktop and with task_on_all_panel
-    new_tsk.title = 0;
-    int k;
-
-    for (k = 0; k < TASK_STATE_COUNT; ++k) {
+    for (int k = 0; k < TASK_STATE_COUNT; ++k) {
         new_tsk.icon[k] = 0;
         new_tsk.state_pix[k] = 0;
     }
 
-    get_title(&new_tsk);
+    new_tsk.UpdateTitle();
     get_icon(&new_tsk);
 
     //printf("task %s : desktop %d, monitor %d\n", new_tsk->title, desktop, monitor);
@@ -121,10 +124,10 @@ Task* add_task(Window win) {
             new_tsk2->on_screen = 0;
         }
 
-        new_tsk2->title = new_tsk.title;
-        new_tsk2->set_tooltip_enabled(panel1[monitor].g_task.tooltip_enabled);
+        new_tsk2->SetTitle(new_tsk.GetTitle());
+        new_tsk2->SetTooltipEnabled(panel1[monitor].g_task.tooltip_enabled);
 
-        for (k = 0; k < TASK_STATE_COUNT; ++k) {
+        for (int k = 0; k < TASK_STATE_COUNT; ++k) {
             new_tsk2->icon[k] = new_tsk.icon[k];
             new_tsk2->state_pix[k] = 0;
         }
@@ -158,11 +161,9 @@ void remove_task(Task* tsk) {
     // free title and icon just for the first task
     // even with task_on_all_desktop and with task_on_all_panel
     //printf("remove_task %s %d\n", tsk->title, tsk->desktop);
-    if (tsk->title) {
-        free(tsk->title);
-    }
+    tsk->SetTitle("");
 
-    for (auto k = 0; k < TASK_STATE_COUNT; ++k) {
+    for (int k = 0; k < TASK_STATE_COUNT; ++k) {
         if (tsk->icon[k]) {
             imlib_context_set_image(tsk->icon[k]);
             imlib_free_image();
@@ -215,28 +216,32 @@ void remove_task(Task* tsk) {
 }
 
 
-int get_title(Task* tsk) {
-    Panel* panel = tsk->panel;
-
+bool Task::UpdateTitle() {
     if (!panel->g_task.text && !panel->g_task.tooltip_enabled) {
-        return 0;
+        return false;
     }
 
-    char* name = (char*) server_get_property(tsk->win,
-                 server.atom._NET_WM_VISIBLE_NAME, server.atom.UTF8_STRING, 0);
+    const char* name = (char*) ServerGetProperty(win,
+                       server.atom._NET_WM_VISIBLE_NAME,
+                       server.atom.UTF8_STRING,
+                       0);
 
     if (!name || *name == '\0') {
-        name = (char*) server_get_property(tsk->win, server.atom._NET_WM_NAME,
-                                           server.atom.UTF8_STRING, 0);
+        name = (char*) ServerGetProperty(win,
+                                         server.atom._NET_WM_NAME,
+                                         server.atom.UTF8_STRING,
+                                         0);
+    }
 
-        if (!name || *name == '\0') {
-            name = (char*) server_get_property(tsk->win, server.atom.WM_NAME, XA_STRING, 0);
+    if (!name || *name == '\0') {
+        name = (char*) ServerGetProperty(win,
+                                         server.atom.WM_NAME,
+                                         XA_STRING,
+                                         0);
+    }
 
-            if (!name || *name == '\0') {
-                name = (char*) malloc(10);
-                strcpy(name, "Untitled");
-            }
-        }
+    if (!name || *name == '\0') {
+        name = kUntitled;
     }
 
     // add space before title
@@ -245,37 +250,43 @@ int get_title(Task* tsk) {
     if (panel->g_task.icon) {
         strcpy(title, " ");
     } else {
-        title[0] = 0;
+        title[0] = '\0';
     }
 
     strcat(title, name);
 
-    if (name) {
-        XFree(name);
+    if (name != nullptr && name != kUntitled) {
+        XFree((void*) name);
     }
 
-    if (tsk->title) {
-        // check unecessary title change
-        if (strcmp(tsk->title, title) == 0) {
-            free(title);
-            return 0;
-        } else {
-            free(tsk->title);
-        }
+    // check unecessary title change
+    if (title_ == title) {
+        free(title);
+        return false;
     }
 
-    tsk->title = title;
-    GPtrArray* task_group = task_get_tasks(tsk->win);
+    title_ = title;
+    GPtrArray* task_group = task_get_tasks(win);
 
     if (task_group) {
         for (size_t i = 0; i < task_group->len; ++i) {
             auto tsk2 = static_cast<Task*>(g_ptr_array_index(task_group, i));
-            tsk2->title = tsk->title;
+            tsk2->title_ = title_;
             set_task_redraw(tsk2);
         }
     }
 
-    return 1;
+    return true;
+}
+
+
+std::string Task::GetTitle() const {
+    return title_;
+}
+
+
+void Task::SetTitle(std::string const& title) {
+    title_.assign(title);
 }
 
 
@@ -299,7 +310,7 @@ void get_icon(Task* tsk) {
     Imlib_Image img = nullptr;
     XWMHints* hints = 0;
     int i;
-    gulong* data = (gulong*) server_get_property(tsk->win, server.atom._NET_WM_ICON,
+    gulong* data = (gulong*) ServerGetProperty(tsk->win, server.atom._NET_WM_ICON,
                    XA_CARDINAL, &i);
 
     if (data) {
@@ -368,9 +379,9 @@ void get_icon(Task* tsk) {
         if (panel->g_task.alpha[k] != 100 || panel->g_task.saturation[k] != 0
             || panel->g_task.brightness[k] != 0) {
             data32 = imlib_image_get_data();
-            adjust_asb(data32, tsk->icon_width, tsk->icon_height, panel->g_task.alpha[k],
-                       (float)panel->g_task.saturation[k] / 100,
-                       (float)panel->g_task.brightness[k] / 100);
+            AdjustAsb(data32, tsk->icon_width, tsk->icon_height, panel->g_task.alpha[k],
+                      (float)panel->g_task.saturation[k] / 100,
+                      (float)panel->g_task.brightness[k] / 100);
             imlib_image_put_back_data(data32);
         }
     }
@@ -404,7 +415,7 @@ void get_icon(Task* tsk) {
 }
 
 
-void Task::draw_icon(int text_width) {
+void Task::DrawIcon(int text_width) {
     if (icon[current_state] == 0) {
         return;
     }
@@ -426,8 +437,8 @@ void Task::draw_icon(int text_width) {
     imlib_context_set_image(icon[current_state]);
 
     if (server.real_transparency) {
-        render_image(pix, pos_x, panel->g_task.icon_posy,
-                     imlib_image_get_width(), imlib_image_get_height());
+        RenderImage(pix, pos_x, panel->g_task.icon_posy,
+                    imlib_image_get_width(), imlib_image_get_height());
     } else {
         imlib_context_set_drawable(pix);
         imlib_render_image_on_drawable(pos_x, panel->g_task.icon_posy);
@@ -446,7 +457,7 @@ void Task::DrawForeground(cairo_t* c) {
         /* Layout */
         PangoLayout* layout = pango_cairo_create_layout(c);
         pango_layout_set_font_description(layout, panel->g_task.font_desc);
-        pango_layout_set_text(layout, title, -1);
+        pango_layout_set_text(layout, title_.c_str(), -1);
 
         /* Drawing width and Cut text */
         // pango use U+22EF or U+2026
@@ -485,7 +496,7 @@ void Task::DrawForeground(cairo_t* c) {
     }
 
     if (panel->g_task.icon) {
-        draw_icon(width);
+        DrawIcon(width);
     }
 }
 

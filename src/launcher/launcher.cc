@@ -297,8 +297,8 @@ void LauncherIcon::OnChangeLayout() {
     posx = (parent->posx + x);
 }
 
-const char* LauncherIcon::GetTooltipText() {
-    return launcher_tooltip_enabled ? icon_tooltip : nullptr;
+std::string LauncherIcon::GetTooltipText() {
+    return launcher_tooltip_enabled ? icon_tooltip : std::string();
 }
 
 void LauncherIcon::DrawForeground(cairo_t* c) {
@@ -306,8 +306,8 @@ void LauncherIcon::DrawForeground(cairo_t* c) {
     imlib_context_set_image(icon_scaled);
 
     if (server.real_transparency) {
-        render_image(pix, 0, 0, imlib_image_get_width(),
-                     imlib_image_get_height());
+        RenderImage(pix, 0, 0, imlib_image_get_width(),
+                    imlib_image_get_height());
     } else {
         imlib_context_set_drawable(pix);
         imlib_render_image_on_drawable(0, 0);
@@ -324,8 +324,8 @@ Imlib_Image scale_icon(Imlib_Image original, int icon_size) {
         imlib_context_set_image(icon_scaled);
         imlib_image_set_has_alpha(1);
         DATA32* data = imlib_image_get_data();
-        adjust_asb(data, icon_size, icon_size, launcher_alpha,
-                   (float)launcher_saturation / 100, (float)launcher_brightness / 100);
+        AdjustAsb(data, icon_size, icon_size, launcher_alpha,
+                  (float)launcher_saturation / 100, (float)launcher_brightness / 100);
         imlib_image_put_back_data(data);
     } else {
         icon_scaled = imlib_create_image(icon_size, icon_size);
