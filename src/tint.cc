@@ -580,7 +580,7 @@ void EventButtonRelease(XEvent* e) {
         LauncherIcon* icon = click_launcher_icon(panel, e->xbutton.x, e->xbutton.y);
 
         if (icon) {
-            launcher_action(icon, e);
+            LauncherAction(icon, e);
         }
 
         task_drag = 0;

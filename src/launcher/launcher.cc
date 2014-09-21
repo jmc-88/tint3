@@ -47,16 +47,19 @@ int launcher_brightness;
 std::string icon_theme_name;
 XSettingsClient* xsettings_client;
 
-#define ICON_FALLBACK "application-x-executable"
 
-std::string icon_path(Launcher* launcher, std::string const& icon_name,
-                      int size);
-void LauncherLoadThemes(Launcher* launcher);
-void free_desktop_entry(DesktopEntry* entry);
-int launcher_read_desktop_file(const char* path, DesktopEntry* entry);
-Imlib_Image scale_icon(Imlib_Image original, int icon_size);
-void free_icon(Imlib_Image icon);
-void free_icon_theme(IconTheme* theme);
+namespace {
+
+const char kIconFallback[] = "application-x-executable";
+
+} // namespace
+
+
+void FreeDesktopEntry(DesktopEntry* entry);
+int LauncherReadDesktopFile(const char* path, DesktopEntry* entry);
+Imlib_Image ScaleIcon(Imlib_Image original, int icon_size);
+void FreeIcon(Imlib_Image icon);
+void FreeIconTheme(IconTheme* theme);
 
 
 void DefaultLauncher() {
@@ -71,7 +74,7 @@ void DefaultLauncher() {
 }
 
 
-void init_launcher() {
+void InitLauncher() {
     if (launcher_enabled) {
         // if XSETTINGS manager running, tint3 read the icon_theme_name.
         xsettings_client = XSettingsClientNew(server.dsp, server.screen,
@@ -80,7 +83,7 @@ void init_launcher() {
 }
 
 
-void init_launcher_panel(void* p) {
+void InitLauncherPanel(void* p) {
     Panel* panel = static_cast<Panel*>(p);
     Launcher* launcher = &panel->launcher;
 
@@ -131,8 +134,8 @@ void Launcher::CleanupTheme() {
 
     for (auto const& launcherIcon : list_icons) {
         if (launcherIcon) {
-            free_icon(launcherIcon->icon_scaled);
-            free_icon(launcherIcon->icon_original);
+            FreeIcon(launcherIcon->icon_scaled);
+            FreeIcon(launcherIcon->icon_original);
             free(launcherIcon->icon_name);
             free(launcherIcon->icon_path);
             free(launcherIcon->cmd);
@@ -143,7 +146,7 @@ void Launcher::CleanupTheme() {
     }
 
     for (auto const& theme : list_themes) {
-        free_icon_theme(theme);
+        FreeIconTheme(theme);
         delete theme;
     }
 
@@ -176,16 +179,16 @@ bool Launcher::Resize() {
             launcherIcon->height = launcherIcon->icon_size;
 
             // Get the path for an icon file with the new size
-            std::string new_icon_path = icon_path(this, launcherIcon->icon_name,
-                                                  launcherIcon->icon_size);
+            std::string new_icon_path = GetIconPath(launcherIcon->icon_name,
+                                                    launcherIcon->icon_size);
 
             if (new_icon_path.empty()) {
                 // Draw a blank icon
-                free_icon(launcherIcon->icon_original);
+                FreeIcon(launcherIcon->icon_original);
                 launcherIcon->icon_original = nullptr;
-                free_icon(launcherIcon->icon_scaled);
+                FreeIcon(launcherIcon->icon_scaled);
                 launcherIcon->icon_scaled = nullptr;
-                new_icon_path = icon_path(this, ICON_FALLBACK, launcherIcon->icon_size);
+                new_icon_path = GetIconPath(kIconFallback, launcherIcon->icon_size);
 
                 if (!new_icon_path.empty()) {
                     launcherIcon->icon_original = imlib_load_image(new_icon_path.c_str());
@@ -193,26 +196,26 @@ bool Launcher::Resize() {
                             new_icon_path.c_str());
                 }
 
-                launcherIcon->icon_scaled = scale_icon(launcherIcon->icon_original, icon_size);
+                launcherIcon->icon_scaled = ScaleIcon(launcherIcon->icon_original, icon_size);
                 continue;
             }
 
             if (launcherIcon->icon_path && new_icon_path == launcherIcon->icon_path) {
                 // If it's the same file just rescale
-                free_icon(launcherIcon->icon_scaled);
-                launcherIcon->icon_scaled = scale_icon(launcherIcon->icon_original, icon_size);
+                FreeIcon(launcherIcon->icon_scaled);
+                launcherIcon->icon_scaled = ScaleIcon(launcherIcon->icon_original, icon_size);
 
                 fprintf(stderr,
                         "launcher.c %d: Using icon %s\n", __LINE__,
                         launcherIcon->icon_path);
             } else {
                 // Free the old files
-                free_icon(launcherIcon->icon_original);
-                free_icon(launcherIcon->icon_scaled);
+                FreeIcon(launcherIcon->icon_original);
+                FreeIcon(launcherIcon->icon_scaled);
                 // Load the new file and scale
                 launcherIcon->icon_original = imlib_load_image(new_icon_path.c_str());
-                launcherIcon->icon_scaled = scale_icon(launcherIcon->icon_original,
-                                                       launcherIcon->icon_size);
+                launcherIcon->icon_scaled = ScaleIcon(launcherIcon->icon_original,
+                                                      launcherIcon->icon_size);
                 free(launcherIcon->icon_path);
                 launcherIcon->icon_path = strdup(new_icon_path.c_str());
 
@@ -314,7 +317,7 @@ void LauncherIcon::DrawForeground(cairo_t* c) {
     }
 }
 
-Imlib_Image scale_icon(Imlib_Image original, int icon_size) {
+Imlib_Image ScaleIcon(Imlib_Image original, int icon_size) {
     Imlib_Image icon_scaled;
 
     if (original) {
@@ -337,14 +340,14 @@ Imlib_Image scale_icon(Imlib_Image original, int icon_size) {
     return icon_scaled;
 }
 
-void free_icon(Imlib_Image icon) {
+void FreeIcon(Imlib_Image icon) {
     if (icon) {
         imlib_context_set_image(icon);
         imlib_free_image();
     }
 }
 
-void launcher_action(LauncherIcon* icon, XEvent* evt) {
+void LauncherAction(LauncherIcon* icon, XEvent* evt) {
 #if HAVE_SN
     auto ctx = sn_launcher_context_new(server.sn_dsp, server.screen);
     sn_launcher_context_set_name(ctx, icon->icon_tooltip);
@@ -401,8 +404,8 @@ void launcher_action(LauncherIcon* icon, XEvent* evt) {
 
 // Splits line at first '=' and returns 1 if successful, and parts are not empty
 // key and value point to the parts
-bool parse_desktop_line(std::string const& line, std::string& key,
-                        std::string& value) {
+bool ParseDesktopLine(std::string const& line, std::string& key,
+                      std::string& value) {
     bool found = false;
 
     for (auto it = line.cbegin(); it != line.cend(); ++it) {
@@ -421,12 +424,12 @@ bool parse_desktop_line(std::string const& line, std::string& key,
     return true;
 }
 
-bool parse_theme_line(std::string const& line, std::string& key,
-                      std::string& value) {
-    return parse_desktop_line(line, key, value);
+bool ParseThemeLine(std::string const& line, std::string& key,
+                    std::string& value) {
+    return ParseDesktopLine(line, key, value);
 }
 
-void expand_exec(DesktopEntry* entry, char const* path) {
+void ExpandExec(DesktopEntry* entry, char const* path) {
     // Expand % in exec
     // %i -> --icon Icon
     // %c -> Name
@@ -476,7 +479,7 @@ void expand_exec(DesktopEntry* entry, char const* path) {
     entry->exec = strdup(exec2.c_str());
 }
 
-int launcher_read_desktop_file(const char* path, DesktopEntry* entry) {
+int LauncherReadDesktopFile(const char* path, DesktopEntry* entry) {
     entry->name = entry->icon = entry->exec = nullptr;
 
     gchar** languages = (gchar**)g_get_language_names();
@@ -505,7 +508,7 @@ int launcher_read_desktop_file(const char* path, DesktopEntry* entry) {
 
         std::string key, value;
 
-        if (inside_desktop_entry && parse_desktop_line(line, key, value)) {
+        if (inside_desktop_entry && ParseDesktopLine(line, key, value)) {
             if (key.substr(0, 4) == "Name") {
                 if (key == "Name" && lang_index > lang_index_default) {
                     entry->name = strdup(value.c_str());
@@ -543,26 +546,19 @@ int launcher_read_desktop_file(const char* path, DesktopEntry* entry) {
     // From this point:
     // entry->name, entry->icon, entry->exec will never be empty strings (can be nullptr though)
 
-    expand_exec(entry, path);
+    ExpandExec(entry, path);
     return 1;
 }
 
-void free_desktop_entry(DesktopEntry* entry) {
+void FreeDesktopEntry(DesktopEntry* entry) {
     free(entry->name);
     free(entry->icon);
     free(entry->exec);
 }
 
-void test_launcher_read_desktop_file() {
-    fprintf(stdout, "\033[1;33m");
-    DesktopEntry entry;
-    launcher_read_desktop_file("/usr/share/applications/firefox.desktop", &entry);
-    printf("Name:%s Icon:%s Exec:%s\n", entry.name, entry.icon, entry.exec);
-    fprintf(stdout, "\033[0m");
-}
 
 //TODO Use UTF8 when parsing the file
-IconTheme* load_theme(char const* name) {
+IconTheme* LoadTheme(char const* name) {
     // Look for name/index.theme in $HOME/.icons, /usr/share/icons, /usr/share/pixmaps (stop at the first found)
     // Parse index.theme -> list of IconThemeDir with attributes
     // Return IconTheme*
@@ -610,7 +606,7 @@ IconTheme* load_theme(char const* name) {
         std::string key, value;
 
         if (inside_header) {
-            if (parse_theme_line(line, key, value)) {
+            if (ParseThemeLine(line, key, value)) {
                 if (key == "Inherits") {
                     // value is like oxygen,wood,default
                     // TODO: remove these strdup/strtok calls
@@ -643,7 +639,7 @@ IconTheme* load_theme(char const* name) {
                 }
             }
         } else if (current_dir != nullptr) {
-            if (parse_theme_line(line, key, value)) {
+            if (ParseThemeLine(line, key, value)) {
                 if (key == "Size") {
                     // value is like 24
                     current_dir->size = std::stoi(value);
@@ -709,7 +705,7 @@ IconTheme* load_theme(char const* name) {
     return theme;
 }
 
-void free_icon_theme(IconTheme* theme) {
+void FreeIconTheme(IconTheme* theme) {
     for (auto l_inherits = theme->list_inherits; l_inherits ;
          l_inherits = l_inherits->next) {
         free(l_inherits->data);
@@ -725,7 +721,7 @@ void free_icon_theme(IconTheme* theme) {
 
 void test_launcher_read_theme_file() {
     fprintf(stdout, "\033[1;33m");
-    auto theme = load_theme("oxygen");
+    auto theme = LoadTheme("oxygen");
 
     if (!theme) {
         printf("Could not load theme\n");
@@ -762,7 +758,7 @@ void Launcher::LoadIcons() {
     // Load apps (.desktop style launcher items)
     for (auto const& app : list_apps) {
         DesktopEntry entry;
-        launcher_read_desktop_file(app, &entry);
+        LauncherReadDesktopFile(app, &entry);
 
         if (entry.exec) {
             auto launcherIcon = new LauncherIcon();
@@ -777,11 +773,11 @@ void Launcher::LoadIcons() {
             launcherIcon->is_app_desktop = 1;
             launcherIcon->cmd = strdup(entry.exec);
             launcherIcon->icon_name = entry.icon ? strdup(entry.icon) : strdup(
-                                          ICON_FALLBACK);
+                                          kIconFallback);
             launcherIcon->icon_size = 1;
             launcherIcon->icon_tooltip = entry.name ? strdup(entry.name) : strdup(
                                              entry.exec);
-            free_desktop_entry(&entry);
+            FreeDesktopEntry(&entry);
             list_icons.push_back(launcherIcon);
             launcherIcon->AddArea();
         }
@@ -830,7 +826,7 @@ void Launcher::LoadThemes() {
         queue = g_slist_remove(queue, name);
 
         fprintf(stderr, " '%s',", name);
-        auto theme = load_theme(name);
+        auto theme = LoadTheme(name);
 
         if (theme != nullptr) {
             list_themes.push_back(theme);
@@ -914,8 +910,7 @@ int directory_size_distance(IconThemeDir* dir, int size) {
 }
 
 // Returns the full path to an icon file (or nullptr) given the icon name
-std::string icon_path(Launcher* launcher, std::string const& icon_name,
-                      int size) {
+std::string Launcher::GetIconPath(std::string const& icon_name, int size) {
     if (icon_name.empty()) {
         return std::string();
     }
@@ -966,7 +961,7 @@ std::string icon_path(Launcher* launcher, std::string const& icon_name,
     std::string next_larger;
     IconTheme* next_larger_theme = nullptr;
 
-    for (auto const& theme : launcher->list_themes) {
+    for (auto const& theme : list_themes) {
         GSList* dir;
 
         for (dir = theme->list_directories; dir; dir = g_slist_next(dir)) {

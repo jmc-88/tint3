@@ -72,7 +72,7 @@ void CleanupBattery();
 // initialize clock : y position, ...
 void UpdateBattery();
 
-void init_battery();
-void init_battery_panel(void* panel);
+void InitBattery();
+void InitBatteryPanel(void* panel);
 
 #endif

@@ -151,7 +151,7 @@ void CleanupBattery() {
 }
 
 
-void init_battery() {
+void InitBattery() {
     if (!battery_enabled) {
         return;
     }
@@ -259,7 +259,7 @@ void init_battery() {
 }
 
 
-void init_battery_panel(void* p) {
+void InitBatteryPanel(void* p) {
     Panel* panel = static_cast<Panel*>(p);
     Battery* battery = &panel->battery;
 

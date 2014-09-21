@@ -40,6 +40,7 @@ struct DesktopEntry {
 #define ICON_DIR_TYPE_SCALABLE 0
 #define ICON_DIR_TYPE_FIXED 1
 #define ICON_DIR_TYPE_THRESHOLD 2
+
 struct IconThemeDir {
     char* name;
     int size;
@@ -57,6 +58,8 @@ struct IconTheme {
 };
 
 class Launcher : public Area {
+    std::string GetIconPath(std::string const& icon_name, int size);
+
   public:
     std::vector<char*> list_apps;          // paths to .desktop files
     std::vector<LauncherIcon*> list_icons;
@@ -86,13 +89,10 @@ extern XSettingsClient* xsettings_client;
 void DefaultLauncher();
 
 // initialize launcher : y position, precision, ...
-void init_launcher();
-void init_launcher_panel(void* panel);
+void InitLauncher();
+void InitLauncherPanel(void* panel);
 void CleanupLauncher();
 
-void launcher_action(LauncherIcon* icon, XEvent* e);
-
-void test_launcher_read_desktop_file();
-void test_launcher_read_theme_file();
+void LauncherAction(LauncherIcon* icon, XEvent* e);
 
 #endif

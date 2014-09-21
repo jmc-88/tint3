@@ -148,7 +148,7 @@ std::string Clock::GetTooltipText() {
 }
 
 
-void init_clock() {
+void InitClock() {
     if (time1_format.empty() || clock_timeout != nullptr) {
         return;
     }
@@ -165,7 +165,7 @@ void init_clock() {
 }
 
 
-void init_clock_panel(void* p) {
+void InitClockPanel(void* p) {
     Panel* panel = static_cast<Panel*>(p);
     Clock* clock = &panel->clock;
 

@@ -153,10 +153,10 @@ void InitPanel() {
 
     init_tooltip();
     init_systray();
-    init_launcher();
-    init_clock();
+    InitLauncher();
+    InitClock();
 #ifdef ENABLE_BATTERY
-    init_battery();
+    InitBattery();
 #endif
     init_taskbar();
 
@@ -199,7 +199,7 @@ void InitPanel() {
         // add children according to panel_items
         for (char item : panel_items_order) {
             if (item == 'L') {
-                init_launcher_panel(p);
+                InitLauncherPanel(p);
             }
 
             if (item == 'T') {
@@ -209,7 +209,7 @@ void InitPanel() {
 #ifdef ENABLE_BATTERY
 
             if (item == 'B') {
-                init_battery_panel(p);
+                InitBatteryPanel(p);
             }
 
 #endif
@@ -222,7 +222,7 @@ void InitPanel() {
             }
 
             if (item == 'C') {
-                init_clock_panel(p);
+                InitClockPanel(p);
             }
         }
 

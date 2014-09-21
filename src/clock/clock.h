@@ -47,8 +47,8 @@ void DefaultClock();
 void CleanupClock();
 
 // initialize clock : y position, precision, ...
-void init_clock();
-void init_clock_panel(void* panel);
+void InitClock();
+void InitClockPanel(void* panel);
 
 void clock_action(int button);
 

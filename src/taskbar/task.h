@@ -62,7 +62,7 @@ class Task : public Area {
   public:
     // TODO: group task with list of windows here
     Window win;
-    int  desktop;
+    int desktop;
     int current_state;
     Imlib_Image icon[TASK_STATE_COUNT];
     Pixmap state_pix[TASK_STATE_COUNT];
