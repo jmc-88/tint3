@@ -48,6 +48,7 @@ class Taskbar : public TaskbarBase {
 
     Taskbar& set_state(size_t state);
     void draw_foreground(cairo_t*);
+    void on_change_layout();
 };
 
 class Global_taskbar : public TaskbarBase {
@@ -71,9 +72,6 @@ void taskbar_remove_task(gpointer key, gpointer value, gpointer user_data);
 Task* task_get_task(Window win);
 GPtrArray* task_get_tasks(Window win);
 void task_refresh_tasklist();
-
-int  resize_taskbar(void* obj);
-void on_change_taskbar(void* obj);
 
 // show/hide taskbar according to current desktop
 void visible_taskbar(void* p);

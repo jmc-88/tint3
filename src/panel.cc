@@ -244,8 +244,8 @@ void init_panel() {
         long event_mask = ExposureMask | ButtonPressMask | ButtonReleaseMask |
                           ButtonMotionMask;
 
-        if (p->g_task.tooltip_enabled || p->clock._get_tooltip_text
-            || (launcher_enabled && launcher_tooltip_enabled)) {
+        if (p->g_task.tooltip_enabled || (launcher_enabled
+                                          && launcher_tooltip_enabled)) {
             event_mask |= PointerMotionMask | LeaveWindowMask;
         }
 
@@ -384,7 +384,7 @@ void init_panel_size_and_position(Panel* panel) {
 
 
 bool Panel::resize() {
-    resize_by_layout(this, 0);
+    resize_by_layout(0);
 
     if (panel_mode != MULTI_DESKTOP && taskbar_enabled) {
         // propagate width/height on hidden taskbar
@@ -506,7 +506,7 @@ void set_panel_items_order(Panel* p) {
         }
     }
 
-    init_rendering(p, 0);
+    p->init_rendering(0);
 }
 
 

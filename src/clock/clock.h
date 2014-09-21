@@ -24,6 +24,7 @@ class Clock : public Area {
     int time2_posy;
 
     void draw_foreground(cairo_t*);
+    const char* get_tooltip_text();
     bool resize();
 };
 

@@ -79,19 +79,17 @@ Area& Area::clone(Area const& other) {
  *
  ************************************************************/
 
-void init_rendering(void* obj, int pos) {
-    Area* a = static_cast<Area*>(obj);
-
+void Area::init_rendering(int pos) {
     // initialize fixed position/size
-    for (auto& child : a->children) {
+    for (auto& child : children) {
         if (panel_horizontal) {
-            child->posy = pos + a->bg->border.width + a->paddingy;
-            child->height = a->height - (2 * (a->bg->border.width + a->paddingy));
-            init_rendering(child, child->posy);
+            child->posy = pos + bg->border.width + paddingy;
+            child->height = height - (2 * (bg->border.width + paddingy));
+            child->init_rendering(child->posy);
         } else {
-            child->posx = pos + a->bg->border.width + a->paddingy;
-            child->width = a->width - (2 * (a->bg->border.width + a->paddingy));
-            init_rendering(child, child->posx);
+            child->posx = pos + bg->border.width + paddingy;
+            child->width = width - (2 * (bg->border.width + paddingy));
+            child->init_rendering(child->posx);
         }
     }
 }
@@ -185,10 +183,7 @@ void Area::size_by_layout(int pos, int level) {
     if (on_changed) {
         // pos/size changed
         need_redraw = true;
-
-        if (_on_change_layout) {
-            _on_change_layout(this);
-        }
+        on_change_layout();
     }
 }
 
@@ -222,15 +217,14 @@ void Area::refresh() {
 }
 
 
-int resize_by_layout(void* obj, int maximum_size) {
-    auto a = static_cast<Area*>(obj);
+int Area::resize_by_layout(int maximum_size) {
     int size, nb_by_content = 0, nb_by_layout = 0;
 
     if (panel_horizontal) {
         // detect free size for SIZE_BY_LAYOUT's Area
-        size = a->width - (2 * (a->paddingxlr + a->bg->border.width));
+        size = width - (2 * (paddingxlr + bg->border.width));
 
-        for (auto& child : a->children) {
+        for (auto& child : children) {
             if (child->on_screen && child->size_mode == SIZE_BY_CONTENT) {
                 size -= child->width;
                 nb_by_content++;
@@ -243,7 +237,7 @@ int resize_by_layout(void* obj, int maximum_size) {
 
         //printf("  resize_by_layout Deb %d, %d\n", nb_by_content, nb_by_layout);
         if (nb_by_content + nb_by_layout) {
-            size -= ((nb_by_content + nb_by_layout - 1) * a->paddingx);
+            size -= ((nb_by_content + nb_by_layout - 1) * paddingx);
         }
 
         int width = 0, modulo = 0, old_width;
@@ -259,7 +253,7 @@ int resize_by_layout(void* obj, int maximum_size) {
         }
 
         // resize SIZE_BY_LAYOUT objects
-        for (auto& child : a->children) {
+        for (auto& child : children) {
             if (child->on_screen && child->size_mode == SIZE_BY_LAYOUT) {
                 old_width = child->width;
                 child->width = width;
@@ -276,9 +270,9 @@ int resize_by_layout(void* obj, int maximum_size) {
         }
     } else {
         // detect free size for SIZE_BY_LAYOUT's Area
-        size = a->height - (2 * (a->paddingxlr + a->bg->border.width));
+        size = height - (2 * (paddingxlr + bg->border.width));
 
-        for (auto& child : a->children) {
+        for (auto& child : children) {
             if (child->on_screen && child->size_mode == SIZE_BY_CONTENT) {
                 size -= child->height;
                 nb_by_content++;
@@ -290,7 +284,7 @@ int resize_by_layout(void* obj, int maximum_size) {
         }
 
         if (nb_by_content + nb_by_layout) {
-            size -= ((nb_by_content + nb_by_layout - 1) * a->paddingx);
+            size -= ((nb_by_content + nb_by_layout - 1) * paddingx);
         }
 
         int height = 0, modulo = 0, old_height;
@@ -306,7 +300,7 @@ int resize_by_layout(void* obj, int maximum_size) {
         }
 
         // resize SIZE_BY_LAYOUT objects
-        for (auto& child : a->children) {
+        for (auto& child : children) {
             if (child->on_screen && child->size_mode == SIZE_BY_LAYOUT) {
                 old_height = child->height;
                 child->height = height;
@@ -443,9 +437,20 @@ void Area::draw_foreground(cairo_t*) {
 }
 
 
+const char* Area::get_tooltip_text() {
+    /* defaults to a no-op */
+    return nullptr;
+}
+
+
 bool Area::resize() {
     /* defaults to a no-op */
     return false;
+}
+
+
+void Area::on_change_layout() {
+    /* defaults to a no-op */
 }
 
 

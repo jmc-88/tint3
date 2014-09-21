@@ -29,6 +29,7 @@ class Systraybar : public Area {
     int icon_size, icons_per_column, icons_per_row, marging;
 
     void draw_foreground(cairo_t*);
+    void on_change_layout();
     bool resize();
 };
 
@@ -62,8 +63,6 @@ void cleanup_systray();
 // initialize protocol and panel position
 void init_systray();
 void init_systray_panel(void* p);
-
-void on_change_systray(void* obj);
 
 
 // systray protocol

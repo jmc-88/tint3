@@ -40,9 +40,13 @@
 Timeout* urgent_timeout;
 std::list<Task*> urgent_list;
 
-const char* task_get_tooltip(void* obj) {
-    Task* t = static_cast<Task*>(obj);
-    return t->title;
+const char* Task::get_tooltip_text() {
+    return tooltip_enabled_ ? title : nullptr;
+}
+
+Task& Task::set_tooltip_enabled(bool is_enabled) {
+    tooltip_enabled_ = is_enabled;
+    return (*this);
 }
 
 
@@ -91,16 +95,14 @@ Task* add_task(Window win) {
                  PropertyChangeMask | StructureNotifyMask);
 
     GPtrArray* task_group = g_ptr_array_new();
-    Taskbar* tskbar;
     Task* new_tsk2 = 0;
-    int j;
 
-    for (j = 0 ; j < panel1[monitor].nb_desktop ; j++) {
+    for (int j = 0 ; j < panel1[monitor].nb_desktop ; j++) {
         if (new_tsk.desktop != ALLDESKTOP && new_tsk.desktop != j) {
             continue;
         }
 
-        tskbar = &panel1[monitor].taskbar[j];
+        Taskbar* tskbar = &panel1[monitor].taskbar[j];
         new_tsk2 = new Task();
 
         // TODO: nuke this from planet Earth ASAP - horrible hack to mimick the
@@ -110,8 +112,9 @@ Task* add_task(Window win) {
         new_tsk2->parent = reinterpret_cast<Area*>(tskbar);
         new_tsk2->win = new_tsk.win;
         new_tsk2->desktop = new_tsk.desktop;
-        new_tsk2->current_state =
-            -1;  // to update the current state later in set_task_state...
+
+        // to update the current state later in set_task_state...
+        new_tsk2->current_state = -1;
 
         if (new_tsk2->desktop == ALLDESKTOP && server.desktop != j) {
             // hide ALLDESKTOP task on non-current desktop
@@ -119,10 +122,7 @@ Task* add_task(Window win) {
         }
 
         new_tsk2->title = new_tsk.title;
-
-        if (panel1[monitor].g_task.tooltip_enabled) {
-            new_tsk2->_get_tooltip_text = task_get_tooltip;
-        }
+        new_tsk2->set_tooltip_enabled(panel1[monitor].g_task.tooltip_enabled);
 
         for (k = 0; k < TASK_STATE_COUNT; ++k) {
             new_tsk2->icon[k] = new_tsk.icon[k];
@@ -490,16 +490,19 @@ void Task::draw_foreground(cairo_t* c) {
 }
 
 
-void on_change_task(void* obj) {
-    Task* tsk = static_cast<Task*>(obj);
-    Panel* panel = tsk->panel;
+void Task::on_change_layout() {
+    long value[] = {
+        panel->posx + posx,
+        panel->posy + posy,
+        width,
+        height
+    };
 
-    long value[] = { panel->posx + tsk->posx, panel->posy + tsk->posy, tsk->width, tsk->height };
-    XChangeProperty(server.dsp, tsk->win, server.atom._NET_WM_ICON_GEOMETRY,
+    XChangeProperty(server.dsp, win, server.atom._NET_WM_ICON_GEOMETRY,
                     XA_CARDINAL, 32, PropModeReplace, (unsigned char*)value, 4);
 
     // reset Pixmap when position/size changed
-    set_task_redraw(tsk);
+    set_task_redraw(this);
 }
 
 // Given a pointer to the active task (active_task) and a pointer

@@ -141,7 +141,7 @@ struct tm* clock_gettime_for_tz(std::string const& timezone) {
     return result;
 }
 
-const char* clock_get_tooltip(void* obj) {
+const char* Clock::get_tooltip_text() {
     strftime(buf_tooltip, sizeof(buf_tooltip), time_tooltip_format.c_str(),
              clock_gettime_for_tz(time_tooltip_timezone));
     return buf_tooltip;
@@ -186,7 +186,6 @@ void init_clock_panel(void* p) {
     clock->on_screen = 1;
 
     if (!time_tooltip_format.empty()) {
-        clock->_get_tooltip_text = clock_get_tooltip;
         strftime(buf_tooltip, sizeof(buf_tooltip), time_tooltip_format.c_str(),
                  clock_gettime_for_tz(time_tooltip_timezone));
     }

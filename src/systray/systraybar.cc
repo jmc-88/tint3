@@ -58,7 +58,6 @@ void default_systray() {
     render_background = 0;
     systray.alpha = 100;
     systray.sort = 3;
-    systray._on_change_layout = on_change_systray;
     systray.size_mode = SIZE_BY_CONTENT;
 }
 
@@ -181,13 +180,11 @@ bool Systraybar::resize() {
 }
 
 
-void on_change_systray(void* obj) {
+void Systraybar::on_change_layout() {
     // here, systray.posx/posy are defined by rendering engine. so we can calculate position of tray icon.
-    Systraybar* sysbar = static_cast<Systraybar*>(obj);
-    Panel* panel = sysbar->panel;
     int i, posx, posy;
     int start = panel->bg->border.width + panel->paddingy +
-                systray.bg->border.width + systray.paddingy + sysbar->marging / 2;
+                systray.bg->border.width + systray.paddingy + marging / 2;
 
     if (panel_horizontal) {
         posy = start;
@@ -212,30 +209,30 @@ void on_change_systray(void* obj) {
         traywin->y = posy;
         traywin->x = posx;
         //printf("systray %d : %d,%d\n", i, posx, posy);
-        traywin->width = sysbar->icon_size;
-        traywin->height = sysbar->icon_size;
+        traywin->width = icon_size;
+        traywin->height = icon_size;
 
         if (panel_horizontal) {
-            if (i % sysbar->icons_per_column) {
-                posy += sysbar->icon_size + sysbar->paddingx;
+            if (i % icons_per_column) {
+                posy += (icon_size + paddingx);
             } else {
                 posy = start;
-                posx += (sysbar->icon_size + systray.paddingx);
+                posx += (icon_size + systray.paddingx);
             }
         } else {
-            if (i % sysbar->icons_per_row) {
-                posx += sysbar->icon_size + systray.paddingx;
+            if (i % icons_per_row) {
+                posx += (icon_size + systray.paddingx);
             } else {
                 posx = start;
-                posy += (sysbar->icon_size + systray.paddingx);
+                posy += (icon_size + systray.paddingx);
             }
         }
 
         // position and size the icon window
         XMoveResizeWindow(server.dsp, traywin->id, traywin->x, traywin->y,
-                          sysbar->icon_size, sysbar->icon_size);
-        XResizeWindow(server.dsp, traywin->tray_id, sysbar->icon_size,
-                      sysbar->icon_size);
+                          icon_size, icon_size);
+        XResizeWindow(server.dsp, traywin->tray_id, icon_size,
+                      icon_size);
     }
 }
 

@@ -27,6 +27,8 @@ class LauncherIcon : public Area {
     int x, y;
 
     void draw_foreground(cairo_t*);
+    const char* get_tooltip_text();
+    void on_change_layout();
 };
 
 struct DesktopEntry {
@@ -79,7 +81,7 @@ void default_launcher();
 void init_launcher();
 void init_launcher_panel(void* panel);
 void cleanup_launcher();
-void cleanup_launcher_theme(Launcher* launcher);
+void cleanup_launcher_theme(Launcher& launcher);
 
 // Populates the list_themes list
 void launcher_load_themes(Launcher* launcher);

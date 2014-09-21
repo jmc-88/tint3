@@ -124,7 +124,7 @@ void tooltip_show(void* arg) {
     area = click_area(g_tooltip.panel, mx, my);
     stop_tooltip_timeout();
 
-    if (!g_tooltip.mapped && area->_get_tooltip_text) {
+    if (!g_tooltip.mapped) {
         tooltip_copy_text(area);
         g_tooltip.mapped = True;
         XMapWindow(server.dsp, g_tooltip.window);
@@ -344,11 +344,12 @@ void stop_tooltip_timeout() {
 
 void tooltip_copy_text(Area* area) {
     free(g_tooltip.tooltip_text);
+    g_tooltip.tooltip_text = 0;
 
-    if (area && area->_get_tooltip_text) {
-        g_tooltip.tooltip_text = strdup(area->_get_tooltip_text(area));
-    } else {
-        g_tooltip.tooltip_text = 0;
+    const char* tooltip = area->get_tooltip_text();
+
+    if (area && tooltip != nullptr) {
+        g_tooltip.tooltip_text = strdup(tooltip);
     }
 
     g_tooltip.area = area;

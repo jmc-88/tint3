@@ -60,11 +60,11 @@ void xsettings_notify_cb(const char* name, XSettingsAction action,
             icon_theme_name = setting->data.v_string;
 
             for (int i = 0 ; i < nb_panel ; ++i) {
-                Launcher* launcher = &panel1[i].launcher;
+                Launcher& launcher = panel1[i].launcher;
                 cleanup_launcher_theme(launcher);
-                launcher_load_themes(launcher);
-                launcher_load_icons(launcher);
-                launcher->need_resize = true;
+                launcher_load_themes(&launcher);
+                launcher_load_icons(&launcher);
+                launcher.need_resize = true;
             }
         }
     }

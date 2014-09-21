@@ -113,9 +113,7 @@ void cleanup_launcher() {
     }
 
     for (int i = 0 ; i < nb_panel ; i++) {
-        Panel* panel = &panel1[i];
-        Launcher* launcher = &panel->launcher;
-        cleanup_launcher_theme(launcher);
+        cleanup_launcher_theme(panel1[i].launcher);
     }
 
     for (auto const& app : panel_config.launcher.list_apps) {
@@ -128,10 +126,10 @@ void cleanup_launcher() {
 }
 
 
-void cleanup_launcher_theme(Launcher* launcher) {
-    launcher->free_area();
+void cleanup_launcher_theme(Launcher& launcher) {
+    launcher.free_area();
 
-    for (auto const& launcherIcon : launcher->list_icons) {
+    for (auto const& launcherIcon : launcher.list_icons) {
         if (launcherIcon) {
             free_icon(launcherIcon->icon_scaled);
             free_icon(launcherIcon->icon_original);
@@ -144,13 +142,13 @@ void cleanup_launcher_theme(Launcher* launcher) {
         delete launcherIcon;
     }
 
-    for (auto const& theme : launcher->list_themes) {
+    for (auto const& theme : launcher.list_themes) {
         free_icon_theme(theme);
         delete theme;
     }
 
-    launcher->list_icons.clear();
-    launcher->list_themes.clear();
+    launcher.list_icons.clear();
+    launcher.list_themes.clear();
 }
 
 
@@ -271,17 +269,19 @@ bool Launcher::resize() {
         launcherIcon->x = posx;
 
         if (panel_horizontal) {
-            if (i % icons_per_column == 0) {
+            if (i % icons_per_column) {
+                posy += (icon_size + paddingx);
+            } else {
                 posy = start;
+                posx += (icon_size + paddingx);
             }
-
-            posx += (icon_size + paddingx);
         } else {
-            if (i % icons_per_row == 0) {
+            if (i % icons_per_column) {
+                posx += (icon_size + paddingx);
+            } else {
                 posx = start;
+                posy += (icon_size + paddingx);
             }
-
-            posx += (icon_size + paddingx);
         }
 
         ++i;
@@ -292,17 +292,13 @@ bool Launcher::resize() {
 
 // Here we override the default layout of the icons; normally Area layouts its children
 // in a stack; we need to layout them in a kind of table
-void launcher_icon_on_change_layout(void* obj) {
-    LauncherIcon* launcherIcon = (LauncherIcon*)obj;
-    launcherIcon->posy = ((Area*)launcherIcon->parent)->posy +
-                         launcherIcon->y;
-    launcherIcon->posx = ((Area*)launcherIcon->parent)->posx +
-                         launcherIcon->x;
+void LauncherIcon::on_change_layout() {
+    posy = (parent->posy + y);
+    posx = (parent->posx + x);
 }
 
-const char* launcher_icon_get_tooltip_text(void* obj) {
-    LauncherIcon* launcherIcon = (LauncherIcon*)obj;
-    return launcherIcon->icon_tooltip;
+const char* LauncherIcon::get_tooltip_text() {
+    return launcher_tooltip_enabled ? icon_tooltip : nullptr;
 }
 
 void LauncherIcon::draw_foreground(cairo_t* c) {
@@ -777,13 +773,6 @@ void launcher_load_icons(Launcher* launcher) {
             launcherIcon->need_redraw = true;
             launcherIcon->bg = backgrounds.front();
             launcherIcon->on_screen = 1;
-            launcherIcon->_on_change_layout = launcher_icon_on_change_layout;
-
-            if (launcher_tooltip_enabled) {
-                launcherIcon->_get_tooltip_text = launcher_icon_get_tooltip_text;
-            } else {
-                launcherIcon->_get_tooltip_text = nullptr;
-            }
 
             launcherIcon->is_app_desktop = 1;
             launcherIcon->cmd = strdup(entry.exec);

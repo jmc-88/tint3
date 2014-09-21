@@ -49,7 +49,10 @@ typedef struct {
 // way to calculate the size
 // SIZE_BY_LAYOUT objects : taskbar and task
 // SIZE_BY_CONTENT objects : clock, battery, launcher, systray
-enum { SIZE_BY_LAYOUT, SIZE_BY_CONTENT };
+enum {
+    SIZE_BY_LAYOUT,
+    SIZE_BY_CONTENT
+};
 
 class Panel;
 class Area {
@@ -85,14 +88,21 @@ class Area {
     // panel
     Panel* panel;
 
+    // on startup, initialize fixed pos/size
+    void init_rendering(int);
+
     // update area's content and update size (width/height).
     // returns true if size changed, false otherwise.
     virtual bool resize();
 
-    // after pos/size changed, the rendering engine will call _on_change_layout(Area*)
+    // generic resize for SIZE_BY_LAYOUT objects
+    int resize_by_layout(int);
+
+    // after pos/size changed, the rendering engine will call on_change_layout()
     int on_changed;
-    void (*_on_change_layout)(void* obj);
-    const char* (*_get_tooltip_text)(void* obj);
+    virtual void on_change_layout();
+
+    virtual const char* get_tooltip_text();
 
     void remove_area();
     void add_area();
@@ -118,11 +128,6 @@ class Area {
     void free_area();
 };
 
-// on startup, initialize fixed pos/size
-void init_rendering(void* obj, int pos);
-
-// generic resize for SIZE_BY_LAYOUT objects
-int resize_by_layout(void* obj, int maximum_size);
 
 // draw rounded rectangle
 void draw_rect(cairo_t* c, double x, double y, double w, double h, double r);

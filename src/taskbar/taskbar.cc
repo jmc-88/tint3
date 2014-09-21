@@ -197,7 +197,6 @@ void init_taskbar_panel(void* p) {
     // taskbar name
     panel->g_taskbar.area_name.panel = panel;
     panel->g_taskbar.area_name.size_mode = SIZE_BY_CONTENT;
-    panel->g_taskbar.area_name._on_change_layout = 0;
     panel->g_taskbar.area_name.need_resize = true;
     panel->g_taskbar.area_name.on_screen = 1;
 
@@ -205,7 +204,6 @@ void init_taskbar_panel(void* p) {
     panel->g_taskbar.parent = panel;
     panel->g_taskbar.panel = panel;
     panel->g_taskbar.size_mode = SIZE_BY_LAYOUT;
-    panel->g_taskbar._on_change_layout = on_change_taskbar;
     panel->g_taskbar.need_resize = true;
     panel->g_taskbar.on_screen = 1;
 
@@ -224,7 +222,6 @@ void init_taskbar_panel(void* p) {
     // task
     panel->g_task.panel = panel;
     panel->g_task.size_mode = SIZE_BY_LAYOUT;
-    panel->g_task._on_change_layout = on_change_task;
     panel->g_task.need_resize = true;
     panel->g_task.on_screen = 1;
 
@@ -442,9 +439,9 @@ void Taskbar::draw_foreground(cairo_t* /* c */) {
 bool TaskbarBase::resize() {
     int text_width;
 
-    //printf("resize_taskbar %d %d\n", posx, posy);
+    //printf("TaskbarBase::resize %d %d\n", posx, posy);
     if (panel_horizontal) {
-        resize_by_layout(this, panel->g_task.maximum_width);
+        resize_by_layout(panel->g_task.maximum_width);
 
         text_width = panel->g_task.maximum_width;
         auto it = children.begin();
@@ -460,7 +457,7 @@ bool TaskbarBase::resize() {
         text_width -= panel->g_task.text_posx -
                       panel->g_task.bg->border.width - panel->g_task.paddingx;
     } else {
-        resize_by_layout(this, panel->g_task.maximum_height);
+        resize_by_layout(panel->g_task.maximum_height);
         text_width = width - (2 * panel->g_taskbar.paddingy)
                      - panel->g_task.text_posx - panel->g_task.bg->border.width -
                      panel->g_task.paddingx;
@@ -470,16 +467,14 @@ bool TaskbarBase::resize() {
 }
 
 
-void on_change_taskbar(void* obj) {
-    Taskbar* tskbar = static_cast<Taskbar*>(obj);
-
+void Taskbar::on_change_layout() {
     // reset Pixmap when position/size changed
     for (int k = 0; k < TASKBAR_STATE_COUNT; ++k) {
-        tskbar->reset_state_pixmap(k);
+        reset_state_pixmap(k);
     }
 
-    tskbar->pix = 0;
-    tskbar->need_redraw = true;
+    pix = 0;
+    need_redraw = true;
 }
 
 

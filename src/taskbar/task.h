@@ -54,6 +54,8 @@ class Global_task : public Area {
 
 // TODO: make this inherit from a common base class that exposes state_pixmap
 class Task : public Area {
+    bool tooltip_enabled_;
+
     void draw_icon(int);
 
   public:
@@ -69,6 +71,9 @@ class Task : public Area {
     int urgent_tick;
 
     void draw_foreground(cairo_t* c);
+    const char* get_tooltip_text();
+    void on_change_layout();
+    Task& set_tooltip_enabled(bool);
 };
 
 extern Timeout* urgent_timeout;
@@ -76,8 +81,6 @@ extern std::list<Task*> urgent_list;
 
 Task* add_task(Window win);
 void remove_task(Task* tsk);
-
-void on_change_task(void* obj);
 
 void get_icon(Task* tsk);
 int  get_title(Task* tsk);
