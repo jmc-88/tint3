@@ -36,154 +36,130 @@
 
 Server_global server;
 
-void ServerCatchError(Display* d, XErrorEvent* ev) {
+int ServerCatchError(Display* d, XErrorEvent* ev) {
+    return 0;
 }
 
-void ServerInitAtoms() {
+void Server_global::InitAtoms() {
     std::string name;
 
-    server.atom._XROOTPMAP_ID = XInternAtom(server.dsp, "_XROOTPMAP_ID", False);
-    server.atom._XROOTMAP_ID = XInternAtom(server.dsp, "_XROOTMAP_ID", False);
-    server.atom._NET_CURRENT_DESKTOP = XInternAtom(server.dsp,
-                                       "_NET_CURRENT_DESKTOP", False);
-    server.atom._NET_NUMBER_OF_DESKTOPS = XInternAtom(server.dsp,
-                                          "_NET_NUMBER_OF_DESKTOPS", False);
-    server.atom._NET_DESKTOP_NAMES = XInternAtom(server.dsp, "_NET_DESKTOP_NAMES",
-                                     False);
-    server.atom._NET_DESKTOP_GEOMETRY = XInternAtom(server.dsp,
-                                        "_NET_DESKTOP_GEOMETRY", False);
-    server.atom._NET_DESKTOP_VIEWPORT = XInternAtom(server.dsp,
-                                        "_NET_DESKTOP_VIEWPORT", False);
-    server.atom._NET_ACTIVE_WINDOW = XInternAtom(server.dsp, "_NET_ACTIVE_WINDOW",
-                                     False);
-    server.atom._NET_WM_WINDOW_TYPE = XInternAtom(server.dsp,
-                                      "_NET_WM_WINDOW_TYPE", False);
-    server.atom._NET_WM_STATE_SKIP_PAGER = XInternAtom(server.dsp,
-                                           "_NET_WM_STATE_SKIP_PAGER", False);
-    server.atom._NET_WM_STATE_SKIP_TASKBAR = XInternAtom(server.dsp,
-            "_NET_WM_STATE_SKIP_TASKBAR", False);
-    server.atom._NET_WM_STATE_STICKY = XInternAtom(server.dsp,
-                                       "_NET_WM_STATE_STICKY", False);
-    server.atom._NET_WM_STATE_DEMANDS_ATTENTION = XInternAtom(server.dsp,
-            "_NET_WM_STATE_DEMANDS_ATTENTION", False);
-    server.atom._NET_WM_WINDOW_TYPE_DOCK = XInternAtom(server.dsp,
-                                           "_NET_WM_WINDOW_TYPE_DOCK", False);
-    server.atom._NET_WM_WINDOW_TYPE_DESKTOP = XInternAtom(server.dsp,
-            "_NET_WM_WINDOW_TYPE_DESKTOP", False);
-    server.atom._NET_WM_WINDOW_TYPE_TOOLBAR = XInternAtom(server.dsp,
-            "_NET_WM_WINDOW_TYPE_TOOLBAR", False);
-    server.atom._NET_WM_WINDOW_TYPE_MENU = XInternAtom(server.dsp,
-                                           "_NET_WM_WINDOW_TYPE_MENU", False);
-    server.atom._NET_WM_WINDOW_TYPE_SPLASH = XInternAtom(server.dsp,
-            "_NET_WM_WINDOW_TYPE_SPLASH", False);
-    server.atom._NET_WM_WINDOW_TYPE_DIALOG = XInternAtom(server.dsp,
-            "_NET_WM_WINDOW_TYPE_DIALOG", False);
-    server.atom._NET_WM_WINDOW_TYPE_NORMAL = XInternAtom(server.dsp,
-            "_NET_WM_WINDOW_TYPE_NORMAL", False);
-    server.atom._NET_WM_DESKTOP = XInternAtom(server.dsp, "_NET_WM_DESKTOP",
-                                  False);
-    server.atom.WM_STATE = XInternAtom(server.dsp, "WM_STATE", False);
-    server.atom._NET_WM_STATE = XInternAtom(server.dsp, "_NET_WM_STATE", False);
-    server.atom._NET_WM_STATE_MAXIMIZED_VERT = XInternAtom(server.dsp,
-            "_NET_WM_STATE_MAXIMIZED_VERT", False);
-    server.atom._NET_WM_STATE_MAXIMIZED_HORZ = XInternAtom(server.dsp,
-            "_NET_WM_STATE_MAXIMIZED_HORZ", False);
-    server.atom._NET_WM_STATE_SHADED = XInternAtom(server.dsp,
-                                       "_NET_WM_STATE_SHADED", False);
-    server.atom._NET_WM_STATE_HIDDEN = XInternAtom(server.dsp,
-                                       "_NET_WM_STATE_HIDDEN", False);
-    server.atom._NET_WM_STATE_BELOW = XInternAtom(server.dsp,
-                                      "_NET_WM_STATE_BELOW", False);
-    server.atom._NET_WM_STATE_ABOVE = XInternAtom(server.dsp,
-                                      "_NET_WM_STATE_ABOVE", False);
-    server.atom._NET_WM_STATE_MODAL = XInternAtom(server.dsp,
-                                      "_NET_WM_STATE_MODAL", False);
-    server.atom._NET_CLIENT_LIST = XInternAtom(server.dsp, "_NET_CLIENT_LIST",
+    atom._XROOTPMAP_ID = XInternAtom(dsp, "_XROOTPMAP_ID", False);
+    atom._XROOTMAP_ID = XInternAtom(dsp, "_XROOTMAP_ID", False);
+    atom._NET_CURRENT_DESKTOP = XInternAtom(dsp, "_NET_CURRENT_DESKTOP", False);
+    atom._NET_NUMBER_OF_DESKTOPS = XInternAtom(dsp, "_NET_NUMBER_OF_DESKTOPS",
                                    False);
-    server.atom._NET_WM_VISIBLE_NAME = XInternAtom(server.dsp,
-                                       "_NET_WM_VISIBLE_NAME", False);
-    server.atom._NET_WM_NAME = XInternAtom(server.dsp, "_NET_WM_NAME", False);
-    server.atom._NET_WM_STRUT = XInternAtom(server.dsp, "_NET_WM_STRUT", False);
-    server.atom._NET_WM_ICON = XInternAtom(server.dsp, "_NET_WM_ICON", False);
-    server.atom._NET_WM_ICON_GEOMETRY = XInternAtom(server.dsp,
-                                        "_NET_WM_ICON_GEOMETRY", False);
-    server.atom._NET_CLOSE_WINDOW = XInternAtom(server.dsp, "_NET_CLOSE_WINDOW",
+    atom._NET_DESKTOP_NAMES = XInternAtom(dsp, "_NET_DESKTOP_NAMES", False);
+    atom._NET_DESKTOP_GEOMETRY = XInternAtom(dsp, "_NET_DESKTOP_GEOMETRY", False);
+    atom._NET_DESKTOP_VIEWPORT = XInternAtom(dsp, "_NET_DESKTOP_VIEWPORT", False);
+    atom._NET_ACTIVE_WINDOW = XInternAtom(dsp, "_NET_ACTIVE_WINDOW", False);
+    atom._NET_WM_WINDOW_TYPE = XInternAtom(dsp, "_NET_WM_WINDOW_TYPE", False);
+    atom._NET_WM_STATE_SKIP_PAGER = XInternAtom(dsp, "_NET_WM_STATE_SKIP_PAGER",
                                     False);
-    server.atom.UTF8_STRING = XInternAtom(server.dsp, "UTF8_STRING", False);
-    server.atom._NET_SUPPORTING_WM_CHECK = XInternAtom(server.dsp,
-                                           "_NET_SUPPORTING_WM_CHECK", False);
-    server.atom._NET_WM_CM_S0 = XInternAtom(server.dsp, "_NET_WM_CM_S0", False);
-    server.atom._NET_SUPPORTING_WM_CHECK = XInternAtom(server.dsp, "_NET_WM_NAME",
-                                           False);
-    server.atom._NET_WM_STRUT_PARTIAL = XInternAtom(server.dsp,
-                                        "_NET_WM_STRUT_PARTIAL", False);
-    server.atom.WM_NAME = XInternAtom(server.dsp, "WM_NAME", False);
-    server.atom.__SWM_VROOT = XInternAtom(server.dsp, "__SWM_VROOT", False);
-    server.atom._MOTIF_WM_HINTS = XInternAtom(server.dsp, "_MOTIF_WM_HINTS", False);
-    server.atom.WM_HINTS = XInternAtom(server.dsp, "WM_HINTS", False);
-
-    name.assign(StringBuilder()
-                << "_XSETTINGS_S"
-                << DefaultScreen(server.dsp));
-    server.atom._XSETTINGS_SCREEN = XInternAtom(server.dsp, name.c_str(), False);
-
-    server.atom._XSETTINGS_SETTINGS = XInternAtom(server.dsp, "_XSETTINGS_SETTINGS",
+    atom._NET_WM_STATE_SKIP_TASKBAR = XInternAtom(dsp, "_NET_WM_STATE_SKIP_TASKBAR",
                                       False);
+    atom._NET_WM_STATE_STICKY = XInternAtom(dsp, "_NET_WM_STATE_STICKY", False);
+    atom._NET_WM_STATE_DEMANDS_ATTENTION = XInternAtom(dsp,
+                                           "_NET_WM_STATE_DEMANDS_ATTENTION", False);
+    atom._NET_WM_WINDOW_TYPE_DOCK = XInternAtom(dsp, "_NET_WM_WINDOW_TYPE_DOCK",
+                                    False);
+    atom._NET_WM_WINDOW_TYPE_DESKTOP = XInternAtom(dsp,
+                                       "_NET_WM_WINDOW_TYPE_DESKTOP", False);
+    atom._NET_WM_WINDOW_TYPE_TOOLBAR = XInternAtom(dsp,
+                                       "_NET_WM_WINDOW_TYPE_TOOLBAR", False);
+    atom._NET_WM_WINDOW_TYPE_MENU = XInternAtom(dsp, "_NET_WM_WINDOW_TYPE_MENU",
+                                    False);
+    atom._NET_WM_WINDOW_TYPE_SPLASH = XInternAtom(dsp, "_NET_WM_WINDOW_TYPE_SPLASH",
+                                      False);
+    atom._NET_WM_WINDOW_TYPE_DIALOG = XInternAtom(dsp, "_NET_WM_WINDOW_TYPE_DIALOG",
+                                      False);
+    atom._NET_WM_WINDOW_TYPE_NORMAL = XInternAtom(dsp, "_NET_WM_WINDOW_TYPE_NORMAL",
+                                      False);
+    atom._NET_WM_DESKTOP = XInternAtom(dsp, "_NET_WM_DESKTOP", False);
+    atom.WM_STATE = XInternAtom(dsp, "WM_STATE", False);
+    atom._NET_WM_STATE = XInternAtom(dsp, "_NET_WM_STATE", False);
+    atom._NET_WM_STATE_MAXIMIZED_VERT = XInternAtom(dsp,
+                                        "_NET_WM_STATE_MAXIMIZED_VERT", False);
+    atom._NET_WM_STATE_MAXIMIZED_HORZ = XInternAtom(dsp,
+                                        "_NET_WM_STATE_MAXIMIZED_HORZ", False);
+    atom._NET_WM_STATE_SHADED = XInternAtom(dsp, "_NET_WM_STATE_SHADED", False);
+    atom._NET_WM_STATE_HIDDEN = XInternAtom(dsp, "_NET_WM_STATE_HIDDEN", False);
+    atom._NET_WM_STATE_BELOW = XInternAtom(dsp, "_NET_WM_STATE_BELOW", False);
+    atom._NET_WM_STATE_ABOVE = XInternAtom(dsp, "_NET_WM_STATE_ABOVE", False);
+    atom._NET_WM_STATE_MODAL = XInternAtom(dsp, "_NET_WM_STATE_MODAL", False);
+    atom._NET_CLIENT_LIST = XInternAtom(dsp, "_NET_CLIENT_LIST", False);
+    atom._NET_WM_VISIBLE_NAME = XInternAtom(dsp, "_NET_WM_VISIBLE_NAME", False);
+    atom._NET_WM_NAME = XInternAtom(dsp, "_NET_WM_NAME", False);
+    atom._NET_WM_STRUT = XInternAtom(dsp, "_NET_WM_STRUT", False);
+    atom._NET_WM_ICON = XInternAtom(dsp, "_NET_WM_ICON", False);
+    atom._NET_WM_ICON_GEOMETRY = XInternAtom(dsp, "_NET_WM_ICON_GEOMETRY", False);
+    atom._NET_CLOSE_WINDOW = XInternAtom(dsp, "_NET_CLOSE_WINDOW", False);
+    atom.UTF8_STRING = XInternAtom(dsp, "UTF8_STRING", False);
+    atom._NET_SUPPORTING_WM_CHECK = XInternAtom(dsp, "_NET_SUPPORTING_WM_CHECK",
+                                    False);
+    atom._NET_WM_CM_S0 = XInternAtom(dsp, "_NET_WM_CM_S0", False);
+    atom._NET_SUPPORTING_WM_CHECK = XInternAtom(dsp, "_NET_WM_NAME", False);
+    atom._NET_WM_STRUT_PARTIAL = XInternAtom(dsp, "_NET_WM_STRUT_PARTIAL", False);
+    atom.WM_NAME = XInternAtom(dsp, "WM_NAME", False);
+    atom.__SWM_VROOT = XInternAtom(dsp, "__SWM_VROOT", False);
+    atom._MOTIF_WM_HINTS = XInternAtom(dsp, "_MOTIF_WM_HINTS", False);
+    atom.WM_HINTS = XInternAtom(dsp, "WM_HINTS", False);
+
+    name.assign(StringBuilder() << "_XSETTINGS_S" << DefaultScreen(dsp));
+    atom._XSETTINGS_SCREEN = XInternAtom(dsp, name.c_str(), False);
+
+    atom._XSETTINGS_SETTINGS = XInternAtom(dsp, "_XSETTINGS_SETTINGS", False);
 
     // systray protocol
-    name.assign(StringBuilder()
-                << "_NET_SYSTEM_TRAY_S"
-                << DefaultScreen(server.dsp));
-    server.atom._NET_SYSTEM_TRAY_SCREEN = XInternAtom(server.dsp, name.c_str(),
-                                          False);
+    name.assign(StringBuilder() << "_NET_SYSTEM_TRAY_S" << DefaultScreen(dsp));
+    atom._NET_SYSTEM_TRAY_SCREEN = XInternAtom(dsp, name.c_str(), False);
 
-    server.atom._NET_SYSTEM_TRAY_OPCODE = XInternAtom(server.dsp,
-                                          "_NET_SYSTEM_TRAY_OPCODE", False);
-    server.atom.MANAGER = XInternAtom(server.dsp, "MANAGER", False);
-    server.atom._NET_SYSTEM_TRAY_MESSAGE_DATA = XInternAtom(server.dsp,
-            "_NET_SYSTEM_TRAY_MESSAGE_DATA", False);
-    server.atom._NET_SYSTEM_TRAY_ORIENTATION = XInternAtom(server.dsp,
-            "_NET_SYSTEM_TRAY_ORIENTATION", False);
-    server.atom._XEMBED = XInternAtom(server.dsp, "_XEMBED", False);
-    server.atom._XEMBED_INFO = XInternAtom(server.dsp, "_XEMBED_INFO", False);
+    atom._NET_SYSTEM_TRAY_OPCODE = XInternAtom(dsp, "_NET_SYSTEM_TRAY_OPCODE",
+                                   False);
+    atom.MANAGER = XInternAtom(dsp, "MANAGER", False);
+    atom._NET_SYSTEM_TRAY_MESSAGE_DATA = XInternAtom(dsp,
+                                         "_NET_SYSTEM_TRAY_MESSAGE_DATA", False);
+    atom._NET_SYSTEM_TRAY_ORIENTATION = XInternAtom(dsp,
+                                        "_NET_SYSTEM_TRAY_ORIENTATION", False);
+    atom._XEMBED = XInternAtom(dsp, "_XEMBED", False);
+    atom._XEMBED_INFO = XInternAtom(dsp, "_XEMBED_INFO", False);
 
     // drag 'n' drop
-    server.atom.XdndAware = XInternAtom(server.dsp, "XdndAware", False);
-    server.atom.XdndEnter = XInternAtom(server.dsp, "XdndEnter", False);
-    server.atom.XdndPosition = XInternAtom(server.dsp, "XdndPosition", False);
-    server.atom.XdndStatus = XInternAtom(server.dsp, "XdndStatus", False);
-    server.atom.XdndDrop = XInternAtom(server.dsp, "XdndDrop", False);
-    server.atom.XdndLeave = XInternAtom(server.dsp, "XdndLeave", False);
-    server.atom.XdndSelection = XInternAtom(server.dsp, "XdndSelection", False);
-    server.atom.XdndTypeList = XInternAtom(server.dsp, "XdndTypeList", False);
-    server.atom.XdndActionCopy = XInternAtom(server.dsp, "XdndActionCopy", False);
-    server.atom.XdndFinished = XInternAtom(server.dsp, "XdndFinished", False);
-    server.atom.TARGETS = XInternAtom(server.dsp, "TARGETS", False);
+    atom.XdndAware = XInternAtom(dsp, "XdndAware", False);
+    atom.XdndEnter = XInternAtom(dsp, "XdndEnter", False);
+    atom.XdndPosition = XInternAtom(dsp, "XdndPosition", False);
+    atom.XdndStatus = XInternAtom(dsp, "XdndStatus", False);
+    atom.XdndDrop = XInternAtom(dsp, "XdndDrop", False);
+    atom.XdndLeave = XInternAtom(dsp, "XdndLeave", False);
+    atom.XdndSelection = XInternAtom(dsp, "XdndSelection", False);
+    atom.XdndTypeList = XInternAtom(dsp, "XdndTypeList", False);
+    atom.XdndActionCopy = XInternAtom(dsp, "XdndActionCopy", False);
+    atom.XdndFinished = XInternAtom(dsp, "XdndFinished", False);
+    atom.TARGETS = XInternAtom(dsp, "TARGETS", False);
 }
 
 
-void CleanupServer() {
-    if (server.colormap) {
-        XFreeColormap(server.dsp, server.colormap);
+void Server_global::Cleanup() {
+    if (colormap) {
+        XFreeColormap(dsp, colormap);
     }
 
-    if (server.colormap32) {
-        XFreeColormap(server.dsp, server.colormap32);
+    if (colormap32) {
+        XFreeColormap(dsp, colormap32);
     }
 
-    if (server.monitor.size() != 0) {
-        for (int i = 0; i < server.nb_monitor; ++i) {
-            if (server.monitor[i].names) {
-                g_strfreev(server.monitor[i].names);
+    if (monitor.size() != 0) {
+        for (int i = 0; i < nb_monitor; ++i) {
+            if (monitor[i].names) {
+                g_strfreev(monitor[i].names);
             }
         }
 
         // TODO: remove this when I'm done getting rid of global state...
-        server.monitor.clear();
+        monitor.clear();
     }
 
-    if (server.gc) {
-        XFreeGC(server.dsp, server.gc);
+    if (gc) {
+        XFreeGC(dsp, gc);
     }
 }
 
@@ -393,12 +369,10 @@ next:
 
 
 void GetDesktops() {
-    int i;
-
     // detect number of desktops
     // wait 15s to leave some time for window manager startup
-    for (i = 0 ; i < 15 ; i++) {
-        server.nb_desktop = server_get_number_of_desktop();
+    for (int i = 0 ; i < 15 ; i++) {
+        server.nb_desktop = server.GetDesktop();
 
         if (server.nb_desktop > 0) {
             break;
@@ -409,33 +383,44 @@ void GetDesktops() {
 
     if (server.nb_desktop == 0) {
         server.nb_desktop = 1;
-        fprintf(stderr,
-                "warning : WM doesn't respect NETWM specs. tint3 default to 1 desktop.\n");
+        util::log::Error() << "WM doesn't respect NETWM specs. "
+                           << "tint3 will default to 1 desktop.\n";
     }
 }
 
+int Server_global::GetCurrentDesktop() {
+    return GetProperty32(root_win, atom._NET_CURRENT_DESKTOP, XA_CARDINAL);
+}
 
-void ServerInitVisual() {
+int Server_global::GetDesktop() {
+    return GetDesktopFromWindow(root_win);
+}
+
+int Server_global::GetDesktopFromWindow(Window win) {
+    return GetProperty32(win, atom._NET_NUMBER_OF_DESKTOPS, XA_CARDINAL);
+}
+
+void Server_global::InitVisual() {
     // inspired by freedesktops fdclock ;)
     XVisualInfo templ;
-    templ.screen = server.screen;
+    templ.screen = screen;
     templ.depth = 32;
     templ.c_class = TrueColor;
 
     int nvi;
-    auto xvi = XGetVisualInfo(server.dsp,
+    auto xvi = XGetVisualInfo(dsp,
                               VisualScreenMask | VisualDepthMask | VisualClassMask,
                               &templ,
                               &nvi);
 
-    Visual* visual = nullptr;
+    Visual* xvi_visual = nullptr;
 
     if (xvi) {
         for (int i = 0; i < nvi; i++) {
-            auto format = XRenderFindVisualFormat(server.dsp, xvi[i].visual);
+            auto format = XRenderFindVisualFormat(dsp, xvi[i].visual);
 
             if (format->type == PictTypeDirect && format->direct.alphaMask) {
-                visual = xvi[i].visual;
+                xvi_visual = xvi[i].visual;
                 break;
             }
         }
@@ -444,41 +429,37 @@ void ServerInitVisual() {
     XFree(xvi);
 
     // check composite manager
-    server.composite_manager = XGetSelectionOwner(server.dsp,
-                               server.atom._NET_WM_CM_S0);
+    composite_manager = XGetSelectionOwner(dsp, atom._NET_WM_CM_S0);
 
-    if (server.colormap) {
-        XFreeColormap(server.dsp, server.colormap);
+    if (colormap) {
+        XFreeColormap(dsp, colormap);
     }
 
-    if (server.colormap32) {
-        XFreeColormap(server.dsp, server.colormap32);
+    if (colormap32) {
+        XFreeColormap(dsp, colormap32);
     }
 
-    if (visual) {
-        server.visual32 = visual;
-        server.colormap32 = XCreateColormap(server.dsp, server.root_win, visual,
-                                            AllocNone);
+    if (xvi_visual) {
+        visual32 = xvi_visual;
+        colormap32 = XCreateColormap(dsp, root_win, xvi_visual, AllocNone);
     }
 
-    if (visual && server.composite_manager != None && snapshot_path.empty()) {
+    if (xvi_visual && composite_manager != None && snapshot_path.empty()) {
         XSetWindowAttributes attrs;
         attrs.event_mask = StructureNotifyMask;
-        XChangeWindowAttributes(server.dsp, server.composite_manager, CWEventMask,
-                                &attrs);
+        XChangeWindowAttributes(dsp, composite_manager, CWEventMask, &attrs);
 
-        server.real_transparency = 1;
-        server.depth = 32;
-        printf("real transparency on... depth: %d\n", server.depth);
-        server.colormap = XCreateColormap(server.dsp, server.root_win, visual,
-                                          AllocNone);
-        server.visual = visual;
+        real_transparency = 1;
+        depth = 32;
+        printf("real transparency on... depth: %d\n", depth);
+        colormap = XCreateColormap(dsp, root_win, xvi_visual, AllocNone);
+        visual = xvi_visual;
     } else {
         // no composite manager or snapshot mode => fake transparency
-        server.real_transparency = 0;
-        server.depth = DefaultDepth(server.dsp, server.screen);
-        printf("real transparency off.... depth: %d\n", server.depth);
-        server.colormap = DefaultColormap(server.dsp, server.screen);
-        server.visual = DefaultVisual(server.dsp, server.screen);
+        real_transparency = 0;
+        depth = DefaultDepth(dsp, screen);
+        printf("real transparency off.... depth: %d\n", depth);
+        colormap = DefaultColormap(dsp, screen);
+        visual = DefaultVisual(dsp, screen);
     }
 }

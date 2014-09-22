@@ -126,11 +126,6 @@ int window_is_hidden(Window win) {
 }
 
 
-int window_get_desktop(Window win) {
-    return GetProperty32(win, server.atom._NET_WM_DESKTOP, XA_CARDINAL);
-}
-
-
 int window_get_monitor(Window win) {
     int i, x, y;
     Window src;
@@ -210,12 +205,6 @@ int window_is_skip_taskbar(Window win) {
 }
 
 
-int server_get_number_of_desktop() {
-    return GetProperty32(server.root_win, server.atom._NET_NUMBER_OF_DESKTOPS,
-                         XA_CARDINAL);
-}
-
-
 std::vector<std::string> server_get_desktop_names() {
     int count;
     char* data_ptr = static_cast<char*>(ServerGetProperty(
@@ -243,12 +232,6 @@ std::vector<std::string> server_get_desktop_names() {
     }
 
     return names;
-}
-
-
-int server_get_current_desktop() {
-    return GetProperty32(server.root_win, server.atom._NET_CURRENT_DESKTOP,
-                         XA_CARDINAL);
 }
 
 

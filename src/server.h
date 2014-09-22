@@ -22,7 +22,7 @@
 #endif
 
 
-typedef struct Global_atom {
+struct Global_atom {
     Atom _XROOTPMAP_ID;
     Atom _XROOTMAP_ID;
     Atom _NET_CURRENT_DESKTOP;
@@ -88,20 +88,18 @@ typedef struct Global_atom {
     Atom XdndActionCopy;
     Atom XdndFinished;
     Atom TARGETS;
-} Global_atom;
+};
 
-
-
-typedef struct Monitor {
+struct Monitor {
     int x;
     int y;
     int width;
     int height;
     char** names;
-} Monitor;
+};
 
-
-typedef struct {
+class Server_global {
+  public:
     Display* dsp;
     Window root_win;
     Window composite_manager;
@@ -127,22 +125,22 @@ typedef struct {
     SnDisplay* sn_dsp;
     std::map<pid_t, SnLauncherContext*> pids;
 #endif // HAVE_SN
-} Server_global;
+
+    void Cleanup();
+    int GetCurrentDesktop();
+    int GetDesktop();
+    int GetDesktopFromWindow(Window win);
+    void InitAtoms();
+    void InitVisual();
+};
 
 
 extern Server_global server;
 
-
-// freed memory
-void CleanupServer();
-
 void SendEvent32(Window win, Atom at, long data1, long data2, long data3);
 int  GetProperty32(Window win, Atom at, Atom type);
 void* ServerGetProperty(Window win, Atom at, Atom type, int* num_results);
-Atom server_get_atom(char* atom_name);
-void ServerCatchError(Display* d, XErrorEvent* ev);
-void ServerInitAtoms();
-void ServerInitVisual();
+int ServerCatchError(Display* d, XErrorEvent* ev);
 
 // detect root background
 void GetRootPixmap();

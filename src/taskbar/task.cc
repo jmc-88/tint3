@@ -79,7 +79,7 @@ Task* add_task(Window win) {
 
     Task new_tsk;
     new_tsk.win = win;
-    new_tsk.desktop = window_get_desktop(win);
+    new_tsk.desktop = server.GetDesktopFromWindow(win);
     new_tsk.panel = &panel1[monitor];
     new_tsk.current_state = window_is_iconified(win) ? TASK_ICONIFIED : TASK_NORMAL;
 

@@ -69,6 +69,7 @@ void SignalHandler(int sig) {
 
 
 void Init(int argc, char* argv[]) {
+    // FIXME: remove this global data shit
     // set global data
     DefaultConfig();
     DefaultTimeout();
@@ -186,12 +187,12 @@ void InitX11() {
         exit(0);
     }
 
-    ServerInitAtoms();
+    server.InitAtoms();
     server.screen = DefaultScreen(server.dsp);
     server.root_win = RootWindow(server.dsp, server.screen);
-    server.desktop = server_get_current_desktop();
-    ServerInitVisual();
-    XSetErrorHandler((XErrorHandler) ServerCatchError);
+    server.desktop = server.GetCurrentDesktop();
+    server.InitVisual();
+    XSetErrorHandler(ServerCatchError);
 
 #ifdef HAVE_SN
     // Initialize startup-notification
@@ -256,7 +257,7 @@ void Cleanup() {
 
     imlib_context_disconnect_display();
 
-    CleanupServer();
+    server.Cleanup();
     CleanupTimeout();
 
     if (server.dsp) {
@@ -677,9 +678,9 @@ void EventPropertyNotify(XEvent* e) {
                 return;
             }
 
-            server.nb_desktop = server_get_number_of_desktop();
+            server.nb_desktop = server.GetDesktop();
 
-            if (server.nb_desktop <= server.desktop) {
+            if (server.desktop >= server.nb_desktop) {
                 server.desktop = server.nb_desktop - 1;
             }
 
@@ -704,7 +705,7 @@ void EventPropertyNotify(XEvent* e) {
             }
 
             int old_desktop = server.desktop;
-            server.desktop = server_get_current_desktop();
+            server.desktop = server.GetCurrentDesktop();
 
             for (i = 0 ; i < nb_panel ; i++) {
                 Panel* panel = &panel1[i];
@@ -833,7 +834,7 @@ void EventPropertyNotify(XEvent* e) {
         }
         // Window desktop changed
         else if (at == server.atom._NET_WM_DESKTOP) {
-            int desktop = window_get_desktop(win);
+            int desktop = server.GetDesktopFromWindow(win);
 
             //printf("  Window desktop changed %d, %d\n", tsk->desktop, desktop);
             // bug in windowmaker : send unecessary 'desktop changed' when focus changed
@@ -1164,15 +1165,15 @@ start:
     Init(argc, argv);
     InitX11();
 
-    int i;
+    bool config_read = false;
 
     if (!config_path.empty()) {
-        i = config::ReadFile(config_path.c_str());
+        config_read = config::ReadFile(config_path.c_str());
     } else {
-        i = config::Read();
+        config_read = config::Read();
     }
 
-    if (!i) {
+    if (!config_read) {
         util::log::Error() << "usage: tint3 [-c] <config_file>\n";
         Cleanup();
         exit(1);
@@ -1188,6 +1189,7 @@ start:
 
     int damage_event, damage_error;
     XDamageQueryExtension(server.dsp, &damage_event, &damage_error);
+
     int x11_fd = ConnectionNumber(server.dsp);
     XSync(server.dsp, False);
 
@@ -1209,7 +1211,7 @@ start:
         if (panel_refresh) {
             panel_refresh = 0;
 
-            for (i = 0 ; i < nb_panel ; i++) {
+            for (int i = 0 ; i < nb_panel ; i++) {
                 panel = &panel1[i];
 
                 if (panel->is_hidden) {
@@ -1499,7 +1501,10 @@ start:
                             union {
                                 XEvent e;
                                 XDamageNotifyEvent de;
-                            } event_union = {.e = e};
+                            } event_union = {
+                                .e = e
+                            };
+
                             TrayWindow* traywin;
                             GSList* l;
                             XDamageNotifyEvent* de = &event_union.de;
