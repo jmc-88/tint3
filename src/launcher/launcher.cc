@@ -193,8 +193,11 @@ bool Launcher::Resize() {
 
                 if (!new_icon_path.empty()) {
                     launcherIcon->icon_original = imlib_load_image(new_icon_path.c_str());
-                    fprintf(stderr, "launcher.c %d: Using icon %s\n", __LINE__,
-                            new_icon_path.c_str());
+
+                    util::log::Error()
+                            << "launcher.c :" << __LINE__
+                            << ": Using icon " << new_icon_path.c_str()
+                            << '\n';
                 }
 
                 launcherIcon->icon_scaled = ScaleIcon(launcherIcon->icon_original, icon_size);
@@ -206,9 +209,10 @@ bool Launcher::Resize() {
                 FreeIcon(launcherIcon->icon_scaled);
                 launcherIcon->icon_scaled = ScaleIcon(launcherIcon->icon_original, icon_size);
 
-                fprintf(stderr,
-                        "launcher.c %d: Using icon %s\n", __LINE__,
-                        launcherIcon->icon_path);
+                util::log::Error()
+                        << "launcher.c " << __LINE__
+                        << ": Using icon " << launcherIcon->icon_path
+                        << '\n';
             } else {
                 // Free the old files
                 FreeIcon(launcherIcon->icon_original);
@@ -361,7 +365,7 @@ void LauncherAction(LauncherIcon* icon, XEvent* evt) {
     if (evt->type == ButtonPress || evt->type == ButtonRelease) {
         time = evt->xbutton.time;
     } else {
-        fprintf(stderr, "Unknown X event: %d\n", evt->type);
+        util::log::Error() << "Unknown X event: " << evt->type << '\n';
         return;
     }
 
@@ -372,7 +376,7 @@ void LauncherAction(LauncherIcon* icon, XEvent* evt) {
     pid_t pid = fork();
 
     if (pid < 0) {
-        fprintf(stderr, "Could not fork\n");
+        util::log::Error() << "Could not fork\n";
     } else if (pid == 0) {
 #if HAVE_SN
         sn_launcher_context_setup_child_process(ctx);
@@ -382,7 +386,7 @@ void LauncherAction(LauncherIcon* icon, XEvent* evt) {
         // Run the command
         execl("/bin/sh", "/bin/sh", "-c", icon->cmd, nullptr);
 
-        fprintf(stderr, "Failed to execlp %s\n", icon->cmd);
+        util::log::Error() << "Failed to execlp " << icon->cmd << '\n';
 #if HAVE_SN
         // TODO: how can this not leak? On a successful execl, this line is
         // never executed.
@@ -540,7 +544,7 @@ int LauncherReadDesktopFile(const char* path, DesktopEntry* entry) {
     });
 
     if (!read) {
-        fprintf(stderr, "Could not open file %s\n", path);
+        util::log::Error() << "Could not open file " << path << '\n';
         return 0;
     }
 
@@ -698,7 +702,7 @@ IconTheme* LoadTheme(char const* name) {
     });
 
     if (!read) {
-        fprintf(stderr, "Could not open theme '%s'\n", file_name.c_str());
+        util::log::Error() << "Could not open theme \"" << file_name.c_str() << "\"\n";
         delete theme;
         return nullptr;
     }
@@ -791,10 +795,10 @@ void Launcher::LoadThemes() {
     // load the user theme, all the inherited themes recursively (DFS), and the hicolor theme
     // avoid inheritance loops
     if (icon_theme_name.empty()) {
-        fprintf(stderr, "Missing launcher theme, defaulting to 'hicolor'.\n");
+        util::log::Error() << "Missing launcher theme, defaulting to 'hicolor'.\n";
         icon_theme_name = "hicolor";
     } else {
-        fprintf(stderr, "Loading %s. Icon theme:", icon_theme_name.c_str());
+        util::log::Error() << "Loading " << icon_theme_name.c_str() << ". Icon theme:";
     }
 
     GSList* queue = g_slist_append(nullptr, strdup(icon_theme_name.c_str()));
@@ -826,7 +830,7 @@ void Launcher::LoadThemes() {
         char* name = static_cast<char*>(queue->data);
         queue = g_slist_remove(queue, name);
 
-        fprintf(stderr, " '%s',", name);
+        util::log::Error() << " '" << name << "',";
         auto theme = LoadTheme(name);
 
         if (theme != nullptr) {
@@ -860,7 +864,7 @@ void Launcher::LoadThemes() {
         }
     }
 
-    fprintf(stderr, "\n");
+    util::log::Error() << '\n';
 
     // Free the queue
     GSList* l;
@@ -1020,7 +1024,7 @@ std::string Launcher::GetIconPath(std::string const& icon_name, int size) {
         }
     }
 
-    fprintf(stderr, "Could not find icon %s\n", icon_name.c_str());
+    util::log::Error() << "Could not find icon " << icon_name.c_str() << '\n';
     return std::string();
 }
 

@@ -960,13 +960,14 @@ Property ReadProperty(Display* disp, Window w, Atom property) {
         read_bytes *= 2;
     } while (bytes_after != 0);
 
-    fprintf(stderr, "DnD %s:%d: Property:\n", __FILE__, __LINE__);
-    fprintf(stderr, "DnD %s:%d: Actual type: %s\n", __FILE__, __LINE__,
-            GetAtomName(disp, actual_type));
-    fprintf(stderr, "DnD %s:%d: Actual format: %d\n", __FILE__, __LINE__,
-            actual_format);
-    fprintf(stderr, "DnD %s:%d: Number of items: %lu\n", __FILE__, __LINE__,
-            nitems);
+    util::log::Debug()
+            << "DnD " << __FILE__ << ':' << __LINE__ << ": Property:\n"
+            << "DnD " << __FILE__ << ':' << __LINE__ << ": Actual type: " << GetAtomName(
+                disp, actual_type) << '\n'
+            << "DnD " << __FILE__ << ':' << __LINE__ << ": Actual format: " << actual_format
+            << '\n'
+            << "DnD " << __FILE__ << ':' << __LINE__ << ": Number of items: " << nitems <<
+            '\n';
 
     Property p;
     p.data = ret;
@@ -986,7 +987,9 @@ Atom PickTargetFromList(Display* disp, Atom* atom_list, int nitems) {
 
     for (i = 0; i < nitems; i++) {
         char const* atom_name = GetAtomName(disp, atom_list[i]);
-        fprintf(stderr, "DnD %s:%d: Type %d = %s\n", __FILE__, __LINE__, i, atom_name);
+
+        util::log::Debug() << "DnD " << __FILE__ << ':' << __LINE__ << ": Type " << i <<
+                           " = " << atom_name << '\n';
 
         //See if this data type is allowed and of higher priority (closer to zero)
         //than the present one.
@@ -1043,17 +1046,18 @@ void DragAndDropEnter(XClientMessageEvent* e) {
     dnd_source_window = e->data.l[0];
     dnd_version = (e->data.l[1] >> 24);
 
-    fprintf(stderr, "DnD %s:%d: DnDEnter\n", __FILE__, __LINE__);
-    fprintf(stderr, "DnD %s:%d: DnDEnter. Supports > 3 types = %s\n", __FILE__,
-            __LINE__, more_than_3 ? "yes" : "no");
-    fprintf(stderr, "DnD %s:%d: Protocol version = %d\n", __FILE__, __LINE__,
-            dnd_version);
-    fprintf(stderr, "DnD %s:%d: Type 1 = %s\n", __FILE__, __LINE__,
-            GetAtomName(server.dsp, e->data.l[2]));
-    fprintf(stderr, "DnD %s:%d: Type 2 = %s\n", __FILE__, __LINE__,
-            GetAtomName(server.dsp, e->data.l[3]));
-    fprintf(stderr, "DnD %s:%d: Type 3 = %s\n", __FILE__, __LINE__,
-            GetAtomName(server.dsp, e->data.l[4]));
+    util::log::Debug()
+            << "DnD " << __FILE__ << ':' << __LINE__ << ": DnDEnter\n"
+            << "DnD " << __FILE__ << ':' << __LINE__ << ": DnDEnter. Supports > 3 types = "
+            << (more_than_3 ? "yes" : "no") << '\n'
+            << "DnD " << __FILE__ << ':' << __LINE__ << ": Protocol version = " <<
+            dnd_version << '\n'
+            << "DnD " << __FILE__ << ':' << __LINE__ << ": Type 1 = " << GetAtomName(
+                server.dsp, e->data.l[2]) << '\n'
+            << "DnD " << __FILE__ << ':' << __LINE__ << ": Type 2 = " << GetAtomName(
+                server.dsp, e->data.l[3]) << '\n'
+            << "DnD " << __FILE__ << ':' << __LINE__ << ": Type 3 = " << GetAtomName(
+                server.dsp, e->data.l[4]) << '\n';
 
     //Query which conversions are available and pick the best
 
@@ -1070,8 +1074,8 @@ void DragAndDropEnter(XClientMessageEvent* e) {
                                        e->data.l[4]);
     }
 
-    fprintf(stderr, "DnD %s:%d: Requested type = %s\n", __FILE__, __LINE__,
-            GetAtomName(server.dsp, dnd_atom));
+    util::log::Debug() << "DnD " << __FILE__ << ':' << __LINE__ <<
+                       ": Requested type = " << GetAtomName(server.dsp, dnd_atom) << '\n';
 }
 
 void DragAndDropPosition(XClientMessageEvent* e) {
@@ -1169,7 +1173,7 @@ start:
     }
 
     if (!i) {
-        fprintf(stderr, "usage: tint3 [-c] <config_file>\n");
+        util::log::Error() << "usage: tint3 [-c] <config_file>\n";
         Cleanup();
         exit(1);
     }
@@ -1401,16 +1405,17 @@ start:
                     case SelectionNotify: {
                             Atom target = e.xselection.target;
 
-                            fprintf(stderr, "DnD %s:%d: A selection notify has arrived!\n", __FILE__,
-                                    __LINE__);
-                            fprintf(stderr, "DnD %s:%d: Requestor = %lu\n", __FILE__, __LINE__,
-                                    e.xselectionrequest.requestor);
-                            fprintf(stderr, "DnD %s:%d: Selection atom = %s\n", __FILE__, __LINE__,
-                                    GetAtomName(server.dsp, e.xselection.selection));
-                            fprintf(stderr, "DnD %s:%d: Target atom    = %s\n", __FILE__, __LINE__,
-                                    GetAtomName(server.dsp, target));
-                            fprintf(stderr, "DnD %s:%d: Property atom  = %s\n", __FILE__, __LINE__,
-                                    GetAtomName(server.dsp, e.xselection.property));
+                            util::log::Debug()
+                                    << "DnD " << __FILE__ << ':' << __LINE__ <<
+                                    ": A selection notify has arrived!\n"
+                                    << "DnD " << __FILE__ << ':' << __LINE__ << ": Requestor = " <<
+                                    e.xselectionrequest.requestor << '\n'
+                                    << "DnD " << __FILE__ << ':' << __LINE__ << ": Selection atom = " <<
+                                    GetAtomName(server.dsp, e.xselection.selection) << '\n'
+                                    << "DnD " << __FILE__ << ':' << __LINE__ << ": Target atom    = " <<
+                                    GetAtomName(server.dsp, target) << '\n'
+                                    << "DnD " << __FILE__ << ':' << __LINE__ << ": Property atom  = " <<
+                                    GetAtomName(server.dsp, e.xselection.property) << '\n';
 
                             if (e.xselection.property != None && dnd_launcher_exec) {
                                 Property prop = ReadProperty(server.dsp, dnd_target_window, dnd_selection);
@@ -1421,24 +1426,26 @@ start:
                                     dnd_atom = PickTargetFromTargets(server.dsp, prop);
 
                                     if (dnd_atom == None) {
-                                        fprintf(stderr, "No matching datatypes.\n");
+                                        util::log::Debug() << "No matching datatypes.\n";
                                     } else {
                                         //Request the data type we are able to select
-                                        fprintf(stderr, "Now requsting type %s", GetAtomName(server.dsp, dnd_atom));
+                                        util::log::Debug() << "Now requesting type " << GetAtomName(server.dsp,
+                                                           dnd_atom) << '\n';
                                         XConvertSelection(server.dsp, dnd_selection, dnd_atom, dnd_selection,
                                                           dnd_target_window, CurrentTime);
                                     }
                                 } else if (target == dnd_atom) {
                                     //Dump the binary data
-                                    fprintf(stderr, "DnD %s:%d: Data begins:\n", __FILE__, __LINE__);
-                                    fprintf(stderr, "--------\n");
+                                    util::log::Debug() << "DnD " << __FILE__ << ':' << __LINE__ <<
+                                                       ": Data begins:\n";
+                                    util::log::Debug() << "--------\n";
                                     int i;
 
                                     for (i = 0; i < prop.nitems * prop.format / 8; i++) {
-                                        fprintf(stderr, "%c", ((char*)prop.data)[i]);
+                                        util::log::Debug() << ((char*)prop.data)[i];
                                     }
 
-                                    fprintf(stderr, "--------\n");
+                                    util::log::Debug() << "--------\n";
 
                                     int cmd_length = 0;
                                     cmd_length += 1; // (
@@ -1466,6 +1473,7 @@ start:
                                     cmd_length += 2; // &)
                                     cmd_length += 1; // terminator
 
+                                    // TODO: replace this with StringBuilder
                                     char* cmd = (char*) malloc(cmd_length);
                                     cmd[0] = '\0';
                                     strcat(cmd, "(");
@@ -1494,7 +1502,8 @@ start:
 
                                     strcat(cmd, "\"");
                                     strcat(cmd, "&)");
-                                    fprintf(stderr, "DnD %s:%d: Running command: %s\n", __FILE__, __LINE__, cmd);
+                                    util::log::Debug() << "DnD " << __FILE__ << ':' << __LINE__ <<
+                                                       ": Running command: \"" << cmd << "\"\n";
                                     TintExec(cmd);
                                     free(cmd);
 

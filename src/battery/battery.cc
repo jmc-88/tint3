@@ -42,6 +42,7 @@
 #include "../server.h"
 #include "util/window.h"
 #include "util/fs.h"
+#include "util/log.h"
 
 PangoFontDescription* bat1_font_desc;
 PangoFontDescription* bat2_font_desc;
@@ -196,7 +197,7 @@ void InitBattery() {
     }
 
     if (battery_dir.empty()) {
-        fprintf(stderr, "ERROR: battery applet can't found power_supply\n");
+        util::log::Error() << "ERROR: battery applet can't found power_supply\n";
         DefaultBattery();
         return;
     }
@@ -210,7 +211,7 @@ void InitBattery() {
         path_energy_full = util::fs::BuildPath({ battery_dir, "charge_full" });
     }
     else {
-        fprintf(stderr, "ERROR: can't found energy_* or charge_*\n");
+        util::log::Error() << "ERROR: can't found energy_* or charge_*\n";
     }
 
     path_current_now = util::fs::BuildPath({ battery_dir, "power_now" });
@@ -231,7 +232,7 @@ void InitBattery() {
         if (fp1 == nullptr || fp2 == nullptr || fp3 == nullptr || fp4 == nullptr) {
             CleanupBattery();
             DefaultBattery();
-            fprintf(stderr, "ERROR: battery applet can't open energy_now\n");
+            util::log::Error() << "ERROR: battery applet can't open energy_now\n";
         }
 
         if (fp1) {
@@ -334,7 +335,7 @@ void UpdateBattery() {
     len = sizeof(sysctl_out);
 
     if (sysctlbyname("hw.acpi.battery.state", &sysctl_out, &len, nullptr, 0) != 0) {
-        fprintf(stderr, "power update: no such sysctl");
+        util::log::Error() << "power update: no such sysctl";
     }
 
     // attemp to map the battery state to linux

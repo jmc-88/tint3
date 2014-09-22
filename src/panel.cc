@@ -176,8 +176,11 @@ void InitPanel() {
         panel1[i] = panel_config;
     }
 
-    fprintf(stderr, "tint3 : nb monitor %d, nb monitor used %d, nb desktop %d\n",
-            server.nb_monitor, nb_panel, server.nb_desktop);
+    util::log::Debug()
+            << "tint3: nb monitor " << server.nb_monitor
+            << ", nb monitor used " << nb_panel
+            << ", nb desktop " << server.nb_desktop
+            << '\n';
 
     for (i = 0 ; i < nb_panel ; i++) {
         auto p = &panel1[i];

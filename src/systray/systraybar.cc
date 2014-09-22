@@ -33,6 +33,7 @@
 #include "systraybar.h"
 #include "server.h"
 #include "panel.h"
+#include "util/log.h"
 
 GSList* icons;
 
@@ -269,15 +270,15 @@ void start_net() {
         int ret = XGetWindowProperty(server.dsp, win, _NET_WM_PID, 0, 1024, False,
                                      AnyPropertyType, &actual_type, &actual_format, &nitems, &bytes_after, &prop);
 
-        fprintf(stderr, "tint3 : another systray is running");
+        util::log::Error() << "tint3 : another systray is running";
 
         if (ret == Success && prop) {
             pid = prop[1] * 256;
             pid += prop[0];
-            fprintf(stderr, " pid=%d", pid);
+            util::log::Error() << " (pid " << pid << ')';
         }
 
-        fprintf(stderr, "\n");
+        util::log::Error() << '\n';
         return;
     }
 
@@ -310,11 +311,10 @@ void start_net() {
     if (XGetSelectionOwner(server.dsp,
                            server.atom._NET_SYSTEM_TRAY_SCREEN) != net_sel_win) {
         stop_net();
-        fprintf(stderr, "tint3 : can't get systray manager\n");
+        util::log::Error() << "tint3 : can't get systray manager\n";
         return;
     }
 
-    //fprintf(stderr, "tint3 : systray started\n");
     XClientMessageEvent ev;
     ev.type = ClientMessage;
     ev.window = server.root_win;
@@ -331,7 +331,6 @@ void start_net() {
 
 
 void stop_net() {
-    //fprintf(stderr, "tint3 : systray stopped\n");
     if (systray.list_icons) {
         // remove_icon change systray.list_icons
         while (systray.list_icons) {
@@ -427,7 +426,7 @@ bool add_icon(Window id) {
     XSetErrorHandler(old);
 
     if (error) {
-        fprintf(stderr, "tint3 : not icon_swallow\n");
+        util::log::Error() << "tint3: not icon_swallow\n";
         XDestroyWindow(server.dsp, parent_window);
         return false;
     }
@@ -452,7 +451,7 @@ bool add_icon(Window id) {
                 XFree(data);
             }
         } else {
-            fprintf(stderr, "tint3 : xembed error\n");
+            util::log::Error() << "tint3: xembed error\n";
             XDestroyWindow(server.dsp, parent_window);
             return false;
         }
@@ -593,9 +592,9 @@ void net_message(XClientMessageEvent* e) {
 
         default:
             if (opcode == server.atom._NET_SYSTEM_TRAY_MESSAGE_DATA) {
-                printf("message from dockapp: %s\n", e->data.b);
+                util::log::Debug() << "message from dockapp: " << e->data.b << '\n';
             } else {
-                fprintf(stderr, "SYSTEM_TRAY : unknown message type\n");
+                util::log::Error() << "SYSTEM_TRAY: unknown message type\n";
             }
 
             break;

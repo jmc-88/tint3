@@ -33,6 +33,7 @@
 #include "server.h"
 #include "panel.h"
 #include "launcher.h"
+#include "util/log.h"
 
 struct _XSettingsClient {
     Display* display;
@@ -207,8 +208,10 @@ static XSettingsList* ParseSettings(unsigned char* data, size_t len) {
     result = FetchCard8(&buffer, (CARD8*)&buffer.byte_order);
 
     if (buffer.byte_order != MSBFirst && buffer.byte_order != LSBFirst) {
-        fprintf(stderr, "Invalid byte order %x in XSETTINGS property\n",
-                buffer.byte_order);
+        util::log::Error()
+                << "Invalid byte order "
+                << buffer.byte_order
+                << " in XSETTINGS property\n";
         result = XSETTINGS_FAILED;
         goto out;
     }
@@ -368,15 +371,16 @@ out:
     if (result != XSETTINGS_SUCCESS) {
         switch (result) {
             case XSETTINGS_NO_MEM:
-                fprintf(stderr, "Out of memory reading XSETTINGS property\n");
+                util::log::Error() << "Out of memory reading XSETTINGS property\n";
                 break;
 
             case XSETTINGS_ACCESS:
-                fprintf(stderr, "Invalid XSETTINGS property (read off end)\n");
+                util::log::Error() << "Invalid XSETTINGS property (read off end)\n";
                 break;
 
             case XSETTINGS_DUPLICATE_ENTRY:
-                fprintf(stderr, "Duplicate XSETTINGS entry for '%s'\n", setting->name);
+                util::log::Error() << "Duplicate XSETTINGS entry for '" << setting->name <<
+                                   "'\n";
 
             case XSETTINGS_FAILED:
             case XSETTINGS_SUCCESS:
@@ -417,7 +421,7 @@ static void ReadSettings(XSettingsClient* client) {
 
     if (result == Success && type == server.atom._XSETTINGS_SETTINGS) {
         if (format != 8) {
-            fprintf(stderr, "Invalid format for XSETTINGS property %d", format);
+            util::log::Error() << "Invalid format for XSETTINGS property " << format;
         } else {
             client->settings = ParseSettings(data, n_items);
         }

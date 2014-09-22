@@ -31,6 +31,7 @@
 #include "server.h"
 #include "config.h"
 #include "util/common.h"
+#include "util/log.h"
 #include "util/window.h"
 
 Server_global server;
@@ -280,7 +281,7 @@ void GetRootPixmap() {
     server.root_pmap = ret;
 
     if (server.root_pmap == None) {
-        fprintf(stderr, "tint3 : pixmap background detection failed\n");
+        util::log::Error() << "tint3: pixmap background detection failed\n";
         return;
     }
 

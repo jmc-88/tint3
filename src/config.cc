@@ -245,7 +245,7 @@ void AddEntry(std::string const& key, char* value) {
 #ifdef ENABLE_BATTERY
                 battery_enabled = 1;
 #else
-                fprintf(stderr, "tint3 is build without battery support\n");
+                util::log::Error() << "tint3 is build without battery support\n";
 #endif
             }
 
