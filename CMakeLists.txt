@@ -1,8 +1,8 @@
 project( tint3 )
 cmake_minimum_required( VERSION 2.8 )
 
-set(CMAKE_C_FLAGS_DEBUG   "-O0 -ggdb")
-set(CMAKE_CXX_FLAGS_DEBUG "-O0 -ggdb")
+set(CMAKE_C_FLAGS_DEBUG   "-O0 -ggdb -D_TINT3_DEBUG")
+set(CMAKE_CXX_FLAGS_DEBUG "-O0 -ggdb -D_TINT3_DEBUG")
 
 include( FindPkgConfig )
 include( CheckLibraryExists )
@@ -62,6 +62,7 @@ set( SOURCES
     src/util/area.cc
     src/util/common.cc
     src/util/fs.cc
+    src/util/log.cc
     src/util/timer.cc
     src/util/window.cc
     src/util/xdg.cc )

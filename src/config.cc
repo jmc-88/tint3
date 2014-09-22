@@ -808,12 +808,12 @@ namespace config {
 bool Read() {
     // follow XDG specification
     // check tint3rc in user directory
-    std::string user_config_dir = fs::BuildPath({
+    std::string user_config_dir = util::fs::BuildPath({
         xdg::basedir::ConfigHome(), "tint3"
     });
-    config_path = fs::BuildPath({ user_config_dir, "tint3rc" });
+    config_path = util::fs::BuildPath({ user_config_dir, "tint3rc" });
 
-    if (fs::FileExists(config_path)) {
+    if (util::fs::FileExists(config_path)) {
         return config::ReadFile(config_path);
     }
 
@@ -821,9 +821,9 @@ bool Read() {
     std::string system_config_file;
 
     for (auto const& system_dir : xdg::basedir::ConfigDirs()) {
-        system_config_file = fs::BuildPath({ system_dir, "tint3", "tint3rc" });
+        system_config_file = util::fs::BuildPath({ system_dir, "tint3", "tint3rc" });
 
-        if (fs::FileExists(system_config_file)) {
+        if (util::fs::FileExists(system_config_file)) {
             break;
         }
 
@@ -832,8 +832,8 @@ bool Read() {
 
     if (!system_config_file.empty()) {
         // copy file in user directory
-        fs::CreateDirectory(user_config_dir);
-        fs::CopyFile(system_config_file, config_path);
+        util::fs::CreateDirectory(user_config_dir);
+        util::fs::CopyFile(system_config_file, config_path);
         return config::ReadFile(config_path);
     }
 
@@ -841,7 +841,7 @@ bool Read() {
 }
 
 bool ReadFile(std::string const& path) {
-    bool read = fs::ReadFileByLine(path, [](std::string const & line) {
+    bool read = util::fs::ReadFileByLine(path, [](std::string const & line) {
         std::string key, value;
 
         if (ParseLine(line, key, value)) {

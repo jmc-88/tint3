@@ -32,6 +32,7 @@
 #include "config.h"
 #include "panel.h"
 #include "tooltip.h"
+#include "util/log.h"
 
 
 namespace {

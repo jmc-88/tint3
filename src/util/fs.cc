@@ -10,6 +10,8 @@
 #include "common.h"
 #include "fs.h"
 
+namespace util {
+
 namespace fs {
 
 std::string BuildPath(std::initializer_list<std::string> parts) {
@@ -131,3 +133,5 @@ bool ReadFileByLine(std::string const& path,
 }
 
 } // namespace fs
+
+} // namespace util

@@ -31,7 +31,7 @@ std::vector<std::string> SplitString(std::string const& str, char sep) {
 }
 
 std::string ValidatePath(std::string path) {
-    if (fs::DirectoryExists(path) && fs::IsAbsolutePath(path)) {
+    if (util::fs::DirectoryExists(path) && util::fs::IsAbsolutePath(path)) {
         return path;
     }
 
@@ -41,11 +41,11 @@ std::string ValidatePath(std::string path) {
 std::function<std::string(std::string)> GetDefaultDirectory(
     char const* relative_path) {
     std::ostringstream ss;
-    ss << fs::HomeDirectory() << relative_path;
+    ss << util::fs::HomeDirectory() << relative_path;
 
     std::string resolved_directory = ss.str();
 
-    if (fs::DirectoryExists(resolved_directory)) {
+    if (util::fs::DirectoryExists(resolved_directory)) {
         return DefaultValue(resolved_directory);
     }
 

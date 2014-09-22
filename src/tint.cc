@@ -50,6 +50,7 @@
 #include "timer.h"
 #include "util/common.h"
 #include "util/fs.h"
+#include "util/log.h"
 #include "xsettings-client.h"
 
 // Drag and Drop state variables
@@ -151,7 +152,7 @@ static void
 ErrorTrapPop(SnDisplay* display,
              Display*   xdisplay) {
     if (error_trap_depth == 0) {
-        fprintf(stderr, "Error trap underflow!\n");
+        util::log::Error() << "Error trap underflow!\n";
         return;
     }
 
@@ -167,7 +168,7 @@ static void SigchldHandler(int /* signal */) {
         auto it = server.pids.find(pid);
 
         if (it != server.pids.end()) {
-            fprintf(stderr, "Unknown child %d terminated!\n", pid);
+            util::log::Error() << "Unknown child " << pid << " terminated!\n";
         } else {
             sn_launcher_context_complete(it->second);
             sn_launcher_context_unref(it->second);
@@ -181,7 +182,7 @@ void InitX11() {
     server.dsp = XOpenDisplay(nullptr);
 
     if (!server.dsp) {
-        fprintf(stderr, "tint3 exit : could not open display.\n");
+        util::log::Error() << "tint3 exit : could not open display.\n";
         exit(0);
     }
 
@@ -225,9 +226,9 @@ void InitX11() {
     const gchar* const* data_dirs = g_get_system_data_dirs();
 
     for (int i = 0; data_dirs[i] != nullptr; i++)  {
-        auto path = fs::BuildPath({ data_dirs[i], "tint3", "default_icon.png" });
+        auto path = util::fs::BuildPath({ data_dirs[i], "tint3", "default_icon.png" });
 
-        if (fs::FileExists(path)) {
+        if (util::fs::FileExists(path)) {
             default_icon = imlib_load_image(path.c_str());
         }
     }

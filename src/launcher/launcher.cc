@@ -37,6 +37,7 @@
 #include "taskbar.h"
 #include "launcher.h"
 #include "util/fs.h"
+#include "util/log.h"
 
 bool launcher_enabled = false;
 int launcher_max_icon_size;
@@ -494,7 +495,7 @@ int LauncherReadDesktopFile(const char* path, DesktopEntry* entry) {
     int lang_index = lang_index_default + 1;
 
     bool inside_desktop_entry = false;
-    bool read = fs::ReadFileByLine(path, [&](std::string const & data) {
+    bool read = util::fs::ReadFileByLine(path, [&](std::string const & data) {
         std::string line(data);
         StringTrim(line);
 
@@ -567,17 +568,17 @@ IconTheme* LoadTheme(char const* name) {
         return nullptr;
     }
 
-    auto file_name = fs::BuildPath({
-        fs::HomeDirectory(), ".icons", name, "index.theme"
+    auto file_name = util::fs::BuildPath({
+        util::fs::HomeDirectory(), ".icons", name, "index.theme"
     });
 
-    if (!fs::FileExists(file_name)) {
-        file_name = fs::BuildPath({ "/usr/share/icons", name, "index.theme" });
+    if (!util::fs::FileExists(file_name)) {
+        file_name = util::fs::BuildPath({ "/usr/share/icons", name, "index.theme" });
 
-        if (!fs::FileExists(file_name)) {
-            file_name = fs::BuildPath({ "/usr/share/pixmaps", name, "index.theme" });
+        if (!util::fs::FileExists(file_name)) {
+            file_name = util::fs::BuildPath({ "/usr/share/pixmaps", name, "index.theme" });
 
-            if (!fs::FileExists(file_name)) {
+            if (!util::fs::FileExists(file_name)) {
                 file_name.clear();
             }
         }
@@ -595,7 +596,7 @@ IconTheme* LoadTheme(char const* name) {
     IconThemeDir* current_dir = nullptr;
     bool inside_header = true;
 
-    bool read = fs::ReadFileByLine(file_name, [&](std::string const & data) {
+    bool read = util::fs::ReadFileByLine(file_name, [&](std::string const & data) {
         std::string line(data);
         StringTrim(line);
 
@@ -917,7 +918,7 @@ std::string Launcher::GetIconPath(std::string const& icon_name, int size) {
 
     // If the icon_name is already a path and the file exists, return it
     if (icon_name[0] == '/') {
-        if (fs::FileExists(icon_name)) {
+        if (util::fs::FileExists(icon_name)) {
             return icon_name;
         }
 
@@ -925,8 +926,8 @@ std::string Launcher::GetIconPath(std::string const& icon_name, int size) {
     }
 
     std::vector<std::string> basenames {
-        fs::BuildPath({ fs::HomeDirectory(), ".icons" }),
-        fs::BuildPath({ fs::HomeDirectory(), ".local", "share", "icons" }),
+        util::fs::BuildPath({ util::fs::HomeDirectory(), ".icons" }),
+        util::fs::BuildPath({ util::fs::HomeDirectory(), ".local", "share", "icons" }),
         "/usr/local/share/icons",
         "/usr/local/share/pixmaps",
         "/usr/share/icons",
@@ -969,11 +970,11 @@ std::string Launcher::GetIconPath(std::string const& icon_name, int size) {
                 for (auto const& extension : extensions) {
                     char* dir_name = ((IconThemeDir*)dir->data)->name;
                     std::string icon_file_name(icon_name + extension);
-                    std::string file_name = fs::BuildPath({
+                    std::string file_name = util::fs::BuildPath({
                         base_name, theme->name, dir_name, icon_file_name
                     });
 
-                    if (fs::FileExists(file_name)) {
+                    if (util::fs::FileExists(file_name)) {
                         // Closest match
                         if (directory_size_distance((IconThemeDir*)dir->data, size) < minimal_size
                             && (!best_file_theme ? true : theme == best_file_theme)) {
@@ -1009,11 +1010,11 @@ std::string Launcher::GetIconPath(std::string const& icon_name, int size) {
     for (auto const& base_name : basenames) {
         for (auto const& extension : extensions) {
             std::string icon_file_name(icon_name + extension);
-            std::string file_name = fs::BuildPath({
+            std::string file_name = util::fs::BuildPath({
                 base_name, icon_file_name
             });
 
-            if (fs::FileExists(file_name)) {
+            if (util::fs::FileExists(file_name)) {
                 return file_name;
             }
         }

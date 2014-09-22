@@ -1,11 +1,13 @@
-#ifndef TINT3_FS_H
-#define TINT3_FS_H
+#ifndef TINT3_UTIL_FS_H
+#define TINT3_UTIL_FS_H
 
 #include <sys/stat.h>
 
 #include <functional>
 #include <initializer_list>
 #include <string>
+
+namespace util {
 
 namespace fs {
 
@@ -22,4 +24,6 @@ bool ReadFileByLine(std::string const& path,
 
 } // namespace fs
 
-#endif // TINT3_FS_H
+} // namespace util
+
+#endif // TINT3_UTIL_FS_H

@@ -182,9 +182,9 @@ void InitBattery() {
                 continue;
             }
 
-            auto sys_path = fs::BuildPath({ "/sys/class/power_supply", entryname });
+            auto sys_path = util::fs::BuildPath({ "/sys/class/power_supply", entryname });
 
-            if (fs::FileExists({ sys_path, "present" })) {
+            if (util::fs::FileExists({ sys_path, "present" })) {
                 battery_dir = sys_path;
                 break;
             }
@@ -201,26 +201,26 @@ void InitBattery() {
         return;
     }
 
-    if (fs::FileExists({ battery_dir, "energy_now" })) {
-        path_energy_now = fs::BuildPath({ battery_dir, "energy_now" });
-        path_energy_full = fs::BuildPath({ battery_dir, "energy_full" });
+    if (util::fs::FileExists({ battery_dir, "energy_now" })) {
+        path_energy_now = util::fs::BuildPath({ battery_dir, "energy_now" });
+        path_energy_full = util::fs::BuildPath({ battery_dir, "energy_full" });
     }
-    else if (fs::FileExists({ battery_dir, "charge_now" })) {
-        path_energy_now = fs::BuildPath({ battery_dir, "charge_now" });
-        path_energy_full = fs::BuildPath({ battery_dir, "charge_full" });
+    else if (util::fs::FileExists({ battery_dir, "charge_now" })) {
+        path_energy_now = util::fs::BuildPath({ battery_dir, "charge_now" });
+        path_energy_full = util::fs::BuildPath({ battery_dir, "charge_full" });
     }
     else {
         fprintf(stderr, "ERROR: can't found energy_* or charge_*\n");
     }
 
-    path_current_now = fs::BuildPath({ battery_dir, "power_now" });
+    path_current_now = util::fs::BuildPath({ battery_dir, "power_now" });
 
-    if (!fs::FileExists(path_current_now)) {
-        path_current_now = fs::BuildPath({ battery_dir, "current_now" });
+    if (!util::fs::FileExists(path_current_now)) {
+        path_current_now = util::fs::BuildPath({ battery_dir, "current_now" });
     }
 
     if (!path_energy_now.empty() && !path_energy_full.empty()) {
-        path_status = fs::BuildPath({ battery_dir, "status" });
+        path_status = util::fs::BuildPath({ battery_dir, "status" });
 
         // check file
         FILE* fp1 = fopen(path_energy_now.c_str(), "r");
