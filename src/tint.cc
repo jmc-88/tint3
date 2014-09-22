@@ -1447,65 +1447,30 @@ start:
 
                                     util::log::Debug() << "--------\n";
 
-                                    int cmd_length = 0;
-                                    cmd_length += 1; // (
-                                    cmd_length += strlen(dnd_launcher_exec) + 1; // exec + space
-                                    cmd_length += 1; // open double quotes
+                                    StringBuilder cmd;
+                                    cmd << '(' << dnd_launcher_exec << " \"";
 
                                     for (i = 0; i < prop.nitems * prop.format / 8; i++) {
                                         char c = ((char*)prop.data)[i];
 
                                         if (c == '\n') {
                                             if (i < prop.nitems * prop.format / 8 - 1) {
-                                                cmd_length += 3; // close double quotes, space, open double quotes
-                                            }
-                                        } else if (c == '\r') {
-                                        } else {
-                                            cmd_length += 1; // 1 character
-
-                                            if (c == '`' || c == '$' || c == '\\') {
-                                                cmd_length += 1; // escape with one backslash
-                                            }
-                                        }
-                                    }
-
-                                    cmd_length += 1; // close double quotes
-                                    cmd_length += 2; // &)
-                                    cmd_length += 1; // terminator
-
-                                    // TODO: replace this with StringBuilder
-                                    char* cmd = (char*) malloc(cmd_length);
-                                    cmd[0] = '\0';
-                                    strcat(cmd, "(");
-                                    strcat(cmd, dnd_launcher_exec);
-                                    strcat(cmd, " \"");
-
-                                    for (i = 0; i < prop.nitems * prop.format / 8; i++) {
-                                        char c = ((char*)prop.data)[i];
-
-                                        if (c == '\n') {
-                                            if (i < prop.nitems * prop.format / 8 - 1) {
-                                                strcat(cmd, "\" \"");
+                                                cmd << "\" \"";
                                             }
                                         } else if (c == '\r') {
                                         } else {
                                             if (c == '`' || c == '$' || c == '\\') {
-                                                strcat(cmd, "\\");
+                                                cmd << '\\';
                                             }
 
-                                            char sc[2];
-                                            sc[0] = c;
-                                            sc[1] = '\0';
-                                            strcat(cmd, sc);
+                                            cmd << c;
                                         }
                                     }
 
-                                    strcat(cmd, "\"");
-                                    strcat(cmd, "&)");
+                                    cmd << "\"&";
                                     util::log::Debug() << "DnD " << __FILE__ << ':' << __LINE__ <<
-                                                       ": Running command: \"" << cmd << "\"\n";
+                                                       ": Running command: \"" << std::string(cmd) << "\"\n";
                                     TintExec(cmd);
-                                    free(cmd);
 
                                     // Reply OK.
                                     XClientMessageEvent m;
