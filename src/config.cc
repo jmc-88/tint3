@@ -209,7 +209,7 @@ void AddEntry(std::string const& key, char* value) {
 
         if ((b = strchr(value1, '%'))) {
             b[0] = '\0';
-            panel_config.pourcentx = 1;
+            panel_config.percent_x = 1;
         }
 
         panel_config.width = atoi(value1);
@@ -217,13 +217,13 @@ void AddEntry(std::string const& key, char* value) {
         if (panel_config.width == 0) {
             // full width mode
             panel_config.width = 100;
-            panel_config.pourcentx = 1;
+            panel_config.percent_x = 1;
         }
 
         if (value2) {
             if ((b = strchr(value2, '%'))) {
                 b[0] = '\0';
-                panel_config.pourcenty = 1;
+                panel_config.percent_y = 1;
             }
 
             panel_config.height = atoi(value2);

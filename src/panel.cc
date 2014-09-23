@@ -292,11 +292,11 @@ void InitPanel() {
 void Panel::InitSizeAndPosition() {
     // detect panel size
     if (panel_horizontal) {
-        if (pourcentx) {
+        if (percent_x) {
             width = (float)server.monitor[monitor].width * width / 100;
         }
 
-        if (pourcenty) {
+        if (percent_y) {
             height = (float)server.monitor[monitor].height * height / 100;
         }
 
@@ -313,13 +313,13 @@ void Panel::InitSizeAndPosition() {
     } else {
         int old_panel_height = height;
 
-        if (pourcentx) {
+        if (percent_x) {
             height = (float)server.monitor[monitor].height * width / 100;
         } else {
             height = width;
         }
 
-        if (pourcenty) {
+        if (percent_y) {
             width = (float)server.monitor[monitor].width * old_panel_height / 100;
         } else {
             width = old_panel_height;

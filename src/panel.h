@@ -84,7 +84,7 @@ class Panel : public Area {
     // position relative to root window
     int posx, posy;
     int marginx, marginy;
-    int pourcentx, pourcenty;
+    int percent_x, percent_y;
     // location of the panel (monitor number)
     int monitor;
 
