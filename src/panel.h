@@ -119,6 +119,14 @@ class Panel : public Area {
     Pixmap hidden_pixmap;
     Timeout* autohide_timeout;
 
+    Taskbar* ClickTaskbar(int x, int y);
+    Task* ClickTask(int x, int y);
+    Launcher* ClickLauncher(int x, int y);
+    LauncherIcon* ClickLauncherIcon(int x, int y);
+    bool ClickPadding(int x, int y);
+    bool ClickClock(int x, int y);
+    Area* ClickArea(int x, int y);
+
     void Render();
     bool Resize();
 
@@ -150,14 +158,6 @@ void InitPanel();
 
 // detect wich panel
 Panel* GetPanel(Window win);
-
-Taskbar* ClickTaskbar(Panel* panel, int x, int y);
-Task* ClickTask(Panel* panel, int x, int y);
-Launcher* ClickLauncher(Panel* panel, int x, int y);
-LauncherIcon* ClickLauncherIcon(Panel* panel, int x, int y);
-int ClickPadding(Panel* panel, int x, int y);
-int ClickClock(Panel* panel, int x, int y);
-Area* ClickArea(Panel* panel, int x, int y);
 
 void AutohideShow(void* p);
 void AutohideHide(void* p);

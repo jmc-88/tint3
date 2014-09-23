@@ -121,7 +121,7 @@ void TooltipShow(void* arg) {
         my += height / 2;
     }
 
-    area = ClickArea(g_tooltip.panel, mx, my);
+    area = g_tooltip.panel->ClickArea(mx, my);
     stop_tooltip_timeout();
 
     if (!g_tooltip.mapped) {

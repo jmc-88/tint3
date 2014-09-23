@@ -385,7 +385,7 @@ void WindowAction(Task* tsk, int action) {
 
 
 bool Tint3HandlesClick(Panel* panel, XButtonEvent* e) {
-    Task* task = ClickTask(panel, e->x, e->y);
+    Task* task = panel->ClickTask(e->x, e->y);
 
     if (task) {
         return ((e->button == 1)
@@ -395,20 +395,20 @@ bool Tint3HandlesClick(Panel* panel, XButtonEvent* e) {
                 || (e->button == 5 && mouse_scroll_down != 0));
     }
 
-    LauncherIcon* icon = ClickLauncherIcon(panel, e->x, e->y);
+    LauncherIcon* icon = panel->ClickLauncherIcon(e->x, e->y);
 
     if (icon) {
         return (e->button == 1);
     }
 
     // no launcher/task clicked --> check if taskbar clicked
-    Taskbar* tskbar = ClickTaskbar(panel, e->x, e->y);
+    Taskbar* tskbar = panel->ClickTaskbar(e->x, e->y);
 
     if (tskbar && e->button == 1 && panel_mode == MULTI_DESKTOP) {
         return 1;
     }
 
-    if (ClickClock(panel, e->x, e->y)) {
+    if (panel->ClickClock(e->x, e->y)) {
         bool clock_lclick = (e->button == 1 && !clock_lclick_command.empty());
         bool clock_rclick = (e->button == 3 && !clock_rclick_command.empty());
         return (clock_lclick || clock_rclick);
@@ -445,7 +445,7 @@ void EventButtonPress(XEvent* e) {
         return;
     }
 
-    task_drag = ClickTask(panel, e->xbutton.x, e->xbutton.y);
+    task_drag = panel->ClickTask(e->xbutton.x, e->xbutton.y);
 
     if (panel_layer == BOTTOM_LAYER) {
         XLowerWindow(server.dsp, panel->main_win);
@@ -460,14 +460,14 @@ void EventButtonMotionNotify(XEvent* e) {
     }
 
     // Find the taskbar on the event's location
-    Taskbar* event_taskbar = ClickTaskbar(panel, e->xbutton.x, e->xbutton.y);
+    Taskbar* event_taskbar = panel->ClickTaskbar(e->xbutton.x, e->xbutton.y);
 
     if (event_taskbar == nullptr) {
         return;
     }
 
     // Find the task on the event's location
-    Task* event_task = ClickTask(panel, e->xbutton.x, e->xbutton.y);
+    Task* event_task = panel->ClickTask(e->xbutton.x, e->xbutton.y);
 
     // If the event takes place on the same taskbar as the task being dragged
     if (event_taskbar == (Taskbar*)task_drag->parent) {
@@ -567,7 +567,7 @@ void EventButtonRelease(XEvent* e) {
             break;
     }
 
-    if (ClickClock(panel, e->xbutton.x, e->xbutton.y)) {
+    if (panel->ClickClock(e->xbutton.x, e->xbutton.y)) {
         clock_action(e->xbutton.button);
 
         if (panel_layer == BOTTOM_LAYER) {
@@ -578,8 +578,8 @@ void EventButtonRelease(XEvent* e) {
         return;
     }
 
-    if (ClickLauncher(panel, e->xbutton.x, e->xbutton.y)) {
-        LauncherIcon* icon = ClickLauncherIcon(panel, e->xbutton.x, e->xbutton.y);
+    if (panel->ClickLauncher(e->xbutton.x, e->xbutton.y)) {
+        LauncherIcon* icon = panel->ClickLauncherIcon(e->xbutton.x, e->xbutton.y);
 
         if (icon) {
             LauncherAction(icon, e);
@@ -589,9 +589,9 @@ void EventButtonRelease(XEvent* e) {
         return;
     }
 
-    Taskbar* tskbar;
+    Taskbar* tskbar = panel->ClickTaskbar(e->xbutton.x, e->xbutton.y);
 
-    if (!(tskbar = ClickTaskbar(panel, e->xbutton.x, e->xbutton.y))) {
+    if (!tskbar) {
         // TODO: check better solution to keep window below
         if (panel_layer == BOTTOM_LAYER) {
             XLowerWindow(server.dsp, panel->main_win);
@@ -617,7 +617,7 @@ void EventButtonRelease(XEvent* e) {
     }
 
     // action on task
-    WindowAction(ClickTask(panel, e->xbutton.x, e->xbutton.y), action);
+    WindowAction(panel->ClickTask(e->xbutton.x, e->xbutton.y), action);
 
     // to keep window below
     if (panel_layer == BOTTOM_LAYER) {
@@ -1089,7 +1089,7 @@ void DragAndDropPosition(XClientMessageEvent* e) {
     y = e->data.l[2] & 0xFFFF;
     XTranslateCoordinates(server.dsp, server.root_win, e->window, x, y, &mapX,
                           &mapY, &child);
-    Task* task = ClickTask(panel, mapX, mapY);
+    Task* task = panel->ClickTask(mapX, mapY);
 
     if (task) {
         if (task->desktop != server.desktop) {
@@ -1098,7 +1098,7 @@ void DragAndDropPosition(XClientMessageEvent* e) {
 
         WindowAction(task, TOGGLE);
     } else {
-        LauncherIcon* icon = ClickLauncherIcon(panel, mapX, mapY);
+        LauncherIcon* icon = panel->ClickLauncherIcon(mapX, mapY);
 
         if (icon) {
             accept = 1;
@@ -1311,7 +1311,7 @@ start:
                             }
 
                             Panel* panel = GetPanel(e.xmotion.window);
-                            Area* area = ClickArea(panel, e.xmotion.x, e.xmotion.y);
+                            Area* area = panel->ClickArea(e.xmotion.x, e.xmotion.y);
 
                             std::string tooltip = area->GetTooltipText();
 

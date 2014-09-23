@@ -688,13 +688,10 @@ Panel* GetPanel(Window win) {
 }
 
 
-Taskbar* ClickTaskbar(Panel* panel, int x, int y) {
-    Taskbar* tskbar;
-    int i;
-
+Taskbar* Panel::ClickTaskbar(int x, int y) {
     if (panel_horizontal) {
-        for (i = 0; i < panel->nb_desktop ; i++) {
-            tskbar = &panel->taskbar[i];
+        for (int i = 0; i < nb_desktop ; i++) {
+            Taskbar* tskbar = &taskbar[i];
 
             if (tskbar->on_screen && x >= tskbar->posx
                 && x <= (tskbar->posx + tskbar->width)) {
@@ -702,8 +699,8 @@ Taskbar* ClickTaskbar(Panel* panel, int x, int y) {
             }
         }
     } else {
-        for (i = 0; i < panel->nb_desktop ; i++) {
-            tskbar = &panel->taskbar[i];
+        for (int i = 0; i < nb_desktop ; i++) {
+            Taskbar* tskbar = &taskbar[i];
 
             if (tskbar->on_screen && y >= tskbar->posy
                 && y <= (tskbar->posy + tskbar->height)) {
@@ -716,8 +713,8 @@ Taskbar* ClickTaskbar(Panel* panel, int x, int y) {
 }
 
 
-Task* ClickTask(Panel* panel, int x, int y) {
-    Taskbar* tskbar = ClickTaskbar(panel, x, y);
+Task* Panel::ClickTask(int x, int y) {
+    Taskbar* tskbar = ClickTaskbar(x, y);
 
     if (tskbar) {
         auto begin = tskbar->children.begin();
@@ -747,18 +744,16 @@ Task* ClickTask(Panel* panel, int x, int y) {
 }
 
 
-Launcher* ClickLauncher(Panel* panel, int x, int y) {
-    auto launcher = &panel->launcher;
-
+Launcher* Panel::ClickLauncher(int x, int y) {
     if (panel_horizontal) {
-        if (launcher->on_screen && x >= launcher->posx
-            && x <= (launcher->posx + launcher->width)) {
-            return launcher;
+        if (launcher.on_screen && x >= launcher.posx
+            && x <= (launcher.posx + launcher.width)) {
+            return &launcher;
         }
     } else {
-        if (launcher->on_screen && y >= launcher->posy
-            && y <= (launcher->posy + launcher->height)) {
-            return launcher;
+        if (launcher.on_screen && y >= launcher.posy
+            && y <= (launcher.posy + launcher.height)) {
+            return &launcher;
         }
     }
 
@@ -766,8 +761,8 @@ Launcher* ClickLauncher(Panel* panel, int x, int y) {
 }
 
 
-LauncherIcon* ClickLauncherIcon(Panel* panel, int x, int y) {
-    auto launcher = ClickLauncher(panel, x, y);
+LauncherIcon* Panel::ClickLauncherIcon(int x, int y) {
+    auto launcher = ClickLauncher(x, y);
 
     if (launcher) {
         for (auto const& launcher_icon : launcher->list_icons) {
@@ -786,44 +781,40 @@ LauncherIcon* ClickLauncherIcon(Panel* panel, int x, int y) {
 }
 
 
-int ClickPadding(Panel* panel, int x, int y) {
+bool Panel::ClickPadding(int x, int y) {
     if (panel_horizontal) {
-        if (x < panel->paddingxlr
-            || x > panel->width - panel->paddingxlr) {
-            return 1;
+        if (x < paddingxlr || x > width - paddingxlr) {
+            return true;
         }
     } else {
-        if (y < panel->paddingxlr
-            || y > panel->height - panel->paddingxlr) {
-            return 1;
+        if (y < paddingxlr || y > height - paddingxlr) {
+            return true;
         }
     }
 
-    return 0;
+    return false;
 }
 
 
-int ClickClock(Panel* panel, int x, int y) {
-    Clock clk = panel->clock;
-
+bool Panel::ClickClock(int x, int y) {
     if (panel_horizontal) {
-        if (clk.on_screen && x >= clk.posx
-            && x <= (clk.posx + clk.width)) {
-            return TRUE;
+        if (clock.on_screen && x >= clock.posx
+            && x <= (clock.posx + clock.width)) {
+            return true;
         }
     } else {
-        if (clk.on_screen && y >= clk.posy
-            && y <= (clk.posy + clk.height)) {
-            return TRUE;
+        if (clock.on_screen && y >= clock.posy
+            && y <= (clock.posy + clock.height)) {
+            return true;
         }
     }
 
-    return FALSE;
+    return false;
 }
 
 
-Area* ClickArea(Panel* panel, int x, int y) {
-    Area* new_result = panel;
+Area* Panel::ClickArea(int x, int y) {
+    Area* new_result = this;
     Area* result;
 
     do {
