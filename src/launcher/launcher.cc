@@ -134,21 +134,15 @@ void Launcher::CleanupTheme() {
     FreeArea();
 
     for (auto const& launcher_icon : list_icons) {
-        if (launcher_icon) {
-            FreeIcon(launcher_icon->icon_scaled_);
-            FreeIcon(launcher_icon->icon_original_);
-            free(launcher_icon->icon_name_);
-            free(launcher_icon->icon_path_);
-            free(launcher_icon->cmd_);
-            free(launcher_icon->icon_tooltip_);
+        if (launcher_icon != nullptr) {
+            delete launcher_icon;
         }
-
-        delete launcher_icon;
     }
 
     for (auto const& theme : list_themes) {
-        FreeIconTheme(theme);
-        delete theme;
+        if (theme != nullptr) {
+            delete theme;
+        }
     }
 
     list_icons.clear();
@@ -298,6 +292,15 @@ bool Launcher::Resize() {
     }
 
     return 1;
+}
+
+LauncherIcon::~LauncherIcon() {
+    FreeIcon(icon_scaled_);
+    FreeIcon(icon_original_);
+    free(icon_name_);
+    free(icon_path_);
+    free(cmd_);
+    free(icon_tooltip_);
 }
 
 // Here we override the default layout of the icons; normally Area layouts its children
@@ -563,6 +566,19 @@ void FreeDesktopEntry(DesktopEntry* entry) {
     free(entry->exec);
 }
 
+IconTheme::~IconTheme() {
+    for (auto l_inherits = list_inherits; l_inherits ;
+         l_inherits = l_inherits->next) {
+        free(l_inherits->data);
+    }
+
+    for (auto l_dir = list_directories; l_dir ; l_dir = l_dir->next) {
+        IconThemeDir* dir = (IconThemeDir*)l_dir->data;
+        free(dir->name);
+        free(dir->context);
+        delete dir;
+    }
+}
 
 //TODO Use UTF8 when parsing the file
 IconTheme* LoadTheme(char const* name) {
@@ -711,54 +727,6 @@ IconTheme* LoadTheme(char const* name) {
 
     return theme;
 }
-
-void FreeIconTheme(IconTheme* theme) {
-    for (auto l_inherits = theme->list_inherits; l_inherits ;
-         l_inherits = l_inherits->next) {
-        free(l_inherits->data);
-    }
-
-    for (auto l_dir = theme->list_directories; l_dir ; l_dir = l_dir->next) {
-        IconThemeDir* dir = (IconThemeDir*)l_dir->data;
-        free(dir->name);
-        free(dir->context);
-        delete dir;
-    }
-}
-
-void test_launcher_read_theme_file() {
-    fprintf(stdout, "\033[1;33m");
-    auto theme = LoadTheme("oxygen");
-
-    if (!theme) {
-        printf("Could not load theme\n");
-        return;
-    }
-
-    printf("Loaded theme: %s\n", theme->name.c_str());
-    GSList* item = theme->list_inherits;
-
-    while (item != nullptr) {
-        printf("Inherits:%s\n", (char*)item->data);
-        item = g_slist_next(item);
-    }
-
-    item = theme->list_directories;
-
-    while (item != nullptr) {
-        IconThemeDir* dir = static_cast<IconThemeDir*>(item->data);
-        printf("Dir:%s Size=%d MinSize=%d MaxSize=%d Threshold=%d Type=%s Context=%s\n",
-               dir->name, dir->size, dir->min_size, dir->max_size, dir->threshold,
-               dir->type == ICON_DIR_TYPE_FIXED ? "Fixed" :
-               dir->type == ICON_DIR_TYPE_SCALABLE ? "Scalable" :
-               dir->type == ICON_DIR_TYPE_THRESHOLD ? "Threshold" : "?????",
-               dir->context);
-        item = g_slist_next(item);
-    }
-
-    fprintf(stdout, "\033[0m");
-}
-
 
 // Populates the list_icons list
 void Launcher::LoadIcons() {

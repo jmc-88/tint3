@@ -16,6 +16,8 @@
 
 class LauncherIcon : public Area {
   public:
+    ~LauncherIcon();
+
     Imlib_Image icon_scaled_;
     Imlib_Image icon_original_;
     char* cmd_;
@@ -52,7 +54,10 @@ struct IconThemeDir {
     char* context;
 };
 
-struct IconTheme {
+class IconTheme {
+  public:
+    ~IconTheme();
+
     std::string name;
     GSList* list_inherits; // each item is a char* (theme name)
     GSList* list_directories; // each item is an IconThemeDir*
