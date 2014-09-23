@@ -37,33 +37,33 @@
 
 
 
-void set_active(Window win) {
+void SetActive(Window win) {
     SendEvent32(win, server.atom._NET_ACTIVE_WINDOW, 2, CurrentTime, 0);
 }
 
 
-void set_desktop(int desktop) {
+void SetDesktop(int desktop) {
     SendEvent32(server.root_win, server.atom._NET_CURRENT_DESKTOP, desktop, 0, 0);
 }
 
 
-void windows_set_desktop(Window win, int desktop) {
+void WindowSetDesktop(Window win, int desktop) {
     SendEvent32(win, server.atom._NET_WM_DESKTOP, desktop, 2, 0);
 }
 
 
-void set_close(Window win) {
+void SetClose(Window win) {
     SendEvent32(win, server.atom._NET_CLOSE_WINDOW, 0, 2, 0);
 }
 
 
-void window_toggle_shade(Window win) {
+void WindowToggleShade(Window win) {
     SendEvent32(win, server.atom._NET_WM_STATE, 2,
                 server.atom._NET_WM_STATE_SHADED, 0);
 }
 
 
-void window_maximize_restore(Window win) {
+void WindowMaximizeRestore(Window win) {
     SendEvent32(win, server.atom._NET_WM_STATE, 2,
                 server.atom._NET_WM_STATE_MAXIMIZED_VERT, 0);
     SendEvent32(win, server.atom._NET_WM_STATE, 2,
@@ -71,7 +71,7 @@ void window_maximize_restore(Window win) {
 }
 
 
-int window_is_hidden(Window win) {
+int WindowIsHidden(Window win) {
     int count;
     Atom* at = static_cast<Atom*>(ServerGetProperty(
                                       win, server.atom._NET_WM_STATE, XA_ATOM, &count));
@@ -126,7 +126,7 @@ int window_is_hidden(Window win) {
 }
 
 
-int window_get_monitor(Window win) {
+int WindowGetMonitor(Window win) {
     int i, x, y;
     Window src;
 
@@ -152,7 +152,7 @@ int window_get_monitor(Window win) {
 }
 
 
-int window_is_iconified(Window win) {
+int WindowIsIconified(Window win) {
     // EWMH specification : minimization of windows use _NET_WM_STATE_HIDDEN.
     // WM_STATE is not accurate for shaded window and in multi_desktop mode.
     int count;
@@ -171,7 +171,7 @@ int window_is_iconified(Window win) {
 }
 
 
-int window_is_urgent(Window win) {
+int WindowIsUrgent(Window win) {
     int count;
     Atom* at = static_cast<Atom*>(ServerGetProperty(
                                       win, server.atom._NET_WM_STATE, XA_ATOM, &count));
@@ -188,7 +188,7 @@ int window_is_urgent(Window win) {
 }
 
 
-int window_is_skip_taskbar(Window win) {
+int WindowIsSkipTaskbar(Window win) {
     int count;
     Atom* at = static_cast<Atom*>(ServerGetProperty(
                                       win, server.atom._NET_WM_STATE, XA_ATOM, &count));
@@ -205,7 +205,7 @@ int window_is_skip_taskbar(Window win) {
 }
 
 
-std::vector<std::string> server_get_desktop_names() {
+std::vector<std::string> ServerGetDesktopNames() {
     int count;
     char* data_ptr = static_cast<char*>(ServerGetProperty(
                                             server.root_win,
@@ -235,18 +235,18 @@ std::vector<std::string> server_get_desktop_names() {
 }
 
 
-Window window_get_active() {
+Window WindowGetActive() {
     return (Window) GetProperty32(server.root_win, server.atom._NET_ACTIVE_WINDOW,
                                   XA_WINDOW);
 }
 
 
-int window_is_active(Window win) {
-    return window_get_active() == win;
+int WindowIsActive(Window win) {
+    return WindowGetActive() == win;
 }
 
 
-int get_icon_count(gulong* data, int num) {
+int GetIconCount(gulong* data, int num) {
     int count = 0;
     int pos = 0;
 
@@ -266,8 +266,8 @@ int get_icon_count(gulong* data, int num) {
 }
 
 
-gulong* get_best_icon(gulong* data, int icon_count, int num, int* iw, int* ih,
-                      int best_icon_size) {
+gulong* GetBestIcon(gulong* data, int icon_count, int num, int* iw, int* ih,
+                    int best_icon_size) {
     int width[icon_count];
     int height[icon_count];
     gulong* icon_data[icon_count];
@@ -318,8 +318,8 @@ gulong* get_best_icon(gulong* data, int icon_count, int num, int* iw, int* ih,
 }
 
 
-void get_text_size(PangoFontDescription* font, int* height_ink, int* height,
-                   int panel_height, char const* text, int len) {
+void GetTextSize(PangoFontDescription* font, int* height_ink, int* height,
+                 int panel_height, char const* text, int len) {
     auto pmap = XCreatePixmap(server.dsp, server.root_win, panel_height,
                               panel_height, server.depth);
 
@@ -344,8 +344,8 @@ void get_text_size(PangoFontDescription* font, int* height_ink, int* height,
 }
 
 
-void get_text_size2(PangoFontDescription* font, int* height_ink, int* height,
-                    int* width, int panel_height, int panel_width, char const* text, int len) {
+void GetTextSize2(PangoFontDescription* font, int* height_ink, int* height,
+                  int* width, int panel_height, int panel_width, char const* text, int len) {
     auto pmap = XCreatePixmap(server.dsp, server.root_win, panel_height,
                               panel_height, server.depth);
 

@@ -304,11 +304,11 @@ void WindowAction(Task* tsk, int action) {
 
     switch (action) {
         case CLOSE:
-            set_close(tsk->win);
+            SetClose(tsk->win);
             break;
 
         case TOGGLE:
-            set_active(tsk->win);
+            SetActive(tsk->win);
             break;
 
         case ICONIFY:
@@ -319,25 +319,25 @@ void WindowAction(Task* tsk, int action) {
             if (task_active && tsk->win == task_active->win) {
                 XIconifyWindow(server.dsp, tsk->win, server.screen);
             } else {
-                set_active(tsk->win);
+                SetActive(tsk->win);
             }
 
             break;
 
         case SHADE:
-            window_toggle_shade(tsk->win);
+            WindowToggleShade(tsk->win);
             break;
 
         case MAXIMIZE_RESTORE:
-            window_maximize_restore(tsk->win);
+            WindowMaximizeRestore(tsk->win);
             break;
 
         case MAXIMIZE:
-            window_maximize_restore(tsk->win);
+            WindowMaximizeRestore(tsk->win);
             break;
 
         case RESTORE:
-            window_maximize_restore(tsk->win);
+            WindowMaximizeRestore(tsk->win);
             break;
 
         case DESKTOP_LEFT:
@@ -346,10 +346,10 @@ void WindowAction(Task* tsk, int action) {
             }
 
             desk = tsk->desktop - 1;
-            windows_set_desktop(tsk->win, desk);
+            WindowSetDesktop(tsk->win, desk);
 
             if (desk == server.desktop) {
-                set_active(tsk->win);
+                SetActive(tsk->win);
             }
 
             break;
@@ -360,10 +360,10 @@ void WindowAction(Task* tsk, int action) {
             }
 
             desk = tsk->desktop + 1;
-            windows_set_desktop(tsk->win, desk);
+            WindowSetDesktop(tsk->win, desk);
 
             if (desk == server.desktop) {
-                set_active(tsk->win);
+                SetActive(tsk->win);
             }
 
             break;
@@ -371,14 +371,14 @@ void WindowAction(Task* tsk, int action) {
         case NEXT_TASK: {
                 Task* tsk1;
                 tsk1 = next_task(find_active_task(tsk, task_active));
-                set_active(tsk1->win);
+                SetActive(tsk1->win);
             }
             break;
 
         case PREV_TASK: {
                 Task* tsk1;
                 tsk1 = prev_task(find_active_task(tsk, task_active));
-                set_active(tsk1->win);
+                SetActive(tsk1->win);
             }
     }
 }
@@ -512,7 +512,7 @@ void EventButtonMotionNotify(XEvent* e) {
         task_drag->parent = event_taskbar;
         task_drag->desktop = event_taskbar->desktop;
 
-        windows_set_desktop(task_drag->win, event_taskbar->desktop);
+        WindowSetDesktop(task_drag->win, event_taskbar->desktop);
 
         event_taskbar->need_resize = true;
         drag_taskbar->need_resize = true;
@@ -612,7 +612,7 @@ void EventButtonRelease(XEvent* e) {
     if (panel_mode == MULTI_DESKTOP) {
         if (tskbar->desktop != server.desktop && action != CLOSE
             && action != DESKTOP_LEFT && action != DESKTOP_RIGHT) {
-            set_desktop(tskbar->desktop);
+            SetDesktop(tskbar->desktop);
         }
     }
 
@@ -648,7 +648,7 @@ void EventPropertyNotify(XEvent* e) {
                 return;
             }
 
-            auto desktop_names = server_get_desktop_names();
+            auto desktop_names = ServerGetDesktopNames();
             auto it = desktop_names.begin();
 
             for (i = 0; i < nb_panel; ++i) {
@@ -689,7 +689,7 @@ void EventPropertyNotify(XEvent* e) {
 
             for (i = 0 ; i < nb_panel ; i++) {
                 init_taskbar_panel(&panel1[i]);
-                set_panel_items_order(&panel1[i]);
+                panel1[i].SetItemsOrder();
                 visible_taskbar(&panel1[i]);
                 panel1[i].need_resize = true;
             }
@@ -762,7 +762,7 @@ void EventPropertyNotify(XEvent* e) {
         } else if (at == server.atom._XROOTPMAP_ID || at == server.atom._XROOTMAP_ID) {
             // change Wallpaper
             for (i = 0 ; i < nb_panel ; i++) {
-                set_panel_background(&panel1[i]);
+                panel1[i].SetBackground();
             }
 
             panel_refresh = 1;
@@ -779,7 +779,7 @@ void EventPropertyNotify(XEvent* e) {
                 XWindowAttributes wa;
                 XGetWindowAttributes(server.dsp, win, &wa);
 
-                if (wa.map_state == IsViewable && !window_is_skip_taskbar(win)) {
+                if (wa.map_state == IsViewable && !WindowIsSkipTaskbar(win)) {
                     if ((tsk = add_task(win))) {
                         panel_refresh = 1;
                     } else {
@@ -807,11 +807,11 @@ void EventPropertyNotify(XEvent* e) {
         }
         // Demand attention
         else if (at == server.atom._NET_WM_STATE) {
-            if (window_is_urgent(win)) {
+            if (WindowIsUrgent(win)) {
                 add_urgent(tsk);
             }
 
-            if (window_is_skip_taskbar(win)) {
+            if (WindowIsSkipTaskbar(win)) {
                 remove_task(tsk);
                 panel_refresh = 1;
             }
@@ -820,7 +820,7 @@ void EventPropertyNotify(XEvent* e) {
             int state = (task_active
                          && tsk->win == task_active->win ? TASK_ACTIVE : TASK_NORMAL);
 
-            if (window_is_iconified(win)) {
+            if (WindowIsIconified(win)) {
                 state = TASK_ICONIFIED;
             }
 
@@ -911,11 +911,11 @@ void EventConfigureNotify(Window win) {
 
     Panel* p = tsk->panel;
 
-    if (p->monitor != window_get_monitor(win)) {
+    if (p->monitor != WindowGetMonitor(win)) {
         remove_task(tsk);
         tsk = add_task(win);
 
-        if (win == window_get_active()) {
+        if (win == WindowGetActive()) {
             set_task_state(tsk, TASK_ACTIVE);
             task_active = tsk;
         }
@@ -1093,7 +1093,7 @@ void DragAndDropPosition(XClientMessageEvent* e) {
 
     if (task) {
         if (task->desktop != server.desktop) {
-            set_desktop(task->desktop);
+            SetDesktop(task->desktop);
         }
 
         WindowAction(task, TOGGLE);

@@ -61,14 +61,14 @@ Task* add_task(Window win) {
         return 0;
     }
 
-    if (window_is_hidden(win)) {
+    if (WindowIsHidden(win)) {
         return 0;
     }
 
     int monitor;
 
     if (nb_panel > 1) {
-        monitor = window_get_monitor(win);
+        monitor = WindowGetMonitor(win);
 
         if (monitor >= nb_panel) {
             monitor = 0;
@@ -81,7 +81,7 @@ Task* add_task(Window win) {
     new_tsk.win = win;
     new_tsk.desktop = server.GetDesktopFromWindow(win);
     new_tsk.panel = &panel1[monitor];
-    new_tsk.current_state = window_is_iconified(win) ? TASK_ICONIFIED : TASK_NORMAL;
+    new_tsk.current_state = WindowIsIconified(win) ? TASK_ICONIFIED : TASK_NORMAL;
 
     // allocate only one title and one icon
     // even with task_on_all_desktop and with task_on_all_panel
@@ -98,7 +98,7 @@ Task* add_task(Window win) {
                  PropertyChangeMask | StructureNotifyMask);
 
     GPtrArray* task_group = g_ptr_array_new();
-    Task* new_tsk2 = 0;
+    Task* new_tsk2 = nullptr;
 
     for (int j = 0 ; j < panel1[monitor].nb_desktop ; j++) {
         if (new_tsk.desktop != ALLDESKTOP && new_tsk.desktop != j) {
@@ -145,7 +145,7 @@ Task* add_task(Window win) {
     g_hash_table_insert(win_to_task_table, key, task_group);
     set_task_state(new_tsk2, new_tsk.current_state);
 
-    if (window_is_urgent(win)) {
+    if (WindowIsUrgent(win)) {
         add_urgent(new_tsk2);
     }
 
@@ -316,8 +316,8 @@ void get_icon(Task* tsk) {
     if (data) {
         // get ARGB icon
         int w, h;
-        gulong* tmp_data = get_best_icon(data, get_icon_count(data, i), i, &w, &h,
-                                         panel->g_task.icon_size1);
+        gulong* tmp_data = GetBestIcon(data, GetIconCount(data, i), i, &w, &h,
+                                       panel->g_task.icon_size1);
 #ifdef __x86_64__
         DATA32 icon_data[w * h];
         int length = w * h;
@@ -608,11 +608,11 @@ Task* prev_task(Task* tsk) {
 void active_task() {
     if (task_active) {
         set_task_state(task_active,
-                       window_is_iconified(task_active->win) ? TASK_ICONIFIED : TASK_NORMAL);
+                       WindowIsIconified(task_active->win) ? TASK_ICONIFIED : TASK_NORMAL);
         task_active = 0;
     }
 
-    Window w1 = window_get_active();
+    Window w1 = WindowGetActive();
     //printf("Change active task %ld\n", w1);
 
     if (w1) {
@@ -685,7 +685,7 @@ void blink_urgent(void* arg) {
             if (t->urgent_tick++ % 2) {
                 set_task_state(t, TASK_URGENT);
             } else {
-                set_task_state(t, window_is_iconified(t->win) ? TASK_ICONIFIED : TASK_NORMAL);
+                set_task_state(t, WindowIsIconified(t->win) ? TASK_ICONIFIED : TASK_NORMAL);
             }
         }
     }

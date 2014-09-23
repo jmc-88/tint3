@@ -315,8 +315,8 @@ void init_taskbar_panel(void* p) {
 
     // compute vertical position : text and icon
     int height_ink, height;
-    get_text_size(panel->g_task.font_desc, &height_ink, &height, panel->height,
-                  "TAjpg", 5);
+    GetTextSize(panel->g_task.font_desc, &height_ink, &height, panel->height,
+                "TAjpg", 5);
 
     if (!panel->g_task.maximum_width && panel_horizontal) {
         panel->g_task.maximum_width = server.monitor[panel->monitor].width;

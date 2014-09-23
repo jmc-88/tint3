@@ -525,12 +525,12 @@ bool Battery::Resize() {
                  battery_state.time.hours, battery_state.time.minutes);
     }
 
-    get_text_size2(bat1_font_desc, &bat_percentage_height_ink,
-                   &bat_percentage_height, &bat_percentage_width, panel->height,
-                   panel->width, buf_bat_percentage, strlen(buf_bat_percentage));
-    get_text_size2(bat2_font_desc, &bat_time_height_ink, &bat_time_height,
-                   &bat_time_width, panel->height, panel->width, buf_bat_time,
-                   strlen(buf_bat_time));
+    GetTextSize2(bat1_font_desc, &bat_percentage_height_ink,
+                 &bat_percentage_height, &bat_percentage_width, panel->height,
+                 panel->width, buf_bat_percentage, strlen(buf_bat_percentage));
+    GetTextSize2(bat2_font_desc, &bat_time_height_ink, &bat_time_height,
+                 &bat_time_width, panel->height, panel->width, buf_bat_time,
+                 strlen(buf_bat_time));
 
     if (panel_horizontal) {
         int new_size = (bat_percentage_width > bat_time_width) ? bat_percentage_width :

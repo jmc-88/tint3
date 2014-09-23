@@ -124,6 +124,12 @@ class Panel : public Area {
 
     // TODO: this should be private
     void InitSizeAndPosition();
+
+    // draw background panel
+    void SetBackground();
+
+    void SetItemsOrder();
+    void SetProperties();
 };
 
 
@@ -142,13 +148,7 @@ void CleanupPanel();
 // use panel_config as default value
 void InitPanel();
 
-void set_panel_items_order(Panel* p);
-void set_panel_properties(Panel* p);
-
-// draw background panel
-void set_panel_background(Panel* p);
-
-// detect witch panel
+// detect wich panel
 Panel* get_panel(Window win);
 
 Taskbar* click_taskbar(Panel* panel, int x, int y);

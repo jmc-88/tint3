@@ -230,7 +230,7 @@ void InitPanel() {
             }
         }
 
-        set_panel_items_order(p);
+        p->SetItemsOrder();
 
         {
             // catch some events
@@ -269,8 +269,8 @@ void InitPanel() {
         }
 
         //printf("panel %d : %d, %d, %d, %d\n", i, p->posx, p->posy, p->width, p->height);
-        set_panel_properties(p);
-        set_panel_background(p);
+        p->SetProperties();
+        p->SetBackground();
 
         if (snapshot_path.empty()) {
             // if we are not in 'snapshot' mode then map new panel
@@ -422,7 +422,7 @@ void update_strut(Panel* p) {
     XGetGeometry(server.dsp, server.root_win, &d2, &d3, &d3, &screen_width,
                  &screen_height, &d1, &d1);
     Monitor monitor = server.monitor[p->monitor];
-    long   struts [12] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+    long struts [12] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
     if (panel_horizontal) {
         int height = p->height + p->marginy;
@@ -472,63 +472,66 @@ void update_strut(Panel* p) {
 }
 
 
-void set_panel_items_order(Panel* p) {
-    p->children.clear();
+void Panel::SetItemsOrder() {
+    children.clear();
 
     for (char item : panel_items_order) {
         if (item == 'L') {
-            p->children.push_back(&p->launcher);
+            children.push_back(&launcher);
         }
 
         if (item == 'T') {
-            for (int j = 0 ; j < p->nb_desktop ; j++) {
-                p->children.push_back(&p->taskbar[j]);
+            for (int j = 0 ; j < nb_desktop ; j++) {
+                children.push_back(&taskbar[j]);
             }
         }
 
 #ifdef ENABLE_BATTERY
 
         if (item == 'B') {
-            p->children.push_back(&p->battery);
+            children.push_back(&battery);
         }
 
 #endif
 
-        if (item == 'S' && p == panel1) {
+        // FIXME: with the move of this method to the Panel class,
+        // this comparison got pretty shitty (this == panel1...)
+
+        if (item == 'S' && this == panel1) {
             // TODO : check systray is only on 1 panel
             // at the moment only on panel1[0] allowed
-            p->children.push_back(&systray);
+            children.push_back(&systray);
         }
 
         if (item == 'C') {
-            p->children.push_back(&p->clock);
+            children.push_back(&clock);
         }
     }
 
-    p->InitRendering(0);
+    InitRendering(0);
 }
 
 
-void set_panel_properties(Panel* p) {
-    XStoreName(server.dsp, p->main_win, "tint3");
+void Panel::SetProperties() {
+    XStoreName(server.dsp, main_win, "tint3");
 
     gsize len;
     gchar* name = g_locale_to_utf8("tint3", -1, nullptr, &len, nullptr);
 
     if (name != nullptr) {
-        XChangeProperty(server.dsp, p->main_win, server.atom._NET_WM_NAME,
+        XChangeProperty(server.dsp, main_win, server.atom._NET_WM_NAME,
                         server.atom.UTF8_STRING, 8, PropModeReplace, (unsigned char*) name, (int) len);
         g_free(name);
     }
 
     // Dock
     long val = server.atom._NET_WM_WINDOW_TYPE_DOCK;
-    XChangeProperty(server.dsp, p->main_win, server.atom._NET_WM_WINDOW_TYPE,
+    XChangeProperty(server.dsp, main_win, server.atom._NET_WM_WINDOW_TYPE,
                     XA_ATOM, 32, PropModeReplace, (unsigned char*) &val, 1);
 
     // Sticky and below other window
     val = ALLDESKTOP;
-    XChangeProperty(server.dsp, p->main_win, server.atom._NET_WM_DESKTOP,
+    XChangeProperty(server.dsp, main_win, server.atom._NET_WM_DESKTOP,
                     XA_CARDINAL, 32, PropModeReplace, (unsigned char*) &val, 1);
     Atom state[4];
     state[0] = server.atom._NET_WM_STATE_SKIP_PAGER;
@@ -537,14 +540,14 @@ void set_panel_properties(Panel* p) {
     state[3] = panel_layer == BOTTOM_LAYER ? server.atom._NET_WM_STATE_BELOW :
                server.atom._NET_WM_STATE_ABOVE;
     int nb_atoms = panel_layer == NORMAL_LAYER ? 3 : 4;
-    XChangeProperty(server.dsp, p->main_win, server.atom._NET_WM_STATE, XA_ATOM,
+    XChangeProperty(server.dsp, main_win, server.atom._NET_WM_STATE, XA_ATOM,
                     32, PropModeReplace, (unsigned char*) state, nb_atoms);
 
     // Unfocusable
     XWMHints wmhints;
 
     if (panel_dock) {
-        wmhints.icon_window = wmhints.window_group = p->main_win;
+        wmhints.icon_window = wmhints.window_group = main_win;
         wmhints.flags = StateHint | IconWindowHint;
         wmhints.initial_state = WithdrawnState;
     } else {
@@ -552,120 +555,120 @@ void set_panel_properties(Panel* p) {
         wmhints.input = False;
     }
 
-    XSetWMHints(server.dsp, p->main_win, &wmhints);
+    XSetWMHints(server.dsp, main_win, &wmhints);
 
     // Undecorated
     long prop[5] = { 2, 0, 0, 0, 0 };
-    XChangeProperty(server.dsp, p->main_win, server.atom._MOTIF_WM_HINTS,
+    XChangeProperty(server.dsp, main_win, server.atom._MOTIF_WM_HINTS,
                     server.atom._MOTIF_WM_HINTS, 32, PropModeReplace, (unsigned char*) prop, 5);
 
     // XdndAware - Register for Xdnd events
     Atom version = 4;
-    XChangeProperty(server.dsp, p->main_win, server.atom.XdndAware, XA_ATOM, 32,
+    XChangeProperty(server.dsp, main_win, server.atom.XdndAware, XA_ATOM, 32,
                     PropModeReplace, (unsigned char*)&version, 1);
 
-    update_strut(p);
+    update_strut(this);
 
     // Fixed position and non-resizable window
     // Allow panel move and resize when tint3 reload config file
-    int minwidth = panel_autohide ? p->hidden_width : p->width;
-    int minheight = panel_autohide ? p->hidden_height : p->height;
+    int minwidth = panel_autohide ? hidden_width : width;
+    int minheight = panel_autohide ? hidden_height : height;
     XSizeHints size_hints;
     size_hints.flags = PPosition | PMinSize | PMaxSize;
     size_hints.min_width = minwidth;
-    size_hints.max_width = p->width;
+    size_hints.max_width = width;
     size_hints.min_height = minheight;
-    size_hints.max_height = p->height;
-    XSetWMNormalHints(server.dsp, p->main_win, &size_hints);
+    size_hints.max_height = height;
+    XSetWMNormalHints(server.dsp, main_win, &size_hints);
 
     // Set WM_CLASS
     XClassHint* classhint = XAllocClassHint();
     classhint->res_name = kClassHintName;
     classhint->res_class = kClassHintClass;
-    XSetClassHint(server.dsp, p->main_win, classhint);
+    XSetClassHint(server.dsp, main_win, classhint);
     XFree(classhint);
 }
 
 
-void set_panel_background(Panel* p) {
-    if (p->pix) {
-        XFreePixmap(server.dsp, p->pix);
+void Panel::SetBackground() {
+    if (pix) {
+        XFreePixmap(server.dsp, pix);
     }
 
-    p->pix = XCreatePixmap(server.dsp, server.root_win, p->width,
-                           p->height, server.depth);
+    pix = XCreatePixmap(server.dsp, server.root_win, width,
+                        height, server.depth);
 
     int xoff = 0, yoff = 0;
 
     if (panel_horizontal && panel_position & BOTTOM) {
-        yoff = p->height - p->hidden_height;
+        yoff = height - hidden_height;
     } else if (!panel_horizontal && panel_position & RIGHT) {
-        xoff = p->width - p->hidden_width;
+        xoff = width - hidden_width;
     }
 
     if (server.real_transparency) {
-        clear_pixmap(p->pix, 0, 0, p->width, p->height);
+        clear_pixmap(pix, 0, 0, width, height);
     } else {
         GetRootPixmap();
         // copy background (server.root_pmap) in panel.pix
         Window dummy;
         int  x, y;
-        XTranslateCoordinates(server.dsp, p->main_win, server.root_win, 0, 0, &x, &y,
+        XTranslateCoordinates(server.dsp, main_win, server.root_win, 0, 0, &x, &y,
                               &dummy);
 
-        if (panel_autohide && p->is_hidden) {
+        if (panel_autohide && is_hidden) {
             x -= xoff;
             y -= yoff;
         }
 
         XSetTSOrigin(server.dsp, server.gc, -x, -y);
-        XFillRectangle(server.dsp, p->pix, server.gc, 0, 0, p->width,
-                       p->height);
+        XFillRectangle(server.dsp, pix, server.gc, 0, 0, width,
+                       height);
     }
 
     // draw background panel
-    auto cs = cairo_xlib_surface_create(server.dsp, p->pix, server.visual,
-                                        p->width, p->height);
+    auto cs = cairo_xlib_surface_create(server.dsp, pix, server.visual,
+                                        width, height);
     auto c = cairo_create(cs);
-    p->DrawBackground(c);
+    DrawBackground(c);
     cairo_destroy(c);
     cairo_surface_destroy(cs);
 
     if (panel_autohide) {
-        if (p->hidden_pixmap) {
-            XFreePixmap(server.dsp, p->hidden_pixmap);
+        if (hidden_pixmap) {
+            XFreePixmap(server.dsp, hidden_pixmap);
         }
 
-        p->hidden_pixmap = XCreatePixmap(server.dsp, server.root_win, p->hidden_width,
-                                         p->hidden_height, server.depth);
-        XCopyArea(server.dsp, p->pix, p->hidden_pixmap, server.gc, xoff, yoff,
-                  p->hidden_width, p->hidden_height, 0, 0);
+        hidden_pixmap = XCreatePixmap(server.dsp, server.root_win, hidden_width,
+                                      hidden_height, server.depth);
+        XCopyArea(server.dsp, pix, hidden_pixmap, server.gc, xoff, yoff,
+                  hidden_width, hidden_height, 0, 0);
     }
 
     // redraw panel's object
-    for (auto& child : p->children) {
+    for (auto& child : children) {
         child->SetRedraw();
     }
 
     // reset task/taskbar 'state_pix'
-    for (int i = 0 ; i < p->nb_desktop ; i++) {
-        auto tskbar = &p->taskbar[i];
+    for (int i = 0 ; i < nb_desktop ; i++) {
+        auto& tskbar = taskbar[i];
 
         for (int k = 0; k < TASKBAR_STATE_COUNT; ++k) {
-            tskbar->reset_state_pixmap(k);
-            tskbar->bar_name.reset_state_pixmap(k);
+            tskbar.reset_state_pixmap(k);
+            tskbar.bar_name.reset_state_pixmap(k);
         }
 
-        tskbar->pix = 0;
-        tskbar->bar_name.pix = 0;
+        tskbar.pix = 0;
+        tskbar.bar_name.pix = 0;
 
-        auto begin = tskbar->children.begin();
+        auto begin = tskbar.children.begin();
 
         if (taskbarname_enabled) {
             ++begin;
         }
 
-        std::for_each(begin, tskbar->children.end(), [](Area * child) {
+        std::for_each(begin, tskbar.children.end(), [](Area * child) {
             set_task_redraw(static_cast<Task*>(child));
         });
     }

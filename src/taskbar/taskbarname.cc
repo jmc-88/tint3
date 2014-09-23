@@ -54,7 +54,7 @@ void init_taskbarname_panel(void* p) {
         return;
     }
 
-    auto desktop_names = server_get_desktop_names();
+    auto desktop_names = ServerGetDesktopNames();
     auto it = desktop_names.begin();
 
     for (int j = 0; j < panel->nb_desktop; ++j) {
@@ -151,7 +151,7 @@ bool Taskbarname::Resize() {
     need_redraw = true;
 
     int name_height, name_width, name_height_ink;
-    get_text_size2(
+    GetTextSize2(
         taskbarname_font_desc,
         &name_height_ink, &name_height, &name_width,
         panel->height, panel->width, name().c_str(),

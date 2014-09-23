@@ -231,14 +231,14 @@ bool Clock::Resize() {
 
     int time_height_ink = 0, time_height = 0, time_width = 0;
     int date_height_ink = 0, date_height = 0, date_width = 0;
-    get_text_size2(time1_font_desc, &time_height_ink, &time_height, &time_width,
-                   panel->height, panel->width, buf_time, strlen(buf_time));
+    GetTextSize2(time1_font_desc, &time_height_ink, &time_height, &time_width,
+                 panel->height, panel->width, buf_time, strlen(buf_time));
 
     if (!time2_format.empty()) {
         strftime(buf_date, sizeof(buf_date), time2_format.c_str(),
                  ClockGetTimeForTimezone(time2_timezone));
-        get_text_size2(time2_font_desc, &date_height_ink, &date_height, &date_width,
-                       panel->height, panel->width, buf_date, strlen(buf_date));
+        GetTextSize2(time2_font_desc, &date_height_ink, &date_height, &date_width,
+                     panel->height, panel->width, buf_date, strlen(buf_date));
     }
 
     if (panel_horizontal) {
