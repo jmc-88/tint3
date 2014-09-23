@@ -385,7 +385,7 @@ void WindowAction(Task* tsk, int action) {
 
 
 bool Tint3HandlesClick(Panel* panel, XButtonEvent* e) {
-    Task* task = click_task(panel, e->x, e->y);
+    Task* task = ClickTask(panel, e->x, e->y);
 
     if (task) {
         return ((e->button == 1)
@@ -395,20 +395,20 @@ bool Tint3HandlesClick(Panel* panel, XButtonEvent* e) {
                 || (e->button == 5 && mouse_scroll_down != 0));
     }
 
-    LauncherIcon* icon = click_launcher_icon(panel, e->x, e->y);
+    LauncherIcon* icon = ClickLauncherIcon(panel, e->x, e->y);
 
     if (icon) {
         return (e->button == 1);
     }
 
     // no launcher/task clicked --> check if taskbar clicked
-    Taskbar* tskbar = click_taskbar(panel, e->x, e->y);
+    Taskbar* tskbar = ClickTaskbar(panel, e->x, e->y);
 
     if (tskbar && e->button == 1 && panel_mode == MULTI_DESKTOP) {
         return 1;
     }
 
-    if (click_clock(panel, e->x, e->y)) {
+    if (ClickClock(panel, e->x, e->y)) {
         bool clock_lclick = (e->button == 1 && !clock_lclick_command.empty());
         bool clock_rclick = (e->button == 3 && !clock_rclick_command.empty());
         return (clock_lclick || clock_rclick);
@@ -433,7 +433,7 @@ void ForwardClick(XEvent* e) {
 
 
 void EventButtonPress(XEvent* e) {
-    Panel* panel = get_panel(e->xany.window);
+    Panel* panel = GetPanel(e->xany.window);
 
     if (!panel) {
         return;
@@ -445,7 +445,7 @@ void EventButtonPress(XEvent* e) {
         return;
     }
 
-    task_drag = click_task(panel, e->xbutton.x, e->xbutton.y);
+    task_drag = ClickTask(panel, e->xbutton.x, e->xbutton.y);
 
     if (panel_layer == BOTTOM_LAYER) {
         XLowerWindow(server.dsp, panel->main_win);
@@ -453,21 +453,21 @@ void EventButtonPress(XEvent* e) {
 }
 
 void EventButtonMotionNotify(XEvent* e) {
-    Panel* panel = get_panel(e->xany.window);
+    Panel* panel = GetPanel(e->xany.window);
 
     if (!panel || !task_drag) {
         return;
     }
 
     // Find the taskbar on the event's location
-    Taskbar* event_taskbar = click_taskbar(panel, e->xbutton.x, e->xbutton.y);
+    Taskbar* event_taskbar = ClickTaskbar(panel, e->xbutton.x, e->xbutton.y);
 
     if (event_taskbar == nullptr) {
         return;
     }
 
     // Find the task on the event's location
-    Task* event_task = click_task(panel, e->xbutton.x, e->xbutton.y);
+    Task* event_task = ClickTask(panel, e->xbutton.x, e->xbutton.y);
 
     // If the event takes place on the same taskbar as the task being dragged
     if (event_taskbar == (Taskbar*)task_drag->parent) {
@@ -522,7 +522,7 @@ void EventButtonMotionNotify(XEvent* e) {
 }
 
 void EventButtonRelease(XEvent* e) {
-    Panel* panel = get_panel(e->xany.window);
+    Panel* panel = GetPanel(e->xany.window);
 
     if (!panel) {
         return;
@@ -567,7 +567,7 @@ void EventButtonRelease(XEvent* e) {
             break;
     }
 
-    if (click_clock(panel, e->xbutton.x, e->xbutton.y)) {
+    if (ClickClock(panel, e->xbutton.x, e->xbutton.y)) {
         clock_action(e->xbutton.button);
 
         if (panel_layer == BOTTOM_LAYER) {
@@ -578,8 +578,8 @@ void EventButtonRelease(XEvent* e) {
         return;
     }
 
-    if (click_launcher(panel, e->xbutton.x, e->xbutton.y)) {
-        LauncherIcon* icon = click_launcher_icon(panel, e->xbutton.x, e->xbutton.y);
+    if (ClickLauncher(panel, e->xbutton.x, e->xbutton.y)) {
+        LauncherIcon* icon = ClickLauncherIcon(panel, e->xbutton.x, e->xbutton.y);
 
         if (icon) {
             LauncherAction(icon, e);
@@ -591,7 +591,7 @@ void EventButtonRelease(XEvent* e) {
 
     Taskbar* tskbar;
 
-    if (!(tskbar = click_taskbar(panel, e->xbutton.x, e->xbutton.y))) {
+    if (!(tskbar = ClickTaskbar(panel, e->xbutton.x, e->xbutton.y))) {
         // TODO: check better solution to keep window below
         if (panel_layer == BOTTOM_LAYER) {
             XLowerWindow(server.dsp, panel->main_win);
@@ -617,7 +617,7 @@ void EventButtonRelease(XEvent* e) {
     }
 
     // action on task
-    WindowAction(click_task(panel, e->xbutton.x, e->xbutton.y), action);
+    WindowAction(ClickTask(panel, e->xbutton.x, e->xbutton.y), action);
 
     // to keep window below
     if (panel_layer == BOTTOM_LAYER) {
@@ -661,11 +661,11 @@ void EventPropertyNotify(XEvent* e) {
                         name = StringRepresentation(j + 1);
                     }
 
-                    Taskbar* tskbar = &panel1[i].taskbar[j];
+                    Taskbar& tskbar = panel1[i].taskbar[j];
 
-                    if (tskbar->bar_name.name() != name) {
-                        tskbar->bar_name.set_name(name);
-                        tskbar->bar_name.need_resize = true;
+                    if (tskbar.bar_name.name() != name) {
+                        tskbar.bar_name.set_name(name);
+                        tskbar.bar_name.need_resize = true;
                     }
                 }
             }
@@ -684,18 +684,18 @@ void EventPropertyNotify(XEvent* e) {
                 server.desktop = server.nb_desktop - 1;
             }
 
-            cleanup_taskbar();
-            init_taskbar();
+            CleanupTaskbar();
+            InitTaskbar();
 
             for (i = 0 ; i < nb_panel ; i++) {
-                init_taskbar_panel(&panel1[i]);
+                InitTaskbarPanel(&panel1[i]);
                 panel1[i].SetItemsOrder();
                 visible_taskbar(&panel1[i]);
                 panel1[i].need_resize = true;
             }
 
-            task_refresh_tasklist();
-            active_task();
+            TaskRefreshTasklist();
+            ActiveTask();
             panel_refresh = 1;
         }
         // Change desktop
@@ -752,12 +752,12 @@ void EventPropertyNotify(XEvent* e) {
         }
         // Window list
         else if (at == server.atom._NET_CLIENT_LIST) {
-            task_refresh_tasklist();
+            TaskRefreshTasklist();
             panel_refresh = 1;
         }
         // Change active
         else if (at == server.atom._NET_ACTIVE_WINDOW) {
-            active_task();
+            ActiveTask();
             panel_refresh = 1;
         } else if (at == server.atom._XROOTPMAP_ID || at == server.atom._XROOTMAP_ID) {
             // change Wallpaper
@@ -780,7 +780,7 @@ void EventPropertyNotify(XEvent* e) {
                 XGetWindowAttributes(server.dsp, win, &wa);
 
                 if (wa.map_state == IsViewable && !WindowIsSkipTaskbar(win)) {
-                    if ((tsk = add_task(win))) {
+                    if ((tsk = AddTask(win))) {
                         panel_refresh = 1;
                     } else {
                         return;
@@ -812,7 +812,7 @@ void EventPropertyNotify(XEvent* e) {
             }
 
             if (WindowIsSkipTaskbar(win)) {
-                remove_task(tsk);
+                RemoveTask(tsk);
                 panel_refresh = 1;
             }
         } else if (at == server.atom.WM_STATE) {
@@ -824,12 +824,12 @@ void EventPropertyNotify(XEvent* e) {
                 state = TASK_ICONIFIED;
             }
 
-            set_task_state(tsk, state);
+            SetTaskState(tsk, state);
             panel_refresh = 1;
         }
         // Window icon changed
         else if (at == server.atom._NET_WM_ICON) {
-            get_icon(tsk);
+            GetIcon(tsk);
             panel_refresh = 1;
         }
         // Window desktop changed
@@ -839,9 +839,9 @@ void EventPropertyNotify(XEvent* e) {
             //printf("  Window desktop changed %d, %d\n", tsk->desktop, desktop);
             // bug in windowmaker : send unecessary 'desktop changed' when focus changed
             if (desktop != tsk->desktop) {
-                remove_task(tsk);
-                tsk = add_task(win);
-                active_task();
+                RemoveTask(tsk);
+                tsk = AddTask(win);
+                ActiveTask();
                 panel_refresh = 1;
             }
         } else if (at == server.atom.WM_HINTS) {
@@ -863,7 +863,7 @@ void EventPropertyNotify(XEvent* e) {
 
 void EventExpose(XEvent* e) {
     Panel* panel;
-    panel = get_panel(e->xany.window);
+    panel = GetPanel(e->xany.window);
 
     if (!panel) {
         return;
@@ -912,11 +912,11 @@ void EventConfigureNotify(Window win) {
     Panel* p = tsk->panel;
 
     if (p->monitor != WindowGetMonitor(win)) {
-        remove_task(tsk);
-        tsk = add_task(win);
+        RemoveTask(tsk);
+        tsk = AddTask(win);
 
         if (win == WindowGetActive()) {
-            set_task_state(tsk, TASK_ACTIVE);
+            SetTaskState(tsk, TASK_ACTIVE);
             task_active = tsk;
         }
 
@@ -1082,14 +1082,14 @@ void DragAndDropEnter(XClientMessageEvent* e) {
 void DragAndDropPosition(XClientMessageEvent* e) {
     dnd_target_window = e->window;
     int accept = 0;
-    Panel* panel = get_panel(e->window);
+    Panel* panel = GetPanel(e->window);
     int x, y, mapX, mapY;
     Window child;
     x = (e->data.l[2] >> 16) & 0xFFFF;
     y = e->data.l[2] & 0xFFFF;
     XTranslateCoordinates(server.dsp, server.root_win, e->window, x, y, &mapX,
                           &mapY, &child);
-    Task* task = click_task(panel, mapX, mapY);
+    Task* task = ClickTask(panel, mapX, mapY);
 
     if (task) {
         if (task->desktop != server.desktop) {
@@ -1098,7 +1098,7 @@ void DragAndDropPosition(XClientMessageEvent* e) {
 
         WindowAction(task, TOGGLE);
     } else {
-        LauncherIcon* icon = click_launcher_icon(panel, mapX, mapY);
+        LauncherIcon* icon = ClickLauncherIcon(panel, mapX, mapY);
 
         if (icon) {
             accept = 1;
@@ -1266,27 +1266,27 @@ start:
                 sn_display_process_event(server.sn_dsp, &e);
 #endif // HAVE_SN
 
-                panel = get_panel(e.xany.window);
+                panel = GetPanel(e.xany.window);
 
                 if (panel && panel_autohide) {
                     if (e.type == EnterNotify) {
-                        autohide_trigger_show(panel);
+                        AutohideTriggerShow(panel);
                     } else if (e.type == LeaveNotify) {
-                        autohide_trigger_hide(panel);
+                        AutohideTriggerHide(panel);
                     }
 
                     if (panel->is_hidden) {
                         if (e.type == ClientMessage
                             && e.xclient.message_type == server.atom.XdndPosition) {
                             hidden_dnd = 1;
-                            autohide_show(panel);
+                            AutohideShow(panel);
                         } else {
                             continue;    // discard further processing of this event because the panel is not visible yet
                         }
                     } else if (hidden_dnd && e.type == ClientMessage
                                && e.xclient.message_type == server.atom.XdndLeave) {
                         hidden_dnd = 0;
-                        autohide_hide(panel);
+                        AutohideHide(panel);
                     }
                 }
 
@@ -1310,8 +1310,8 @@ start:
                                 EventButtonMotionNotify(&e);
                             }
 
-                            Panel* panel = get_panel(e.xmotion.window);
-                            Area* area = click_area(panel, e.xmotion.x, e.xmotion.y);
+                            Panel* panel = GetPanel(e.xmotion.window);
+                            Area* area = ClickArea(panel, e.xmotion.x, e.xmotion.y);
 
                             std::string tooltip = area->GetTooltipText();
 

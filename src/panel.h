@@ -149,19 +149,19 @@ void CleanupPanel();
 void InitPanel();
 
 // detect wich panel
-Panel* get_panel(Window win);
+Panel* GetPanel(Window win);
 
-Taskbar* click_taskbar(Panel* panel, int x, int y);
-Task* click_task(Panel* panel, int x, int y);
-Launcher* click_launcher(Panel* panel, int x, int y);
-LauncherIcon* click_launcher_icon(Panel* panel, int x, int y);
-int click_padding(Panel* panel, int x, int y);
-int click_clock(Panel* panel, int x, int y);
-Area* click_area(Panel* panel, int x, int y);
+Taskbar* ClickTaskbar(Panel* panel, int x, int y);
+Task* ClickTask(Panel* panel, int x, int y);
+Launcher* ClickLauncher(Panel* panel, int x, int y);
+LauncherIcon* ClickLauncherIcon(Panel* panel, int x, int y);
+int ClickPadding(Panel* panel, int x, int y);
+int ClickClock(Panel* panel, int x, int y);
+Area* ClickArea(Panel* panel, int x, int y);
 
-void autohide_show(void* p);
-void autohide_hide(void* p);
-void autohide_trigger_show(Panel* p);
-void autohide_trigger_hide(Panel* p);
+void AutohideShow(void* p);
+void AutohideHide(void* p);
+void AutohideTriggerShow(Panel* p);
+void AutohideTriggerHide(Panel* p);
 
 #endif

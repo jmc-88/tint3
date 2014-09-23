@@ -110,7 +110,7 @@ void CleanupPanel() {
         return;
     }
 
-    cleanup_taskbar();
+    CleanupTaskbar();
 
     // taskbarname_font_desc freed here because cleanup_taskbarname() called on _NET_NUMBER_OF_DESKTOPS
     if (taskbarname_font_desc) {
@@ -159,7 +159,7 @@ void InitPanel() {
 #ifdef ENABLE_BATTERY
     InitBattery();
 #endif
-    init_taskbar();
+    InitTaskbar();
 
     // number of panels (one monitor or 'all' monitors)
     if (panel_config.monitor >= 0) {
@@ -207,7 +207,7 @@ void InitPanel() {
             }
 
             if (item == 'T') {
-                init_taskbar_panel(p);
+                InitTaskbarPanel(p);
             }
 
 #ifdef ENABLE_BATTERY
@@ -278,14 +278,14 @@ void InitPanel() {
         }
 
         if (panel_autohide) {
-            add_timeout(panel_autohide_hide_timeout, 0, autohide_hide, p);
+            add_timeout(panel_autohide_hide_timeout, 0, AutohideHide, p);
         }
 
         visible_taskbar(p);
     }
 
-    task_refresh_tasklist();
-    active_task();
+    TaskRefreshTasklist();
+    ActiveTask();
 }
 
 
@@ -675,7 +675,7 @@ void Panel::SetBackground() {
 }
 
 
-Panel* get_panel(Window win) {
+Panel* GetPanel(Window win) {
     int i;
 
     for (i = 0 ; i < nb_panel ; i++) {
@@ -688,7 +688,7 @@ Panel* get_panel(Window win) {
 }
 
 
-Taskbar* click_taskbar(Panel* panel, int x, int y) {
+Taskbar* ClickTaskbar(Panel* panel, int x, int y) {
     Taskbar* tskbar;
     int i;
 
@@ -716,8 +716,8 @@ Taskbar* click_taskbar(Panel* panel, int x, int y) {
 }
 
 
-Task* click_task(Panel* panel, int x, int y) {
-    Taskbar* tskbar = click_taskbar(panel, x, y);
+Task* ClickTask(Panel* panel, int x, int y) {
+    Taskbar* tskbar = ClickTaskbar(panel, x, y);
 
     if (tskbar) {
         auto begin = tskbar->children.begin();
@@ -747,7 +747,7 @@ Task* click_task(Panel* panel, int x, int y) {
 }
 
 
-Launcher* click_launcher(Panel* panel, int x, int y) {
+Launcher* ClickLauncher(Panel* panel, int x, int y) {
     auto launcher = &panel->launcher;
 
     if (panel_horizontal) {
@@ -766,8 +766,8 @@ Launcher* click_launcher(Panel* panel, int x, int y) {
 }
 
 
-LauncherIcon* click_launcher_icon(Panel* panel, int x, int y) {
-    auto launcher = click_launcher(panel, x, y);
+LauncherIcon* ClickLauncherIcon(Panel* panel, int x, int y) {
+    auto launcher = ClickLauncher(panel, x, y);
 
     if (launcher) {
         for (auto const& launcher_icon : launcher->list_icons) {
@@ -786,7 +786,7 @@ LauncherIcon* click_launcher_icon(Panel* panel, int x, int y) {
 }
 
 
-int click_padding(Panel* panel, int x, int y) {
+int ClickPadding(Panel* panel, int x, int y) {
     if (panel_horizontal) {
         if (x < panel->paddingxlr
             || x > panel->width - panel->paddingxlr) {
@@ -803,7 +803,7 @@ int click_padding(Panel* panel, int x, int y) {
 }
 
 
-int click_clock(Panel* panel, int x, int y) {
+int ClickClock(Panel* panel, int x, int y) {
     Clock clk = panel->clock;
 
     if (panel_horizontal) {
@@ -822,7 +822,7 @@ int click_clock(Panel* panel, int x, int y) {
 }
 
 
-Area* click_area(Panel* panel, int x, int y) {
+Area* ClickArea(Panel* panel, int x, int y) {
     Area* new_result = panel;
     Area* result;
 
@@ -852,7 +852,7 @@ void stop_autohide_timeout(Panel* p) {
 }
 
 
-void autohide_show(void* p) {
+void AutohideShow(void* p) {
     Panel* panel = static_cast<Panel*>(p);
     stop_autohide_timeout(panel);
     panel->is_hidden = 0;
@@ -887,7 +887,7 @@ void autohide_show(void* p) {
 }
 
 
-void autohide_hide(void* p) {
+void AutohideHide(void* p) {
     Panel* panel = static_cast<Panel*>(p);
     stop_autohide_timeout(panel);
     panel->is_hidden = 1;
@@ -923,22 +923,22 @@ void autohide_hide(void* p) {
 }
 
 
-void autohide_trigger_show(Panel* p) {
+void AutohideTriggerShow(Panel* p) {
     if (!p) {
         return;
     }
 
     if (p->autohide_timeout) {
         change_timeout(p->autohide_timeout, panel_autohide_show_timeout, 0,
-                       autohide_show, p);
+                       AutohideShow, p);
     } else {
-        p->autohide_timeout = add_timeout(panel_autohide_show_timeout, 0, autohide_show,
+        p->autohide_timeout = add_timeout(panel_autohide_show_timeout, 0, AutohideShow,
                                           p);
     }
 }
 
 
-void autohide_trigger_hide(Panel* p) {
+void AutohideTriggerHide(Panel* p) {
     if (!p) {
         return;
     }
@@ -956,9 +956,9 @@ void autohide_trigger_hide(Panel* p) {
 
     if (p->autohide_timeout) {
         change_timeout(p->autohide_timeout, panel_autohide_hide_timeout, 0,
-                       autohide_hide, p);
+                       AutohideHide, p);
     } else {
-        p->autohide_timeout = add_timeout(panel_autohide_hide_timeout, 0, autohide_hide,
+        p->autohide_timeout = add_timeout(panel_autohide_hide_timeout, 0, AutohideHide,
                                           p);
     }
 }

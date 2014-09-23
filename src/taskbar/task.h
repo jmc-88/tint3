@@ -82,12 +82,12 @@ class Task : public Area {
 extern Timeout* urgent_timeout;
 extern std::list<Task*> urgent_list;
 
-Task* add_task(Window win);
-void remove_task(Task* tsk);
+Task* AddTask(Window win);
+void RemoveTask(Task* tsk);
 
-void get_icon(Task* tsk);
-void active_task();
-void set_task_state(Task* tsk, int state);
+void GetIcon(Task* tsk);
+void ActiveTask();
+void SetTaskState(Task* tsk, int state);
 void set_task_redraw(Task* tsk);
 
 Task* find_active_task(Task* current_task, Task* active_task);

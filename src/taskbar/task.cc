@@ -56,7 +56,7 @@ Task& Task::SetTooltipEnabled(bool is_enabled) {
 }
 
 
-Task* add_task(Window win) {
+Task* AddTask(Window win) {
     if (!win) {
         return 0;
     }
@@ -91,7 +91,7 @@ Task* add_task(Window win) {
     }
 
     new_tsk.UpdateTitle();
-    get_icon(&new_tsk);
+    GetIcon(&new_tsk);
 
     //printf("task %s : desktop %d, monitor %d\n", new_tsk->title, desktop, monitor);
     XSelectInput(server.dsp, new_tsk.win,
@@ -143,7 +143,7 @@ Task* add_task(Window win) {
     auto key = (Window*) malloc(sizeof(Window));
     (*key) = new_tsk.win;
     g_hash_table_insert(win_to_task_table, key, task_group);
-    set_task_state(new_tsk2, new_tsk.current_state);
+    SetTaskState(new_tsk2, new_tsk.current_state);
 
     if (WindowIsUrgent(win)) {
         add_urgent(new_tsk2);
@@ -153,7 +153,7 @@ Task* add_task(Window win) {
 }
 
 
-void remove_task(Task* tsk) {
+void RemoveTask(Task* tsk) {
     if (!tsk) {
         return;
     }
@@ -290,7 +290,7 @@ void Task::SetTitle(std::string const& title) {
 }
 
 
-void get_icon(Task* tsk) {
+void GetIcon(Task* tsk) {
     Panel* panel = tsk->panel;
 
     if (!panel->g_task.icon) {
@@ -605,10 +605,10 @@ Task* prev_task(Task* tsk) {
 }
 
 
-void active_task() {
+void ActiveTask() {
     if (task_active) {
-        set_task_state(task_active,
-                       WindowIsIconified(task_active->win) ? TASK_ICONIFIED : TASK_NORMAL);
+        SetTaskState(task_active,
+                     WindowIsIconified(task_active->win) ? TASK_ICONIFIED : TASK_NORMAL);
         task_active = 0;
     }
 
@@ -624,12 +624,12 @@ void active_task() {
             }
         }
 
-        set_task_state((task_active = task_get_task(w1)), TASK_ACTIVE);
+        SetTaskState((task_active = task_get_task(w1)), TASK_ACTIVE);
     }
 }
 
 
-void set_task_state(Task* tsk, int state) {
+void SetTaskState(Task* tsk, int state) {
     if (tsk == 0 || state < 0 || state >= TASK_STATE_COUNT) {
         return;
     }
@@ -683,9 +683,9 @@ void blink_urgent(void* arg) {
     for (auto& t : urgent_list) {
         if (t->urgent_tick < max_tick_urgent) {
             if (t->urgent_tick++ % 2) {
-                set_task_state(t, TASK_URGENT);
+                SetTaskState(t, TASK_URGENT);
             } else {
-                set_task_state(t, WindowIsIconified(t->win) ? TASK_ICONIFIED : TASK_NORMAL);
+                SetTaskState(t, WindowIsIconified(t->win) ? TASK_ICONIFIED : TASK_NORMAL);
             }
         }
     }

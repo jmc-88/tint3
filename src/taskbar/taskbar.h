@@ -63,15 +63,15 @@ class Global_taskbar : public TaskbarBase {
 void DefaultTaskbar();
 
 // freed memory
-void cleanup_taskbar();
+void CleanupTaskbar();
 
-void init_taskbar();
-void init_taskbar_panel(void* p);
+void InitTaskbar();
+void InitTaskbarPanel(void* p);
 
 void taskbar_remove_task(gpointer key, gpointer value, gpointer user_data);
 Task* task_get_task(Window win);
 GPtrArray* task_get_tasks(Window win);
-void task_refresh_tasklist();
+void TaskRefreshTasklist();
 
 // show/hide taskbar according to current desktop
 void visible_taskbar(void* p);

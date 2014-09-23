@@ -117,11 +117,11 @@ void TooltipShow(void* arg) {
     Area* area;
 
     if (!panel_horizontal) {
-        my += height /
-              2;    /* we adjusted y in tooltip_trigger_show, revert or we won't find the correct area anymore */
+        // we adjusted y in tooltip_trigger_show, revert or we won't find the correct area anymore
+        my += height / 2;
     }
 
-    area = click_area(g_tooltip.panel, mx, my);
+    area = ClickArea(g_tooltip.panel, mx, my);
     stop_tooltip_timeout();
 
     if (!g_tooltip.mapped) {

@@ -124,7 +124,7 @@ void DefaultTaskbar() {
     default_taskbarname();
 }
 
-void cleanup_taskbar() {
+void CleanupTaskbar() {
     cleanup_taskbarname();
 
     if (win_to_task_table) {
@@ -165,7 +165,7 @@ void cleanup_taskbar() {
 }
 
 
-void init_taskbar() {
+void InitTaskbar() {
     if (win_to_task_table == 0) {
         win_to_task_table = g_hash_table_new_full(win_hash, win_compare, free,
                             free_ptr_array);
@@ -176,7 +176,7 @@ void init_taskbar() {
 }
 
 
-void init_taskbar_panel(void* p) {
+void InitTaskbarPanel(void* p) {
     Panel* panel = (Panel*)p;
     int j;
 
@@ -362,7 +362,7 @@ void init_taskbar_panel(void* p) {
 
 
 void taskbar_remove_task(gpointer key, gpointer value, gpointer user_data) {
-    remove_task(task_get_task(*static_cast<Window*>(key)));
+    RemoveTask(task_get_task(*static_cast<Window*>(key)));
 }
 
 
@@ -386,7 +386,7 @@ GPtrArray* task_get_tasks(Window win) {
 }
 
 
-void task_refresh_tasklist() {
+void TaskRefreshTasklist() {
     if (!taskbar_enabled) {
         return;
     }
@@ -422,7 +422,7 @@ void task_refresh_tasklist() {
     // Add any new
     for (i = 0; i < num_results; i++) {
         if (!task_get_task(win[i])) {
-            add_task(win[i]);
+            AddTask(win[i]);
         }
     }
 
