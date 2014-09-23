@@ -16,15 +16,16 @@
 
 class LauncherIcon : public Area {
   public:
-    Imlib_Image icon_scaled;
-    Imlib_Image icon_original;
-    char* cmd;
-    char* icon_name;
-    char* icon_path;
-    char* icon_tooltip;
-    int icon_size;
-    int is_app_desktop;
-    int x, y;
+    Imlib_Image icon_scaled_;
+    Imlib_Image icon_original_;
+    char* cmd_;
+    char* icon_name_;
+    char* icon_path_;
+    char* icon_tooltip_;
+    int icon_size_;
+    int is_app_desktop_;
+    int x_;
+    int y_;
 
     void DrawForeground(cairo_t*);
     std::string GetTooltipText();
@@ -93,6 +94,6 @@ void InitLauncher();
 void InitLauncherPanel(void* panel);
 void CleanupLauncher();
 
-void LauncherAction(LauncherIcon* icon, XEvent* e);
+void LauncherAction(LauncherIcon* launcher_icon, XEvent* evt);
 
 #endif

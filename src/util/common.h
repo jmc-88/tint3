@@ -35,17 +35,17 @@ enum {
 extern int const ALLDESKTOP;
 
 class StringBuilder {
-    std::ostringstream ss;
+    std::ostringstream ss_;
 
   public:
     template<typename T>
     StringBuilder& operator<<(T const& value) {
-        ss << value;
+        ss_ << value;
         return (*this);
     }
 
     operator std::string() const {
-        return ss.str();
+        return ss_.str();
     }
 };
 

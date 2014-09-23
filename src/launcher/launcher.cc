@@ -133,17 +133,17 @@ void CleanupLauncher() {
 void Launcher::CleanupTheme() {
     FreeArea();
 
-    for (auto const& launcherIcon : list_icons) {
-        if (launcherIcon) {
-            FreeIcon(launcherIcon->icon_scaled);
-            FreeIcon(launcherIcon->icon_original);
-            free(launcherIcon->icon_name);
-            free(launcherIcon->icon_path);
-            free(launcherIcon->cmd);
-            free(launcherIcon->icon_tooltip);
+    for (auto const& launcher_icon : list_icons) {
+        if (launcher_icon) {
+            FreeIcon(launcher_icon->icon_scaled_);
+            FreeIcon(launcher_icon->icon_original_);
+            free(launcher_icon->icon_name_);
+            free(launcher_icon->icon_path_);
+            free(launcher_icon->cmd_);
+            free(launcher_icon->icon_tooltip_);
         }
 
-        delete launcherIcon;
+        delete launcher_icon;
     }
 
     for (auto const& theme : list_themes) {
@@ -173,26 +173,26 @@ bool Launcher::Resize() {
     }
 
     // Resize icons if necessary
-    for (auto& launcherIcon : list_icons) {
-        if (launcherIcon->icon_size != icon_size || !launcherIcon->icon_original) {
-            launcherIcon->icon_size = icon_size;
-            launcherIcon->width = launcherIcon->icon_size;
-            launcherIcon->height = launcherIcon->icon_size;
+    for (auto& launcher_icon : list_icons) {
+        if (launcher_icon->icon_size_ != icon_size || !launcher_icon->icon_original_) {
+            launcher_icon->icon_size_ = icon_size;
+            launcher_icon->width = launcher_icon->icon_size_;
+            launcher_icon->height = launcher_icon->icon_size_;
 
             // Get the path for an icon file with the new size
-            std::string new_icon_path = GetIconPath(launcherIcon->icon_name,
-                                                    launcherIcon->icon_size);
+            std::string new_icon_path = GetIconPath(launcher_icon->icon_name_,
+                                                    launcher_icon->icon_size_);
 
             if (new_icon_path.empty()) {
                 // Draw a blank icon
-                FreeIcon(launcherIcon->icon_original);
-                launcherIcon->icon_original = nullptr;
-                FreeIcon(launcherIcon->icon_scaled);
-                launcherIcon->icon_scaled = nullptr;
-                new_icon_path = GetIconPath(kIconFallback, launcherIcon->icon_size);
+                FreeIcon(launcher_icon->icon_original_);
+                launcher_icon->icon_original_ = nullptr;
+                FreeIcon(launcher_icon->icon_scaled_);
+                launcher_icon->icon_scaled_ = nullptr;
+                new_icon_path = GetIconPath(kIconFallback, launcher_icon->icon_size_);
 
                 if (!new_icon_path.empty()) {
-                    launcherIcon->icon_original = imlib_load_image(new_icon_path.c_str());
+                    launcher_icon->icon_original_ = imlib_load_image(new_icon_path.c_str());
 
                     util::log::Error()
                             << "launcher.c :" << __LINE__
@@ -200,33 +200,35 @@ bool Launcher::Resize() {
                             << '\n';
                 }
 
-                launcherIcon->icon_scaled = ScaleIcon(launcherIcon->icon_original, icon_size);
+                launcher_icon->icon_scaled_ = ScaleIcon(launcher_icon->icon_original_,
+                                                        icon_size);
                 continue;
             }
 
-            if (launcherIcon->icon_path && new_icon_path == launcherIcon->icon_path) {
+            if (launcher_icon->icon_path_ && new_icon_path == launcher_icon->icon_path_) {
                 // If it's the same file just rescale
-                FreeIcon(launcherIcon->icon_scaled);
-                launcherIcon->icon_scaled = ScaleIcon(launcherIcon->icon_original, icon_size);
+                FreeIcon(launcher_icon->icon_scaled_);
+                launcher_icon->icon_scaled_ = ScaleIcon(launcher_icon->icon_original_,
+                                                        icon_size);
 
                 util::log::Error()
                         << "launcher.c " << __LINE__
-                        << ": Using icon " << launcherIcon->icon_path
+                        << ": Using icon " << launcher_icon->icon_path_
                         << '\n';
             } else {
                 // Free the old files
-                FreeIcon(launcherIcon->icon_original);
-                FreeIcon(launcherIcon->icon_scaled);
+                FreeIcon(launcher_icon->icon_original_);
+                FreeIcon(launcher_icon->icon_scaled_);
                 // Load the new file and scale
-                launcherIcon->icon_original = imlib_load_image(new_icon_path.c_str());
-                launcherIcon->icon_scaled = ScaleIcon(launcherIcon->icon_original,
-                                                      launcherIcon->icon_size);
-                free(launcherIcon->icon_path);
-                launcherIcon->icon_path = strdup(new_icon_path.c_str());
+                launcher_icon->icon_original_ = imlib_load_image(new_icon_path.c_str());
+                launcher_icon->icon_scaled_ = ScaleIcon(launcher_icon->icon_original_,
+                                                        launcher_icon->icon_size_);
+                free(launcher_icon->icon_path_);
+                launcher_icon->icon_path_ = strdup(new_icon_path.c_str());
 
                 fprintf(stderr,
                         "launcher.c %d: Using icon %s\n", __LINE__,
-                        launcherIcon->icon_path);
+                        launcher_icon->icon_path_);
             }
         }
     }
@@ -272,9 +274,9 @@ bool Launcher::Resize() {
 
     int i = 1;
 
-    for (auto& launcherIcon : list_icons) {
-        launcherIcon->y = posy;
-        launcherIcon->x = posx;
+    for (auto& launcher_icon : list_icons) {
+        launcher_icon->y_ = posy;
+        launcher_icon->x_ = posx;
 
         if (panel_horizontal) {
             if (i % icons_per_column) {
@@ -301,17 +303,17 @@ bool Launcher::Resize() {
 // Here we override the default layout of the icons; normally Area layouts its children
 // in a stack; we need to layout them in a kind of table
 void LauncherIcon::OnChangeLayout() {
-    posy = (parent->posy + y);
-    posx = (parent->posx + x);
+    posy = (parent->posy + y_);
+    posx = (parent->posx + x_);
 }
 
 std::string LauncherIcon::GetTooltipText() {
-    return launcher_tooltip_enabled ? icon_tooltip : std::string();
+    return launcher_tooltip_enabled ? icon_tooltip_ : std::string();
 }
 
 void LauncherIcon::DrawForeground(cairo_t* c) {
     // Render
-    imlib_context_set_image(icon_scaled);
+    imlib_context_set_image(icon_scaled_);
 
     if (server.real_transparency) {
         RenderImage(pix, 0, 0, imlib_image_get_width(),
@@ -352,12 +354,12 @@ void FreeIcon(Imlib_Image icon) {
     }
 }
 
-void LauncherAction(LauncherIcon* icon, XEvent* evt) {
+void LauncherAction(LauncherIcon* launcher_icon, XEvent* evt) {
 #if HAVE_SN
     auto ctx = sn_launcher_context_new(server.sn_dsp, server.screen);
-    sn_launcher_context_set_name(ctx, icon->icon_tooltip);
+    sn_launcher_context_set_name(ctx, launcher_icon->icon_tooltip_);
     sn_launcher_context_set_description(ctx, "Application launched from tint3");
-    sn_launcher_context_set_binary_name(ctx, icon->cmd);
+    sn_launcher_context_set_binary_name(ctx, launcher_icon->cmd_);
 
     // Get a timestamp from the X event
     Time time;
@@ -369,7 +371,7 @@ void LauncherAction(LauncherIcon* icon, XEvent* evt) {
         return;
     }
 
-    sn_launcher_context_initiate(ctx, "tint3", icon->cmd, time);
+    sn_launcher_context_initiate(ctx, "tint3", launcher_icon->cmd_, time);
 #endif /* HAVE_SN */
 
     // TODO: make this use tint_exec...
@@ -384,9 +386,9 @@ void LauncherAction(LauncherIcon* icon, XEvent* evt) {
         // Allow children to exist after parent destruction
         setsid();
         // Run the command
-        execl("/bin/sh", "/bin/sh", "-c", icon->cmd, nullptr);
+        execl("/bin/sh", "/bin/sh", "-c", launcher_icon->cmd_, nullptr);
 
-        util::log::Error() << "Failed to execlp " << icon->cmd << '\n';
+        util::log::Error() << "Failed to execlp " << launcher_icon->cmd_ << '\n';
 #if HAVE_SN
         // TODO: how can this not leak? On a successful execl, this line is
         // never executed.
@@ -766,25 +768,27 @@ void Launcher::LoadIcons() {
         LauncherReadDesktopFile(app, &entry);
 
         if (entry.exec) {
-            auto launcherIcon = new LauncherIcon();
-            launcherIcon->parent = this;
-            launcherIcon->panel = panel;
-            launcherIcon->size_mode = SIZE_BY_CONTENT;
-            launcherIcon->need_resize = false;
-            launcherIcon->need_redraw = true;
-            launcherIcon->bg = backgrounds.front();
-            launcherIcon->on_screen = 1;
+            auto launcher_icon = new LauncherIcon();
+            launcher_icon->parent = this;
+            launcher_icon->panel = panel;
+            launcher_icon->size_mode = SIZE_BY_CONTENT;
+            launcher_icon->need_resize = false;
+            launcher_icon->need_redraw = true;
+            launcher_icon->bg = backgrounds.front();
+            launcher_icon->on_screen = 1;
 
-            launcherIcon->is_app_desktop = 1;
-            launcherIcon->cmd = strdup(entry.exec);
-            launcherIcon->icon_name = entry.icon ? strdup(entry.icon) : strdup(
-                                          kIconFallback);
-            launcherIcon->icon_size = 1;
-            launcherIcon->icon_tooltip = entry.name ? strdup(entry.name) : strdup(
-                                             entry.exec);
+            launcher_icon->is_app_desktop_ = 1;
+            launcher_icon->cmd_ = strdup(entry.exec);
+            launcher_icon->icon_name_ = entry.icon
+                                        ? strdup(entry.icon)
+                                        : strdup(kIconFallback);
+            launcher_icon->icon_size_ = 1;
+            launcher_icon->icon_tooltip_ = entry.name
+                                           ? strdup(entry.name)
+                                           : strdup(entry.exec);
             FreeDesktopEntry(&entry);
-            list_icons.push_back(launcherIcon);
-            launcherIcon->AddArea();
+            list_icons.push_back(launcher_icon);
+            launcher_icon->AddArea();
         }
     }
 }

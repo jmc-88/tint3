@@ -770,14 +770,14 @@ LauncherIcon* click_launcher_icon(Panel* panel, int x, int y) {
     auto launcher = click_launcher(panel, x, y);
 
     if (launcher) {
-        for (auto const& icon : launcher->list_icons) {
-            bool insideX = (x >= (launcher->posx + icon->x)
-                            && x <= (launcher->posx + icon->x + icon->icon_size));
-            bool insideY = (y >= (launcher->posy + icon->y)
-                            && y <= (launcher->posy + icon->y + icon->icon_size));
+        for (auto const& launcher_icon : launcher->list_icons) {
+            bool insideX = (x >= (launcher->posx + launcher_icon->x_)
+                            && x <= (launcher->posx + launcher_icon->x_ + launcher_icon->icon_size_));
+            bool insideY = (y >= (launcher->posy + launcher_icon->y_)
+                            && y <= (launcher->posy + launcher_icon->y_ + launcher_icon->icon_size_));
 
             if (insideX && insideY) {
-                return icon;
+                return launcher_icon;
             }
         }
     }

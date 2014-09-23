@@ -1102,7 +1102,7 @@ void DragAndDropPosition(XClientMessageEvent* e) {
 
         if (icon) {
             accept = 1;
-            dnd_launcher_exec = icon->cmd;
+            dnd_launcher_exec = icon->cmd_;
         } else {
             dnd_launcher_exec = 0;
         }
