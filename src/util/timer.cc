@@ -319,11 +319,10 @@ void CleanupTimeout() {
             StopMultiTimeout(t);
         }
 
-        timeout_list.erase(std::remove(timeout_list.begin(), timeout_list.end(), t),
-                           timeout_list.end());
         delete t;
     }
 
+    timeout_list.clear();
     multi_timeouts.clear();
 }
 
