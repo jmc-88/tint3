@@ -568,7 +568,7 @@ void EventButtonRelease(XEvent* e) {
     }
 
     if (panel->ClickClock(e->xbutton.x, e->xbutton.y)) {
-        clock_action(e->xbutton.button);
+        ClockAction(e->xbutton.button);
 
         if (panel_layer == BOTTOM_LAYER) {
             XLowerWindow(server.dsp, panel->main_win);
@@ -1249,7 +1249,7 @@ start:
         fd_set fdset;
         FD_ZERO(&fdset);
         FD_SET(x11_fd, &fdset);
-        update_next_timeout();
+        UpdateNextTimeout();
 
         struct timeval* timeout = nullptr;
 

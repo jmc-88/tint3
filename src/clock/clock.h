@@ -50,6 +50,6 @@ void CleanupClock();
 void InitClock();
 void InitClockPanel(void* panel);
 
-void clock_action(int button);
+void ClockAction(int button);
 
 #endif

@@ -81,6 +81,81 @@ std::vector<Background*> backgrounds;
 
 Imlib_Image default_icon;
 
+namespace {
+
+void UpdateStrut(Panel* p) {
+    if (panel_strut_policy == STRUT_NONE) {
+        XDeleteProperty(server.dsp, p->main_win, server.atom._NET_WM_STRUT);
+        XDeleteProperty(server.dsp, p->main_win, server.atom._NET_WM_STRUT_PARTIAL);
+        return;
+    }
+
+    // Reserved space
+    unsigned int d1, screen_width, screen_height;
+    Window d2;
+    int d3;
+    XGetGeometry(server.dsp, server.root_win, &d2, &d3, &d3, &screen_width,
+                 &screen_height, &d1, &d1);
+    Monitor monitor = server.monitor[p->monitor];
+    long struts [12] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+    if (panel_horizontal) {
+        int height = p->height + p->marginy;
+
+        if (panel_strut_policy == STRUT_MINIMUM
+            || (panel_strut_policy == STRUT_FOLLOW_SIZE && p->is_hidden)) {
+            height = p->hidden_height;
+        }
+
+        if (panel_position & TOP) {
+            struts[2] = height + monitor.y;
+            struts[8] = p->posx;
+            // p->width - 1 allowed full screen on monitor 2
+            struts[9] = p->posx + p->width - 1;
+        } else {
+            struts[3] = height + screen_height - monitor.y - monitor.height;
+            struts[10] = p->posx;
+            // p->width - 1 allowed full screen on monitor 2
+            struts[11] = p->posx + p->width - 1;
+        }
+    } else {
+        int width = p->width + p->marginx;
+
+        if (panel_strut_policy == STRUT_MINIMUM
+            || (panel_strut_policy == STRUT_FOLLOW_SIZE && p->is_hidden)) {
+            width = p->hidden_width;
+        }
+
+        if (panel_position & LEFT) {
+            struts[0] = width + monitor.x;
+            struts[4] = p->posy;
+            // p->width - 1 allowed full screen on monitor 2
+            struts[5] = p->posy + p->height - 1;
+        } else {
+            struts[1] = width + screen_width - monitor.x - monitor.width;
+            struts[6] = p->posy;
+            // p->width - 1 allowed full screen on monitor 2
+            struts[7] = p->posy + p->height - 1;
+        }
+    }
+
+    // Old specification : fluxbox need _NET_WM_STRUT.
+    XChangeProperty(server.dsp, p->main_win, server.atom._NET_WM_STRUT,
+                    XA_CARDINAL, 32, PropModeReplace, (unsigned char*) &struts, 4);
+    XChangeProperty(server.dsp, p->main_win, server.atom._NET_WM_STRUT_PARTIAL,
+                    XA_CARDINAL, 32, PropModeReplace, (unsigned char*) &struts, 12);
+}
+
+void StopAutohideTimeout(Panel* p) {
+    if (p->autohide_timeout) {
+        StopTimeout(p->autohide_timeout);
+        p->autohide_timeout = 0;
+    }
+}
+
+} // namespace
+
+
 void DefaultPanel() {
     panel1 = 0;
     nb_panel = 0;
@@ -278,7 +353,7 @@ void InitPanel() {
         }
 
         if (panel_autohide) {
-            add_timeout(panel_autohide_hide_timeout, 0, AutohideHide, p);
+            AddTimeout(panel_autohide_hide_timeout, 0, AutohideHide, p);
         }
 
         visible_taskbar(p);
@@ -408,70 +483,6 @@ void Panel::Render() {
 }
 
 
-void update_strut(Panel* p) {
-    if (panel_strut_policy == STRUT_NONE) {
-        XDeleteProperty(server.dsp, p->main_win, server.atom._NET_WM_STRUT);
-        XDeleteProperty(server.dsp, p->main_win, server.atom._NET_WM_STRUT_PARTIAL);
-        return;
-    }
-
-    // Reserved space
-    unsigned int d1, screen_width, screen_height;
-    Window d2;
-    int d3;
-    XGetGeometry(server.dsp, server.root_win, &d2, &d3, &d3, &screen_width,
-                 &screen_height, &d1, &d1);
-    Monitor monitor = server.monitor[p->monitor];
-    long struts [12] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-
-    if (panel_horizontal) {
-        int height = p->height + p->marginy;
-
-        if (panel_strut_policy == STRUT_MINIMUM
-            || (panel_strut_policy == STRUT_FOLLOW_SIZE && p->is_hidden)) {
-            height = p->hidden_height;
-        }
-
-        if (panel_position & TOP) {
-            struts[2] = height + monitor.y;
-            struts[8] = p->posx;
-            // p->width - 1 allowed full screen on monitor 2
-            struts[9] = p->posx + p->width - 1;
-        } else {
-            struts[3] = height + screen_height - monitor.y - monitor.height;
-            struts[10] = p->posx;
-            // p->width - 1 allowed full screen on monitor 2
-            struts[11] = p->posx + p->width - 1;
-        }
-    } else {
-        int width = p->width + p->marginx;
-
-        if (panel_strut_policy == STRUT_MINIMUM
-            || (panel_strut_policy == STRUT_FOLLOW_SIZE && p->is_hidden)) {
-            width = p->hidden_width;
-        }
-
-        if (panel_position & LEFT) {
-            struts[0] = width + monitor.x;
-            struts[4] = p->posy;
-            // p->width - 1 allowed full screen on monitor 2
-            struts[5] = p->posy + p->height - 1;
-        } else {
-            struts[1] = width + screen_width - monitor.x - monitor.width;
-            struts[6] = p->posy;
-            // p->width - 1 allowed full screen on monitor 2
-            struts[7] = p->posy + p->height - 1;
-        }
-    }
-
-    // Old specification : fluxbox need _NET_WM_STRUT.
-    XChangeProperty(server.dsp, p->main_win, server.atom._NET_WM_STRUT,
-                    XA_CARDINAL, 32, PropModeReplace, (unsigned char*) &struts, 4);
-    XChangeProperty(server.dsp, p->main_win, server.atom._NET_WM_STRUT_PARTIAL,
-                    XA_CARDINAL, 32, PropModeReplace, (unsigned char*) &struts, 12);
-}
-
-
 void Panel::SetItemsOrder() {
     children.clear();
 
@@ -567,7 +578,7 @@ void Panel::SetProperties() {
     XChangeProperty(server.dsp, main_win, server.atom.XdndAware, XA_ATOM, 32,
                     PropModeReplace, (unsigned char*)&version, 1);
 
-    update_strut(this);
+    UpdateStrut(this);
 
     // Fixed position and non-resizable window
     // Allow panel move and resize when tint3 reload config file
@@ -835,21 +846,13 @@ Area* Panel::ClickArea(int x, int y) {
 }
 
 
-void stop_autohide_timeout(Panel* p) {
-    if (p->autohide_timeout) {
-        stop_timeout(p->autohide_timeout);
-        p->autohide_timeout = 0;
-    }
-}
-
-
 void AutohideShow(void* p) {
     Panel* panel = static_cast<Panel*>(p);
-    stop_autohide_timeout(panel);
+    StopAutohideTimeout(panel);
     panel->is_hidden = 0;
 
     if (panel_strut_policy == STRUT_FOLLOW_SIZE) {
-        update_strut(panel);
+        UpdateStrut(panel);
     }
 
     XMapSubwindows(server.dsp, panel->main_win);  // systray windows
@@ -880,11 +883,11 @@ void AutohideShow(void* p) {
 
 void AutohideHide(void* p) {
     Panel* panel = static_cast<Panel*>(p);
-    stop_autohide_timeout(panel);
+    StopAutohideTimeout(panel);
     panel->is_hidden = 1;
 
     if (panel_strut_policy == STRUT_FOLLOW_SIZE) {
-        update_strut(panel);
+        UpdateStrut(panel);
     }
 
     XUnmapSubwindows(server.dsp, panel->main_win);  // systray windows
@@ -920,11 +923,11 @@ void AutohideTriggerShow(Panel* p) {
     }
 
     if (p->autohide_timeout) {
-        change_timeout(p->autohide_timeout, panel_autohide_show_timeout, 0,
-                       AutohideShow, p);
+        ChangeTimeout(p->autohide_timeout, panel_autohide_show_timeout, 0,
+                      AutohideShow, p);
     } else {
-        p->autohide_timeout = add_timeout(panel_autohide_show_timeout, 0, AutohideShow,
-                                          p);
+        p->autohide_timeout = AddTimeout(panel_autohide_show_timeout, 0, AutohideShow,
+                                         p);
     }
 }
 
@@ -946,10 +949,10 @@ void AutohideTriggerHide(Panel* p) {
     }
 
     if (p->autohide_timeout) {
-        change_timeout(p->autohide_timeout, panel_autohide_hide_timeout, 0,
-                       AutohideHide, p);
+        ChangeTimeout(p->autohide_timeout, panel_autohide_hide_timeout, 0,
+                      AutohideHide, p);
     } else {
-        p->autohide_timeout = add_timeout(panel_autohide_hide_timeout, 0, AutohideHide,
-                                          p);
+        p->autohide_timeout = AddTimeout(panel_autohide_hide_timeout, 0, AutohideHide,
+                                         p);
     }
 }

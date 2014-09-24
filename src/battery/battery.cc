@@ -139,7 +139,7 @@ void CleanupBattery() {
     path_status.clear();
 
     if (battery_timeout) {
-        stop_timeout(battery_timeout);
+        StopTimeout(battery_timeout);
     }
 
 #if defined(__OpenBSD__) || defined(__NetBSD__)
@@ -255,7 +255,7 @@ void InitBattery() {
 #endif
 
     if (battery_enabled && battery_timeout == 0) {
-        battery_timeout = add_timeout(10, 10000, UpdateBatteries, 0);
+        battery_timeout = AddTimeout(10, 10000, UpdateBatteries, 0);
     }
 }
 

@@ -543,7 +543,7 @@ void remove_icon(TrayWindow* traywin) {
     XSetErrorHandler(old);
 
     if (traywin->render_timeout) {
-        stop_timeout(traywin->render_timeout);
+        StopTimeout(traywin->render_timeout);
     }
 
     delete traywin;
@@ -701,7 +701,7 @@ void systray_render_icon(TrayWindow* traywin) {
         || systray.saturation != 0) {
         // wine tray icons update whenever mouse is over them, so we limit the updates to 50 ms
         if (traywin->render_timeout == 0) {
-            traywin->render_timeout = add_timeout(50, 0, systray_render_icon_now, traywin);
+            traywin->render_timeout = AddTimeout(50, 0, systray_render_icon_now, traywin);
         }
     } else {
         // comment by andreas: I'm still not sure, what exactly we need to do here... Somehow trayicons which do not

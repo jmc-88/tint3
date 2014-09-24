@@ -43,26 +43,11 @@ std::list<Timeout*> timeout_list;
 struct timeval next_timeout;
 std::map<Timeout*, MultiTimeoutHandler*> multi_timeouts;
 
-void add_timeout_intern(int value_msec, int interval_msec,
-                        void(*_callback)(void*), void* arg, Timeout* t);
-int timespec_subtract(struct timespec* result, struct timespec* x,
-                      struct timespec* y);
-struct timespec add_msec_to_timespec(struct timespec ts, int msec);
-
-
-bool align_with_existing_timeouts(Timeout* t);
-void create_multi_timeout(Timeout* t1, Timeout* t2);
-void append_multi_timeout(Timeout* t1, Timeout* t2);
-int calc_multi_timeout_interval(MultiTimeoutHandler* mth);
-void update_multi_timeout_values(MultiTimeoutHandler* mth);
-void callback_multi_timeout(void* mth);
-void remove_from_multi_timeout(Timeout* t);
-void stop_multi_timeout(Timeout* t);
-
-
 namespace {
 
-int compare_timespecs(struct timespec const& t1, struct timespec const& t2) {
+void UpdateMultiTimeoutValues(MultiTimeoutHandler* mth);
+
+int CompareTimespecs(struct timespec const& t1, struct timespec const& t2) {
     if (t1.tv_sec < t2.tv_sec) {
         return -1;
     }
@@ -82,207 +67,11 @@ int compare_timespecs(struct timespec const& t1, struct timespec const& t2) {
     return 1;
 }
 
-bool compare_timeouts(Timeout const* t1, Timeout const* t2) {
-    return (compare_timespecs(t1->timeout_expires, t2->timeout_expires) < 0);
+bool CompareTimeouts(Timeout const* t1, Timeout const* t2) {
+    return (CompareTimespecs(t1->timeout_expires, t2->timeout_expires) < 0);
 }
 
-} // namespace
-
-void DefaultTimeout() {
-    timeout_list.clear();
-    multi_timeouts.clear();
-}
-
-void CleanupTimeout() {
-    for (auto const& t : timeout_list) {
-        if (t->multi_timeout) {
-            stop_multi_timeout(t);
-        }
-
-        timeout_list.erase(std::remove(timeout_list.begin(), timeout_list.end(), t),
-                           timeout_list.end());
-        delete t;
-    }
-
-    multi_timeouts.clear();
-}
-
-/** Implementation notes for timeouts: The timeouts are kept in a GSList sorted by their
-    * expiration time.
-    * That means that update_next_timeout() only have to consider the first timeout in the list,
-    * and callback_timeout_expired() only have to consider the timeouts as long as the expiration time
-    * is in the past to the current time.
-    * As time measurement we use clock_gettime(CLOCK_MONOTONIC) because this refers to a timer, which
-    * reference point lies somewhere in the past and cannot be changed, but just queried.
-    * If a single shot timer is installed it will be automatically deleted. I.e. the returned value
-    * of add_timeout will not be valid anymore. You do not need to call stop_timeout for these timeouts,
-    * however it's save to call it.
-**/
-
-Timeout* add_timeout(int value_msec, int interval_msec,
-                     void (*_callback)(void*), void* arg) {
-    auto t = new Timeout();
-    t->multi_timeout = 0;
-    add_timeout_intern(value_msec, interval_msec, _callback, arg, t);
-    return t;
-}
-
-
-void change_timeout(Timeout* t, int value_msec, int interval_msec,
-                    void (*_callback)(void*), void* arg) {
-    auto timeout_it = std::find(timeout_list.begin(),
-                                timeout_list.end(),
-                                t);
-    bool has_timeout = (timeout_it != timeout_list.end());
-    bool has_multi_timeout = (multi_timeouts.find(t) != multi_timeouts.end());
-
-    if (!has_timeout && !has_multi_timeout) {
-        printf("programming error: timeout already deleted...");
-        return;
-    }
-
-    if (t->multi_timeout) {
-        remove_from_multi_timeout(t);
-    } else {
-        timeout_list.erase(timeout_it);
-    }
-
-    add_timeout_intern(value_msec, interval_msec, _callback, arg, t);
-}
-
-
-void update_next_timeout() {
-    if (!timeout_list.empty()) {
-        auto t = timeout_list.front();
-
-        struct timespec next_timeout2 = {
-            .tv_sec = next_timeout.tv_sec,
-            .tv_nsec = next_timeout.tv_usec * 1000
-        };
-
-        struct timespec cur_time;
-        clock_gettime(CLOCK_MONOTONIC, &cur_time);
-
-        if (timespec_subtract(&next_timeout2, &t->timeout_expires, &cur_time)) {
-            next_timeout.tv_sec = 0;
-            next_timeout.tv_usec = 0;
-        } else {
-            next_timeout.tv_sec = next_timeout2.tv_sec;
-            next_timeout.tv_usec = next_timeout2.tv_nsec / 1000;
-        }
-    } else {
-        next_timeout.tv_sec = -1;
-    }
-}
-
-
-void CallbackTimeoutExpired() {
-    auto it = timeout_list.begin();
-
-    while (it != timeout_list.end()) {
-        auto t = (*it);
-
-        struct timespec cur_time;
-        clock_gettime(CLOCK_MONOTONIC, &cur_time);
-
-        if (compare_timespecs(t->timeout_expires, cur_time) > 0) {
-            return;
-        }
-
-        // it's time for the callback function
-        t->_callback(t->arg);
-
-        auto pos = std::find(timeout_list.begin(), timeout_list.end(), t);
-
-        // if _callback() calls stop_timeout(t) the timeout 't' was freed and is not in the timeout_list
-        // FIXME: make all of this less ugly
-        if (pos == timeout_list.end()) {
-            ++it;
-        } else {
-            it = timeout_list.erase(pos);
-
-            if (t->interval_msec > 0) {
-                add_timeout_intern(t->interval_msec, t->interval_msec, t->_callback, t->arg, t);
-            } else {
-                delete t;
-            }
-        }
-    }
-}
-
-
-void stop_timeout(Timeout* t) {
-    bool has_timeout = (std::find(timeout_list.begin(),
-                                  timeout_list.end(),
-                                  t) != timeout_list.end());
-    bool has_multi_timeout = (multi_timeouts.find(t) != multi_timeouts.end());
-
-    // if not in the list, it was deleted in callback_timeout_expired
-    if (has_timeout || has_multi_timeout) {
-        if (t->multi_timeout) {
-            remove_from_multi_timeout(t);
-        }
-
-        timeout_list.erase(std::remove(timeout_list.begin(),
-                                       timeout_list.end(),
-                                       t), timeout_list.end());
-        delete t;
-    }
-}
-
-
-void add_timeout_intern(int value_msec, int interval_msec,
-                        void(*_callback)(void*), void* arg, Timeout* t) {
-    t->interval_msec = interval_msec;
-    t->_callback = _callback;
-    t->arg = arg;
-    struct timespec cur_time;
-    clock_gettime(CLOCK_MONOTONIC, &cur_time);
-    t->timeout_expires = add_msec_to_timespec(cur_time, value_msec);
-
-    bool can_align = false;
-
-    if (interval_msec > 0 && t->multi_timeout == nullptr) {
-        can_align = align_with_existing_timeouts(t);
-    }
-
-    if (!can_align) {
-        auto it = std::lower_bound(
-                      timeout_list.begin(),
-                      timeout_list.end(),
-                      t,
-        [](Timeout * t1, Timeout * t2) {
-            return compare_timeouts(t1, t2);
-        });
-        timeout_list.insert(it, t);
-    }
-}
-
-int timespec_subtract(struct timespec* result, struct timespec* x,
-                      struct timespec* y) {
-    /* Perform the carry for the later subtraction by updating y. */
-    if (x->tv_nsec < y->tv_nsec) {
-        int nsec = (y->tv_nsec - x->tv_nsec) / 1000000000 + 1;
-        y->tv_nsec -= 1000000000 * nsec;
-        y->tv_sec += nsec;
-    }
-
-    if (x->tv_nsec - y->tv_nsec > 1000000000) {
-        int nsec = (x->tv_nsec - y->tv_nsec) / 1000000000;
-        y->tv_nsec += 1000000000 * nsec;
-        y->tv_sec -= nsec;
-    }
-
-    /* Compute the time remaining to wait. tv_nsec is certainly positive. */
-    result->tv_sec = x->tv_sec - y->tv_sec;
-    result->tv_nsec = x->tv_nsec - y->tv_nsec;
-
-    /* Return 1 if result is negative. */
-    return x->tv_sec < y->tv_sec;
-}
-
-
-struct timespec add_msec_to_timespec(struct timespec ts, int msec) {
+struct timespec AddMsecToTimespec(struct timespec ts, int msec) {
     ts.tv_sec += msec / 1000;
     ts.tv_nsec += (msec % 1000) * 1000000;
 
@@ -294,44 +83,7 @@ struct timespec add_msec_to_timespec(struct timespec ts, int msec) {
     return ts;
 }
 
-
-bool align_with_existing_timeouts(Timeout* t) {
-    for (auto const& t2 : timeout_list) {
-        if (t2->interval_msec > 0) {
-            if (t->interval_msec % t2->interval_msec == 0
-                || t2->interval_msec % t->interval_msec == 0) {
-                if (!t->multi_timeout && !t2->multi_timeout) {
-                    // both timeouts can be aligned, but there is no multi timeout for them
-                    create_multi_timeout(t, t2);
-                } else {
-                    // there is already a multi timeout, so we append the new timeout to the multi timeout
-                    append_multi_timeout(t, t2);
-                }
-
-                return true;
-            }
-        }
-    }
-
-    return false;
-}
-
-
-int calc_multi_timeout_interval(MultiTimeoutHandler* mth) {
-    auto const& front = mth->timeout_list.front();
-    int min_interval = front->interval_msec;
-
-    for (auto const& t : mth->timeout_list) {
-        if (t->interval_msec < min_interval) {
-            min_interval = t->interval_msec;
-        }
-    }
-
-    return min_interval;
-}
-
-
-void create_multi_timeout(Timeout* t1, Timeout* t2) {
+void CreateMultiTimeout(Timeout* t1, Timeout* t2) {
     auto mt1 = new MultiTimeout();
     auto mt2 = new MultiTimeout();
     auto real_timeout = new Timeout();
@@ -356,11 +108,10 @@ void create_multi_timeout(Timeout* t1, Timeout* t2) {
     timeout_list.erase(std::remove(timeout_list.begin(), timeout_list.end(), t2),
                        timeout_list.end());
 
-    update_multi_timeout_values(mth);
+    UpdateMultiTimeoutValues(mth);
 }
 
-
-void append_multi_timeout(Timeout* t1, Timeout* t2) {
+void AppendMultiTimeout(Timeout* t1, Timeout* t2) {
     if (t2->multi_timeout) {
         // swap t1 and t2 such that t1 is the multi timeout
         auto tmp = t2;
@@ -373,12 +124,111 @@ void append_multi_timeout(Timeout* t1, Timeout* t2) {
     multi_timeouts.insert(std::make_pair(t2, mth));
     t2->multi_timeout = new MultiTimeout();
 
-    update_multi_timeout_values(mth);
+    UpdateMultiTimeoutValues(mth);
 }
 
+bool AlignWithExistingTimeouts(Timeout* t) {
+    for (auto const& t2 : timeout_list) {
+        if (t2->interval_msec > 0) {
+            if (t->interval_msec % t2->interval_msec == 0
+                || t2->interval_msec % t->interval_msec == 0) {
+                if (!t->multi_timeout && !t2->multi_timeout) {
+                    // both timeouts can be aligned, but there is no multi timeout for them
+                    CreateMultiTimeout(t, t2);
+                } else {
+                    // there is already a multi timeout, so we append the new timeout to the multi timeout
+                    AppendMultiTimeout(t, t2);
+                }
 
-void update_multi_timeout_values(MultiTimeoutHandler* mth) {
-    int interval = calc_multi_timeout_interval(mth);
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+void AddTimeoutInternal(int value_msec, int interval_msec,
+                        void(*_callback)(void*), void* arg, Timeout* t) {
+    t->interval_msec = interval_msec;
+    t->_callback = _callback;
+    t->arg = arg;
+    struct timespec cur_time;
+    clock_gettime(CLOCK_MONOTONIC, &cur_time);
+    t->timeout_expires = AddMsecToTimespec(cur_time, value_msec);
+
+    bool can_align = false;
+
+    if (interval_msec > 0 && t->multi_timeout == nullptr) {
+        can_align = AlignWithExistingTimeouts(t);
+    }
+
+    if (!can_align) {
+        auto it = std::lower_bound(
+                      timeout_list.begin(),
+                      timeout_list.end(),
+                      t,
+        [](Timeout * t1, Timeout * t2) {
+            return CompareTimeouts(t1, t2);
+        });
+        timeout_list.insert(it, t);
+    }
+}
+
+int TimespecSubtract(struct timespec* result, struct timespec* x,
+                     struct timespec* y) {
+    /* Perform the carry for the later subtraction by updating y. */
+    if (x->tv_nsec < y->tv_nsec) {
+        int nsec = (y->tv_nsec - x->tv_nsec) / 1000000000 + 1;
+        y->tv_nsec -= 1000000000 * nsec;
+        y->tv_sec += nsec;
+    }
+
+    if (x->tv_nsec - y->tv_nsec > 1000000000) {
+        int nsec = (x->tv_nsec - y->tv_nsec) / 1000000000;
+        y->tv_nsec += 1000000000 * nsec;
+        y->tv_sec -= nsec;
+    }
+
+    /* Compute the time remaining to wait. tv_nsec is certainly positive. */
+    result->tv_sec = x->tv_sec - y->tv_sec;
+    result->tv_nsec = x->tv_nsec - y->tv_nsec;
+
+    /* Return 1 if result is negative. */
+    return x->tv_sec < y->tv_sec;
+}
+
+int CalcMultiTimeoutInterval(MultiTimeoutHandler* mth) {
+    auto const& front = mth->timeout_list.front();
+    int min_interval = front->interval_msec;
+
+    for (auto const& t : mth->timeout_list) {
+        if (t->interval_msec < min_interval) {
+            min_interval = t->interval_msec;
+        }
+    }
+
+    return min_interval;
+}
+
+void CallbackMultiTimeout(void* arg) {
+    auto mth = static_cast<MultiTimeoutHandler*>(arg);
+
+    struct timespec cur_time;
+    clock_gettime(CLOCK_MONOTONIC, &cur_time);
+
+    for (auto& t : mth->timeout_list) {
+        if (++t->multi_timeout->current_count >=
+            t->multi_timeout->count_to_expiration) {
+            t->_callback(t->arg);
+            t->multi_timeout->current_count = 0;
+            t->timeout_expires = AddMsecToTimespec(cur_time, t->interval_msec);
+        }
+    }
+}
+
+void UpdateMultiTimeoutValues(MultiTimeoutHandler* mth) {
+    int interval = CalcMultiTimeoutInterval(mth);
     int next_timeout_msec = interval;
 
     struct timespec cur_time;
@@ -388,7 +238,7 @@ void update_multi_timeout_values(MultiTimeoutHandler* mth) {
         t->multi_timeout->count_to_expiration = t->interval_msec / interval;
 
         struct timespec diff_time;
-        timespec_subtract(&diff_time, &t->timeout_expires, &cur_time);
+        TimespecSubtract(&diff_time, &t->timeout_expires, &cur_time);
 
         int msec_to_expiration = diff_time.tv_sec * 1000 + diff_time.tv_nsec / 1000000;
         int count_left = msec_to_expiration / interval + (msec_to_expiration % interval
@@ -404,29 +254,11 @@ void update_multi_timeout_values(MultiTimeoutHandler* mth) {
     mth->parent_timeout->interval_msec = interval;
     timeout_list.erase(std::remove(timeout_list.begin(), timeout_list.end(),
                                    mth->parent_timeout), timeout_list.end());
-    add_timeout_intern(next_timeout_msec, interval, callback_multi_timeout, mth,
+    AddTimeoutInternal(next_timeout_msec, interval, CallbackMultiTimeout, mth,
                        mth->parent_timeout);
 }
 
-
-void callback_multi_timeout(void* arg) {
-    auto mth = static_cast<MultiTimeoutHandler*>(arg);
-
-    struct timespec cur_time;
-    clock_gettime(CLOCK_MONOTONIC, &cur_time);
-
-    for (auto& t : mth->timeout_list) {
-        if (++t->multi_timeout->current_count >=
-            t->multi_timeout->count_to_expiration) {
-            t->_callback(t->arg);
-            t->multi_timeout->current_count = 0;
-            t->timeout_expires = add_msec_to_timespec(cur_time, t->interval_msec);
-        }
-    }
-}
-
-
-void remove_from_multi_timeout(Timeout* t) {
+void RemoveFromMultiTimeout(Timeout* t) {
     auto mth = multi_timeouts[t];
 
     multi_timeouts.erase(t);
@@ -445,22 +277,21 @@ void remove_from_multi_timeout(Timeout* t) {
         multi_timeouts.erase(last_timeout);
         multi_timeouts.erase(mth->parent_timeout);
         mth->parent_timeout->multi_timeout = nullptr;
-        stop_timeout(mth->parent_timeout);
+        StopTimeout(mth->parent_timeout);
         delete mth;
 
         struct timespec cur_time, diff_time;
         clock_gettime(CLOCK_MONOTONIC, &cur_time);
-        timespec_subtract(&diff_time, &t->timeout_expires, &cur_time);
+        TimespecSubtract(&diff_time, &t->timeout_expires, &cur_time);
         int msec_to_expiration = diff_time.tv_sec * 1000 + diff_time.tv_nsec / 1000000;
-        add_timeout_intern(msec_to_expiration, last_timeout->interval_msec,
+        AddTimeoutInternal(msec_to_expiration, last_timeout->interval_msec,
                            last_timeout->_callback, last_timeout->arg, last_timeout);
     } else {
-        update_multi_timeout_values(mth);
+        UpdateMultiTimeoutValues(mth);
     }
 }
 
-
-void stop_multi_timeout(Timeout* t) {
+void StopMultiTimeout(Timeout* t) {
     auto mth = multi_timeouts[t];
     multi_timeouts.erase(mth->parent_timeout);
 
@@ -473,4 +304,148 @@ void stop_multi_timeout(Timeout* t) {
     }
 
     delete mth;
+}
+
+} // namespace
+
+void DefaultTimeout() {
+    timeout_list.clear();
+    multi_timeouts.clear();
+}
+
+void CleanupTimeout() {
+    for (auto const& t : timeout_list) {
+        if (t->multi_timeout) {
+            StopMultiTimeout(t);
+        }
+
+        timeout_list.erase(std::remove(timeout_list.begin(), timeout_list.end(), t),
+                           timeout_list.end());
+        delete t;
+    }
+
+    multi_timeouts.clear();
+}
+
+/** Implementation notes for timeouts: The timeouts are kept in a GSList sorted by their
+    * expiration time.
+    * That means that update_next_timeout() only have to consider the first timeout in the list,
+    * and callback_timeout_expired() only have to consider the timeouts as long as the expiration time
+    * is in the past to the current time.
+    * As time measurement we use clock_gettime(CLOCK_MONOTONIC) because this refers to a timer, which
+    * reference point lies somewhere in the past and cannot be changed, but just queried.
+    * If a single shot timer is installed it will be automatically deleted. I.e. the returned value
+    * of add_timeout will not be valid anymore. You do not need to call stop_timeout for these timeouts,
+    * however it's save to call it.
+**/
+
+Timeout* AddTimeout(int value_msec, int interval_msec,
+                    void (*_callback)(void*), void* arg) {
+    auto t = new Timeout();
+    t->multi_timeout = 0;
+    AddTimeoutInternal(value_msec, interval_msec, _callback, arg, t);
+    return t;
+}
+
+
+void ChangeTimeout(Timeout* t, int value_msec, int interval_msec,
+                   void (*_callback)(void*), void* arg) {
+    auto timeout_it = std::find(timeout_list.begin(),
+                                timeout_list.end(),
+                                t);
+    bool has_timeout = (timeout_it != timeout_list.end());
+    bool has_multi_timeout = (multi_timeouts.find(t) != multi_timeouts.end());
+
+    if (!has_timeout && !has_multi_timeout) {
+        printf("programming error: timeout already deleted...");
+        return;
+    }
+
+    if (t->multi_timeout) {
+        RemoveFromMultiTimeout(t);
+    } else {
+        timeout_list.erase(timeout_it);
+    }
+
+    AddTimeoutInternal(value_msec, interval_msec, _callback, arg, t);
+}
+
+
+void UpdateNextTimeout() {
+    if (!timeout_list.empty()) {
+        auto t = timeout_list.front();
+
+        struct timespec next_timeout2 = {
+            .tv_sec = next_timeout.tv_sec,
+            .tv_nsec = next_timeout.tv_usec * 1000
+        };
+
+        struct timespec cur_time;
+        clock_gettime(CLOCK_MONOTONIC, &cur_time);
+
+        if (TimespecSubtract(&next_timeout2, &t->timeout_expires, &cur_time)) {
+            next_timeout.tv_sec = 0;
+            next_timeout.tv_usec = 0;
+        } else {
+            next_timeout.tv_sec = next_timeout2.tv_sec;
+            next_timeout.tv_usec = next_timeout2.tv_nsec / 1000;
+        }
+    } else {
+        next_timeout.tv_sec = -1;
+    }
+}
+
+
+void CallbackTimeoutExpired() {
+    auto it = timeout_list.begin();
+
+    while (it != timeout_list.end()) {
+        auto t = (*it);
+
+        struct timespec cur_time;
+        clock_gettime(CLOCK_MONOTONIC, &cur_time);
+
+        if (CompareTimespecs(t->timeout_expires, cur_time) > 0) {
+            return;
+        }
+
+        // it's time for the callback function
+        t->_callback(t->arg);
+
+        auto pos = std::find(timeout_list.begin(), timeout_list.end(), t);
+
+        // if _callback() calls stop_timeout(t) the timeout 't' was freed and is not in the timeout_list
+        // FIXME: make all of this less ugly
+        if (pos == timeout_list.end()) {
+            ++it;
+        } else {
+            it = timeout_list.erase(pos);
+
+            if (t->interval_msec > 0) {
+                AddTimeoutInternal(t->interval_msec, t->interval_msec, t->_callback, t->arg, t);
+            } else {
+                delete t;
+            }
+        }
+    }
+}
+
+
+void StopTimeout(Timeout* t) {
+    bool has_timeout = (std::find(timeout_list.begin(),
+                                  timeout_list.end(),
+                                  t) != timeout_list.end());
+    bool has_multi_timeout = (multi_timeouts.find(t) != multi_timeouts.end());
+
+    // if not in the list, it was deleted in callback_timeout_expired
+    if (has_timeout || has_multi_timeout) {
+        if (t->multi_timeout) {
+            RemoveFromMultiTimeout(t);
+        }
+
+        timeout_list.erase(std::remove(timeout_list.begin(),
+                                       timeout_list.end(),
+                                       t), timeout_list.end());
+        delete t;
+    }
 }

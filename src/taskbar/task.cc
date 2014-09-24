@@ -717,7 +717,7 @@ void add_urgent(Task* tsk) {
         urgent_list.push_front(tsk);
 
         if (urgent_timeout == 0) {
-            urgent_timeout = add_timeout(10, 1000, blink_urgent, 0);
+            urgent_timeout = AddTimeout(10, 1000, blink_urgent, 0);
         }
     }
 }
@@ -728,7 +728,7 @@ void del_urgent(Task* tsk) {
                       urgent_list.end());
 
     if (urgent_list.empty()) {
-        stop_timeout(urgent_timeout);
+        StopTimeout(urgent_timeout);
         urgent_timeout = 0;
     }
 }

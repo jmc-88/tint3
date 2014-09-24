@@ -77,7 +77,7 @@ void CleanupClock() {
     }
 
     if (clock_timeout) {
-        stop_timeout(clock_timeout);
+        StopTimeout(clock_timeout);
     }
 
     time1_format.clear();
@@ -158,9 +158,9 @@ void InitClock() {
                               || time1_format.find('r') != std::string::npos;
 
     if (has_seconds_format) {
-        clock_timeout = add_timeout(10, 1000, UpdateClockSeconds, 0);
+        clock_timeout = AddTimeout(10, 1000, UpdateClockSeconds, 0);
     } else {
-        clock_timeout = add_timeout(10, 1000, UpdateClockMinutes, 0);
+        clock_timeout = AddTimeout(10, 1000, UpdateClockMinutes, 0);
     }
 }
 
@@ -279,7 +279,7 @@ bool Clock::Resize() {
 }
 
 
-void clock_action(int button) {
+void ClockAction(int button) {
     if (button == 1) {
         TintExec(clock_lclick_command);
     } else if (button == 2) {

@@ -29,12 +29,40 @@
 
 static int x, y, width, height;
 
-// the next functions are helper functions for tooltip handling
-void start_show_timeout();
-void start_hide_timeout();
-void stop_tooltip_timeout();
-
 Tooltip g_tooltip;
+
+namespace {
+
+void StartShowTimeout() {
+    if (g_tooltip.timeout) {
+        ChangeTimeout(g_tooltip.timeout, g_tooltip.show_timeout_msec, 0, TooltipShow,
+                      0);
+    } else {
+        g_tooltip.timeout = AddTimeout(g_tooltip.show_timeout_msec, 0, TooltipShow,
+                                       0);
+    }
+}
+
+
+void StartHideTimeout() {
+    if (g_tooltip.timeout) {
+        ChangeTimeout(g_tooltip.timeout, g_tooltip.hide_timeout_msec, 0, TooltipHide,
+                      0);
+    } else {
+        g_tooltip.timeout = AddTimeout(g_tooltip.hide_timeout_msec, 0, TooltipHide,
+                                       0);
+    }
+}
+
+
+void StopTooltipTimeout() {
+    if (g_tooltip.timeout) {
+        StopTimeout(g_tooltip.timeout);
+        g_tooltip.timeout = 0;
+    }
+}
+
+} // namespace
 
 
 void DefaultTooltip() {
@@ -47,7 +75,7 @@ void DefaultTooltip() {
 }
 
 void CleanupTooltip() {
-    stop_tooltip_timeout();
+    StopTooltipTimeout();
     TooltipHide(0);
     TooltipCopyText(0);
 
@@ -102,9 +130,9 @@ void TooltipTriggerShow(Area* area, Panel* p, XEvent* e) {
     if (g_tooltip.mapped && g_tooltip.area != area) {
         TooltipCopyText(area);
         TooltipUpdate();
-        stop_tooltip_timeout();
+        StopTooltipTimeout();
     } else if (!g_tooltip.mapped) {
-        start_show_timeout();
+        StartShowTimeout();
     }
 }
 
@@ -122,7 +150,7 @@ void TooltipShow(void* arg) {
     }
 
     area = g_tooltip.panel->ClickArea(mx, my);
-    stop_tooltip_timeout();
+    StopTooltipTimeout();
 
     if (!g_tooltip.mapped) {
         TooltipCopyText(area);
@@ -293,51 +321,21 @@ void TooltipUpdate() {
 void TooltipTriggerHide() {
     if (g_tooltip.mapped) {
         TooltipCopyText(0);
-        start_hide_timeout();
+        StartHideTimeout();
     } else {
         // tooltip not visible yet, but maybe a timeout is still pending
-        stop_tooltip_timeout();
+        StopTooltipTimeout();
     }
 }
 
 
 void TooltipHide(void* arg) {
-    stop_tooltip_timeout();
+    StopTooltipTimeout();
 
     if (g_tooltip.mapped) {
         g_tooltip.mapped = False;
         XUnmapWindow(server.dsp, g_tooltip.window);
         XFlush(server.dsp);
-    }
-}
-
-
-void start_show_timeout() {
-    if (g_tooltip.timeout) {
-        change_timeout(g_tooltip.timeout, g_tooltip.show_timeout_msec, 0, TooltipShow,
-                       0);
-    } else {
-        g_tooltip.timeout = add_timeout(g_tooltip.show_timeout_msec, 0, TooltipShow,
-                                        0);
-    }
-}
-
-
-void start_hide_timeout() {
-    if (g_tooltip.timeout) {
-        change_timeout(g_tooltip.timeout, g_tooltip.hide_timeout_msec, 0, TooltipHide,
-                       0);
-    } else {
-        g_tooltip.timeout = add_timeout(g_tooltip.hide_timeout_msec, 0, TooltipHide,
-                                        0);
-    }
-}
-
-
-void stop_tooltip_timeout() {
-    if (g_tooltip.timeout) {
-        stop_timeout(g_tooltip.timeout);
-        g_tooltip.timeout = 0;
     }
 }
 
