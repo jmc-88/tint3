@@ -69,29 +69,25 @@ static int new_config_file;
 
 namespace {
 
-void GetAction(char* event, int* action) {
-    if (strcmp(event, "none") == 0) {
-        *action = NONE;
-    } else if (strcmp(event, "close") == 0) {
-        *action = CLOSE;
-    } else if (strcmp(event, "toggle") == 0) {
-        *action = TOGGLE;
-    } else if (strcmp(event, "iconify") == 0) {
-        *action = ICONIFY;
-    } else if (strcmp(event, "shade") == 0) {
-        *action = SHADE;
-    } else if (strcmp(event, "toggle_iconify") == 0) {
-        *action = TOGGLE_ICONIFY;
-    } else if (strcmp(event, "maximize_restore") == 0) {
-        *action = MAXIMIZE_RESTORE;
-    } else if (strcmp(event, "desktop_left") == 0) {
-        *action = DESKTOP_LEFT;
-    } else if (strcmp(event, "desktop_right") == 0) {
-        *action = DESKTOP_RIGHT;
-    } else if (strcmp(event, "next_task") == 0) {
-        *action = NEXT_TASK;
-    } else if (strcmp(event, "prev_task") == 0) {
-        *action = PREV_TASK;
+void GetAction(std::string const& event, int* action) {
+    static std::map<std::string, MouseActionEnum> eventmap = {
+        {"none", NONE},
+        {"close", CLOSE},
+        {"toggle", TOGGLE},
+        {"iconify", ICONIFY},
+        {"shade", SHADE},
+        {"toggle_iconify", TOGGLE_ICONIFY},
+        {"maximize_restore", MAXIMIZE_RESTORE},
+        {"desktop_left", DESKTOP_LEFT},
+        {"desktop_right", DESKTOP_RIGHT},
+        {"next_task", NEXT_TASK},
+        {"prev_task", PREV_TASK},
+    };
+
+    auto const& it = eventmap.find(event);
+
+    if (it != eventmap.end()) {
+        (*action) = it->second;
     }
 }
 
@@ -112,23 +108,23 @@ int GetTaskStatus(char* status) {
     return TASK_NORMAL;
 }
 
-int ConfigGetMonitor(char* monitor) {
-    if (strcmp(monitor, "all") != 0) {
+int ConfigGetMonitor(std::string const& monitor) {
+    if (monitor != "all") {
         char* endptr;
-        int ret_int = strtol(monitor, &endptr, 10);
+        int ret_int = StringToLongInt(monitor, &endptr);
 
-        if (*endptr == 0) {
-            return ret_int - 1;
+        if (*endptr == '\0') {
+            return (ret_int - 1);
         } else {
             // monitor specified by name, not by index
             for (int i = 0; i < server.nb_monitor; ++i) {
-                if (server.monitor[i].names == 0) {
+                if (server.monitor[i].names == nullptr) {
                     // xrandr can't identify monitors
                     continue;
                 }
 
-                for (int j = 0; server.monitor[i].names[j] != 0; ++j) {
-                    if (strcmp(monitor, server.monitor[i].names[j]) == 0) {
+                for (int j = 0; server.monitor[i].names[j] != nullptr; ++j) {
+                    if (monitor == server.monitor[i].names[j]) {
                         return i;
                     }
                 }
@@ -162,38 +158,34 @@ Background* GetBackgroundFromId(size_t id) {
     }
 }
 
-Background* GetBackgroundFromId(char const* id) {
-    return GetBackgroundFromId(atoi(id));
-}
-
-void AddEntry(std::string const& key, char* value) {
-    char* value1 = 0, *value2 = 0, *value3 = 0;
+void AddEntry(std::string const& key, std::string const& value) {
+    std::string value1, value2, value3;
 
     /* Background and border */
     if (key == "rounded") {
         // 'rounded' is the first parameter => alloc a new background
         auto bg = new Background();
-        bg->border.rounded = atoi(value);
+        bg->border.rounded = StringToLongInt(value);
         backgrounds.push_back(bg);
     } else if (key == "border_width") {
-        backgrounds.back()->border.width = atoi(value);
+        backgrounds.back()->border.width = StringToLongInt(value);
     } else if (key == "background_color") {
         auto bg = backgrounds.back();
-        ExtractValues(value, &value1, &value2, &value3);
+        ExtractValues(value, value1, value2, value3);
         GetColor(value1, bg->back.color);
 
-        if (value2) {
-            bg->back.alpha = (atoi(value2) / 100.0);
+        if (!value2.empty()) {
+            bg->back.alpha = (StringToLongInt(value2) / 100.0);
         } else {
             bg->back.alpha = 0.5;
         }
     } else if (key == "border_color") {
         auto bg = backgrounds.back();
-        ExtractValues(value, &value1, &value2, &value3);
+        ExtractValues(value, value1, value2, value3);
         GetColor(value1, bg->border.color);
 
-        if (value2) {
-            bg->border.alpha = (atoi(value2) / 100.0);
+        if (!value2.empty()) {
+            bg->border.alpha = (StringToLongInt(value2) / 100.0);
         } else {
             bg->border.alpha = 0.5;
         }
@@ -203,16 +195,16 @@ void AddEntry(std::string const& key, char* value) {
     else if (key == "panel_monitor") {
         panel_config.monitor = ConfigGetMonitor(value);
     } else if (key == "panel_size") {
-        ExtractValues(value, &value1, &value2, &value3);
+        ExtractValues(value, value1, value2, value3);
 
-        char* b;
+        size_t b = value1.find_first_of('%');
 
-        if ((b = strchr(value1, '%'))) {
-            b[0] = '\0';
+        if (b != std::string::npos) {
+            b = (b - 1);  // don't parse the '%' character
             panel_config.percent_x = 1;
         }
 
-        panel_config.width = atoi(value1);
+        panel_config.width = StringToLongInt(value1.substr(0, b));
 
         if (panel_config.width == 0) {
             // full width mode
@@ -220,13 +212,15 @@ void AddEntry(std::string const& key, char* value) {
             panel_config.percent_x = 1;
         }
 
-        if (value2) {
-            if ((b = strchr(value2, '%'))) {
-                b[0] = '\0';
+        if (!value2.empty()) {
+            b = value2.find_first_of('%');
+
+            if (b != std::string::npos) {
+                b = (b - 1);  // don't parse the '%' character
                 panel_config.percent_y = 1;
             }
 
-            panel_config.height = atoi(value2);
+            panel_config.height = StringToLongInt(value2.substr(0, b));
         }
     } else if (key == "panel_items") {
         new_config_file = 1;
@@ -261,73 +255,57 @@ void AddEntry(std::string const& key, char* value) {
             }
         }
     } else if (key == "panel_margin") {
-        ExtractValues(value, &value1, &value2, &value3);
-        panel_config.marginx = atoi(value1);
+        ExtractValues(value, value1, value2, value3);
+        panel_config.marginx = StringToLongInt(value1);
 
-        if (value2) {
-            panel_config.marginy = atoi(value2);
+        if (!value2.empty()) {
+            panel_config.marginy = StringToLongInt(value2);
         }
     } else if (key == "panel_padding") {
-        ExtractValues(value, &value1, &value2, &value3);
-        panel_config.paddingxlr = panel_config.paddingx = atoi(value1);
+        ExtractValues(value, value1, value2, value3);
+        panel_config.paddingxlr = panel_config.paddingx = StringToLongInt(value1);
 
-        if (value2) {
-            panel_config.paddingy = atoi(value2);
+        if (!value2.empty()) {
+            panel_config.paddingy = StringToLongInt(value2);
         }
 
-        if (value3) {
-            panel_config.paddingx = atoi(value3);
+        if (!value3.empty()) {
+            panel_config.paddingx = StringToLongInt(value3);
         }
     } else if (key == "panel_position") {
-        ExtractValues(value, &value1, &value2, &value3);
+        ExtractValues(value, value1, value2, value3);
 
-        if (strcmp(value1, "top") == 0) {
+        if (value1 == "top") {
             panel_position = TOP;
+        } else if (value1 == "bottom") {
+            panel_position = BOTTOM;
         } else {
-            if (strcmp(value1, "bottom") == 0) {
-                panel_position = BOTTOM;
-            } else {
-                panel_position = CENTER;
-            }
+            panel_position = CENTER;
         }
 
-        if (!value2) {
+        if (value2 == "left") {
+            panel_position |= LEFT;
+        } else if (value2 == "right") {
+            panel_position |= RIGHT;
+        } else {
             panel_position |= CENTER;
-        } else {
-            if (strcmp(value2, "left") == 0) {
-                panel_position |= LEFT;
-            } else {
-                if (strcmp(value2, "right") == 0) {
-                    panel_position |= RIGHT;
-                } else {
-                    panel_position |= CENTER;
-                }
-            }
         }
 
-        if (!value3) {
-            panel_horizontal = 1;
-        } else {
-            if (strcmp(value3, "vertical") == 0) {
-                panel_horizontal = 0;
-            } else {
-                panel_horizontal = 1;
-            }
-        }
+        panel_horizontal = (value3 == "vertical");
     } else if (key == "font_shadow") {
-        panel_config.g_task.font_shadow = atoi(value);
+        panel_config.g_task.font_shadow = StringToLongInt(value);
     } else if (key == "panel_background_id") {
-        panel_config.bg = GetBackgroundFromId(value);
+        panel_config.bg = GetBackgroundFromId(StringToLongInt(value));
     } else if (key == "wm_menu") {
-        wm_menu = atoi(value);
+        wm_menu = StringToLongInt(value);
     } else if (key == "panel_dock") {
-        panel_dock = atoi(value);
+        panel_dock = StringToLongInt(value);
     } else if (key == "urgent_nb_of_blink") {
-        max_tick_urgent = atoi(value);
+        max_tick_urgent = StringToLongInt(value);
     } else if (key == "panel_layer") {
-        if (strcmp(value, "bottom") == 0) {
+        if (value == "bottom") {
             panel_layer = BOTTOM_LAYER;
-        } else if (strcmp(value, "top") == 0) {
+        } else if (value == "top") {
             panel_layer = TOP_LAYER;
         } else {
             panel_layer = NORMAL_LAYER;
@@ -337,7 +315,7 @@ void AddEntry(std::string const& key, char* value) {
     /* Battery */
     else if (key == "battery_low_status") {
 #ifdef ENABLE_BATTERY
-        battery_low_status = atoi(value);
+        battery_low_status = StringToLongInt(value);
 
         if (battery_low_status < 0 || battery_low_status > 100) {
             battery_low_status = 0;
@@ -347,26 +325,26 @@ void AddEntry(std::string const& key, char* value) {
     } else if (key == "battery_low_cmd") {
 #ifdef ENABLE_BATTERY
 
-        if (*value != '\0') {
+        if (!value.empty()) {
             battery_low_cmd = value;
         }
 
 #endif
     } else if (key == "bat1_font") {
 #ifdef ENABLE_BATTERY
-        bat1_font_desc = pango_font_description_from_string(value);
+        bat1_font_desc = pango_font_description_from_string(value.c_str());
 #endif
     } else if (key == "bat2_font") {
 #ifdef ENABLE_BATTERY
-        bat2_font_desc = pango_font_description_from_string(value);
+        bat2_font_desc = pango_font_description_from_string(value.c_str());
 #endif
     } else if (key == "battery_font_color") {
 #ifdef ENABLE_BATTERY
-        ExtractValues(value, &value1, &value2, &value3);
+        ExtractValues(value, value1, value2, value3);
         GetColor(value1, panel_config.battery.font.color);
 
-        if (value2) {
-            panel_config.battery.font.alpha = (atoi(value2) / 100.0);
+        if (!value2.empty()) {
+            panel_config.battery.font.alpha = (StringToLongInt(value2) / 100.0);
         } else {
             panel_config.battery.font.alpha = 0.5;
         }
@@ -374,26 +352,26 @@ void AddEntry(std::string const& key, char* value) {
 #endif
     } else if (key == "battery_padding") {
 #ifdef ENABLE_BATTERY
-        ExtractValues(value, &value1, &value2, &value3);
+        ExtractValues(value, value1, value2, value3);
         panel_config.battery.paddingxlr = panel_config.battery.paddingx =
-                                              atoi(value1);
+                                              StringToLongInt(value1);
 
-        if (value2) {
-            panel_config.battery.paddingy = atoi(value2);
+        if (!value2.empty()) {
+            panel_config.battery.paddingy = StringToLongInt(value2);
         }
 
-        if (value3) {
-            panel_config.battery.paddingx = atoi(value3);
+        if (!value3.empty()) {
+            panel_config.battery.paddingx = StringToLongInt(value3);
         }
 
 #endif
     } else if (key == "battery_background_id") {
 #ifdef ENABLE_BATTERY
-        panel_config.battery.bg = GetBackgroundFromId(value);
+        panel_config.battery.bg = GetBackgroundFromId(StringToLongInt(value));
 #endif
     } else if (key == "battery_hide") {
 #ifdef ENABLE_BATTERY
-        percentage_hide = atoi(value);
+        percentage_hide = StringToLongInt(value);
 
         if (percentage_hide == 0) {
             percentage_hide = 101;
@@ -409,89 +387,89 @@ void AddEntry(std::string const& key, char* value) {
             panel_items_order.push_back('C');
         }
 
-        if (strlen(value) > 0) {
+        if (!value.empty()) {
             time1_format = value;
             clock_enabled = true;
         }
     } else if (key == "time2_format") {
-        if (strlen(value) > 0) {
+        if (!value.empty()) {
             time2_format = value;
         }
     } else if (key == "time1_font") {
-        time1_font_desc = pango_font_description_from_string(value);
+        time1_font_desc = pango_font_description_from_string(value.c_str());
     } else if (key == "time1_timezone") {
-        if (strlen(value) > 0) {
+        if (!value.empty()) {
             time1_timezone = value;
         }
     } else if (key == "time2_timezone") {
-        if (strlen(value) > 0) {
+        if (!value.empty()) {
             time2_timezone = value;
         }
     } else if (key == "time2_font") {
-        time2_font_desc = pango_font_description_from_string(value);
+        time2_font_desc = pango_font_description_from_string(value.c_str());
     } else if (key == "clock_font_color") {
-        ExtractValues(value, &value1, &value2, &value3);
+        ExtractValues(value, value1, value2, value3);
         GetColor(value1, panel_config.clock.font.color);
 
-        if (value2) {
-            panel_config.clock.font.alpha = (atoi(value2) / 100.0);
+        if (!value2.empty()) {
+            panel_config.clock.font.alpha = (StringToLongInt(value2) / 100.0);
         } else {
             panel_config.clock.font.alpha = 0.5;
         }
     } else if (key == "clock_padding") {
-        ExtractValues(value, &value1, &value2, &value3);
-        panel_config.clock.paddingxlr = panel_config.clock.paddingx = atoi(
+        ExtractValues(value, value1, value2, value3);
+        panel_config.clock.paddingxlr = panel_config.clock.paddingx = StringToLongInt(
                                             value1);
 
-        if (value2) {
-            panel_config.clock.paddingy = atoi(value2);
+        if (!value2.empty()) {
+            panel_config.clock.paddingy = StringToLongInt(value2);
         }
 
-        if (value3) {
-            panel_config.clock.paddingx = atoi(value3);
+        if (!value3.empty()) {
+            panel_config.clock.paddingx = StringToLongInt(value3);
         }
     } else if (key == "clock_background_id") {
-        panel_config.clock.bg = GetBackgroundFromId(value);
+        panel_config.clock.bg = GetBackgroundFromId(StringToLongInt(value));
     } else if (key == "clock_tooltip") {
-        if (strlen(value) > 0) {
+        if (!value.empty()) {
             time_tooltip_format = value;
         }
     } else if (key == "clock_tooltip_timezone") {
-        if (strlen(value) > 0) {
+        if (!value.empty()) {
             time_tooltip_timezone = value;
         }
     } else if (key == "clock_lclick_command") {
-        if (strlen(value) > 0) {
+        if (!value.empty()) {
             clock_lclick_command = value;
         }
     } else if (key == "clock_rclick_command") {
-        if (strlen(value) > 0) {
+        if (!value.empty()) {
             clock_rclick_command = value;
         }
     }
 
     /* Taskbar */
     else if (key == "taskbar_mode") {
-        if (strcmp(value, "multi_desktop") == 0) {
+        if (value == "multi_desktop") {
             panel_mode = MULTI_DESKTOP;
         } else {
             panel_mode = SINGLE_DESKTOP;
         }
     } else if (key == "taskbar_padding") {
-        ExtractValues(value, &value1, &value2, &value3);
+        ExtractValues(value, value1, value2, value3);
         panel_config.g_taskbar.paddingxlr = panel_config.g_taskbar.paddingx =
-                                                atoi(value1);
+                                                StringToLongInt(value1);
 
-        if (value2) {
-            panel_config.g_taskbar.paddingy = atoi(value2);
+        if (!value2.empty()) {
+            panel_config.g_taskbar.paddingy = StringToLongInt(value2);
         }
 
-        if (value3) {
-            panel_config.g_taskbar.paddingx = atoi(value3);
+        if (!value3.empty()) {
+            panel_config.g_taskbar.paddingx = StringToLongInt(value3);
         }
     } else if (key == "taskbar_background_id") {
         panel_config.g_taskbar.background[TASKBAR_NORMAL] = GetBackgroundFromId(
-                    value);
+                    StringToLongInt(value));
 
         if (panel_config.g_taskbar.background[TASKBAR_ACTIVE] == 0) {
             panel_config.g_taskbar.background[TASKBAR_ACTIVE] =
@@ -499,16 +477,16 @@ void AddEntry(std::string const& key, char* value) {
         }
     } else if (key == "taskbar_active_background_id") {
         panel_config.g_taskbar.background[TASKBAR_ACTIVE] = GetBackgroundFromId(
-                    value);
+                    StringToLongInt(value));
     } else if (key == "taskbar_name") {
-        taskbarname_enabled = atoi(value);
+        taskbarname_enabled = StringToLongInt(value);
     } else if (key == "taskbar_name_padding") {
-        ExtractValues(value, &value1, &value2, &value3);
+        ExtractValues(value, value1, value2, value3);
         panel_config.g_taskbar.area_name.paddingxlr =
-            panel_config.g_taskbar.area_name.paddingx = atoi(value1);
+            panel_config.g_taskbar.area_name.paddingx = StringToLongInt(value1);
     } else if (key == "taskbar_name_background_id") {
         panel_config.g_taskbar.background_name[TASKBAR_NORMAL] = GetBackgroundFromId(
-                    value);
+                    StringToLongInt(value));
 
         if (panel_config.g_taskbar.background_name[TASKBAR_ACTIVE] == 0) {
             panel_config.g_taskbar.background_name[TASKBAR_ACTIVE] =
@@ -516,24 +494,24 @@ void AddEntry(std::string const& key, char* value) {
         }
     } else if (key == "taskbar_name_active_background_id") {
         panel_config.g_taskbar.background_name[TASKBAR_ACTIVE] = GetBackgroundFromId(
-                    value);
+                    StringToLongInt(value));
     } else if (key == "taskbar_name_font") {
-        taskbarname_font_desc = pango_font_description_from_string(value);
+        taskbarname_font_desc = pango_font_description_from_string(value.c_str());
     } else if (key == "taskbar_name_font_color") {
-        ExtractValues(value, &value1, &value2, &value3);
+        ExtractValues(value, value1, value2, value3);
         GetColor(value1, taskbarname_font.color);
 
-        if (value2) {
-            taskbarname_font.alpha = (atoi(value2) / 100.0);
+        if (!value2.empty()) {
+            taskbarname_font.alpha = (StringToLongInt(value2) / 100.0);
         } else {
             taskbarname_font.alpha = 0.5;
         }
     } else if (key == "taskbar_name_active_font_color") {
-        ExtractValues(value, &value1, &value2, &value3);
+        ExtractValues(value, value1, value2, value3);
         GetColor(value1, taskbarname_active_font.color);
 
-        if (value2) {
-            taskbarname_active_font.alpha = (atoi(value2) / 100.0);
+        if (!value2.empty()) {
+            taskbarname_active_font.alpha = (StringToLongInt(value2) / 100.0);
         } else {
             taskbarname_active_font.alpha = 0.5;
         }
@@ -541,46 +519,47 @@ void AddEntry(std::string const& key, char* value) {
 
     /* Task */
     else if (key == "task_text") {
-        panel_config.g_task.text = atoi(value);
+        panel_config.g_task.text = StringToLongInt(value);
     } else if (key == "task_icon") {
-        panel_config.g_task.icon = atoi(value);
+        panel_config.g_task.icon = StringToLongInt(value);
     } else if (key == "task_centered") {
-        panel_config.g_task.centered = atoi(value);
+        panel_config.g_task.centered = StringToLongInt(value);
     } else if (key == "task_width") {
         // old parameter : just for backward compatibility
-        panel_config.g_task.maximum_width = atoi(value);
+        panel_config.g_task.maximum_width = StringToLongInt(value);
         panel_config.g_task.maximum_height = 30;
     } else if (key == "task_maximum_size") {
-        ExtractValues(value, &value1, &value2, &value3);
-        panel_config.g_task.maximum_width = atoi(value1);
+        ExtractValues(value, value1, value2, value3);
+        panel_config.g_task.maximum_width = StringToLongInt(value1);
         panel_config.g_task.maximum_height = 30;
 
-        if (value2) {
-            panel_config.g_task.maximum_height = atoi(value2);
+        if (!value2.empty()) {
+            panel_config.g_task.maximum_height = StringToLongInt(value2);
         }
     } else if (key == "task_padding") {
-        ExtractValues(value, &value1, &value2, &value3);
-        panel_config.g_task.paddingxlr = panel_config.g_task.paddingx = atoi(
+        ExtractValues(value, value1, value2, value3);
+        panel_config.g_task.paddingxlr = panel_config.g_task.paddingx = StringToLongInt(
                                              value1);
 
-        if (value2) {
-            panel_config.g_task.paddingy = atoi(value2);
+        if (!value2.empty()) {
+            panel_config.g_task.paddingy = StringToLongInt(value2);
         }
 
-        if (value3) {
-            panel_config.g_task.paddingx = atoi(value3);
+        if (!value3.empty()) {
+            panel_config.g_task.paddingx = StringToLongInt(value3);
         }
     } else if (key == "task_font") {
-        panel_config.g_task.font_desc = pango_font_description_from_string(value);
+        panel_config.g_task.font_desc = pango_font_description_from_string(
+                                            value.c_str());
     } else if (regex_match("task.*_font_color", key.c_str())) {
         gchar** split = regex_split("_", key.c_str());
         int status = GetTaskStatus(split[1]);
         g_strfreev(split);
-        ExtractValues(value, &value1, &value2, &value3);
+        ExtractValues(value, value1, value2, value3);
         float alpha = 1;
 
-        if (value2) {
-            alpha = (atoi(value2) / 100.0);
+        if (!value2.empty()) {
+            alpha = (StringToLongInt(value2) / 100.0);
         }
 
         GetColor(value1, panel_config.g_task.font[status].color);
@@ -590,16 +569,17 @@ void AddEntry(std::string const& key, char* value) {
         gchar** split = regex_split("_", key.c_str());
         int status = GetTaskStatus(split[1]);
         g_strfreev(split);
-        ExtractValues(value, &value1, &value2, &value3);
-        panel_config.g_task.alpha[status] = atoi(value1);
-        panel_config.g_task.saturation[status] = atoi(value2);
-        panel_config.g_task.brightness[status] = atoi(value3);
+        ExtractValues(value, value1, value2, value3);
+        panel_config.g_task.alpha[status] = StringToLongInt(value1);
+        panel_config.g_task.saturation[status] = StringToLongInt(value2);
+        panel_config.g_task.brightness[status] = StringToLongInt(value3);
         panel_config.g_task.config_asb_mask |= (1 << status);
     } else if (regex_match("task.*_background_id", key.c_str())) {
         gchar** split = regex_split("_", key.c_str());
         int status = GetTaskStatus(split[1]);
         g_strfreev(split);
-        panel_config.g_task.background[status] = GetBackgroundFromId(value);
+        panel_config.g_task.background[status] = GetBackgroundFromId(StringToLongInt(
+                    value));
         panel_config.g_task.config_background_mask |= (1 << status);
 
         if (status == TASK_NORMAL) {
@@ -608,7 +588,7 @@ void AddEntry(std::string const& key, char* value) {
     }
     // "tooltip" is deprecated but here for backwards compatibility
     else if (key == "task_tooltip" || key == "tooltip") {
-        panel_config.g_task.tooltip_enabled = atoi(value);
+        panel_config.g_task.tooltip_enabled = StringToLongInt(value);
     }
 
     /* Systray */
@@ -618,100 +598,102 @@ void AddEntry(std::string const& key, char* value) {
             panel_items_order.push_back('S');
         }
 
-        ExtractValues(value, &value1, &value2, &value3);
-        systray.paddingxlr = systray.paddingx = atoi(value1);
+        ExtractValues(value, value1, value2, value3);
+        systray.paddingxlr = systray.paddingx = StringToLongInt(value1);
 
-        if (value2) {
-            systray.paddingy = atoi(value2);
+        if (!value2.empty()) {
+            systray.paddingy = StringToLongInt(value2);
         }
 
-        if (value3) {
-            systray.paddingx = atoi(value3);
+        if (!value3.empty()) {
+            systray.paddingx = StringToLongInt(value3);
         }
     } else if (key == "systray_background_id") {
-        systray.bg = GetBackgroundFromId(value);
+        systray.bg = GetBackgroundFromId(StringToLongInt(value));
     } else if (key == "systray_sort") {
-        if (strcmp(value, "descending") == 0) {
+        if (value == "descending") {
             systray.sort = -1;
-        } else if (strcmp(value, "ascending") == 0) {
+        } else if (value == "ascending") {
             systray.sort = 1;
-        } else if (strcmp(value, "left2right") == 0) {
+        } else if (value == "left2right") {
             systray.sort = 2;
-        } else  if (strcmp(value, "right2left") == 0) {
+        } else  if (value == "right2left") {
             systray.sort = 3;
         }
     } else if (key == "systray_icon_size") {
-        systray_max_icon_size = atoi(value);
+        systray_max_icon_size = StringToLongInt(value);
     } else if (key == "systray_icon_asb") {
-        ExtractValues(value, &value1, &value2, &value3);
-        systray.alpha = atoi(value1);
-        systray.saturation = atoi(value2);
-        systray.brightness = atoi(value3);
+        ExtractValues(value, value1, value2, value3);
+        systray.alpha = StringToLongInt(value1);
+        systray.saturation = StringToLongInt(value2);
+        systray.brightness = StringToLongInt(value3);
     }
 
     /* Launcher */
     else if (key == "launcher_padding") {
-        ExtractValues(value, &value1, &value2, &value3);
+        ExtractValues(value, value1, value2, value3);
         panel_config.launcher.paddingxlr = panel_config.launcher.paddingx =
-                                               atoi(value1);
+                                               StringToLongInt(value1);
 
-        if (value2) {
-            panel_config.launcher.paddingy = atoi(value2);
+        if (!value2.empty()) {
+            panel_config.launcher.paddingy = StringToLongInt(value2);
         }
 
-        if (value3) {
-            panel_config.launcher.paddingx = atoi(value3);
+        if (!value3.empty()) {
+            panel_config.launcher.paddingx = StringToLongInt(value3);
         }
     } else if (key == "launcher_background_id") {
-        panel_config.launcher.bg = GetBackgroundFromId(value);
+        panel_config.launcher.bg = GetBackgroundFromId(StringToLongInt(value));
     } else if (key == "launcher_icon_size") {
-        launcher_max_icon_size = atoi(value);
+        launcher_max_icon_size = StringToLongInt(value);
     } else if (key == "launcher_item_app") {
-        panel_config.launcher.list_apps.push_back(value);
+        // FIXME: remove this strdup hack as soon as list_apps is a list of strings
+        // also, strdup might fail and needs more checking
+        panel_config.launcher.list_apps.push_back(strdup(value.c_str()));
     } else if (key == "launcher_icon_theme") {
         // if XSETTINGS manager running, tint3 use it.
         if (icon_theme_name.empty()) {
             icon_theme_name = value;
         }
     } else if (key == "launcher_icon_asb") {
-        ExtractValues(value, &value1, &value2, &value3);
-        launcher_alpha = atoi(value1);
-        launcher_saturation = atoi(value2);
-        launcher_brightness = atoi(value3);
+        ExtractValues(value, value1, value2, value3);
+        launcher_alpha = StringToLongInt(value1);
+        launcher_saturation = StringToLongInt(value2);
+        launcher_brightness = StringToLongInt(value3);
     } else if (key == "launcher_tooltip") {
-        launcher_tooltip_enabled = atoi(value);
+        launcher_tooltip_enabled = StringToLongInt(value);
     }
 
     /* Tooltip */
     else if (key == "tooltip_show_timeout") {
-        int timeout_msec = 1000 * atof(value);
+        int timeout_msec = 1000 * StringToFloat(value);
         g_tooltip.show_timeout_msec = timeout_msec;
     } else if (key == "tooltip_hide_timeout") {
-        int timeout_msec = 1000 * atof(value);
+        int timeout_msec = 1000 * StringToFloat(value);
         g_tooltip.hide_timeout_msec = timeout_msec;
     } else if (key == "tooltip_padding") {
-        ExtractValues(value, &value1, &value2, &value3);
+        ExtractValues(value, value1, value2, value3);
 
-        if (value1) {
-            g_tooltip.paddingx = atoi(value1);
+        if (!value1.empty()) {
+            g_tooltip.paddingx = StringToLongInt(value1);
         }
 
-        if (value2) {
-            g_tooltip.paddingy = atoi(value2);
+        if (!value2.empty()) {
+            g_tooltip.paddingy = StringToLongInt(value2);
         }
     } else if (key == "tooltip_background_id") {
-        g_tooltip.bg = GetBackgroundFromId(value);
+        g_tooltip.bg = GetBackgroundFromId(StringToLongInt(value));
     } else if (key == "tooltip_font_color") {
-        ExtractValues(value, &value1, &value2, &value3);
+        ExtractValues(value, value1, value2, value3);
         GetColor(value1, g_tooltip.font_color.color);
 
-        if (value2) {
-            g_tooltip.font_color.alpha = (atoi(value2) / 100.0);
+        if (!value2.empty()) {
+            g_tooltip.font_color.alpha = (StringToLongInt(value2) / 100.0);
         } else {
             g_tooltip.font_color.alpha = 0.1;
         }
     } else if (key == "tooltip_font") {
-        g_tooltip.font_desc = pango_font_description_from_string(value);
+        g_tooltip.font_desc = pango_font_description_from_string(value.c_str());
     }
 
     /* Mouse actions */
@@ -727,21 +709,21 @@ void AddEntry(std::string const& key, char* value) {
 
     /* autohide options */
     else if (key == "autohide") {
-        panel_autohide = atoi(value);
+        panel_autohide = StringToLongInt(value);
     } else if (key == "autohide_show_timeout") {
-        panel_autohide_show_timeout = 1000 * atof(value);
+        panel_autohide_show_timeout = 1000 * StringToFloat(value);
     } else if (key == "autohide_hide_timeout") {
-        panel_autohide_hide_timeout = 1000 * atof(value);
+        panel_autohide_hide_timeout = 1000 * StringToFloat(value);
     } else if (key == "strut_policy") {
-        if (strcmp(value, "follow_size") == 0) {
+        if (value == "follow_size") {
             panel_strut_policy = STRUT_FOLLOW_SIZE;
-        } else if (strcmp(value, "none") == 0) {
+        } else if (value == "none") {
             panel_strut_policy = STRUT_NONE;
         } else {
             panel_strut_policy = STRUT_MINIMUM;
         }
     } else if (key == "autohide_height") {
-        panel_autohide_height = atoi(value);
+        panel_autohide_height = StringToLongInt(value);
 
         if (panel_autohide_height == 0) {
             // autohide need height > 0
@@ -752,7 +734,7 @@ void AddEntry(std::string const& key, char* value) {
     // old config option
     else if (key == "systray") {
         if (new_config_file == 0) {
-            systray_enabled = atoi(value);
+            systray_enabled = StringToLongInt(value);
 
             if (systray_enabled) {
                 panel_items_order.push_back('S');
@@ -760,7 +742,7 @@ void AddEntry(std::string const& key, char* value) {
         }
     } else if (key == "battery") {
         if (new_config_file == 0) {
-            battery_enabled = atoi(value);
+            battery_enabled = StringToLongInt(value);
 
             if (battery_enabled) {
                 panel_items_order.push_back('B');
@@ -770,18 +752,6 @@ void AddEntry(std::string const& key, char* value) {
         std::cerr << "tint3: invalid option \""
                   << key
                   << "\", please upgrade tint3 or correct your configuration file.\n";
-    }
-
-    if (value1) {
-        free(value1);
-    }
-
-    if (value2) {
-        free(value2);
-    }
-
-    if (value3) {
-        free(value3);
     }
 }
 

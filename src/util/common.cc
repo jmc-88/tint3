@@ -22,12 +22,11 @@
 #include <X11/Xutil.h>
 #include <X11/Xatom.h>
 #include <X11/extensions/Xrender.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <unistd.h>
 
 #include <cctype>
+#include <cstdlib>
+#include <cstring>
 
 #include "common.h"
 #include "../server.h"
@@ -49,23 +48,21 @@ unsigned int HexCharToInt(char c) {
     return 0;
 }
 
-bool HexToRgb(char const* hex, unsigned int* r, unsigned int* g,
+bool HexToRgb(std::string const& hex, unsigned int* r, unsigned int* g,
               unsigned int* b) {
-    if (hex == nullptr || hex[0] != '#') {
+    if (hex.empty() || hex[0] != '#') {
         return false;
     }
 
-    size_t len = strlen(hex);
-
-    if (len == 3 + 1) {
+    if (hex.length() == 3 + 1) {
         (*r) = HexCharToInt(hex[1]);
         (*g) = HexCharToInt(hex[2]);
         (*b) = HexCharToInt(hex[3]);
-    } else if (len == 6 + 1) {
+    } else if (hex.length() == 6 + 1) {
         (*r) = HexCharToInt(hex[1]) * 16 + HexCharToInt(hex[2]);
         (*g) = HexCharToInt(hex[3]) * 16 + HexCharToInt(hex[4]);
         (*b) = HexCharToInt(hex[5]) * 16 + HexCharToInt(hex[6]);
-    } else if (len == 12 + 1) {
+    } else if (hex.length() == 12 + 1) {
         (*r) = HexCharToInt(hex[1]) * 16 + HexCharToInt(hex[2]);
         (*g) = HexCharToInt(hex[5]) * 16 + HexCharToInt(hex[6]);
         (*b) = HexCharToInt(hex[9]) * 16 + HexCharToInt(hex[10]);
@@ -109,6 +106,14 @@ std::string& StringTrim(std::string& str) {
     return str;
 }
 
+long int StringToLongInt(std::string const& str, char** endptr) {
+    return strtol(str.c_str(), endptr, 10);
+}
+
+float StringToFloat(std::string const& str, char** endptr) {
+    return strtof(str.c_str(), endptr);
+}
+
 void TintExec(std::string const& command) {
     if (!command.empty()) {
         if (fork() == 0) {
@@ -122,7 +127,7 @@ void TintExec(std::string const& command) {
     }
 }
 
-bool GetColor(char const* hex, double* rgb) {
+bool GetColor(std::string const& hex, double* rgb) {
     unsigned int r, g, b;
 
     if (!HexToRgb(hex, &r, &g, &b)) {
@@ -136,50 +141,28 @@ bool GetColor(char const* hex, double* rgb) {
 }
 
 
-void ExtractValues(char* value, char** value1, char** value2, char** value3) {
-    if (*value1) {
-        free(*value1);
+void ExtractValues(std::string const& value, std::string& v1, std::string& v2,
+                   std::string& v3) {
+    v1.clear();
+    v2.clear();
+    v3.clear();
+
+    size_t first_space = value.find_first_of(' ');
+    size_t second_space = std::string::npos;
+
+    v1.assign(value, 0, first_space);
+    StringTrim(v1);
+
+    if (first_space != std::string::npos) {
+        second_space = value.find_first_of(' ', first_space + 1);
+
+        v2.assign(value, first_space + 1, second_space - first_space);
+        StringTrim(v2);
     }
 
-    if (*value2) {
-        free(*value2);
-    }
-
-    if (*value3) {
-        free(*value3);
-    }
-
-    char* b = 0;
-
-    if ((b = strchr(value, ' '))) {
-        b[0] = '\0';
-        b++;
-    } else {
-        *value2 = 0;
-        *value3 = 0;
-    }
-
-    *value1 = strdup(value);
-    g_strstrip(*value1);
-
-    char* c = 0;
-
-    if (b) {
-        if ((c = strchr(b, ' '))) {
-            c[0] = '\0';
-            c++;
-        } else {
-            c = 0;
-            *value3 = 0;
-        }
-
-        *value2 = strdup(b);
-        g_strstrip(*value2);
-    }
-
-    if (c) {
-        *value3 = strdup(c);
-        g_strstrip(*value3);
+    if (second_space != std::string::npos) {
+        v3.assign(value, first_space + 1, std::string::npos);
+        StringTrim(v3);
     }
 }
 

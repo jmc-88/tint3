@@ -16,7 +16,7 @@
 #include <string>
 
 // mouse actions
-enum {
+enum MouseActionEnum {
     NONE = 0,
     CLOSE,
     TOGGLE,
@@ -53,6 +53,9 @@ std::string GetEnvironment(std::string const& variable_name);
 
 std::string& StringTrim(std::string& str);
 
+long int StringToLongInt(std::string const& str, char** endptr = nullptr);
+float StringToFloat(std::string const& str, char** endptr = nullptr);
+
 template<typename T>
 std::string StringRepresentation(T const& value) {
     return StringBuilder() << value;
@@ -63,9 +66,10 @@ void TintExec(std::string const& command);
 
 
 // color conversion
-bool GetColor(char const* hex, double* rgb);
+bool GetColor(const std::string& hex, double* rgb);
 
-void ExtractValues(char* value, char** value1, char** value2, char** value3);
+void ExtractValues(const std::string& value, std::string& v1, std::string& v2,
+                   std::string& v3);
 
 // adjust Alpha/Saturation/Brightness on an ARGB icon
 // alpha from 0 to 100, satur from 0 to 1, bright from 0 to 1.
