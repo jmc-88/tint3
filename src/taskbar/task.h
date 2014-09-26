@@ -70,12 +70,12 @@ class Task : public Area {
     unsigned int icon_height;
     int urgent_tick;
 
-    void DrawForeground(cairo_t* c);
-    std::string GetTooltipText();
+    void DrawForeground(cairo_t* c) override;
+    std::string GetTooltipText() override;
     bool UpdateTitle(); // TODO: find a more descriptive name
     std::string GetTitle() const;
     void SetTitle(std::string const& title);
-    void OnChangeLayout();
+    void OnChangeLayout() override;
     Task& SetTooltipEnabled(bool);
 };
 

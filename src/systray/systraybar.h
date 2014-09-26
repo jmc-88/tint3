@@ -28,9 +28,9 @@ class Systraybar : public Area {
     int alpha, saturation, brightness;
     int icon_size, icons_per_column, icons_per_row, marging;
 
-    void DrawForeground(cairo_t*);
-    void OnChangeLayout();
-    bool Resize();
+    void DrawForeground(cairo_t*) override;
+    void OnChangeLayout() override;
+    bool Resize() override;
 };
 
 
@@ -76,7 +76,6 @@ void remove_icon(TrayWindow* traywin);
 
 void refresh_systray_icon();
 void systray_render_icon(TrayWindow* traywin);
-void kde_update_icons();
 
 #endif
 

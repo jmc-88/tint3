@@ -25,7 +25,7 @@ class TaskbarBase : public Area {
     TaskbarBase& set_state_pixmap(size_t i, Pixmap value);
     TaskbarBase& reset_state_pixmap(size_t i);
 
-    bool Resize();
+    bool Resize() override;
 };
 
 class Taskbarname : public TaskbarBase {
@@ -35,8 +35,8 @@ class Taskbarname : public TaskbarBase {
     std::string const& name() const;
     Taskbarname& set_name(std::string const& name);
 
-    void DrawForeground(cairo_t*);
-    bool Resize();
+    void DrawForeground(cairo_t*) override;
+    bool Resize() override;
 };
 
 // tint3 uses one taskbar per desktop.
@@ -47,8 +47,8 @@ class Taskbar : public TaskbarBase {
     Taskbarname bar_name;
 
     Taskbar& set_state(size_t state);
-    void DrawForeground(cairo_t*);
-    void OnChangeLayout();
+    void DrawForeground(cairo_t*) override;
+    void OnChangeLayout() override;
 };
 
 class Global_taskbar : public TaskbarBase {

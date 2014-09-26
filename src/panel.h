@@ -128,7 +128,7 @@ class Panel : public Area {
     Area* ClickArea(int x, int y);
 
     void Render();
-    bool Resize();
+    bool Resize() override;
 
     // TODO: this should be private
     void InitSizeAndPosition();
