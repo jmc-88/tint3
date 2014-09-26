@@ -4,8 +4,8 @@
 #include <string>
 #include <vector>
 
+namespace util {
 namespace xdg {
-
 namespace basedir {
 
 std::string DataHome();
@@ -16,7 +16,7 @@ std::vector<std::string> DataDirs();
 std::vector<std::string> ConfigDirs();
 
 } // namespace basedir
-
 } // namespace xdg
+} // namespace util
 
 #endif // TINT3_XDG_H

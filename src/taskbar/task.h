@@ -90,9 +90,9 @@ void ActiveTask();
 void SetTaskState(Task* tsk, int state);
 void set_task_redraw(Task* tsk);
 
-Task* find_active_task(Task* current_task, Task* active_task);
-Task* next_task(Task* tsk);
-Task* prev_task(Task* tsk);
+Task* FindActiveTask(Task* current_task, Task* active_task);
+Task* NextTask(Task* tsk);
+Task* PreviousTask(Task* tsk);
 
 void add_urgent(Task* tsk);
 void del_urgent(Task* tsk);

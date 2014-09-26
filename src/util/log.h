@@ -4,7 +4,6 @@
 #include <ostream>
 
 namespace util {
-
 namespace log {
 
 class Logger {
@@ -46,7 +45,6 @@ Logger& Debug();
 Logger& Error();
 
 } // namespace log
-
 } // namespace util
 
 #endif // TINT3_UTIL_LOG_H

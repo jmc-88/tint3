@@ -779,7 +779,7 @@ bool Read() {
     // follow XDG specification
     // check tint3rc in user directory
     std::string user_config_dir = util::fs::BuildPath({
-        xdg::basedir::ConfigHome(), "tint3"
+        util::xdg::basedir::ConfigHome(), "tint3"
     });
     config_path = util::fs::BuildPath({ user_config_dir, "tint3rc" });
 
@@ -790,7 +790,7 @@ bool Read() {
     // copy tint3rc from system directory to user directory
     std::string system_config_file;
 
-    for (auto const& system_dir : xdg::basedir::ConfigDirs()) {
+    for (auto const& system_dir : util::xdg::basedir::ConfigDirs()) {
         system_config_file = util::fs::BuildPath({ system_dir, "tint3", "tint3rc" });
 
         if (util::fs::FileExists(system_config_file)) {

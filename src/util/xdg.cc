@@ -58,8 +58,8 @@ std::function<std::string(std::string)> GetDefaultDirectory(
 
 } // namespace
 
+namespace util {
 namespace xdg {
-
 namespace basedir {
 
 std::string DataHome() {
@@ -98,5 +98,5 @@ std::vector<std::string> ConfigDirs() {
 }
 
 } // namespace basedir
-
 } // namespace xdg
+} // namespace util

@@ -523,7 +523,7 @@ void Task::OnChangeLayout() {
 // it is set to appear on all desktops. In that case we search for
 // another Task on current_task's taskbar, with the same window as
 // active_task.
-Task* find_active_task(Task* current_task, Task* active_task) {
+Task* FindActiveTask(Task* current_task, Task* active_task) {
     if (active_task == 0) {
         return current_task;
     }
@@ -554,7 +554,7 @@ Task* find_active_task(Task* current_task, Task* active_task) {
     return active_task;
 }
 
-Task* next_task(Task* tsk) {
+Task* NextTask(Task* tsk) {
     if (tsk == nullptr) {
         return nullptr;
     }
@@ -579,7 +579,7 @@ Task* next_task(Task* tsk) {
     return static_cast<Task*>(*first);
 }
 
-Task* prev_task(Task* tsk) {
+Task* PreviousTask(Task* tsk) {
     if (tsk == nullptr) {
         return nullptr;
     }

@@ -51,6 +51,7 @@
 #include "util/common.h"
 #include "util/fs.h"
 #include "util/log.h"
+#include "util/xdg.h"
 #include "xsettings-client.h"
 
 // Drag and Drop state variables
@@ -214,20 +215,16 @@ void InitX11() {
     imlib_context_set_colormap(server.colormap);
 
     /* Catch events */
-    XSelectInput(
-        server.dsp,
-        server.root_win,
-        PropertyChangeMask | StructureNotifyMask);
+    XSelectInput(server.dsp, server.root_win,
+                 PropertyChangeMask | StructureNotifyMask);
 
     setlocale(LC_ALL, "");
     // config file use '.' as decimal separator
     setlocale(LC_NUMERIC, "POSIX");
 
     // load default icon
-    const gchar* const* data_dirs = g_get_system_data_dirs();
-
-    for (int i = 0; data_dirs[i] != nullptr; i++)  {
-        auto path = util::fs::BuildPath({ data_dirs[i], "tint3", "default_icon.png" });
+    for (auto const& dir : util::xdg::basedir::DataDirs()) {
+        auto path = util::fs::BuildPath({ dir, "tint3", "default_icon.png" });
 
         if (util::fs::FileExists(path)) {
             default_icon = imlib_load_image(path.c_str());
@@ -267,20 +264,19 @@ void Cleanup() {
 
 
 void GetSnapshot(const char* path) {
-    Panel* panel = &panel1[0];
+    Panel& panel = panel1[0];
 
-    if (panel->width > server.monitor[0].width) {
-        panel->width = server.monitor[0].width;
+    if (panel.width > server.monitor[0].width) {
+        panel.width = server.monitor[0].width;
     }
 
-    panel->temp_pmap = XCreatePixmap(server.dsp, server.root_win, panel->width,
-                                     panel->height, server.depth);
-    panel->Render();
+    panel.temp_pmap = XCreatePixmap(server.dsp, server.root_win, panel.width,
+                                    panel.height, server.depth);
+    panel.Render();
 
-    Imlib_Image img = nullptr;
-    imlib_context_set_drawable(panel->temp_pmap);
-    img = imlib_create_image_from_drawable(0, 0, 0, panel->width,
-                                           panel->height, 0);
+    imlib_context_set_drawable(panel.temp_pmap);
+    Imlib_Image img = imlib_create_image_from_drawable(
+                          0, 0, 0, panel.width, panel.height, 0);
 
     imlib_context_set_image(img);
 
@@ -345,7 +341,7 @@ void WindowAction(Task* tsk, int action) {
                 break;
             }
 
-            desk = tsk->desktop - 1;
+            desk = (tsk->desktop - 1);
             WindowSetDesktop(tsk->win, desk);
 
             if (desk == server.desktop) {
@@ -359,7 +355,7 @@ void WindowAction(Task* tsk, int action) {
                 break;
             }
 
-            desk = tsk->desktop + 1;
+            desk = (tsk->desktop + 1);
             WindowSetDesktop(tsk->win, desk);
 
             if (desk == server.desktop) {
@@ -369,15 +365,13 @@ void WindowAction(Task* tsk, int action) {
             break;
 
         case NEXT_TASK: {
-                Task* tsk1;
-                tsk1 = next_task(find_active_task(tsk, task_active));
+                Task* tsk1 = NextTask(FindActiveTask(tsk, task_active));
                 SetActive(tsk1->win);
             }
             break;
 
         case PREV_TASK: {
-                Task* tsk1;
-                tsk1 = prev_task(find_active_task(tsk, task_active));
+                Task* tsk1 = PreviousTask(FindActiveTask(tsk, task_active));
                 SetActive(tsk1->win);
             }
     }

@@ -8,7 +8,6 @@
 #include <string>
 
 namespace util {
-
 namespace fs {
 
 std::string BuildPath(std::initializer_list<std::string> parts);
@@ -23,7 +22,6 @@ bool ReadFileByLine(std::string const& path,
                     std::function<void(std::string const&)> fn);
 
 } // namespace fs
-
 } // namespace util
 
 #endif // TINT3_UTIL_FS_H
