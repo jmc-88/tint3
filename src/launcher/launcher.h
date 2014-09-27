@@ -67,9 +67,9 @@ class Launcher : public Area {
     std::string GetIconPath(std::string const& icon_name, int size);
 
   public:
-    std::vector<char*> list_apps;          // paths to .desktop files
-    std::vector<LauncherIcon*> list_icons;
-    std::vector<IconTheme*> list_themes;
+    std::vector<std::string> list_apps_;  // paths to .desktop files
+    std::vector<LauncherIcon*> list_icons_;
+    std::vector<IconTheme*> list_themes_;
 
     void CleanupTheme();
 

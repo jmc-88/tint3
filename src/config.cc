@@ -647,9 +647,7 @@ void AddEntry(std::string const& key, std::string const& value) {
     } else if (key == "launcher_icon_size") {
         launcher_max_icon_size = StringToLongInt(value);
     } else if (key == "launcher_item_app") {
-        // FIXME: remove this strdup hack as soon as list_apps is a list of strings
-        // also, strdup might fail and needs more checking
-        panel_config.launcher.list_apps.push_back(strdup(value.c_str()));
+        panel_config.launcher.list_apps_.push_back(value);
     } else if (key == "launcher_icon_theme") {
         // if XSETTINGS manager running, tint3 use it.
         if (icon_theme_name.empty()) {

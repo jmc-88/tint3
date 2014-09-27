@@ -776,7 +776,7 @@ LauncherIcon* Panel::ClickLauncherIcon(int x, int y) {
     auto launcher = ClickLauncher(x, y);
 
     if (launcher) {
-        for (auto const& launcher_icon : launcher->list_icons) {
+        for (auto const& launcher_icon : launcher->list_icons_) {
             bool insideX = (x >= (launcher->posx + launcher_icon->x_)
                             && x <= (launcher->posx + launcher_icon->x_ + launcher_icon->icon_size_));
             bool insideY = (y >= (launcher->posy + launcher_icon->y_)
