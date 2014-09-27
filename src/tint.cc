@@ -1357,7 +1357,7 @@ start:
 
                         for (auto& traywin : systray.list_icons) {
                             if (traywin->tray_id == e.xany.window) {
-                                RemoveIcon(traywin);
+                                systray.RemoveIcon(traywin);
                                 break;
                             }
                         }

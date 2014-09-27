@@ -327,11 +327,9 @@ void StartNet() {
 
 void StopNet() {
     // remove_icon change systray.list_icons
-    for (auto& traywin : systray.list_icons) {
-        RemoveIcon(traywin);
+    while (!systray.list_icons.empty()) {
+        systray.RemoveIcon(systray.list_icons.back());
     }
-
-    systray.list_icons.clear();
 
     if (net_sel_win != None) {
         XDestroyWindow(server.dsp, net_sel_win);
@@ -380,8 +378,7 @@ bool CompareTrayWindows(gconstpointer a, gconstpointer b) {
 }
 
 
-bool AddIcon(Window id) {
-    auto panel = systray.panel;
+bool Systraybar::AddIcon(Window id) {
     int hide = 0;
 
     error = false;
@@ -397,8 +394,8 @@ bool AddIcon(Window id) {
 
     //printf("icon with depth: %d, width %d, height %d\n", attr.depth, attr.width, attr.height);
     //printf("icon with depth: %d\n", attr.depth);
-    if (attr.depth != server.depth || systray.alpha != 100
-        || systray.brightness != 0 || systray.saturation != 0) {
+    if (attr.depth != server.depth || alpha != 100 || brightness != 0
+        || saturation != 0) {
         visual = attr.visual;
         set_attr.colormap = attr.colormap;
         set_attr.background_pixel = 0;
@@ -430,10 +427,10 @@ bool AddIcon(Window id) {
         int actfmt;
         unsigned long nbitem, bytes;
         unsigned char* data = 0;
-        int ret;
 
-        ret = XGetWindowProperty(server.dsp, id, server.atom._XEMBED_INFO, 0, 2, False,
-                                 server.atom._XEMBED_INFO, &acttype, &actfmt, &nbitem, &bytes, &data);
+        int ret = XGetWindowProperty(server.dsp, id, server.atom._XEMBED_INFO, 0, 2,
+                                     False, server.atom._XEMBED_INFO, &acttype, &actfmt,
+                                     &nbitem, &bytes, &data);
 
         if (ret == Success) {
             if (data) {
@@ -474,22 +471,22 @@ bool AddIcon(Window id) {
     traywin->depth = attr.depth;
     traywin->damage = 0;
 
-    if (systray.on_screen == 0) {
-        systray.Show();
+    if (on_screen == 0) {
+        Show();
     }
 
-    if (systray.sort == 3) {
-        systray.list_icons.push_front(traywin);
-    } else if (systray.sort == 2) {
-        systray.list_icons.push_back(traywin);
+    if (sort == 3) {
+        list_icons.push_front(traywin);
+    } else if (sort == 2) {
+        list_icons.push_back(traywin);
     } else {
-        auto it = std::lower_bound(systray.list_icons.begin(), systray.list_icons.end(),
+        auto it = std::lower_bound(list_icons.begin(), list_icons.end(),
                                    traywin, CompareTrayWindows);
-        systray.list_icons.insert(it, traywin);
+        list_icons.insert(it, traywin);
     }
 
-    if (server.real_transparency || systray.alpha != 100 || systray.brightness != 0
-        || systray.saturation != 0) {
+    if (server.real_transparency || alpha != 100 || brightness != 0
+        || saturation != 0) {
         traywin->damage = XDamageCreate(server.dsp, traywin->id,
                                         XDamageReportRawRectangles);
         XCompositeRedirectWindow(server.dsp, traywin->id, CompositeRedirectManual);
@@ -505,16 +502,16 @@ bool AddIcon(Window id) {
     }
 
     // changed in systray
-    systray.need_resize = true;
+    need_resize = true;
     panel_refresh = 1;
     return true;
 }
 
 
-void RemoveIcon(TrayWindow* traywin) {
+void Systraybar::RemoveIcon(TrayWindow* traywin) {
     // remove from our list
-    systray.list_icons.erase(std::remove(systray.list_icons.begin(),
-                                         systray.list_icons.end(), traywin), systray.list_icons.end());
+    list_icons.erase(std::remove(list_icons.begin(), list_icons.end(), traywin),
+                     list_icons.end());
     //printf("remove_icon id %lx, %d\n", traywin->id);
 
     XSelectInput(server.dsp, traywin->tray_id, NoEventMask);
@@ -543,12 +540,12 @@ void RemoveIcon(TrayWindow* traywin) {
     delete traywin;
 
     // check empty systray
-    if (systray.VisibleIcons() == 0) {
-        systray.Hide();
+    if (VisibleIcons() == 0) {
+        Hide();
     }
 
     // changed in systray
-    systray.need_resize = true;
+    need_resize = true;
     panel_refresh = 1;
 }
 
@@ -564,7 +561,7 @@ void NetMessage(XClientMessageEvent* e) {
             id = e->data.l[2];
 
             if (id) {
-                AddIcon(id);
+                systray.AddIcon(id);
             }
 
             break;

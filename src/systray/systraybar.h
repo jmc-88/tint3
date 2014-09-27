@@ -47,6 +47,8 @@ class Systraybar : public Area {
     bool Resize() override;
 
     size_t VisibleIcons();
+    bool AddIcon(Window id);
+    void RemoveIcon(TrayWindow* traywin);
 };
 
 // net_sel_win != None when protocol started
@@ -72,9 +74,6 @@ void InitSystrayPanel(void* p);
 void StartNet();
 void StopNet();
 void NetMessage(XClientMessageEvent* e);
-
-bool AddIcon(Window id);
-void RemoveIcon(TrayWindow* traywin);
 
 void RefreshSystrayIcon();
 void SystrayRenderIcon(TrayWindow* traywin);
