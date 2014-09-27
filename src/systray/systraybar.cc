@@ -29,6 +29,7 @@
 #include <X11/extensions/Xcomposite.h>
 #include <X11/extensions/Xrender.h>
 
+#include <algorithm>
 
 #include "systraybar.h"
 #include "server.h"
@@ -99,17 +100,7 @@ void InitSystrayPanel(void* p) {
         systray.bg = backgrounds.front();
     }
 
-    int count = 0;
-
-    for (auto l = systray.list_icons; l ; l = l->next) {
-        auto win = static_cast<TrayWindow*>(l->data);
-
-        if (!win->hide) {
-            count++;
-        }
-    }
-
-    if (count == 0) {
+    if (systray.VisibleIcons() == 0) {
         systray.Hide();
     } else {
         systray.Show();
@@ -149,15 +140,7 @@ bool Systraybar::Resize() {
         icon_size = systray_max_icon_size;
     }
 
-    int count = 0;
-
-    for (GSList* l = systray.list_icons; l ; l = l->next) {
-        if (!((TrayWindow*)l->data)->hide) {
-            count++;
-        }
-    }
-
-    //printf("count %d\n", count);
+    size_t count = systray.VisibleIcons();
 
     if (panel_horizontal) {
         int height_ = height - 2 * bg->border.width - 2 * paddingy;
@@ -183,7 +166,7 @@ bool Systraybar::Resize() {
 
 void Systraybar::OnChangeLayout() {
     // here, systray.posx/posy are defined by rendering engine. so we can calculate position of tray icon.
-    int i, posx, posy;
+    int posx, posy;
     int start = panel->bg->border.width + panel->paddingy +
                 systray.bg->border.width + systray.paddingy + marging / 2;
 
@@ -197,11 +180,10 @@ void Systraybar::OnChangeLayout() {
                systray.paddingxlr;
     }
 
-    TrayWindow* traywin;
-    GSList* l;
+    int i = 0;
 
-    for (i = 1, l = systray.list_icons; l ; i++, l = l->next) {
-        traywin = (TrayWindow*)l->data;
+    for (auto& traywin : systray.list_icons) {
+        ++i;
 
         if (traywin->hide) {
             continue;
@@ -235,6 +217,19 @@ void Systraybar::OnChangeLayout() {
         XResizeWindow(server.dsp, traywin->tray_id, icon_size,
                       icon_size);
     }
+}
+
+
+size_t Systraybar::VisibleIcons() {
+    size_t count = 0;
+
+    for (auto& traywin : list_icons) {
+        if (!traywin->hide) {
+            ++count;
+        }
+    }
+
+    return count;
 }
 
 
@@ -331,15 +326,12 @@ void StartNet() {
 
 
 void StopNet() {
-    if (systray.list_icons) {
-        // remove_icon change systray.list_icons
-        while (systray.list_icons) {
-            RemoveIcon((TrayWindow*)systray.list_icons->data);
-        }
-
-        g_slist_free(systray.list_icons);
-        systray.list_icons = 0;
+    // remove_icon change systray.list_icons
+    for (auto& traywin : systray.list_icons) {
+        RemoveIcon(traywin);
     }
+
+    systray.list_icons.clear();
 
     if (net_sel_win != None) {
         XDestroyWindow(server.dsp, net_sel_win);
@@ -366,23 +358,25 @@ int WindowErrorHandler(Display* d, XErrorEvent* e) {
 }
 
 
-static gint CompareTrayWindows(gconstpointer a, gconstpointer b) {
+bool CompareTrayWindows(gconstpointer a, gconstpointer b) {
     const TrayWindow* traywin_a = (TrayWindow*)a;
     const TrayWindow* traywin_b = (TrayWindow*)b;
     XTextProperty name_a, name_b;
 
     if (XGetWMName(server.dsp, traywin_a->tray_id, &name_a) == 0) {
-        return -1;
-    } else if (XGetWMName(server.dsp, traywin_b->tray_id, &name_b) == 0) {
-        XFree(name_a.value);
-        return 1;
-    } else {
-        gint retval = g_ascii_strncasecmp((char*)name_a.value, (char*)name_b.value,
-                                          -1) * systray.sort;
-        XFree(name_a.value);
-        XFree(name_b.value);
-        return retval;
+        return true;
     }
+
+    if (XGetWMName(server.dsp, traywin_b->tray_id, &name_b) == 0) {
+        XFree(name_a.value);
+        return false;
+    }
+
+    gint retval = g_ascii_strncasecmp((char*)name_a.value, (char*)name_b.value,
+                                      -1) * systray.sort;
+    XFree(name_a.value);
+    XFree(name_b.value);
+    return (retval <= 0);
 }
 
 
@@ -485,15 +479,14 @@ bool AddIcon(Window id) {
     }
 
     if (systray.sort == 3) {
-        systray.list_icons = g_slist_prepend(systray.list_icons, traywin);
+        systray.list_icons.push_front(traywin);
     } else if (systray.sort == 2) {
-        systray.list_icons = g_slist_append(systray.list_icons, traywin);
+        systray.list_icons.push_back(traywin);
     } else {
-        systray.list_icons = g_slist_insert_sorted(systray.list_icons, traywin,
-                             CompareTrayWindows);
+        auto it = std::lower_bound(systray.list_icons.begin(), systray.list_icons.end(),
+                                   traywin, CompareTrayWindows);
+        systray.list_icons.insert(it, traywin);
     }
-
-    //printf("add_icon id %lx, %d\n", id, g_slist_length(systray.list_icons));
 
     if (server.real_transparency || systray.alpha != 100 || systray.brightness != 0
         || systray.saturation != 0) {
@@ -520,7 +513,8 @@ bool AddIcon(Window id) {
 
 void RemoveIcon(TrayWindow* traywin) {
     // remove from our list
-    systray.list_icons = g_slist_remove(systray.list_icons, traywin);
+    systray.list_icons.erase(std::remove(systray.list_icons.begin(),
+                                         systray.list_icons.end(), traywin), systray.list_icons.end());
     //printf("remove_icon id %lx, %d\n", traywin->id);
 
     XSelectInput(server.dsp, traywin->tray_id, NoEventMask);
@@ -551,9 +545,7 @@ void RemoveIcon(TrayWindow* traywin) {
     // check empty systray
     int count = 0;
 
-    for (auto l = systray.list_icons; l ; l = l->next) {
-        traywin = static_cast<TrayWindow*>(l->data);
-
+    for (auto& traywin : systray.list_icons) {
         if (!traywin->hide) {
             count++;
         }
@@ -609,7 +601,7 @@ void systray_render_icon_now(void* t) {
 
     if (traywin->width == 0 || traywin->height == 0) {
         // reschedule rendering since the geometry information has not yet been processed (can happen on slow cpu)
-        systrayRenderIcon(traywin);
+        SystrayRenderIcon(traywin);
         return;
     }
 
@@ -696,7 +688,7 @@ void systray_render_icon_now(void* t) {
 }
 
 
-void systrayRenderIcon(TrayWindow* traywin) {
+void SystrayRenderIcon(TrayWindow* traywin) {
     if (server.real_transparency || systray.alpha != 100 || systray.brightness != 0
         || systray.saturation != 0) {
         // wine tray icons update whenever mouse is over them, so we limit the updates to 50 ms
@@ -717,16 +709,11 @@ void systrayRenderIcon(TrayWindow* traywin) {
 
 
 void RefreshSystrayIcon() {
-    TrayWindow* traywin;
-    GSList* l;
-
-    for (l = systray.list_icons; l ; l = l->next) {
-        traywin = (TrayWindow*)l->data;
-
+    for (auto& traywin : systray.list_icons) {
         if (traywin->hide) {
             continue;
         }
 
-        systrayRenderIcon(traywin);
+        SystrayRenderIcon(traywin);
     }
 }

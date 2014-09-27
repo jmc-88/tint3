@@ -10,31 +10,20 @@
 #ifndef SYSTRAYBAR_H
 #define SYSTRAYBAR_H
 
-#include "common.h"
-#include "area.h"
-#include "timer.h"
 #include <X11/extensions/Xdamage.h>
+
+#include <list>
+
+#include "util/common.h"
+#include "util/area.h"
+#include "util/timer.h"
 
 // XEMBED messages
 #define XEMBED_EMBEDDED_NOTIFY      0
 // Flags for _XEMBED_INFO
 #define XEMBED_MAPPED       (1 << 0)
 
-
-class Systraybar : public Area {
-  public:
-    GSList* list_icons;
-    int sort;
-    int alpha, saturation, brightness;
-    int icon_size, icons_per_column, icons_per_row, marging;
-
-    void DrawForeground(cairo_t*) override;
-    void OnChangeLayout() override;
-    bool Resize() override;
-};
-
-
-typedef struct {
+struct TrayWindow {
     Window id;
     Window tray_id;
     int x, y;
@@ -44,8 +33,21 @@ typedef struct {
     int depth;
     Damage damage;
     Timeout* render_timeout;
-} TrayWindow;
+};
 
+class Systraybar : public Area {
+  public:
+    std::list<TrayWindow*> list_icons;
+    int sort;
+    int alpha, saturation, brightness;
+    int icon_size, icons_per_column, icons_per_row, marging;
+
+    void DrawForeground(cairo_t*) override;
+    void OnChangeLayout() override;
+    bool Resize() override;
+
+    size_t VisibleIcons();
+};
 
 // net_sel_win != None when protocol started
 extern Window net_sel_win;
@@ -75,7 +77,7 @@ bool AddIcon(Window id);
 void RemoveIcon(TrayWindow* traywin);
 
 void RefreshSystrayIcon();
-void systrayRenderIcon(TrayWindow* traywin);
+void SystrayRenderIcon(TrayWindow* traywin);
 
 #endif
 

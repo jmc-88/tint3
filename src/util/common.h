@@ -53,7 +53,10 @@ std::string GetEnvironment(std::string const& variable_name);
 
 std::string& StringTrim(std::string& str);
 
+// Wrapper around strtol()
 long int StringToLongInt(std::string const& str, char** endptr = nullptr);
+
+// Wrapper around strtof()
 float StringToFloat(std::string const& str, char** endptr = nullptr);
 
 template<typename T>

@@ -875,13 +875,8 @@ void EventConfigureNotify(Window win) {
         return;
     }
 
-    // 'win' is a trayer icon
-    TrayWindow* traywin;
-    GSList* l;
-
-    for (l = systray.list_icons; l ; l = l->next) {
-        traywin = (TrayWindow*)l->data;
-
+    // 'win' is a tray icon
+    for (auto& traywin : systray.list_icons) {
         if (traywin->tray_id == win) {
             //printf("move tray %d\n", traywin->x);
             XMoveResizeWindow(server.dsp, traywin->id, traywin->x, traywin->y,
@@ -1360,9 +1355,9 @@ start:
                             break;
                         }
 
-                        for (it = systray.list_icons; it; it = g_slist_next(it)) {
-                            if (((TrayWindow*)it->data)->tray_id == e.xany.window) {
-                                RemoveIcon((TrayWindow*)it->data);
+                        for (auto& traywin : systray.list_icons) {
+                            if (traywin->tray_id == e.xany.window) {
+                                RemoveIcon(traywin);
                                 break;
                             }
                         }
@@ -1499,15 +1494,9 @@ start:
                                 .e = e
                             };
 
-                            TrayWindow* traywin;
-                            GSList* l;
-                            XDamageNotifyEvent* de = &event_union.de;
-
-                            for (l = systray.list_icons; l ; l = l->next) {
-                                traywin = (TrayWindow*)l->data;
-
-                                if (traywin->id == de->drawable) {
-                                    systrayRenderIcon(traywin);
+                            for (auto& traywin : systray.list_icons) {
+                                if (traywin->id == event_union.de.drawable) {
+                                    SystrayRenderIcon(traywin);
                                     break;
                                 }
                             }
