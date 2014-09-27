@@ -24,8 +24,6 @@ class TaskbarBase : public Area {
     Pixmap state_pixmap(size_t i) const;
     TaskbarBase& set_state_pixmap(size_t i, Pixmap value);
     TaskbarBase& reset_state_pixmap(size_t i);
-
-    bool Resize() override;
 };
 
 class Taskbarname : public TaskbarBase {
@@ -49,6 +47,7 @@ class Taskbar : public TaskbarBase {
     Taskbar& set_state(size_t state);
     void DrawForeground(cairo_t*) override;
     void OnChangeLayout() override;
+    bool Resize() override;
 };
 
 class Global_taskbar : public TaskbarBase {

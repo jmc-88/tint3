@@ -436,14 +436,15 @@ void Taskbar::DrawForeground(cairo_t* /* c */) {
 }
 
 
-bool TaskbarBase::Resize() {
-    int text_width;
+bool Taskbar::Resize() {
+    int horizontal_size = (panel->g_task.text_posx + panel->g_task.bg->border.width
+                           + panel->g_task.paddingx);
 
     //printf("TaskbarBase::resize %d %d\n", posx, posy);
     if (panel_horizontal) {
         ResizeByLayout(panel->g_task.maximum_width);
 
-        text_width = panel->g_task.maximum_width;
+        int text_width_ = panel->g_task.maximum_width;
         auto it = children.begin();
 
         if (taskbarname_enabled) {
@@ -451,16 +452,13 @@ bool TaskbarBase::Resize() {
         }
 
         if (it != children.end()) {
-            text_width = static_cast<Task*>(*it)->width;
+            text_width_ = static_cast<Task*>(*it)->width;
         }
 
-        text_width -= panel->g_task.text_posx -
-                      panel->g_task.bg->border.width - panel->g_task.paddingx;
+        text_width = (text_width_ - horizontal_size);
     } else {
         ResizeByLayout(panel->g_task.maximum_height);
-        text_width = width - (2 * panel->g_taskbar.paddingy)
-                     - panel->g_task.text_posx - panel->g_task.bg->border.width -
-                     panel->g_task.paddingx;
+        text_width = (width - (2 * panel->g_taskbar.paddingy) - horizontal_size);
     }
 
     return false;
