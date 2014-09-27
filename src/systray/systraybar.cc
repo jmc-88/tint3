@@ -63,7 +63,7 @@ void DefaultSystray() {
 }
 
 void CleanupSystray() {
-    stop_net();
+    StopNet();
     systray_enabled = 0;
     systray_max_icon_size = 0;
     systray.on_screen = 0;
@@ -75,8 +75,8 @@ void CleanupSystray() {
     }
 }
 
-void init_systray() {
-    start_net();
+void InitSystray() {
+    StartNet();
 
     if (!systray_enabled) {
         return;
@@ -91,7 +91,7 @@ void init_systray() {
 }
 
 
-void init_systray_panel(void* p) {
+void InitSystrayPanel(void* p) {
     systray.parent = static_cast<Area*>(p);
     systray.panel = static_cast<Panel*>(p);
 
@@ -241,11 +241,11 @@ void Systraybar::OnChangeLayout() {
 // ***********************************************
 // systray protocol
 
-void start_net() {
+void StartNet() {
     if (net_sel_win) {
         // protocol already started
         if (!systray_enabled) {
-            stop_net();
+            StopNet();
         }
 
         return;
@@ -270,7 +270,7 @@ void start_net() {
         int ret = XGetWindowProperty(server.dsp, win, _NET_WM_PID, 0, 1024, False,
                                      AnyPropertyType, &actual_type, &actual_format, &nitems, &bytes_after, &prop);
 
-        util::log::Error() << "tint3 : another systray is running";
+        util::log::Error() << "tint3: another systray is running";
 
         if (ret == Success && prop) {
             pid = prop[1] * 256;
@@ -310,7 +310,7 @@ void start_net() {
 
     if (XGetSelectionOwner(server.dsp,
                            server.atom._NET_SYSTEM_TRAY_SCREEN) != net_sel_win) {
-        stop_net();
+        StopNet();
         util::log::Error() << "tint3 : can't get systray manager\n";
         return;
     }
@@ -330,11 +330,11 @@ void start_net() {
 }
 
 
-void stop_net() {
+void StopNet() {
     if (systray.list_icons) {
         // remove_icon change systray.list_icons
         while (systray.list_icons) {
-            remove_icon((TrayWindow*)systray.list_icons->data);
+            RemoveIcon((TrayWindow*)systray.list_icons->data);
         }
 
         g_slist_free(systray.list_icons);
@@ -352,21 +352,21 @@ void stop_net() {
 // possible..
 bool error = false;
 
-int window_error_handler(Display* d, XErrorEvent* e) {
+int WindowErrorHandler(Display* d, XErrorEvent* e) {
     error = true;
 
     // TODO: fix this - how large should the buffer be?
     char error_text[512];
 
     if (XGetErrorText(d, e->error_code, error_text, 512) == 0) {
-        printf("window_error_handler: %s\n", error_text);
+        util::log::Error() << "WindowErrorHandler: " << error_text << '\n';
     }
 
     return 0;
 }
 
 
-static gint compare_traywindows(gconstpointer a, gconstpointer b) {
+static gint CompareTrayWindows(gconstpointer a, gconstpointer b) {
     const TrayWindow* traywin_a = (TrayWindow*)a;
     const TrayWindow* traywin_b = (TrayWindow*)b;
     XTextProperty name_a, name_b;
@@ -386,7 +386,7 @@ static gint compare_traywindows(gconstpointer a, gconstpointer b) {
 }
 
 
-bool add_icon(Window id) {
+bool AddIcon(Window id) {
     auto panel = systray.panel;
     int hide = 0;
 
@@ -418,12 +418,12 @@ bool add_icon(Window id) {
     Window parent_window = XCreateWindow(server.dsp, panel->main_win,
                                          0, 0, 30, 30, 0,
                                          attr.depth, InputOutput, visual, mask, &set_attr);
-    auto old = XSetErrorHandler(window_error_handler);
+    auto old_handler = XSetErrorHandler(WindowErrorHandler);
     XReparentWindow(server.dsp, id, parent_window, 0, 0);
     // watch for the icon trying to resize itself / closing again!
     XSelectInput(server.dsp, id, StructureNotifyMask);
     XSync(server.dsp, False);
-    XSetErrorHandler(old);
+    XSetErrorHandler(old_handler);
 
     if (error) {
         util::log::Error() << "tint3: not icon_swallow\n";
@@ -490,7 +490,7 @@ bool add_icon(Window id) {
         systray.list_icons = g_slist_append(systray.list_icons, traywin);
     } else {
         systray.list_icons = g_slist_insert_sorted(systray.list_icons, traywin,
-                             compare_traywindows);
+                             CompareTrayWindows);
     }
 
     //printf("add_icon id %lx, %d\n", id, g_slist_length(systray.list_icons));
@@ -518,7 +518,7 @@ bool add_icon(Window id) {
 }
 
 
-void remove_icon(TrayWindow* traywin) {
+void RemoveIcon(TrayWindow* traywin) {
     // remove from our list
     systray.list_icons = g_slist_remove(systray.list_icons, traywin);
     //printf("remove_icon id %lx, %d\n", traywin->id);
@@ -531,7 +531,7 @@ void remove_icon(TrayWindow* traywin) {
 
     // reparent to root
     error = false;
-    auto old = XSetErrorHandler(window_error_handler);
+    auto old = XSetErrorHandler(WindowErrorHandler);
 
     if (!traywin->hide) {
         XUnmapWindow(server.dsp, traywin->tray_id);
@@ -569,7 +569,7 @@ void remove_icon(TrayWindow* traywin) {
 }
 
 
-void net_message(XClientMessageEvent* e) {
+void NetMessage(XClientMessageEvent* e) {
     unsigned long opcode;
     Window id;
 
@@ -580,7 +580,7 @@ void net_message(XClientMessageEvent* e) {
             id = e->data.l[2];
 
             if (id) {
-                add_icon(id);
+                AddIcon(id);
             }
 
             break;
@@ -609,7 +609,7 @@ void systray_render_icon_now(void* t) {
 
     if (traywin->width == 0 || traywin->height == 0) {
         // reschedule rendering since the geometry information has not yet been processed (can happen on slow cpu)
-        systray_render_icon(traywin);
+        systrayRenderIcon(traywin);
         return;
     }
 
@@ -696,7 +696,7 @@ void systray_render_icon_now(void* t) {
 }
 
 
-void systray_render_icon(TrayWindow* traywin) {
+void systrayRenderIcon(TrayWindow* traywin) {
     if (server.real_transparency || systray.alpha != 100 || systray.brightness != 0
         || systray.saturation != 0) {
         // wine tray icons update whenever mouse is over them, so we limit the updates to 50 ms
@@ -716,7 +716,7 @@ void systray_render_icon(TrayWindow* traywin) {
 }
 
 
-void refresh_systray_icon() {
+void RefreshSystrayIcon() {
     TrayWindow* traywin;
     GSList* l;
 
@@ -727,6 +727,6 @@ void refresh_systray_icon() {
             continue;
         }
 
-        systray_render_icon(traywin);
+        systrayRenderIcon(traywin);
     }
 }

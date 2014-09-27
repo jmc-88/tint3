@@ -1234,7 +1234,7 @@ start:
                 // tint3 doen't draw systray icons. it just redraw background.
                 XSetWindowBackgroundPixmap(server.dsp, panel->main_win, panel->temp_pmap);
                 // force icon's refresh
-                refresh_systray_icon();
+                RefreshSystrayIcon();
             }
         }
 
@@ -1362,7 +1362,7 @@ start:
 
                         for (it = systray.list_icons; it; it = g_slist_next(it)) {
                             if (((TrayWindow*)it->data)->tray_id == e.xany.window) {
-                                remove_icon((TrayWindow*)it->data);
+                                RemoveIcon((TrayWindow*)it->data);
                                 break;
                             }
                         }
@@ -1387,7 +1387,7 @@ start:
                         if (systray_enabled
                             && e.xclient.message_type == server.atom._NET_SYSTEM_TRAY_OPCODE
                             && e.xclient.format == 32 && e.xclient.window == net_sel_win) {
-                            net_message(&e.xclient);
+                            NetMessage(&e.xclient);
                         } else if (e.xclient.message_type == server.atom.XdndEnter) {
                             DragAndDropEnter(&e.xclient);
                         } else if (e.xclient.message_type == server.atom.XdndPosition) {
@@ -1507,7 +1507,7 @@ start:
                                 traywin = (TrayWindow*)l->data;
 
                                 if (traywin->id == de->drawable) {
-                                    systray_render_icon(traywin);
+                                    systrayRenderIcon(traywin);
                                     break;
                                 }
                             }

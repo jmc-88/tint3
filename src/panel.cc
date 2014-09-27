@@ -228,7 +228,7 @@ void InitPanel() {
     }
 
     init_tooltip();
-    init_systray();
+    InitSystray();
     InitLauncher();
     InitClock();
 #ifdef ENABLE_BATTERY
@@ -296,7 +296,7 @@ void InitPanel() {
             if (item == 'S' && i == 0) {
                 // TODO : check systray is only on 1 panel
                 // at the moment only on panel1[0] allowed
-                init_systray_panel(p);
+                InitSystrayPanel(p);
                 refresh_systray = 1;
             }
 

@@ -61,21 +61,21 @@ void DefaultSystray();
 void CleanupSystray();
 
 // initialize protocol and panel position
-void init_systray();
-void init_systray_panel(void* p);
+void InitSystray();
+void InitSystrayPanel(void* p);
 
 
 // systray protocol
-// many tray icon doesn't manage stop/restart of the systray manager
-void start_net();
-void stop_net();
-void net_message(XClientMessageEvent* e);
+// many tray icon don't manage stop/restart of the systray manager
+void StartNet();
+void StopNet();
+void NetMessage(XClientMessageEvent* e);
 
-bool add_icon(Window id);
-void remove_icon(TrayWindow* traywin);
+bool AddIcon(Window id);
+void RemoveIcon(TrayWindow* traywin);
 
-void refresh_systray_icon();
-void systray_render_icon(TrayWindow* traywin);
+void RefreshSystrayIcon();
+void systrayRenderIcon(TrayWindow* traywin);
 
 #endif
 
