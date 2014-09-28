@@ -307,7 +307,7 @@ void StartNet() {
     if (XGetSelectionOwner(server.dsp,
                            server.atoms_["_NET_SYSTEM_TRAY_SCREEN"]) != net_sel_win) {
         StopNet();
-        util::log::Error() << "tint3 : can't get systray manager\n";
+        util::log::Error() << "tint3: can't get systray manager\n";
         return;
     }
 

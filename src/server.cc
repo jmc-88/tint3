@@ -34,7 +34,7 @@
 
 namespace {
 
-static std::vector<const char*> kAtomList = {
+static char const* const kAtomList[] = {
     /* X11 */
     "_XEMBED", "_XEMBED_INFO", "_XROOTMAP_ID", "_XROOTPMAP_ID",
     "_XSETTINGS_SETTINGS",
@@ -69,9 +69,7 @@ static std::vector<const char*> kAtomList = {
     "MANAGER", "UTF8_STRING", "_MOTIF_WM_HINTS", "__SWM_VROOT"
 };
 
-Atom GetAtom(Display* display, const char* atom_name) {
-    return XInternAtom(display, atom_name, False);
-}
+static int kAtomCount = (sizeof(kAtomList) / sizeof(kAtomList[0]));
 
 }  // namespace
 
@@ -82,19 +80,40 @@ int ServerCatchError(Display* d, XErrorEvent* ev) {
 }
 
 void Server::InitAtoms() {
-    for (auto& atom_name : kAtomList) {
-        atoms_.insert(std::make_pair(atom_name, GetAtom(dsp, atom_name)));
+    Atom atom_list[kAtomCount] = { None };
+
+    if (!XInternAtoms(dsp, (char**) kAtomList, kAtomCount, False, atom_list)) {
+        util::log::Error() << "tint3: XInternAtoms failed\n";
+    }
+
+    atoms_.clear();
+
+    for (int i = 0; i < kAtomCount; ++i) {
+        util::log::Debug() << "Atom " << kAtomList[i]
+                           << " = " << atom_list[i] << '\n';
+        atoms_.insert(std::make_pair(kAtomList[i], atom_list[i]));
     }
 
     std::string name;
+    Atom atom;
 
     name.assign(StringBuilder() << "_XSETTINGS_S" << DefaultScreen(dsp));
-    atoms_.insert(std::make_pair(
-                      "_XSETTINGS_SCREEN", GetAtom(dsp, name.c_str())));
+    atom = XInternAtom(dsp, name.c_str(), False);
+    util::log::Debug() << "Atom " << name << " = " << atom << '\n';
+    atoms_.insert(std::make_pair("_XSETTINGS_SCREEN", atom));
+
+    if (atom == None) {
+        util::log::Error() << "tint3: XInternAtom(" << name << ") failed\n";
+    }
 
     name.assign(StringBuilder() << "_NET_SYSTEM_TRAY_S" << DefaultScreen(dsp));
-    atoms_.insert(std::make_pair(
-                      "_NET_SYSTEM_TRAY_SCREEN", GetAtom(dsp, name.c_str())));
+    atom = XInternAtom(dsp, name.c_str(), False);
+    util::log::Debug() << "Atom " << name << " = " << atom << '\n';
+    atoms_.insert(std::make_pair("_NET_SYSTEM_TRAY_SCREEN", atom));
+
+    if (atom == None) {
+        util::log::Error() << "tint3: XInternAtom(" << name << ") failed\n";
+    }
 }
 
 
