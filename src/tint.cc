@@ -637,7 +637,7 @@ void EventPropertyNotify(XEvent* e) {
             server.got_root_win = 1;
         }
         // Change name of desktops
-        else if (at == server.atom._NET_DESKTOP_NAMES) {
+        else if (at == server.atoms_["_NET_DESKTOP_NAMES"]) {
             if (!taskbarname_enabled) {
                 return;
             }
@@ -667,7 +667,7 @@ void EventPropertyNotify(XEvent* e) {
             panel_refresh = 1;
         }
         // Change number of desktops
-        else if (at == server.atom._NET_NUMBER_OF_DESKTOPS) {
+        else if (at == server.atoms_["_NET_NUMBER_OF_DESKTOPS"]) {
             if (!taskbar_enabled) {
                 return;
             }
@@ -693,7 +693,7 @@ void EventPropertyNotify(XEvent* e) {
             panel_refresh = 1;
         }
         // Change desktop
-        else if (at == server.atom._NET_CURRENT_DESKTOP) {
+        else if (at == server.atoms_["_NET_CURRENT_DESKTOP"]) {
             if (!taskbar_enabled) {
                 return;
             }
@@ -745,15 +745,16 @@ void EventPropertyNotify(XEvent* e) {
             }
         }
         // Window list
-        else if (at == server.atom._NET_CLIENT_LIST) {
+        else if (at == server.atoms_["_NET_CLIENT_LIST"]) {
             TaskRefreshTasklist();
             panel_refresh = 1;
         }
         // Change active
-        else if (at == server.atom._NET_ACTIVE_WINDOW) {
+        else if (at == server.atoms_["_NET_ACTIVE_WINDOW"]) {
             ActiveTask();
             panel_refresh = 1;
-        } else if (at == server.atom._XROOTPMAP_ID || at == server.atom._XROOTMAP_ID) {
+        } else if (at == server.atoms_["_XROOTPMAP_ID"]
+                   || at == server.atoms_["_XROOTMAP_ID"]) {
             // change Wallpaper
             for (i = 0 ; i < nb_panel ; i++) {
                 panel1[i].SetBackground();
@@ -765,7 +766,7 @@ void EventPropertyNotify(XEvent* e) {
         tsk = task_get_task(win);
 
         if (!tsk) {
-            if (at != server.atom._NET_WM_STATE) {
+            if (at != server.atoms_["_NET_WM_STATE"]) {
                 return;
             } else {
                 // xfce4 sends _NET_WM_STATE after minimized to tray, so we need to check if window is mapped
@@ -788,8 +789,9 @@ void EventPropertyNotify(XEvent* e) {
         //printf("atom root_win = %s, %s\n", XGetAtomName(server.dsp, at), tsk->title);
 
         // Window title changed
-        if (at == server.atom._NET_WM_VISIBLE_NAME || at == server.atom._NET_WM_NAME
-            || at == server.atom.WM_NAME) {
+        if (at == server.atoms_["_NET_WM_VISIBLE_NAME"]
+            || at == server.atoms_["_NET_WM_NAME"]
+            || at == server.atoms_["WM_NAME"]) {
             if (tsk->UpdateTitle()) {
                 if (g_tooltip.mapped && (g_tooltip.area == (Area*)tsk)) {
                     TooltipCopyText(tsk);
@@ -800,7 +802,7 @@ void EventPropertyNotify(XEvent* e) {
             }
         }
         // Demand attention
-        else if (at == server.atom._NET_WM_STATE) {
+        else if (at == server.atoms_["_NET_WM_STATE"]) {
             if (WindowIsUrgent(win)) {
                 add_urgent(tsk);
             }
@@ -809,7 +811,7 @@ void EventPropertyNotify(XEvent* e) {
                 RemoveTask(tsk);
                 panel_refresh = 1;
             }
-        } else if (at == server.atom.WM_STATE) {
+        } else if (at == server.atoms_["WM_STATE"]) {
             // Iconic state
             int state = (task_active
                          && tsk->win == task_active->win ? TASK_ACTIVE : TASK_NORMAL);
@@ -822,12 +824,12 @@ void EventPropertyNotify(XEvent* e) {
             panel_refresh = 1;
         }
         // Window icon changed
-        else if (at == server.atom._NET_WM_ICON) {
+        else if (at == server.atoms_["_NET_WM_ICON"]) {
             GetIcon(tsk);
             panel_refresh = 1;
         }
         // Window desktop changed
-        else if (at == server.atom._NET_WM_DESKTOP) {
+        else if (at == server.atoms_["_NET_WM_DESKTOP"]) {
             int desktop = server.GetDesktopFromWindow(win);
 
             //printf("  Window desktop changed %d, %d\n", tsk->desktop, desktop);
@@ -838,7 +840,7 @@ void EventPropertyNotify(XEvent* e) {
                 ActiveTask();
                 panel_refresh = 1;
             }
-        } else if (at == server.atom.WM_HINTS) {
+        } else if (at == server.atoms_["WM_HINTS"]) {
             XWMHints* wmhints = XGetWMHints(server.dsp, win);
 
             if (wmhints && wmhints->flags & XUrgencyHint) {
@@ -1017,7 +1019,8 @@ Atom PickTargetFromTargets(Display* disp, Property p) {
     //The list of targets is a list of atoms, so it should have type XA_ATOM
     //but it may have the type TARGETS instead.
 
-    if ((p.type != XA_ATOM && p.type != server.atom.TARGETS) || p.format != 32) {
+    if ((p.type != XA_ATOM && p.type != server.atoms_["TARGETS"])
+        || p.format != 32) {
         //This would be really broken. Targets have to be an atom list
         //and applications should support this. Nevertheless, some
         //seem broken (MATLAB 7, for instance), so ask for STRING
@@ -1055,7 +1058,7 @@ void DragAndDropEnter(XClientMessageEvent* e) {
         //Fetch the list of possible conversions
         //Notice the similarity to TARGETS with paste.
         Property p = ReadProperty(server.dsp, dnd_source_window,
-                                  server.atom.XdndTypeList);
+                                  server.atoms_["XdndTypeList"]);
         dnd_atom = PickTargetFromTargets(server.dsp, p);
         XFree(p.data);
     } else {
@@ -1101,7 +1104,7 @@ void DragAndDropPosition(XClientMessageEvent* e) {
     XClientMessageEvent se;
     se.type = ClientMessage;
     se.window = e->data.l[0];
-    se.message_type = server.atom.XdndStatus;
+    se.message_type = server.atoms_["XdndStatus"];
     se.format = 32;
     se.data.l[0] = e->window;  // XID of the target window
     se.data.l[1] = accept ? 1 :
@@ -1112,7 +1115,8 @@ void DragAndDropPosition(XClientMessageEvent* e) {
                    1;  // Rectangle w,h for which no more XdndPosition events
 
     if (accept) {
-        se.data.l[4] = dnd_version >= 2 ? e->data.l[4] : server.atom.XdndActionCopy;
+        se.data.l[4] = dnd_version >= 2 ? e->data.l[4] :
+                       server.atoms_["XdndActionCopy"];
     } else {
         se.data.l[4] = None;       // None = drop will not be accepted
     }
@@ -1123,10 +1127,10 @@ void DragAndDropPosition(XClientMessageEvent* e) {
 void DragAndDropDrop(XClientMessageEvent* e) {
     if (dnd_target_window && dnd_launcher_exec) {
         if (dnd_version >= 1) {
-            XConvertSelection(server.dsp, server.atom.XdndSelection, XA_STRING,
+            XConvertSelection(server.dsp, server.atoms_["XdndSelection"], XA_STRING,
                               dnd_selection, dnd_target_window, e->data.l[2]);
         } else {
-            XConvertSelection(server.dsp, server.atom.XdndSelection, XA_STRING,
+            XConvertSelection(server.dsp, server.atoms_["XdndSelection"], XA_STRING,
                               dnd_selection, dnd_target_window, CurrentTime);
         }
     } else {
@@ -1137,7 +1141,7 @@ void DragAndDropDrop(XClientMessageEvent* e) {
         m.type = ClientMessage;
         m.display = e->display;
         m.window = e->data.l[0];
-        m.message_type = server.atom.XdndFinished;
+        m.message_type = server.atoms_["XdndFinished"];
         m.format = 32;
         m.data.l[0] = dnd_target_window;
         m.data.l[1] = 0;
@@ -1266,14 +1270,14 @@ start:
 
                     if (panel->is_hidden) {
                         if (e.type == ClientMessage
-                            && e.xclient.message_type == server.atom.XdndPosition) {
+                            && e.xclient.message_type == server.atoms_["XdndPosition"]) {
                             hidden_dnd = 1;
                             AutohideShow(panel);
                         } else {
                             continue;    // discard further processing of this event because the panel is not visible yet
                         }
                     } else if (hidden_dnd && e.type == ClientMessage
-                               && e.xclient.message_type == server.atom.XdndLeave) {
+                               && e.xclient.message_type == server.atoms_["XdndLeave"]) {
                         hidden_dnd = 0;
                         AutohideHide(panel);
                     }
@@ -1367,7 +1371,7 @@ start:
                     case ClientMessage:
                         ev = &e.xclient;
 
-                        if (ev->data.l[1] == server.atom._NET_WM_CM_S0) {
+                        if (ev->data.l[1] == server.atoms_["_NET_WM_CM_S0"]) {
                             if (ev->data.l[2] == None)
                                 // Stop real_transparency
                             {
@@ -1380,14 +1384,14 @@ start:
                         }
 
                         if (systray_enabled
-                            && e.xclient.message_type == server.atom._NET_SYSTEM_TRAY_OPCODE
+                            && e.xclient.message_type == server.atoms_["_NET_SYSTEM_TRAY_OPCODE"]
                             && e.xclient.format == 32 && e.xclient.window == net_sel_win) {
                             NetMessage(&e.xclient);
-                        } else if (e.xclient.message_type == server.atom.XdndEnter) {
+                        } else if (e.xclient.message_type == server.atoms_["XdndEnter"]) {
                             DragAndDropEnter(&e.xclient);
-                        } else if (e.xclient.message_type == server.atom.XdndPosition) {
+                        } else if (e.xclient.message_type == server.atoms_["XdndPosition"]) {
                             DragAndDropPosition(&e.xclient);
-                        } else if (e.xclient.message_type == server.atom.XdndDrop) {
+                        } else if (e.xclient.message_type == server.atoms_["XdndDrop"]) {
                             DragAndDropDrop(&e.xclient);
                         }
 
@@ -1412,7 +1416,7 @@ start:
                                 Property prop = ReadProperty(server.dsp, dnd_target_window, dnd_selection);
 
                                 //If we're being given a list of targets (possible conversions)
-                                if (target == server.atom.TARGETS && !dnd_sent_request) {
+                                if (target == server.atoms_["TARGETS"] && !dnd_sent_request) {
                                     dnd_sent_request = 1;
                                     dnd_atom = PickTargetFromTargets(server.dsp, prop);
 
@@ -1469,11 +1473,11 @@ start:
                                     m.type = ClientMessage;
                                     m.display = server.dsp;
                                     m.window = dnd_source_window;
-                                    m.message_type = server.atom.XdndFinished;
+                                    m.message_type = server.atoms_["XdndFinished"];
                                     m.format = 32;
                                     m.data.l[0] = dnd_target_window;
                                     m.data.l[1] = 1;
-                                    m.data.l[2] = server.atom.XdndActionCopy; //We only ever copy.
+                                    m.data.l[2] = server.atoms_["XdndActionCopy"];  //We only ever copy.
                                     XSendEvent(server.dsp, dnd_source_window, False, NoEventMask, (XEvent*)&m);
                                     XSync(server.dsp, False);
                                 }

@@ -21,75 +21,6 @@
 #include <glib.h>
 #endif
 
-
-struct Global_atom {
-    Atom _XROOTPMAP_ID;
-    Atom _XROOTMAP_ID;
-    Atom _NET_CURRENT_DESKTOP;
-    Atom _NET_NUMBER_OF_DESKTOPS;
-    Atom _NET_DESKTOP_NAMES;
-    Atom _NET_DESKTOP_GEOMETRY;
-    Atom _NET_DESKTOP_VIEWPORT;
-    Atom _NET_ACTIVE_WINDOW;
-    Atom _NET_WM_WINDOW_TYPE;
-    Atom _NET_WM_STATE_SKIP_PAGER;
-    Atom _NET_WM_STATE_SKIP_TASKBAR;
-    Atom _NET_WM_STATE_STICKY;
-    Atom _NET_WM_STATE_DEMANDS_ATTENTION;
-    Atom _NET_WM_WINDOW_TYPE_DOCK;
-    Atom _NET_WM_WINDOW_TYPE_DESKTOP;
-    Atom _NET_WM_WINDOW_TYPE_TOOLBAR;
-    Atom _NET_WM_WINDOW_TYPE_MENU;
-    Atom _NET_WM_WINDOW_TYPE_SPLASH;
-    Atom _NET_WM_WINDOW_TYPE_DIALOG;
-    Atom _NET_WM_WINDOW_TYPE_NORMAL;
-    Atom _NET_WM_DESKTOP;
-    Atom WM_STATE;
-    Atom _NET_WM_STATE;
-    Atom _NET_WM_STATE_MAXIMIZED_VERT;
-    Atom _NET_WM_STATE_MAXIMIZED_HORZ;
-    Atom _NET_WM_STATE_SHADED;
-    Atom _NET_WM_STATE_HIDDEN;
-    Atom _NET_WM_STATE_BELOW;
-    Atom _NET_WM_STATE_ABOVE;
-    Atom _NET_WM_STATE_MODAL;
-    Atom _NET_CLIENT_LIST;
-    Atom _NET_WM_NAME;
-    Atom _NET_WM_VISIBLE_NAME;
-    Atom _NET_WM_STRUT;
-    Atom _NET_WM_ICON;
-    Atom _NET_WM_ICON_GEOMETRY;
-    Atom _NET_CLOSE_WINDOW;
-    Atom UTF8_STRING;
-    Atom _NET_SUPPORTING_WM_CHECK;
-    Atom _NET_WM_CM_S0;
-    Atom _NET_WM_STRUT_PARTIAL;
-    Atom WM_NAME;
-    Atom __SWM_VROOT;
-    Atom _MOTIF_WM_HINTS;
-    Atom WM_HINTS;
-    Atom _NET_SYSTEM_TRAY_SCREEN;
-    Atom _NET_SYSTEM_TRAY_OPCODE;
-    Atom MANAGER;
-    Atom _NET_SYSTEM_TRAY_MESSAGE_DATA;
-    Atom _NET_SYSTEM_TRAY_ORIENTATION;
-    Atom _XEMBED;
-    Atom _XEMBED_INFO;
-    Atom _XSETTINGS_SCREEN;
-    Atom _XSETTINGS_SETTINGS;
-    Atom XdndAware;
-    Atom XdndEnter;
-    Atom XdndPosition;
-    Atom XdndStatus;
-    Atom XdndDrop;
-    Atom XdndLeave;
-    Atom XdndSelection;
-    Atom XdndTypeList;
-    Atom XdndActionCopy;
-    Atom XdndFinished;
-    Atom TARGETS;
-};
-
 struct Monitor {
     int x;
     int y;
@@ -98,8 +29,10 @@ struct Monitor {
     char** names;
 };
 
-class Server_global {
+class Server {
   public:
+    std::map<const char*, Atom> atoms_;
+
     Display* dsp;
     Window root_win;
     Window composite_manager;
@@ -120,10 +53,10 @@ class Server_global {
     GC gc;
     Colormap colormap;
     Colormap colormap32;
-    Global_atom atom;
 #ifdef HAVE_SN
     SnDisplay* sn_dsp;
     std::map<pid_t, SnLauncherContext*> pids;
+    Atom atom;
 #endif // HAVE_SN
 
     void Cleanup();
@@ -135,7 +68,7 @@ class Server_global {
 };
 
 
-extern Server_global server;
+extern Server server;
 
 void SendEvent32(Window win, Atom at, long data1, long data2, long data3);
 int  GetProperty32(Window win, Atom at, Atom type);

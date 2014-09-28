@@ -38,48 +38,49 @@
 
 
 void SetActive(Window win) {
-    SendEvent32(win, server.atom._NET_ACTIVE_WINDOW, 2, CurrentTime, 0);
+    SendEvent32(win, server.atoms_["_NET_ACTIVE_WINDOW"], 2, CurrentTime, 0);
 }
 
 
 void SetDesktop(int desktop) {
-    SendEvent32(server.root_win, server.atom._NET_CURRENT_DESKTOP, desktop, 0, 0);
+    SendEvent32(server.root_win, server.atoms_["_NET_CURRENT_DESKTOP"], desktop, 0,
+                0);
 }
 
 
 void WindowSetDesktop(Window win, int desktop) {
-    SendEvent32(win, server.atom._NET_WM_DESKTOP, desktop, 2, 0);
+    SendEvent32(win, server.atoms_["_NET_WM_DESKTOP"], desktop, 2, 0);
 }
 
 
 void SetClose(Window win) {
-    SendEvent32(win, server.atom._NET_CLOSE_WINDOW, 0, 2, 0);
+    SendEvent32(win, server.atoms_["_NET_CLOSE_WINDOW"], 0, 2, 0);
 }
 
 
 void WindowToggleShade(Window win) {
-    SendEvent32(win, server.atom._NET_WM_STATE, 2,
-                server.atom._NET_WM_STATE_SHADED, 0);
+    SendEvent32(win, server.atoms_["_NET_WM_STATE"], 2,
+                server.atoms_["_NET_WM_STATE_SHADED"], 0);
 }
 
 
 void WindowMaximizeRestore(Window win) {
-    SendEvent32(win, server.atom._NET_WM_STATE, 2,
-                server.atom._NET_WM_STATE_MAXIMIZED_VERT, 0);
-    SendEvent32(win, server.atom._NET_WM_STATE, 2,
-                server.atom._NET_WM_STATE_MAXIMIZED_HORZ, 0);
+    SendEvent32(win, server.atoms_["_NET_WM_STATE"], 2,
+                server.atoms_["_NET_WM_STATE_MAXIMIZED_VERT"], 0);
+    SendEvent32(win, server.atoms_["_NET_WM_STATE"], 2,
+                server.atoms_["_NET_WM_STATE_MAXIMIZED_HORZ"], 0);
 }
 
 
 int WindowIsHidden(Window win) {
     int count;
     Atom* at = static_cast<Atom*>(ServerGetProperty(
-                                      win, server.atom._NET_WM_STATE, XA_ATOM, &count));
+                                      win, server.atoms_["_NET_WM_STATE"], XA_ATOM, &count));
 
     int i;
 
     for (i = 0; i < count; ++i) {
-        if (at[i] == server.atom._NET_WM_STATE_SKIP_TASKBAR) {
+        if (at[i] == server.atoms_["_NET_WM_STATE_SKIP_TASKBAR"]) {
             XFree(at);
             return 1;
         }
@@ -98,14 +99,14 @@ int WindowIsHidden(Window win) {
     XFree(at);
 
     at = static_cast<Atom*>(ServerGetProperty(
-                                win, server.atom._NET_WM_WINDOW_TYPE, XA_ATOM, &count));
+                                win, server.atoms_["_NET_WM_WINDOW_TYPE"], XA_ATOM, &count));
 
     for (i = 0; i < count; ++i) {
-        if (at[i] == server.atom._NET_WM_WINDOW_TYPE_DOCK
-            || at[i] == server.atom._NET_WM_WINDOW_TYPE_DESKTOP
-            || at[i] == server.atom._NET_WM_WINDOW_TYPE_TOOLBAR
-            || at[i] == server.atom._NET_WM_WINDOW_TYPE_MENU
-            || at[i] == server.atom._NET_WM_WINDOW_TYPE_SPLASH) {
+        if (at[i] == server.atoms_["_NET_WM_WINDOW_TYPE_DOCK"] ||
+            at[i] == server.atoms_["_NET_WM_WINDOW_TYPE_DESKTOP"] ||
+            at[i] == server.atoms_["_NET_WM_WINDOW_TYPE_TOOLBAR"] ||
+            at[i] == server.atoms_["_NET_WM_WINDOW_TYPE_MENU"] ||
+            at[i] == server.atoms_["_NET_WM_WINDOW_TYPE_SPLASH"]) {
             XFree(at);
             return 1;
         }
@@ -157,10 +158,10 @@ int WindowIsIconified(Window win) {
     // WM_STATE is not accurate for shaded window and in multi_desktop mode.
     int count;
     Atom* at = static_cast<Atom*>(ServerGetProperty(
-                                      win, server.atom._NET_WM_STATE, XA_ATOM, &count));
+                                      win, server.atoms_["_NET_WM_STATE"], XA_ATOM, &count));
 
     for (int i = 0; i < count; i++) {
-        if (at[i] == server.atom._NET_WM_STATE_HIDDEN) {
+        if (at[i] == server.atoms_["_NET_WM_STATE_HIDDEN"]) {
             XFree(at);
             return 1;
         }
@@ -174,10 +175,10 @@ int WindowIsIconified(Window win) {
 int WindowIsUrgent(Window win) {
     int count;
     Atom* at = static_cast<Atom*>(ServerGetProperty(
-                                      win, server.atom._NET_WM_STATE, XA_ATOM, &count));
+                                      win, server.atoms_["_NET_WM_STATE"], XA_ATOM, &count));
 
     for (int i = 0; i < count; i++) {
-        if (at[i] == server.atom._NET_WM_STATE_DEMANDS_ATTENTION) {
+        if (at[i] == server.atoms_["_NET_WM_STATE_DEMANDS_ATTENTION"]) {
             XFree(at);
             return 1;
         }
@@ -191,10 +192,10 @@ int WindowIsUrgent(Window win) {
 int WindowIsSkipTaskbar(Window win) {
     int count;
     Atom* at = static_cast<Atom*>(ServerGetProperty(
-                                      win, server.atom._NET_WM_STATE, XA_ATOM, &count));
+                                      win, server.atoms_["_NET_WM_STATE"], XA_ATOM, &count));
 
     for (int i = 0; i < count; ++i) {
-        if (at[i] == server.atom._NET_WM_STATE_SKIP_TASKBAR) {
+        if (at[i] == server.atoms_["_NET_WM_STATE_SKIP_TASKBAR"]) {
             XFree(at);
             return 1;
         }
@@ -209,8 +210,8 @@ std::vector<std::string> ServerGetDesktopNames() {
     int count;
     char* data_ptr = static_cast<char*>(ServerGetProperty(
                                             server.root_win,
-                                            server.atom._NET_DESKTOP_NAMES,
-                                            server.atom.UTF8_STRING,
+                                            server.atoms_["_NET_DESKTOP_NAMES"],
+                                            server.atoms_["UTF8_STRING"],
                                             &count));
 
     std::vector<std::string> names;
@@ -236,7 +237,8 @@ std::vector<std::string> ServerGetDesktopNames() {
 
 
 Window WindowGetActive() {
-    return (Window) GetProperty32(server.root_win, server.atom._NET_ACTIVE_WINDOW,
+    return (Window) GetProperty32(server.root_win,
+                                  server.atoms_["_NET_ACTIVE_WINDOW"],
                                   XA_WINDOW);
 }
 

@@ -249,7 +249,7 @@ void StartNet() {
     }
 
     Window win = XGetSelectionOwner(server.dsp,
-                                    server.atom._NET_SYSTEM_TRAY_SCREEN);
+                                    server.atoms_["_NET_SYSTEM_TRAY_SCREEN"]);
 
     // freedesktop systray specification
     if (win != None) {
@@ -285,7 +285,7 @@ void StartNet() {
     // Vertical panel will draw the systray horizontal.
     long orient = 0;
     XChangeProperty(server.dsp, net_sel_win,
-                    server.atom._NET_SYSTEM_TRAY_ORIENTATION, XA_CARDINAL, 32, PropModeReplace,
+                    server.atoms_["_NET_SYSTEM_TRAY_ORIENTATION"], XA_CARDINAL, 32, PropModeReplace,
                     (unsigned char*) &orient, 1);
     VisualID vid;
 
@@ -300,11 +300,12 @@ void StartNet() {
                     "_NET_SYSTEM_TRAY_VISUAL", False), XA_VISUALID, 32, PropModeReplace,
                     (unsigned char*)&vid, 1);
 
-    XSetSelectionOwner(server.dsp, server.atom._NET_SYSTEM_TRAY_SCREEN, net_sel_win,
+    XSetSelectionOwner(server.dsp, server.atoms_["_NET_SYSTEM_TRAY_SCREEN"],
+                       net_sel_win,
                        CurrentTime);
 
     if (XGetSelectionOwner(server.dsp,
-                           server.atom._NET_SYSTEM_TRAY_SCREEN) != net_sel_win) {
+                           server.atoms_["_NET_SYSTEM_TRAY_SCREEN"]) != net_sel_win) {
         StopNet();
         util::log::Error() << "tint3 : can't get systray manager\n";
         return;
@@ -313,10 +314,10 @@ void StartNet() {
     XClientMessageEvent ev;
     ev.type = ClientMessage;
     ev.window = server.root_win;
-    ev.message_type = server.atom.MANAGER;
+    ev.message_type = server.atoms_["MANAGER"];
     ev.format = 32;
     ev.data.l[0] = CurrentTime;
-    ev.data.l[1] = server.atom._NET_SYSTEM_TRAY_SCREEN;
+    ev.data.l[1] = server.atoms_["_NET_SYSTEM_TRAY_SCREEN"];
     ev.data.l[2] = net_sel_win;
     ev.data.l[3] = 0;
     ev.data.l[4] = 0;
@@ -428,8 +429,9 @@ bool Systraybar::AddIcon(Window id) {
         unsigned long nbitem, bytes;
         unsigned char* data = 0;
 
-        int ret = XGetWindowProperty(server.dsp, id, server.atom._XEMBED_INFO, 0, 2,
-                                     False, server.atom._XEMBED_INFO, &acttype, &actfmt,
+        int ret = XGetWindowProperty(server.dsp, id, server.atoms_["_XEMBED_INFO"], 0,
+                                     2,
+                                     False, server.atoms_["_XEMBED_INFO"], &acttype, &actfmt,
                                      &nbitem, &bytes, &data);
 
         if (ret == Success) {
@@ -453,7 +455,7 @@ bool Systraybar::AddIcon(Window id) {
         e.xclient.type = ClientMessage;
         e.xclient.serial = 0;
         e.xclient.send_event = True;
-        e.xclient.message_type = server.atom._XEMBED;
+        e.xclient.message_type = server.atoms_["_XEMBED"];
         e.xclient.window = id;
         e.xclient.format = 32;
         e.xclient.data.l[0] = CurrentTime;
@@ -572,7 +574,7 @@ void NetMessage(XClientMessageEvent* e) {
             break;
 
         default:
-            if (opcode == server.atom._NET_SYSTEM_TRAY_MESSAGE_DATA) {
+            if (opcode == server.atoms_["_NET_SYSTEM_TRAY_MESSAGE_DATA"]) {
                 util::log::Debug() << "message from dockapp: " << e->data.b << '\n';
             } else {
                 util::log::Error() << "SYSTEM_TRAY: unknown message type\n";

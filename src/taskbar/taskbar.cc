@@ -394,7 +394,7 @@ void TaskRefreshTasklist() {
     int num_results;
     Window* win = static_cast<Window*>(ServerGetProperty(
                                            server.root_win,
-                                           server.atom._NET_CLIENT_LIST,
+                                           server.atoms_["_NET_CLIENT_LIST"],
                                            XA_WINDOW,
                                            &num_results));
 

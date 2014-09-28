@@ -415,11 +415,12 @@ static void ReadSettings(XSettingsClient* client) {
 
     old_handler = XSetErrorHandler(IgnoreErrors);
     result = XGetWindowProperty(client->display, client->manager_window,
-                                server.atom._XSETTINGS_SETTINGS, 0, LONG_MAX, False,
-                                server.atom._XSETTINGS_SETTINGS, &type, &format, &n_items, &bytes_after, &data);
+                                server.atoms_["_XSETTINGS_SETTINGS"], 0, LONG_MAX, False,
+                                server.atoms_["_XSETTINGS_SETTINGS"], &type, &format, &n_items, &bytes_after,
+                                &data);
     XSetErrorHandler(old_handler);
 
-    if (result == Success && type == server.atom._XSETTINGS_SETTINGS) {
+    if (result == Success && type == server.atoms_["_XSETTINGS_SETTINGS"]) {
         if (format != 8) {
             util::log::Error() << "Invalid format for XSETTINGS property " << format;
         } else {
@@ -442,7 +443,7 @@ static void CheckManagerWindow(XSettingsClient* client) {
     XGrabServer(client->display);
 
     client->manager_window = XGetSelectionOwner(server.dsp,
-                             server.atom._XSETTINGS_SCREEN);
+                             server.atoms_["_XSETTINGS_SCREEN"]);
 
     if (client->manager_window) {
         XSelectInput(server.dsp, client->manager_window,
@@ -531,7 +532,7 @@ Bool XSettingsClientProcessEvent(XSettingsClient* client, XEvent* xev) {
     */
     if (xev->xany.window == RootWindow(server.dsp, server.screen)) {
         if (xev->xany.type == ClientMessage
-            && xev->xclient.message_type == server.atom.MANAGER) {
+            && xev->xclient.message_type == server.atoms_["MANAGER"]) {
             CheckManagerWindow(client);
             return True;
         }

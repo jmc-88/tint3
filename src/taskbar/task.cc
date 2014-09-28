@@ -222,20 +222,20 @@ bool Task::UpdateTitle() {
     }
 
     const char* name = (char*) ServerGetProperty(win,
-                       server.atom._NET_WM_VISIBLE_NAME,
-                       server.atom.UTF8_STRING,
+                       server.atoms_["_NET_WM_VISIBLE_NAME"],
+                       server.atoms_["UTF8_STRING"],
                        0);
 
     if (!name || *name == '\0') {
         name = (char*) ServerGetProperty(win,
-                                         server.atom._NET_WM_NAME,
-                                         server.atom.UTF8_STRING,
+                                         server.atoms_["_NET_WM_NAME"],
+                                         server.atoms_["UTF8_STRING"],
                                          0);
     }
 
     if (!name || *name == '\0') {
         name = (char*) ServerGetProperty(win,
-                                         server.atom.WM_NAME,
+                                         server.atoms_["WM_NAME"],
                                          XA_STRING,
                                          0);
     }
@@ -310,7 +310,8 @@ void GetIcon(Task* tsk) {
     Imlib_Image img = nullptr;
     XWMHints* hints = 0;
     int i;
-    gulong* data = (gulong*) ServerGetProperty(tsk->win, server.atom._NET_WM_ICON,
+    gulong* data = (gulong*) ServerGetProperty(tsk->win,
+                   server.atoms_["_NET_WM_ICON"],
                    XA_CARDINAL, &i);
 
     if (data) {
@@ -509,7 +510,7 @@ void Task::OnChangeLayout() {
         height
     };
 
-    XChangeProperty(server.dsp, win, server.atom._NET_WM_ICON_GEOMETRY,
+    XChangeProperty(server.dsp, win, server.atoms_["_NET_WM_ICON_GEOMETRY"],
                     XA_CARDINAL, 32, PropModeReplace, (unsigned char*)value, 4);
 
     // reset Pixmap when position/size changed
