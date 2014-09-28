@@ -543,15 +543,7 @@ void RemoveIcon(TrayWindow* traywin) {
     delete traywin;
 
     // check empty systray
-    int count = 0;
-
-    for (auto& traywin : systray.list_icons) {
-        if (!traywin->hide) {
-            count++;
-        }
-    }
-
-    if (count == 0) {
+    if (systray.VisibleIcons() == 0) {
         systray.Hide();
     }
 
