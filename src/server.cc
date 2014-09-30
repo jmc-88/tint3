@@ -34,7 +34,7 @@
 
 namespace {
 
-static char const* const kAtomList[] = {
+static constexpr char const* const kAtomList[] = {
     /* X11 */
     "_XEMBED", "_XEMBED_INFO", "_XROOTMAP_ID", "_XROOTPMAP_ID",
     "_XSETTINGS_SETTINGS",
@@ -69,7 +69,7 @@ static char const* const kAtomList[] = {
     "MANAGER", "UTF8_STRING", "_MOTIF_WM_HINTS", "__SWM_VROOT"
 };
 
-static int kAtomCount = (sizeof(kAtomList) / sizeof(kAtomList[0]));
+static constexpr int kAtomCount = (sizeof(kAtomList) / sizeof(kAtomList[0]));
 
 }  // namespace
 
