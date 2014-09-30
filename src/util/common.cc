@@ -31,7 +31,6 @@
 #include "common.h"
 #include "../server.h"
 
-
 namespace {
 
 unsigned int HexCharToInt(char c) {
@@ -161,7 +160,7 @@ void ExtractValues(std::string const& value, std::string& v1, std::string& v2,
     }
 
     if (second_space != std::string::npos) {
-        v3.assign(value, first_space + 1, std::string::npos);
+        v3.assign(value, second_space + 1, std::string::npos);
         StringTrim(v3);
     }
 }
