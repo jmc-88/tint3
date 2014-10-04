@@ -65,7 +65,7 @@ Task* AddTask(Window win) {
         return 0;
     }
 
-    int monitor;
+    int monitor = 0;
 
     if (nb_panel > 1) {
         monitor = WindowGetMonitor(win);
@@ -73,8 +73,6 @@ Task* AddTask(Window win) {
         if (monitor >= nb_panel) {
             monitor = 0;
         }
-    } else {
-        monitor = 0;
     }
 
     Task new_tsk;
