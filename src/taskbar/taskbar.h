@@ -52,7 +52,7 @@ class Taskbar : public TaskbarBase {
 
 class Global_taskbar : public TaskbarBase {
   public:
-    Taskbarname area_name;
+    Taskbarname bar_name_;
     Background* background[TASKBAR_STATE_COUNT];
     Background* background_name[TASKBAR_STATE_COUNT];
 };
@@ -65,7 +65,7 @@ void DefaultTaskbar();
 void CleanupTaskbar();
 
 void InitTaskbar();
-void InitTaskbarPanel(void* p);
+void InitTaskbarPanel(Panel* panel);
 
 void taskbar_remove_task(gpointer key, gpointer value, gpointer user_data);
 Task* task_get_task(Window win);

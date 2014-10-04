@@ -176,9 +176,7 @@ void DefaultPanel() {
     max_tick_urgent = 14;
 
     // append full transparency background
-    auto transparent_bg = static_cast<Background*>(
-                              calloc(1, sizeof(Background)));
-    backgrounds.push_back(transparent_bg);
+    backgrounds.push_back(new Background());
 }
 
 void CleanupPanel() {

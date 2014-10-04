@@ -483,8 +483,8 @@ void AddEntry(std::string const& key, std::string const& value) {
         taskbarname_enabled = StringToLongInt(value);
     } else if (key == "taskbar_name_padding") {
         ExtractValues(value, value1, value2, value3);
-        panel_config.g_taskbar.area_name.padding_x_lr_ =
-            panel_config.g_taskbar.area_name.padding_x_ = StringToLongInt(value1);
+        panel_config.g_taskbar.bar_name_.padding_x_lr_ =
+            panel_config.g_taskbar.bar_name_.padding_x_ = StringToLongInt(value1);
     } else if (key == "taskbar_name_background_id") {
         panel_config.g_taskbar.background_name[TASKBAR_NORMAL] = GetBackgroundFromId(
                     StringToLongInt(value));

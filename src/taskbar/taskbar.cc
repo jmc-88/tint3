@@ -176,10 +176,7 @@ void InitTaskbar() {
 }
 
 
-void InitTaskbarPanel(void* p) {
-    Panel* panel = (Panel*)p;
-    int j;
-
+void InitTaskbarPanel(Panel* panel) {
     if (panel->g_taskbar.background[TASKBAR_NORMAL] == 0) {
         panel->g_taskbar.background[TASKBAR_NORMAL] = backgrounds.front();
         panel->g_taskbar.background[TASKBAR_ACTIVE] = backgrounds.front();
@@ -195,10 +192,10 @@ void InitTaskbarPanel(void* p) {
     }
 
     // taskbar name
-    panel->g_taskbar.area_name.panel_ = panel;
-    panel->g_taskbar.area_name.size_mode_ = SIZE_BY_CONTENT;
-    panel->g_taskbar.area_name.need_resize_ = true;
-    panel->g_taskbar.area_name.on_screen_ = 1;
+    panel->g_taskbar.bar_name_.panel_ = panel;
+    panel->g_taskbar.bar_name_.size_mode_ = SIZE_BY_CONTENT;
+    panel->g_taskbar.bar_name_.need_resize_ = true;
+    panel->g_taskbar.bar_name_.on_screen_ = 1;
 
     // taskbar
     panel->g_taskbar.parent_ = panel;
@@ -210,13 +207,13 @@ void InitTaskbarPanel(void* p) {
     if (panel_horizontal) {
         panel->g_taskbar.posy_ = (panel->bg_->border.width + panel->padding_y_);
         panel->g_taskbar.height_ = panel->height_ - (2 * panel->g_taskbar.posy_);
-        panel->g_taskbar.area_name.posy_ = panel->g_taskbar.posy_;
-        panel->g_taskbar.area_name.height_ = panel->g_taskbar.height_;
+        panel->g_taskbar.bar_name_.posy_ = panel->g_taskbar.posy_;
+        panel->g_taskbar.bar_name_.height_ = panel->g_taskbar.height_;
     } else {
         panel->g_taskbar.posx_ = panel->bg_->border.width + panel->padding_y_;
         panel->g_taskbar.width_ = panel->width_ - (2 * panel->g_taskbar.posx_);
-        panel->g_taskbar.area_name.posx_ = panel->g_taskbar.posx_;
-        panel->g_taskbar.area_name.width_ = panel->g_taskbar.width_;
+        panel->g_taskbar.bar_name_.posx_ = panel->g_taskbar.posx_;
+        panel->g_taskbar.bar_name_.width_ = panel->g_taskbar.width_;
     }
 
     // task
@@ -298,7 +295,7 @@ void InitTaskbarPanel(void* p) {
         panel->g_task.height_ = panel->g_task.maximum_height;
     }
 
-    for (j = 0; j < TASK_STATE_COUNT; ++j) {
+    for (int j = 0; j < TASK_STATE_COUNT; ++j) {
         if (panel->g_task.background[j] == 0) {
             panel->g_task.background[j] = backgrounds.front();
         }
@@ -337,12 +334,11 @@ void InitTaskbarPanel(void* p) {
 
     //printf("monitor %d, task_maximum_width %d\n", panel->monitor, panel->g_task.maximum_width);
 
-    Taskbar* tskbar;
     panel->nb_desktop = server.nb_desktop;
-    panel->taskbar = (Taskbar*) calloc(server.nb_desktop, sizeof(Taskbar));
+    panel->taskbar = new Taskbar[server.nb_desktop];
 
-    for (j = 0 ; j < panel->nb_desktop ; j++) {
-        tskbar = &panel->taskbar[j];
+    for (int j = 0 ; j < panel->nb_desktop ; j++) {
+        Taskbar* tskbar = &panel->taskbar[j];
 
         // TODO: nuke this from planet Earth ASAP - horrible hack to mimick the
         // original memcpy() call

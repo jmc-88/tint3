@@ -59,7 +59,7 @@ void init_taskbarname_panel(void* p) {
 
     for (int j = 0; j < panel->nb_desktop; ++j) {
         Taskbar* tskbar = &panel->taskbar[j];
-        tskbar->bar_name = panel->g_taskbar.area_name;
+        tskbar->bar_name = panel->g_taskbar.bar_name_;
         tskbar->bar_name.parent_ = reinterpret_cast<Area*>(tskbar);
 
         if (j == server.desktop) {
