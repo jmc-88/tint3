@@ -78,7 +78,7 @@ Task* AddTask(Window win) {
     Task new_tsk;
     new_tsk.win = win;
     new_tsk.desktop = server.GetDesktopFromWindow(win);
-    new_tsk.panel = &panel1[monitor];
+    new_tsk.panel_ = &panel1[monitor];
     new_tsk.current_state = WindowIsIconified(win) ? TASK_ICONIFIED : TASK_NORMAL;
 
     // allocate only one title and one icon
@@ -110,7 +110,7 @@ Task* AddTask(Window win) {
         // original memcpy() call
         new_tsk2->Clone(panel1[monitor].g_task);
 
-        new_tsk2->parent = reinterpret_cast<Area*>(tskbar);
+        new_tsk2->parent_ = reinterpret_cast<Area*>(tskbar);
         new_tsk2->win = new_tsk.win;
         new_tsk2->desktop = new_tsk.desktop;
 
@@ -119,7 +119,7 @@ Task* AddTask(Window win) {
 
         if (new_tsk2->desktop == ALLDESKTOP && server.desktop != j) {
             // hide ALLDESKTOP task on non-current desktop
-            new_tsk2->on_screen = 0;
+            new_tsk2->on_screen_ = 0;
         }
 
         new_tsk2->SetTitle(new_tsk.GetTitle());
@@ -132,8 +132,8 @@ Task* AddTask(Window win) {
 
         new_tsk2->icon_width = new_tsk.icon_width;
         new_tsk2->icon_height = new_tsk.icon_height;
-        tskbar->children.push_back(new_tsk2);
-        tskbar->need_resize = true;
+        tskbar->children_.push_back(new_tsk2);
+        tskbar->need_resize_ = true;
         g_ptr_array_add(task_group, new_tsk2);
         //printf("add_task panel %d, desktop %d, task %s\n", i, j, new_tsk2->title);
     }
@@ -179,17 +179,17 @@ void RemoveTask(Task* tsk) {
 
     for (size_t i = 0; i < task_group->len; ++i) {
         auto tsk2 = static_cast<Task*>(g_ptr_array_index(task_group, i));
-        auto tskbar = reinterpret_cast<Taskbar*>(tsk2->parent);
+        auto tskbar = reinterpret_cast<Taskbar*>(tsk2->parent_);
 
-        auto tsk2_iter = std::find(tskbar->children.begin(),
-                                   tskbar->children.end(),
+        auto tsk2_iter = std::find(tskbar->children_.begin(),
+                                   tskbar->children_.end(),
                                    tsk2);
 
-        if (tsk2_iter != tskbar->children.end()) {
-            tskbar->children.erase(tsk2_iter);
+        if (tsk2_iter != tskbar->children_.end()) {
+            tskbar->children_.erase(tsk2_iter);
         }
 
-        tskbar->need_resize = true;
+        tskbar->need_resize_ = true;
 
         if (tsk2 == task_active) {
             task_active = 0;
@@ -215,7 +215,7 @@ void RemoveTask(Task* tsk) {
 
 
 bool Task::UpdateTitle() {
-    if (!panel->g_task.text && !panel->g_task.tooltip_enabled) {
+    if (!panel_->g_task.text && !panel_->g_task.tooltip_enabled) {
         return false;
     }
 
@@ -245,7 +245,7 @@ bool Task::UpdateTitle() {
     // add space before title
     char* title = (char*) malloc(strlen(name) + 2);
 
-    if (panel->g_task.icon) {
+    if (panel_->g_task.icon) {
         strcpy(title, " ");
     } else {
         title[0] = '\0';
@@ -289,7 +289,7 @@ void Task::SetTitle(std::string const& title) {
 
 
 void GetIcon(Task* tsk) {
-    Panel* panel = tsk->panel;
+    Panel* panel = tsk->panel_;
 
     if (!panel->g_task.icon) {
         return;
@@ -422,52 +422,52 @@ void Task::DrawIcon(int text_width) {
     // Find pos
     int pos_x;
 
-    if (panel->g_task.centered) {
-        if (panel->g_task.text) {
-            pos_x = (width - text_width - panel->g_task.icon_size1) / 2;
+    if (panel_->g_task.centered) {
+        if (panel_->g_task.text) {
+            pos_x = (width_ - text_width - panel_->g_task.icon_size1) / 2;
         } else {
-            pos_x = (width - panel->g_task.icon_size1) / 2;
+            pos_x = (width_ - panel_->g_task.icon_size1) / 2;
         }
     } else {
-        pos_x = panel->g_task.paddingxlr + bg->border.width;
+        pos_x = panel_->g_task.padding_x_lr_ + bg_->border.width;
     }
 
     // Render
     imlib_context_set_image(icon[current_state]);
 
     if (server.real_transparency) {
-        RenderImage(pix, pos_x, panel->g_task.icon_posy,
+        RenderImage(pix_, pos_x, panel_->g_task.icon_posy,
                     imlib_image_get_width(), imlib_image_get_height());
     } else {
-        imlib_context_set_drawable(pix);
-        imlib_render_image_on_drawable(pos_x, panel->g_task.icon_posy);
+        imlib_context_set_drawable(pix_);
+        imlib_render_image_on_drawable(pos_x, panel_->g_task.icon_posy);
     }
 }
 
 
 void Task::DrawForeground(cairo_t* c) {
-    state_pix[current_state] = pix;
+    state_pix[current_state] = pix_;
 
     int width = 0;
     int height = 0;
     //printf("draw_task %d %d\n", posx, posy);
 
-    if (panel->g_task.text) {
+    if (panel_->g_task.text) {
         /* Layout */
         PangoLayout* layout = pango_cairo_create_layout(c);
-        pango_layout_set_font_description(layout, panel->g_task.font_desc);
+        pango_layout_set_font_description(layout, panel_->g_task.font_desc);
         pango_layout_set_text(layout, title_.c_str(), -1);
 
         /* Drawing width and Cut text */
         // pango use U+22EF or U+2026
         pango_layout_set_width(layout,
-                               ((Taskbar*)parent)->text_width * PANGO_SCALE);
-        pango_layout_set_height(layout, panel->g_task.text_height * PANGO_SCALE);
+                               ((Taskbar*)parent_)->text_width * PANGO_SCALE);
+        pango_layout_set_height(layout, panel_->g_task.text_height * PANGO_SCALE);
         pango_layout_set_wrap(layout, PANGO_WRAP_CHAR);
         pango_layout_set_ellipsize(layout, PANGO_ELLIPSIZE_END);
 
         /* Center text */
-        if (panel->g_task.centered) {
+        if (panel_->g_task.centered) {
             pango_layout_set_alignment(layout, PANGO_ALIGN_CENTER);
         } else {
             pango_layout_set_alignment(layout, PANGO_ALIGN_LEFT);
@@ -475,26 +475,26 @@ void Task::DrawForeground(cairo_t* c) {
 
         pango_layout_get_pixel_size(layout, &width, &height);
 
-        Color* config_text = &panel->g_task.font[current_state];
+        Color* config_text = &panel_->g_task.font[current_state];
         cairo_set_source_rgba(c, config_text->color[0], config_text->color[1],
                               config_text->color[2], config_text->alpha);
 
         pango_cairo_update_layout(c, layout);
-        double text_posy = (panel->g_task.height - height) / 2.0;
-        cairo_move_to(c, panel->g_task.text_posx, text_posy);
+        double text_posy = (panel_->g_task.height_ - height) / 2.0;
+        cairo_move_to(c, panel_->g_task.text_posx, text_posy);
         pango_cairo_show_layout(c, layout);
 
-        if (panel->g_task.font_shadow) {
+        if (panel_->g_task.font_shadow) {
             cairo_set_source_rgba(c, 0.0, 0.0, 0.0, 0.5);
             pango_cairo_update_layout(c, layout);
-            cairo_move_to(c, panel->g_task.text_posx + 1, text_posy + 1);
+            cairo_move_to(c, panel_->g_task.text_posx + 1, text_posy + 1);
             pango_cairo_show_layout(c, layout);
         }
 
         g_object_unref(layout);
     }
 
-    if (panel->g_task.icon) {
+    if (panel_->g_task.icon) {
         DrawIcon(width);
     }
 }
@@ -502,10 +502,10 @@ void Task::DrawForeground(cairo_t* c) {
 
 void Task::OnChangeLayout() {
     long value[] = {
-        panel->posx + posx,
-        panel->posy + posy,
-        width,
-        height
+        panel_->posx_ + posx_,
+        panel_->posy_ + posy_,
+        width_,
+        height_
     };
 
     XChangeProperty(server.dsp, win, server.atoms_["_NET_WM_ICON_GEOMETRY"],
@@ -535,14 +535,14 @@ Task* FindActiveTask(Task* current_task, Task* active_task) {
         return active_task;
     }
 
-    Taskbar* tskbar = reinterpret_cast<Taskbar*>(current_task->parent);
-    auto it = tskbar->children.begin();
+    Taskbar* tskbar = reinterpret_cast<Taskbar*>(current_task->parent_);
+    auto it = tskbar->children_.begin();
 
     if (taskbarname_enabled) {
         ++it;
     }
 
-    for (; it != tskbar->children.end(); ++it) {
+    for (; it != tskbar->children_.end(); ++it) {
         auto tsk = static_cast<Task*>(*it);
 
         if (tsk->win == active_task->win) {
@@ -558,20 +558,20 @@ Task* NextTask(Task* tsk) {
         return nullptr;
     }
 
-    auto tskbar = reinterpret_cast<Taskbar*>(tsk->parent);
-    auto first = tskbar->children.begin();
+    auto tskbar = reinterpret_cast<Taskbar*>(tsk->parent_);
+    auto first = tskbar->children_.begin();
 
     if (taskbarname_enabled) {
         ++first;
     }
 
-    auto it = std::find(first, tskbar->children.end(), tsk);
+    auto it = std::find(first, tskbar->children_.end(), tsk);
 
-    if (it == tskbar->children.end()) {
+    if (it == tskbar->children_.end()) {
         return nullptr;
     }
 
-    if (++it == tskbar->children.end()) {
+    if (++it == tskbar->children_.end()) {
         return static_cast<Task*>(*it);
     }
 
@@ -583,21 +583,21 @@ Task* PreviousTask(Task* tsk) {
         return nullptr;
     }
 
-    auto tskbar = reinterpret_cast<Taskbar*>(tsk->parent);
-    auto first = tskbar->children.begin();
+    auto tskbar = reinterpret_cast<Taskbar*>(tsk->parent_);
+    auto first = tskbar->children_.begin();
 
     if (taskbarname_enabled) {
         ++first;
     }
 
-    auto it = std::find(tskbar->children.begin(), tskbar->children.end(), tsk);
+    auto it = std::find(tskbar->children_.begin(), tskbar->children_.end(), tsk);
 
-    if (it == tskbar->children.end()) {
+    if (it == tskbar->children_.end()) {
         return nullptr;
     }
 
     if (it-- == first) {
-        return static_cast<Task*>(tskbar->children.back());
+        return static_cast<Task*>(tskbar->children_.back());
     }
 
     return static_cast<Task*>(*it);
@@ -640,11 +640,11 @@ void SetTaskState(Task* tsk, int state) {
             for (size_t i = 0; i < task_group->len; ++i) {
                 auto tsk1 = static_cast<Task*>(g_ptr_array_index(task_group, i));
                 tsk1->current_state = state;
-                tsk1->bg = panel1[0].g_task.background[state];
-                tsk1->pix = tsk1->state_pix[state];
+                tsk1->bg_ = panel1[0].g_task.background[state];
+                tsk1->pix_ = tsk1->state_pix[state];
 
                 if (tsk1->state_pix[state] == 0) {
-                    tsk1->need_redraw = true;
+                    tsk1->need_redraw_ = true;
                 }
 
                 auto it = std::find(urgent_list.begin(),
@@ -673,8 +673,8 @@ void set_task_redraw(Task* tsk) {
         tsk->state_pix[k] = 0;
     }
 
-    tsk->pix = 0;
-    tsk->need_redraw = true;
+    tsk->pix_ = 0;
+    tsk->need_redraw_ = true;
 }
 
 

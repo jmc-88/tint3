@@ -60,12 +60,12 @@ void init_taskbarname_panel(void* p) {
     for (int j = 0; j < panel->nb_desktop; ++j) {
         Taskbar* tskbar = &panel->taskbar[j];
         tskbar->bar_name = panel->g_taskbar.area_name;
-        tskbar->bar_name.parent = reinterpret_cast<Area*>(tskbar);
+        tskbar->bar_name.parent_ = reinterpret_cast<Area*>(tskbar);
 
         if (j == server.desktop) {
-            tskbar->bar_name.bg = panel->g_taskbar.background_name[TASKBAR_ACTIVE];
+            tskbar->bar_name.bg_ = panel->g_taskbar.background_name[TASKBAR_ACTIVE];
         } else {
-            tskbar->bar_name.bg = panel->g_taskbar.background_name[TASKBAR_NORMAL];
+            tskbar->bar_name.bg_ = panel->g_taskbar.background_name[TASKBAR_NORMAL];
         }
 
         // use desktop number if name is missing
@@ -76,7 +76,7 @@ void init_taskbarname_panel(void* p) {
         }
 
         // append the name at the beginning of taskbar
-        tskbar->children.push_back(&tskbar->bar_name);
+        tskbar->children_.push_back(&tskbar->bar_name);
     }
 }
 
@@ -94,11 +94,11 @@ void cleanup_taskbarname() {
                 tskbar->bar_name.reset_state_pixmap(k);
             }
 
-            auto it = std::find(tskbar->children.begin(), tskbar->children.end(),
+            auto it = std::find(tskbar->children_.begin(), tskbar->children_.end(),
                                 &tskbar->bar_name);
 
-            if (it != tskbar->children.end()) {
-                tskbar->children.erase(it);
+            if (it != tskbar->children_.end()) {
+                tskbar->children_.erase(it);
             }
         }
     }
@@ -114,7 +114,7 @@ Taskbarname& Taskbarname::set_name(std::string const& name) {
 }
 
 void Taskbarname::DrawForeground(cairo_t* c) {
-    Taskbar* taskbar = reinterpret_cast<Taskbar*>(parent);
+    Taskbar* taskbar = reinterpret_cast<Taskbar*>(parent_);
 
     // TODO: the parent should return this value, without the children knowing
     // about its internals
@@ -126,12 +126,12 @@ void Taskbarname::DrawForeground(cairo_t* c) {
     // about its internals
     int state = (taskbar->desktop == server.desktop) ? TASKBAR_ACTIVE :
                 TASKBAR_NORMAL;
-    set_state_pixmap(state, pix);
+    set_state_pixmap(state, pix_);
 
     // draw content
     PangoLayout* layout = pango_cairo_create_layout(c);
     pango_layout_set_font_description(layout, taskbarname_font_desc);
-    pango_layout_set_width(layout, width * PANGO_SCALE);
+    pango_layout_set_width(layout, width_ * PANGO_SCALE);
     pango_layout_set_alignment(layout, PANGO_ALIGN_CENTER);
     pango_layout_set_text(layout, name_.c_str(), name_.length());
 
@@ -139,7 +139,7 @@ void Taskbarname::DrawForeground(cairo_t* c) {
                           config_text->color[2], config_text->alpha);
 
     pango_cairo_update_layout(c, layout);
-    cairo_move_to(c, 0, posy);
+    cairo_move_to(c, 0, posy_);
     pango_cairo_show_layout(c, layout);
 
     g_object_unref(layout);
@@ -148,29 +148,29 @@ void Taskbarname::DrawForeground(cairo_t* c) {
 
 
 bool Taskbarname::Resize() {
-    need_redraw = true;
+    need_redraw_ = true;
 
     int name_height, name_width, name_height_ink;
     GetTextSize2(
         taskbarname_font_desc,
         &name_height_ink, &name_height, &name_width,
-        panel->height, panel->width, name().c_str(),
+        panel_->height_, panel_->width_, name().c_str(),
         name().length());
 
     if (panel_horizontal) {
-        int new_size = name_width + (2 * (paddingxlr + bg->border.width));
+        int new_size = name_width + (2 * (padding_x_lr_ + bg_->border.width));
 
-        if (new_size != width) {
-            width = new_size;
-            posy = (height - name_height) / 2;
+        if (new_size != width_) {
+            width_ = new_size;
+            posy_ = (height_ - name_height) / 2;
             return true;
         }
     } else {
-        int new_size = name_height + (2 * (paddingxlr + bg->border.width));
+        int new_size = name_height + (2 * (padding_x_lr_ + bg_->border.width));
 
-        if (new_size != height) {
-            height = new_size;
-            posy = (height - name_height) / 2;
+        if (new_size != height_) {
+            height_ = new_size;
+            posy_ = (height_ - name_height) / 2;
             return true;
         }
     }

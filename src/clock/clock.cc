@@ -97,7 +97,7 @@ void UpdateClockSeconds(void* arg) {
 
     if (!time1_format.empty()) {
         for (i = 0 ; i < nb_panel ; i++) {
-            panel1[i].clock.need_resize = true;
+            panel1[i].clock.need_resize_ = true;
         }
     }
 
@@ -115,7 +115,7 @@ void UpdateClockMinutes(void* arg) {
 
         if (!time1_format.empty()) {
             for (i = 0 ; i < nb_panel ; i++) {
-                panel1[i].clock.need_resize = true;
+                panel1[i].clock.need_resize_ = true;
             }
         }
 
@@ -169,21 +169,21 @@ void InitClockPanel(void* p) {
     Panel* panel = static_cast<Panel*>(p);
     Clock* clock = &panel->clock;
 
-    if (clock->bg == 0) {
-        clock->bg = backgrounds.front();
+    if (clock->bg_ == 0) {
+        clock->bg_ = backgrounds.front();
     }
 
-    clock->parent = panel;
-    clock->panel = panel;
-    clock->size_mode = SIZE_BY_CONTENT;
+    clock->parent_ = panel;
+    clock->panel_ = panel;
+    clock->size_mode_ = SIZE_BY_CONTENT;
 
     // check consistency
     if (time1_format.empty()) {
         return;
     }
 
-    clock->need_resize = true;
-    clock->on_screen = 1;
+    clock->need_resize_ = true;
+    clock->on_screen_ = 1;
 
     if (!time_tooltip_format.empty()) {
         strftime(buf_tooltip, sizeof(buf_tooltip), time_tooltip_format.c_str(),
@@ -197,7 +197,7 @@ void Clock::DrawForeground(cairo_t* c) {
 
     // draw layout
     pango_layout_set_font_description(layout, time1_font_desc);
-    pango_layout_set_width(layout, width * PANGO_SCALE);
+    pango_layout_set_width(layout, width_ * PANGO_SCALE);
     pango_layout_set_alignment(layout, PANGO_ALIGN_CENTER);
     pango_layout_set_text(layout, buf_time, strlen(buf_time));
 
@@ -212,7 +212,7 @@ void Clock::DrawForeground(cairo_t* c) {
         pango_layout_set_font_description(layout, time2_font_desc);
         pango_layout_set_indent(layout, 0);
         pango_layout_set_text(layout, buf_date, strlen(buf_date));
-        pango_layout_set_width(layout, width * PANGO_SCALE);
+        pango_layout_set_width(layout, width_ * PANGO_SCALE);
 
         pango_cairo_update_layout(c, layout);
         cairo_move_to(c, 0, time2_posy);
@@ -224,7 +224,7 @@ void Clock::DrawForeground(cairo_t* c) {
 
 
 bool Clock::Resize() {
-    need_redraw = true;
+    need_redraw_ = true;
 
     strftime(buf_time, sizeof(buf_time), time1_format.c_str(),
              ClockGetTimeForTimezone(time1_timezone));
@@ -232,23 +232,23 @@ bool Clock::Resize() {
     int time_height_ink = 0, time_height = 0, time_width = 0;
     int date_height_ink = 0, date_height = 0, date_width = 0;
     GetTextSize2(time1_font_desc, &time_height_ink, &time_height, &time_width,
-                 panel->height, panel->width, buf_time, strlen(buf_time));
+                 panel_->height_, panel_->width_, buf_time, strlen(buf_time));
 
     if (!time2_format.empty()) {
         strftime(buf_date, sizeof(buf_date), time2_format.c_str(),
                  ClockGetTimeForTimezone(time2_timezone));
         GetTextSize2(time2_font_desc, &date_height_ink, &date_height, &date_width,
-                     panel->height, panel->width, buf_date, strlen(buf_date));
+                     panel_->height_, panel_->width_, buf_date, strlen(buf_date));
     }
 
     if (panel_horizontal) {
         int new_size = (time_width > date_width) ? time_width : date_width;
-        new_size += (2 * paddingxlr) + (2 * bg->border.width);
+        new_size += (2 * padding_x_lr_) + (2 * bg_->border.width);
 
-        if (new_size > width || new_size < (width - 6)) {
+        if (new_size > width_ || new_size < (width_ - 6)) {
             // we try to limit the number of resize
-            width = new_size + 1;
-            time1_posy = (height - time_height) / 2;
+            width_ = new_size + 1;
+            time1_posy = (height_ - time_height) / 2;
 
             if (!time2_format.empty()) {
                 time1_posy -= (date_height) / 2;
@@ -258,13 +258,13 @@ bool Clock::Resize() {
             return true;
         }
     } else {
-        int new_size = time_height + date_height + (2 * (paddingxlr +
-                       bg->border.width));
+        int new_size = time_height + date_height + (2 * (padding_x_lr_ +
+                       bg_->border.width));
 
-        if (new_size != height) {
+        if (new_size != height_) {
             // we try to limit the number of resize
-            height = new_size;
-            time1_posy = (height - time_height) / 2;
+            height_ = new_size;
+            time1_posy = (height_ - time_height) / 2;
 
             if (!time2_format.empty()) {
                 time1_posy -= (date_height) / 2;

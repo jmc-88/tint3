@@ -62,31 +62,33 @@ class Area {
     Area& Clone(Area const&);
 
     // coordinate relative to panel window
-    int posx, posy;
+    int posx_;
+    int posy_;
     // width and height including border
-    int width, height;
-    Pixmap pix;
-    Background* bg;
+    int width_;
+    int height_;
+    Pixmap pix_;
+    Background* bg_;
 
     // list of children Area objects
-    std::vector<Area*> children;
+    std::vector<Area*> children_;
 
     // object visible on screen.
     // An object (like systray) could be enabled but hidden (because no tray icon).
-    int on_screen;
+    int on_screen_;
     // way to calculate the size (SIZE_BY_CONTENT or SIZE_BY_LAYOUT)
-    int size_mode;
+    int size_mode_;
     // need to calculate position and width
-    bool need_resize;
+    bool need_resize_;
     // need redraw Pixmap
-    bool need_redraw;
+    bool need_redraw_;
     // paddingxlr = horizontal padding left/right
     // paddingx = horizontal padding between childs
-    int paddingxlr, paddingx, paddingy;
+    int padding_x_lr_, padding_x_, padding_y_;
     // parent Area
-    Area* parent;
+    Area* parent_;
     // panel
-    Panel* panel;
+    Panel* panel_;
 
     // on startup, initialize fixed pos/size
     void InitRendering(int);
@@ -99,7 +101,7 @@ class Area {
     int ResizeByLayout(int);
 
     // after pos/size changed, the rendering engine will call on_change_layout()
-    int on_changed;
+    int on_changed_;
     virtual void OnChangeLayout();
 
     virtual std::string GetTooltipText();

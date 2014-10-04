@@ -66,7 +66,7 @@ void XSettingsNotifyCallback(const char* name, XSettingsAction action,
                 launcher.CleanupTheme();
                 launcher.LoadThemes();
                 launcher.LoadIcons();
-                launcher.need_resize = true;
+                launcher.need_resize_ = true;
             }
         }
     }

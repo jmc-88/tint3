@@ -266,17 +266,17 @@ void Cleanup() {
 void GetSnapshot(const char* path) {
     Panel& panel = panel1[0];
 
-    if (panel.width > server.monitor[0].width) {
-        panel.width = server.monitor[0].width;
+    if (panel.width_ > server.monitor[0].width) {
+        panel.width_ = server.monitor[0].width;
     }
 
-    panel.temp_pmap = XCreatePixmap(server.dsp, server.root_win, panel.width,
-                                    panel.height, server.depth);
+    panel.temp_pmap = XCreatePixmap(server.dsp, server.root_win, panel.width_,
+                                    panel.height_, server.depth);
     panel.Render();
 
     imlib_context_set_drawable(panel.temp_pmap);
     Imlib_Image img = imlib_create_image_from_drawable(
-                          0, 0, 0, panel.width, panel.height, 0);
+                          0, 0, 0, panel.width_, panel.height_, 0);
 
     imlib_context_set_image(img);
 
@@ -464,16 +464,16 @@ void EventButtonMotionNotify(XEvent* e) {
     Task* event_task = panel->ClickTask(e->xbutton.x, e->xbutton.y);
 
     // If the event takes place on the same taskbar as the task being dragged
-    if (event_taskbar == (Taskbar*)task_drag->parent) {
+    if (event_taskbar == (Taskbar*)task_drag->parent_) {
         // Swap the task_drag with the task on the event's location (if they differ)
         if (event_task && event_task != task_drag) {
-            auto& children = event_taskbar->children;
+            auto& children = event_taskbar->children_;
             auto drag_iter = std::find(children.begin(), children.end(), task_drag);
             auto task_iter = std::find(children.begin(), children.end(), event_task);
 
             if (drag_iter != children.end() && task_iter != children.end()) {
                 std::iter_swap(drag_iter, task_iter);
-                event_taskbar->need_resize = true;
+                event_taskbar->need_resize_ = true;
                 panel_refresh = 1;
                 task_dragged = 1;
             }
@@ -483,33 +483,33 @@ void EventButtonMotionNotify(XEvent* e) {
             return;
         }
 
-        auto drag_taskbar = reinterpret_cast<Taskbar*>(task_drag->parent);
+        auto drag_taskbar = reinterpret_cast<Taskbar*>(task_drag->parent_);
         auto drag_taskbar_iter = std::find(
-                                     drag_taskbar->children.begin(),
-                                     drag_taskbar->children.end(),
+                                     drag_taskbar->children_.begin(),
+                                     drag_taskbar->children_.end(),
                                      task_drag);
 
-        if (drag_taskbar_iter != drag_taskbar->children.end()) {
-            drag_taskbar->children.erase(drag_taskbar_iter);
+        if (drag_taskbar_iter != drag_taskbar->children_.end()) {
+            drag_taskbar->children_.erase(drag_taskbar_iter);
         }
 
-        if (event_taskbar->posx > drag_taskbar->posx
-            || event_taskbar->posy > drag_taskbar->posy) {
-            auto& children = event_taskbar->children;
+        if (event_taskbar->posx_ > drag_taskbar->posx_ ||
+            event_taskbar->posy_ > drag_taskbar->posy_) {
+            auto& children = event_taskbar->children_;
             size_t i = (taskbarname_enabled) ? 1 : 0;
             children.insert(children.begin() + i, task_drag);
         } else {
-            event_taskbar->children.push_back(task_drag);
+            event_taskbar->children_.push_back(task_drag);
         }
 
         // Move task to other desktop (but avoid the 'Window desktop changed' code in 'event_property_notify')
-        task_drag->parent = event_taskbar;
+        task_drag->parent_ = event_taskbar;
         task_drag->desktop = event_taskbar->desktop;
 
         WindowSetDesktop(task_drag->win, event_taskbar->desktop);
 
-        event_taskbar->need_resize = true;
-        drag_taskbar->need_resize = true;
+        event_taskbar->need_resize_ = true;
+        drag_taskbar->need_resize_ = true;
         task_dragged = 1;
         panel_refresh = 1;
     }
@@ -659,7 +659,7 @@ void EventPropertyNotify(XEvent* e) {
 
                     if (tskbar.bar_name.name() != name) {
                         tskbar.bar_name.set_name(name);
-                        tskbar.bar_name.need_resize = true;
+                        tskbar.bar_name.need_resize_ = true;
                     }
                 }
             }
@@ -685,7 +685,7 @@ void EventPropertyNotify(XEvent* e) {
                 InitTaskbarPanel(&panel1[i]);
                 panel1[i].SetItemsOrder();
                 visible_taskbar(&panel1[i]);
-                panel1[i].need_resize = true;
+                panel1[i].need_resize_ = true;
             }
 
             TaskRefreshTasklist();
@@ -710,36 +710,36 @@ void EventPropertyNotify(XEvent* e) {
 
                 if (server.nb_desktop > old_desktop) {
                     tskbar = &panel->taskbar[old_desktop];
-                    auto it = tskbar->children.begin();
+                    auto it = tskbar->children_.begin();
 
                     if (taskbarname_enabled) {
                         ++it;
                     }
 
-                    for (; it != tskbar->children.end(); ++it) {
+                    for (; it != tskbar->children_.end(); ++it) {
                         auto tsk = static_cast<Task*>(*it);
 
                         if (tsk->desktop == ALLDESKTOP) {
-                            tsk->on_screen = 0;
-                            tskbar->need_resize = true;
+                            tsk->on_screen_ = 0;
+                            tskbar->need_resize_ = true;
                             panel_refresh = 1;
                         }
                     }
                 }
 
                 tskbar = &panel->taskbar[server.desktop];
-                auto it = tskbar->children.begin();
+                auto it = tskbar->children_.begin();
 
                 if (taskbarname_enabled) {
                     ++it;
                 }
 
-                for (; it != tskbar->children.end(); ++it) {
+                for (; it != tskbar->children_.end(); ++it) {
                     auto tsk = static_cast<Task*>(*it);
 
                     if (tsk->desktop == ALLDESKTOP) {
-                        tsk->on_screen = 1;
-                        tskbar->need_resize = true;
+                        tsk->on_screen_ = 1;
+                        tskbar->need_resize_ = true;
                     }
                 }
             }
@@ -900,7 +900,7 @@ void EventConfigureNotify(Window win) {
         return;
     }
 
-    Panel* p = tsk->panel;
+    Panel* p = tsk->panel_;
 
     if (p->monitor != WindowGetMonitor(win)) {
         RemoveTask(tsk);
@@ -1215,17 +1215,17 @@ start:
                         XFreePixmap(server.dsp, panel->temp_pmap);
                     }
 
-                    panel->temp_pmap = XCreatePixmap(server.dsp, server.root_win, panel->width,
-                                                     panel->height, server.depth);
+                    panel->temp_pmap = XCreatePixmap(server.dsp, server.root_win, panel->width_,
+                                                     panel->height_, server.depth);
                     panel->Render();
                     XCopyArea(server.dsp, panel->temp_pmap, panel->main_win, server.gc, 0, 0,
-                              panel->width, panel->height, 0, 0);
+                              panel->width_, panel->height_, 0, 0);
                 }
             }
 
             XFlush(server.dsp);
 
-            panel = systray.panel;
+            panel = systray.panel_;
 
             if (refresh_systray && panel && !panel->is_hidden) {
                 refresh_systray = 0;
@@ -1337,7 +1337,7 @@ start:
                             break;
                         }
 
-                        panel = systray.panel;
+                        panel = systray.panel_;
 
                         if (e.xany.window == panel->main_win) { // reparented to us
                             break;

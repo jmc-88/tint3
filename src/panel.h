@@ -82,7 +82,7 @@ class Panel : public Area {
     Pixmap temp_pmap;
 
     // position relative to root window
-    int posx, posy;
+    int posx_, posy_;
     int marginx, marginy;
     int percent_x, percent_y;
     // location of the panel (monitor number)

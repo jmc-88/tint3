@@ -88,14 +88,14 @@ void InitLauncherPanel(void* p) {
     Panel* panel = static_cast<Panel*>(p);
     Launcher* launcher = &panel->launcher;
 
-    launcher->parent = panel;
-    launcher->panel = panel;
-    launcher->size_mode = SIZE_BY_CONTENT;
-    launcher->need_resize = true;
-    launcher->need_redraw = true;
+    launcher->parent_ = panel;
+    launcher->panel_ = panel;
+    launcher->size_mode_ = SIZE_BY_CONTENT;
+    launcher->need_resize_ = true;
+    launcher->need_redraw_ = true;
 
-    if (launcher->bg == 0) {
-        launcher->bg = backgrounds.front();
+    if (launcher->bg_ == 0) {
+        launcher->bg_ = backgrounds.front();
     }
 
     // check consistency
@@ -103,7 +103,7 @@ void InitLauncherPanel(void* p) {
         return;
     }
 
-    launcher->on_screen = 1;
+    launcher->on_screen_ = 1;
     panel_refresh = 1;
 
     launcher->LoadThemes();
@@ -151,12 +151,12 @@ bool Launcher::Resize() {
     int icon_size;
 
     if (panel_horizontal) {
-        icon_size = height;
+        icon_size = height_;
     } else {
-        icon_size = width;
+        icon_size = width_;
     }
 
-    icon_size -= (2 * bg->border.width) - (2 * paddingy);
+    icon_size -= (2 * bg_->border.width) - (2 * padding_y_);
 
     if (launcher_max_icon_size > 0 && icon_size > launcher_max_icon_size) {
         icon_size = launcher_max_icon_size;
@@ -166,8 +166,8 @@ bool Launcher::Resize() {
     for (auto& launcher_icon : list_icons_) {
         if (launcher_icon->icon_size_ != icon_size || !launcher_icon->icon_original_) {
             launcher_icon->icon_size_ = icon_size;
-            launcher_icon->width = launcher_icon->icon_size_;
-            launcher_icon->height = launcher_icon->icon_size_;
+            launcher_icon->width_ = launcher_icon->icon_size_;
+            launcher_icon->height_ = launcher_icon->icon_size_;
 
             // Get the path for an icon file with the new size
             std::string new_icon_path = GetIconPath(launcher_icon->icon_name_,
@@ -227,39 +227,41 @@ bool Launcher::Resize() {
 
     if (panel_horizontal) {
         if (count == 0) {
-            width = 0;
+            width_ = 0;
         } else {
-            int height_ = height - 2 * bg->border.width - 2 * paddingy;
+            int height = height_ - 2 * bg_->border.width - 2 * padding_y_;
             // here icons_per_column always higher than 0
-            icons_per_column = (height_ + paddingx) / (icon_size + paddingx);
-            marging = height_ - (icons_per_column - 1) * (icon_size + paddingx) - icon_size;
+            icons_per_column = (height + padding_x_) / (icon_size + padding_x_);
+            marging = height - (icons_per_column - 1) * (icon_size + padding_x_) -
+                      icon_size;
             icons_per_row = count / icons_per_column + (count % icons_per_column != 0);
-            width = (2 * bg->border.width) + (2 * paddingxlr) + (icon_size * icons_per_row)
-                    + ((icons_per_row - 1) * paddingx);
+            width_ = (2 * bg_->border.width) + (2 * padding_x_lr_) +
+                     (icon_size * icons_per_row)
+                     + ((icons_per_row - 1) * padding_x_);
         }
     } else {
         if (count == 0) {
-            height = 0;
+            height_ = 0;
         } else {
-            int width_ = width - 2 * bg->border.width - 2 * paddingy;
+            int width = width_ - 2 * bg_->border.width - 2 * padding_y_;
             // here icons_per_row always higher than 0
-            icons_per_row = (width_ + paddingx) / (icon_size + paddingx);
-            marging = width_ - (icons_per_row - 1) * (icon_size + paddingx) - icon_size;
+            icons_per_row = (width + padding_x_) / (icon_size + padding_x_);
+            marging = width - (icons_per_row - 1) * (icon_size + padding_x_) - icon_size;
             icons_per_column = count / icons_per_row + (count % icons_per_row != 0);
-            height = (2 * bg->border.width) + (2 * paddingxlr) + (icon_size *
-                     icons_per_column) + ((icons_per_column - 1) * paddingx);
+            height_ = (2 * bg_->border.width) + (2 * padding_x_lr_) + (icon_size *
+                      icons_per_column) + ((icons_per_column - 1) * padding_x_);
         }
     }
 
     int posx, posy;
-    int start = bg->border.width + paddingy + marging / 2;
+    int start = bg_->border.width + padding_y_ + marging / 2;
 
     if (panel_horizontal) {
         posy = start;
-        posx = bg->border.width + paddingxlr;
+        posx = bg_->border.width + padding_x_lr_;
     } else {
         posx = start;
-        posy = bg->border.width + paddingxlr;
+        posy = bg_->border.width + padding_x_lr_;
     }
 
     int i = 1;
@@ -270,17 +272,17 @@ bool Launcher::Resize() {
 
         if (panel_horizontal) {
             if (i % icons_per_column) {
-                posy += (icon_size + paddingx);
+                posy += (icon_size + padding_x_);
             } else {
                 posy = start;
-                posx += (icon_size + paddingx);
+                posx += (icon_size + padding_x_);
             }
         } else {
             if (i % icons_per_column) {
-                posx += (icon_size + paddingx);
+                posx += (icon_size + padding_x_);
             } else {
                 posx = start;
-                posy += (icon_size + paddingx);
+                posy += (icon_size + padding_x_);
             }
         }
 
@@ -302,8 +304,8 @@ LauncherIcon::~LauncherIcon() {
 // Here we override the default layout of the icons; normally Area layouts its children
 // in a stack; we need to layout them in a kind of table
 void LauncherIcon::OnChangeLayout() {
-    posy = (parent->posy + y_);
-    posx = (parent->posx + x_);
+    posy_ = (parent_->posy_ + y_);
+    posx_ = (parent_->posx_ + x_);
 }
 
 std::string LauncherIcon::GetTooltipText() {
@@ -315,10 +317,10 @@ void LauncherIcon::DrawForeground(cairo_t* c) {
     imlib_context_set_image(icon_scaled_);
 
     if (server.real_transparency) {
-        RenderImage(pix, 0, 0, imlib_image_get_width(),
+        RenderImage(pix_, 0, 0, imlib_image_get_width(),
                     imlib_image_get_height());
     } else {
-        imlib_context_set_drawable(pix);
+        imlib_context_set_drawable(pix_);
         imlib_render_image_on_drawable(0, 0);
     }
 }
@@ -734,13 +736,13 @@ void Launcher::LoadIcons() {
 
         if (entry.exec) {
             auto launcher_icon = new LauncherIcon();
-            launcher_icon->parent = this;
-            launcher_icon->panel = panel;
-            launcher_icon->size_mode = SIZE_BY_CONTENT;
-            launcher_icon->need_resize = false;
-            launcher_icon->need_redraw = true;
-            launcher_icon->bg = backgrounds.front();
-            launcher_icon->on_screen = 1;
+            launcher_icon->parent_ = this;
+            launcher_icon->panel_ = panel_;
+            launcher_icon->size_mode_ = SIZE_BY_CONTENT;
+            launcher_icon->need_resize_ = false;
+            launcher_icon->need_redraw_ = true;
+            launcher_icon->bg_ = backgrounds.front();
+            launcher_icon->on_screen_ = 1;
 
             launcher_icon->is_app_desktop_ = 1;
             launcher_icon->cmd_ = strdup(entry.exec);

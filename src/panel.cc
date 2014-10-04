@@ -101,7 +101,7 @@ void UpdateStrut(Panel* p) {
     long struts [12] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
     if (panel_horizontal) {
-        int height = p->height + p->marginy;
+        int height = p->height_ + p->marginy;
 
         if (panel_strut_policy == STRUT_MINIMUM
             || (panel_strut_policy == STRUT_FOLLOW_SIZE && p->is_hidden)) {
@@ -110,17 +110,17 @@ void UpdateStrut(Panel* p) {
 
         if (panel_position & TOP) {
             struts[2] = height + monitor.y;
-            struts[8] = p->posx;
+            struts[8] = p->posx_;
             // p->width - 1 allowed full screen on monitor 2
-            struts[9] = p->posx + p->width - 1;
+            struts[9] = p->posx_ + p->width_ - 1;
         } else {
             struts[3] = height + screen_height - monitor.y - monitor.height;
-            struts[10] = p->posx;
+            struts[10] = p->posx_;
             // p->width - 1 allowed full screen on monitor 2
-            struts[11] = p->posx + p->width - 1;
+            struts[11] = p->posx_ + p->width_ - 1;
         }
     } else {
-        int width = p->width + p->marginx;
+        int width = p->width_ + p->marginx;
 
         if (panel_strut_policy == STRUT_MINIMUM
             || (panel_strut_policy == STRUT_FOLLOW_SIZE && p->is_hidden)) {
@@ -129,14 +129,14 @@ void UpdateStrut(Panel* p) {
 
         if (panel_position & LEFT) {
             struts[0] = width + monitor.x;
-            struts[4] = p->posy;
+            struts[4] = p->posy_;
             // p->width - 1 allowed full screen on monitor 2
-            struts[5] = p->posy + p->height - 1;
+            struts[5] = p->posy_ + p->height_ - 1;
         } else {
             struts[1] = width + screen_width - monitor.x - monitor.width;
-            struts[6] = p->posy;
+            struts[6] = p->posy_;
             // p->width - 1 allowed full screen on monitor 2
-            struts[7] = p->posy + p->height - 1;
+            struts[7] = p->posy_ + p->height_ - 1;
         }
     }
 
@@ -265,15 +265,15 @@ void InitPanel() {
             p->monitor = i;
         }
 
-        if (p->bg == 0) {
-            p->bg = backgrounds.front();
+        if (p->bg_ == 0) {
+            p->bg_ = backgrounds.front();
         }
 
-        p->parent = p;
-        p->panel = p;
-        p->on_screen = 1;
-        p->need_resize = true;
-        p->size_mode = SIZE_BY_LAYOUT;
+        p->parent_ = p;
+        p->panel_ = p;
+        p->on_screen_ = 1;
+        p->need_resize_ = true;
+        p->size_mode_ = SIZE_BY_LAYOUT;
         p->InitSizeAndPosition();
 
         // add children according to panel_items
@@ -316,8 +316,8 @@ void InitPanel() {
             attr.border_pixel = 0;
 
             unsigned long mask = CWEventMask | CWColormap | CWBackPixel | CWBorderPixel;
-            p->main_win = XCreateWindow(server.dsp, server.root_win, p->posx, p->posy,
-                                        p->width, p->height, 0, server.depth, InputOutput, server.visual,
+            p->main_win = XCreateWindow(server.dsp, server.root_win, p->posx_, p->posy_,
+                                        p->width_, p->height_, 0, server.depth, InputOutput, server.visual,
                                         mask, &attr);
         }
 
@@ -369,89 +369,90 @@ void Panel::InitSizeAndPosition() {
     // detect panel size
     if (panel_horizontal) {
         if (percent_x) {
-            width = (float)server.monitor[monitor].width * width / 100;
+            width_ = (float)server.monitor[monitor].width * width_ / 100;
         }
 
         if (percent_y) {
-            height = (float)server.monitor[monitor].height * height / 100;
+            height_ = (float)server.monitor[monitor].height * height_ / 100;
         }
 
-        if (width + marginx > server.monitor[monitor].width) {
-            width = server.monitor[monitor].width - marginx;
+        if (width_ + marginx > server.monitor[monitor].width) {
+            width_ = server.monitor[monitor].width - marginx;
         }
 
-        if (bg->border.rounded > height / 2) {
+        if (bg_->border.rounded > height_ / 2) {
             printf("panel_background_id rounded is too big... please fix your tint3rc\n");
             /* backgrounds.push_back(*bg); */
             /* bg = backgrounds.back(); */
-            bg->border.rounded = height / 2;
+            bg_->border.rounded = height_ / 2;
         }
     } else {
-        int old_panel_height = height;
+        int old_panel_height = height_;
 
         if (percent_x) {
-            height = (float)server.monitor[monitor].height * width / 100;
+            height_ = (float)server.monitor[monitor].height * width_ / 100;
         } else {
-            height = width;
+            height_ = width_;
         }
 
         if (percent_y) {
-            width = (float)server.monitor[monitor].width * old_panel_height / 100;
+            width_ = (float)server.monitor[monitor].width * old_panel_height / 100;
         } else {
-            width = old_panel_height;
+            width_ = old_panel_height;
         }
 
-        if (height + marginy >
+        if (height_ + marginy >
             server.monitor[monitor].height) {
-            height = server.monitor[monitor].height - marginy;
+            height_ = server.monitor[monitor].height - marginy;
         }
 
-        if (bg->border.rounded > width / 2) {
+        if (bg_->border.rounded > width_ / 2) {
             printf("panel_background_id rounded is too big... please fix your tint3rc\n");
             /* backgrounds.push_back(*bg); */
             /* bg = backgrounds.back(); */
-            bg->border.rounded = width / 2;
+            bg_->border.rounded = width_ / 2;
         }
     }
 
     // panel position determined here
     if (panel_position & LEFT) {
-        posx = server.monitor[monitor].x + marginx;
+        posx_ = server.monitor[monitor].x + marginx;
     } else {
         if (panel_position & RIGHT) {
-            posx = server.monitor[monitor].x + server.monitor[monitor].width - width -
-                   marginx;
+            posx_ = server.monitor[monitor].x + server.monitor[monitor].width - width_ -
+                    marginx;
         } else {
             if (panel_horizontal) {
-                posx = server.monitor[monitor].x + ((server.monitor[monitor].width - width) /
-                                                    2);
+                posx_ = server.monitor[monitor].x + ((server.monitor[monitor].width - width_) /
+                                                     2);
             } else {
-                posx = server.monitor[monitor].x + marginx;
+                posx_ = server.monitor[monitor].x + marginx;
             }
         }
     }
 
     if (panel_position & TOP) {
-        posy = server.monitor[monitor].y + marginy;
+        posy_ = server.monitor[monitor].y + marginy;
     } else {
         if (panel_position & BOTTOM) {
-            posy = server.monitor[monitor].y + server.monitor[monitor].height - height -
-                   marginy;
+            posy_ = server.monitor[monitor].y + server.monitor[monitor].height - height_ -
+                    marginy;
         } else {
-            posy = server.monitor[monitor].y + ((server.monitor[monitor].height - height) /
-                                                2);
+            posy_ = server.monitor[monitor].y + ((server.monitor[monitor].height -
+                                                  height_) /
+                                                 2);
         }
     }
 
     // autohide or strut_policy=minimum
-    int diff = (panel_horizontal ? height : width) - panel_autohide_height;
+    int diff = (panel_horizontal ? height_ : width_) - panel_autohide_height;
 
     if (panel_horizontal) {
-        hidden_width = width;
-        hidden_height = height - diff;
+        hidden_width = width_;
+        hidden_height = height_ - diff;
     } else {
-        hidden_width = width - diff;
-        hidden_height = height;
+        hidden_width = width_ - diff;
+        hidden_height = height_;
     }
 
     // printf("panel : posx %d, posy %d, width %d, height %d\n", posx, posy, width, height);
@@ -463,13 +464,13 @@ bool Panel::Resize() {
 
     if (panel_mode != MULTI_DESKTOP && taskbar_enabled) {
         // propagate width/height on hidden taskbar
-        int width = taskbar[server.desktop].width;
-        int height = taskbar[server.desktop].height;
+        int width = taskbar[server.desktop].width_;
+        int height = taskbar[server.desktop].height_;
 
         for (int i = 0 ; i < nb_desktop ; ++i) {
-            taskbar[i].width = width;
-            taskbar[i].height = height;
-            taskbar[i].need_resize = true;
+            taskbar[i].width_ = width;
+            taskbar[i].height_ = height;
+            taskbar[i].need_resize_ = true;
         }
     }
 
@@ -485,23 +486,23 @@ void Panel::Render() {
 
 
 void Panel::SetItemsOrder() {
-    children.clear();
+    children_.clear();
 
     for (char item : panel_items_order) {
         if (item == 'L') {
-            children.push_back(&launcher);
+            children_.push_back(&launcher);
         }
 
         if (item == 'T') {
             for (int j = 0 ; j < nb_desktop ; j++) {
-                children.push_back(&taskbar[j]);
+                children_.push_back(&taskbar[j]);
             }
         }
 
 #ifdef ENABLE_BATTERY
 
         if (item == 'B') {
-            children.push_back(&battery);
+            children_.push_back(&battery);
         }
 
 #endif
@@ -512,11 +513,11 @@ void Panel::SetItemsOrder() {
         if (item == 'S' && this == panel1) {
             // TODO : check systray is only on 1 panel
             // at the moment only on panel1[0] allowed
-            children.push_back(&systray);
+            children_.push_back(&systray);
         }
 
         if (item == 'C') {
-            children.push_back(&clock);
+            children_.push_back(&clock);
         }
     }
 
@@ -585,14 +586,14 @@ void Panel::SetProperties() {
 
     // Fixed position and non-resizable window
     // Allow panel move and resize when tint3 reload config file
-    int minwidth = panel_autohide ? hidden_width : width;
-    int minheight = panel_autohide ? hidden_height : height;
+    int minwidth = panel_autohide ? hidden_width : width_;
+    int minheight = panel_autohide ? hidden_height : height_;
     XSizeHints size_hints;
     size_hints.flags = PPosition | PMinSize | PMaxSize;
     size_hints.min_width = minwidth;
-    size_hints.max_width = width;
+    size_hints.max_width = width_;
     size_hints.min_height = minheight;
-    size_hints.max_height = height;
+    size_hints.max_height = height_;
     XSetWMNormalHints(server.dsp, main_win, &size_hints);
 
     // Set WM_CLASS
@@ -605,23 +606,23 @@ void Panel::SetProperties() {
 
 
 void Panel::SetBackground() {
-    if (pix) {
-        XFreePixmap(server.dsp, pix);
+    if (pix_) {
+        XFreePixmap(server.dsp, pix_);
     }
 
-    pix = XCreatePixmap(server.dsp, server.root_win, width,
-                        height, server.depth);
+    pix_ = XCreatePixmap(server.dsp, server.root_win, width_,
+                         height_, server.depth);
 
     int xoff = 0, yoff = 0;
 
     if (panel_horizontal && panel_position & BOTTOM) {
-        yoff = height - hidden_height;
+        yoff = height_ - hidden_height;
     } else if (!panel_horizontal && panel_position & RIGHT) {
-        xoff = width - hidden_width;
+        xoff = width_ - hidden_width;
     }
 
     if (server.real_transparency) {
-        clear_pixmap(pix, 0, 0, width, height);
+        clear_pixmap(pix_, 0, 0, width_, height_);
     } else {
         GetRootPixmap();
         // copy background (server.root_pmap) in panel.pix
@@ -636,13 +637,13 @@ void Panel::SetBackground() {
         }
 
         XSetTSOrigin(server.dsp, server.gc, -x, -y);
-        XFillRectangle(server.dsp, pix, server.gc, 0, 0, width,
-                       height);
+        XFillRectangle(server.dsp, pix_, server.gc, 0, 0, width_,
+                       height_);
     }
 
     // draw background panel
-    auto cs = cairo_xlib_surface_create(server.dsp, pix, server.visual,
-                                        width, height);
+    auto cs = cairo_xlib_surface_create(server.dsp, pix_, server.visual,
+                                        width_, height_);
     auto c = cairo_create(cs);
     DrawBackground(c);
     cairo_destroy(c);
@@ -655,12 +656,12 @@ void Panel::SetBackground() {
 
         hidden_pixmap = XCreatePixmap(server.dsp, server.root_win, hidden_width,
                                       hidden_height, server.depth);
-        XCopyArea(server.dsp, pix, hidden_pixmap, server.gc, xoff, yoff,
+        XCopyArea(server.dsp, pix_, hidden_pixmap, server.gc, xoff, yoff,
                   hidden_width, hidden_height, 0, 0);
     }
 
     // redraw panel's object
-    for (auto& child : children) {
+    for (auto& child : children_) {
         child->SetRedraw();
     }
 
@@ -673,16 +674,16 @@ void Panel::SetBackground() {
             tskbar.bar_name.reset_state_pixmap(k);
         }
 
-        tskbar.pix = 0;
-        tskbar.bar_name.pix = 0;
+        tskbar.pix_ = 0;
+        tskbar.bar_name.pix_ = 0;
 
-        auto begin = tskbar.children.begin();
+        auto begin = tskbar.children_.begin();
 
         if (taskbarname_enabled) {
             ++begin;
         }
 
-        std::for_each(begin, tskbar.children.end(), [](Area * child) {
+        std::for_each(begin, tskbar.children_.end(), [](Area * child) {
             set_task_redraw(static_cast<Task*>(child));
         });
     }
@@ -707,8 +708,8 @@ Taskbar* Panel::ClickTaskbar(int x, int y) {
         for (int i = 0; i < nb_desktop ; i++) {
             Taskbar* tskbar = &taskbar[i];
 
-            if (tskbar->on_screen && x >= tskbar->posx
-                && x <= (tskbar->posx + tskbar->width)) {
+            if (tskbar->on_screen_ && x >= tskbar->posx_
+                && x <= (tskbar->posx_ + tskbar->width_)) {
                 return tskbar;
             }
         }
@@ -716,8 +717,8 @@ Taskbar* Panel::ClickTaskbar(int x, int y) {
         for (int i = 0; i < nb_desktop ; i++) {
             Taskbar* tskbar = &taskbar[i];
 
-            if (tskbar->on_screen && y >= tskbar->posy
-                && y <= (tskbar->posy + tskbar->height)) {
+            if (tskbar->on_screen_ && y >= tskbar->posy_
+                && y <= (tskbar->posy_ + tskbar->height_)) {
                 return tskbar;
             }
         }
@@ -731,23 +732,23 @@ Task* Panel::ClickTask(int x, int y) {
     Taskbar* tskbar = ClickTaskbar(x, y);
 
     if (tskbar) {
-        auto begin = tskbar->children.begin();
+        auto begin = tskbar->children_.begin();
 
         if (taskbarname_enabled) {
             ++begin;
         }
 
-        for (auto it = begin; it != tskbar->children.end(); ++it) {
+        for (auto it = begin; it != tskbar->children_.end(); ++it) {
             auto tsk = reinterpret_cast<Task*>(*it);
 
             if (panel_horizontal) {
-                if (tsk->on_screen && x >= tsk->posx
-                    && x <= (tsk->posx + tsk->width)) {
+                if (tsk->on_screen_ && x >= tsk->posx_
+                    && x <= (tsk->posx_ + tsk->width_)) {
                     return tsk;
                 }
             } else {
-                if (tsk->on_screen && y >= tsk->posy
-                    && y <= (tsk->posy + tsk->height)) {
+                if (tsk->on_screen_ && y >= tsk->posy_
+                    && y <= (tsk->posy_ + tsk->height_)) {
                     return tsk;
                 }
             }
@@ -760,13 +761,13 @@ Task* Panel::ClickTask(int x, int y) {
 
 Launcher* Panel::ClickLauncher(int x, int y) {
     if (panel_horizontal) {
-        if (launcher.on_screen && x >= launcher.posx
-            && x <= (launcher.posx + launcher.width)) {
+        if (launcher.on_screen_ && x >= launcher.posx_
+            && x <= (launcher.posx_ + launcher.width_)) {
             return &launcher;
         }
     } else {
-        if (launcher.on_screen && y >= launcher.posy
-            && y <= (launcher.posy + launcher.height)) {
+        if (launcher.on_screen_ && y >= launcher.posy_
+            && y <= (launcher.posy_ + launcher.height_)) {
             return &launcher;
         }
     }
@@ -780,10 +781,10 @@ LauncherIcon* Panel::ClickLauncherIcon(int x, int y) {
 
     if (launcher) {
         for (auto const& launcher_icon : launcher->list_icons_) {
-            bool insideX = (x >= (launcher->posx + launcher_icon->x_)
-                            && x <= (launcher->posx + launcher_icon->x_ + launcher_icon->icon_size_));
-            bool insideY = (y >= (launcher->posy + launcher_icon->y_)
-                            && y <= (launcher->posy + launcher_icon->y_ + launcher_icon->icon_size_));
+            bool insideX = (x >= (launcher->posx_ + launcher_icon->x_)
+                            && x <= (launcher->posx_ + launcher_icon->x_ + launcher_icon->icon_size_));
+            bool insideY = (y >= (launcher->posy_ + launcher_icon->y_)
+                            && y <= (launcher->posy_ + launcher_icon->y_ + launcher_icon->icon_size_));
 
             if (insideX && insideY) {
                 return launcher_icon;
@@ -797,11 +798,11 @@ LauncherIcon* Panel::ClickLauncherIcon(int x, int y) {
 
 bool Panel::ClickPadding(int x, int y) {
     if (panel_horizontal) {
-        if (x < paddingxlr || x > width - paddingxlr) {
+        if (x < padding_x_lr_ || x > width_ - padding_x_lr_) {
             return true;
         }
     } else {
-        if (y < paddingxlr || y > height - paddingxlr) {
+        if (y < padding_x_lr_ || y > height_ - padding_x_lr_) {
             return true;
         }
     }
@@ -812,13 +813,13 @@ bool Panel::ClickPadding(int x, int y) {
 
 bool Panel::ClickClock(int x, int y) {
     if (panel_horizontal) {
-        if (clock.on_screen && x >= clock.posx
-            && x <= (clock.posx + clock.width)) {
+        if (clock.on_screen_ && x >= clock.posx_
+            && x <= (clock.posx_ + clock.width_)) {
             return true;
         }
     } else {
-        if (clock.on_screen && y >= clock.posy
-            && y <= (clock.posy + clock.height)) {
+        if (clock.on_screen_ && y >= clock.posy_
+            && y <= (clock.posy_ + clock.height_)) {
             return true;
         }
     }
@@ -834,11 +835,11 @@ Area* Panel::ClickArea(int x, int y) {
     do {
         result = new_result;
 
-        for (auto it = result->children.begin(); it != result->children.end(); ++it) {
+        for (auto it = result->children_.begin(); it != result->children_.end(); ++it) {
             Area* a = (*it);
 
-            if (a->on_screen && x >= a->posx && x <= (a->posx + a->width)
-                && y >= a->posy && y <= (a->posy + a->height)) {
+            if (a->on_screen_ && x >= a->posx_ && x <= (a->posx_ + a->width_)
+                && y >= a->posy_ && y <= (a->posy_ + a->height_)) {
                 new_result = a;
                 break;
             }
@@ -862,19 +863,19 @@ void AutohideShow(void* p) {
 
     if (panel_horizontal) {
         if (panel_position & TOP) {
-            XResizeWindow(server.dsp, panel->main_win, panel->width,
-                          panel->height);
+            XResizeWindow(server.dsp, panel->main_win, panel->width_,
+                          panel->height_);
         } else {
-            XMoveResizeWindow(server.dsp, panel->main_win, panel->posx, panel->posy,
-                              panel->width, panel->height);
+            XMoveResizeWindow(server.dsp, panel->main_win, panel->posx_, panel->posy_,
+                              panel->width_, panel->height_);
         }
     } else {
         if (panel_position & LEFT) {
-            XResizeWindow(server.dsp, panel->main_win, panel->width,
-                          panel->height);
+            XResizeWindow(server.dsp, panel->main_win, panel->width_,
+                          panel->height_);
         } else {
-            XMoveResizeWindow(server.dsp, panel->main_win, panel->posx, panel->posy,
-                              panel->width, panel->height);
+            XMoveResizeWindow(server.dsp, panel->main_win, panel->posx_, panel->posy_,
+                              panel->width_, panel->height_);
         }
     }
 
@@ -894,7 +895,7 @@ void AutohideHide(void* p) {
     }
 
     XUnmapSubwindows(server.dsp, panel->main_win);  // systray windows
-    int diff = (panel_horizontal ? panel->height : panel->width) -
+    int diff = (panel_horizontal ? panel->height_ : panel->width_) -
                panel_autohide_height;
 
     //printf("autohide_hide : diff %d, w %d, h %d\n", diff, panel->hidden_width, panel->hidden_height);
@@ -903,7 +904,8 @@ void AutohideHide(void* p) {
             XResizeWindow(server.dsp, panel->main_win, panel->hidden_width,
                           panel->hidden_height);
         } else {
-            XMoveResizeWindow(server.dsp, panel->main_win, panel->posx, panel->posy + diff,
+            XMoveResizeWindow(server.dsp, panel->main_win, panel->posx_,
+                              panel->posy_ + diff,
                               panel->hidden_width, panel->hidden_height);
         }
     } else {
@@ -911,7 +913,8 @@ void AutohideHide(void* p) {
             XResizeWindow(server.dsp, panel->main_win, panel->hidden_width,
                           panel->hidden_height);
         } else {
-            XMoveResizeWindow(server.dsp, panel->main_win, panel->posx + diff, panel->posy,
+            XMoveResizeWindow(server.dsp, panel->main_win, panel->posx_ + diff,
+                              panel->posy_,
                               panel->hidden_width, panel->hidden_height);
         }
     }

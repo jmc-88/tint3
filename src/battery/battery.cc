@@ -83,19 +83,19 @@ void UpdateBatteries(void* arg) {
 
     for (int i = 0 ; i < nb_panel ; i++) {
         if (battery_state.percentage >= percentage_hide) {
-            if (panel1[i].battery.on_screen == 1) {
+            if (panel1[i].battery.on_screen_ == 1) {
                 panel1[i].battery.Hide();
                 panel_refresh = 1;
             }
         } else {
-            if (panel1[i].battery.on_screen == 0) {
+            if (panel1[i].battery.on_screen_ == 0) {
                 panel1[i].battery.Show();
                 panel_refresh = 1;
             }
         }
 
-        if (panel1[i].battery.on_screen == 1) {
-            panel1[i].battery.need_resize = true;
+        if (panel1[i].battery.on_screen_ == 1) {
+            panel1[i].battery.need_resize_ = true;
             panel_refresh = 1;
         }
     }
@@ -268,15 +268,15 @@ void InitBatteryPanel(void* p) {
         return;
     }
 
-    if (battery->bg == 0) {
-        battery->bg = backgrounds.front();
+    if (battery->bg_ == 0) {
+        battery->bg_ = backgrounds.front();
     }
 
-    battery->parent = panel;
-    battery->panel = panel;
-    battery->size_mode = SIZE_BY_CONTENT;
-    battery->on_screen = 1;
-    battery->need_resize = true;
+    battery->parent_ = panel;
+    battery->panel_ = panel;
+    battery->size_mode_ = SIZE_BY_CONTENT;
+    battery->on_screen_ = 1;
+    battery->need_resize_ = true;
 }
 
 
@@ -484,7 +484,7 @@ void Battery::DrawForeground(cairo_t* c) {
 
     // draw layout
     pango_layout_set_font_description(layout, bat1_font_desc);
-    pango_layout_set_width(layout, width * PANGO_SCALE);
+    pango_layout_set_width(layout, width_ * PANGO_SCALE);
     pango_layout_set_alignment(layout, PANGO_ALIGN_CENTER);
     pango_layout_set_text(layout, buf_bat_percentage, strlen(buf_bat_percentage));
 
@@ -498,7 +498,7 @@ void Battery::DrawForeground(cairo_t* c) {
     pango_layout_set_font_description(layout, bat2_font_desc);
     pango_layout_set_indent(layout, 0);
     pango_layout_set_text(layout, buf_bat_time, strlen(buf_bat_time));
-    pango_layout_set_width(layout, width * PANGO_SCALE);
+    pango_layout_set_width(layout, width_ * PANGO_SCALE);
 
     pango_cairo_update_layout(c, layout);
     cairo_move_to(c, 0, bat2_posy);
@@ -513,7 +513,7 @@ bool Battery::Resize() {
     int bat_time_height, bat_time_width, bat_time_height_ink;
     int ret = 0;
 
-    need_redraw = true;
+    need_redraw_ = true;
 
     snprintf(buf_bat_percentage, sizeof(buf_bat_percentage), "%d%%",
              battery_state.percentage);
@@ -526,31 +526,31 @@ bool Battery::Resize() {
     }
 
     GetTextSize2(bat1_font_desc, &bat_percentage_height_ink,
-                 &bat_percentage_height, &bat_percentage_width, panel->height,
-                 panel->width, buf_bat_percentage, strlen(buf_bat_percentage));
+                 &bat_percentage_height, &bat_percentage_width, panel_->height_,
+                 panel_->width_, buf_bat_percentage, strlen(buf_bat_percentage));
     GetTextSize2(bat2_font_desc, &bat_time_height_ink, &bat_time_height,
-                 &bat_time_width, panel->height, panel->width, buf_bat_time,
+                 &bat_time_width, panel_->height_, panel_->width_, buf_bat_time,
                  strlen(buf_bat_time));
 
     if (panel_horizontal) {
         int new_size = (bat_percentage_width > bat_time_width) ? bat_percentage_width :
                        bat_time_width;
-        new_size += (2 * paddingxlr) + (2 * bg->border.width);
+        new_size += (2 * padding_x_lr_) + (2 * bg_->border.width);
 
-        if (new_size > width || new_size < (width - 2)) {
+        if (new_size > width_ || new_size < (width_ - 2)) {
             // we try to limit the number of resize
-            width = new_size;
-            bat1_posy = (height - bat_percentage_height - bat_time_height) / 2;
+            width_ = new_size;
+            bat1_posy = (height_ - bat_percentage_height - bat_time_height) / 2;
             bat2_posy = bat1_posy + bat_percentage_height;
             ret = 1;
         }
     } else {
         int new_size = bat_percentage_height + bat_time_height + (2 *
-                       (paddingxlr + bg->border.width));
+                       (padding_x_lr_ + bg_->border.width));
 
-        if (new_size > height || new_size < (height - 2)) {
-            height = new_size;
-            bat1_posy = (height - bat_percentage_height - bat_time_height - 2) / 2;
+        if (new_size > height_ || new_size < (height_ - 2)) {
+            height_ = new_size;
+            bat1_posy = (height_ - bat_percentage_height - bat_time_height - 2) / 2;
             bat2_posy = bat1_posy + bat_percentage_height + 2;
             ret = 1;
         }

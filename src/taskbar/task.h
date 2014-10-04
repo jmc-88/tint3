@@ -13,8 +13,9 @@
 
 #include <list>
 
-#include "common.h"
-#include "timer.h"
+#include "util/common.h"
+#include "util/timer.h"
+#include "util/area.h"
 
 enum {
     TASK_NORMAL,

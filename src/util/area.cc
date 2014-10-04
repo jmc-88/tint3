@@ -81,15 +81,15 @@ Area& Area::Clone(Area const& other) {
 
 void Area::InitRendering(int pos) {
     // initialize fixed position/size
-    for (auto& child : children) {
+    for (auto& child : children_) {
         if (panel_horizontal) {
-            child->posy = pos + bg->border.width + paddingy;
-            child->height = height - (2 * (bg->border.width + paddingy));
-            child->InitRendering(child->posy);
+            child->posy_ = pos + bg_->border.width + padding_y_;
+            child->height_ = height_ - (2 * (bg_->border.width + padding_y_));
+            child->InitRendering(child->posy_);
         } else {
-            child->posx = pos + bg->border.width + paddingy;
-            child->width = width - (2 * (bg->border.width + paddingy));
-            child->InitRendering(child->posx);
+            child->posx_ = pos + bg_->border.width + padding_y_;
+            child->width_ = width_ - (2 * (bg_->border.width + padding_y_));
+            child->InitRendering(child->posx_);
         }
     }
 }
@@ -97,25 +97,25 @@ void Area::InitRendering(int pos) {
 
 void Area::SizeByContent() {
     // don't resize hidden objects
-    if (!on_screen) {
+    if (!on_screen_) {
         return;
     }
 
     // children node are resized before its parent
-    for (auto& child : children) {
+    for (auto& child : children_) {
         child->SizeByContent();
     }
 
     // calculate area's size
-    on_changed = 0;
+    on_changed_ = 0;
 
-    if (need_resize && size_mode == SIZE_BY_CONTENT) {
-        need_resize = false;
+    if (need_resize_ && size_mode_ == SIZE_BY_CONTENT) {
+        need_resize_ = false;
 
         if (Resize()) {
             // 'size' changed => 'need_resize = true' on the parent
-            parent->need_resize = true;
-            on_changed = 1;
+            parent_->need_resize_ = true;
+            on_changed_ = 1;
         }
     }
 }
@@ -123,66 +123,59 @@ void Area::SizeByContent() {
 
 void Area::SizeByLayout(int pos, int level) {
     // don't resize hiden objects
-    if (!on_screen) {
+    if (!on_screen_) {
         return;
     }
 
     // parent node is resized before its children
     // calculate area's size
-    if (need_resize && size_mode == SIZE_BY_LAYOUT) {
-        need_resize = false;
+    if (need_resize_ && size_mode_ == SIZE_BY_LAYOUT) {
+        need_resize_ = false;
 
         Resize();
 
         // resize children with SIZE_BY_LAYOUT
-        for (auto& child : children) {
-            if (child->size_mode == SIZE_BY_LAYOUT && child->children.size() != 0) {
-                child->need_resize = true;
+        for (auto& child : children_) {
+            if (child->size_mode_ == SIZE_BY_LAYOUT && child->children_.size() != 0) {
+                child->need_resize_ = true;
             }
         }
     }
 
     // update position of childs
-    pos += paddingxlr + bg->border.width;
-    int i = 0;
+    pos += padding_x_lr_ + bg_->border.width;
 
-    for (auto& child : children) {
-        if (!child->on_screen) {
+    for (auto& child : children_) {
+        if (!child->on_screen_) {
             return;
         }
 
-        i++;
-
         if (panel_horizontal) {
-            if (pos != child->posx) {
+            if (pos != child->posx_) {
                 // pos changed => redraw
-                child->posx = pos;
-                child->on_changed = 1;
+                child->posx_ = pos;
+                child->on_changed_ = 1;
             }
         } else {
-            if (pos != child->posy) {
+            if (pos != child->posy_) {
                 // pos changed => redraw
-                child->posy = pos;
-                child->on_changed = 1;
+                child->posy_ = pos;
+                child->on_changed_ = 1;
             }
         }
 
-        /*// position of each visible object
-        int k;
-        for (k=0 ; k < level ; k++) printf("  ");
-        printf("tree level %d, object %d, pos %d, %s\n", level, i, pos, (child->size_mode == SIZE_BY_LAYOUT) ? "SIZE_BY_LAYOUT" : "SIZE_BY_CONTENT");*/
         child->SizeByLayout(pos, level + 1);
 
         if (panel_horizontal) {
-            pos += child->width + paddingx;
+            pos += child->width_ + padding_x_;
         } else {
-            pos += child->height + paddingx;
+            pos += child->height_ + padding_x_;
         }
     }
 
-    if (on_changed) {
+    if (on_changed_) {
         // pos/size changed
-        need_redraw = true;
+        need_redraw_ = true;
         OnChangeLayout();
     }
 }
@@ -190,28 +183,28 @@ void Area::SizeByLayout(int pos, int level) {
 
 void Area::Refresh() {
     // don't draw and resize hidden objects
-    if (!on_screen) {
+    if (!on_screen_) {
         return;
     }
 
     // don't draw transparent objects (without foreground and without background)
-    if (need_redraw) {
-        need_redraw = false;
+    if (need_redraw_) {
+        need_redraw_ = false;
         Draw();
     }
 
     // draw current Area
-    if (pix == 0) {
-        printf("empty area posx %d, width %d\n", posx, width);
+    if (pix_ == 0) {
+        printf("empty area posx %d, width %d\n", posx_, width_);
     }
 
     XCopyArea(
-        server.dsp, pix,
-        panel->temp_pmap, server.gc, 0, 0,
-        width, height, posx, posy);
+        server.dsp, pix_,
+        panel_->temp_pmap, server.gc, 0, 0,
+        width_, height_, posx_, posy_);
 
     // and then refresh child object
-    for (auto& child : children) {
+    for (auto& child : children_) {
         child->Refresh();
     }
 }
@@ -222,22 +215,22 @@ int Area::ResizeByLayout(int maximum_size) {
 
     if (panel_horizontal) {
         // detect free size for SIZE_BY_LAYOUT's Area
-        size = width - (2 * (paddingxlr + bg->border.width));
+        size = width_ - (2 * (padding_x_lr_ + bg_->border.width));
 
-        for (auto& child : children) {
-            if (child->on_screen && child->size_mode == SIZE_BY_CONTENT) {
-                size -= child->width;
+        for (auto& child : children_) {
+            if (child->on_screen_ && child->size_mode_ == SIZE_BY_CONTENT) {
+                size -= child->width_;
                 nb_by_content++;
             }
 
-            if (child->on_screen && child->size_mode == SIZE_BY_LAYOUT) {
+            if (child->on_screen_ && child->size_mode_ == SIZE_BY_LAYOUT) {
                 nb_by_layout++;
             }
         }
 
         //printf("  resize_by_layout Deb %d, %d\n", nb_by_content, nb_by_layout);
         if (nb_by_content + nb_by_layout) {
-            size -= ((nb_by_content + nb_by_layout - 1) * paddingx);
+            size -= ((nb_by_content + nb_by_layout - 1) * padding_x_);
         }
 
         int width = 0, modulo = 0, old_width;
@@ -253,38 +246,38 @@ int Area::ResizeByLayout(int maximum_size) {
         }
 
         // resize SIZE_BY_LAYOUT objects
-        for (auto& child : children) {
-            if (child->on_screen && child->size_mode == SIZE_BY_LAYOUT) {
-                old_width = child->width;
-                child->width = width;
+        for (auto& child : children_) {
+            if (child->on_screen_ && child->size_mode_ == SIZE_BY_LAYOUT) {
+                old_width = child->width_;
+                child->width_ = width;
 
                 if (modulo) {
-                    child->width++;
+                    child->width_++;
                     modulo--;
                 }
 
-                if (child->width != old_width) {
-                    child->on_changed = 1;
+                if (child->width_ != old_width) {
+                    child->on_changed_ = 1;
                 }
             }
         }
     } else {
         // detect free size for SIZE_BY_LAYOUT's Area
-        size = height - (2 * (paddingxlr + bg->border.width));
+        size = height_ - (2 * (padding_x_lr_ + bg_->border.width));
 
-        for (auto& child : children) {
-            if (child->on_screen && child->size_mode == SIZE_BY_CONTENT) {
-                size -= child->height;
+        for (auto& child : children_) {
+            if (child->on_screen_ && child->size_mode_ == SIZE_BY_CONTENT) {
+                size -= child->height_;
                 nb_by_content++;
             }
 
-            if (child->on_screen && child->size_mode == SIZE_BY_LAYOUT) {
+            if (child->on_screen_ && child->size_mode_ == SIZE_BY_LAYOUT) {
                 nb_by_layout++;
             }
         }
 
         if (nb_by_content + nb_by_layout) {
-            size -= ((nb_by_content + nb_by_layout - 1) * paddingx);
+            size -= ((nb_by_content + nb_by_layout - 1) * padding_x_);
         }
 
         int height = 0, modulo = 0, old_height;
@@ -300,18 +293,18 @@ int Area::ResizeByLayout(int maximum_size) {
         }
 
         // resize SIZE_BY_LAYOUT objects
-        for (auto& child : children) {
-            if (child->on_screen && child->size_mode == SIZE_BY_LAYOUT) {
-                old_height = child->height;
-                child->height = height;
+        for (auto& child : children_) {
+            if (child->on_screen_ && child->size_mode_ == SIZE_BY_LAYOUT) {
+                old_height = child->height_;
+                child->height_ = height;
 
                 if (modulo) {
-                    child->height++;
+                    child->height_++;
                     modulo--;
                 }
 
-                if (child->height != old_height) {
-                    child->on_changed = 1;
+                if (child->height_ != old_height) {
+                    child->on_changed_ = 1;
                 }
             }
         }
@@ -322,49 +315,49 @@ int Area::ResizeByLayout(int maximum_size) {
 
 
 void Area::SetRedraw() {
-    need_redraw = true;
+    need_redraw_ = true;
 
-    for (auto& child : children) {
+    for (auto& child : children_) {
         child->SetRedraw();
     }
 }
 
 void Area::Hide() {
-    on_screen = 0;
-    parent->need_resize = true;
+    on_screen_ = 0;
+    parent_->need_resize_ = true;
 
     if (panel_horizontal) {
-        width = 0;
+        width_ = 0;
     } else {
-        height = 0;
+        height_ = 0;
     }
 }
 
 void Area::Show() {
-    on_screen = 1;
-    need_resize = true;
-    parent->need_resize = true;
+    on_screen_ = 1;
+    need_resize_ = true;
+    parent_->need_resize_ = true;
 }
 
 void Area::Draw() {
-    if (pix) {
-        XFreePixmap(server.dsp, pix);
+    if (pix_) {
+        XFreePixmap(server.dsp, pix_);
     }
 
-    pix = XCreatePixmap(server.dsp, server.root_win, width, height,
-                        server.depth);
+    pix_ = XCreatePixmap(server.dsp, server.root_win, width_, height_,
+                         server.depth);
 
     // add layer of root pixmap (or clear pixmap if real_transparency==true)
     if (server.real_transparency) {
-        clear_pixmap(pix, 0 , 0, width, height);
+        clear_pixmap(pix_, 0 , 0, width_, height_);
     }
 
-    XCopyArea(server.dsp, panel->temp_pmap, pix, server.gc,
-              posx, posy, width, height, 0, 0);
+    XCopyArea(server.dsp, panel_->temp_pmap, pix_, server.gc,
+              posx_, posy_, width_, height_, 0, 0);
 
-    cairo_surface_t* cs = cairo_xlib_surface_create(server.dsp, pix, server.visual,
-                          width,
-                          height);
+    cairo_surface_t* cs = cairo_xlib_surface_create(server.dsp, pix_, server.visual,
+                          width_,
+                          height_);
     cairo_t* c = cairo_create(cs);
 
     DrawBackground(c);
@@ -376,58 +369,58 @@ void Area::Draw() {
 
 
 void Area::DrawBackground(cairo_t* c) {
-    if (bg->back.alpha > 0.0) {
+    if (bg_->back.alpha > 0.0) {
         //printf("    draw_background (%d %d) RGBA (%lf, %lf, %lf, %lf)\n", posx, posy, pix->back.color[0], pix->back.color[1], pix->back.color[2], pix->back.alpha);
-        draw_rect(c, bg->border.width, bg->border.width,
-                  width - (2.0 * bg->border.width), height - (2.0 * bg->border.width),
-                  bg->border.rounded - bg->border.width / 1.571);
-        cairo_set_source_rgba(c, bg->back.color[0], bg->back.color[1],
-                              bg->back.color[2], bg->back.alpha);
+        draw_rect(c, bg_->border.width, bg_->border.width,
+                  width_ - (2.0 * bg_->border.width), height_ - (2.0 * bg_->border.width),
+                  bg_->border.rounded - bg_->border.width / 1.571);
+        cairo_set_source_rgba(c, bg_->back.color[0], bg_->back.color[1],
+                              bg_->back.color[2], bg_->back.alpha);
         cairo_fill(c);
     }
 
-    if (bg->border.width > 0 && bg->border.alpha > 0.0) {
-        cairo_set_line_width(c, bg->border.width);
+    if (bg_->border.width > 0 && bg_->border.alpha > 0.0) {
+        cairo_set_line_width(c, bg_->border.width);
 
         // draw border inside (x, y, width, height)
-        draw_rect(c, bg->border.width / 2.0, bg->border.width / 2.0,
-                  width - bg->border.width, height - bg->border.width,
-                  bg->border.rounded);
+        draw_rect(c, bg_->border.width / 2.0, bg_->border.width / 2.0,
+                  width_ - bg_->border.width, height_ - bg_->border.width,
+                  bg_->border.rounded);
 
-        cairo_set_source_rgba(c, bg->border.color[0], bg->border.color[1],
-                              bg->border.color[2], bg->border.alpha);
+        cairo_set_source_rgba(c, bg_->border.color[0], bg_->border.color[1],
+                              bg_->border.color[2], bg_->border.alpha);
         cairo_stroke(c);
     }
 }
 
 
 void Area::RemoveArea() {
-    auto it = std::find(parent->children.begin(), parent->children.end(), this);
+    auto it = std::find(parent_->children_.begin(), parent_->children_.end(), this);
 
-    if (it != parent->children.end()) {
-        parent->children.erase(it);
+    if (it != parent_->children_.end()) {
+        parent_->children_.erase(it);
     }
 
-    parent->SetRedraw();
+    parent_->SetRedraw();
 }
 
 
 void Area::AddArea() {
-    parent->children.push_back(this);
-    parent->SetRedraw();
+    parent_->children_.push_back(this);
+    parent_->SetRedraw();
 }
 
 
 void Area::FreeArea() {
-    for (auto& child : children) {
+    for (auto& child : children_) {
         child->FreeArea();
     }
 
-    children.clear();
+    children_.clear();
 
-    if (pix) {
-        XFreePixmap(server.dsp, pix);
-        pix = 0;
+    if (pix_) {
+        XFreePixmap(server.dsp, pix_);
+        pix_ = 0;
     }
 }
 
