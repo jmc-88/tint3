@@ -1152,7 +1152,6 @@ void DragAndDropDrop(XClientMessageEvent* e) {
 
 int main(int argc, char* argv[]) {
     int hidden_dnd = 0;
-    GSList* it;
 
 start:
     Init(argc, argv);
