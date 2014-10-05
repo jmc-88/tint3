@@ -108,25 +108,20 @@ int GetTaskStatus(char* status) {
     return TASK_NORMAL;
 }
 
-int ConfigGetMonitor(std::string const& monitor) {
-    if (monitor != "all") {
+int ConfigGetMonitor(std::string const& monitor_name) {
+    if (monitor_name != "all") {
         char* endptr;
-        int ret_int = StringToLongInt(monitor, &endptr);
+        int ret_int = StringToLongInt(monitor_name, &endptr);
 
         if (*endptr == '\0') {
             return (ret_int - 1);
-        } else {
-            // monitor specified by name, not by index
-            for (int i = 0; i < server.nb_monitor; ++i) {
-                if (server.monitor[i].names.empty()) {
-                    // xrandr can't identify monitors
-                    continue;
-                }
+        }
 
-                for (size_t j = 0; j < server.monitor[i].names.size(); ++j) {
-                    if (monitor == server.monitor[i].names[j]) {
-                        return i;
-                    }
+        // monitor specified by name, not by index
+        for (int i = 0; i < server.nb_monitor; ++i) {
+            for (auto& name : server.monitor[i].names) {
+                if (name == monitor_name) {
+                    return i;
                 }
             }
         }
