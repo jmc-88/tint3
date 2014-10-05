@@ -177,12 +177,12 @@ void InitTaskbar() {
 
 
 void InitTaskbarPanel(Panel* panel) {
-    if (panel->g_taskbar.background[TASKBAR_NORMAL] == 0) {
+    if (panel->g_taskbar.background[TASKBAR_NORMAL] == nullptr) {
         panel->g_taskbar.background[TASKBAR_NORMAL] = backgrounds.front();
         panel->g_taskbar.background[TASKBAR_ACTIVE] = backgrounds.front();
     }
 
-    if (panel->g_taskbar.background_name[TASKBAR_NORMAL] == 0) {
+    if (panel->g_taskbar.background_name[TASKBAR_NORMAL] == nullptr) {
         panel->g_taskbar.background_name[TASKBAR_NORMAL] = backgrounds.front();
         panel->g_taskbar.background_name[TASKBAR_ACTIVE] = backgrounds.front();
     }
@@ -296,7 +296,7 @@ void InitTaskbarPanel(Panel* panel) {
     }
 
     for (int j = 0; j < TASK_STATE_COUNT; ++j) {
-        if (panel->g_task.background[j] == 0) {
+        if (panel->g_task.background[j] == nullptr) {
             panel->g_task.background[j] = backgrounds.front();
         }
 

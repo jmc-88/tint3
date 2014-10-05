@@ -34,31 +34,33 @@ Tooltip g_tooltip;
 namespace {
 
 void StartShowTimeout() {
-    if (g_tooltip.timeout) {
-        ChangeTimeout(g_tooltip.timeout, g_tooltip.show_timeout_msec, 0, TooltipShow,
-                      0);
+    if (g_tooltip.timeout != nullptr) {
+        ChangeTimeout(g_tooltip.timeout,
+                      g_tooltip.show_timeout_msec,
+                      0, TooltipShow, 0);
     } else {
-        g_tooltip.timeout = AddTimeout(g_tooltip.show_timeout_msec, 0, TooltipShow,
-                                       0);
+        g_tooltip.timeout = AddTimeout(g_tooltip.show_timeout_msec,
+                                       0, TooltipShow, 0);
     }
 }
 
 
 void StartHideTimeout() {
-    if (g_tooltip.timeout) {
-        ChangeTimeout(g_tooltip.timeout, g_tooltip.hide_timeout_msec, 0, TooltipHide,
-                      0);
+    if (g_tooltip.timeout != nullptr) {
+        ChangeTimeout(g_tooltip.timeout,
+                      g_tooltip.hide_timeout_msec,
+                      0, TooltipHide, 0);
     } else {
-        g_tooltip.timeout = AddTimeout(g_tooltip.hide_timeout_msec, 0, TooltipHide,
-                                       0);
+        g_tooltip.timeout = AddTimeout(g_tooltip.hide_timeout_msec,
+                                       0, TooltipHide, 0);
     }
 }
 
 
 void StopTooltipTimeout() {
-    if (g_tooltip.timeout) {
+    if (g_tooltip.timeout != nullptr) {
         StopTimeout(g_tooltip.timeout);
-        g_tooltip.timeout = 0;
+        g_tooltip.timeout = nullptr;
     }
 }
 
@@ -67,7 +69,18 @@ void StopTooltipTimeout() {
 
 void DefaultTooltip() {
     // give the tooltip some reasonable default values
-    memset(&g_tooltip, 0, sizeof(Tooltip));
+    g_tooltip.area = nullptr;
+    g_tooltip.tooltip_text.clear();
+    g_tooltip.panel = nullptr;
+    g_tooltip.window = 0;
+    g_tooltip.show_timeout_msec = 0;
+    g_tooltip.hide_timeout_msec = 0;
+    g_tooltip.mapped = False;
+    g_tooltip.paddingx = 0;
+    g_tooltip.paddingy = 0;
+    g_tooltip.font_desc = nullptr;
+    g_tooltip.bg = nullptr;
+    g_tooltip.timeout = nullptr;
     g_tooltip.font_color.color[0] = 1;
     g_tooltip.font_color.color[1] = 1;
     g_tooltip.font_color.color[2] = 1;
@@ -83,7 +96,7 @@ void CleanupTooltip() {
         XDestroyWindow(server.dsp, g_tooltip.window);
     }
 
-    if (g_tooltip.font_desc) {
+    if (g_tooltip.font_desc != nullptr) {
         pango_font_description_free(g_tooltip.font_desc);
     }
 }
@@ -94,7 +107,7 @@ void init_tooltip() {
         g_tooltip.font_desc = pango_font_description_from_string("sans 10");
     }
 
-    if (g_tooltip.bg == 0) {
+    if (g_tooltip.bg == nullptr) {
         g_tooltip.bg = backgrounds.front();
     }
 
@@ -137,19 +150,18 @@ void TooltipTriggerShow(Area* area, Panel* p, XEvent* e) {
 }
 
 
-void TooltipShow(void* arg) {
+void TooltipShow(void* /* arg */) {
     int mx, my;
     Window w;
     XTranslateCoordinates(server.dsp, server.root_win, g_tooltip.panel->main_win,
                           x, y, &mx, &my, &w);
-    Area* area;
 
     if (!panel_horizontal) {
         // we adjusted y in tooltip_trigger_show, revert or we won't find the correct area anymore
         my += height / 2;
     }
 
-    area = g_tooltip.panel->ClickArea(mx, my);
+    Area* area = g_tooltip.panel->ClickArea(mx, my);
     StopTooltipTimeout();
 
     if (!g_tooltip.mapped) {
@@ -163,15 +175,14 @@ void TooltipShow(void* arg) {
 
 
 void tooltip_update_geometry() {
-    cairo_surface_t* cs;
-    cairo_t* c;
-    PangoLayout* layout;
-    cs = cairo_xlib_surface_create(server.dsp, g_tooltip.window, server.visual,
-                                   width, height);
-    c = cairo_create(cs);
-    layout = pango_cairo_create_layout(c);
+    cairo_surface_t* cs = cairo_xlib_surface_create(
+        server.dsp, g_tooltip.window, server.visual, width, height);
+    cairo_t* c = cairo_create(cs);
+    PangoLayout* layout = pango_cairo_create_layout(c);
+
     pango_layout_set_font_description(layout, g_tooltip.font_desc);
     pango_layout_set_text(layout, g_tooltip.tooltip_text.c_str(), -1);
+
     PangoRectangle r1, r2;
     pango_layout_get_pixel_extents(layout, &r1, &r2);
     width = 2 * g_tooltip.bg->border.width + 2 * g_tooltip.paddingx + r2.width;
@@ -199,7 +210,6 @@ void tooltip_adjust_geometry() {
     // adjust coordinates and size to not go offscreen
     // it seems quite impossible that the height needs to be adjusted, but we do it anyway.
 
-    int min_x, min_y, max_width, max_height;
     Panel* panel = g_tooltip.panel;
     int screen_width = server.monitor[panel->monitor].x +
                        server.monitor[panel->monitor].width;
@@ -211,6 +221,8 @@ void tooltip_adjust_geometry() {
         && y >= server.monitor[panel->monitor].y) {
         return;    // no adjustment needed
     }
+
+    int min_x, min_y, max_width, max_height;
 
     if (panel_horizontal) {
         min_x = 0;

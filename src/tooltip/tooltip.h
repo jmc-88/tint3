@@ -18,13 +18,13 @@
 #ifndef TOOLTIP_H
 #define TOOLTIP_H
 
+#include <string>
+
 #include "task.h"
 #include "panel.h"
 #include "util/timer.h"
 
-#include <string>
-
-typedef struct {
+struct Tooltip {
     Area* area; // never ever use the area attribute if you are not 100% sure that this area was not freed // don't you say?
     std::string tooltip_text;
     Panel* panel;
@@ -38,7 +38,7 @@ typedef struct {
     Color font_color;
     Background* bg;
     Timeout* timeout;
-} Tooltip;
+};
 
 extern Tooltip g_tooltip;
 
