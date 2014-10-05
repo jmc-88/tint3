@@ -26,7 +26,7 @@ struct Monitor {
     int y;
     int width;
     int height;
-    char** names;
+    std::vector<std::string> names;
 };
 
 class Server {

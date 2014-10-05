@@ -118,12 +118,12 @@ int ConfigGetMonitor(std::string const& monitor) {
         } else {
             // monitor specified by name, not by index
             for (int i = 0; i < server.nb_monitor; ++i) {
-                if (server.monitor[i].names == nullptr) {
+                if (server.monitor[i].names.empty()) {
                     // xrandr can't identify monitors
                     continue;
                 }
 
-                for (int j = 0; server.monitor[i].names[j] != nullptr; ++j) {
+                for (size_t j = 0; j < server.monitor[i].names.size(); ++j) {
                     if (monitor == server.monitor[i].names[j]) {
                         return i;
                     }

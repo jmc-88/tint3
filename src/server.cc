@@ -126,16 +126,7 @@ void Server::Cleanup() {
         XFreeColormap(dsp, colormap32);
     }
 
-    if (monitor.size() != 0) {
-        for (int i = 0; i < nb_monitor; ++i) {
-            if (monitor[i].names) {
-                g_strfreev(monitor[i].names);
-            }
-        }
-
-        // TODO: remove this when I'm done getting rid of global state...
-        monitor.clear();
-    }
+    monitor.clear();
 
     if (gc) {
         XFreeGC(dsp, gc);
@@ -277,18 +268,15 @@ void GetMonitors() {
                 server.monitor[i].y = crtc_info->y;
                 server.monitor[i].width = crtc_info->width;
                 server.monitor[i].height = crtc_info->height;
-                server.monitor[i].names = (char**) calloc(crtc_info->noutput + 1,
-                                          sizeof(char*));
 
                 for (j = 0; j < crtc_info->noutput; ++j) {
                     XRROutputInfo* output_info = XRRGetOutputInfo(server.dsp, res,
                                                  crtc_info->outputs[j]);
                     printf("xRandr: Linking output %s with crtc %d\n", output_info->name, i);
-                    server.monitor[i].names[j] = g_strdup(output_info->name);
+                    server.monitor[i].names.push_back(output_info->name);
                     XRRFreeOutputInfo(output_info);
                 }
 
-                server.monitor[i].names[j] = nullptr;
                 XRRFreeCrtcInfo(crtc_info);
             }
 
@@ -301,7 +289,7 @@ void GetMonitors() {
                 server.monitor[i].y = info[i].y_org;
                 server.monitor[i].width = info[i].width;
                 server.monitor[i].height = info[i].height;
-                server.monitor[i].names = nullptr;
+                server.monitor[i].names.clear();
             }
         }
 
@@ -320,9 +308,7 @@ void GetMonitors() {
 next:
 
         for (j = i; j < nbmonitor; ++j) {
-            if (server.monitor[j].names) {
-                g_strfreev(server.monitor[j].names);
-            }
+            server.monitor[j].names.clear();
         }
 
         server.nb_monitor = i;
@@ -342,7 +328,7 @@ next:
         server.monitor[0].x = server.monitor[0].y = 0;
         server.monitor[0].width = DisplayWidth(server.dsp, server.screen);
         server.monitor[0].height = DisplayHeight(server.dsp, server.screen);
-        server.monitor[0].names = 0;
+        server.monitor[0].names.clear();
     }
 }
 
