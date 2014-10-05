@@ -755,13 +755,13 @@ Task* Panel::ClickTask(int x, int y) {
 
 Launcher* Panel::ClickLauncher(int x, int y) {
     if (panel_horizontal) {
-        if (launcher.on_screen_ && x >= launcher.posx_
-            && x <= (launcher.posx_ + launcher.width_)) {
+        if (launcher.on_screen_ && x >= launcher.posx_ &&
+            x <= (launcher.posx_ + launcher.width_)) {
             return &launcher;
         }
     } else {
-        if (launcher.on_screen_ && y >= launcher.posy_
-            && y <= (launcher.posy_ + launcher.height_)) {
+        if (launcher.on_screen_ && y >= launcher.posy_ &&
+            y <= (launcher.posy_ + launcher.height_)) {
             return &launcher;
         }
     }
@@ -773,14 +773,16 @@ Launcher* Panel::ClickLauncher(int x, int y) {
 LauncherIcon* Panel::ClickLauncherIcon(int x, int y) {
     auto launcher = ClickLauncher(x, y);
 
-    if (launcher) {
-        for (auto const& launcher_icon : launcher->list_icons_) {
-            bool insideX = (x >= (launcher->posx_ + launcher_icon->x_)
-                            && x <= (launcher->posx_ + launcher_icon->x_ + launcher_icon->icon_size_));
-            bool insideY = (y >= (launcher->posy_ + launcher_icon->y_)
-                            && y <= (launcher->posy_ + launcher_icon->y_ + launcher_icon->icon_size_));
+    if (launcher != nullptr) {
+        for (auto& launcher_icon : launcher->list_icons_) {
+            int base_x = (launcher->posx_ + launcher_icon->x_);
+            bool inside_x = (x >= base_x &&
+                             x <= (base_x + launcher_icon->icon_size_));
+            int base_y = (launcher->posy_ + launcher_icon->y_);
+            bool inside_y = (y >= base_y &&
+                             y <= (base_y + launcher_icon->icon_size_));
 
-            if (insideX && insideY) {
+            if (inside_x && inside_y) {
                 return launcher_icon;
             }
         }
@@ -922,12 +924,13 @@ void AutohideTriggerShow(Panel* p) {
         return;
     }
 
-    if (p->autohide_timeout) {
-        ChangeTimeout(p->autohide_timeout, panel_autohide_show_timeout, 0,
-                      AutohideShow, p);
+    if (p->autohide_timeout != nullptr) {
+        ChangeTimeout(p->autohide_timeout,
+                      panel_autohide_show_timeout,
+                      0, AutohideShow, p);
     } else {
-        p->autohide_timeout = AddTimeout(panel_autohide_show_timeout, 0, AutohideShow,
-                                         p);
+        p->autohide_timeout = AddTimeout(panel_autohide_show_timeout,
+                                         0, AutohideShow, p);
     }
 }
 
@@ -941,18 +944,20 @@ void AutohideTriggerHide(Panel* p) {
     int xr, yr, xw, yw;
     unsigned int mask;
 
-    if (XQueryPointer(server.dsp, p->main_win, &root, &child, &xr, &yr, &xw, &yw,
-                      &mask)) {
+    if (XQueryPointer(server.dsp, p->main_win,
+                      &root, &child, &xr, &yr,
+                      &xw, &yw, &mask)) {
         if (child) {
             return;  // mouse over one of the system tray icons
         }
     }
 
-    if (p->autohide_timeout) {
-        ChangeTimeout(p->autohide_timeout, panel_autohide_hide_timeout, 0,
-                      AutohideHide, p);
+    if (p->autohide_timeout != nullptr) {
+        ChangeTimeout(p->autohide_timeout,
+                      panel_autohide_hide_timeout,
+                      0, AutohideHide, p);
     } else {
-        p->autohide_timeout = AddTimeout(panel_autohide_hide_timeout, 0, AutohideHide,
-                                         p);
+        p->autohide_timeout = AddTimeout(panel_autohide_hide_timeout,
+                                         0, AutohideHide, p);
     }
 }
