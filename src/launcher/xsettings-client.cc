@@ -464,7 +464,7 @@ static void CheckManagerWindow(XSettingsClient* client) {
 
 XSettingsClient* XSettingsClientNew(Display* display, int screen,
                                     XSettingsNotifyFunc notify, XSettingsWatchFunc watch, void* cb_data) {
-    XSettingsClient* client = (XSettingsClient*) malloc(sizeof * client);
+    XSettingsClient* client = (XSettingsClient*) std::malloc(sizeof(*client));
 
     if (!client) {
         return nullptr;

@@ -108,7 +108,7 @@ Task* AddTask(Window win) {
 
         // TODO: nuke this from planet Earth ASAP - horrible hack to mimick the
         // original memcpy() call
-        new_tsk2->Clone(panel1[monitor].g_task);
+        new_tsk2->CloneArea(panel1[monitor].g_task);
 
         new_tsk2->parent_ = reinterpret_cast<Area*>(tskbar);
         new_tsk2->win = new_tsk.win;

@@ -34,8 +34,31 @@
 Area::~Area() {
 }
 
-Area& Area::Clone(Area const& other) {
-    *this = other;
+Area& Area::CloneArea(Area const& other) {
+    posx_ = other.posx_;
+    posy_ = other.posy_;
+    width_ = other.width_;
+    height_ = other.height_;
+    pix_ = other.pix_;
+    bg_ = other.bg_;
+
+    // TODO: this should probably free all Area*
+    // children before copying the others over
+    children_.clear();
+    std::copy(other.children_.begin(),
+              other.children_.end(),
+              children_.begin());
+
+    on_screen_ = other.on_screen_;
+    size_mode_ = other.size_mode_;
+    need_resize_ = other.need_resize_;
+    need_redraw_ = other.need_redraw_;
+    padding_x_lr_ = other.padding_x_lr_;
+    padding_x_ = other.padding_x_;
+    padding_y_ = other.padding_y_;
+    parent_ = other.parent_;
+    panel_ = other.panel_;
+    on_changed_ = other.on_changed_;
     return *this;
 }
 

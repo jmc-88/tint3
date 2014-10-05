@@ -218,17 +218,15 @@ XSettingsListInsert(XSettingsList**    list,
 XSettingsResult
 XSettingsListDelete(XSettingsList** list,
                     const char*     name) {
-    XSettingsList* iter;
+    XSettingsList* iter = (*list);
     XSettingsList* last = nullptr;
-
-    iter = *list;
 
     while (iter) {
         if (strcmp(name, iter->setting->name) == 0) {
             if (last) {
                 last->next = iter->next;
             } else {
-                *list = iter->next;
+                (*list) = iter->next;
             }
 
             XSettingsSettingFree(iter->setting);
@@ -247,9 +245,7 @@ XSettingsListDelete(XSettingsList** list,
 XSettingsSetting*
 XSettingsListLookup(XSettingsList* list,
                     const char*    name) {
-    XSettingsList* iter;
-
-    iter = list;
+    XSettingsList* iter = list;
 
     while (iter) {
         if (strcmp(name, iter->setting->name) == 0) {

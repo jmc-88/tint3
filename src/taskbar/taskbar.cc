@@ -132,10 +132,10 @@ void CleanupTaskbar() {
     }
 
     for (int i = 0 ; i < nb_panel; ++i) {
-        Panel* panel = &panel1[i];
+        Panel& panel = panel1[i];
 
-        for (int j = 0 ; j < panel->nb_desktop ; ++j) {
-            Taskbar* tskbar = &panel->taskbar[j];
+        for (int j = 0 ; j < panel.nb_desktop ; ++j) {
+            Taskbar* tskbar = &panel.taskbar[j];
 
             for (int k = 0; k < TASKBAR_STATE_COUNT; ++k) {
                 tskbar->reset_state_pixmap(k);
@@ -143,18 +143,18 @@ void CleanupTaskbar() {
 
             tskbar->FreeArea();
             // remove taskbar from the panel
-            auto it = std::find(panel->children_.begin(),
-                                panel->children_.end(),
+            auto it = std::find(panel.children_.begin(),
+                                panel.children_.end(),
                                 tskbar);
 
-            if (it != panel->children_.end()) {
-                panel->children_.erase(it);
+            if (it != panel.children_.end()) {
+                panel.children_.erase(it);
             }
         }
 
-        if (panel->taskbar) {
-            free(panel->taskbar);
-            panel->taskbar = 0;
+        if (panel.taskbar != nullptr) {
+            delete panel.taskbar;
+            panel.taskbar = nullptr;
         }
     }
 
@@ -342,7 +342,7 @@ void InitTaskbarPanel(Panel* panel) {
 
         // TODO: nuke this from planet Earth ASAP - horrible hack to mimick the
         // original memcpy() call
-        tskbar->Clone(panel->g_taskbar);
+        tskbar->CloneArea(panel->g_taskbar);
 
         tskbar->desktop = j;
 

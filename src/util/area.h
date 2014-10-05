@@ -57,9 +57,9 @@ enum {
 class Panel;
 class Area {
   public:
-    virtual ~Area();
+    virtual ~Area() = 0;
 
-    Area& Clone(Area const&);
+    Area& CloneArea(Area const&);
 
     // coordinate relative to panel window
     int posx_;
