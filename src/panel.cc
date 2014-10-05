@@ -226,7 +226,7 @@ void InitPanel() {
         panel_config.monitor = 0;
     }
 
-    init_tooltip();
+    InitTooltip();
     InitSystray();
     InitLauncher();
     InitClock();
@@ -244,9 +244,7 @@ void InitPanel() {
 
     panel1 = new Panel[nb_panel];
 
-    int i;
-
-    for (i = 0 ; i < nb_panel ; i++) {
+    for (int i = 0 ; i < nb_panel ; i++) {
         panel1[i] = panel_config;
     }
 
@@ -256,7 +254,7 @@ void InitPanel() {
             << ", nb desktop " << server.nb_desktop
             << '\n';
 
-    for (i = 0 ; i < nb_panel ; i++) {
+    for (int i = 0 ; i < nb_panel ; i++) {
         auto p = &panel1[i];
 
         if (panel_config.monitor < 0) {

@@ -102,7 +102,7 @@ void CleanupTooltip() {
 }
 
 
-void init_tooltip() {
+void InitTooltip() {
     if (!g_tooltip.font_desc) {
         g_tooltip.font_desc = pango_font_description_from_string("sans 10");
     }
@@ -174,7 +174,7 @@ void TooltipShow(void* /* arg */) {
 }
 
 
-void tooltip_update_geometry() {
+void TooltipUpdateGeometry() {
     cairo_surface_t* cs = cairo_xlib_surface_create(
         server.dsp, g_tooltip.window, server.visual, width, height);
     cairo_t* c = cairo_create(cs);
@@ -206,7 +206,7 @@ void tooltip_update_geometry() {
 }
 
 
-void tooltip_adjust_geometry() {
+void TooltipAdjustGeometry() {
     // adjust coordinates and size to not go offscreen
     // it seems quite impossible that the height needs to be adjusted, but we do it anyway.
 
@@ -271,8 +271,8 @@ void TooltipUpdate() {
         return;
     }
 
-    tooltip_update_geometry();
-    tooltip_adjust_geometry();
+    TooltipUpdateGeometry();
+    TooltipAdjustGeometry();
     XMoveResizeWindow(server.dsp, g_tooltip.window, x, y, width, height);
 
     // Stuff for drawing the tooltip

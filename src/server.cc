@@ -103,7 +103,7 @@ void Server::InitAtoms() {
     atoms_.insert(std::make_pair("_XSETTINGS_SCREEN", atom));
 
     if (atom == None) {
-        util::log::Error() << "tint3: XInternAtom(" << name << ") failed\n";
+        util::log::Error() << "tint3: XInternAtom(\"" << name << "\") failed\n";
     }
 
     name.assign(StringBuilder() << "_NET_SYSTEM_TRAY_S" << DefaultScreen(dsp));
@@ -112,7 +112,7 @@ void Server::InitAtoms() {
     atoms_.insert(std::make_pair("_NET_SYSTEM_TRAY_SCREEN", atom));
 
     if (atom == None) {
-        util::log::Error() << "tint3: XInternAtom(" << name << ") failed\n";
+        util::log::Error() << "tint3: XInternAtom(\"" << name << "\") failed\n";
     }
 }
 

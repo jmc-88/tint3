@@ -49,7 +49,7 @@ void DefaultTooltip();
 // freed memory
 void CleanupTooltip();
 
-void init_tooltip();
+void InitTooltip();
 void TooltipUpdate();
 void TooltipTriggerHide();
 void TooltipTriggerShow(Area* area, Panel* p, XEvent* e);
