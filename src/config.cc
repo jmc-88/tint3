@@ -199,11 +199,7 @@ void AddEntry(std::string const& key, std::string const& value) {
 
         size_t b = value1.find_first_of('%');
 
-        if (b != std::string::npos) {
-            b = (b - 1);  // don't parse the '%' character
-            panel_config.percent_x = 1;
-        }
-
+        panel_config.percent_x = (b != std::string::npos);
         panel_config.width_ = StringToLongInt(value1.substr(0, b));
 
         if (panel_config.width_ == 0) {
@@ -291,7 +287,7 @@ void AddEntry(std::string const& key, std::string const& value) {
             panel_position |= CENTER;
         }
 
-        panel_horizontal = (value3 == "vertical");
+        panel_horizontal = (value3 != "vertical");
     } else if (key == "font_shadow") {
         panel_config.g_task.font_shadow = StringToLongInt(value);
     } else if (key == "panel_background_id") {
