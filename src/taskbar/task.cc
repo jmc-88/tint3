@@ -295,9 +295,7 @@ void GetIcon(Task* tsk) {
         return;
     }
 
-    int k;
-
-    for (k = 0; k < TASK_STATE_COUNT; ++k) {
+    for (int k = 0; k < TASK_STATE_COUNT; ++k) {
         if (tsk->icon[k]) {
             imlib_context_set_image(tsk->icon[k]);
             imlib_free_image();
@@ -321,7 +319,7 @@ void GetIcon(Task* tsk) {
         DATA32 icon_data[w * h];
         int length = w * h;
 
-        for (i = 0; i < length; ++i) {
+        for (int i = 0; i < length; ++i) {
             icon_data[i] =  tmp_data[i];
         }
 
@@ -369,7 +367,7 @@ void GetIcon(Task* tsk) {
     tsk->icon_width = imlib_image_get_width();
     tsk->icon_height = imlib_image_get_height();
 
-    for (k = 0; k < TASK_STATE_COUNT; ++k) {
+    for (int k = 0; k < TASK_STATE_COUNT; ++k) {
         imlib_context_set_image(orig_image);
         tsk->icon[k] = imlib_clone_image();
         imlib_context_set_image(tsk->icon[k]);
@@ -399,12 +397,12 @@ void GetIcon(Task* tsk) {
     GPtrArray* task_group = task_get_tasks(tsk->win);
 
     if (task_group) {
-        for (i = 0; i < task_group->len; ++i) {
+        for (size_t i = 0; i < task_group->len; ++i) {
             auto tsk2 = static_cast<Task*>(g_ptr_array_index(task_group, i));
             tsk2->icon_width = tsk->icon_width;
             tsk2->icon_height = tsk->icon_height;
 
-            for (k = 0; k < TASK_STATE_COUNT; ++k) {
+            for (int k = 0; k < TASK_STATE_COUNT; ++k) {
                 tsk2->icon[k] = tsk->icon[k];
             }
 

@@ -27,23 +27,23 @@
 #include <string>
 #include <vector>
 
-typedef struct {
+struct Border {
     double color[3];
     double alpha;
     int width;
     int rounded;
-} Border;
+};
 
 
-typedef struct {
+struct Color {
     double color[3];
     double alpha;
-} Color;
+};
 
-typedef struct {
+struct Background{
     Color back;
     Border border;
-} Background;
+};
 
 
 // way to calculate the size
