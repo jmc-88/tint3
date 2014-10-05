@@ -689,15 +689,13 @@ void Panel::SetBackground() {
 
 
 Panel* GetPanel(Window win) {
-    int i;
-
-    for (i = 0 ; i < nb_panel ; i++) {
+    for (int i = 0 ; i < nb_panel ; ++i) {
         if (panel1[i].main_win == win) {
             return &panel1[i];
         }
     }
 
-    return 0;
+    return nullptr;
 }
 
 
