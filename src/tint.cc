@@ -1370,14 +1370,12 @@ start:
                     case ClientMessage:
                         ev = &e.xclient;
 
-                        if (ev->data.l[1] == server.atoms_["_NET_WM_CM_S0"]) {
-                            if (ev->data.l[2] == None)
+                        if (ev->data.l[1] == (long int) server.atoms_["_NET_WM_CM_S0"]) {
+                            if (ev->data.l[2] == None) {
                                 // Stop real_transparency
-                            {
                                 signal_pending = SIGUSR1;
-                            } else
+                            } else {
                                 // Start real_transparency
-                            {
                                 signal_pending = SIGUSR1;
                             }
                         }

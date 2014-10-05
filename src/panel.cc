@@ -148,9 +148,9 @@ void UpdateStrut(Panel* p) {
 }
 
 void StopAutohideTimeout(Panel* p) {
-    if (p->autohide_timeout) {
+    if (p->autohide_timeout != nullptr) {
         StopTimeout(p->autohide_timeout);
-        p->autohide_timeout = 0;
+        p->autohide_timeout = nullptr;
     }
 }
 
@@ -158,7 +158,7 @@ void StopAutohideTimeout(Panel* p) {
 
 
 void DefaultPanel() {
-    panel1 = 0;
+    panel1 = nullptr;
     nb_panel = 0;
     default_icon = nullptr;
     task_dragged = 0;
@@ -192,20 +192,20 @@ void CleanupPanel() {
     }
 
     for (int i = 0 ; i < nb_panel ; i++) {
-        Panel* p = &panel1[i];
+        Panel& p = panel1[i];
 
-        p->FreeArea();
+        p.FreeArea();
 
-        if (p->temp_pmap) {
-            XFreePixmap(server.dsp, p->temp_pmap);
+        if (p.temp_pmap) {
+            XFreePixmap(server.dsp, p.temp_pmap);
         }
 
-        if (p->hidden_pixmap) {
-            XFreePixmap(server.dsp, p->hidden_pixmap);
+        if (p.hidden_pixmap) {
+            XFreePixmap(server.dsp, p.hidden_pixmap);
         }
 
-        if (p->main_win) {
-            XDestroyWindow(server.dsp, p->main_win);
+        if (p.main_win) {
+            XDestroyWindow(server.dsp, p.main_win);
         }
     }
 
@@ -221,8 +221,8 @@ void CleanupPanel() {
 void InitPanel() {
     if (panel_config.monitor > (server.nb_monitor - 1)) {
         // server.nb_monitor minimum value is 1 (see get_monitors())
-        fprintf(stderr,
-                "warning : monitor not found. tint3 default to all monitors.\n");
+        util::log::Error() << "warning: monitor not found, "
+                           << "defaulting to all monitors.\n";
         panel_config.monitor = 0;
     }
 
@@ -873,8 +873,8 @@ void AutohideShow(void* p) {
         }
     }
 
-    refresh_systray =
-        1;   // ugly hack, because we actually only need to call XSetBackgroundPixmap
+    // ugly hack, because we actually only need to call XSetBackgroundPixmap
+    refresh_systray = 1;
     panel_refresh = 1;
 }
 
