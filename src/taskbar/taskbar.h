@@ -67,13 +67,10 @@ void CleanupTaskbar();
 void InitTaskbar();
 void InitTaskbarPanel(Panel* panel);
 
-void taskbar_remove_task(gpointer key, gpointer value, gpointer user_data);
-Task* task_get_task(Window win);
-GPtrArray* task_get_tasks(Window win);
+void TaskbarRemoveTask(gpointer key, gpointer value, gpointer user_data);
+Task* TaskGetTask(Window win);
+GPtrArray* TaskGetTasks(Window win);
 void TaskRefreshTasklist();
-
-// show/hide taskbar according to current desktop
-void visible_taskbar(void* p);
 
 
 #endif

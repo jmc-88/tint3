@@ -128,7 +128,7 @@ void CleanupTaskbar() {
     cleanup_taskbarname();
 
     if (win_to_task_table) {
-        g_hash_table_foreach(win_to_task_table, taskbar_remove_task, 0);
+        g_hash_table_foreach(win_to_task_table, TaskbarRemoveTask, 0);
     }
 
     for (int i = 0 ; i < nb_panel; ++i) {
@@ -357,13 +357,13 @@ void InitTaskbarPanel(Panel* panel) {
 }
 
 
-void taskbar_remove_task(gpointer key, gpointer value, gpointer user_data) {
-    RemoveTask(task_get_task(*static_cast<Window*>(key)));
+void TaskbarRemoveTask(gpointer key, gpointer value, gpointer user_data) {
+    RemoveTask(TaskGetTask(*static_cast<Window*>(key)));
 }
 
 
-Task* task_get_task(Window win) {
-    GPtrArray* task_group = task_get_tasks(win);
+Task* TaskGetTask(Window win) {
+    GPtrArray* task_group = TaskGetTasks(win);
 
     if (task_group) {
         return static_cast<Task*>(g_ptr_array_index(task_group, 0));
@@ -373,7 +373,7 @@ Task* task_get_task(Window win) {
 }
 
 
-GPtrArray* task_get_tasks(Window win) {
+GPtrArray* TaskGetTasks(Window win) {
     if (win_to_task_table && taskbar_enabled) {
         return static_cast<GPtrArray*>(g_hash_table_lookup(win_to_task_table, &win));
     }
@@ -409,7 +409,7 @@ void TaskRefreshTasklist() {
         }
 
         if (i == num_results) {
-            taskbar_remove_task(it->data, 0, 0);
+            TaskbarRemoveTask(it->data, 0, 0);
         }
     }
 
@@ -417,7 +417,7 @@ void TaskRefreshTasklist() {
 
     // Add any new
     for (i = 0; i < num_results; i++) {
-        if (!task_get_task(win[i])) {
+        if (!TaskGetTask(win[i])) {
             AddTask(win[i]);
         }
     }
@@ -470,23 +470,5 @@ void Taskbar::OnChangeLayout() {
 
     pix_ = 0;
     need_redraw_ = true;
-}
-
-
-void visible_taskbar(void* p) {
-    Panel* panel = static_cast<Panel*>(p);
-
-    for (int j = 0 ; j < panel->nb_desktop ; j++) {
-        Taskbar* taskbar = &panel->taskbar[j];
-
-        if (panel_mode != MULTI_DESKTOP && taskbar->desktop != server.desktop) {
-            // SINGLE_DESKTOP and not current desktop
-            taskbar->on_screen_ = 0;
-        } else {
-            taskbar->on_screen_ = 1;
-        }
-    }
-
-    panel_refresh = 1;
 }
 

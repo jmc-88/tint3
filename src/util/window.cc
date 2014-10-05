@@ -89,7 +89,7 @@ int WindowIsHidden(Window win) {
         Window window = win;
 
         while (XGetTransientForHint(server.dsp, window, &window)) {
-            if (task_get_tasks(window)) {
+            if (TaskGetTasks(window)) {
                 XFree(at);
                 return 1;
             }

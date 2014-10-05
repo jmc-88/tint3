@@ -684,7 +684,7 @@ void EventPropertyNotify(XEvent* e) {
             for (i = 0 ; i < nb_panel ; i++) {
                 InitTaskbarPanel(&panel1[i]);
                 panel1[i].SetItemsOrder();
-                visible_taskbar(&panel1[i]);
+                panel1[i].UpdateTaskbarVisibility();
                 panel1[i].need_resize_ = true;
             }
 
@@ -763,7 +763,7 @@ void EventPropertyNotify(XEvent* e) {
             panel_refresh = 1;
         }
     } else {
-        tsk = task_get_task(win);
+        tsk = TaskGetTask(win);
 
         if (!tsk) {
             if (at != server.atoms_["_NET_WM_STATE"]) {
@@ -894,7 +894,7 @@ void EventConfigureNotify(Window win) {
         return;
     }
 
-    Task* tsk = task_get_task(win);
+    Task* tsk = TaskGetTask(win);
 
     if (!tsk) {
         return;

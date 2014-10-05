@@ -264,7 +264,7 @@ bool Task::UpdateTitle() {
     }
 
     title_ = title;
-    GPtrArray* task_group = task_get_tasks(win);
+    GPtrArray* task_group = TaskGetTasks(win);
 
     if (task_group) {
         for (size_t i = 0; i < task_group->len; ++i) {
@@ -394,7 +394,7 @@ void GetIcon(Task* tsk) {
         XFree(data);
     }
 
-    GPtrArray* task_group = task_get_tasks(tsk->win);
+    GPtrArray* task_group = TaskGetTasks(tsk->win);
 
     if (task_group) {
         for (size_t i = 0; i < task_group->len; ++i) {
@@ -613,7 +613,7 @@ void ActiveTask() {
     //printf("Change active task %ld\n", w1);
 
     if (w1) {
-        if (!task_get_tasks(w1)) {
+        if (!TaskGetTasks(w1)) {
             Window w2;
 
             while (XGetTransientForHint(server.dsp, w1, &w2)) {
@@ -621,7 +621,7 @@ void ActiveTask() {
             }
         }
 
-        SetTaskState((task_active = task_get_task(w1)), TASK_ACTIVE);
+        SetTaskState((task_active = TaskGetTask(w1)), TASK_ACTIVE);
     }
 }
 
@@ -632,7 +632,7 @@ void SetTaskState(Task* tsk, int state) {
     }
 
     if (tsk->current_state != state) {
-        GPtrArray* task_group = task_get_tasks(tsk->win);
+        GPtrArray* task_group = TaskGetTasks(tsk->win);
 
         if (task_group) {
             for (size_t i = 0; i < task_group->len; ++i) {
@@ -702,7 +702,7 @@ void add_urgent(Task* tsk) {
     }
 
     // always add the first tsk for a task group (omnipresent windows)
-    tsk = task_get_task(tsk->win);
+    tsk = TaskGetTask(tsk->win);
     tsk->urgent_tick = 0;
 
     auto it = std::find(urgent_list.begin(),

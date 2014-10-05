@@ -353,7 +353,7 @@ void InitPanel() {
             AddTimeout(panel_autohide_hide_timeout, 0, AutohideHide, p);
         }
 
-        visible_taskbar(p);
+        p->UpdateTaskbarVisibility();
     }
 
     TaskRefreshTasklist();
@@ -683,6 +683,22 @@ void Panel::SetBackground() {
             set_task_redraw(static_cast<Task*>(child));
         });
     }
+}
+
+
+void Panel::UpdateTaskbarVisibility() {
+    for (int j = 0 ; j < nb_desktop ; j++) {
+        Taskbar& tskbar = taskbar[j];
+
+        if (panel_mode != MULTI_DESKTOP && tskbar.desktop != server.desktop) {
+            // SINGLE_DESKTOP and not current desktop
+            tskbar.on_screen_ = 0;
+        } else {
+            tskbar.on_screen_ = 1;
+        }
+    }
+
+    panel_refresh = 1;
 }
 
 

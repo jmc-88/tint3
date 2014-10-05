@@ -138,6 +138,9 @@ class Panel : public Area {
 
     void SetItemsOrder();
     void SetProperties();
+
+    // show/hide taskbar according to current desktop
+    void UpdateTaskbarVisibility();
 };
 
 
