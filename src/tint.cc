@@ -170,11 +170,11 @@ static void SigchldHandler(int /* signal */) {
         auto it = server.pids.find(pid);
 
         if (it != server.pids.end()) {
-            util::log::Error() << "Unknown child " << pid << " terminated!\n";
-        } else {
             sn_launcher_context_complete(it->second);
             sn_launcher_context_unref(it->second);
             server.pids.erase(it);
+        } else {
+            util::log::Error() << "Unknown child " << pid << " terminated!\n";
         }
     }
 }
