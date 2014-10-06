@@ -153,7 +153,7 @@ void CleanupTaskbar() {
         }
 
         if (panel.taskbar != nullptr) {
-            delete panel.taskbar;
+            delete[] panel.taskbar;
             panel.taskbar = nullptr;
         }
     }
