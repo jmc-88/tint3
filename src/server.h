@@ -13,8 +13,9 @@
 #include <X11/Xatom.h>
 #include <X11/extensions/Xinerama.h>
 
-#include <vector>
 #include <map>
+#include <string>
+#include <vector>
 
 #ifdef HAVE_SN
 #include <libsn/sn.h>
