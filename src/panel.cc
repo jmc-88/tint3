@@ -40,7 +40,7 @@ namespace {
 static char kClassHintName[]  = "tint3";
 static char kClassHintClass[] = "Tint3";
 
-}
+}  // namespace
 
 
 int signal_pending;
@@ -859,6 +859,40 @@ Area* Panel::ClickArea(int x, int y) {
     } while (new_result != result);
 
     return result;
+}
+
+
+bool Panel::HandlesClick(XButtonEvent* e) {
+    Task* task = ClickTask(e->x, e->y);
+
+    if (task) {
+        return ((e->button == 1)
+                || (e->button == 2 && mouse_middle != 0)
+                || (e->button == 3 && mouse_right != 0)
+                || (e->button == 4 && mouse_scroll_up != 0)
+                || (e->button == 5 && mouse_scroll_down != 0));
+    }
+
+    LauncherIcon* icon = ClickLauncherIcon(e->x, e->y);
+
+    if (icon) {
+        return (e->button == 1);
+    }
+
+    // no launcher/task clicked --> check if taskbar clicked
+    Taskbar* tskbar = ClickTaskbar(e->x, e->y);
+
+    if (tskbar && e->button == 1 && panel_mode == MULTI_DESKTOP) {
+        return 1;
+    }
+
+    if (ClickClock(e->x, e->y)) {
+        bool clock_lclick = (e->button == 1 && !clock_lclick_command.empty());
+        bool clock_rclick = (e->button == 3 && !clock_rclick_command.empty());
+        return (clock_lclick || clock_rclick);
+    }
+
+    return false;
 }
 
 

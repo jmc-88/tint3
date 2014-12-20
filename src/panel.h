@@ -13,6 +13,7 @@
 
 #include <pango/pangocairo.h>
 #include <sys/time.h>
+#include <X11/Xlib.h>
 
 #include <string>
 #include <vector>
@@ -126,6 +127,7 @@ class Panel : public Area {
     bool ClickPadding(int x, int y);
     bool ClickClock(int x, int y);
     Area* ClickArea(int x, int y);
+    bool HandlesClick(XButtonEvent* e);
 
     void Render();
     bool Resize() override;

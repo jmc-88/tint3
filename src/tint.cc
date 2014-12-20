@@ -18,18 +18,18 @@
 * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 **************************************************************************/
 
-#include <sys/stat.h>
 #include <unistd.h>
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
+#include <sys/stat.h>
+#include <Imlib2.h>
 #include <X11/Xutil.h>
 #include <X11/Xatom.h>
 #include <X11/Xlocale.h>
 #include <X11/extensions/Xdamage.h>
-#include <Imlib2.h>
-#include <signal.h>
 
 #ifdef HAVE_SN
 #include <sys/wait.h>
@@ -378,40 +378,6 @@ void WindowAction(Task* tsk, int action) {
 }
 
 
-bool Tint3HandlesClick(Panel* panel, XButtonEvent* e) {
-    Task* task = panel->ClickTask(e->x, e->y);
-
-    if (task) {
-        return ((e->button == 1)
-                || (e->button == 2 && mouse_middle != 0)
-                || (e->button == 3 && mouse_right != 0)
-                || (e->button == 4 && mouse_scroll_up != 0)
-                || (e->button == 5 && mouse_scroll_down != 0));
-    }
-
-    LauncherIcon* icon = panel->ClickLauncherIcon(e->x, e->y);
-
-    if (icon) {
-        return (e->button == 1);
-    }
-
-    // no launcher/task clicked --> check if taskbar clicked
-    Taskbar* tskbar = panel->ClickTaskbar(e->x, e->y);
-
-    if (tskbar && e->button == 1 && panel_mode == MULTI_DESKTOP) {
-        return 1;
-    }
-
-    if (panel->ClickClock(e->x, e->y)) {
-        bool clock_lclick = (e->button == 1 && !clock_lclick_command.empty());
-        bool clock_rclick = (e->button == 3 && !clock_rclick_command.empty());
-        return (clock_lclick || clock_rclick);
-    }
-
-    return false;
-}
-
-
 void ForwardClick(XEvent* e) {
     // forward the click to the desktop window (thanks conky)
     XUngrabPointer(server.dsp, e->xbutton.time);
@@ -434,7 +400,7 @@ void EventButtonPress(XEvent* e) {
     }
 
 
-    if (wm_menu && !Tint3HandlesClick(panel, &e->xbutton)) {
+    if (wm_menu && !panel->HandlesClick(&e->xbutton)) {
         ForwardClick(e);
         return;
     }
@@ -522,7 +488,7 @@ void EventButtonRelease(XEvent* e) {
         return;
     }
 
-    if (wm_menu && !Tint3HandlesClick(panel, &e->xbutton)) {
+    if (wm_menu && !panel->HandlesClick(&e->xbutton)) {
         ForwardClick(e);
 
         if (panel_layer == BOTTOM_LAYER) {
