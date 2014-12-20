@@ -37,7 +37,7 @@ class Server {
     Display* dsp;
     Window root_win;
     Window composite_manager;
-    int real_transparency;
+    bool real_transparency;
     // current desktop
     int desktop;
     int screen;

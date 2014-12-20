@@ -920,12 +920,13 @@ Property ReadProperty(Display* disp, Window w, Atom property) {
 
     util::log::Debug()
             << "DnD " << __FILE__ << ':' << __LINE__ << ": Property:\n"
-            << "DnD " << __FILE__ << ':' << __LINE__ << ": Actual type: " << GetAtomName(
-                disp, actual_type) << '\n'
-            << "DnD " << __FILE__ << ':' << __LINE__ << ": Actual format: " << actual_format
-            << '\n'
-            << "DnD " << __FILE__ << ':' << __LINE__ << ": Number of items: " << nitems <<
-            '\n';
+            << "DnD " << __FILE__ << ':' << __LINE__
+            << ": Actual type: " << GetAtomName(disp, actual_type) << '\n'
+            << "DnD " << __FILE__ << ':' << __LINE__
+            << ": Actual format: " << actual_format << '\n'
+            << "DnD " << __FILE__ << ':' << __LINE__
+            << ": Number of items: " << nitems
+            << '\n';
 
     Property p;
     p.data = ret;
@@ -945,8 +946,10 @@ Atom PickTargetFromList(Display* disp, Atom* atom_list, int nitems) {
     for (int i = 0; i < nitems; ++i) {
         char const* atom_name = GetAtomName(disp, atom_list[i]);
 
-        util::log::Debug() << "DnD " << __FILE__ << ':' << __LINE__ << ": Type " << i <<
-                           " = " << atom_name << '\n';
+        util::log::Debug()
+            << "DnD " << __FILE__ << ':' << __LINE__
+            << ": Type " << i << " = " << atom_name
+            << '\n';
 
         //See if this data type is allowed and of higher priority (closer to zero)
         //than the present one.

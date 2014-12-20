@@ -426,14 +426,14 @@ void Server::InitVisual() {
         attrs.event_mask = StructureNotifyMask;
         XChangeWindowAttributes(dsp, composite_manager, CWEventMask, &attrs);
 
-        real_transparency = 1;
+        real_transparency = true;
         depth = 32;
         printf("real transparency on... depth: %d\n", depth);
         colormap = XCreateColormap(dsp, root_win, xvi_visual, AllocNone);
         visual = xvi_visual;
     } else {
         // no composite manager or snapshot mode => fake transparency
-        real_transparency = 0;
+        real_transparency = false;
         depth = DefaultDepth(dsp, screen);
         printf("real transparency off.... depth: %d\n", depth);
         colormap = DefaultColormap(dsp, screen);
