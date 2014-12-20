@@ -176,7 +176,7 @@ void TooltipShow(void* /* arg */) {
 
 void TooltipUpdateGeometry() {
     cairo_surface_t* cs = cairo_xlib_surface_create(
-        server.dsp, g_tooltip.window, server.visual, width, height);
+                              server.dsp, g_tooltip.window, server.visual, width, height);
     cairo_t* c = cairo_create(cs);
     PangoLayout* layout = pango_cairo_create_layout(c);
 

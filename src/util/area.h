@@ -40,7 +40,7 @@ struct Color {
     double alpha;
 };
 
-struct Background{
+struct Background {
     Color back;
     Border border;
 };
