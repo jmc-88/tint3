@@ -18,9 +18,9 @@
 * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 **************************************************************************/
 
+#include <unistd.h>
 #include <X11/extensions/Xrender.h>
 #include <X11/extensions/Xrandr.h>
-#include <unistd.h>
 
 #include <algorithm>
 #include <cstdio>
@@ -44,8 +44,9 @@ static constexpr char const* const kAtomList[] = {
     "_NET_CURRENT_DESKTOP", "_NET_DESKTOP_GEOMETRY", "_NET_DESKTOP_NAMES",
     "_NET_DESKTOP_VIEWPORT", "_NET_NUMBER_OF_DESKTOPS",
     "_NET_SUPPORTING_WM_CHECK", "_NET_SYSTEM_TRAY_MESSAGE_DATA",
-    "_NET_SYSTEM_TRAY_OPCODE", "_NET_SYSTEM_TRAY_ORIENTATION", "_NET_WM_CM_S0",
-    "_NET_WM_DESKTOP", "_NET_WM_ICON", "_NET_WM_ICON_GEOMETRY", "_NET_WM_NAME",
+    "_NET_SYSTEM_TRAY_OPCODE", "_NET_SYSTEM_TRAY_ORIENTATION",
+    "_NET_SYSTEM_TRAY_VISUAL", "_NET_WM_CM_S0", "_NET_WM_DESKTOP",
+    "_NET_WM_ICON", "_NET_WM_ICON_GEOMETRY", "_NET_WM_NAME", "_NET_WM_PID",
     "_NET_WM_STATE", "_NET_WM_STATE_ABOVE", "_NET_WM_STATE_BELOW",
     "_NET_WM_STATE_DEMANDS_ATTENTION", "_NET_WM_STATE_HIDDEN",
     "_NET_WM_STATE_MAXIMIZED_HORZ", "_NET_WM_STATE_MAXIMIZED_VERT",
@@ -89,9 +90,12 @@ void Server::InitAtoms() {
     atoms_.clear();
 
     for (int i = 0; i < kAtomCount; ++i) {
-        util::log::Debug() << "Atom " << kAtomList[i]
-                           << " = " << atom_list[i] << '\n';
         atoms_.insert(std::make_pair(kAtomList[i], atom_list[i]));
+
+        util::log::Debug()
+                << "Atom " << kAtomList[i]
+                << " = " << atoms_[kAtomList[i]]
+                << '\n';
     }
 
     std::string name;
@@ -99,8 +103,12 @@ void Server::InitAtoms() {
 
     name.assign(StringBuilder() << "_XSETTINGS_S" << DefaultScreen(dsp));
     atom = XInternAtom(dsp, name.c_str(), False);
-    util::log::Debug() << "Atom " << name << " = " << atom << '\n';
     atoms_.insert(std::make_pair("_XSETTINGS_SCREEN", atom));
+
+    util::log::Debug()
+            << "Atom _XSETTINGS_SCREEN (" << name
+            << ") = " << atoms_["_XSETTINGS_SCREEN"]
+            << '\n';
 
     if (atom == None) {
         util::log::Error() << "tint3: XInternAtom(\"" << name << "\") failed\n";
@@ -108,8 +116,12 @@ void Server::InitAtoms() {
 
     name.assign(StringBuilder() << "_NET_SYSTEM_TRAY_S" << DefaultScreen(dsp));
     atom = XInternAtom(dsp, name.c_str(), False);
-    util::log::Debug() << "Atom " << name << " = " << atom << '\n';
     atoms_.insert(std::make_pair("_NET_SYSTEM_TRAY_SCREEN", atom));
+
+    util::log::Debug()
+            << "Atom _NET_SYSTEM_TRAY_SCREEN (" << name
+            << ") = " << atoms_["_NET_SYSTEM_TRAY_SCREEN"]
+            << '\n';
 
     if (atom == None) {
         util::log::Error() << "tint3: XInternAtom(\"" << name << "\") failed\n";

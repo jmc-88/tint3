@@ -184,7 +184,7 @@ void InitX11() {
     server.dsp = XOpenDisplay(nullptr);
 
     if (!server.dsp) {
-        util::log::Error() << "tint3 exit : could not open display.\n";
+        util::log::Error() << "Couldn't open display.\n";
         exit(0);
     }
 
@@ -941,9 +941,8 @@ Property ReadProperty(Display* disp, Window w, Atom property) {
 // entry in datatypes which is also in atom_list: ie it finds the best match.
 Atom PickTargetFromList(Display* disp, Atom* atom_list, int nitems) {
     Atom to_be_requested = None;
-    int i;
 
-    for (i = 0; i < nitems; i++) {
+    for (int i = 0; i < nitems; ++i) {
         char const* atom_name = GetAtomName(disp, atom_list[i]);
 
         util::log::Debug() << "DnD " << __FILE__ << ':' << __LINE__ << ": Type " << i <<

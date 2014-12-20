@@ -154,7 +154,7 @@ void StopAutohideTimeout(Panel* p) {
     }
 }
 
-} // namespace
+}  // namespace
 
 
 void DefaultPanel() {
@@ -273,6 +273,11 @@ void InitPanel() {
         p->InitSizeAndPosition();
 
         // add children according to panel_items
+        util::log::Debug()
+                << "Setting panel items: "
+                << panel_items_order
+                << '\n';
+
         for (char item : panel_items_order) {
             if (item == 'L') {
                 InitLauncherPanel(p);

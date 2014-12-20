@@ -9,8 +9,8 @@
 #ifndef SERVER_H
 #define SERVER_H
 
-#include <X11/Xlib.h>
 #include <X11/Xatom.h>
+#include <X11/Xlib.h>
 #include <X11/extensions/Xinerama.h>
 
 #include <map>
@@ -32,7 +32,7 @@ struct Monitor {
 
 class Server {
   public:
-    std::map<const char*, Atom> atoms_;
+    std::map<std::string, Atom> atoms_;
 
     Display* dsp;
     Window root_win;

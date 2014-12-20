@@ -256,22 +256,21 @@ void StartNet() {
     // freedesktop systray specification
     if (win != None) {
         // search pid
-        Atom _NET_WM_PID, actual_type;
+        unsigned char* prop = nullptr;
+        Atom actual_type;
         int actual_format;
         unsigned long nitems;
         unsigned long bytes_after;
-        unsigned char* prop = 0;
-        int pid;
-
-        _NET_WM_PID = XInternAtom(server.dsp, "_NET_WM_PID", True);
-        int ret = XGetWindowProperty(server.dsp, win, _NET_WM_PID, 0, 1024, False,
-                                     AnyPropertyType, &actual_type, &actual_format, &nitems, &bytes_after, &prop);
+        int ret = XGetWindowProperty(server.dsp, win,
+                                     server.atoms_["_NET_WM_PID"], 0, 1024,
+                                     False, AnyPropertyType, &actual_type,
+                                     &actual_format, &nitems, &bytes_after,
+                                     &prop);
 
         util::log::Error() << "tint3: another systray is running";
 
-        if (ret == Success && prop) {
-            pid = prop[1] * 256;
-            pid += prop[0];
+        if (ret == Success && prop != nullptr) {
+            pid_t pid = (prop[1] << 8) + prop[0];
             util::log::Error() << " (pid " << pid << ')';
         }
 
@@ -280,15 +279,17 @@ void StartNet() {
     }
 
     // init systray protocol
-    net_sel_win = XCreateSimpleWindow(server.dsp, server.root_win, -1, -1, 1, 1, 0,
-                                      0, 0);
+    net_sel_win = XCreateSimpleWindow(server.dsp, server.root_win,
+                                      -1, -1, 1, 1, 0, 0, 0);
 
     // v0.3 trayer specification. tint3 always horizontal.
     // Vertical panel will draw the systray horizontal.
-    long orient = 0;
+    unsigned char orient = 0;
     XChangeProperty(server.dsp, net_sel_win,
-                    server.atoms_["_NET_SYSTEM_TRAY_ORIENTATION"], XA_CARDINAL, 32, PropModeReplace,
-                    (unsigned char*) &orient, 1);
+                    server.atoms_["_NET_SYSTEM_TRAY_ORIENTATION"],
+                    XA_CARDINAL, 32, PropModeReplace,
+                    &orient, 1);
+
     VisualID vid;
 
     if (server.visual32 && (systray.alpha != 100 || systray.brightness != 0
@@ -298,18 +299,19 @@ void StartNet() {
         vid = XVisualIDFromVisual(server.visual);
     }
 
-    XChangeProperty(server.dsp, net_sel_win, XInternAtom(server.dsp,
-                    "_NET_SYSTEM_TRAY_VISUAL", False), XA_VISUALID, 32, PropModeReplace,
-                    (unsigned char*)&vid, 1);
+    XChangeProperty(server.dsp, net_sel_win,
+                    server.atoms_["_NET_SYSTEM_TRAY_VISUAL"],
+                    XA_VISUALID, 32, PropModeReplace, (unsigned char*)&vid, 1);
 
     XSetSelectionOwner(server.dsp, server.atoms_["_NET_SYSTEM_TRAY_SCREEN"],
-                       net_sel_win,
-                       CurrentTime);
+                       net_sel_win, CurrentTime);
 
-    if (XGetSelectionOwner(server.dsp,
-                           server.atoms_["_NET_SYSTEM_TRAY_SCREEN"]) != net_sel_win) {
+    Window owner = XGetSelectionOwner(server.dsp,
+                                      server.atoms_["_NET_SYSTEM_TRAY_SCREEN"]);
+
+    if (owner != net_sel_win) {
+        util::log::Error() << "Can't get systray manager.\n";
         StopNet();
-        util::log::Error() << "tint3: can't get systray manager\n";
         return;
     }
 
@@ -330,9 +332,11 @@ void StartNet() {
 
 void StopNet() {
     // remove_icon change systray.list_icons
-    while (!systray.list_icons.empty()) {
-        systray.RemoveIcon(systray.list_icons.back());
+    for (auto& icon : systray.list_icons) {
+        systray.RemoveIcon(icon);
     }
+
+    systray.list_icons.clear();
 
     if (net_sel_win != None) {
         XDestroyWindow(server.dsp, net_sel_win);
