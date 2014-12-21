@@ -459,8 +459,8 @@ void EventButtonMotionNotify(XEvent* e) {
             drag_taskbar->children_.erase(drag_taskbar_iter);
         }
 
-        if (event_taskbar->posx_ > drag_taskbar->posx_ ||
-            event_taskbar->posy_ > drag_taskbar->posy_) {
+        if (event_taskbar->panel_x_ > drag_taskbar->panel_x_ ||
+            event_taskbar->panel_y_ > drag_taskbar->panel_y_) {
             auto& children = event_taskbar->children_;
             size_t i = (taskbarname_enabled) ? 1 : 0;
             children.insert(children.begin() + i, task_drag);

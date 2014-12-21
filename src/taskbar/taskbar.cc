@@ -205,14 +205,14 @@ void InitTaskbarPanel(Panel* panel) {
     panel->g_taskbar.on_screen_ = 1;
 
     if (panel_horizontal) {
-        panel->g_taskbar.posy_ = (panel->bg_->border.width + panel->padding_y_);
-        panel->g_taskbar.height_ = panel->height_ - (2 * panel->g_taskbar.posy_);
-        panel->g_taskbar.bar_name_.posy_ = panel->g_taskbar.posy_;
+        panel->g_taskbar.panel_y_ = (panel->bg_->border.width + panel->padding_y_);
+        panel->g_taskbar.height_ = panel->height_ - (2 * panel->g_taskbar.panel_y_);
+        panel->g_taskbar.bar_name_.panel_y_ = panel->g_taskbar.panel_y_;
         panel->g_taskbar.bar_name_.height_ = panel->g_taskbar.height_;
     } else {
-        panel->g_taskbar.posx_ = panel->bg_->border.width + panel->padding_y_;
-        panel->g_taskbar.width_ = panel->width_ - (2 * panel->g_taskbar.posx_);
-        panel->g_taskbar.bar_name_.posx_ = panel->g_taskbar.posx_;
+        panel->g_taskbar.panel_x_ = panel->bg_->border.width + panel->padding_y_;
+        panel->g_taskbar.width_ = panel->width_ - (2 * panel->g_taskbar.panel_x_);
+        panel->g_taskbar.bar_name_.panel_x_ = panel->g_taskbar.panel_x_;
         panel->g_taskbar.bar_name_.width_ = panel->g_taskbar.width_;
     }
 
@@ -283,15 +283,15 @@ void InitTaskbarPanel(Panel* panel) {
     }
 
     if (panel_horizontal) {
-        panel->g_task.posy_ = panel->g_taskbar.posy_ +
-                              panel->g_taskbar.background[TASKBAR_NORMAL]->border.width +
-                              panel->g_taskbar.padding_y_;
-        panel->g_task.height_ = panel->height_ - (2 * panel->g_task.posy_);
+        panel->g_task.panel_y_ = panel->g_taskbar.panel_y_ +
+                                 panel->g_taskbar.background[TASKBAR_NORMAL]->border.width +
+                                 panel->g_taskbar.padding_y_;
+        panel->g_task.height_ = panel->height_ - (2 * panel->g_task.panel_y_);
     } else {
-        panel->g_task.posx_ = panel->g_taskbar.posx_ +
-                              panel->g_taskbar.background[TASKBAR_NORMAL]->border.width +
-                              panel->g_taskbar.padding_y_;
-        panel->g_task.width_ = panel->width_ - (2 * panel->g_task.posx_);
+        panel->g_task.panel_x_ = panel->g_taskbar.panel_x_ +
+                                 panel->g_taskbar.background[TASKBAR_NORMAL]->border.width +
+                                 panel->g_taskbar.padding_y_;
+        panel->g_task.width_ = panel->width_ - (2 * panel->g_task.panel_x_);
         panel->g_task.height_ = panel->g_task.maximum_height;
     }
 

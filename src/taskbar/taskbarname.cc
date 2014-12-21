@@ -139,7 +139,7 @@ void Taskbarname::DrawForeground(cairo_t* c) {
                           config_text->color[2], config_text->alpha);
 
     pango_cairo_update_layout(c, layout);
-    cairo_move_to(c, 0, posy_);
+    cairo_move_to(c, 0, panel_y_);
     pango_cairo_show_layout(c, layout);
 
     g_object_unref(layout);
@@ -162,7 +162,7 @@ bool Taskbarname::Resize() {
 
         if (new_size != width_) {
             width_ = new_size;
-            posy_ = (height_ - name_height) / 2;
+            panel_y_ = (height_ - name_height) / 2;
             return true;
         }
     } else {
@@ -170,7 +170,7 @@ bool Taskbarname::Resize() {
 
         if (new_size != height_) {
             height_ = new_size;
-            posy_ = (height_ - name_height) / 2;
+            panel_y_ = (height_ - name_height) / 2;
             return true;
         }
     }

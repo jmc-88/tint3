@@ -35,8 +35,8 @@ Area::~Area() {
 }
 
 Area& Area::CloneArea(Area const& other) {
-    posx_ = other.posx_;
-    posy_ = other.posy_;
+    panel_x_ = other.panel_x_;
+    panel_y_ = other.panel_y_;
     width_ = other.width_;
     height_ = other.height_;
     pix_ = other.pix_;
@@ -106,13 +106,13 @@ void Area::InitRendering(int pos) {
     // initialize fixed position/size
     for (auto& child : children_) {
         if (panel_horizontal) {
-            child->posy_ = pos + bg_->border.width + padding_y_;
+            child->panel_y_ = pos + bg_->border.width + padding_y_;
             child->height_ = height_ - (2 * (bg_->border.width + padding_y_));
-            child->InitRendering(child->posy_);
+            child->InitRendering(child->panel_y_);
         } else {
-            child->posx_ = pos + bg_->border.width + padding_y_;
+            child->panel_x_ = pos + bg_->border.width + padding_y_;
             child->width_ = width_ - (2 * (bg_->border.width + padding_y_));
-            child->InitRendering(child->posx_);
+            child->InitRendering(child->panel_x_);
         }
     }
 }
@@ -174,15 +174,15 @@ void Area::SizeByLayout(int pos, int level) {
         }
 
         if (panel_horizontal) {
-            if (pos != child->posx_) {
+            if (pos != child->panel_x_) {
                 // pos changed => redraw
-                child->posx_ = pos;
+                child->panel_x_ = pos;
                 child->on_changed_ = 1;
             }
         } else {
-            if (pos != child->posy_) {
+            if (pos != child->panel_y_) {
                 // pos changed => redraw
-                child->posy_ = pos;
+                child->panel_y_ = pos;
                 child->on_changed_ = 1;
             }
         }
@@ -218,13 +218,13 @@ void Area::Refresh() {
 
     // draw current Area
     if (pix_ == 0) {
-        printf("empty area posx %d, width %d\n", posx_, width_);
+        printf("empty area posx %d, width %d\n", panel_x_, width_);
     }
 
     XCopyArea(
         server.dsp, pix_,
         panel_->temp_pmap, server.gc, 0, 0,
-        width_, height_, posx_, posy_);
+        width_, height_, panel_x_, panel_y_);
 
     // and then refresh child object
     for (auto& child : children_) {
@@ -376,7 +376,7 @@ void Area::Draw() {
     }
 
     XCopyArea(server.dsp, panel_->temp_pmap, pix_, server.gc,
-              posx_, posy_, width_, height_, 0, 0);
+              panel_x_, panel_y_, width_, height_, 0, 0);
 
     cairo_surface_t* cs = cairo_xlib_surface_create(server.dsp, pix_, server.visual,
                           width_,

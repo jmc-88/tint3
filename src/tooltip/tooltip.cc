@@ -131,8 +131,8 @@ void InitTooltip() {
 
 void TooltipTriggerShow(Area* area, Panel* p, XEvent* e) {
     // Position the tooltip in the center of the area
-    x = area->posx_ + area->width_ / 2 + e->xmotion.x_root - e->xmotion.x;
-    y = area->posy_ + area->height_ / 2 + e->xmotion.y_root - e->xmotion.y;
+    x = area->panel_x_ + area->width_ / 2 + e->xmotion.x_root - e->xmotion.x;
+    y = area->panel_y_ + area->height_ / 2 + e->xmotion.y_root - e->xmotion.y;
 
     if (!panel_horizontal) {
         y -= height / 2;
@@ -191,13 +191,13 @@ void TooltipUpdateGeometry() {
     Panel* panel = g_tooltip.panel;
 
     if (panel_horizontal && panel_position & BOTTOM) {
-        y = panel->posy_ - height;
+        y = panel->panel_y_ - height;
     } else if (panel_horizontal && panel_position & TOP) {
-        y = panel->posy_ + panel->height_;
+        y = panel->panel_y_ + panel->height_;
     } else if (panel_position & LEFT) {
-        x = panel->posx_ + panel->width_;
+        x = panel->panel_x_ + panel->width_;
     } else {
-        x = panel->posx_ - width;
+        x = panel->panel_x_ - width;
     }
 
     g_object_unref(layout);

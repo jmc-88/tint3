@@ -303,8 +303,8 @@ LauncherIcon::~LauncherIcon() {
 // Here we override the default layout of the icons; normally Area layouts its children
 // in a stack; we need to layout them in a kind of table
 void LauncherIcon::OnChangeLayout() {
-    posy_ = (parent_->posy_ + y_);
-    posx_ = (parent_->posx_ + x_);
+    panel_y_ = (parent_->panel_y_ + y_);
+    panel_x_ = (parent_->panel_x_ + x_);
 }
 
 std::string LauncherIcon::GetTooltipText() {

@@ -62,8 +62,8 @@ class Area {
     Area& CloneArea(Area const&);
 
     // coordinate relative to panel window
-    int posx_;
-    int posy_;
+    int panel_x_;
+    int panel_y_;
     // width and height including border
     int width_;
     int height_;

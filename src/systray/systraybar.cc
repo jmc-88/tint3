@@ -174,11 +174,11 @@ void Systraybar::OnChangeLayout() {
 
     if (panel_horizontal) {
         posy = start;
-        posx = systray.posx_ + systray.bg_->border.width +
+        posx = systray.panel_x_ + systray.bg_->border.width +
                systray.padding_x_lr_;
     } else {
         posx = start;
-        posy = systray.posy_ + systray.bg_->border.width +
+        posy = systray.panel_y_ + systray.bg_->border.width +
                systray.padding_x_lr_;
     }
 
@@ -664,13 +664,13 @@ void systray_render_icon_now(void* t) {
 
     imlib_image_put_back_data(data);
     XCopyArea(server.dsp, render_background, systray.pix_, server.gc,
-              traywin->x - systray.posx_, traywin->y - systray.posy_, traywin->width,
-              traywin->height, traywin->x - systray.posx_,
-              traywin->y - systray.posy_);
-    RenderImage(systray.pix_, traywin->x - systray.posx_,
-                traywin->y - systray.posy_, traywin->width, traywin->height);
+              traywin->x - systray.panel_x_, traywin->y - systray.panel_y_, traywin->width,
+              traywin->height, traywin->x - systray.panel_x_,
+              traywin->y - systray.panel_y_);
+    RenderImage(systray.pix_, traywin->x - systray.panel_x_,
+                traywin->y - systray.panel_y_, traywin->width, traywin->height);
     XCopyArea(server.dsp, systray.pix_, panel->main_win_, server.gc,
-              traywin->x - systray.posx_, traywin->y - systray.posy_, traywin->width,
+              traywin->x - systray.panel_x_, traywin->y - systray.panel_y_, traywin->width,
               traywin->height, traywin->x, traywin->y);
     imlib_free_image_and_decache();
     XFreePixmap(server.dsp, tmp_pmap);

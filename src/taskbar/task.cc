@@ -500,8 +500,8 @@ void Task::DrawForeground(cairo_t* c) {
 
 void Task::OnChangeLayout() {
     long value[] = {
-        panel_->posx_ + posx_,
-        panel_->posy_ + posy_,
+        panel_->panel_x_ + panel_x_,
+        panel_->panel_y_ + panel_y_,
         width_,
         height_
     };

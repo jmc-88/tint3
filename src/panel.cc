@@ -110,14 +110,14 @@ void UpdateStrut(Panel* p) {
 
         if (panel_position & TOP) {
             struts[2] = height + monitor.y;
-            struts[8] = p->pos_x_;
+            struts[8] = p->root_x_;
             // p->width - 1 allowed full screen on monitor 2
-            struts[9] = p->pos_x_ + p->width_ - 1;
+            struts[9] = p->root_x_ + p->width_ - 1;
         } else {
             struts[3] = height + screen_height - monitor.y - monitor.height;
-            struts[10] = p->pos_x_;
+            struts[10] = p->root_x_;
             // p->width - 1 allowed full screen on monitor 2
-            struts[11] = p->pos_x_ + p->width_ - 1;
+            struts[11] = p->root_x_ + p->width_ - 1;
         }
     } else {
         int width = p->width_ + p->margin_x_;
@@ -129,14 +129,14 @@ void UpdateStrut(Panel* p) {
 
         if (panel_position & LEFT) {
             struts[0] = width + monitor.x;
-            struts[4] = p->pos_y_;
+            struts[4] = p->root_y_;
             // p->width - 1 allowed full screen on monitor 2
-            struts[5] = p->pos_y_ + p->height_ - 1;
+            struts[5] = p->root_y_ + p->height_ - 1;
         } else {
             struts[1] = width + screen_width - monitor.x - monitor.width;
-            struts[6] = p->pos_y_;
+            struts[6] = p->root_y_;
             // p->width - 1 allowed full screen on monitor 2
-            struts[7] = p->pos_y_ + p->height_ - 1;
+            struts[7] = p->root_y_ + p->height_ - 1;
         }
     }
 
@@ -318,7 +318,8 @@ void InitPanel() {
             attr.border_pixel = 0;
 
             unsigned long mask = CWEventMask | CWColormap | CWBackPixel | CWBorderPixel;
-            p->main_win_ = XCreateWindow(server.dsp, server.root_win, p->pos_x_, p->pos_y_,
+            p->main_win_ = XCreateWindow(server.dsp, server.root_win, p->root_x_,
+                                         p->root_y_,
                                          p->width_, p->height_, 0, server.depth, InputOutput, server.visual,
                                          mask, &attr);
         }
@@ -418,33 +419,33 @@ void Panel::InitSizeAndPosition() {
 
     // panel position determined here
     if (panel_position & LEFT) {
-        pos_x_ = server.monitor[monitor_].x + margin_x_;
+        root_x_ = server.monitor[monitor_].x + margin_x_;
     } else {
         if (panel_position & RIGHT) {
-            pos_x_ = server.monitor[monitor_].x + server.monitor[monitor_].width - width_ -
-                     margin_x_;
+            root_x_ = server.monitor[monitor_].x + server.monitor[monitor_].width - width_ -
+                      margin_x_;
         } else {
             if (panel_horizontal) {
-                pos_x_ = server.monitor[monitor_].x + ((server.monitor[monitor_].width -
+                root_x_ = server.monitor[monitor_].x + ((server.monitor[monitor_].width -
                                                         width_) /
-                                                       2);
+                                                        2);
             } else {
-                pos_x_ = server.monitor[monitor_].x + margin_x_;
+                root_x_ = server.monitor[monitor_].x + margin_x_;
             }
         }
     }
 
     if (panel_position & TOP) {
-        pos_y_ = server.monitor[monitor_].y + margin_y_;
+        root_y_ = server.monitor[monitor_].y + margin_y_;
     } else {
         if (panel_position & BOTTOM) {
-            pos_y_ = server.monitor[monitor_].y + server.monitor[monitor_].height - height_
-                     -
-                     margin_y_;
+            root_y_ = server.monitor[monitor_].y + server.monitor[monitor_].height - height_
+                      -
+                      margin_y_;
         } else {
-            pos_y_ = server.monitor[monitor_].y + ((server.monitor[monitor_].height -
+            root_y_ = server.monitor[monitor_].y + ((server.monitor[monitor_].height -
                                                     height_) /
-                                                   2);
+                                                    2);
         }
     }
 
@@ -726,8 +727,8 @@ Taskbar* Panel::ClickTaskbar(int x, int y) {
         for (int i = 0; i < nb_desktop_ ; i++) {
             Taskbar* tskbar = &taskbar_[i];
 
-            if (tskbar->on_screen_ && x >= tskbar->posx_
-                && x <= (tskbar->posx_ + tskbar->width_)) {
+            if (tskbar->on_screen_ && x >= tskbar->panel_x_
+                && x <= (tskbar->panel_x_ + tskbar->width_)) {
                 return tskbar;
             }
         }
@@ -735,8 +736,8 @@ Taskbar* Panel::ClickTaskbar(int x, int y) {
         for (int i = 0; i < nb_desktop_ ; i++) {
             Taskbar* tskbar = &taskbar_[i];
 
-            if (tskbar->on_screen_ && y >= tskbar->posy_
-                && y <= (tskbar->posy_ + tskbar->height_)) {
+            if (tskbar->on_screen_ && y >= tskbar->panel_y_
+                && y <= (tskbar->panel_y_ + tskbar->height_)) {
                 return tskbar;
             }
         }
@@ -760,13 +761,13 @@ Task* Panel::ClickTask(int x, int y) {
             auto tsk = reinterpret_cast<Task*>(*it);
 
             if (panel_horizontal) {
-                if (tsk->on_screen_ && x >= tsk->posx_
-                    && x <= (tsk->posx_ + tsk->width_)) {
+                if (tsk->on_screen_ && x >= tsk->panel_x_
+                    && x <= (tsk->panel_x_ + tsk->width_)) {
                     return tsk;
                 }
             } else {
-                if (tsk->on_screen_ && y >= tsk->posy_
-                    && y <= (tsk->posy_ + tsk->height_)) {
+                if (tsk->on_screen_ && y >= tsk->panel_y_
+                    && y <= (tsk->panel_y_ + tsk->height_)) {
                     return tsk;
                 }
             }
@@ -779,13 +780,13 @@ Task* Panel::ClickTask(int x, int y) {
 
 Launcher* Panel::ClickLauncher(int x, int y) {
     if (panel_horizontal) {
-        if (launcher_.on_screen_ && x >= launcher_.posx_ &&
-            x <= (launcher_.posx_ + launcher_.width_)) {
+        if (launcher_.on_screen_ && x >= launcher_.panel_x_ &&
+            x <= (launcher_.panel_x_ + launcher_.width_)) {
             return &launcher_;
         }
     } else {
-        if (launcher_.on_screen_ && y >= launcher_.posy_ &&
-            y <= (launcher_.posy_ + launcher_.height_)) {
+        if (launcher_.on_screen_ && y >= launcher_.panel_y_ &&
+            y <= (launcher_.panel_y_ + launcher_.height_)) {
             return &launcher_;
         }
     }
@@ -799,10 +800,10 @@ LauncherIcon* Panel::ClickLauncherIcon(int x, int y) {
 
     if (launcher != nullptr) {
         for (auto& launcher_icon : launcher->list_icons_) {
-            int base_x = (launcher->posx_ + launcher_icon->x_);
+            int base_x = (launcher->panel_x_ + launcher_icon->x_);
             bool inside_x = (x >= base_x &&
                              x <= (base_x + launcher_icon->icon_size_));
-            int base_y = (launcher->posy_ + launcher_icon->y_);
+            int base_y = (launcher->panel_y_ + launcher_icon->y_);
             bool inside_y = (y >= base_y &&
                              y <= (base_y + launcher_icon->icon_size_));
 
@@ -833,13 +834,13 @@ bool Panel::ClickPadding(int x, int y) {
 
 bool Panel::ClickClock(int x, int y) {
     if (panel_horizontal) {
-        if (clock_.on_screen_ && x >= clock_.posx_
-            && x <= (clock_.posx_ + clock_.width_)) {
+        if (clock_.on_screen_ && x >= clock_.panel_x_
+            && x <= (clock_.panel_x_ + clock_.width_)) {
             return true;
         }
     } else {
-        if (clock_.on_screen_ && y >= clock_.posy_
-            && y <= (clock_.posy_ + clock_.height_)) {
+        if (clock_.on_screen_ && y >= clock_.panel_y_
+            && y <= (clock_.panel_y_ + clock_.height_)) {
             return true;
         }
     }
@@ -858,8 +859,8 @@ Area* Panel::ClickArea(int x, int y) {
         for (auto it = result->children_.begin(); it != result->children_.end(); ++it) {
             Area* a = (*it);
 
-            if (a->on_screen_ && x >= a->posx_ && x <= (a->posx_ + a->width_)
-                && y >= a->posy_ && y <= (a->posy_ + a->height_)) {
+            if (a->on_screen_ && x >= a->panel_x_ && x <= (a->panel_x_ + a->width_)
+                && y >= a->panel_y_ && y <= (a->panel_y_ + a->height_)) {
                 new_result = a;
                 break;
             }
@@ -920,7 +921,7 @@ void AutohideShow(void* p) {
             XResizeWindow(server.dsp, panel->main_win_, panel->width_,
                           panel->height_);
         } else {
-            XMoveResizeWindow(server.dsp, panel->main_win_, panel->pos_x_, panel->pos_y_,
+            XMoveResizeWindow(server.dsp, panel->main_win_, panel->root_x_, panel->root_y_,
                               panel->width_, panel->height_);
         }
     } else {
@@ -928,7 +929,7 @@ void AutohideShow(void* p) {
             XResizeWindow(server.dsp, panel->main_win_, panel->width_,
                           panel->height_);
         } else {
-            XMoveResizeWindow(server.dsp, panel->main_win_, panel->pos_x_, panel->pos_y_,
+            XMoveResizeWindow(server.dsp, panel->main_win_, panel->root_x_, panel->root_y_,
                               panel->width_, panel->height_);
         }
     }
@@ -958,8 +959,8 @@ void AutohideHide(void* p) {
             XResizeWindow(server.dsp, panel->main_win_, panel->hidden_width_,
                           panel->hidden_height_);
         } else {
-            XMoveResizeWindow(server.dsp, panel->main_win_, panel->pos_x_,
-                              panel->pos_y_ + diff,
+            XMoveResizeWindow(server.dsp, panel->main_win_, panel->root_x_,
+                              panel->root_y_ + diff,
                               panel->hidden_width_, panel->hidden_height_);
         }
     } else {
@@ -967,8 +968,8 @@ void AutohideHide(void* p) {
             XResizeWindow(server.dsp, panel->main_win_, panel->hidden_width_,
                           panel->hidden_height_);
         } else {
-            XMoveResizeWindow(server.dsp, panel->main_win_, panel->pos_x_ + diff,
-                              panel->pos_y_,
+            XMoveResizeWindow(server.dsp, panel->main_win_, panel->root_x_ + diff,
+                              panel->root_y_,
                               panel->hidden_width_, panel->hidden_height_);
         }
     }
