@@ -62,7 +62,7 @@ void XSettingsNotifyCallback(const char* name, XSettingsAction action,
             icon_theme_name = setting->data.v_string;
 
             for (int i = 0 ; i < nb_panel ; ++i) {
-                Launcher& launcher = panel1[i].launcher;
+                Launcher& launcher = panel1[i].launcher_;
                 launcher.CleanupTheme();
                 launcher.LoadThemes();
                 launcher.LoadIcons();
@@ -234,7 +234,6 @@ static XSettingsList* ParseSettings(unsigned char* data, size_t len) {
         CARD8 type;
         CARD16 name_len;
         CARD32 v_int;
-        size_t pad_len;
 
         result = FetchCard8(&buffer, &type);
 
@@ -250,7 +249,7 @@ static XSettingsList* ParseSettings(unsigned char* data, size_t len) {
             goto out;
         }
 
-        pad_len = XSETTINGS_PAD(name_len, 4);
+        int pad_len = XSETTINGS_PAD(name_len, 4);
 
         if (BYTES_LEFT(&buffer) < pad_len) {
             result = XSETTINGS_ACCESS;

@@ -408,7 +408,7 @@ void EventButtonPress(XEvent* e) {
     task_drag = panel->ClickTask(e->xbutton.x, e->xbutton.y);
 
     if (panel_layer == BOTTOM_LAYER) {
-        XLowerWindow(server.dsp, panel->main_win);
+        XLowerWindow(server.dsp, panel->main_win_);
     }
 }
 
@@ -492,7 +492,7 @@ void EventButtonRelease(XEvent* e) {
         ForwardClick(e);
 
         if (panel_layer == BOTTOM_LAYER) {
-            XLowerWindow(server.dsp, panel->main_win);
+            XLowerWindow(server.dsp, panel->main_win_);
         }
 
         task_drag = 0;
@@ -531,7 +531,7 @@ void EventButtonRelease(XEvent* e) {
         ClockAction(e->xbutton.button);
 
         if (panel_layer == BOTTOM_LAYER) {
-            XLowerWindow(server.dsp, panel->main_win);
+            XLowerWindow(server.dsp, panel->main_win_);
         }
 
         task_drag = 0;
@@ -554,7 +554,7 @@ void EventButtonRelease(XEvent* e) {
     if (!tskbar) {
         // TODO: check better solution to keep window below
         if (panel_layer == BOTTOM_LAYER) {
-            XLowerWindow(server.dsp, panel->main_win);
+            XLowerWindow(server.dsp, panel->main_win_);
         }
 
         task_drag = 0;
@@ -581,7 +581,7 @@ void EventButtonRelease(XEvent* e) {
 
     // to keep window below
     if (panel_layer == BOTTOM_LAYER) {
-        XLowerWindow(server.dsp, panel->main_win);
+        XLowerWindow(server.dsp, panel->main_win_);
     }
 }
 
@@ -612,7 +612,7 @@ void EventPropertyNotify(XEvent* e) {
             auto it = desktop_names.begin();
 
             for (i = 0; i < nb_panel; ++i) {
-                for (int j = 0; j < panel1[i].nb_desktop; ++j) {
+                for (int j = 0; j < panel1[i].nb_desktop_; ++j) {
                     std::string name;
 
                     if (it != desktop_names.end()) {
@@ -621,7 +621,7 @@ void EventPropertyNotify(XEvent* e) {
                         name = StringRepresentation(j + 1);
                     }
 
-                    Taskbar& tskbar = panel1[i].taskbar[j];
+                    Taskbar& tskbar = panel1[i].taskbar_[j];
 
                     if (tskbar.bar_name.name() != name) {
                         tskbar.bar_name.set_name(name);
@@ -669,13 +669,13 @@ void EventPropertyNotify(XEvent* e) {
 
             for (i = 0 ; i < nb_panel ; i++) {
                 Panel* panel = &panel1[i];
-                panel->taskbar[old_desktop].set_state(TASKBAR_NORMAL);
-                panel->taskbar[server.desktop].set_state(TASKBAR_ACTIVE);
+                panel->taskbar_[old_desktop].set_state(TASKBAR_NORMAL);
+                panel->taskbar_[server.desktop].set_state(TASKBAR_ACTIVE);
                 // check ALLDESKTOP task => resize taskbar
                 Taskbar* tskbar;
 
                 if (server.nb_desktop > old_desktop) {
-                    tskbar = &panel->taskbar[old_desktop];
+                    tskbar = &panel->taskbar_[old_desktop];
                     auto it = tskbar->children_.begin();
 
                     if (taskbarname_enabled) {
@@ -693,7 +693,7 @@ void EventPropertyNotify(XEvent* e) {
                     }
                 }
 
-                tskbar = &panel->taskbar[server.desktop];
+                tskbar = &panel->taskbar_[server.desktop];
                 auto it = tskbar->children_.begin();
 
                 if (taskbarname_enabled) {
@@ -868,7 +868,7 @@ void EventConfigureNotify(Window win) {
 
     Panel* p = tsk->panel_;
 
-    if (p->monitor != WindowGetMonitor(win)) {
+    if (p->monitor_ != WindowGetMonitor(win)) {
         RemoveTask(tsk);
         tsk = AddTask(win);
 
@@ -947,9 +947,9 @@ Atom PickTargetFromList(Display* disp, Atom* atom_list, int nitems) {
         char const* atom_name = GetAtomName(disp, atom_list[i]);
 
         util::log::Debug()
-            << "DnD " << __FILE__ << ':' << __LINE__
-            << ": Type " << i << " = " << atom_name
-            << '\n';
+                << "DnD " << __FILE__ << ':' << __LINE__
+                << ": Type " << i << " = " << atom_name
+                << '\n';
 
         //See if this data type is allowed and of higher priority (closer to zero)
         //than the present one.
@@ -1174,10 +1174,10 @@ start:
             for (int i = 0 ; i < nb_panel ; i++) {
                 panel = &panel1[i];
 
-                if (panel->is_hidden) {
-                    XCopyArea(server.dsp, panel->hidden_pixmap, panel->main_win, server.gc, 0, 0,
-                              panel->hidden_width, panel->hidden_height, 0, 0);
-                    XSetWindowBackgroundPixmap(server.dsp, panel->main_win, panel->hidden_pixmap);
+                if (panel->is_hidden_) {
+                    XCopyArea(server.dsp, panel->hidden_pixmap_, panel->main_win_, server.gc, 0, 0,
+                              panel->hidden_width_, panel->hidden_height_, 0, 0);
+                    XSetWindowBackgroundPixmap(server.dsp, panel->main_win_, panel->hidden_pixmap_);
                 } else {
                     if (panel->temp_pmap) {
                         XFreePixmap(server.dsp, panel->temp_pmap);
@@ -1186,7 +1186,7 @@ start:
                     panel->temp_pmap = XCreatePixmap(server.dsp, server.root_win, panel->width_,
                                                      panel->height_, server.depth);
                     panel->Render();
-                    XCopyArea(server.dsp, panel->temp_pmap, panel->main_win, server.gc, 0, 0,
+                    XCopyArea(server.dsp, panel->temp_pmap, panel->main_win_, server.gc, 0, 0,
                               panel->width_, panel->height_, 0, 0);
                 }
             }
@@ -1195,10 +1195,10 @@ start:
 
             panel = systray.panel_;
 
-            if (refresh_systray && panel && !panel->is_hidden) {
+            if (refresh_systray && panel && !panel->is_hidden_) {
                 refresh_systray = 0;
                 // tint3 doen't draw systray icons. it just redraw background.
-                XSetWindowBackgroundPixmap(server.dsp, panel->main_win, panel->temp_pmap);
+                XSetWindowBackgroundPixmap(server.dsp, panel->main_win_, panel->temp_pmap);
                 // force icon's refresh
                 RefreshSystrayIcon();
             }
@@ -1235,7 +1235,7 @@ start:
                         AutohideTriggerHide(panel);
                     }
 
-                    if (panel->is_hidden) {
+                    if (panel->is_hidden_) {
                         if (e.type == ClientMessage
                             && e.xclient.message_type == server.atoms_["XdndPosition"]) {
                             hidden_dnd = 1;
@@ -1307,7 +1307,7 @@ start:
 
                         panel = systray.panel_;
 
-                        if (e.xany.window == panel->main_win) { // reparented to us
+                        if (e.xany.window == panel->main_win_) { // reparented to us
                             break;
                         }
 

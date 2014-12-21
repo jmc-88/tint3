@@ -84,9 +84,8 @@ void InitLauncher() {
 }
 
 
-void InitLauncherPanel(void* p) {
-    Panel* panel = static_cast<Panel*>(p);
-    Launcher* launcher = &panel->launcher;
+void InitLauncherPanel(Panel* panel) {
+    Launcher* launcher = &panel->launcher_;
 
     launcher->parent_ = panel;
     launcher->panel_ = panel;
@@ -94,7 +93,7 @@ void InitLauncherPanel(void* p) {
     launcher->need_resize_ = true;
     launcher->need_redraw_ = true;
 
-    if (launcher->bg_ == 0) {
+    if (launcher->bg_ == nullptr) {
         launcher->bg_ = backgrounds.front();
     }
 
@@ -117,10 +116,10 @@ void CleanupLauncher() {
     }
 
     for (int i = 0 ; i < nb_panel ; i++) {
-        panel1[i].launcher.CleanupTheme();
+        panel1[i].launcher_.CleanupTheme();
     }
 
-    panel_config.launcher.list_apps_.clear();
+    panel_config.launcher_.list_apps_.clear();
     icon_theme_name.clear();
     launcher_enabled = false;
 }

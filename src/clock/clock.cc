@@ -93,11 +93,10 @@ void CleanupClock() {
 
 void UpdateClockSeconds(void* arg) {
     gettimeofday(&time_clock, 0);
-    int i;
 
     if (!time1_format.empty()) {
-        for (i = 0 ; i < nb_panel ; i++) {
-            panel1[i].clock.need_resize_ = true;
+        for (int i = 0 ; i < nb_panel ; i++) {
+            panel1[i].clock_.need_resize_ = true;
         }
     }
 
@@ -111,11 +110,9 @@ void UpdateClockMinutes(void* arg) {
     gettimeofday(&time_clock, 0);
 
     if (time_clock.tv_sec % 60 == 0 || time_clock.tv_sec - old_sec > 60) {
-        int i;
-
         if (!time1_format.empty()) {
-            for (i = 0 ; i < nb_panel ; i++) {
-                panel1[i].clock.need_resize_ = true;
+            for (int i = 0 ; i < nb_panel ; i++) {
+                panel1[i].clock_.need_resize_ = true;
             }
         }
 
@@ -167,7 +164,7 @@ void InitClock() {
 
 void InitClockPanel(void* p) {
     Panel* panel = static_cast<Panel*>(p);
-    Clock* clock = &panel->clock;
+    Clock* clock = &panel->clock_;
 
     if (clock->bg_ == 0) {
         clock->bg_ = backgrounds.front();

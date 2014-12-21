@@ -57,8 +57,8 @@ void init_taskbarname_panel(void* p) {
     auto desktop_names = ServerGetDesktopNames();
     auto it = desktop_names.begin();
 
-    for (int j = 0; j < panel->nb_desktop; ++j) {
-        Taskbar* tskbar = &panel->taskbar[j];
+    for (int j = 0; j < panel->nb_desktop_; ++j) {
+        Taskbar* tskbar = &panel->taskbar_[j];
         tskbar->bar_name = panel->g_taskbar.bar_name_;
         tskbar->bar_name.parent_ = reinterpret_cast<Area*>(tskbar);
 
@@ -85,8 +85,8 @@ void cleanup_taskbarname() {
     for (int i = 0 ; i < nb_panel ; i++) {
         Panel* panel = &panel1[i];
 
-        for (int j = 0 ; j < panel->nb_desktop ; j++) {
-            Taskbar* tskbar = &panel->taskbar[j];
+        for (int j = 0 ; j < panel->nb_desktop_ ; j++) {
+            Taskbar* tskbar = &panel->taskbar_[j];
 
             tskbar->bar_name.FreeArea();
 

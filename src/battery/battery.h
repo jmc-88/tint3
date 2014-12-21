@@ -16,8 +16,9 @@
 
 #include <string>
 
-#include "common.h"
 #include "area.h"
+#include "common.h"
+#include "panel.h"
 
 
 // battery drawing parameter (per panel)
@@ -73,6 +74,6 @@ void CleanupBattery();
 void UpdateBattery();
 
 void InitBattery();
-void InitBatteryPanel(void* panel);
+void InitBatteryPanel(Panel* panel);
 
 #endif

@@ -79,15 +79,15 @@ class Panel : public Area {
   public:
     // --------------------------------------------------
     // panel
-    Window main_win;
+    Window main_win_;
     Pixmap temp_pmap;
 
     // position relative to root window
-    int posx_, posy_;
-    int marginx, marginy;
+    int pos_x_, pos_y_;
+    int margin_x_, margin_y_;
     int percent_x, percent_y;
     // location of the panel (monitor number)
-    int monitor;
+    int monitor_;
 
     // --------------------------------------------------
     // task and taskbar parameter per panel
@@ -99,26 +99,26 @@ class Panel : public Area {
     // number of tasbar == nb_desktop. taskbar[i] is for desktop(i).
     // taskbar[i] is used to loop over taskbar,
     // while panel->area.list is used to loop over all panel's objects
-    Taskbar* taskbar;
-    int  nb_desktop;
+    Taskbar* taskbar_;
+    int nb_desktop_;
 
     // --------------------------------------------------
     // clock
-    Clock clock;
+    Clock clock_;
 
     // --------------------------------------------------
     // battery
 #ifdef ENABLE_BATTERY
-    Battery battery;
+    Battery battery_;
 #endif
 
-    Launcher launcher;
+    Launcher launcher_;
 
     // autohide
-    int is_hidden;
-    int hidden_width, hidden_height;
-    Pixmap hidden_pixmap;
-    Timeout* autohide_timeout;
+    int is_hidden_;
+    int hidden_width_, hidden_height_;
+    Pixmap hidden_pixmap_;
+    Timeout* autohide_timeout_;
 
     Taskbar* ClickTaskbar(int x, int y);
     Task* ClickTask(int x, int y);
@@ -148,7 +148,7 @@ class Panel : public Area {
 
 extern Panel panel_config;
 extern Panel* panel1;
-extern int  nb_panel;
+extern int nb_panel;
 
 
 // default global data

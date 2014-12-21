@@ -134,8 +134,8 @@ void CleanupTaskbar() {
     for (int i = 0 ; i < nb_panel; ++i) {
         Panel& panel = panel1[i];
 
-        for (int j = 0 ; j < panel.nb_desktop ; ++j) {
-            Taskbar* tskbar = &panel.taskbar[j];
+        for (int j = 0 ; j < panel.nb_desktop_ ; ++j) {
+            Taskbar* tskbar = &panel.taskbar_[j];
 
             for (int k = 0; k < TASKBAR_STATE_COUNT; ++k) {
                 tskbar->reset_state_pixmap(k);
@@ -152,9 +152,9 @@ void CleanupTaskbar() {
             }
         }
 
-        if (panel.taskbar != nullptr) {
-            delete[] panel.taskbar;
-            panel.taskbar = nullptr;
+        if (panel.taskbar_ != nullptr) {
+            delete[] panel.taskbar_;
+            panel.taskbar_ = nullptr;
         }
     }
 
@@ -316,7 +316,7 @@ void InitTaskbarPanel(Panel* panel) {
                 "TAjpg", 5);
 
     if (!panel->g_task.maximum_width && panel_horizontal) {
-        panel->g_task.maximum_width = server.monitor[panel->monitor].width;
+        panel->g_task.maximum_width = server.monitor[panel->monitor_].width;
     }
 
     panel->g_task.text_posx = panel->g_task.background[0]->border.width +
@@ -334,11 +334,11 @@ void InitTaskbarPanel(Panel* panel) {
 
     //printf("monitor %d, task_maximum_width %d\n", panel->monitor, panel->g_task.maximum_width);
 
-    panel->nb_desktop = server.nb_desktop;
-    panel->taskbar = new Taskbar[server.nb_desktop];
+    panel->nb_desktop_ = server.nb_desktop;
+    panel->taskbar_ = new Taskbar[server.nb_desktop];
 
-    for (int j = 0 ; j < panel->nb_desktop ; j++) {
-        Taskbar* tskbar = &panel->taskbar[j];
+    for (int j = 0 ; j < panel->nb_desktop_ ; j++) {
+        Taskbar* tskbar = &panel->taskbar_[j];
 
         // TODO: nuke this from planet Earth ASAP - horrible hack to mimick the
         // original memcpy() call

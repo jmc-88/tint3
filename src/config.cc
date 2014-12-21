@@ -188,7 +188,7 @@ void AddEntry(std::string const& key, std::string const& value) {
 
     /* Panel */
     else if (key == "panel_monitor") {
-        panel_config.monitor = ConfigGetMonitor(value);
+        panel_config.monitor_ = ConfigGetMonitor(value);
     } else if (key == "panel_size") {
         ExtractValues(value, value1, value2, value3);
 
@@ -247,10 +247,10 @@ void AddEntry(std::string const& key, std::string const& value) {
         }
     } else if (key == "panel_margin") {
         ExtractValues(value, value1, value2, value3);
-        panel_config.marginx = StringToLongInt(value1);
+        panel_config.margin_x_ = StringToLongInt(value1);
 
         if (!value2.empty()) {
-            panel_config.marginy = StringToLongInt(value2);
+            panel_config.margin_y_ = StringToLongInt(value2);
         }
     } else if (key == "panel_padding") {
         ExtractValues(value, value1, value2, value3);
@@ -332,33 +332,33 @@ void AddEntry(std::string const& key, std::string const& value) {
     } else if (key == "battery_font_color") {
 #ifdef ENABLE_BATTERY
         ExtractValues(value, value1, value2, value3);
-        GetColor(value1, panel_config.battery.font.color);
+        GetColor(value1, panel_config.battery_.font.color);
 
         if (!value2.empty()) {
-            panel_config.battery.font.alpha = (StringToLongInt(value2) / 100.0);
+            panel_config.battery_.font.alpha = (StringToLongInt(value2) / 100.0);
         } else {
-            panel_config.battery.font.alpha = 0.5;
+            panel_config.battery_.font.alpha = 0.5;
         }
 
 #endif
     } else if (key == "battery_padding") {
 #ifdef ENABLE_BATTERY
         ExtractValues(value, value1, value2, value3);
-        panel_config.battery.padding_x_lr_ = panel_config.battery.padding_x_ =
+        panel_config.battery_.padding_x_lr_ = panel_config.battery_.padding_x_ =
                 StringToLongInt(value1);
 
         if (!value2.empty()) {
-            panel_config.battery.padding_y_ = StringToLongInt(value2);
+            panel_config.battery_.padding_y_ = StringToLongInt(value2);
         }
 
         if (!value3.empty()) {
-            panel_config.battery.padding_x_ = StringToLongInt(value3);
+            panel_config.battery_.padding_x_ = StringToLongInt(value3);
         }
 
 #endif
     } else if (key == "battery_background_id") {
 #ifdef ENABLE_BATTERY
-        panel_config.battery.bg_ = GetBackgroundFromId(StringToLongInt(value));
+        panel_config.battery_.bg_ = GetBackgroundFromId(StringToLongInt(value));
 #endif
     } else if (key == "battery_hide") {
 #ifdef ENABLE_BATTERY
@@ -400,28 +400,28 @@ void AddEntry(std::string const& key, std::string const& value) {
         time2_font_desc = pango_font_description_from_string(value.c_str());
     } else if (key == "clock_font_color") {
         ExtractValues(value, value1, value2, value3);
-        GetColor(value1, panel_config.clock.font.color);
+        GetColor(value1, panel_config.clock_.font.color);
 
         if (!value2.empty()) {
-            panel_config.clock.font.alpha = (StringToLongInt(value2) / 100.0);
+            panel_config.clock_.font.alpha = (StringToLongInt(value2) / 100.0);
         } else {
-            panel_config.clock.font.alpha = 0.5;
+            panel_config.clock_.font.alpha = 0.5;
         }
     } else if (key == "clock_padding") {
         ExtractValues(value, value1, value2, value3);
-        panel_config.clock.padding_x_lr_ = panel_config.clock.padding_x_ =
-                                               StringToLongInt(
-                                                       value1);
+        panel_config.clock_.padding_x_lr_ = panel_config.clock_.padding_x_ =
+                                                StringToLongInt(
+                                                        value1);
 
         if (!value2.empty()) {
-            panel_config.clock.padding_y_ = StringToLongInt(value2);
+            panel_config.clock_.padding_y_ = StringToLongInt(value2);
         }
 
         if (!value3.empty()) {
-            panel_config.clock.padding_x_ = StringToLongInt(value3);
+            panel_config.clock_.padding_x_ = StringToLongInt(value3);
         }
     } else if (key == "clock_background_id") {
-        panel_config.clock.bg_ = GetBackgroundFromId(StringToLongInt(value));
+        panel_config.clock_.bg_ = GetBackgroundFromId(StringToLongInt(value));
     } else if (key == "clock_tooltip") {
         if (!value.empty()) {
             time_tooltip_format = value;
@@ -625,22 +625,22 @@ void AddEntry(std::string const& key, std::string const& value) {
     /* Launcher */
     else if (key == "launcher_padding") {
         ExtractValues(value, value1, value2, value3);
-        panel_config.launcher.padding_x_lr_ = panel_config.launcher.padding_x_ =
+        panel_config.launcher_.padding_x_lr_ = panel_config.launcher_.padding_x_ =
                 StringToLongInt(value1);
 
         if (!value2.empty()) {
-            panel_config.launcher.padding_y_ = StringToLongInt(value2);
+            panel_config.launcher_.padding_y_ = StringToLongInt(value2);
         }
 
         if (!value3.empty()) {
-            panel_config.launcher.padding_x_ = StringToLongInt(value3);
+            panel_config.launcher_.padding_x_ = StringToLongInt(value3);
         }
     } else if (key == "launcher_background_id") {
-        panel_config.launcher.bg_ = GetBackgroundFromId(StringToLongInt(value));
+        panel_config.launcher_.bg_ = GetBackgroundFromId(StringToLongInt(value));
     } else if (key == "launcher_icon_size") {
         launcher_max_icon_size = StringToLongInt(value);
     } else if (key == "launcher_item_app") {
-        panel_config.launcher.list_apps_.push_back(value);
+        panel_config.launcher_.list_apps_.push_back(value);
     } else if (key == "launcher_icon_theme") {
         // if XSETTINGS manager running, tint3 use it.
         if (icon_theme_name.empty()) {

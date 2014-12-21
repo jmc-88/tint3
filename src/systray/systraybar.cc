@@ -413,7 +413,7 @@ bool Systraybar::AddIcon(Window id) {
         mask = CWBackPixmap;
     }
 
-    Window parent_window = XCreateWindow(server.dsp, panel_->main_win,
+    Window parent_window = XCreateWindow(server.dsp, panel_->main_win_,
                                          0, 0, 30, 30, 0,
                                          attr.depth, InputOutput, visual, mask, &set_attr);
     auto old_handler = XSetErrorHandler(WindowErrorHandler);
@@ -505,7 +505,7 @@ bool Systraybar::AddIcon(Window id) {
         XMapWindow(server.dsp, traywin->tray_id);
     }
 
-    if (!traywin->hide && !panel_->is_hidden) {
+    if (!traywin->hide && !panel_->is_hidden_) {
         XMapRaised(server.dsp, traywin->id);
     }
 
@@ -669,7 +669,7 @@ void systray_render_icon_now(void* t) {
               traywin->y - systray.posy_);
     RenderImage(systray.pix_, traywin->x - systray.posx_,
                 traywin->y - systray.posy_, traywin->width, traywin->height);
-    XCopyArea(server.dsp, systray.pix_, panel->main_win, server.gc,
+    XCopyArea(server.dsp, systray.pix_, panel->main_win_, server.gc,
               traywin->x - systray.posx_, traywin->y - systray.posy_, traywin->width,
               traywin->height, traywin->x, traywin->y);
     imlib_free_image_and_decache();

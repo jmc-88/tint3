@@ -83,19 +83,19 @@ void UpdateBatteries(void* arg) {
 
     for (int i = 0 ; i < nb_panel ; i++) {
         if (battery_state.percentage >= percentage_hide) {
-            if (panel1[i].battery.on_screen_ == 1) {
-                panel1[i].battery.Hide();
+            if (panel1[i].battery_.on_screen_ == 1) {
+                panel1[i].battery_.Hide();
                 panel_refresh = 1;
             }
         } else {
-            if (panel1[i].battery.on_screen_ == 0) {
-                panel1[i].battery.Show();
+            if (panel1[i].battery_.on_screen_ == 0) {
+                panel1[i].battery_.Show();
                 panel_refresh = 1;
             }
         }
 
-        if (panel1[i].battery.on_screen_ == 1) {
-            panel1[i].battery.need_resize_ = true;
+        if (panel1[i].battery_.on_screen_ == 1) {
+            panel1[i].battery_.need_resize_ = true;
             panel_refresh = 1;
         }
     }
@@ -260,23 +260,22 @@ void InitBattery() {
 }
 
 
-void InitBatteryPanel(void* p) {
-    Panel* panel = static_cast<Panel*>(p);
-    Battery* battery = &panel->battery;
-
+void InitBatteryPanel(Panel* panel) {
     if (!battery_enabled) {
         return;
     }
 
-    if (battery->bg_ == 0) {
-        battery->bg_ = backgrounds.front();
+    Battery& battery = panel->battery_;
+
+    if (battery.bg_ == 0) {
+        battery.bg_ = backgrounds.front();
     }
 
-    battery->parent_ = panel;
-    battery->panel_ = panel;
-    battery->size_mode_ = SIZE_BY_CONTENT;
-    battery->on_screen_ = 1;
-    battery->need_resize_ = true;
+    battery.parent_ = panel;
+    battery.panel_ = panel;
+    battery.size_mode_ = SIZE_BY_CONTENT;
+    battery.on_screen_ = 1;
+    battery.need_resize_ = true;
 }
 
 

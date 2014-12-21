@@ -96,7 +96,7 @@ void DefaultLauncher();
 
 // initialize launcher : y position, precision, ...
 void InitLauncher();
-void InitLauncherPanel(void* panel);
+void InitLauncherPanel(Panel* panel);
 void CleanupLauncher();
 
 void LauncherAction(LauncherIcon* launcher_icon, XEvent* evt);

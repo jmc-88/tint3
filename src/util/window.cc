@@ -77,9 +77,7 @@ int WindowIsHidden(Window win) {
     Atom* at = static_cast<Atom*>(ServerGetProperty(
                                       win, server.atoms_["_NET_WM_STATE"], XA_ATOM, &count));
 
-    int i;
-
-    for (i = 0; i < count; ++i) {
+    for (int i = 0; i < count; ++i) {
         if (at[i] == server.atoms_["_NET_WM_STATE_SKIP_TASKBAR"]) {
             XFree(at);
             return 1;
@@ -101,7 +99,7 @@ int WindowIsHidden(Window win) {
     at = static_cast<Atom*>(ServerGetProperty(
                                 win, server.atoms_["_NET_WM_WINDOW_TYPE"], XA_ATOM, &count));
 
-    for (i = 0; i < count; ++i) {
+    for (int i = 0; i < count; ++i) {
         if (at[i] == server.atoms_["_NET_WM_WINDOW_TYPE_DOCK"] ||
             at[i] == server.atoms_["_NET_WM_WINDOW_TYPE_DESKTOP"] ||
             at[i] == server.atoms_["_NET_WM_WINDOW_TYPE_TOOLBAR"] ||
@@ -114,8 +112,8 @@ int WindowIsHidden(Window win) {
 
     XFree(at);
 
-    for (i = 0 ; i < nb_panel ; ++i) {
-        if (panel1[i].main_win == win) {
+    for (int i = 0 ; i < nb_panel ; ++i) {
+        if (panel1[i].main_win_ == win) {
             return 1;
         }
     }

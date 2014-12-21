@@ -98,12 +98,12 @@ Task* AddTask(Window win) {
     GPtrArray* task_group = g_ptr_array_new();
     Task* new_tsk2 = nullptr;
 
-    for (int j = 0 ; j < panel1[monitor].nb_desktop ; j++) {
+    for (int j = 0 ; j < panel1[monitor].nb_desktop_ ; j++) {
         if (new_tsk.desktop != ALLDESKTOP && new_tsk.desktop != j) {
             continue;
         }
 
-        Taskbar* tskbar = &panel1[monitor].taskbar[j];
+        Taskbar* tskbar = &panel1[monitor].taskbar_[j];
         new_tsk2 = new Task();
 
         // TODO: nuke this from planet Earth ASAP - horrible hack to mimick the
