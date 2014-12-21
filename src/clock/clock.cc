@@ -180,7 +180,7 @@ void InitClockPanel(void* p) {
     }
 
     clock->need_resize_ = true;
-    clock->on_screen_ = 1;
+    clock->on_screen_ = true;
 
     if (!time_tooltip_format.empty()) {
         strftime(buf_tooltip, sizeof(buf_tooltip), time_tooltip_format.c_str(),

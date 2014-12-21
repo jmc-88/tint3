@@ -346,7 +346,7 @@ void Area::SetRedraw() {
 }
 
 void Area::Hide() {
-    on_screen_ = 0;
+    on_screen_ = false;
     parent_->need_resize_ = true;
 
     if (panel_horizontal) {
@@ -357,7 +357,7 @@ void Area::Hide() {
 }
 
 void Area::Show() {
-    on_screen_ = 1;
+    on_screen_ = true;
     need_resize_ = true;
     parent_->need_resize_ = true;
 }

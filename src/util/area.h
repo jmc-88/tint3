@@ -75,7 +75,7 @@ class Area {
 
     // object visible on screen.
     // An object (like systray) could be enabled but hidden (because no tray icon).
-    int on_screen_;
+    bool on_screen_;
     // way to calculate the size (SIZE_BY_CONTENT or SIZE_BY_LAYOUT)
     int size_mode_;
     // need to calculate position and width

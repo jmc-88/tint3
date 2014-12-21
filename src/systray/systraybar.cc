@@ -67,7 +67,7 @@ void CleanupSystray() {
     StopNet();
     systray_enabled = 0;
     systray_max_icon_size = 0;
-    systray.on_screen_ = 0;
+    systray.on_screen_ = false;
     systray.FreeArea();
 
     if (render_background) {
@@ -479,7 +479,7 @@ bool Systraybar::AddIcon(Window id) {
     traywin->depth = attr.depth;
     traywin->damage = 0;
 
-    if (on_screen_ == 0) {
+    if (!on_screen_) {
         Show();
     }
 

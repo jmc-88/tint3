@@ -119,7 +119,7 @@ Task* AddTask(Window win) {
 
         if (new_tsk2->desktop == ALLDESKTOP && server.desktop != j) {
             // hide ALLDESKTOP task on non-current desktop
-            new_tsk2->on_screen_ = 0;
+            new_tsk2->on_screen_ = false;
         }
 
         new_tsk2->SetTitle(new_tsk.GetTitle());

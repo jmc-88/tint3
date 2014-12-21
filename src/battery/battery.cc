@@ -274,7 +274,7 @@ void InitBatteryPanel(Panel* panel) {
     battery.parent_ = panel;
     battery.panel_ = panel;
     battery.size_mode_ = SIZE_BY_CONTENT;
-    battery.on_screen_ = 1;
+    battery.on_screen_ = true;
     battery.need_resize_ = true;
 }
 

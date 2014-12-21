@@ -73,10 +73,10 @@ Taskbar& Taskbar::set_state(size_t state) {
     }
 
     if (panel_mode != MULTI_DESKTOP) {
-        on_screen_ = (state == TASKBAR_NORMAL ? 0 : 1);
+        on_screen_ = (state != TASKBAR_NORMAL);
     }
 
-    if (on_screen_ == 1) {
+    if (on_screen_ == true) {
         if (state_pixmap(state) == 0) {
             need_redraw_ = true;
         }

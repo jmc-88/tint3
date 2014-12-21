@@ -686,7 +686,7 @@ void EventPropertyNotify(XEvent* e) {
                         auto tsk = static_cast<Task*>(*it);
 
                         if (tsk->desktop == ALLDESKTOP) {
-                            tsk->on_screen_ = 0;
+                            tsk->on_screen_ = false;
                             tskbar->need_resize_ = true;
                             panel_refresh = 1;
                         }
@@ -704,7 +704,7 @@ void EventPropertyNotify(XEvent* e) {
                     auto tsk = static_cast<Task*>(*it);
 
                     if (tsk->desktop == ALLDESKTOP) {
-                        tsk->on_screen_ = 1;
+                        tsk->on_screen_ = true;
                         tskbar->need_resize_ = true;
                     }
                 }

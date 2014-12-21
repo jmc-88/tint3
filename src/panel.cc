@@ -268,7 +268,7 @@ void InitPanel() {
 
         p->parent_ = p;
         p->panel_ = p;
-        p->on_screen_ = 1;
+        p->on_screen_ = true;
         p->need_resize_ = true;
         p->size_mode_ = SIZE_BY_LAYOUT;
         p->InitSizeAndPosition();
@@ -700,9 +700,9 @@ void Panel::UpdateTaskbarVisibility() {
 
         if (panel_mode != MULTI_DESKTOP && tskbar.desktop != server.desktop) {
             // SINGLE_DESKTOP and not current desktop
-            tskbar.on_screen_ = 0;
+            tskbar.on_screen_ = false;
         } else {
-            tskbar.on_screen_ = 1;
+            tskbar.on_screen_ = true;
         }
     }
 

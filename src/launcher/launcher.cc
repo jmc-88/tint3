@@ -102,7 +102,7 @@ void InitLauncherPanel(Panel* panel) {
         return;
     }
 
-    launcher->on_screen_ = 1;
+    launcher->on_screen_ = true;
     panel_refresh = 1;
 
     launcher->LoadThemes();
@@ -741,7 +741,7 @@ void Launcher::LoadIcons() {
             launcher_icon->need_resize_ = false;
             launcher_icon->need_redraw_ = true;
             launcher_icon->bg_ = backgrounds.front();
-            launcher_icon->on_screen_ = 1;
+            launcher_icon->on_screen_ = true;
 
             launcher_icon->is_app_desktop_ = 1;
             launcher_icon->cmd_ = strdup(entry.exec);
