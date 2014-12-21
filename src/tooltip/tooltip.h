@@ -24,8 +24,8 @@
 #include "panel.h"
 #include "util/timer.h"
 
-struct Tooltip {
-    Area* area; // never ever use the area attribute if you are not 100% sure that this area was not freed // don't you say?
+class Tooltip {
+public:
     std::string tooltip_text;
     Panel* panel;
     Window window;
@@ -38,6 +38,9 @@ struct Tooltip {
     Color font_color;
     Background* bg;
     Timeout* timeout;
+
+    Area* area_;
+    void CopyText(Area* area);
 };
 
 extern Tooltip g_tooltip;
@@ -55,6 +58,5 @@ void TooltipTriggerHide();
 void TooltipTriggerShow(Area* area, Panel* p, XEvent* e);
 void TooltipHide(void* /*arg*/);
 void TooltipShow(void* /*arg*/);
-void TooltipCopyText(Area* area);
 
 #endif // TOOLTIP_H

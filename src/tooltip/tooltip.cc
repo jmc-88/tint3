@@ -69,7 +69,7 @@ void StopTooltipTimeout() {
 
 void DefaultTooltip() {
     // give the tooltip some reasonable default values
-    g_tooltip.area = nullptr;
+    g_tooltip.area_ = nullptr;
     g_tooltip.tooltip_text.clear();
     g_tooltip.panel = nullptr;
     g_tooltip.window = 0;
@@ -90,7 +90,7 @@ void DefaultTooltip() {
 void CleanupTooltip() {
     StopTooltipTimeout();
     TooltipHide(0);
-    TooltipCopyText(0);
+    g_tooltip.CopyText(nullptr);
 
     if (g_tooltip.window) {
         XDestroyWindow(server.dsp, g_tooltip.window);
@@ -140,8 +140,8 @@ void TooltipTriggerShow(Area* area, Panel* p, XEvent* e) {
 
     g_tooltip.panel = p;
 
-    if (g_tooltip.mapped && g_tooltip.area != area) {
-        TooltipCopyText(area);
+    if (g_tooltip.mapped && g_tooltip.area_ != area) {
+        g_tooltip.CopyText(area);
         TooltipUpdate();
         StopTooltipTimeout();
     } else if (!g_tooltip.mapped) {
@@ -165,7 +165,7 @@ void TooltipShow(void* /* arg */) {
     StopTooltipTimeout();
 
     if (!g_tooltip.mapped) {
-        TooltipCopyText(area);
+        g_tooltip.CopyText(area);
         g_tooltip.mapped = True;
         XMapWindow(server.dsp, g_tooltip.window);
         TooltipUpdate();
@@ -332,7 +332,7 @@ void TooltipUpdate() {
 
 void TooltipTriggerHide() {
     if (g_tooltip.mapped) {
-        TooltipCopyText(0);
+        g_tooltip.CopyText(nullptr);
         StartHideTimeout();
     } else {
         // tooltip not visible yet, but maybe a timeout is still pending
@@ -352,16 +352,16 @@ void TooltipHide(void* arg) {
 }
 
 
-void TooltipCopyText(Area* area) {
-    g_tooltip.tooltip_text.clear();
+void Tooltip::CopyText(Area* area) {
+    tooltip_text.clear();
 
     if (area) {
         std::string tooltip = area->GetTooltipText();
 
         if (!tooltip.empty()) {
-            g_tooltip.tooltip_text.assign(tooltip);
+            tooltip_text.assign(tooltip);
         }
     }
 
-    g_tooltip.area = area;
+    area_ = area;
 }

@@ -759,8 +759,8 @@ void EventPropertyNotify(XEvent* e) {
             || at == server.atoms_["_NET_WM_NAME"]
             || at == server.atoms_["WM_NAME"]) {
             if (tsk->UpdateTitle()) {
-                if (g_tooltip.mapped && (g_tooltip.area == (Area*)tsk)) {
-                    TooltipCopyText(tsk);
+                if (g_tooltip.mapped && (g_tooltip.area_ == (Area*)tsk)) {
+                    g_tooltip.CopyText(tsk);
                     TooltipUpdate();
                 }
 

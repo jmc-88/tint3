@@ -437,7 +437,6 @@ bool Taskbar::Resize() {
                            panel_->g_task.bg_->border.width
                            + panel_->g_task.padding_x_);
 
-    //printf("TaskbarBase::resize %d %d\n", posx, posy);
     if (panel_horizontal) {
         ResizeByLayout(panel_->g_task.maximum_width);
 
