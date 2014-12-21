@@ -534,7 +534,7 @@ void EventButtonRelease(XEvent* e) {
             XLowerWindow(server.dsp, panel->main_win_);
         }
 
-        task_drag = 0;
+        task_drag = nullptr;
         return;
     }
 
@@ -545,7 +545,7 @@ void EventButtonRelease(XEvent* e) {
             LauncherAction(icon, e);
         }
 
-        task_drag = 0;
+        task_drag = nullptr;
         return;
     }
 
@@ -557,13 +557,13 @@ void EventButtonRelease(XEvent* e) {
             XLowerWindow(server.dsp, panel->main_win_);
         }
 
-        task_drag = 0;
+        task_drag = nullptr;
         return;
     }
 
     // drag and drop task
     if (task_dragged) {
-        task_drag = 0;
+        task_drag = nullptr;
         task_dragged = 0;
         return;
     }

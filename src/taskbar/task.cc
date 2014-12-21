@@ -456,7 +456,7 @@ void Task::DrawForeground(cairo_t* c) {
         /* Drawing width and Cut text */
         // pango use U+22EF or U+2026
         pango_layout_set_width(layout,
-                               ((Taskbar*)parent_)->text_width * PANGO_SCALE);
+                               ((Taskbar*)parent_)->text_width_ * PANGO_SCALE);
         pango_layout_set_height(layout, panel_->g_task.text_height * PANGO_SCALE);
         pango_layout_set_wrap(layout, PANGO_WRAP_CHAR);
         pango_layout_set_ellipsize(layout, PANGO_ELLIPSIZE_END);

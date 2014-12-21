@@ -122,7 +122,7 @@ class Panel : public Area {
 
     Taskbar* ClickTaskbar(int x, int y);
     Task* ClickTask(int x, int y);
-    Launcher* ClickLauncher(int x, int y);
+    bool ClickLauncher(int x, int y);
     LauncherIcon* ClickLauncherIcon(int x, int y);
     bool ClickPadding(int x, int y);
     bool ClickClock(int x, int y);

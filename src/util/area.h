@@ -128,6 +128,8 @@ class Area {
     void Show();
 
     void FreeArea();
+
+    bool IsClickInside(int x, int y) const;
 };
 
 

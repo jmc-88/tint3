@@ -40,7 +40,6 @@
    contains to every Task* on each panel a pointer (i.e. GPtrArray.len == server.nb_desktop)
 */
 GHashTable* win_to_task_table;
-
 Task* task_active;
 Task* task_drag;
 int taskbar_enabled;
@@ -99,8 +98,8 @@ void free_ptr_array(gpointer data) {
 
 
 void DefaultTaskbar() {
-    win_to_task_table = 0;
-    urgent_timeout = 0;
+    win_to_task_table = nullptr;
+    urgent_timeout = nullptr;
     urgent_list.clear();
     taskbar_enabled = 0;
     Taskbarname::Default();
@@ -148,7 +147,7 @@ void CleanupTaskbar() {
 
 
 void InitTaskbar() {
-    if (win_to_task_table == 0) {
+    if (win_to_task_table == nullptr) {
         win_to_task_table = g_hash_table_new_full(win_hash, win_compare, free,
                             free_ptr_array);
     }
@@ -422,7 +421,7 @@ bool Taskbar::Resize() {
     if (panel_horizontal) {
         ResizeByLayout(panel_->g_task.maximum_width);
 
-        int text_width_ = panel_->g_task.maximum_width;
+        int new_width = panel_->g_task.maximum_width;
         auto it = children_.begin();
 
         if (taskbarname_enabled) {
@@ -430,13 +429,13 @@ bool Taskbar::Resize() {
         }
 
         if (it != children_.end()) {
-            text_width_ = static_cast<Task*>(*it)->width_;
+            new_width = (*it)->width_;
         }
 
-        text_width = (text_width_ - horizontal_size);
+        text_width_ = (new_width - horizontal_size);
     } else {
         ResizeByLayout(panel_->g_task.maximum_height);
-        text_width = (width_ - (2 * panel_->g_taskbar.padding_y_) - horizontal_size);
+        text_width_ = (width_ - (2 * panel_->g_taskbar.padding_y_) - horizontal_size);
     }
 
     return false;
@@ -452,4 +451,3 @@ void Taskbar::OnChangeLayout() {
     pix_ = 0;
     need_redraw_ = true;
 }
-

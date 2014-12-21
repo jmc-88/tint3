@@ -27,9 +27,10 @@
 
 #include <algorithm>
 
-#include "area.h"
 #include "panel.h"
-#include "../server.h"
+#include "server.h"
+#include "util/area.h"
+#include "util/log.h"
 
 Area::~Area() {
 }
@@ -251,8 +252,7 @@ int Area::ResizeByLayout(int maximum_size) {
             }
         }
 
-        //printf("  resize_by_layout Deb %d, %d\n", nb_by_content, nb_by_layout);
-        if (nb_by_content + nb_by_layout) {
+        if (nb_by_content + nb_by_layout != 0) {
             size -= ((nb_by_content + nb_by_layout - 1) * padding_x_);
         }
 
@@ -274,7 +274,7 @@ int Area::ResizeByLayout(int maximum_size) {
                 old_width = child->width_;
                 child->width_ = width;
 
-                if (modulo) {
+                if (modulo != 0) {
                     child->width_++;
                     modulo--;
                 }
@@ -299,7 +299,7 @@ int Area::ResizeByLayout(int maximum_size) {
             }
         }
 
-        if (nb_by_content + nb_by_layout) {
+        if (nb_by_content + nb_by_layout != 0) {
             size -= ((nb_by_content + nb_by_layout - 1) * padding_x_);
         }
 
@@ -321,7 +321,7 @@ int Area::ResizeByLayout(int maximum_size) {
                 old_height = child->height_;
                 child->height_ = height;
 
-                if (modulo) {
+                if (modulo != 0) {
                     child->height_++;
                     modulo--;
                 }
@@ -375,6 +375,13 @@ void Area::Draw() {
         clear_pixmap(pix_, 0 , 0, width_, height_);
     }
 
+    util::log::Debug()
+            << "XCopyArea(panel_x_ = " << panel_x_
+            << ", panel_y_ = " << panel_y_
+            << ", width_ = " << width_
+            << ", height_ = " << height_
+            << ")\n";
+
     XCopyArea(server.dsp, panel_->temp_pmap, pix_, server.gc,
               panel_x_, panel_y_, width_, height_, 0, 0);
 
@@ -418,12 +425,10 @@ void Area::DrawBackground(cairo_t* c) {
 
 
 void Area::RemoveArea() {
-    auto it = std::find(parent_->children_.begin(), parent_->children_.end(), this);
-
-    if (it != parent_->children_.end()) {
-        parent_->children_.erase(it);
-    }
-
+    parent_->children_.erase(std::remove(parent_->children_.begin(),
+                                         parent_->children_.end(),
+                                         this),
+                             parent_->children_.end());
     parent_->SetRedraw();
 }
 
@@ -495,4 +500,12 @@ void clear_pixmap(Pixmap p, int x, int y, int w, int h) {
     XRenderColor col = { .red = 0, .green = 0, .blue = 0, .alpha = 0 };
     XRenderFillRectangle(server.dsp, PictOpSrc, pict, &col, x, y, w, h);
     XRenderFreePicture(server.dsp, pict);
+}
+
+
+bool Area::IsClickInside(int x, int y) const {
+    bool inside_x = (x >= panel_x_ && x <= panel_x_ + width_);
+    bool inside_y = (y >= panel_y_ && y <= panel_y_ + height_);
+
+    return on_screen_ && inside_x && inside_y;
 }

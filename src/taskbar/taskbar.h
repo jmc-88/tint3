@@ -21,7 +21,7 @@ extern int taskbar_enabled;
 class Taskbar : public TaskbarBase {
   public:
     int desktop;
-    int text_width;
+    int text_width_;
     Taskbarname bar_name;
 
     Taskbar& set_state(size_t state);

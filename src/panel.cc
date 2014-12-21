@@ -723,23 +723,9 @@ Panel* GetPanel(Window win) {
 
 
 Taskbar* Panel::ClickTaskbar(int x, int y) {
-    if (panel_horizontal) {
-        for (int i = 0; i < nb_desktop_ ; i++) {
-            Taskbar* tskbar = &taskbar_[i];
-
-            if (tskbar->on_screen_ && x >= tskbar->panel_x_
-                && x <= (tskbar->panel_x_ + tskbar->width_)) {
-                return tskbar;
-            }
-        }
-    } else {
-        for (int i = 0; i < nb_desktop_ ; i++) {
-            Taskbar* tskbar = &taskbar_[i];
-
-            if (tskbar->on_screen_ && y >= tskbar->panel_y_
-                && y <= (tskbar->panel_y_ + tskbar->height_)) {
-                return tskbar;
-            }
+    for (int i = 0; i < nb_desktop_ ; i++) {
+        if (taskbar_[i].IsClickInside(x, y)) {
+            return &taskbar_[i];
         }
     }
 
@@ -758,18 +744,8 @@ Task* Panel::ClickTask(int x, int y) {
         }
 
         for (auto it = begin; it != tskbar->children_.end(); ++it) {
-            auto tsk = reinterpret_cast<Task*>(*it);
-
-            if (panel_horizontal) {
-                if (tsk->on_screen_ && x >= tsk->panel_x_
-                    && x <= (tsk->panel_x_ + tsk->width_)) {
-                    return tsk;
-                }
-            } else {
-                if (tsk->on_screen_ && y >= tsk->panel_y_
-                    && y <= (tsk->panel_y_ + tsk->height_)) {
-                    return tsk;
-                }
+            if ((*it)->IsClickInside(x, y)) {
+                return reinterpret_cast<Task*>(*it);
             }
         }
     }
@@ -778,32 +754,18 @@ Task* Panel::ClickTask(int x, int y) {
 }
 
 
-Launcher* Panel::ClickLauncher(int x, int y) {
-    if (panel_horizontal) {
-        if (launcher_.on_screen_ && x >= launcher_.panel_x_ &&
-            x <= (launcher_.panel_x_ + launcher_.width_)) {
-            return &launcher_;
-        }
-    } else {
-        if (launcher_.on_screen_ && y >= launcher_.panel_y_ &&
-            y <= (launcher_.panel_y_ + launcher_.height_)) {
-            return &launcher_;
-        }
-    }
-
-    return nullptr;
+bool Panel::ClickLauncher(int x, int y) {
+    return launcher_.IsClickInside(x, y);
 }
 
 
 LauncherIcon* Panel::ClickLauncherIcon(int x, int y) {
-    auto launcher = ClickLauncher(x, y);
-
-    if (launcher != nullptr) {
-        for (auto& launcher_icon : launcher->list_icons_) {
-            int base_x = (launcher->panel_x_ + launcher_icon->x_);
+    if (ClickLauncher(x, y)) {
+        for (auto& launcher_icon : launcher_.list_icons_) {
+            int base_x = (launcher_.panel_x_ + launcher_icon->x_);
             bool inside_x = (x >= base_x &&
                              x <= (base_x + launcher_icon->icon_size_));
-            int base_y = (launcher->panel_y_ + launcher_icon->y_);
+            int base_y = (launcher_.panel_y_ + launcher_icon->y_);
             bool inside_y = (y >= base_y &&
                              y <= (base_y + launcher_icon->icon_size_));
 
@@ -833,35 +795,20 @@ bool Panel::ClickPadding(int x, int y) {
 
 
 bool Panel::ClickClock(int x, int y) {
-    if (panel_horizontal) {
-        if (clock_.on_screen_ && x >= clock_.panel_x_
-            && x <= (clock_.panel_x_ + clock_.width_)) {
-            return true;
-        }
-    } else {
-        if (clock_.on_screen_ && y >= clock_.panel_y_
-            && y <= (clock_.panel_y_ + clock_.height_)) {
-            return true;
-        }
-    }
-
-    return false;
+    return clock_.IsClickInside(x, y);
 }
 
 
 Area* Panel::ClickArea(int x, int y) {
     Area* new_result = this;
-    Area* result;
+    Area* result = nullptr;
 
     do {
         result = new_result;
 
-        for (auto it = result->children_.begin(); it != result->children_.end(); ++it) {
-            Area* a = (*it);
-
-            if (a->on_screen_ && x >= a->panel_x_ && x <= (a->panel_x_ + a->width_)
-                && y >= a->panel_y_ && y <= (a->panel_y_ + a->height_)) {
-                new_result = a;
+        for (auto& child : result->children_) {
+            if (child->IsClickInside(x, y)) {
+                new_result = child;
                 break;
             }
         }
