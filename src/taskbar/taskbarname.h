@@ -8,14 +8,14 @@
 #include "common.h"
 #include "area.h"
 
-extern int taskbarname_enabled;
+extern bool taskbarname_enabled;
 extern PangoFontDescription* taskbarname_font_desc;
 extern Color taskbarname_font;
 extern Color taskbarname_active_font;
 
-void default_taskbarname();
-void cleanup_taskbarname();
+void DefaultTaskbarname();
+void CleanupTaskbarname();
 
-void init_taskbarname_panel(void* p);
+void InitTaskbarnamePanel(Panel* panel);
 
 #endif

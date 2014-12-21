@@ -35,21 +35,19 @@
 #include "util/common.h"
 #include "util/window.h"
 
-int taskbarname_enabled;
+bool taskbarname_enabled;
 PangoFontDescription* taskbarname_font_desc;
 Color taskbarname_font;
 Color taskbarname_active_font;
 
 
-void default_taskbarname() {
-    taskbarname_enabled = 0;
-    taskbarname_font_desc = 0;
+void DefaultTaskbarname() {
+    taskbarname_enabled = false;
+    taskbarname_font_desc = nullptr;
 }
 
 
-void init_taskbarname_panel(void* p) {
-    Panel* panel = static_cast<Panel*>(p);
-
+void InitTaskbarnamePanel(Panel* panel) {
     if (!taskbarname_enabled) {
         return;
     }
@@ -81,7 +79,7 @@ void init_taskbarname_panel(void* p) {
 }
 
 
-void cleanup_taskbarname() {
+void CleanupTaskbarname() {
     for (int i = 0 ; i < nb_panel ; i++) {
         Panel* panel = &panel1[i];
 

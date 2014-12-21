@@ -121,11 +121,11 @@ void DefaultTaskbar() {
     urgent_timeout = 0;
     urgent_list.clear();
     taskbar_enabled = 0;
-    default_taskbarname();
+    DefaultTaskbarname();
 }
 
 void CleanupTaskbar() {
-    cleanup_taskbarname();
+    CleanupTaskbarname();
 
     if (win_to_task_table) {
         g_hash_table_foreach(win_to_task_table, TaskbarRemoveTask, 0);
@@ -353,7 +353,7 @@ void InitTaskbarPanel(Panel* panel) {
         }
     }
 
-    init_taskbarname_panel(panel);
+    InitTaskbarnamePanel(panel);
 }
 
 
