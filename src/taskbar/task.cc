@@ -243,27 +243,24 @@ bool Task::UpdateTitle() {
     }
 
     // add space before title
-    char* title = (char*) malloc(strlen(name) + 2);
+    std::string new_title;
 
     if (panel_->g_task.icon) {
-        strcpy(title, " ");
-    } else {
-        title[0] = '\0';
+        new_title.assign(" ");
     }
 
-    strcat(title, name);
+    new_title.append(name);
 
-    if (name != nullptr && name != kUntitled) {
+    if (name != nullptr && strcmp(name, kUntitled) != 0) {
         XFree((void*) name);
     }
 
     // check unecessary title change
-    if (title_ == title) {
-        free(title);
+    if (title_ == new_title) {
         return false;
     }
 
-    title_ = title;
+    title_ = new_title;
     GPtrArray* task_group = TaskGetTasks(win);
 
     if (task_group) {
