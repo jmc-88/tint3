@@ -144,7 +144,7 @@ Task* AddTask(Window win) {
     SetTaskState(new_tsk2, new_tsk.current_state);
 
     if (WindowIsUrgent(win)) {
-        add_urgent(new_tsk2);
+        new_tsk2->AddUrgent();
     }
 
     return new_tsk2;
@@ -204,7 +204,7 @@ void RemoveTask(Task* tsk) {
                             tsk2);
 
         if (it != urgent_list.end()) {
-            del_urgent(tsk2);
+            tsk2->DelUrgent();
         }
 
         delete tsk2;
@@ -650,7 +650,7 @@ void SetTaskState(Task* tsk, int state) {
                                     tsk1);
 
                 if (state == TASK_ACTIVE && it != urgent_list.end()) {
-                    del_urgent(tsk1);
+                    tsk1->DelUrgent();
                 }
             }
 
@@ -691,18 +691,14 @@ void blink_urgent(void* arg) {
 }
 
 
-void add_urgent(Task* tsk) {
-    if (!tsk) {
-        return;
-    }
-
+void Task::AddUrgent() {
     // some programs set urgency hint although they are active
-    if (task_active && task_active->win == tsk->win) {
+    if (task_active && task_active->win == win) {
         return;
     }
 
     // always add the first tsk for a task group (omnipresent windows)
-    tsk = TaskGetTask(tsk->win);
+    Task* tsk = TaskGetTask(win);
     tsk->urgent_tick = 0;
 
     auto it = std::find(urgent_list.begin(),
@@ -713,19 +709,19 @@ void add_urgent(Task* tsk) {
         // not yet in the list, so we have to add it
         urgent_list.push_front(tsk);
 
-        if (urgent_timeout == 0) {
+        if (urgent_timeout == nullptr) {
             urgent_timeout = AddTimeout(10, 1000, blink_urgent, 0);
         }
     }
 }
 
 
-void del_urgent(Task* tsk) {
-    urgent_list.erase(std::remove(urgent_list.begin(), urgent_list.end(), tsk),
+void Task::DelUrgent() {
+    urgent_list.erase(std::remove(urgent_list.begin(), urgent_list.end(), this),
                       urgent_list.end());
 
     if (urgent_list.empty()) {
         StopTimeout(urgent_timeout);
-        urgent_timeout = 0;
+        urgent_timeout = nullptr;
     }
 }

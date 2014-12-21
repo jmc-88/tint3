@@ -770,7 +770,7 @@ void EventPropertyNotify(XEvent* e) {
         // Demand attention
         else if (at == server.atoms_["_NET_WM_STATE"]) {
             if (WindowIsUrgent(win)) {
-                add_urgent(tsk);
+                tsk->AddUrgent();
             }
 
             if (WindowIsSkipTaskbar(win)) {
@@ -810,7 +810,7 @@ void EventPropertyNotify(XEvent* e) {
             XWMHints* wmhints = XGetWMHints(server.dsp, win);
 
             if (wmhints && wmhints->flags & XUrgencyHint) {
-                add_urgent(tsk);
+                tsk->AddUrgent();
             }
 
             XFree(wmhints);

@@ -25,7 +25,7 @@
 #include "util/timer.h"
 
 class Tooltip {
-public:
+  public:
     std::string tooltip_text;
     Panel* panel;
     Window window;

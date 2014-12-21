@@ -17,7 +17,7 @@
 #include "util/timer.h"
 #include "util/area.h"
 
-enum {
+enum TaskState {
     TASK_NORMAL,
     TASK_ACTIVE,
     TASK_ICONIFIED,
@@ -78,6 +78,9 @@ class Task : public Area {
     void SetTitle(std::string const& title);
     void OnChangeLayout() override;
     Task& SetTooltipEnabled(bool);
+
+    void AddUrgent();
+    void DelUrgent();
 };
 
 extern Timeout* urgent_timeout;
@@ -94,9 +97,6 @@ void set_task_redraw(Task* tsk);
 Task* FindActiveTask(Task* current_task, Task* active_task);
 Task* NextTask(Task* tsk);
 Task* PreviousTask(Task* tsk);
-
-void add_urgent(Task* tsk);
-void del_urgent(Task* tsk);
 
 #endif
 
