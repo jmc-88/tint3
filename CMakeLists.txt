@@ -57,6 +57,7 @@ set( SOURCES
     src/launcher/xsettings-common.cc
     src/taskbar/task.cc
     src/taskbar/taskbar.cc
+    src/taskbar/taskbarbase.cc
     src/taskbar/taskbarname.cc
     src/tooltip/tooltip.cc
     src/util/area.cc

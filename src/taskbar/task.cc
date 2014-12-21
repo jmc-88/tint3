@@ -41,7 +41,7 @@ namespace {
 
 const char kUntitled[] = "Untitled";
 
-} // namespace
+}  // namespace
 
 Timeout* urgent_timeout;
 std::list<Task*> urgent_list;

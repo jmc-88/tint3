@@ -31,7 +31,7 @@
 #include "panel.h"
 #include "taskbar.h"
 #include "server.h"
-#include "taskbarname.h"
+#include "taskbar/taskbarname.h"
 #include "util/common.h"
 #include "util/window.h"
 
@@ -41,13 +41,13 @@ Color taskbarname_font;
 Color taskbarname_active_font;
 
 
-void DefaultTaskbarname() {
+void Taskbarname::Default() {
     taskbarname_enabled = false;
     taskbarname_font_desc = nullptr;
 }
 
 
-void InitTaskbarnamePanel(Panel* panel) {
+void Taskbarname::InitPanel(Panel* panel) {
     if (!taskbarname_enabled) {
         return;
     }
@@ -56,47 +56,47 @@ void InitTaskbarnamePanel(Panel* panel) {
     auto it = desktop_names.begin();
 
     for (int j = 0; j < panel->nb_desktop_; ++j) {
-        Taskbar* tskbar = &panel->taskbar_[j];
-        tskbar->bar_name = panel->g_taskbar.bar_name_;
-        tskbar->bar_name.parent_ = reinterpret_cast<Area*>(tskbar);
+        Taskbar& tskbar = panel->taskbar_[j];
+        tskbar.bar_name = panel->g_taskbar.bar_name_;
+        tskbar.bar_name.parent_ = reinterpret_cast<Area*>(&tskbar);
 
         if (j == server.desktop) {
-            tskbar->bar_name.bg_ = panel->g_taskbar.background_name[TASKBAR_ACTIVE];
+            tskbar.bar_name.bg_ = panel->g_taskbar.background_name[TASKBAR_ACTIVE];
         } else {
-            tskbar->bar_name.bg_ = panel->g_taskbar.background_name[TASKBAR_NORMAL];
+            tskbar.bar_name.bg_ = panel->g_taskbar.background_name[TASKBAR_NORMAL];
         }
 
         // use desktop number if name is missing
         if (it != desktop_names.end()) {
-            tskbar->bar_name.set_name(*it++);
+            tskbar.bar_name.set_name(*it++);
         } else {
-            tskbar->bar_name.set_name(StringRepresentation(j + 1));
+            tskbar.bar_name.set_name(StringRepresentation(j + 1));
         }
 
         // append the name at the beginning of taskbar
-        tskbar->children_.push_back(&tskbar->bar_name);
+        tskbar.children_.push_back(&(tskbar.bar_name));
     }
 }
 
 
-void CleanupTaskbarname() {
+void Taskbarname::Cleanup() {
     for (int i = 0 ; i < nb_panel ; i++) {
-        Panel* panel = &panel1[i];
+        Panel& panel = panel1[i];
 
-        for (int j = 0 ; j < panel->nb_desktop_ ; j++) {
-            Taskbar* tskbar = &panel->taskbar_[j];
+        for (int j = 0 ; j < panel.nb_desktop_ ; j++) {
+            Taskbar& tskbar = panel.taskbar_[j];
 
-            tskbar->bar_name.FreeArea();
+            tskbar.bar_name.FreeArea();
 
             for (int k = 0; k < TASKBAR_STATE_COUNT; ++k) {
-                tskbar->bar_name.reset_state_pixmap(k);
+                tskbar.bar_name.reset_state_pixmap(k);
             }
 
-            auto it = std::find(tskbar->children_.begin(), tskbar->children_.end(),
-                                &tskbar->bar_name);
+            auto it = std::find(tskbar.children_.begin(), tskbar.children_.end(),
+                                &(tskbar.bar_name));
 
-            if (it != tskbar->children_.end()) {
-                tskbar->children_.erase(it);
+            if (it != tskbar.children_.end()) {
+                tskbar.children_.erase(it);
             }
         }
     }

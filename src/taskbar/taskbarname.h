@@ -5,17 +5,28 @@
 #ifndef TASKBARNAME_H
 #define TASKBARNAME_H
 
-#include "common.h"
-#include "area.h"
+#include "taskbar/taskbarbase.h"
+#include "util/common.h"
+#include "util/area.h"
 
 extern bool taskbarname_enabled;
 extern PangoFontDescription* taskbarname_font_desc;
 extern Color taskbarname_font;
 extern Color taskbarname_active_font;
 
-void DefaultTaskbarname();
-void CleanupTaskbarname();
+class Taskbarname : public TaskbarBase {
+    std::string name_;
 
-void InitTaskbarnamePanel(Panel* panel);
+  public:
+    std::string const& name() const;
+    Taskbarname& set_name(std::string const& name);
+
+    void DrawForeground(cairo_t*) override;
+    bool Resize() override;
+
+    static void Default();
+    static void Cleanup();
+    static void InitPanel(Panel* panel);
+};
 
 #endif

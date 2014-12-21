@@ -45,24 +45,6 @@ Task* task_active;
 Task* task_drag;
 int taskbar_enabled;
 
-Pixmap TaskbarBase::state_pixmap(size_t i) const {
-    return state_pixmap_[i];
-}
-
-TaskbarBase& TaskbarBase::set_state_pixmap(size_t i, Pixmap value) {
-    state_pixmap_[i] = value;
-    return (*this);
-}
-
-TaskbarBase& TaskbarBase::reset_state_pixmap(size_t i) {
-    if (state_pixmap_[i] != 0) {
-        XFreePixmap(server.dsp, state_pixmap_[i]);
-    }
-
-    state_pixmap_[i] = 0;
-    return (*this);
-}
-
 Taskbar& Taskbar::set_state(size_t state) {
     bg_ = panel1[0].g_taskbar.background[state];
     pix_ = state_pixmap(state);
@@ -121,11 +103,11 @@ void DefaultTaskbar() {
     urgent_timeout = 0;
     urgent_list.clear();
     taskbar_enabled = 0;
-    DefaultTaskbarname();
+    Taskbarname::Default();
 }
 
 void CleanupTaskbar() {
-    CleanupTaskbarname();
+    Taskbarname::Cleanup();
 
     if (win_to_task_table) {
         g_hash_table_foreach(win_to_task_table, TaskbarRemoveTask, 0);
@@ -353,7 +335,7 @@ void InitTaskbarPanel(Panel* panel) {
         }
     }
 
-    InitTaskbarnamePanel(panel);
+    Taskbarname::InitPanel(panel);
 }
 
 
