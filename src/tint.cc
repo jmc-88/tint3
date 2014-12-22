@@ -477,7 +477,7 @@ void EventButtonRelease(XEvent* e) {
             XLowerWindow(server.dsp, panel->main_win_);
         }
 
-        task_drag = 0;
+        task_drag = nullptr;
         return;
     }
 

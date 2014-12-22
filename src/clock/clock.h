@@ -26,6 +26,8 @@ class Clock : public Area {
     void DrawForeground(cairo_t*) override;
     std::string GetTooltipText() override;
     bool Resize() override;
+
+    static void InitPanel(Panel* panel);
 };
 
 extern std::string time1_format;
@@ -48,7 +50,6 @@ void CleanupClock();
 
 // initialize clock : y position, precision, ...
 void InitClock();
-void InitClockPanel(void* panel);
 
 void ClockAction(int button);
 

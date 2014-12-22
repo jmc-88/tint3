@@ -162,25 +162,24 @@ void InitClock() {
 }
 
 
-void InitClockPanel(void* p) {
-    Panel* panel = static_cast<Panel*>(p);
-    Clock* clock = &panel->clock_;
+void Clock::InitPanel(Panel* panel) {
+    Clock& clock = panel->clock_;
 
-    if (clock->bg_ == 0) {
-        clock->bg_ = backgrounds.front();
+    if (clock.bg_ == nullptr) {
+        clock.bg_ = backgrounds.front();
     }
 
-    clock->parent_ = panel;
-    clock->panel_ = panel;
-    clock->size_mode_ = SIZE_BY_CONTENT;
+    clock.parent_ = panel;
+    clock.panel_ = panel;
+    clock.size_mode_ = SIZE_BY_CONTENT;
 
     // check consistency
     if (time1_format.empty()) {
         return;
     }
 
-    clock->need_resize_ = true;
-    clock->on_screen_ = true;
+    clock.need_resize_ = true;
+    clock.on_screen_ = true;
 
     if (!time_tooltip_format.empty()) {
         strftime(buf_tooltip, sizeof(buf_tooltip), time_tooltip_format.c_str(),

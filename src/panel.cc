@@ -262,7 +262,7 @@ void InitPanel() {
             p->monitor_ = i;
         }
 
-        if (p->bg_ == 0) {
+        if (p->bg_ == nullptr) {
             p->bg_ = backgrounds.front();
         }
 
@@ -304,7 +304,7 @@ void InitPanel() {
             }
 
             if (item == 'C') {
-                InitClockPanel(p);
+                Clock::InitPanel(p);
             }
         }
 

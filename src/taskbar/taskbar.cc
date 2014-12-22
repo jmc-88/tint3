@@ -152,8 +152,8 @@ void InitTaskbar() {
                             free_ptr_array);
     }
 
-    task_active = 0;
-    task_drag = 0;
+    task_active = nullptr;
+    task_drag = nullptr;
 }
 
 
@@ -176,14 +176,14 @@ void InitTaskbarPanel(Panel* panel) {
     panel->g_taskbar.bar_name_.panel_ = panel;
     panel->g_taskbar.bar_name_.size_mode_ = SIZE_BY_CONTENT;
     panel->g_taskbar.bar_name_.need_resize_ = true;
-    panel->g_taskbar.bar_name_.on_screen_ = 1;
+    panel->g_taskbar.bar_name_.on_screen_ = true;
 
     // taskbar
     panel->g_taskbar.parent_ = panel;
     panel->g_taskbar.panel_ = panel;
     panel->g_taskbar.size_mode_ = SIZE_BY_LAYOUT;
     panel->g_taskbar.need_resize_ = true;
-    panel->g_taskbar.on_screen_ = 1;
+    panel->g_taskbar.on_screen_ = true;
 
     if (panel_horizontal) {
         panel->g_taskbar.panel_y_ = (panel->bg_->border.width + panel->padding_y_);
@@ -201,7 +201,7 @@ void InitTaskbarPanel(Panel* panel) {
     panel->g_task.panel_ = panel;
     panel->g_task.size_mode_ = SIZE_BY_LAYOUT;
     panel->g_task.need_resize_ = true;
-    panel->g_task.on_screen_ = 1;
+    panel->g_task.on_screen_ = true;
 
     if ((panel->g_task.config_asb_mask & (1 << TASK_NORMAL)) == 0) {
         panel->g_task.alpha[TASK_NORMAL] = 100;
