@@ -19,7 +19,6 @@
 **************************************************************************/
 
 #include <unistd.h>
-#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -63,11 +62,6 @@ Atom dnd_atom;
 int dnd_sent_request;
 char* dnd_launcher_exec;
 
-void SignalHandler(int sig) {
-    // signal handler is light as it should be
-    signal_pending = sig;
-}
-
 
 void Init(int argc, char* argv[]) {
     // FIXME: remove this global data shit
@@ -77,7 +71,7 @@ void Init(int argc, char* argv[]) {
     DefaultSystray();
 #ifdef ENABLE_BATTERY
     DefaultBattery();
-#endif
+#endif  // ENABLE_BATTERY
     DefaultClock();
     DefaultLauncher();
     DefaultTaskbar();
@@ -116,19 +110,15 @@ void Init(int argc, char* argv[]) {
     // Set signal handler
     signal_pending = 0;
 
-    struct sigaction sa;
-    memset(&sa, 0, sizeof(sa));
-    sa.sa_handler = SignalHandler;
-    sigaction(SIGUSR1, &sa, 0);
-    sigaction(SIGINT, &sa, 0);
-    sigaction(SIGTERM, &sa, 0);
-    sigaction(SIGHUP, &sa, 0);
+    auto signal_handler = [&](int signal_number) -> void {
+        signal_pending = signal_number;
+    };
 
-    struct sigaction sa_chld;
-    memset(&sa_chld, 0, sizeof(sa_chld));
-    sa_chld.sa_handler = SIG_DFL;
-    sa_chld.sa_flags = SA_NOCLDWAIT;
-    sigaction(SIGCHLD, &sa_chld, 0);
+    SignalAction(SIGHUP, signal_handler);
+    SignalAction(SIGINT, signal_handler);
+    SignalAction(SIGTERM, signal_handler);
+    SignalAction(SIGUSR1, signal_handler);
+    SignalAction(SIGCHLD, SIG_DFL, SA_NOCLDWAIT);
 
     // BSD does not support pselect(), therefore we have to use select and hope that we do not
     // end up in a race condition there (see 'man select()' on a linux machine for more information)
@@ -161,24 +151,7 @@ ErrorTrapPop(SnDisplay* display,
     XSync(xdisplay, False); /* get all errors out of the queue */
     --error_trap_depth;
 }
-
-static void SigchldHandler(int /* signal */) {
-    // Wait for all dead processes
-    pid_t pid;
-
-    while ((pid = waitpid(-1, nullptr, WNOHANG)) > 0) {
-        auto it = server.pids.find(pid);
-
-        if (it != server.pids.end()) {
-            sn_launcher_context_complete(it->second);
-            sn_launcher_context_unref(it->second);
-            server.pids.erase(it);
-        } else {
-            util::log::Error() << "Unknown child " << pid << " terminated!\n";
-        }
-    }
-}
-#endif // HAVE_SN
+#endif  // HAVE_SN
 
 void InitX11() {
     server.dsp = XOpenDisplay(nullptr);
@@ -200,15 +173,23 @@ void InitX11() {
     server.sn_dsp = sn_display_new(server.dsp, ErrorTrapPush, ErrorTrapPop);
 
     // Setup a handler for child termination
-    struct sigaction act;
-    memset(&act, 0, sizeof(struct sigaction));
-    act.sa_handler = SigchldHandler;
+    SignalAction(SIGCHLD, [&](int) -> void {
+        // Wait for all dead processes
+        pid_t pid;
 
-    if (sigaction(SIGCHLD, &act, 0)) {
-        perror("sigaction");
-    }
+        while ((pid = waitpid(-1, nullptr, WNOHANG)) > 0) {
+            auto it = server.pids.find(pid);
 
-#endif // HAVE_SN
+            if (it != server.pids.end()) {
+                sn_launcher_context_complete(it->second);
+                sn_launcher_context_unref(it->second);
+                server.pids.erase(it);
+            } else {
+                util::log::Error() << "Unknown child " << pid << " terminated!\n";
+            }
+        }
+    });
+#endif  // HAVE_SN
 
     imlib_context_set_display(server.dsp);
     imlib_context_set_visual(server.visual);
@@ -224,7 +205,8 @@ void InitX11() {
 
     // load default icon
     for (auto const& dir : util::xdg::basedir::DataDirs()) {
-        auto path = util::fs::BuildPath({ dir, "tint3", "default_icon.png" });
+        auto const& path =
+            util::fs::BuildPath({ dir, "tint3", "default_icon.png" });
 
         if (util::fs::FileExists(path)) {
             default_icon = imlib_load_image(path.c_str());

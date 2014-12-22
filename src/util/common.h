@@ -10,10 +10,12 @@
 #define WM_CLASS_TINT   "panel"
 
 #include <Imlib2.h>
-#include "area.h"
+#include <signal.h>
 
 #include <sstream>
 #include <string>
+
+#include "area.h"
 
 // mouse actions
 enum MouseActionEnum {
@@ -50,6 +52,10 @@ class StringBuilder {
 };
 
 std::string GetEnvironment(std::string const& variable_name);
+
+bool SignalAction(int signal_number,
+                  void (*signal_handler)(int),
+                  int flags = 0);
 
 std::string& StringTrim(std::string& str);
 

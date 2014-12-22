@@ -18,7 +18,7 @@ std::string BuildPath(std::initializer_list<std::string> parts) {
     std::ostringstream ss;
     bool first = true;
 
-    for (auto& p : parts) {
+    for (auto const& p : parts) {
         if (!first) {
             // tint2 has only ever supported Unix systems, so it's probably not
             // worth bothering with other kinds of path separators at all

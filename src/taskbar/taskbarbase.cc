@@ -1,6 +1,11 @@
-#include "taskbarbase.h"
+#include <cstring>
 
+#include "taskbarbase.h"
 #include "server.h"
+
+TaskbarBase::TaskbarBase() {
+    memset(&state_pixmap_, 0, sizeof(state_pixmap_));
+}
 
 Pixmap TaskbarBase::state_pixmap(size_t i) const {
     return state_pixmap_[i];
