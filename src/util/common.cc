@@ -91,11 +91,11 @@ std::string GetEnvironment(std::string const& variable_name) {
 }
 
 bool SignalAction(int signal_number,
-                  void (*signal_handler)(int),
+                  std::function<void(int)> signal_handler,
                   int flags) {
     struct sigaction sa;
     memset(&sa, 0, sizeof(sa));
-    sa.sa_handler = signal_handler;
+    sa.sa_handler = signal_handler.target<void(int)>();
     sa.sa_flags = flags;
 
     util::log::Debug()

@@ -12,6 +12,7 @@
 #include <Imlib2.h>
 #include <signal.h>
 
+#include <functional>
 #include <sstream>
 #include <string>
 
@@ -54,7 +55,7 @@ class StringBuilder {
 std::string GetEnvironment(std::string const& variable_name);
 
 bool SignalAction(int signal_number,
-                  void (*signal_handler)(int),
+                  std::function<void(int)> signal_handler,
                   int flags = 0);
 
 std::string& StringTrim(std::string& str);
