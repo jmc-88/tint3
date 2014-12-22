@@ -401,7 +401,9 @@ bool Systraybar::AddIcon(Window id) {
 
     //printf("icon with depth: %d, width %d, height %d\n", attr.depth, attr.width, attr.height);
     //printf("icon with depth: %d\n", attr.depth);
-    if (attr.depth != server.depth || alpha != 100 || brightness != 0
+    if (attr.depth != server.depth
+        || alpha != 100
+        || brightness != 0
         || saturation != 0) {
         visual = attr.visual;
         set_attr.colormap = attr.colormap;
@@ -435,10 +437,9 @@ bool Systraybar::AddIcon(Window id) {
         unsigned long nbitem, bytes;
         unsigned char* data = 0;
 
-        int ret = XGetWindowProperty(server.dsp, id, server.atoms_["_XEMBED_INFO"], 0,
-                                     2,
-                                     False, server.atoms_["_XEMBED_INFO"], &acttype, &actfmt,
-                                     &nbitem, &bytes, &data);
+        int ret = XGetWindowProperty(server.dsp, id, server.atoms_["_XEMBED_INFO"],
+                                     0, 2, False, server.atoms_["_XEMBED_INFO"],
+                                     &acttype, &actfmt, &nbitem, &bytes, &data);
 
         if (ret == Success) {
             if (data) {

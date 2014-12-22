@@ -789,13 +789,12 @@ void EventPropertyNotify(XEvent* e) {
                 panel_refresh = 1;
             }
         } else if (at == server.atoms_["WM_HINTS"]) {
-            XWMHints* wmhints = XGetWMHints(server.dsp, win);
+            util::x11::ClientData<XWMHints*> wmhints(
+                XGetWMHints(server.dsp, win));
 
-            if (wmhints && wmhints->flags & XUrgencyHint) {
+            if (wmhints != nullptr && (*wmhints).flags & XUrgencyHint) {
                 tsk->AddUrgent();
             }
-
-            XFree(wmhints);
         }
 
         if (!server.got_root_win) {
@@ -883,14 +882,14 @@ Property ReadProperty(Display* disp, Window w, Atom property) {
     int actual_format;
     unsigned long nitems;
     unsigned long bytes_after;
-    unsigned char* ret = 0;
+    unsigned char* ret = nullptr;
 
     int read_bytes = 1024;
 
     //Keep trying to read the property until there are no
     //bytes unread.
     do {
-        if (ret != 0) {
+        if (ret != nullptr) {
             XFree(ret);
         }
 

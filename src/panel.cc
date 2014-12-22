@@ -579,13 +579,13 @@ void Panel::SetProperties() {
     // Undecorated
     long prop[5] = { 2, 0, 0, 0, 0 };
     XChangeProperty(server.dsp, main_win_, server.atoms_["_MOTIF_WM_HINTS"],
-                    server.atoms_["_MOTIF_WM_HINTS"], 32, PropModeReplace, (unsigned char*) prop,
-                    5);
+                    server.atoms_["_MOTIF_WM_HINTS"], 32, PropModeReplace,
+                    (unsigned char*) prop, 5);
 
     // XdndAware - Register for Xdnd events
     Atom version = 4;
-    XChangeProperty(server.dsp, main_win_, server.atoms_["XdndAware"], XA_ATOM, 32,
-                    PropModeReplace, (unsigned char*)&version, 1);
+    XChangeProperty(server.dsp, main_win_, server.atoms_["XdndAware"], XA_ATOM,
+                    32, PropModeReplace, (unsigned char*)&version, 1);
 
     UpdateStrut(this);
 
@@ -602,11 +602,10 @@ void Panel::SetProperties() {
     XSetWMNormalHints(server.dsp, main_win_, &size_hints);
 
     // Set WM_CLASS
-    XClassHint* classhint = XAllocClassHint();
-    classhint->res_name = kClassHintName;
-    classhint->res_class = kClassHintClass;
+    util::x11::ClientData<XClassHint*> classhint(XAllocClassHint());
+    (*classhint).res_name = kClassHintName;
+    (*classhint).res_class = kClassHintClass;
     XSetClassHint(server.dsp, main_win_, classhint);
-    XFree(classhint);
 }
 
 

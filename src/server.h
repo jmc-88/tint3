@@ -22,6 +22,8 @@
 #include <glib.h>
 #endif
 
+#include "util/x11.h"
+
 struct Monitor {
     int x;
     int y;
@@ -73,7 +75,6 @@ extern Server server;
 
 void SendEvent32(Window win, Atom at, long data1, long data2, long data3);
 int  GetProperty32(Window win, Atom at, Atom type);
-void* ServerGetProperty(Window win, Atom at, Atom type, int* num_results);
 int ServerCatchError(Display* d, XErrorEvent* ev);
 
 // detect root background
@@ -82,6 +83,52 @@ void GetRootPixmap();
 // detect monitors and desktops
 void GetMonitors();
 void GetDesktops();
+
+
+template<typename T>
+util::x11::ClientData<T> ServerGetProperty(Window win,
+        Atom at,
+        Atom type,
+        int* num_results) {
+    if (!win) {
+        return util::x11::ClientData<T>(nullptr);
+    }
+
+    Atom type_ret;
+    int format_ret = 0;
+    unsigned long nitems_ret = 0;
+    unsigned long bafter_ret = 0;
+    unsigned char* prop_value = nullptr;
+    int result = XGetWindowProperty(
+                     server.dsp, win, at, 0, 0x7fffffff, False, type,
+                     &type_ret, &format_ret, &nitems_ret, &bafter_ret, &prop_value);
+
+    // Send back resultcount
+    if (num_results != nullptr) {
+        (*num_results) = static_cast<int>(nitems_ret);
+    }
+
+    if (result == Success && prop_value != nullptr) {
+        return util::x11::ClientData<T>(prop_value);
+    }
+
+    return util::x11::ClientData<T>(nullptr);
+}
+
+
+template<typename T>
+T GetProperty32(Window win, Atom at, Atom type) {
+    int num_results;
+    auto data = ServerGetProperty<unsigned long*>(
+                    win, at,
+                    type, &num_results);
+
+    if (data != nullptr) {
+        return static_cast<T>(*data);
+    }
+
+    return T();
+}
 
 
 #endif

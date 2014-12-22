@@ -57,12 +57,8 @@ Task& Task::SetTooltipEnabled(bool is_enabled) {
 
 
 Task* AddTask(Window win) {
-    if (!win) {
-        return 0;
-    }
-
-    if (WindowIsHidden(win)) {
-        return 0;
+    if (win == 0 || WindowIsHidden(win)) {
+        return nullptr;
     }
 
     int monitor = 0;
@@ -219,27 +215,20 @@ bool Task::UpdateTitle() {
         return false;
     }
 
-    const char* name = (char*) ServerGetProperty(win,
-                       server.atoms_["_NET_WM_VISIBLE_NAME"],
-                       server.atoms_["UTF8_STRING"],
-                       0);
+    auto name = ServerGetProperty<char*>(
+                    win, server.atoms_["_NET_WM_VISIBLE_NAME"],
+                    server.atoms_["UTF8_STRING"], 0);
 
-    if (!name || *name == '\0') {
-        name = (char*) ServerGetProperty(win,
-                                         server.atoms_["_NET_WM_NAME"],
-                                         server.atoms_["UTF8_STRING"],
-                                         0);
+    if (name == nullptr || *name == '\0') {
+        name = ServerGetProperty<char*>(
+                   win, server.atoms_["_NET_WM_NAME"],
+                   server.atoms_["UTF8_STRING"], 0);
     }
 
-    if (!name || *name == '\0') {
-        name = (char*) ServerGetProperty(win,
-                                         server.atoms_["WM_NAME"],
-                                         XA_STRING,
-                                         0);
-    }
-
-    if (!name || *name == '\0') {
-        name = kUntitled;
+    if (name == nullptr || *name == '\0') {
+        name = ServerGetProperty<char*>(
+                   win, server.atoms_["WM_NAME"],
+                   XA_STRING, 0);
     }
 
     // add space before title
@@ -249,10 +238,10 @@ bool Task::UpdateTitle() {
         new_title.assign(" ");
     }
 
-    new_title.append(name);
-
-    if (name != nullptr && strcmp(name, kUntitled) != 0) {
-        XFree((void*) name);
+    if (name != nullptr && *name != '\0') {
+        new_title.append(name);
+    } else {
+        new_title.append(kUntitled);
     }
 
     // check unecessary title change
@@ -301,13 +290,12 @@ void GetIcon(Task* tsk) {
     }
 
     Imlib_Image img = nullptr;
-    XWMHints* hints = 0;
     int i;
-    gulong* data = (gulong*) ServerGetProperty(tsk->win,
-                   server.atoms_["_NET_WM_ICON"],
-                   XA_CARDINAL, &i);
+    auto data = ServerGetProperty<gulong*>(
+                    tsk->win, server.atoms_["_NET_WM_ICON"],
+                    XA_CARDINAL, &i);
 
-    if (data) {
+    if (data != nullptr) {
         // get ARGB icon
         int w, h;
         gulong* tmp_data = GetBestIcon(data, GetIconCount(data, i), i, &w, &h,
@@ -326,10 +314,11 @@ void GetIcon(Task* tsk) {
 #endif
     } else {
         // get Pixmap icon
-        hints = XGetWMHints(server.dsp, tsk->win);
+        util::x11::ClientData<XWMHints*> hints(
+            XGetWMHints(server.dsp, tsk->win));
 
-        if (hints) {
-            if (hints->flags & IconPixmapHint && hints->icon_pixmap != 0) {
+        if (hints != nullptr) {
+            if ((*hints).flags & IconPixmapHint && (*hints).icon_pixmap != 0) {
                 // get width, height and depth for the pixmap
                 Window root;
                 int  icon_x, icon_y;
@@ -337,10 +326,10 @@ void GetIcon(Task* tsk) {
                 uint w, h;
 
                 //printf("  get pixmap\n");
-                XGetGeometry(server.dsp, hints->icon_pixmap, &root, &icon_x, &icon_y, &w, &h,
+                XGetGeometry(server.dsp, (*hints).icon_pixmap, &root, &icon_x, &icon_y, &w, &h,
                              &border_width, &bpp);
-                imlib_context_set_drawable(hints->icon_pixmap);
-                img = imlib_create_image_from_drawable(hints->icon_mask, 0, 0, w, h, 0);
+                imlib_context_set_drawable((*hints).icon_pixmap);
+                img = imlib_create_image_from_drawable((*hints).icon_mask, 0, 0, w, h, 0);
             }
         }
     }
@@ -382,14 +371,6 @@ void GetIcon(Task* tsk) {
 
     imlib_context_set_image(orig_image);
     imlib_free_image();
-
-    if (hints) {
-        XFree(hints);
-    }
-
-    if (data) {
-        XFree(data);
-    }
 
     GPtrArray* task_group = TaskGetTasks(tsk->win);
 

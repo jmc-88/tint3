@@ -168,57 +168,6 @@ void SendEvent32(Window win, Atom at, long data1, long data2, long data3) {
 }
 
 
-int GetProperty32(Window win, Atom at, Atom type) {
-    if (!win) {
-        return 0;
-    }
-
-    Atom type_ret;
-    int format_ret = 0, data = 0;
-    unsigned long nitems_ret = 0;
-    unsigned long bafter_ret = 0;
-    unsigned char* prop_value = 0;
-
-    int result = XGetWindowProperty(server.dsp, win, at, 0, 0x7fffffff, False, type,
-                                    &type_ret, &format_ret, &nitems_ret, &bafter_ret, &prop_value);
-
-    if (result == Success && prop_value) {
-        data = ((gulong*)prop_value)[0];
-        XFree(prop_value);
-    }
-
-    return data;
-}
-
-
-void* ServerGetProperty(Window win, Atom at, Atom type, int* num_results) {
-    Atom type_ret;
-    int format_ret = 0;
-    unsigned long nitems_ret = 0;
-    unsigned long bafter_ret = 0;
-    unsigned char* prop_value;
-    int result;
-
-    if (!win) {
-        return 0;
-    }
-
-    result = XGetWindowProperty(server.dsp, win, at, 0, 0x7fffffff, False, type,
-                                &type_ret, &format_ret, &nitems_ret, &bafter_ret, &prop_value);
-
-    // Send back resultcount
-    if (num_results) {
-        *num_results = (int)nitems_ret;
-    }
-
-    if (result == Success && prop_value) {
-        return prop_value;
-    } else {
-        return 0;
-    }
-}
-
-
 void GetRootPixmap() {
     Pixmap ret = None;
     Atom pixmap_atoms[] = {
@@ -227,11 +176,12 @@ void GetRootPixmap() {
     };
 
     for (size_t i = 0; i < sizeof(pixmap_atoms) / sizeof(Atom); ++i) {
-        void* res = ServerGetProperty(server.root_win, pixmap_atoms[i], XA_PIXMAP, 0);
+        auto res = ServerGetProperty<Pixmap*>(
+                       server.root_win, pixmap_atoms[i],
+                       XA_PIXMAP, 0);
 
-        if (res) {
-            ret = *(static_cast<Pixmap*>(res));
-            XFree(res);
+        if (res != nullptr) {
+            ret = (*res);
             break;
         }
     }
@@ -265,11 +215,12 @@ void GetMonitors() {
     int i, j, nbmonitor;
 
     if (XineramaIsActive(server.dsp)) {
-        XineramaScreenInfo* info = XineramaQueryScreens(server.dsp, &nbmonitor);
+        util::x11::ClientData<XineramaScreenInfo*> info(
+            XineramaQueryScreens(server.dsp, &nbmonitor));
         XRRScreenResources* res = XRRGetScreenResourcesCurrent(server.dsp,
                                   server.root_win);
 
-        if (res && res->ncrtc >= nbmonitor) {
+        if (res != nullptr && res->ncrtc >= nbmonitor) {
             // use xrandr to identify monitors (does not work with proprietery nvidia drivers)
             printf("xRandr: Found crtc's: %d\n", res->ncrtc);
             server.monitor.resize(res->ncrtc);
@@ -293,7 +244,7 @@ void GetMonitors() {
             }
 
             nbmonitor = res->ncrtc;
-        } else if (info && nbmonitor > 0) {
+        } else if (info != nullptr && nbmonitor > 0) {
             server.monitor.resize(nbmonitor);
 
             for (i = 0 ; i < nbmonitor; ++i) {
@@ -330,8 +281,6 @@ next:
         if (res) {
             XRRFreeScreenResources(res);
         }
-
-        XFree(info);
     }
 
     if (!server.nb_monitor) {
@@ -366,7 +315,9 @@ void GetDesktops() {
 }
 
 int Server::GetCurrentDesktop() {
-    return GetProperty32(root_win, atoms_["_NET_CURRENT_DESKTOP"], XA_CARDINAL);
+    return GetProperty32<int>(root_win,
+                              atoms_["_NET_CURRENT_DESKTOP"],
+                              XA_CARDINAL);
 }
 
 int Server::GetDesktop() {
@@ -374,7 +325,9 @@ int Server::GetDesktop() {
 }
 
 int Server::GetDesktopFromWindow(Window win) {
-    return GetProperty32(win, atoms_["_NET_NUMBER_OF_DESKTOPS"], XA_CARDINAL);
+    return GetProperty32<int>(win,
+                              atoms_["_NET_NUMBER_OF_DESKTOPS"],
+                              XA_CARDINAL);
 }
 
 void Server::InitVisual() {
@@ -385,14 +338,15 @@ void Server::InitVisual() {
     templ.c_class = TrueColor;
 
     int nvi;
-    auto xvi = XGetVisualInfo(dsp,
-                              VisualScreenMask | VisualDepthMask | VisualClassMask,
-                              &templ,
-                              &nvi);
+    util::x11::ClientData<XVisualInfo*> xvi(
+        XGetVisualInfo(dsp,
+                       VisualScreenMask | VisualDepthMask | VisualClassMask,
+                       &templ,
+                       &nvi));
 
     Visual* xvi_visual = nullptr;
 
-    if (xvi) {
+    if (xvi != nullptr) {
         for (int i = 0; i < nvi; i++) {
             auto format = XRenderFindVisualFormat(dsp, xvi[i].visual);
 
@@ -402,8 +356,6 @@ void Server::InitVisual() {
             }
         }
     }
-
-    XFree(xvi);
 
     // check composite manager
     composite_manager = XGetSelectionOwner(dsp, atoms_["_NET_WM_CM_S0"]);

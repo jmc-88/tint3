@@ -73,13 +73,13 @@ void WindowMaximizeRestore(Window win) {
 
 
 int WindowIsHidden(Window win) {
-    int count;
-    Atom* at = static_cast<Atom*>(ServerGetProperty(
-                                      win, server.atoms_["_NET_WM_STATE"], XA_ATOM, &count));
+    int state_count;
+    auto at = ServerGetProperty<Atom*>(
+                  win, server.atoms_["_NET_WM_STATE"],
+                  XA_ATOM, &state_count);
 
-    for (int i = 0; i < count; ++i) {
+    for (int i = 0; i < state_count; ++i) {
         if (at[i] == server.atoms_["_NET_WM_STATE_SKIP_TASKBAR"]) {
-            XFree(at);
             return 1;
         }
 
@@ -88,29 +88,25 @@ int WindowIsHidden(Window win) {
 
         while (XGetTransientForHint(server.dsp, window, &window)) {
             if (TaskGetTasks(window)) {
-                XFree(at);
                 return 1;
             }
         }
     }
 
-    XFree(at);
+    int type_count;
+    at = ServerGetProperty<Atom*>(
+             win, server.atoms_["_NET_WM_WINDOW_TYPE"],
+             XA_ATOM, &type_count);
 
-    at = static_cast<Atom*>(ServerGetProperty(
-                                win, server.atoms_["_NET_WM_WINDOW_TYPE"], XA_ATOM, &count));
-
-    for (int i = 0; i < count; ++i) {
+    for (int i = 0; i < type_count; ++i) {
         if (at[i] == server.atoms_["_NET_WM_WINDOW_TYPE_DOCK"] ||
             at[i] == server.atoms_["_NET_WM_WINDOW_TYPE_DESKTOP"] ||
             at[i] == server.atoms_["_NET_WM_WINDOW_TYPE_TOOLBAR"] ||
             at[i] == server.atoms_["_NET_WM_WINDOW_TYPE_MENU"] ||
             at[i] == server.atoms_["_NET_WM_WINDOW_TYPE_SPLASH"]) {
-            XFree(at);
             return 1;
         }
     }
-
-    XFree(at);
 
     for (int i = 0 ; i < nb_panel ; ++i) {
         if (panel1[i].main_win_ == win) {
@@ -155,62 +151,57 @@ int WindowIsIconified(Window win) {
     // EWMH specification : minimization of windows use _NET_WM_STATE_HIDDEN.
     // WM_STATE is not accurate for shaded window and in multi_desktop mode.
     int count;
-    Atom* at = static_cast<Atom*>(ServerGetProperty(
-                                      win, server.atoms_["_NET_WM_STATE"], XA_ATOM, &count));
+    auto at = ServerGetProperty<Atom*>(
+                  win, server.atoms_["_NET_WM_STATE"],
+                  XA_ATOM, &count);
 
     for (int i = 0; i < count; i++) {
         if (at[i] == server.atoms_["_NET_WM_STATE_HIDDEN"]) {
-            XFree(at);
             return 1;
         }
     }
 
-    XFree(at);
     return 0;
 }
 
 
 int WindowIsUrgent(Window win) {
     int count;
-    Atom* at = static_cast<Atom*>(ServerGetProperty(
-                                      win, server.atoms_["_NET_WM_STATE"], XA_ATOM, &count));
+    auto at = ServerGetProperty<Atom*>(
+                  win, server.atoms_["_NET_WM_STATE"],
+                  XA_ATOM, &count);
 
     for (int i = 0; i < count; i++) {
         if (at[i] == server.atoms_["_NET_WM_STATE_DEMANDS_ATTENTION"]) {
-            XFree(at);
             return 1;
         }
     }
 
-    XFree(at);
     return 0;
 }
 
 
 int WindowIsSkipTaskbar(Window win) {
     int count;
-    Atom* at = static_cast<Atom*>(ServerGetProperty(
-                                      win, server.atoms_["_NET_WM_STATE"], XA_ATOM, &count));
+    auto at = ServerGetProperty<Atom*>(
+                  win, server.atoms_["_NET_WM_STATE"],
+                  XA_ATOM, &count);
 
     for (int i = 0; i < count; ++i) {
         if (at[i] == server.atoms_["_NET_WM_STATE_SKIP_TASKBAR"]) {
-            XFree(at);
             return 1;
         }
     }
 
-    XFree(at);
     return 0;
 }
 
 
 std::vector<std::string> ServerGetDesktopNames() {
     int count;
-    char* data_ptr = static_cast<char*>(ServerGetProperty(
-                                            server.root_win,
-                                            server.atoms_["_NET_DESKTOP_NAMES"],
-                                            server.atoms_["UTF8_STRING"],
-                                            &count));
+    auto data_ptr = ServerGetProperty<char*>(
+                        server.root_win, server.atoms_["_NET_DESKTOP_NAMES"],
+                        server.atoms_["UTF8_STRING"], &count);
 
     std::vector<std::string> names;
 
@@ -218,7 +209,7 @@ std::vector<std::string> ServerGetDesktopNames() {
     // one and add its length to a counter, then repeat until the data has been
     // fully consumed
     if (data_ptr != nullptr) {
-        names.push_back(data_ptr);
+        names.push_back(std::string(data_ptr));
 
         int j = (names.back().length() + 1);
 
@@ -226,8 +217,6 @@ std::vector<std::string> ServerGetDesktopNames() {
             names.push_back(&data_ptr[j]);
             j += (names.back().length() + 1);
         }
-
-        XFree(data_ptr);
     }
 
     return names;
@@ -235,9 +224,9 @@ std::vector<std::string> ServerGetDesktopNames() {
 
 
 Window WindowGetActive() {
-    return (Window) GetProperty32(server.root_win,
-                                  server.atoms_["_NET_ACTIVE_WINDOW"],
-                                  XA_WINDOW);
+    return GetProperty32<Window>(server.root_win,
+                                 server.atoms_["_NET_ACTIVE_WINDOW"],
+                                 XA_WINDOW);
 }
 
 

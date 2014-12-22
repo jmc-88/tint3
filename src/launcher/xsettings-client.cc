@@ -21,10 +21,11 @@
  * Author:  Owen Taylor, Red Hat, Inc.
  */
 
-#include <limits.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <climits>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <functional>
 
 #include <X11/Xlib.h>
 #include <X11/Xmd.h>        /* For CARD16 */
@@ -400,23 +401,24 @@ out:
 
 
 static void ReadSettings(XSettingsClient* client) {
+    XSettingsList* old_list = client->settings;
+
+    client->settings = nullptr;
+
+    int (*old_handler)(Display*, XErrorEvent*) =
+        XSetErrorHandler(IgnoreErrors);
+
     Atom type;
     int format;
     unsigned long n_items;
     unsigned long bytes_after;
-    unsigned char* data;
-    int result;
+    unsigned char* data = nullptr;
+    int result = XGetWindowProperty(
+                     client->display, client->manager_window,
+                     server.atoms_["_XSETTINGS_SETTINGS"], 0, LONG_MAX, False,
+                     server.atoms_["_XSETTINGS_SETTINGS"], &type, &format, &n_items,
+                     &bytes_after, &data);
 
-    int (*old_handler)(Display*, XErrorEvent*);
-
-    XSettingsList* old_list = client->settings;
-    client->settings = nullptr;
-
-    old_handler = XSetErrorHandler(IgnoreErrors);
-    result = XGetWindowProperty(client->display, client->manager_window,
-                                server.atoms_["_XSETTINGS_SETTINGS"], 0, LONG_MAX, False,
-                                server.atoms_["_XSETTINGS_SETTINGS"], &type, &format, &n_items, &bytes_after,
-                                &data);
     XSetErrorHandler(old_handler);
 
     if (result == Success && type == server.atoms_["_XSETTINGS_SETTINGS"]) {

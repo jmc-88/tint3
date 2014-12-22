@@ -34,7 +34,6 @@
 #include "window.h"
 #include "panel.h"
 
-
 /* win_to_task_table holds for every Window an array of tasks. Usually the array contains only one
    element. However for omnipresent windows (windows which are visible in every taskbar) the array
    contains to every Task* on each panel a pointer (i.e. GPtrArray.len == server.nb_desktop)
@@ -369,13 +368,11 @@ void TaskRefreshTasklist() {
     }
 
     int num_results;
-    Window* win = static_cast<Window*>(ServerGetProperty(
-                                           server.root_win,
-                                           server.atoms_["_NET_CLIENT_LIST"],
-                                           XA_WINDOW,
-                                           &num_results));
+    auto window = ServerGetProperty<Window*>(
+                      server.root_win, server.atoms_["_NET_CLIENT_LIST"],
+                      XA_WINDOW, &num_results);
 
-    if (!win) {
+    if (window == nullptr) {
         return;
     }
 
@@ -384,7 +381,7 @@ void TaskRefreshTasklist() {
 
     for (GList* it = win_list; it; it = it->next) {
         for (i = 0; i < num_results; i++) {
-            if (*static_cast<Window*>(it->data) == win[i]) {
+            if (*static_cast<Window*>(it->data) == window[i]) {
                 break;
             }
         }
@@ -398,12 +395,10 @@ void TaskRefreshTasklist() {
 
     // Add any new
     for (i = 0; i < num_results; i++) {
-        if (!TaskGetTask(win[i])) {
-            AddTask(win[i]);
+        if (!TaskGetTask(window[i])) {
+            AddTask(window[i]);
         }
     }
-
-    XFree(win);
 }
 
 
