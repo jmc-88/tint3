@@ -77,6 +77,7 @@ static constexpr int kAtomCount = (sizeof(kAtomList) / sizeof(kAtomList[0]));
 Server server;
 
 int ServerCatchError(Display* d, XErrorEvent* ev) {
+    // TODO: add debug info here, otherwise rename it to, like, "IgnoreErrors"
     return 0;
 }
 

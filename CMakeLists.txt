@@ -66,6 +66,7 @@ set( SOURCES
     src/util/log.cc
     src/util/timer.cc
     src/util/window.cc
+    src/util/x11.cc
     src/util/xdg.cc )
 
 option( ENABLE_BATTERY "Enable battery status plugin" ON )

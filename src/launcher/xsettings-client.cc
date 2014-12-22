@@ -35,6 +35,7 @@
 #include "panel.h"
 #include "launcher.h"
 #include "util/log.h"
+#include "util/x11.h"
 
 struct _XSettingsClient {
     Display* display;
@@ -401,12 +402,10 @@ out:
 
 
 static void ReadSettings(XSettingsClient* client) {
+    util::x11::ScopedErrorHandler error_handler(IgnoreErrors);
     XSettingsList* old_list = client->settings;
 
     client->settings = nullptr;
-
-    int (*old_handler)(Display*, XErrorEvent*) =
-        XSetErrorHandler(IgnoreErrors);
 
     Atom type;
     int format;
@@ -418,8 +417,6 @@ static void ReadSettings(XSettingsClient* client) {
                      server.atoms_["_XSETTINGS_SETTINGS"], 0, LONG_MAX, False,
                      server.atoms_["_XSETTINGS_SETTINGS"], &type, &format, &n_items,
                      &bytes_after, &data);
-
-    XSetErrorHandler(old_handler);
 
     if (result == Success && type == server.atoms_["_XSETTINGS_SETTINGS"]) {
         if (format != 8) {

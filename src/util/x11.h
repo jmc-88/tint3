@@ -7,6 +7,15 @@
 namespace util {
 namespace x11 {
 
+class ScopedErrorHandler {
+public:
+    explicit ScopedErrorHandler(XErrorHandler new_handler);
+    ~ScopedErrorHandler();
+
+private:
+    XErrorHandler old_handler_;
+};
+
 template<typename T>
 class ClientData {
   public:

@@ -418,12 +418,15 @@ bool Systraybar::AddIcon(Window id) {
     Window parent_window = XCreateWindow(server.dsp, panel_->main_win_,
                                          0, 0, 30, 30, 0,
                                          attr.depth, InputOutput, visual, mask, &set_attr);
-    auto old_handler = XSetErrorHandler(WindowErrorHandler);
-    XReparentWindow(server.dsp, id, parent_window, 0, 0);
-    // watch for the icon trying to resize itself / closing again!
-    XSelectInput(server.dsp, id, StructureNotifyMask);
-    XSync(server.dsp, False);
-    XSetErrorHandler(old_handler);
+
+    {
+        error = false;
+        util::x11::ScopedErrorHandler error_handler(WindowErrorHandler);
+        XReparentWindow(server.dsp, id, parent_window, 0, 0);
+        // watch for the icon trying to resize itself / closing again!
+        XSelectInput(server.dsp, id, StructureNotifyMask);
+        XSync(server.dsp, False);
+    }
 
     if (error) {
         util::log::Error() << "tint3: not icon_swallow\n";
@@ -530,17 +533,18 @@ void Systraybar::RemoveIcon(TrayWindow* traywin) {
     }
 
     // reparent to root
-    error = false;
-    auto old = XSetErrorHandler(WindowErrorHandler);
+    {
+        error = false;
+        util::x11::ScopedErrorHandler error_handler(WindowErrorHandler);
 
-    if (!traywin->hide) {
-        XUnmapWindow(server.dsp, traywin->tray_id);
+        if (!traywin->hide) {
+            XUnmapWindow(server.dsp, traywin->tray_id);
+        }
+
+        XReparentWindow(server.dsp, traywin->tray_id, server.root_win, 0, 0);
+        XDestroyWindow(server.dsp, traywin->id);
+        XSync(server.dsp, False);
     }
-
-    XReparentWindow(server.dsp, traywin->tray_id, server.root_win, 0, 0);
-    XDestroyWindow(server.dsp, traywin->id);
-    XSync(server.dsp, False);
-    XSetErrorHandler(old);
 
     if (traywin->render_timeout) {
         StopTimeout(traywin->render_timeout);
