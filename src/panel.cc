@@ -16,9 +16,6 @@
 * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 **************************************************************************/
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <X11/Xatom.h>
@@ -27,6 +24,8 @@
 #include <pango/pangocairo.h>
 
 #include <algorithm>
+#include <cstdlib>
+#include <cstring>
 
 #include "server.h"
 #include "config.h"
@@ -313,14 +312,17 @@ void InitPanel() {
         {
             // catch some events
             XSetWindowAttributes attr;
+            std::memset(&attr, 0, sizeof(attr));
             attr.colormap = server.colormap;
             attr.background_pixel = 0;
             attr.border_pixel = 0;
 
             unsigned long mask = CWEventMask | CWColormap | CWBackPixel | CWBorderPixel;
-            p->main_win_ = XCreateWindow(server.dsp, server.root_win, p->root_x_,
-                                         p->root_y_,
-                                         p->width_, p->height_, 0, server.depth, InputOutput, server.visual,
+            p->main_win_ = XCreateWindow(server.dsp, server.root_win,
+                                         p->root_x_, p->root_y_,
+                                         p->width_, p->height_,
+                                         0, server.depth,
+                                         InputOutput, server.visual,
                                          mask, &attr);
         }
 
@@ -338,12 +340,16 @@ void InitPanel() {
 
         {
             XSetWindowAttributes attr;
+            std::memset(&attr, 0, sizeof(attr));
             attr.event_mask = event_mask;
-            XChangeWindowAttributes(server.dsp, p->main_win_, CWEventMask, &attr);
+            XChangeWindowAttributes(server.dsp,
+                                    p->main_win_,
+                                    CWEventMask,
+                                    &attr);
         }
 
         if (!server.gc) {
-            XGCValues  gcv;
+            XGCValues gcv;
             server.gc = XCreateGC(server.dsp, p->main_win_, 0, &gcv);
         }
 

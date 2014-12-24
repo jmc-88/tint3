@@ -94,7 +94,7 @@ bool SignalAction(int signal_number,
                   std::function<void(int)> signal_handler,
                   int flags) {
     struct sigaction sa;
-    memset(&sa, 0, sizeof(sa));
+    std::memset(&sa, 0, sizeof(sa));
     sa.sa_handler = signal_handler.target<void(int)>();
     sa.sa_flags = flags;
 

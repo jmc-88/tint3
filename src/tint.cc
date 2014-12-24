@@ -19,10 +19,6 @@
 **************************************************************************/
 
 #include <unistd.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdint.h>
-#include <string.h>
 #include <sys/stat.h>
 #include <Imlib2.h>
 #include <X11/Xutil.h>
@@ -35,6 +31,10 @@
 #endif
 
 #include <algorithm>
+#include <cstdio>
+#include <cstdlib>
+#include <cstdint>
+#include <cstring>
 
 #include "version.h"
 #include "server.h"
@@ -1086,7 +1086,7 @@ void DragAndDropDrop(XClientMessageEvent* e) {
         //The source is sending anyway, despite instructions to the contrary.
         //So reply that we're not interested.
         XClientMessageEvent m;
-        memset(&m, sizeof(m), 0);
+        std::memset(&m, 0, sizeof(m));
         m.type = ClientMessage;
         m.display = e->display;
         m.window = e->data.l[0];
@@ -1415,7 +1415,7 @@ start:
 
                                     // Reply OK.
                                     XClientMessageEvent m;
-                                    memset(&m, sizeof(m), 0);
+                                    std::memset(&m, 0, sizeof(m));
                                     m.type = ClientMessage;
                                     m.display = server.dsp;
                                     m.window = dnd_source_window;
