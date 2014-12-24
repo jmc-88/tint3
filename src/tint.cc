@@ -630,7 +630,7 @@ void EventPropertyNotify(XEvent* e) {
             InitTaskbar();
 
             for (i = 0 ; i < nb_panel ; i++) {
-                InitTaskbarPanel(&panel1[i]);
+                Taskbar::InitPanel(&panel1[i]);
                 panel1[i].SetItemsOrder();
                 panel1[i].UpdateTaskbarVisibility();
                 panel1[i].need_resize_ = true;

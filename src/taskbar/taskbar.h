@@ -28,6 +28,8 @@ class Taskbar : public TaskbarBase {
     void DrawForeground(cairo_t*) override;
     void OnChangeLayout() override;
     bool Resize() override;
+
+    static void InitPanel(Panel* panel);
 };
 
 class Global_taskbar : public TaskbarBase {
@@ -45,7 +47,6 @@ void DefaultTaskbar();
 void CleanupTaskbar();
 
 void InitTaskbar();
-void InitTaskbarPanel(Panel* panel);
 
 void TaskbarRemoveTask(gpointer key, gpointer value, gpointer user_data);
 Task* TaskGetTask(Window win);

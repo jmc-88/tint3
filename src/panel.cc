@@ -284,7 +284,7 @@ void InitPanel() {
             }
 
             if (item == 'T') {
-                InitTaskbarPanel(p);
+                Taskbar::InitPanel(p);
             }
 
 #ifdef ENABLE_BATTERY

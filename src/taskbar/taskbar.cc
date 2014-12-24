@@ -156,7 +156,7 @@ void InitTaskbar() {
 }
 
 
-void InitTaskbarPanel(Panel* panel) {
+void Taskbar::InitPanel(Panel* panel) {
     if (panel->g_taskbar.background[TASKBAR_NORMAL] == nullptr) {
         panel->g_taskbar.background[TASKBAR_NORMAL] = backgrounds.front();
         panel->g_taskbar.background[TASKBAR_ACTIVE] = backgrounds.front();
