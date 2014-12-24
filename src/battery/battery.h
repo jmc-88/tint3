@@ -30,6 +30,8 @@ class Battery : public Area {
 
     void DrawForeground(cairo_t*) override;
     bool Resize() override;
+
+    static void InitPanel(Panel* panel);
 };
 
 enum chargestate {
@@ -74,6 +76,5 @@ void CleanupBattery();
 void UpdateBattery();
 
 void InitBattery();
-void InitBatteryPanel(Panel* panel);
 
 #endif

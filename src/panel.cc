@@ -290,7 +290,7 @@ void InitPanel() {
 #ifdef ENABLE_BATTERY
 
             if (item == 'B') {
-                InitBatteryPanel(p);
+                Battery::InitPanel(p);
             }
 
 #endif

@@ -260,7 +260,7 @@ void InitBattery() {
 }
 
 
-void InitBatteryPanel(Panel* panel) {
+void Battery::InitPanel(Panel* panel) {
     if (!battery_enabled) {
         return;
     }
