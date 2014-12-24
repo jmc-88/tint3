@@ -182,7 +182,7 @@ void GetRootPixmap() {
     };
 
     for (size_t i = 0; i < sizeof(pixmap_atoms) / sizeof(Atom); ++i) {
-        auto res = ServerGetProperty<Pixmap*>(
+        auto res = ServerGetProperty<Pixmap>(
                        server.root_win, pixmap_atoms[i],
                        XA_PIXMAP, 0);
 
@@ -221,7 +221,7 @@ void GetMonitors() {
     int i, j, nbmonitor;
 
     if (XineramaIsActive(server.dsp)) {
-        util::x11::ClientData<XineramaScreenInfo*> info(
+        util::x11::ClientData<XineramaScreenInfo> info(
             XineramaQueryScreens(server.dsp, &nbmonitor));
         XRRScreenResources* res = XRRGetScreenResourcesCurrent(server.dsp,
                                   server.root_win);
@@ -254,10 +254,10 @@ void GetMonitors() {
             server.monitor.resize(nbmonitor);
 
             for (i = 0 ; i < nbmonitor; ++i) {
-                server.monitor[i].x = info[i].x_org;
-                server.monitor[i].y = info[i].y_org;
-                server.monitor[i].width = info[i].width;
-                server.monitor[i].height = info[i].height;
+                server.monitor[i].x = info.get()[i].x_org;
+                server.monitor[i].y = info.get()[i].y_org;
+                server.monitor[i].width = info.get()[i].width;
+                server.monitor[i].height = info.get()[i].height;
                 server.monitor[i].names.clear();
             }
         }
@@ -344,7 +344,7 @@ void Server::InitVisual() {
     templ.c_class = TrueColor;
 
     int nvi;
-    util::x11::ClientData<XVisualInfo*> xvi(
+    util::x11::ClientData<XVisualInfo> xvi(
         XGetVisualInfo(dsp,
                        VisualScreenMask | VisualDepthMask | VisualClassMask,
                        &templ,
@@ -354,10 +354,10 @@ void Server::InitVisual() {
 
     if (xvi != nullptr) {
         for (int i = 0; i < nvi; i++) {
-            auto format = XRenderFindVisualFormat(dsp, xvi[i].visual);
+            auto format = XRenderFindVisualFormat(dsp, xvi.get()[i].visual);
 
             if (format->type == PictTypeDirect && format->direct.alphaMask) {
-                xvi_visual = xvi[i].visual;
+                xvi_visual = xvi.get()[i].visual;
                 break;
             }
         }

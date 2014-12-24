@@ -2,7 +2,20 @@
 #define X11_H
 
 #include <X11/Xlib.h>
-#include <utility>
+#include <memory>
+
+
+namespace {
+
+class XFreeDeleter {
+  public:
+    void operator()(void* data) {
+        XFree(data);
+    }
+};
+
+}  // namespace
+
 
 namespace util {
 namespace x11 {
@@ -17,37 +30,15 @@ class ScopedErrorHandler {
 };
 
 template<typename T>
-class ClientData {
+class ClientData : public std::unique_ptr<T, ::XFreeDeleter> {
   public:
     explicit ClientData(void* data)
-        : data_(data) {
+        : std::unique_ptr<T, ::XFreeDeleter>(static_cast<T * >(data)) {
     }
-
-    ClientData(ClientData&& other) {
-        data_ = other.data_;
-        other.data_ = nullptr;
-    }
-
-    ~ClientData() {
-        if (data_ != nullptr) {
-            XFree(data_);
-        }
-    }
-
-    ClientData& operator=(ClientData other) {
-        std::swap(data_, other.data_);
-        return (*this);
-    }
-
-    operator T const() const {
-        return reinterpret_cast<T>(data_);
-    }
-
-  private:
-    void* data_;
 };
 
 }  // namespace x11
 }  // namespace util
+
 
 #endif // X11_H

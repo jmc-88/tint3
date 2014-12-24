@@ -16,7 +16,7 @@
 #include <sstream>
 #include <string>
 
-#include "area.h"
+#include "util/area.h"
 
 // mouse actions
 enum MouseActionEnum {
@@ -51,6 +51,7 @@ class StringBuilder {
         return ss_.str();
     }
 };
+
 
 std::string GetEnvironment(std::string const& variable_name);
 

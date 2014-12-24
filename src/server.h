@@ -119,7 +119,7 @@ util::x11::ClientData<T> ServerGetProperty(Window win,
 template<typename T>
 T GetProperty32(Window win, Atom at, Atom type) {
     int num_results;
-    auto data = ServerGetProperty<unsigned long*>(
+    auto data = ServerGetProperty<unsigned long>(
                     win, at,
                     type, &num_results);
 

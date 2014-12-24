@@ -789,10 +789,10 @@ void EventPropertyNotify(XEvent* e) {
                 panel_refresh = 1;
             }
         } else if (at == server.atoms_["WM_HINTS"]) {
-            util::x11::ClientData<XWMHints*> wmhints(
+            util::x11::ClientData<XWMHints> wmhints(
                 XGetWMHints(server.dsp, win));
 
-            if (wmhints != nullptr && (*wmhints).flags & XUrgencyHint) {
+            if (wmhints != nullptr && wmhints->flags & XUrgencyHint) {
                 tsk->AddUrgent();
             }
         }

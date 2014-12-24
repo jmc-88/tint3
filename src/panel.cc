@@ -608,10 +608,10 @@ void Panel::SetProperties() {
     XSetWMNormalHints(server.dsp, main_win_, &size_hints);
 
     // Set WM_CLASS
-    util::x11::ClientData<XClassHint*> classhint(XAllocClassHint());
-    (*classhint).res_name = kClassHintName;
-    (*classhint).res_class = kClassHintClass;
-    XSetClassHint(server.dsp, main_win_, classhint);
+    util::x11::ClientData<XClassHint> classhint(XAllocClassHint());
+    classhint->res_name = kClassHintName;
+    classhint->res_class = kClassHintClass;
+    XSetClassHint(server.dsp, main_win_, classhint.get());
 }
 
 

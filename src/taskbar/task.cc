@@ -215,18 +215,18 @@ bool Task::UpdateTitle() {
         return false;
     }
 
-    auto name = ServerGetProperty<char*>(
+    auto name = ServerGetProperty<char>(
                     win, server.atoms_["_NET_WM_VISIBLE_NAME"],
                     server.atoms_["UTF8_STRING"], 0);
 
     if (name == nullptr || *name == '\0') {
-        name = ServerGetProperty<char*>(
+        name = ServerGetProperty<char>(
                    win, server.atoms_["_NET_WM_NAME"],
                    server.atoms_["UTF8_STRING"], 0);
     }
 
     if (name == nullptr || *name == '\0') {
-        name = ServerGetProperty<char*>(
+        name = ServerGetProperty<char>(
                    win, server.atoms_["WM_NAME"],
                    XA_STRING, 0);
     }
@@ -239,7 +239,7 @@ bool Task::UpdateTitle() {
     }
 
     if (name != nullptr && *name != '\0') {
-        new_title.append(name);
+        new_title.append(name.get());
     } else {
         new_title.append(kUntitled);
     }
@@ -291,15 +291,15 @@ void GetIcon(Task* tsk) {
 
     Imlib_Image img = nullptr;
     int i;
-    auto data = ServerGetProperty<gulong*>(
+    auto data = ServerGetProperty<gulong>(
                     tsk->win, server.atoms_["_NET_WM_ICON"],
                     XA_CARDINAL, &i);
 
     if (data != nullptr) {
         // get ARGB icon
         int w, h;
-        gulong* tmp_data = GetBestIcon(data, GetIconCount(data, i), i, &w, &h,
-                                       panel->g_task.icon_size1);
+        gulong* tmp_data = GetBestIcon(data.get(), GetIconCount(data.get(), i),
+                                       i, &w, &h, panel->g_task.icon_size1);
 #ifdef __x86_64__
         DATA32 icon_data[w * h];
         int length = w * h;
@@ -314,11 +314,11 @@ void GetIcon(Task* tsk) {
 #endif
     } else {
         // get Pixmap icon
-        util::x11::ClientData<XWMHints*> hints(
+        util::x11::ClientData<XWMHints> hints(
             XGetWMHints(server.dsp, tsk->win));
 
         if (hints != nullptr) {
-            if ((*hints).flags & IconPixmapHint && (*hints).icon_pixmap != 0) {
+            if (hints->flags & IconPixmapHint && hints->icon_pixmap != 0) {
                 // get width, height and depth for the pixmap
                 Window root;
                 int  icon_x, icon_y;
@@ -326,10 +326,10 @@ void GetIcon(Task* tsk) {
                 uint w, h;
 
                 //printf("  get pixmap\n");
-                XGetGeometry(server.dsp, (*hints).icon_pixmap, &root, &icon_x, &icon_y, &w, &h,
+                XGetGeometry(server.dsp, hints->icon_pixmap, &root, &icon_x, &icon_y, &w, &h,
                              &border_width, &bpp);
-                imlib_context_set_drawable((*hints).icon_pixmap);
-                img = imlib_create_image_from_drawable((*hints).icon_mask, 0, 0, w, h, 0);
+                imlib_context_set_drawable(hints->icon_pixmap);
+                img = imlib_create_image_from_drawable(hints->icon_mask, 0, 0, w, h, 0);
             }
         }
     }

@@ -74,12 +74,12 @@ void WindowMaximizeRestore(Window win) {
 
 int WindowIsHidden(Window win) {
     int state_count;
-    auto at = ServerGetProperty<Atom*>(
+    auto at = ServerGetProperty<Atom>(
                   win, server.atoms_["_NET_WM_STATE"],
                   XA_ATOM, &state_count);
 
     for (int i = 0; i < state_count; ++i) {
-        if (at[i] == server.atoms_["_NET_WM_STATE_SKIP_TASKBAR"]) {
+        if (at.get()[i] == server.atoms_["_NET_WM_STATE_SKIP_TASKBAR"]) {
             return 1;
         }
 
@@ -94,16 +94,16 @@ int WindowIsHidden(Window win) {
     }
 
     int type_count;
-    at = ServerGetProperty<Atom*>(
+    at = ServerGetProperty<Atom>(
              win, server.atoms_["_NET_WM_WINDOW_TYPE"],
              XA_ATOM, &type_count);
 
     for (int i = 0; i < type_count; ++i) {
-        if (at[i] == server.atoms_["_NET_WM_WINDOW_TYPE_DOCK"] ||
-            at[i] == server.atoms_["_NET_WM_WINDOW_TYPE_DESKTOP"] ||
-            at[i] == server.atoms_["_NET_WM_WINDOW_TYPE_TOOLBAR"] ||
-            at[i] == server.atoms_["_NET_WM_WINDOW_TYPE_MENU"] ||
-            at[i] == server.atoms_["_NET_WM_WINDOW_TYPE_SPLASH"]) {
+        if (at.get()[i] == server.atoms_["_NET_WM_WINDOW_TYPE_DOCK"] ||
+            at.get()[i] == server.atoms_["_NET_WM_WINDOW_TYPE_DESKTOP"] ||
+            at.get()[i] == server.atoms_["_NET_WM_WINDOW_TYPE_TOOLBAR"] ||
+            at.get()[i] == server.atoms_["_NET_WM_WINDOW_TYPE_MENU"] ||
+            at.get()[i] == server.atoms_["_NET_WM_WINDOW_TYPE_SPLASH"]) {
             return 1;
         }
     }
@@ -151,12 +151,12 @@ int WindowIsIconified(Window win) {
     // EWMH specification : minimization of windows use _NET_WM_STATE_HIDDEN.
     // WM_STATE is not accurate for shaded window and in multi_desktop mode.
     int count;
-    auto at = ServerGetProperty<Atom*>(
+    auto at = ServerGetProperty<Atom>(
                   win, server.atoms_["_NET_WM_STATE"],
                   XA_ATOM, &count);
 
     for (int i = 0; i < count; i++) {
-        if (at[i] == server.atoms_["_NET_WM_STATE_HIDDEN"]) {
+        if (at.get()[i] == server.atoms_["_NET_WM_STATE_HIDDEN"]) {
             return 1;
         }
     }
@@ -167,12 +167,12 @@ int WindowIsIconified(Window win) {
 
 int WindowIsUrgent(Window win) {
     int count;
-    auto at = ServerGetProperty<Atom*>(
+    auto at = ServerGetProperty<Atom>(
                   win, server.atoms_["_NET_WM_STATE"],
                   XA_ATOM, &count);
 
     for (int i = 0; i < count; i++) {
-        if (at[i] == server.atoms_["_NET_WM_STATE_DEMANDS_ATTENTION"]) {
+        if (at.get()[i] == server.atoms_["_NET_WM_STATE_DEMANDS_ATTENTION"]) {
             return 1;
         }
     }
@@ -183,12 +183,12 @@ int WindowIsUrgent(Window win) {
 
 int WindowIsSkipTaskbar(Window win) {
     int count;
-    auto at = ServerGetProperty<Atom*>(
+    auto at = ServerGetProperty<Atom>(
                   win, server.atoms_["_NET_WM_STATE"],
                   XA_ATOM, &count);
 
     for (int i = 0; i < count; ++i) {
-        if (at[i] == server.atoms_["_NET_WM_STATE_SKIP_TASKBAR"]) {
+        if (at.get()[i] == server.atoms_["_NET_WM_STATE_SKIP_TASKBAR"]) {
             return 1;
         }
     }
@@ -199,7 +199,7 @@ int WindowIsSkipTaskbar(Window win) {
 
 std::vector<std::string> ServerGetDesktopNames() {
     int count;
-    auto data_ptr = ServerGetProperty<char*>(
+    auto data_ptr = ServerGetProperty<char>(
                         server.root_win, server.atoms_["_NET_DESKTOP_NAMES"],
                         server.atoms_["UTF8_STRING"], &count);
 
@@ -209,12 +209,12 @@ std::vector<std::string> ServerGetDesktopNames() {
     // one and add its length to a counter, then repeat until the data has been
     // fully consumed
     if (data_ptr != nullptr) {
-        names.push_back(std::string(data_ptr));
+        names.push_back(data_ptr.get());
 
         int j = (names.back().length() + 1);
 
         while (j < count - 1) {
-            names.push_back(&data_ptr[j]);
+            names.push_back(data_ptr.get() + j);
             j += (names.back().length() + 1);
         }
     }
