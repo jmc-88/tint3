@@ -807,12 +807,7 @@ bool ReadFile(std::string const& path) {
         std::string key, value;
 
         if (ParseLine(line, key, value)) {
-            // TODO: delete this stupid strdup wrap which is only needed for now
-            // because functions as extract_values will modify the input
-            // string...
-            char* value_str = strdup(value.c_str());
-            AddEntry(key, value_str);
-            std::free(value_str);
+            AddEntry(key, value);
         }
     });
 
