@@ -127,20 +127,18 @@ void Taskbarname::DrawForeground(cairo_t* c) {
     set_state_pixmap(state, pix_);
 
     // draw content
-    PangoLayout* layout = pango_cairo_create_layout(c);
-    pango_layout_set_font_description(layout, taskbarname_font_desc);
-    pango_layout_set_width(layout, width_ * PANGO_SCALE);
-    pango_layout_set_alignment(layout, PANGO_ALIGN_CENTER);
-    pango_layout_set_text(layout, name_.c_str(), name_.length());
+    util::GObjectPtr<PangoLayout> layout(pango_cairo_create_layout(c));
+    pango_layout_set_font_description(layout.get(), taskbarname_font_desc);
+    pango_layout_set_width(layout.get(), width_ * PANGO_SCALE);
+    pango_layout_set_alignment(layout.get(), PANGO_ALIGN_CENTER);
+    pango_layout_set_text(layout.get(), name_.c_str(), name_.length());
 
     cairo_set_source_rgba(c, config_text->color[0], config_text->color[1],
                           config_text->color[2], config_text->alpha);
 
-    pango_cairo_update_layout(c, layout);
+    pango_cairo_update_layout(c, layout.get());
     cairo_move_to(c, 0, panel_y_);
-    pango_cairo_show_layout(c, layout);
-
-    g_object_unref(layout);
+    pango_cairo_show_layout(c, layout.get());
     //printf("draw_taskbarname %s ******************************\n", name);
 }
 

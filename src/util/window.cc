@@ -21,20 +21,19 @@
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <X11/Xatom.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
 #include <Imlib2.h>
 #include <cairo.h>
 #include <cairo-xlib.h>
 
-#include "common.h"
-#include "window.h"
-#include "panel.h"
-#include "../server.h"
-#include "../taskbar/taskbar.h"
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 
+#include "panel.h"
+#include "server.h"
+#include "taskbar/taskbar.h"
+#include "util/common.h"
+#include "util/window.h"
 
 
 void SetActive(Window win) {
@@ -316,17 +315,16 @@ void GetTextSize(PangoFontDescription* font, int* height_ink, int* height,
                                         server.visual, panel_height, panel_height);
     auto c = cairo_create(cs);
 
-    auto layout = pango_cairo_create_layout(c);
-    pango_layout_set_font_description(layout, font);
-    pango_layout_set_text(layout, text, len);
+    util::GObjectPtr<PangoLayout> layout(pango_cairo_create_layout(c));
+    pango_layout_set_font_description(layout.get(), font);
+    pango_layout_set_text(layout.get(), text, len);
 
     PangoRectangle rect_ink, rect;
-    pango_layout_get_pixel_extents(layout, &rect_ink, &rect);
+    pango_layout_get_pixel_extents(layout.get(), &rect_ink, &rect);
     (*height_ink) = rect_ink.height;
     (*height) = rect.height;
     //printf("dimension : %d - %d\n", rect_ink.height, rect.height);
 
-    g_object_unref(layout);
     cairo_destroy(c);
     cairo_surface_destroy(cs);
     XFreePixmap(server.dsp, pmap);
@@ -342,18 +340,17 @@ void GetTextSize2(PangoFontDescription* font, int* height_ink, int* height,
                                         server.visual, panel_height, panel_width);
     auto c = cairo_create(cs);
 
-    auto layout = pango_cairo_create_layout(c);
-    pango_layout_set_font_description(layout, font);
-    pango_layout_set_text(layout, text, len);
+    util::GObjectPtr<PangoLayout> layout(pango_cairo_create_layout(c));
+    pango_layout_set_font_description(layout.get(), font);
+    pango_layout_set_text(layout.get(), text, len);
 
     PangoRectangle rect_ink, rect;
-    pango_layout_get_pixel_extents(layout, &rect_ink, &rect);
+    pango_layout_get_pixel_extents(layout.get(), &rect_ink, &rect);
     (*height_ink) = rect_ink.height;
     (*height) = rect.height;
     (*width) = rect.width;
     //printf("dimension : %d - %d\n", rect_ink.height, rect.height);
 
-    g_object_unref(layout);
     cairo_destroy(c);
     cairo_surface_destroy(cs);
     XFreePixmap(server.dsp, pmap);

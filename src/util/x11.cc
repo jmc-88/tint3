@@ -11,5 +11,9 @@ ScopedErrorHandler::~ScopedErrorHandler() {
     XSetErrorHandler(old_handler_);
 }
 
+void XFreeDeleter::operator()(void* data) const {
+    XFree(data);
+}
+
 }  // namespace x11
 }  // namespace util

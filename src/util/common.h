@@ -10,13 +10,29 @@
 #define WM_CLASS_TINT   "panel"
 
 #include <Imlib2.h>
+#include <glib-object.h>
 #include <signal.h>
 
 #include <functional>
+#include <memory>
 #include <sstream>
 #include <string>
 
 #include "util/area.h"
+
+
+namespace util {
+
+class GObjectUnrefDeleter {
+  public:
+    void operator()(gpointer data) const;
+};
+
+template<typename T>
+using GObjectPtr = std::unique_ptr<T, GObjectUnrefDeleter>;
+
+}  // namespace util
+
 
 // mouse actions
 enum MouseActionEnum {
@@ -36,6 +52,7 @@ enum MouseActionEnum {
 };
 
 extern int const ALLDESKTOP;
+
 
 class StringBuilder {
     std::ostringstream ss_;

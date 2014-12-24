@@ -15,17 +15,19 @@
 * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 **************************************************************************/
 
-#include <stdio.h>
 #include <unistd.h>
-#include <string.h>
-#include <stdlib.h>
 #include <cairo.h>
 #include <cairo-xlib.h>
 
+#include <cstdio>
+#include <cstring>
+#include <cstdlib>
+
 #include "server.h"
-#include "tooltip.h"
 #include "panel.h"
-#include "timer.h"
+#include "tooltip/tooltip.h"
+#include "util/common.h"
+#include "util/timer.h"
 
 static int x, y, width, height;
 
@@ -64,7 +66,7 @@ void StopTooltipTimeout() {
     }
 }
 
-} // namespace
+}  // namespace
 
 
 void DefaultTooltip() {
@@ -178,13 +180,13 @@ void TooltipUpdateGeometry() {
     cairo_surface_t* cs = cairo_xlib_surface_create(
                               server.dsp, g_tooltip.window, server.visual, width, height);
     cairo_t* c = cairo_create(cs);
-    PangoLayout* layout = pango_cairo_create_layout(c);
+    util::GObjectPtr<PangoLayout> layout(pango_cairo_create_layout(c));
 
-    pango_layout_set_font_description(layout, g_tooltip.font_desc);
-    pango_layout_set_text(layout, g_tooltip.tooltip_text.c_str(), -1);
+    pango_layout_set_font_description(layout.get(), g_tooltip.font_desc);
+    pango_layout_set_text(layout.get(), g_tooltip.tooltip_text.c_str(), -1);
 
     PangoRectangle r1, r2;
-    pango_layout_get_pixel_extents(layout, &r1, &r2);
+    pango_layout_get_pixel_extents(layout.get(), &r1, &r2);
     width = 2 * g_tooltip.bg->border.width + 2 * g_tooltip.paddingx + r2.width;
     height = 2 * g_tooltip.bg->border.width + 2 * g_tooltip.paddingy + r2.height;
 
@@ -200,7 +202,6 @@ void TooltipUpdateGeometry() {
         x = panel->panel_x_ - width;
     }
 
-    g_object_unref(layout);
     cairo_destroy(c);
     cairo_surface_destroy(cs);
 }
@@ -276,12 +277,12 @@ void TooltipUpdate() {
     XMoveResizeWindow(server.dsp, g_tooltip.window, x, y, width, height);
 
     // Stuff for drawing the tooltip
-    cairo_surface_t* cs;
-    cairo_t* c;
-    PangoLayout* layout;
-    cs = cairo_xlib_surface_create(server.dsp, g_tooltip.window, server.visual,
-                                   width, height);
-    c = cairo_create(cs);
+    auto cs = cairo_xlib_surface_create(server.dsp,
+                                        g_tooltip.window,
+                                        server.visual,
+                                        width,
+                                        height);
+    auto c = cairo_create(cs);
     Color bc = g_tooltip.bg->back;
     Border b = g_tooltip.bg->border;
 
@@ -311,20 +312,21 @@ void TooltipUpdate() {
 
     Color fc = g_tooltip.font_color;
     cairo_set_source_rgba(c, fc.color[0], fc.color[1], fc.color[2], fc.alpha);
-    layout = pango_cairo_create_layout(c);
-    pango_layout_set_font_description(layout, g_tooltip.font_desc);
-    pango_layout_set_text(layout, g_tooltip.tooltip_text.c_str(), -1);
+
+    util::GObjectPtr<PangoLayout> layout(pango_cairo_create_layout(c));
+    pango_layout_set_font_description(layout.get(), g_tooltip.font_desc);
+    pango_layout_set_text(layout.get(), g_tooltip.tooltip_text.c_str(), -1);
+
     PangoRectangle r1, r2;
-    pango_layout_get_pixel_extents(layout, &r1, &r2);
-    pango_layout_set_width(layout, width * PANGO_SCALE);
-    pango_layout_set_height(layout, height * PANGO_SCALE);
-    pango_layout_set_ellipsize(layout, PANGO_ELLIPSIZE_END);
+    pango_layout_get_pixel_extents(layout.get(), &r1, &r2);
+    pango_layout_set_width(layout.get(), width * PANGO_SCALE);
+    pango_layout_set_height(layout.get(), height * PANGO_SCALE);
+    pango_layout_set_ellipsize(layout.get(), PANGO_ELLIPSIZE_END);
     // I do not know why this is the right way, but with the below cairo_move_to it seems to be centered (horiz. and vert.)
     cairo_move_to(c, -r1.x / 2 + g_tooltip.bg->border.width + g_tooltip.paddingx,
                   -r1.y / 2 + g_tooltip.bg->border.width + g_tooltip.paddingy);
-    pango_cairo_show_layout(c, layout);
+    pango_cairo_show_layout(c, layout.get());
 
-    g_object_unref(layout);
     cairo_destroy(c);
     cairo_surface_destroy(cs);
 }

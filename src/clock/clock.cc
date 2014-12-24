@@ -27,12 +27,12 @@
 #include <ctime>
 #include <string>
 
-#include "window.h"
 #include "server.h"
 #include "panel.h"
-#include "clock.h"
-#include "timer.h"
-#include "common.h"
+#include "clock/clock.h"
+#include "util/common.h"
+#include "util/timer.h"
+#include "util/window.h"
 
 
 std::string time1_format;
@@ -192,33 +192,31 @@ void Clock::InitPanel(Panel* panel) {
 
 
 void Clock::DrawForeground(cairo_t* c) {
-    PangoLayout* layout = pango_cairo_create_layout(c);
+    util::GObjectPtr<PangoLayout> layout(pango_cairo_create_layout(c));
 
     // draw layout
-    pango_layout_set_font_description(layout, time1_font_desc);
-    pango_layout_set_width(layout, width_ * PANGO_SCALE);
-    pango_layout_set_alignment(layout, PANGO_ALIGN_CENTER);
-    pango_layout_set_text(layout, buf_time, strlen(buf_time));
+    pango_layout_set_font_description(layout.get(), time1_font_desc);
+    pango_layout_set_width(layout.get(), width_ * PANGO_SCALE);
+    pango_layout_set_alignment(layout.get(), PANGO_ALIGN_CENTER);
+    pango_layout_set_text(layout.get(), buf_time, strlen(buf_time));
 
     cairo_set_source_rgba(c, font.color[0], font.color[1],
                           font.color[2], font.alpha);
 
-    pango_cairo_update_layout(c, layout);
+    pango_cairo_update_layout(c, layout.get());
     cairo_move_to(c, 0, time1_posy);
-    pango_cairo_show_layout(c, layout);
+    pango_cairo_show_layout(c, layout.get());
 
     if (!time2_format.empty()) {
-        pango_layout_set_font_description(layout, time2_font_desc);
-        pango_layout_set_indent(layout, 0);
-        pango_layout_set_text(layout, buf_date, strlen(buf_date));
-        pango_layout_set_width(layout, width_ * PANGO_SCALE);
+        pango_layout_set_font_description(layout.get(), time2_font_desc);
+        pango_layout_set_indent(layout.get(), 0);
+        pango_layout_set_text(layout.get(), buf_date, strlen(buf_date));
+        pango_layout_set_width(layout.get(), width_ * PANGO_SCALE);
 
-        pango_cairo_update_layout(c, layout);
+        pango_cairo_update_layout(c, layout.get());
         cairo_move_to(c, 0, time2_posy);
-        pango_cairo_show_layout(c, layout);
+        pango_cairo_show_layout(c, layout.get());
     }
-
-    g_object_unref(layout);
 }
 
 

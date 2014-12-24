@@ -5,18 +5,6 @@
 #include <memory>
 
 
-namespace {
-
-class XFreeDeleter {
-  public:
-    void operator()(void* data) {
-        XFree(data);
-    }
-};
-
-}  // namespace
-
-
 namespace util {
 namespace x11 {
 
@@ -29,11 +17,16 @@ class ScopedErrorHandler {
     XErrorHandler old_handler_;
 };
 
+class XFreeDeleter {
+  public:
+    void operator()(void* data) const;
+};
+
 template<typename T>
-class ClientData : public std::unique_ptr<T, ::XFreeDeleter> {
+class ClientData : public std::unique_ptr<T, XFreeDeleter> {
   public:
     explicit ClientData(void* data)
-        : std::unique_ptr<T, ::XFreeDeleter>(static_cast<T * >(data)) {
+        : std::unique_ptr<T, XFreeDeleter>(static_cast<T * >(data)) {
     }
 };
 

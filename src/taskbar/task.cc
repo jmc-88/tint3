@@ -29,12 +29,13 @@
 
 #include <algorithm>
 
-#include "task.h"
-#include "taskbar.h"
 #include "server.h"
 #include "panel.h"
-#include "tooltip.h"
-#include "timer.h"
+#include "taskbar/task.h"
+#include "taskbar/taskbar.h"
+#include "tooltip/tooltip.h"
+#include "util/common.h"
+#include "util/timer.h"
 #include "util/window.h"
 
 namespace {
@@ -430,44 +431,43 @@ void Task::DrawForeground(cairo_t* c) {
 
     if (panel_->g_task.text) {
         /* Layout */
-        PangoLayout* layout = pango_cairo_create_layout(c);
-        pango_layout_set_font_description(layout, panel_->g_task.font_desc);
-        pango_layout_set_text(layout, title_.c_str(), -1);
+        util::GObjectPtr<PangoLayout> layout(pango_cairo_create_layout(c));
+        pango_layout_set_font_description(layout.get(),
+                                          panel_->g_task.font_desc);
+        pango_layout_set_text(layout.get(), title_.c_str(), -1);
 
         /* Drawing width and Cut text */
         // pango use U+22EF or U+2026
-        pango_layout_set_width(layout,
+        pango_layout_set_width(layout.get(),
                                ((Taskbar*)parent_)->text_width_ * PANGO_SCALE);
-        pango_layout_set_height(layout, panel_->g_task.text_height * PANGO_SCALE);
-        pango_layout_set_wrap(layout, PANGO_WRAP_CHAR);
-        pango_layout_set_ellipsize(layout, PANGO_ELLIPSIZE_END);
+        pango_layout_set_height(layout.get(), panel_->g_task.text_height * PANGO_SCALE);
+        pango_layout_set_wrap(layout.get(), PANGO_WRAP_CHAR);
+        pango_layout_set_ellipsize(layout.get(), PANGO_ELLIPSIZE_END);
 
         /* Center text */
         if (panel_->g_task.centered) {
-            pango_layout_set_alignment(layout, PANGO_ALIGN_CENTER);
+            pango_layout_set_alignment(layout.get(), PANGO_ALIGN_CENTER);
         } else {
-            pango_layout_set_alignment(layout, PANGO_ALIGN_LEFT);
+            pango_layout_set_alignment(layout.get(), PANGO_ALIGN_LEFT);
         }
 
-        pango_layout_get_pixel_size(layout, &width, &height);
+        pango_layout_get_pixel_size(layout.get(), &width, &height);
 
         Color* config_text = &panel_->g_task.font[current_state];
         cairo_set_source_rgba(c, config_text->color[0], config_text->color[1],
                               config_text->color[2], config_text->alpha);
 
-        pango_cairo_update_layout(c, layout);
+        pango_cairo_update_layout(c, layout.get());
         double text_posy = (panel_->g_task.height_ - height) / 2.0;
         cairo_move_to(c, panel_->g_task.text_posx, text_posy);
-        pango_cairo_show_layout(c, layout);
+        pango_cairo_show_layout(c, layout.get());
 
         if (panel_->g_task.font_shadow) {
             cairo_set_source_rgba(c, 0.0, 0.0, 0.0, 0.5);
-            pango_cairo_update_layout(c, layout);
+            pango_cairo_update_layout(c, layout.get());
             cairo_move_to(c, panel_->g_task.text_posx + 1, text_posy + 1);
-            pango_cairo_show_layout(c, layout);
+            pango_cairo_show_layout(c, layout.get());
         }
-
-        g_object_unref(layout);
     }
 
     if (panel_->g_task.icon) {

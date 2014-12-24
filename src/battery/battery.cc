@@ -36,13 +36,13 @@
 #endif
 
 #include "panel.h"
-#include "battery.h"
-#include "timer.h"
-#include "common.h"
-#include "../server.h"
-#include "util/window.h"
+#include "server.h"
+#include "battery/battery.h"
+#include "util/common.h"
 #include "util/fs.h"
 #include "util/log.h"
+#include "util/timer.h"
+#include "util/window.h"
 
 PangoFontDescription* bat1_font_desc;
 PangoFontDescription* bat2_font_desc;
@@ -479,31 +479,30 @@ void UpdateBattery() {
 
 
 void Battery::DrawForeground(cairo_t* c) {
-    PangoLayout* layout = pango_cairo_create_layout(c);
+    util::GObjectPtr<PangoLayout> layout(pango_cairo_create_layout(c));
 
     // draw layout
-    pango_layout_set_font_description(layout, bat1_font_desc);
-    pango_layout_set_width(layout, width_ * PANGO_SCALE);
-    pango_layout_set_alignment(layout, PANGO_ALIGN_CENTER);
-    pango_layout_set_text(layout, buf_bat_percentage, strlen(buf_bat_percentage));
+    pango_layout_set_font_description(layout.get(), bat1_font_desc);
+    pango_layout_set_width(layout.get(), width_ * PANGO_SCALE);
+    pango_layout_set_alignment(layout.get(), PANGO_ALIGN_CENTER);
+    pango_layout_set_text(layout.get(), buf_bat_percentage,
+                          strlen(buf_bat_percentage));
 
     cairo_set_source_rgba(c, font.color[0], font.color[1],
                           font.color[2], font.alpha);
 
-    pango_cairo_update_layout(c, layout);
+    pango_cairo_update_layout(c, layout.get());
     cairo_move_to(c, 0, bat1_posy);
-    pango_cairo_show_layout(c, layout);
+    pango_cairo_show_layout(c, layout.get());
 
-    pango_layout_set_font_description(layout, bat2_font_desc);
-    pango_layout_set_indent(layout, 0);
-    pango_layout_set_text(layout, buf_bat_time, strlen(buf_bat_time));
-    pango_layout_set_width(layout, width_ * PANGO_SCALE);
+    pango_layout_set_font_description(layout.get(), bat2_font_desc);
+    pango_layout_set_indent(layout.get(), 0);
+    pango_layout_set_text(layout.get(), buf_bat_time, strlen(buf_bat_time));
+    pango_layout_set_width(layout.get(), width_ * PANGO_SCALE);
 
-    pango_cairo_update_layout(c, layout);
+    pango_cairo_update_layout(c, layout.get());
     cairo_move_to(c, 0, bat2_posy);
-    pango_cairo_show_layout(c, layout);
-
-    g_object_unref(layout);
+    pango_cairo_show_layout(c, layout.get());
 }
 
 

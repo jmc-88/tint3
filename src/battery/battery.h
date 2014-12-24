@@ -16,9 +16,9 @@
 
 #include <string>
 
-#include "area.h"
-#include "common.h"
 #include "panel.h"
+#include "util/area.h"
+#include "util/common.h"
 
 
 // battery drawing parameter (per panel)

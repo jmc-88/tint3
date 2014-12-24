@@ -74,7 +74,16 @@ bool HexToRgb(std::string const& hex, unsigned int* r, unsigned int* g,
     return true;
 }
 
-} // namespace
+}  // namespace
+
+
+namespace util {
+
+void GObjectUnrefDeleter::operator()(gpointer data) const {
+    g_object_unref(data);
+}
+
+}  // namespace util
 
 
 int const ALLDESKTOP = 0xFFFFFFFF;
