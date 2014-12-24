@@ -84,7 +84,7 @@ void InitLauncher() {
 }
 
 
-void InitLauncherPanel(Panel* panel) {
+void Launcher::InitPanel(Panel* panel) {
     Launcher* launcher = &panel->launcher_;
 
     launcher->parent_ = panel;

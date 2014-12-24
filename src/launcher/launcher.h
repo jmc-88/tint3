@@ -80,6 +80,8 @@ class Launcher : public Area {
     void LoadIcons();
 
     bool Resize() override;
+
+    static void InitPanel(Panel* panel);
 };
 
 extern bool launcher_enabled;
@@ -96,7 +98,6 @@ void DefaultLauncher();
 
 // initialize launcher : y position, precision, ...
 void InitLauncher();
-void InitLauncherPanel(Panel* panel);
 void CleanupLauncher();
 
 void LauncherAction(LauncherIcon* launcher_icon, XEvent* evt);

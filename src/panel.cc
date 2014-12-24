@@ -280,7 +280,7 @@ void InitPanel() {
 
         for (char item : panel_items_order) {
             if (item == 'L') {
-                InitLauncherPanel(p);
+                Launcher::InitPanel(p);
             }
 
             if (item == 'T') {
