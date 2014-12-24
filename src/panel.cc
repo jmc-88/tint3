@@ -298,7 +298,7 @@ void InitPanel() {
             if (item == 'S' && i == 0) {
                 // TODO : check systray is only on 1 panel
                 // at the moment only on panel1[0] allowed
-                InitSystrayPanel(p);
+                Systraybar::InitPanel(p);
                 refresh_systray = 1;
             }
 

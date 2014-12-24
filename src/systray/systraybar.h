@@ -49,6 +49,8 @@ class Systraybar : public Area {
     size_t VisibleIcons();
     bool AddIcon(Window id);
     void RemoveIcon(TrayWindow* traywin);
+
+    static void InitPanel(Panel* panel);
 };
 
 // net_sel_win != None when protocol started
@@ -66,7 +68,6 @@ void CleanupSystray();
 
 // initialize protocol and panel position
 void InitSystray();
-void InitSystrayPanel(void* p);
 
 
 // systray protocol

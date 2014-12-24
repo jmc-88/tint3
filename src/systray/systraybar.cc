@@ -92,9 +92,9 @@ void InitSystray() {
 }
 
 
-void InitSystrayPanel(void* p) {
-    systray.parent_ = static_cast<Area*>(p);
-    systray.panel_ = static_cast<Panel*>(p);
+void Systraybar::InitPanel(Panel* panel) {
+    systray.parent_ = panel;
+    systray.panel_ = panel;
 
     if (systray.bg_ == 0) {
         systray.bg_ = backgrounds.front();
