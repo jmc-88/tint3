@@ -4,9 +4,9 @@
 #include <functional>
 #include <sstream>
 
-#include "common.h"
-#include "fs.h"
-#include "xdg.h"
+#include "util/common.h"
+#include "util/fs.h"
+#include "util/xdg.h"
 
 namespace {
 
@@ -31,7 +31,7 @@ std::vector<std::string> SplitString(std::string const& str, char sep) {
 }
 
 std::string ValidatePath(std::string path) {
-    if (util::fs::DirectoryExists(path) && util::fs::IsAbsolutePath(path)) {
+    if (util::fs::DirectoryExists(path)) {
         return path;
     }
 
@@ -93,7 +93,7 @@ std::vector<std::string> DataDirs() {
 }
 
 std::vector<std::string> ConfigDirs() {
-    static auto default_ = DefaultValue("/etc/xdg");
+    static auto default_ = DefaultValue("/usr/local/etc/xdg:/etc/xdg");
     return SplitString(default_(GetEnvironment("XDG_CONFIG_DIRS")), ':');
 }
 

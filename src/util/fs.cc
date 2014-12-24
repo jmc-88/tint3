@@ -7,8 +7,8 @@
 #include <fstream>
 #include <sstream>
 
-#include "common.h"
-#include "fs.h"
+#include "util/common.h"
+#include "util/fs.h"
 
 namespace util {
 

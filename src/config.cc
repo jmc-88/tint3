@@ -49,6 +49,7 @@
 #include "taskbar/taskbarname.h"
 #include "tooltip/tooltip.h"
 #include "util/fs.h"
+#include "util/log.h"
 #include "util/timer.h"
 #include "util/window.h"
 #include "util/xdg.h"
@@ -230,7 +231,7 @@ void AddEntry(std::string const& key, std::string const& value) {
 #ifdef ENABLE_BATTERY
                 battery_enabled = 1;
 #else
-                util::log::Error() << "tint3 is build without battery support\n";
+                util::log::Error() << "tint3 is built without battery support\n";
 #endif
             }
 
