@@ -26,7 +26,7 @@ Logger& Debug() {
 }
 
 Logger& Error() {
-    static Logger error(std::cerr);
+    static Logger error(std::cerr, util::log::Logger::kAutoFlush);
     return error;
 }
 
