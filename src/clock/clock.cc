@@ -17,13 +17,14 @@
 * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 **************************************************************************/
 
-#include <string.h>
-#include <stdio.h>
 #include <cairo.h>
 #include <cairo-xlib.h>
 #include <pango/pangocairo.h>
-#include <stdlib.h>
 
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <ctime>
 #include <string>
 
 #include "window.h"
@@ -122,12 +123,12 @@ void UpdateClockMinutes(void* arg) {
 
 struct tm* ClockGetTimeForTimezone(std::string const& timezone) {
     if (timezone.empty()) {
-        return localtime(&time_clock.tv_sec);
+        return std::localtime(&time_clock.tv_sec);
     }
 
     const char* old_tz = getenv("TZ");
     setenv("TZ", timezone.c_str(), 1);
-    struct tm* result = localtime(&time_clock.tv_sec);
+    struct tm* result = std::localtime(&time_clock.tv_sec);
 
     if (old_tz) {
         setenv("TZ", old_tz, 1);
@@ -139,8 +140,9 @@ struct tm* ClockGetTimeForTimezone(std::string const& timezone) {
 }
 
 std::string Clock::GetTooltipText() {
-    strftime(buf_tooltip, sizeof(buf_tooltip), time_tooltip_format.c_str(),
-             ClockGetTimeForTimezone(time_tooltip_timezone));
+    std::strftime(buf_tooltip, sizeof(buf_tooltip),
+                  time_tooltip_format.c_str(),
+                  ClockGetTimeForTimezone(time_tooltip_timezone));
     return buf_tooltip;
 }
 
@@ -182,8 +184,9 @@ void Clock::InitPanel(Panel* panel) {
     clock.on_screen_ = true;
 
     if (!time_tooltip_format.empty()) {
-        strftime(buf_tooltip, sizeof(buf_tooltip), time_tooltip_format.c_str(),
-                 ClockGetTimeForTimezone(time_tooltip_timezone));
+        std::strftime(buf_tooltip, sizeof(buf_tooltip),
+                      time_tooltip_format.c_str(),
+                      ClockGetTimeForTimezone(time_tooltip_timezone));
     }
 }
 
@@ -222,8 +225,9 @@ void Clock::DrawForeground(cairo_t* c) {
 bool Clock::Resize() {
     need_redraw_ = true;
 
-    strftime(buf_time, sizeof(buf_time), time1_format.c_str(),
-             ClockGetTimeForTimezone(time1_timezone));
+    std::strftime(buf_time, sizeof(buf_time),
+                  time1_format.c_str(),
+                  ClockGetTimeForTimezone(time1_timezone));
 
     int time_height_ink = 0, time_height = 0, time_width = 0;
     int date_height_ink = 0, date_height = 0, date_width = 0;
@@ -231,8 +235,9 @@ bool Clock::Resize() {
                  panel_->height_, panel_->width_, buf_time, strlen(buf_time));
 
     if (!time2_format.empty()) {
-        strftime(buf_date, sizeof(buf_date), time2_format.c_str(),
-                 ClockGetTimeForTimezone(time2_timezone));
+        std::strftime(buf_date, sizeof(buf_date),
+                      time2_format.c_str(),
+                      ClockGetTimeForTimezone(time2_timezone));
         GetTextSize2(time2_font_desc, &date_height_ink, &date_height, &date_width,
                      panel_->height_, panel_->width_, buf_date, strlen(buf_date));
     }
