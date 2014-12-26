@@ -17,9 +17,6 @@
 * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 **************************************************************************/
 
-#include <string.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include <cairo.h>
 #include <cairo-xlib.h>
 
@@ -34,6 +31,11 @@
 #include <sys/types.h>
 #include <sys/sysctl.h>
 #endif
+
+#include <algorithm>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 
 #include "panel.h"
 #include "server.h"
@@ -507,10 +509,6 @@ void Battery::DrawForeground(cairo_t* c) {
 
 
 bool Battery::Resize() {
-    int bat_percentage_height, bat_percentage_width, bat_percentage_height_ink;
-    int bat_time_height, bat_time_width, bat_time_height_ink;
-    int ret = 0;
-
     need_redraw_ = true;
 
     snprintf(buf_bat_percentage, sizeof(buf_bat_percentage), "%d%%",
@@ -523,37 +521,40 @@ bool Battery::Resize() {
                  battery_state.time.hours, battery_state.time.minutes);
     }
 
+    int bat_percentage_height, bat_percentage_width, bat_percentage_height_ink;
     GetTextSize2(bat1_font_desc, &bat_percentage_height_ink,
                  &bat_percentage_height, &bat_percentage_width, panel_->height_,
                  panel_->width_, buf_bat_percentage, strlen(buf_bat_percentage));
+
+    int bat_time_height, bat_time_width, bat_time_height_ink;
     GetTextSize2(bat2_font_desc, &bat_time_height_ink, &bat_time_height,
                  &bat_time_width, panel_->height_, panel_->width_, buf_bat_time,
                  strlen(buf_bat_time));
 
     if (panel_horizontal) {
-        int new_size = (bat_percentage_width > bat_time_width) ? bat_percentage_width :
-                       bat_time_width;
-        new_size += (2 * padding_x_lr_) + (2 * bg_->border.width);
+        int new_size = std::max(bat_percentage_width, bat_time_width)
+                       + (2 * padding_x_lr_)
+                       + (2 * bg_->border.width);
 
         if (new_size > width_ || new_size < (width_ - 2)) {
             // we try to limit the number of resize
             width_ = new_size;
             bat1_posy = (height_ - bat_percentage_height - bat_time_height) / 2;
-            bat2_posy = bat1_posy + bat_percentage_height;
-            ret = 1;
+            bat2_posy = (bat1_posy + bat_percentage_height);
+            return true;
         }
     } else {
-        int new_size = bat_percentage_height + bat_time_height + (2 *
-                       (padding_x_lr_ + bg_->border.width));
+        int new_size = bat_percentage_height + bat_time_height
+                       + (2 * (padding_x_lr_ + bg_->border.width));
 
         if (new_size > height_ || new_size < (height_ - 2)) {
             height_ = new_size;
             bat1_posy = (height_ - bat_percentage_height - bat_time_height - 2) / 2;
-            bat2_posy = bat1_posy + bat_percentage_height + 2;
-            ret = 1;
+            bat2_posy = (bat1_posy + bat_percentage_height + 2);
+            return true;
         }
     }
 
-    return ret;
+    return false;
 }
 
