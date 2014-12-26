@@ -81,8 +81,10 @@ int ServerCatchError(Display* d, XErrorEvent* ev) {
     XGetErrorText(d, ev->error_code, error_text, sizeof(error_text) - 1);
 
     util::log::Error()
-            << " -> Xlib error (" << ev->error_code << "): "
-            << error_text << '\n';
+            << " -> Xlib error ("
+            << static_cast<unsigned int>(ev->error_code)
+            << "): " << error_text
+            << '\n';
     return 0;
 }
 
