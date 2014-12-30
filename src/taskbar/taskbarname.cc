@@ -20,13 +20,13 @@
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <X11/Xatom.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <glib.h>
 #include <Imlib2.h>
 
 #include <algorithm>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 
 #include "panel.h"
 #include "taskbar.h"
@@ -58,7 +58,7 @@ void Taskbarname::InitPanel(Panel* panel) {
     for (int j = 0; j < panel->nb_desktop_; ++j) {
         Taskbar& tskbar = panel->taskbar_[j];
         tskbar.bar_name = panel->g_taskbar.bar_name_;
-        tskbar.bar_name.parent_ = reinterpret_cast<Area*>(&tskbar);
+        tskbar.bar_name.parent_ = &tskbar;
 
         if (j == server.desktop) {
             tskbar.bar_name.bg_ = panel->g_taskbar.background_name[TASKBAR_ACTIVE];

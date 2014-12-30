@@ -21,13 +21,13 @@
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <X11/Xatom.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <glib.h>
 #include <unistd.h>
 
 #include <algorithm>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 
 #include "server.h"
 #include "panel.h"
@@ -100,14 +100,14 @@ Task* AddTask(Window win) {
             continue;
         }
 
-        Taskbar* tskbar = &panel1[monitor].taskbar_[j];
+        Taskbar& tskbar = panel1[monitor].taskbar_[j];
         new_tsk2 = new Task();
 
         // TODO: nuke this from planet Earth ASAP - horrible hack to mimick the
         // original memcpy() call
         new_tsk2->CloneArea(panel1[monitor].g_task);
 
-        new_tsk2->parent_ = reinterpret_cast<Area*>(tskbar);
+        new_tsk2->parent_ = &tskbar;
         new_tsk2->win = new_tsk.win;
         new_tsk2->desktop = new_tsk.desktop;
 
@@ -129,8 +129,8 @@ Task* AddTask(Window win) {
 
         new_tsk2->icon_width = new_tsk.icon_width;
         new_tsk2->icon_height = new_tsk.icon_height;
-        tskbar->children_.push_back(new_tsk2);
-        tskbar->need_resize_ = true;
+        tskbar.children_.push_back(new_tsk2);
+        tskbar.need_resize_ = true;
         g_ptr_array_add(task_group, new_tsk2);
         //printf("add_task panel %d, desktop %d, task %s\n", i, j, new_tsk2->title);
     }

@@ -20,13 +20,13 @@
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <X11/Xatom.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <glib.h>
 #include <Imlib2.h>
 
 #include <algorithm>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 
 #include "task.h"
 #include "taskbar.h"
@@ -345,11 +345,11 @@ void TaskbarRemoveTask(gpointer key, gpointer value, gpointer user_data) {
 Task* TaskGetTask(Window win) {
     GPtrArray* task_group = TaskGetTasks(win);
 
-    if (task_group) {
+    if (task_group != nullptr) {
         return static_cast<Task*>(g_ptr_array_index(task_group, 0));
     }
 
-    return 0;
+    return nullptr;
 }
 
 
