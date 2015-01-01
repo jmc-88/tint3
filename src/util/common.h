@@ -13,7 +13,6 @@
 #include <glib-object.h>
 #include <signal.h>
 
-#include <functional>
 #include <memory>
 #include <sstream>
 #include <string>
@@ -73,7 +72,7 @@ class StringBuilder {
 std::string GetEnvironment(std::string const& variable_name);
 
 bool SignalAction(int signal_number,
-                  std::function<void(int)> signal_handler,
+                  void signal_handler(int),
                   int flags = 0);
 
 std::string& StringTrim(std::string& str);

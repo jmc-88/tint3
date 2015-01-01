@@ -110,7 +110,7 @@ void Init(int argc, char* argv[]) {
     // Set signal handler
     signal_pending = 0;
 
-    auto signal_handler = [&](int signal_number) -> void {
+    auto signal_handler = [](int signal_number) -> void {
         util::log::Debug() << "Received signal " << signal_number << '\n';
         signal_pending = signal_number;
     };
@@ -174,7 +174,7 @@ void InitX11() {
     server.sn_dsp = sn_display_new(server.dsp, ErrorTrapPush, ErrorTrapPop);
 
     // Setup a handler for child termination
-    SignalAction(SIGCHLD, [&](int) -> void {
+    SignalAction(SIGCHLD, [](int) -> void {
         // Wait for all dead processes
         pid_t pid;
 
