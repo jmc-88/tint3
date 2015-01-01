@@ -31,6 +31,7 @@
 #endif
 
 #include <algorithm>
+#include <csignal>
 #include <cstdio>
 #include <cstdlib>
 #include <cstdint>
@@ -111,8 +112,16 @@ void Init(int argc, char* argv[]) {
     signal_pending = 0;
 
     auto signal_handler = [](int signal_number) -> void {
-        util::log::Debug() << "Received signal " << signal_number << '\n';
+        char const* signal_description = strsignal(signal_number);
+
         signal_pending = signal_number;
+        util::log::Debug() << "Received signal " << signal_number;
+
+        if (signal_description != nullptr) {
+            util::log::Debug() << " (" << signal_description << ')';
+        }
+
+        util::log::Debug() << '\n';
     };
 
     SignalAction(SIGHUP, signal_handler);
