@@ -28,11 +28,12 @@
 #include <cstdlib>
 #include <cstring>
 
-#include "task.h"
-#include "taskbar.h"
 #include "server.h"
-#include "window.h"
 #include "panel.h"
+#include "taskbar/task.h"
+#include "taskbar/taskbar.h"
+#include "util/window.h"
+#include "util/log.h"
 
 /* win_to_task_table holds for every Window an array of tasks. Usually the array contains only one
    element. However for omnipresent windows (windows which are visible in every taskbar) the array
@@ -228,10 +229,11 @@ void Taskbar::InitPanel(Panel* panel) {
         panel->g_task.brightness[TASK_URGENT] = panel->g_task.brightness[TASK_ACTIVE];
     }
 
-    if ((panel->g_task.config_font_mask & (1 << TASK_NORMAL)) == 0)
+    if ((panel->g_task.config_font_mask & (1 << TASK_NORMAL)) == 0) {
         panel->g_task.font[TASK_NORMAL] = (Color) {
-        {0, 0, 0}, 0
-    };
+            {0, 0, 0}, 0
+        };
+    }
 
     if ((panel->g_task.config_font_mask & (1 << TASK_ACTIVE)) == 0) {
         panel->g_task.font[TASK_ACTIVE] = panel->g_task.font[TASK_NORMAL];
@@ -250,7 +252,8 @@ void Taskbar::InitPanel(Panel* panel) {
     }
 
     if ((panel->g_task.config_background_mask & (1 << TASK_ACTIVE)) == 0) {
-        panel->g_task.background[TASK_ACTIVE] = panel->g_task.background[TASK_NORMAL];
+        panel->g_task.background[TASK_ACTIVE] =
+            panel->g_task.background[TASK_NORMAL];
     }
 
     if ((panel->g_task.config_background_mask & (1 << TASK_ICONIFIED)) == 0) {
@@ -259,7 +262,8 @@ void Taskbar::InitPanel(Panel* panel) {
     }
 
     if ((panel->g_task.config_background_mask & (1 << TASK_URGENT)) == 0) {
-        panel->g_task.background[TASK_URGENT] = panel->g_task.background[TASK_ACTIVE];
+        panel->g_task.background[TASK_URGENT] =
+            panel->g_task.background[TASK_ACTIVE];
     }
 
     if (panel_horizontal) {
@@ -280,13 +284,20 @@ void Taskbar::InitPanel(Panel* panel) {
             panel->g_task.background[j] = backgrounds.front();
         }
 
-        if (panel->g_task.background[j]->border.rounded > panel->g_task.height_ /
-            2) {
-            printf("task%sbackground_id has a too large rounded value. Please fix your tint3rc\n",
-                   j == 0 ? "_" : j == 1 ? "_active_" : j == 2 ? "_iconified_" : "_urgent_");
+        auto half_height = (panel->g_task.height_ / 2);
+
+        if (panel->g_task.background[j]->border.rounded > half_height) {
+            std::string separator = (j == 0 ? "_" :
+                                     (j == 1 ? "_active_" :
+                                      (j == 2 ? "_iconified_" : "_urgent_")));
+
+            util::log::Error()
+                    << "task" << separator << "background_id "
+                    << "has a too large rounded value. "
+                    << "Please fix your tint3rc.\n";
             /* backgrounds.push_back(*panel->g_task.background[j]); */
             /* panel->g_task.background[j] = backgrounds.back(); */
-            panel->g_task.background[j]->border.rounded = panel->g_task.height_ / 2;
+            panel->g_task.background[j]->border.rounded = half_height;
         }
     }
 
@@ -377,9 +388,10 @@ void TaskRefreshTasklist() {
     }
 
     GList* win_list = g_hash_table_get_keys(win_to_task_table);
-    int i;
 
     for (GList* it = win_list; it; it = it->next) {
+        int i;
+
         for (i = 0; i < num_results; i++) {
             if (*static_cast<Window*>(it->data) == window.get()[i]) {
                 break;
@@ -394,7 +406,7 @@ void TaskRefreshTasklist() {
     g_list_free(win_list);
 
     // Add any new
-    for (i = 0; i < num_results; i++) {
+    for (int i = 0; i < num_results; i++) {
         if (!TaskGetTask(window.get()[i])) {
             AddTask(window.get()[i]);
         }
@@ -410,8 +422,8 @@ void Taskbar::DrawForeground(cairo_t* /* c */) {
 
 bool Taskbar::Resize() {
     int horizontal_size = (panel_->g_task.text_posx +
-                           panel_->g_task.bg_->border.width
-                           + panel_->g_task.padding_x_);
+                           panel_->g_task.bg_->border.width +
+                           panel_->g_task.padding_x_);
 
     if (panel_horizontal) {
         ResizeByLayout(panel_->g_task.maximum_width);
@@ -446,3 +458,4 @@ void Taskbar::OnChangeLayout() {
     pix_ = 0;
     need_redraw_ = true;
 }
+

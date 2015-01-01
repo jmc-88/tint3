@@ -428,13 +428,14 @@ void Panel::InitSizeAndPosition() {
         root_x_ = server.monitor[monitor_].x + margin_x_;
     } else {
         if (panel_position & RIGHT) {
-            root_x_ = server.monitor[monitor_].x + server.monitor[monitor_].width - width_ -
-                      margin_x_;
+            root_x_ = server.monitor[monitor_].x
+                      + server.monitor[monitor_].width
+                      - width_
+                      - margin_x_;
         } else {
             if (panel_horizontal) {
-                root_x_ = server.monitor[monitor_].x + ((server.monitor[monitor_].width -
-                                                        width_) /
-                                                        2);
+                root_x_ = server.monitor[monitor_].x
+                          + ((server.monitor[monitor_].width - width_) / 2);
             } else {
                 root_x_ = server.monitor[monitor_].x + margin_x_;
             }
@@ -445,13 +446,13 @@ void Panel::InitSizeAndPosition() {
         root_y_ = server.monitor[monitor_].y + margin_y_;
     } else {
         if (panel_position & BOTTOM) {
-            root_y_ = server.monitor[monitor_].y + server.monitor[monitor_].height - height_
-                      -
-                      margin_y_;
+            root_y_ = server.monitor[monitor_].y
+                      + server.monitor[monitor_].height
+                      - height_
+                      - margin_y_;
         } else {
-            root_y_ = server.monitor[monitor_].y + ((server.monitor[monitor_].height -
-                                                    height_) /
-                                                    2);
+            root_y_ = server.monitor[monitor_].y
+                      + ((server.monitor[monitor_].height - height_) / 2);
         }
     }
 
@@ -544,8 +545,8 @@ void Panel::SetProperties() {
 
     if (name != nullptr) {
         XChangeProperty(server.dsp, main_win_, server.atoms_["_NET_WM_NAME"],
-                        server.atoms_["UTF8_STRING"], 8, PropModeReplace, (unsigned char*) name,
-                        (int) len);
+                        server.atoms_["UTF8_STRING"], 8, PropModeReplace,
+                        (unsigned char*) name, (int) len);
         g_free(name);
     }
 
@@ -638,8 +639,8 @@ void Panel::SetBackground() {
         // copy background (server.root_pmap) in panel.pix
         Window dummy;
         int  x, y;
-        XTranslateCoordinates(server.dsp, main_win_, server.root_win, 0, 0, &x, &y,
-                              &dummy);
+        XTranslateCoordinates(server.dsp, main_win_, server.root_win,
+                              0, 0, &x, &y, &dummy);
 
         if (panel_autohide && is_hidden_) {
             x -= xoff;
@@ -741,7 +742,7 @@ Taskbar* Panel::ClickTaskbar(int x, int y) {
 Task* Panel::ClickTask(int x, int y) {
     Taskbar* tskbar = ClickTaskbar(x, y);
 
-    if (tskbar) {
+    if (tskbar != nullptr) {
         auto begin = tskbar->children_.begin();
 
         if (taskbarname_enabled) {
@@ -836,14 +837,14 @@ bool Panel::HandlesClick(XButtonEvent* e) {
 
     LauncherIcon* icon = ClickLauncherIcon(e->x, e->y);
 
-    if (icon) {
+    if (icon != nullptr) {
         return (e->button == 1);
     }
 
     // no launcher/task clicked --> check if taskbar clicked
     Taskbar* tskbar = ClickTaskbar(e->x, e->y);
 
-    if (tskbar && e->button == 1 && panel_mode == MULTI_DESKTOP) {
+    if (tskbar != nullptr && e->button == 1 && panel_mode == MULTI_DESKTOP) {
         return 1;
     }
 
@@ -870,18 +871,20 @@ void AutohideShow(void* p) {
 
     if (panel_horizontal) {
         if (panel_position & TOP) {
-            XResizeWindow(server.dsp, panel->main_win_, panel->width_,
-                          panel->height_);
+            XResizeWindow(server.dsp, panel->main_win_,
+                          panel->width_, panel->height_);
         } else {
-            XMoveResizeWindow(server.dsp, panel->main_win_, panel->root_x_, panel->root_y_,
+            XMoveResizeWindow(server.dsp, panel->main_win_,
+                              panel->root_x_, panel->root_y_,
                               panel->width_, panel->height_);
         }
     } else {
         if (panel_position & LEFT) {
-            XResizeWindow(server.dsp, panel->main_win_, panel->width_,
-                          panel->height_);
+            XResizeWindow(server.dsp, panel->main_win_,
+                          panel->width_, panel->height_);
         } else {
-            XMoveResizeWindow(server.dsp, panel->main_win_, panel->root_x_, panel->root_y_,
+            XMoveResizeWindow(server.dsp, panel->main_win_,
+                              panel->root_x_, panel->root_y_,
                               panel->width_, panel->height_);
         }
     }
@@ -908,20 +911,20 @@ void AutohideHide(void* p) {
     //printf("autohide_hide : diff %d, w %d, h %d\n", diff, panel->hidden_width, panel->hidden_height);
     if (panel_horizontal) {
         if (panel_position & TOP) {
-            XResizeWindow(server.dsp, panel->main_win_, panel->hidden_width_,
-                          panel->hidden_height_);
+            XResizeWindow(server.dsp, panel->main_win_,
+                          panel->hidden_width_, panel->hidden_height_);
         } else {
-            XMoveResizeWindow(server.dsp, panel->main_win_, panel->root_x_,
-                              panel->root_y_ + diff,
+            XMoveResizeWindow(server.dsp, panel->main_win_,
+                              panel->root_x_, panel->root_y_ + diff,
                               panel->hidden_width_, panel->hidden_height_);
         }
     } else {
         if (panel_position & LEFT) {
-            XResizeWindow(server.dsp, panel->main_win_, panel->hidden_width_,
-                          panel->hidden_height_);
+            XResizeWindow(server.dsp, panel->main_win_,
+                          panel->hidden_width_, panel->hidden_height_);
         } else {
-            XMoveResizeWindow(server.dsp, panel->main_win_, panel->root_x_ + diff,
-                              panel->root_y_,
+            XMoveResizeWindow(server.dsp, panel->main_win_,
+                              panel->root_x_ + diff, panel->root_y_,
                               panel->hidden_width_, panel->hidden_height_);
         }
     }
