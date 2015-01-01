@@ -82,12 +82,12 @@ void Init(int argc, char* argv[]) {
     for (int i = 1; i < argc; ++i) {
         if (!strcmp(argv[i], "-h") || !strcmp(argv[i], "--help"))   {
             printf("Usage: tint3 [-c] <config_file>\n");
-            exit(0);
+            std::exit(0);
         }
 
         if (!strcmp(argv[i], "-v") || !strcmp(argv[i], "--version"))    {
             printf("tint3 version %s\n", VERSION_STRING);
-            exit(0);
+            std::exit(0);
         }
 
         if (!strcmp(argv[i], "-c")) {
@@ -159,7 +159,7 @@ void InitX11() {
 
     if (!server.dsp) {
         util::log::Error() << "Couldn't open display.\n";
-        exit(0);
+        std::exit(0);
     }
 
     server.InitAtoms();
@@ -1121,7 +1121,7 @@ start:
     if (!config_read) {
         util::log::Error() << "usage: tint3 [-c] <config_file>\n";
         Cleanup();
-        exit(1);
+        std::exit(1);
     }
 
     InitPanel();
@@ -1129,7 +1129,7 @@ start:
     if (!snapshot_path.empty()) {
         GetSnapshot(snapshot_path.c_str());
         Cleanup();
-        exit(0);
+        std::exit(0);
     }
 
     int damage_event, damage_error;
