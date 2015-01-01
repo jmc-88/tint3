@@ -419,8 +419,8 @@ void TaskRefreshTasklist() {
 
     // Add any new
     for (int i = 0; i < num_results; i++) {
-        if (!TaskGetTask(window.get()[i])) {
-            AddTask(window.get()[i]);
+        if (!TaskGetTask(windows.get()[i])) {
+            AddTask(windows.get()[i]);
         }
     }
 }
