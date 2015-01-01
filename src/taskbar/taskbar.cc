@@ -35,6 +35,24 @@
 #include "util/window.h"
 #include "util/log.h"
 
+
+namespace {
+
+bool FindWindow(Window const needle,
+                Window const* const haystack,
+                int num_results) {
+    for (int i = 0; i < num_results; i++) {
+        if (needle == haystack[i]) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+}  // namespace
+
+
 /* win_to_task_table holds for every Window an array of tasks. Usually the array contains only one
    element. However for omnipresent windows (windows which are visible in every taskbar) the array
    contains to every Task* on each panel a pointer (i.e. GPtrArray.len == server.nb_desktop)
@@ -379,26 +397,20 @@ void TaskRefreshTasklist() {
     }
 
     int num_results;
-    auto window = ServerGetProperty<Window>(
-                      server.root_win, server.atoms_["_NET_CLIENT_LIST"],
-                      XA_WINDOW, &num_results);
+    auto windows = ServerGetProperty<Window>(
+                       server.root_win, server.atoms_["_NET_CLIENT_LIST"],
+                       XA_WINDOW, &num_results);
 
-    if (window == nullptr) {
+    if (windows == nullptr) {
         return;
     }
 
     GList* win_list = g_hash_table_get_keys(win_to_task_table);
 
-    for (GList* it = win_list; it; it = it->next) {
-        int i;
-
-        for (i = 0; i < num_results; i++) {
-            if (*static_cast<Window*>(it->data) == window.get()[i]) {
-                break;
-            }
-        }
-
-        if (i == num_results) {
+    for (GList* it = win_list; it != nullptr; it = it->next) {
+        if (!FindWindow(*static_cast<Window*>(it->data),
+                        windows.get(),
+                        num_results)) {
             TaskbarRemoveTask(it->data, 0, 0);
         }
     }
