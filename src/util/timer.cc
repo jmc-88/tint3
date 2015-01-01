@@ -370,7 +370,7 @@ void ChangeTimeout(Timeout* t, int value_msec, int interval_msec,
 }
 
 
-void UpdateNextTimeout() {
+struct timeval* UpdateNextTimeout() {
     if (!timeout_list.empty()) {
         auto t = timeout_list.front();
 
@@ -392,6 +392,12 @@ void UpdateNextTimeout() {
     } else {
         next_timeout.tv_sec = -1;
     }
+
+    if (next_timeout.tv_sec >= 0 && next_timeout.tv_usec >= 0) {
+        return &next_timeout;
+    }
+
+    return nullptr;
 }
 
 

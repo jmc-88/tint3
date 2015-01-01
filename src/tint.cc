@@ -111,6 +111,7 @@ void Init(int argc, char* argv[]) {
     signal_pending = 0;
 
     auto signal_handler = [&](int signal_number) -> void {
+        util::log::Debug() << "Received signal " << signal_number << '\n';
         signal_pending = signal_number;
     };
 
@@ -805,8 +806,7 @@ void EventPropertyNotify(XEvent* e) {
 
 
 void EventExpose(XEvent* e) {
-    Panel* panel;
-    panel = GetPanel(e->xany.window);
+    Panel* panel = GetPanel(e->xany.window);
 
     if (!panel) {
         return;
@@ -1016,20 +1016,25 @@ void DragAndDropEnter(XClientMessageEvent* e) {
                                        e->data.l[4]);
     }
 
-    util::log::Debug() << "DnD " << __FILE__ << ':' << __LINE__ <<
-                       ": Requested type = " << GetAtomName(server.dsp, dnd_atom) << '\n';
+    util::log::Debug() << "DnD " << __FILE__ << ':' << __LINE__
+                       << ": Requested type = "
+                       << GetAtomName(server.dsp, dnd_atom)
+                       << '\n';
 }
 
 void DragAndDropPosition(XClientMessageEvent* e) {
+    bool accept = false;
+
     dnd_target_window = e->window;
-    int accept = 0;
-    Panel* panel = GetPanel(e->window);
-    int x, y, mapX, mapY;
+
+    int x = (e->data.l[2] >> 16) & 0xFFFF;
+    int y = e->data.l[2] & 0xFFFF;
+    int mapX, mapY;
     Window child;
-    x = (e->data.l[2] >> 16) & 0xFFFF;
-    y = e->data.l[2] & 0xFFFF;
-    XTranslateCoordinates(server.dsp, server.root_win, e->window, x, y, &mapX,
-                          &mapY, &child);
+    XTranslateCoordinates(server.dsp, server.root_win, e->window,
+                          x, y, &mapX, &mapY, &child);
+
+    Panel* panel = GetPanel(e->window);
     Task* task = panel->ClickTask(mapX, mapY);
 
     if (task) {
@@ -1042,7 +1047,7 @@ void DragAndDropPosition(XClientMessageEvent* e) {
         LauncherIcon* icon = panel->ClickLauncherIcon(mapX, mapY);
 
         if (icon) {
-            accept = 1;
+            accept = true;
             dnd_launcher_exec = icon->cmd_;
         } else {
             dnd_launcher_exec = 0;
@@ -1056,16 +1061,17 @@ void DragAndDropPosition(XClientMessageEvent* e) {
     se.message_type = server.atoms_["XdndStatus"];
     se.format = 32;
     se.data.l[0] = e->window;  // XID of the target window
-    se.data.l[1] = accept ? 1 :
-                   0;          // bit 0: accept drop    bit 1: send XdndPosition events if inside rectangle
-    se.data.l[2] =
-        0;          // Rectangle x,y for which no more XdndPosition events
-    se.data.l[3] = (1 << 16) |
-                   1;  // Rectangle w,h for which no more XdndPosition events
+    // bit 0: accept drop, bit 1: send XdndPosition events if inside rectangle
+    se.data.l[1] = accept ? 1 : 0;
+    // Rectangle x,y for which no more XdndPosition events
+    se.data.l[2] = 0;
+    // Rectangle w,h for which no more XdndPosition events
+    se.data.l[3] = (1 << 16) | 1;
 
     if (accept) {
-        se.data.l[4] = dnd_version >= 2 ? e->data.l[4] :
-                       server.atoms_["XdndActionCopy"];
+        se.data.l[4] = (dnd_version >= 2)
+                       ? e->data.l[4]
+                       : server.atoms_["XdndActionCopy"];
     } else {
         se.data.l[4] = None;       // None = drop will not be accepted
     }
@@ -1100,8 +1106,6 @@ void DragAndDropDrop(XClientMessageEvent* e) {
 }
 
 int main(int argc, char* argv[]) {
-    int hidden_dnd = 0;
-
 start:
     Init(argc, argv);
     InitX11();
@@ -1130,8 +1134,6 @@ start:
 
     int damage_event, damage_error;
     XDamageQueryExtension(server.dsp, &damage_event, &damage_error);
-
-    int x11_fd = ConnectionNumber(server.dsp);
     XSync(server.dsp, False);
 
     // XDND initialization
@@ -1146,331 +1148,235 @@ start:
     //  sigset_t empty_mask;
     //  sigemptyset(&empty_mask);
 
-    while (true) {
-        Panel* panel = nullptr;
+    util::x11::EventLoop event_loop(&server);
 
-        if (panel_refresh) {
-            panel_refresh = 0;
+    event_loop.RegisterHandler(ButtonPress, [](XEvent & e) -> void {
+        TooltipHide(nullptr);
+        EventButtonPress(&e);
+    });
 
-            for (int i = 0 ; i < nb_panel ; i++) {
-                panel = &panel1[i];
+    event_loop.RegisterHandler(ButtonRelease, [](XEvent & e) -> void {
+        EventButtonRelease(&e);
+    });
 
-                if (panel->is_hidden_) {
-                    XCopyArea(server.dsp, panel->hidden_pixmap_, panel->main_win_, server.gc, 0, 0,
-                              panel->hidden_width_, panel->hidden_height_, 0, 0);
-                    XSetWindowBackgroundPixmap(server.dsp, panel->main_win_, panel->hidden_pixmap_);
-                } else {
-                    if (panel->temp_pmap) {
-                        XFreePixmap(server.dsp, panel->temp_pmap);
-                    }
+    event_loop.RegisterHandler(MotionNotify, [](XEvent & e) -> void {
+        static constexpr unsigned int button_mask =
+        Button1Mask | Button2Mask |
+        Button3Mask | Button4Mask |
+        Button5Mask;
 
-                    panel->temp_pmap = XCreatePixmap(server.dsp, server.root_win, panel->width_,
-                                                     panel->height_, server.depth);
-                    panel->Render();
-                    XCopyArea(server.dsp, panel->temp_pmap, panel->main_win_, server.gc, 0, 0,
-                              panel->width_, panel->height_, 0, 0);
-                }
-            }
-
-            XFlush(server.dsp);
-
-            panel = systray.panel_;
-
-            if (refresh_systray && panel && !panel->is_hidden_) {
-                refresh_systray = 0;
-                // tint3 doen't draw systray icons. it just redraw background.
-                XSetWindowBackgroundPixmap(server.dsp, panel->main_win_, panel->temp_pmap);
-                // force icon's refresh
-                RefreshSystrayIcon();
-            }
+        if (e.xmotion.state & button_mask) {
+            EventButtonMotionNotify(&e);
         }
 
-        // thanks to AngryLlama for the timer
-        // Create a File Description Set containing x11_fd
-        fd_set fdset;
-        FD_ZERO(&fdset);
-        FD_SET(x11_fd, &fdset);
-        UpdateNextTimeout();
+        Panel* panel = GetPanel(e.xmotion.window);
+        Area* area = panel->ClickArea(e.xmotion.x, e.xmotion.y);
+        std::string tooltip = area->GetTooltipText();
 
-        struct timeval* timeout = nullptr;
+        if (!tooltip.empty()) {
+            TooltipTriggerShow(area, panel, &e);
+        } else {
+            TooltipTriggerHide();
+        }
+    });
 
-        if (next_timeout.tv_sec >= 0 && next_timeout.tv_usec >= 0) {
-            timeout = &next_timeout;
+    event_loop.RegisterHandler(LeaveNotify, [](XEvent & e) -> void {
+        TooltipTriggerHide();
+    });
+
+    event_loop.RegisterHandler(Expose, [](XEvent & e) -> void {
+        EventExpose(&e);
+    });
+
+    event_loop.RegisterHandler(PropertyNotify, [](XEvent & e) -> void {
+        EventPropertyNotify(&e);
+    });
+
+    event_loop.RegisterHandler(ConfigureNotify, [](XEvent & e) -> void {
+        EventConfigureNotify(e.xconfigure.window);
+    });
+
+    event_loop.RegisterHandler(ReparentNotify, [&](XEvent & e) -> void {
+        if (!systray_enabled) {
+            return;
         }
 
-        // Wait for X Event or a Timer
-        if (select(x11_fd + 1, &fdset, 0, 0, timeout) > 0) {
-            while (XPending(server.dsp)) {
-                XEvent e;
-                XNextEvent(server.dsp, &e);
-#if HAVE_SN
-                sn_display_process_event(server.sn_dsp, &e);
-#endif // HAVE_SN
+        // reparented to us
+        if (e.xany.window == systray.panel_->main_win_) {
+            return;
+        }
 
-                panel = GetPanel(e.xany.window);
+        // FIXME: 'reparent to us' badly detected => disabled
+    });
 
-                if (panel && panel_autohide) {
-                    if (e.type == EnterNotify) {
-                        AutohideTriggerShow(panel);
-                    } else if (e.type == LeaveNotify) {
-                        AutohideTriggerHide(panel);
-                    }
+    event_loop.RegisterHandler({
+        UnmapNotify,
+        DestroyNotify
+    }, [&](XEvent & e) -> void {
+        if (e.xany.window == server.composite_manager) {
+            // Stop real_transparency
+            signal_pending = SIGUSR1;
+            return;
+        }
 
-                    if (panel->is_hidden_) {
-                        if (e.type == ClientMessage
-                            && e.xclient.message_type == server.atoms_["XdndPosition"]) {
-                            hidden_dnd = 1;
-                            AutohideShow(panel);
-                        } else {
-                            continue;    // discard further processing of this event because the panel is not visible yet
-                        }
-                    } else if (hidden_dnd && e.type == ClientMessage
-                               && e.xclient.message_type == server.atoms_["XdndLeave"]) {
-                        hidden_dnd = 0;
-                        AutohideHide(panel);
-                    }
-                }
+        if (e.xany.window == g_tooltip.window || !systray_enabled) {
+            return;
+        }
 
-                XClientMessageEvent* ev;
-
-                switch (e.type) {
-                    case ButtonPress:
-                        TooltipHide(0);
-                        EventButtonPress(&e);
-                        break;
-
-                    case ButtonRelease:
-                        EventButtonRelease(&e);
-                        break;
-
-                    case MotionNotify: {
-                            unsigned int button_mask = Button1Mask | Button2Mask | Button3Mask | Button4Mask
-                                                       | Button5Mask;
-
-                            if (e.xmotion.state & button_mask) {
-                                EventButtonMotionNotify(&e);
-                            }
-
-                            Panel* panel = GetPanel(e.xmotion.window);
-                            Area* area = panel->ClickArea(e.xmotion.x, e.xmotion.y);
-
-                            std::string tooltip = area->GetTooltipText();
-
-                            if (!tooltip.empty()) {
-                                TooltipTriggerShow(area, panel, &e);
-                            } else {
-                                TooltipTriggerHide();
-                            }
-
-                            break;
-                        }
-
-                    case LeaveNotify:
-                        TooltipTriggerHide();
-                        break;
-
-                    case Expose:
-                        EventExpose(&e);
-                        break;
-
-                    case PropertyNotify:
-                        EventPropertyNotify(&e);
-                        break;
-
-                    case ConfigureNotify:
-                        EventConfigureNotify(e.xconfigure.window);
-                        break;
-
-                    case ReparentNotify:
-                        if (!systray_enabled) {
-                            break;
-                        }
-
-                        panel = systray.panel_;
-
-                        if (e.xany.window == panel->main_win_) { // reparented to us
-                            break;
-                        }
-
-                        // FIXME: 'reparent to us' badly detected => disabled
-                        break;
-
-                    case UnmapNotify:
-                    case DestroyNotify:
-                        if (e.xany.window == server.composite_manager) {
-                            // Stop real_transparency
-                            signal_pending = SIGUSR1;
-                            break;
-                        }
-
-                        if (e.xany.window == g_tooltip.window || !systray_enabled) {
-                            break;
-                        }
-
-                        for (auto& traywin : systray.list_icons) {
-                            if (traywin->tray_id == e.xany.window) {
-                                systray.RemoveIcon(traywin);
-                                break;
-                            }
-                        }
-
-                        break;
-
-                    case ClientMessage:
-                        ev = &e.xclient;
-
-                        if (ev->data.l[1] == (long int) server.atoms_["_NET_WM_CM_S0"]) {
-                            if (ev->data.l[2] == None) {
-                                // Stop real_transparency
-                                signal_pending = SIGUSR1;
-                            } else {
-                                // Start real_transparency
-                                signal_pending = SIGUSR1;
-                            }
-                        }
-
-                        if (systray_enabled
-                            && e.xclient.message_type == server.atoms_["_NET_SYSTEM_TRAY_OPCODE"]
-                            && e.xclient.format == 32 && e.xclient.window == net_sel_win) {
-                            NetMessage(&e.xclient);
-                        } else if (e.xclient.message_type == server.atoms_["XdndEnter"]) {
-                            DragAndDropEnter(&e.xclient);
-                        } else if (e.xclient.message_type == server.atoms_["XdndPosition"]) {
-                            DragAndDropPosition(&e.xclient);
-                        } else if (e.xclient.message_type == server.atoms_["XdndDrop"]) {
-                            DragAndDropDrop(&e.xclient);
-                        }
-
-                        break;
-
-                    case SelectionNotify: {
-                            Atom target = e.xselection.target;
-
-                            util::log::Debug()
-                                    << "DnD " << __FILE__ << ':' << __LINE__ <<
-                                    ": A selection notify has arrived!\n"
-                                    << "DnD " << __FILE__ << ':' << __LINE__ << ": Requestor = " <<
-                                    e.xselectionrequest.requestor << '\n'
-                                    << "DnD " << __FILE__ << ':' << __LINE__ << ": Selection atom = " <<
-                                    GetAtomName(server.dsp, e.xselection.selection) << '\n'
-                                    << "DnD " << __FILE__ << ':' << __LINE__ << ": Target atom    = " <<
-                                    GetAtomName(server.dsp, target) << '\n'
-                                    << "DnD " << __FILE__ << ':' << __LINE__ << ": Property atom  = " <<
-                                    GetAtomName(server.dsp, e.xselection.property) << '\n';
-
-                            if (e.xselection.property != None && dnd_launcher_exec) {
-                                Property prop = ReadProperty(server.dsp, dnd_target_window, dnd_selection);
-
-                                //If we're being given a list of targets (possible conversions)
-                                if (target == server.atoms_["TARGETS"] && !dnd_sent_request) {
-                                    dnd_sent_request = 1;
-                                    dnd_atom = PickTargetFromTargets(server.dsp, prop);
-
-                                    if (dnd_atom == None) {
-                                        util::log::Debug() << "No matching datatypes.\n";
-                                    } else {
-                                        //Request the data type we are able to select
-                                        util::log::Debug() << "Now requesting type " << GetAtomName(server.dsp,
-                                                           dnd_atom) << '\n';
-                                        XConvertSelection(server.dsp, dnd_selection, dnd_atom, dnd_selection,
-                                                          dnd_target_window, CurrentTime);
-                                    }
-                                } else if (target == dnd_atom) {
-                                    //Dump the binary data
-                                    util::log::Debug() << "DnD " << __FILE__ << ':' << __LINE__ <<
-                                                       ": Data begins:\n";
-                                    util::log::Debug() << "--------\n";
-                                    int i;
-
-                                    for (i = 0; i < prop.nitems * prop.format / 8; i++) {
-                                        util::log::Debug() << ((char*)prop.data)[i];
-                                    }
-
-                                    util::log::Debug() << "--------\n";
-
-                                    StringBuilder cmd;
-                                    cmd << '(' << dnd_launcher_exec << " \"";
-
-                                    for (i = 0; i < prop.nitems * prop.format / 8; i++) {
-                                        char c = ((char*)prop.data)[i];
-
-                                        if (c == '\n') {
-                                            if (i < prop.nitems * prop.format / 8 - 1) {
-                                                cmd << "\" \"";
-                                            }
-                                        } else if (c == '\r') {
-                                        } else {
-                                            if (c == '`' || c == '$' || c == '\\') {
-                                                cmd << '\\';
-                                            }
-
-                                            cmd << c;
-                                        }
-                                    }
-
-                                    cmd << "\"&";
-                                    util::log::Debug() << "DnD " << __FILE__ << ':' << __LINE__ <<
-                                                       ": Running command: \"" << std::string(cmd) << "\"\n";
-                                    TintExec(cmd);
-
-                                    // Reply OK.
-                                    XClientMessageEvent m;
-                                    std::memset(&m, 0, sizeof(m));
-                                    m.type = ClientMessage;
-                                    m.display = server.dsp;
-                                    m.window = dnd_source_window;
-                                    m.message_type = server.atoms_["XdndFinished"];
-                                    m.format = 32;
-                                    m.data.l[0] = dnd_target_window;
-                                    m.data.l[1] = 1;
-                                    m.data.l[2] = server.atoms_["XdndActionCopy"];  //We only ever copy.
-                                    XSendEvent(server.dsp, dnd_source_window, False, NoEventMask, (XEvent*)&m);
-                                    XSync(server.dsp, False);
-                                }
-
-                                XFree(prop.data);
-                            }
-
-                            break;
-                        }
-
-                    default:
-                        if (e.type == XDamageNotify + damage_event) {
-                            // union needed to avoid strict-aliasing warnings by gcc
-                            union {
-                                XEvent e;
-                                XDamageNotifyEvent de;
-                            } event_union = {
-                                .e = e
-                            };
-
-                            for (auto& traywin : systray.list_icons) {
-                                if (traywin->id == event_union.de.drawable) {
-                                    SystrayRenderIcon(traywin);
-                                    break;
-                                }
-                            }
-                        }
-                }
+        for (auto& traywin : systray.list_icons) {
+            if (traywin->tray_id == e.xany.window) {
+                systray.RemoveIcon(traywin);
+                return;
             }
         }
+    });
 
-        CallbackTimeoutExpired();
+    event_loop.RegisterHandler(ClientMessage, [&](XEvent & e) -> void {
+        auto& ev = e.xclient;
 
-        if (signal_pending) {
-            Cleanup();
-
-            if (signal_pending == SIGUSR1) {
-                // restart tint3
-                // SIGUSR1 used when : user's signal, composite manager stop/start or xrandr
-                FD_CLR(x11_fd, &fdset);  // not sure if needed
-                goto start;
+        if (ev.data.l[1] == (long int) server.atoms_["_NET_WM_CM_S0"]) {
+            if (ev.data.l[2] == None) {
+                // Stop real_transparency
+                signal_pending = SIGUSR1;
             } else {
-                // SIGINT, SIGTERM, SIGHUP
-                return 0;
+                // Start real_transparency
+                signal_pending = SIGUSR1;
             }
         }
-    }
-}
 
+        if (systray_enabled
+            && e.xclient.message_type == server.atoms_["_NET_SYSTEM_TRAY_OPCODE"]
+            && e.xclient.format == 32
+            && e.xclient.window == net_sel_win) {
+            NetMessage(&e.xclient);
+        } else if (e.xclient.message_type == server.atoms_["XdndEnter"]) {
+            DragAndDropEnter(&e.xclient);
+        } else if (e.xclient.message_type == server.atoms_["XdndPosition"]) {
+            DragAndDropPosition(&e.xclient);
+        } else if (e.xclient.message_type == server.atoms_["XdndDrop"]) {
+            DragAndDropDrop(&e.xclient);
+        }
+    });
+
+    event_loop.RegisterHandler(SelectionNotify, [&](XEvent & e) -> void {
+        Atom target = e.xselection.target;
+
+        util::log::Debug()
+                << "DnD " << __FILE__ << ':' << __LINE__
+        << ": A selection notify has arrived!\n"
+        << "DnD " << __FILE__ << ':' << __LINE__
+        << ": Requestor = " << e.xselectionrequest.requestor << '\n'
+        << "DnD " << __FILE__ << ':' << __LINE__
+        << ": Selection atom = "
+        << GetAtomName(server.dsp, e.xselection.selection) << '\n'
+        << "DnD " << __FILE__ << ':' << __LINE__
+        << ": Target atom    = "
+        << GetAtomName(server.dsp, target) << '\n'
+        << "DnD " << __FILE__ << ':' << __LINE__
+        << ": Property atom  = "
+        << GetAtomName(server.dsp, e.xselection.property) << '\n';
+
+        if (e.xselection.property != None && dnd_launcher_exec) {
+            Property prop = ReadProperty(server.dsp, dnd_target_window, dnd_selection);
+
+            //If we're being given a list of targets (possible conversions)
+            if (target == server.atoms_["TARGETS"] && !dnd_sent_request) {
+                dnd_sent_request = 1;
+                dnd_atom = PickTargetFromTargets(server.dsp, prop);
+
+                if (dnd_atom == None) {
+                    util::log::Debug() << "No matching datatypes.\n";
+                } else {
+                    //Request the data type we are able to select
+                    util::log::Debug()
+                            << "Now requesting type "
+                            << GetAtomName(server.dsp, dnd_atom)
+                            << '\n';
+                    XConvertSelection(server.dsp, dnd_selection, dnd_atom,
+                                      dnd_selection, dnd_target_window,
+                                      CurrentTime);
+                }
+            } else if (target == dnd_atom) {
+                //Dump the binary data
+                util::log::Debug() << "DnD " << __FILE__ << ':' << __LINE__ <<
+                                   ": Data begins:\n";
+                util::log::Debug() << "--------\n";
+
+                for (int i = 0; i < prop.nitems * prop.format / 8; i++) {
+                    util::log::Debug() << ((char*)prop.data)[i];
+                }
+
+                util::log::Debug() << "--------\n";
+
+                StringBuilder cmd;
+                cmd << '(' << dnd_launcher_exec << " \"";
+
+                for (int i = 0; i < prop.nitems * prop.format / 8; i++) {
+                    char c = ((char*)prop.data)[i];
+
+                    if (c == '\n') {
+                        if (i < prop.nitems * prop.format / 8 - 1) {
+                            cmd << "\" \"";
+                        }
+                    } else {
+                        if (c == '`' || c == '$' || c == '\\') {
+                            cmd << '\\';
+                        }
+
+                        cmd << c;
+                    }
+                }
+
+                cmd << "\"&";
+                util::log::Debug()
+                        << "DnD " << __FILE__ << ':' << __LINE__
+                        << ": Running command: \""
+                        << std::string(cmd)
+                        << "\"\n";
+                TintExec(cmd);
+
+                // Reply OK.
+                XClientMessageEvent m;
+                std::memset(&m, 0, sizeof(m));
+                m.type = ClientMessage;
+                m.display = server.dsp;
+                m.window = dnd_source_window;
+                m.message_type = server.atoms_["XdndFinished"];
+                m.format = 32;
+                m.data.l[0] = dnd_target_window;
+                m.data.l[1] = 1;
+                m.data.l[2] = server.atoms_["XdndActionCopy"];  //We only ever copy.
+                XSendEvent(server.dsp, dnd_source_window, False, NoEventMask, (XEvent*)&m);
+                XSync(server.dsp, False);
+            }
+
+            XFree(prop.data);
+        }
+    });
+
+    event_loop.RegisterDefaultHandler([&](XEvent & e) -> void {
+        if (e.type == XDamageNotify + damage_event) {
+            // union needed to avoid strict-aliasing warnings by gcc
+            union {
+                XEvent e;
+                XDamageNotifyEvent de;
+            } event_union = {
+                .e = e
+            };
+
+            for (auto& traywin : systray.list_icons) {
+                if (traywin->id == event_union.de.drawable) {
+                    SystrayRenderIcon(traywin);
+                    return;
+                }
+            }
+        }
+    });
+
+    if (event_loop.RunLoop()) {
+        goto start;  // brrr
+    }
+
+    return 0;
+}
 

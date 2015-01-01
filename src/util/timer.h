@@ -63,7 +63,7 @@ void ChangeTimeout(Timeout* t, int value_msec, int interval_msec,
 void StopTimeout(Timeout* t);
 
 /** update_next_timeout updates next_timeout to the value, when the next installed timeout will expire **/
-void UpdateNextTimeout();
+struct timeval* UpdateNextTimeout();
 
 /** Callback of all expired timeouts **/
 void CallbackTimeoutExpired();

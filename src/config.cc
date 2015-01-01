@@ -26,15 +26,15 @@
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <X11/Xatom.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <ctype.h>
 #include <glib/gstdio.h>
 #include <pango/pangocairo.h>
 #include <pango/pangoxft.h>
 #include <Imlib2.h>
 
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <cctype>
 #include <iostream>
 #include <stdexcept>
 
