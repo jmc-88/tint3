@@ -772,10 +772,10 @@ void EventPropertyNotify(XEvent* e) {
         } else if (at == server.atoms_["WM_STATE"]) {
             // Iconic state
             int state = (task_active
-                         && tsk->win == task_active->win ? TASK_ACTIVE : TASK_NORMAL);
+                         && tsk->win == task_active->win ? kTaskActive : kTaskNormal);
 
             if (WindowIsIconified(win)) {
-                state = TASK_ICONIFIED;
+                state = kTaskIconified;
             }
 
             SetTaskState(tsk, state);
@@ -863,7 +863,7 @@ void EventConfigureNotify(Window win) {
         tsk = AddTask(win);
 
         if (win == WindowGetActive()) {
-            SetTaskState(tsk, TASK_ACTIVE);
+            SetTaskState(tsk, kTaskActive);
             task_active = tsk;
         }
 

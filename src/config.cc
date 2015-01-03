@@ -95,18 +95,18 @@ void GetAction(std::string const& event, int* action) {
 
 int GetTaskStatus(char* status) {
     if (strcmp(status, "active") == 0) {
-        return TASK_ACTIVE;
+        return kTaskActive;
     }
 
     if (strcmp(status, "iconified") == 0) {
-        return TASK_ICONIFIED;
+        return kTaskIconified;
     }
 
     if (strcmp(status, "urgent") == 0) {
-        return TASK_URGENT;
+        return kTaskUrgent;
     }
 
-    return TASK_NORMAL;
+    return kTaskNormal;
 }
 
 int ConfigGetMonitor(std::string const& monitor_name) {
@@ -576,8 +576,8 @@ void AddEntry(std::string const& key, std::string const& value) {
                     value));
         panel_config.g_task.config_background_mask |= (1 << status);
 
-        if (status == TASK_NORMAL) {
-            panel_config.g_task.bg_ = panel_config.g_task.background[TASK_NORMAL];
+        if (status == kTaskNormal) {
+            panel_config.g_task.bg_ = panel_config.g_task.background[kTaskNormal];
         }
     }
     // "tooltip" is deprecated but here for backwards compatibility

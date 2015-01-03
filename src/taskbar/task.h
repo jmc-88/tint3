@@ -18,11 +18,11 @@
 #include "util/area.h"
 
 enum TaskState {
-    TASK_NORMAL,
-    TASK_ACTIVE,
-    TASK_ICONIFIED,
-    TASK_URGENT,
-    TASK_STATE_COUNT
+    kTaskNormal,
+    kTaskActive,
+    kTaskIconified,
+    kTaskUrgent,
+    kTaskStateCount
 };
 
 // --------------------------------------------------
@@ -37,18 +37,18 @@ class Global_task : public Area {
     int icon_size1;
     int maximum_width;
     int maximum_height;
-    int alpha[TASK_STATE_COUNT];
-    int saturation[TASK_STATE_COUNT];
-    int brightness[TASK_STATE_COUNT];
+    int alpha[kTaskStateCount];
+    int saturation[kTaskStateCount];
+    int brightness[kTaskStateCount];
     int config_asb_mask;
-    Background* background[TASK_STATE_COUNT];
+    Background* background[kTaskStateCount];
     int config_background_mask;
     // starting position for text ~ task_padding + task_border + icon_size
     double text_posx, text_height;
 
     int font_shadow;
     PangoFontDescription* font_desc;
-    Color font[TASK_STATE_COUNT];
+    Color font[kTaskStateCount];
     int config_font_mask;
     int tooltip_enabled;
 };
@@ -65,8 +65,8 @@ class Task : public Area {
     Window win;
     int desktop;
     int current_state;
-    Imlib_Image icon[TASK_STATE_COUNT];
-    Pixmap state_pix[TASK_STATE_COUNT];
+    Imlib_Image icon[kTaskStateCount];
+    Pixmap state_pix[kTaskStateCount];
     unsigned int icon_width;
     unsigned int icon_height;
     int urgent_tick;

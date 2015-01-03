@@ -75,11 +75,11 @@ Task* AddTask(Window win) {
     new_tsk.win = win;
     new_tsk.desktop = server.GetDesktopFromWindow(win);
     new_tsk.panel_ = &panel1[monitor];
-    new_tsk.current_state = WindowIsIconified(win) ? TASK_ICONIFIED : TASK_NORMAL;
+    new_tsk.current_state = WindowIsIconified(win) ? kTaskIconified : kTaskNormal;
 
     // allocate only one title and one icon
     // even with task_on_all_desktop and with task_on_all_panel
-    for (int k = 0; k < TASK_STATE_COUNT; ++k) {
+    for (int k = 0; k < kTaskStateCount; ++k) {
         new_tsk.icon[k] = 0;
         new_tsk.state_pix[k] = 0;
     }
@@ -121,7 +121,7 @@ Task* AddTask(Window win) {
         new_tsk2->SetTitle(new_tsk.GetTitle());
         new_tsk2->SetTooltipEnabled(panel1[monitor].g_task.tooltip_enabled);
 
-        for (int k = 0; k < TASK_STATE_COUNT; ++k) {
+        for (int k = 0; k < kTaskStateCount; ++k) {
             new_tsk2->icon[k] = new_tsk.icon[k];
             new_tsk2->state_pix[k] = 0;
         }
@@ -155,7 +155,7 @@ void RemoveTask(Task* tsk) {
     //printf("remove_task %s %d\n", tsk->title, tsk->desktop);
     tsk->SetTitle("");
 
-    for (int k = 0; k < TASK_STATE_COUNT; ++k) {
+    for (int k = 0; k < kTaskStateCount; ++k) {
         if (tsk->icon[k]) {
             imlib_context_set_image(tsk->icon[k]);
             imlib_free_image();
@@ -268,7 +268,7 @@ void GetIcon(Task* tsk) {
         return;
     }
 
-    for (int k = 0; k < TASK_STATE_COUNT; ++k) {
+    for (int k = 0; k < kTaskStateCount; ++k) {
         if (tsk->icon[k]) {
             imlib_context_set_image(tsk->icon[k]);
             imlib_free_image();
@@ -341,7 +341,7 @@ void GetIcon(Task* tsk) {
     tsk->icon_width = imlib_image_get_width();
     tsk->icon_height = imlib_image_get_height();
 
-    for (int k = 0; k < TASK_STATE_COUNT; ++k) {
+    for (int k = 0; k < kTaskStateCount; ++k) {
         imlib_context_set_image(orig_image);
         tsk->icon[k] = imlib_clone_image();
         imlib_context_set_image(tsk->icon[k]);
@@ -368,7 +368,7 @@ void GetIcon(Task* tsk) {
         tsk2->icon_width = tsk->icon_width;
         tsk2->icon_height = tsk->icon_height;
 
-        for (int k = 0; k < TASK_STATE_COUNT; ++k) {
+        for (int k = 0; k < kTaskStateCount; ++k) {
             tsk2->icon[k] = tsk->icon[k];
         }
 
@@ -569,7 +569,7 @@ Task* PreviousTask(Task* tsk) {
 void ActiveTask() {
     if (task_active) {
         SetTaskState(task_active,
-                     WindowIsIconified(task_active->win) ? TASK_ICONIFIED : TASK_NORMAL);
+                     WindowIsIconified(task_active->win) ? kTaskIconified : kTaskNormal);
         task_active = 0;
     }
 
@@ -585,13 +585,13 @@ void ActiveTask() {
             }
         }
 
-        SetTaskState((task_active = TaskGetTask(w1)), TASK_ACTIVE);
+        SetTaskState((task_active = TaskGetTask(w1)), kTaskActive);
     }
 }
 
 
 void SetTaskState(Task* tsk, int state) {
-    if (tsk == 0 || state < 0 || state >= TASK_STATE_COUNT) {
+    if (tsk == 0 || state < 0 || state >= kTaskStateCount) {
         return;
     }
 
@@ -609,7 +609,7 @@ void SetTaskState(Task* tsk, int state) {
                                 urgent_list.end(),
                                 tsk1);
 
-            if (state == TASK_ACTIVE && it != urgent_list.end()) {
+            if (state == kTaskActive && it != urgent_list.end()) {
                 tsk1->DelUrgent();
             }
         }
@@ -622,7 +622,7 @@ void SetTaskState(Task* tsk, int state) {
 void set_task_redraw(Task* tsk) {
     int k;
 
-    for (k = 0; k < TASK_STATE_COUNT; ++k) {
+    for (k = 0; k < kTaskStateCount; ++k) {
         if (tsk->state_pix[k]) {
             XFreePixmap(server.dsp, tsk->state_pix[k]);
         }
@@ -639,9 +639,9 @@ void blink_urgent(void* arg) {
     for (auto& t : urgent_list) {
         if (t->urgent_tick < max_tick_urgent) {
             if (t->urgent_tick++ % 2) {
-                SetTaskState(t, TASK_URGENT);
+                SetTaskState(t, kTaskUrgent);
             } else {
-                SetTaskState(t, WindowIsIconified(t->win) ? TASK_ICONIFIED : TASK_NORMAL);
+                SetTaskState(t, WindowIsIconified(t->win) ? kTaskIconified : kTaskNormal);
             }
         }
     }

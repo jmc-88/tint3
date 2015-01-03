@@ -204,67 +204,67 @@ void Taskbar::InitPanel(Panel* panel) {
     panel->g_task.need_resize_ = true;
     panel->g_task.on_screen_ = true;
 
-    if ((panel->g_task.config_asb_mask & (1 << TASK_NORMAL)) == 0) {
-        panel->g_task.alpha[TASK_NORMAL] = 100;
-        panel->g_task.saturation[TASK_NORMAL] = 0;
-        panel->g_task.brightness[TASK_NORMAL] = 0;
+    if ((panel->g_task.config_asb_mask & (1 << kTaskNormal)) == 0) {
+        panel->g_task.alpha[kTaskNormal] = 100;
+        panel->g_task.saturation[kTaskNormal] = 0;
+        panel->g_task.brightness[kTaskNormal] = 0;
     }
 
-    if ((panel->g_task.config_asb_mask & (1 << TASK_ACTIVE)) == 0) {
-        panel->g_task.alpha[TASK_ACTIVE] = panel->g_task.alpha[TASK_NORMAL];
-        panel->g_task.saturation[TASK_ACTIVE] = panel->g_task.saturation[TASK_NORMAL];
-        panel->g_task.brightness[TASK_ACTIVE] = panel->g_task.brightness[TASK_NORMAL];
+    if ((panel->g_task.config_asb_mask & (1 << kTaskActive)) == 0) {
+        panel->g_task.alpha[kTaskActive] = panel->g_task.alpha[kTaskNormal];
+        panel->g_task.saturation[kTaskActive] = panel->g_task.saturation[kTaskNormal];
+        panel->g_task.brightness[kTaskActive] = panel->g_task.brightness[kTaskNormal];
     }
 
-    if ((panel->g_task.config_asb_mask & (1 << TASK_ICONIFIED)) == 0) {
-        panel->g_task.alpha[TASK_ICONIFIED] = panel->g_task.alpha[TASK_NORMAL];
-        panel->g_task.saturation[TASK_ICONIFIED] =
-            panel->g_task.saturation[TASK_NORMAL];
-        panel->g_task.brightness[TASK_ICONIFIED] =
-            panel->g_task.brightness[TASK_NORMAL];
+    if ((panel->g_task.config_asb_mask & (1 << kTaskIconified)) == 0) {
+        panel->g_task.alpha[kTaskIconified] = panel->g_task.alpha[kTaskNormal];
+        panel->g_task.saturation[kTaskIconified] =
+            panel->g_task.saturation[kTaskNormal];
+        panel->g_task.brightness[kTaskIconified] =
+            panel->g_task.brightness[kTaskNormal];
     }
 
-    if ((panel->g_task.config_asb_mask & (1 << TASK_URGENT)) == 0) {
-        panel->g_task.alpha[TASK_URGENT] = panel->g_task.alpha[TASK_ACTIVE];
-        panel->g_task.saturation[TASK_URGENT] = panel->g_task.saturation[TASK_ACTIVE];
-        panel->g_task.brightness[TASK_URGENT] = panel->g_task.brightness[TASK_ACTIVE];
+    if ((panel->g_task.config_asb_mask & (1 << kTaskUrgent)) == 0) {
+        panel->g_task.alpha[kTaskUrgent] = panel->g_task.alpha[kTaskActive];
+        panel->g_task.saturation[kTaskUrgent] = panel->g_task.saturation[kTaskActive];
+        panel->g_task.brightness[kTaskUrgent] = panel->g_task.brightness[kTaskActive];
     }
 
-    if ((panel->g_task.config_font_mask & (1 << TASK_NORMAL)) == 0) {
-        panel->g_task.font[TASK_NORMAL] = (Color) {
+    if ((panel->g_task.config_font_mask & (1 << kTaskNormal)) == 0) {
+        panel->g_task.font[kTaskNormal] = (Color) {
             {0, 0, 0}, 0
         };
     }
 
-    if ((panel->g_task.config_font_mask & (1 << TASK_ACTIVE)) == 0) {
-        panel->g_task.font[TASK_ACTIVE] = panel->g_task.font[TASK_NORMAL];
+    if ((panel->g_task.config_font_mask & (1 << kTaskActive)) == 0) {
+        panel->g_task.font[kTaskActive] = panel->g_task.font[kTaskNormal];
     }
 
-    if ((panel->g_task.config_font_mask & (1 << TASK_ICONIFIED)) == 0) {
-        panel->g_task.font[TASK_ICONIFIED] = panel->g_task.font[TASK_NORMAL];
+    if ((panel->g_task.config_font_mask & (1 << kTaskIconified)) == 0) {
+        panel->g_task.font[kTaskIconified] = panel->g_task.font[kTaskNormal];
     }
 
-    if ((panel->g_task.config_font_mask & (1 << TASK_URGENT)) == 0) {
-        panel->g_task.font[TASK_URGENT] = panel->g_task.font[TASK_ACTIVE];
+    if ((panel->g_task.config_font_mask & (1 << kTaskUrgent)) == 0) {
+        panel->g_task.font[kTaskUrgent] = panel->g_task.font[kTaskActive];
     }
 
-    if ((panel->g_task.config_background_mask & (1 << TASK_NORMAL)) == 0) {
-        panel->g_task.background[TASK_NORMAL] = backgrounds.front();
+    if ((panel->g_task.config_background_mask & (1 << kTaskNormal)) == 0) {
+        panel->g_task.background[kTaskNormal] = backgrounds.front();
     }
 
-    if ((panel->g_task.config_background_mask & (1 << TASK_ACTIVE)) == 0) {
-        panel->g_task.background[TASK_ACTIVE] =
-            panel->g_task.background[TASK_NORMAL];
+    if ((panel->g_task.config_background_mask & (1 << kTaskActive)) == 0) {
+        panel->g_task.background[kTaskActive] =
+            panel->g_task.background[kTaskNormal];
     }
 
-    if ((panel->g_task.config_background_mask & (1 << TASK_ICONIFIED)) == 0) {
-        panel->g_task.background[TASK_ICONIFIED] =
-            panel->g_task.background[TASK_NORMAL];
+    if ((panel->g_task.config_background_mask & (1 << kTaskIconified)) == 0) {
+        panel->g_task.background[kTaskIconified] =
+            panel->g_task.background[kTaskNormal];
     }
 
-    if ((panel->g_task.config_background_mask & (1 << TASK_URGENT)) == 0) {
-        panel->g_task.background[TASK_URGENT] =
-            panel->g_task.background[TASK_ACTIVE];
+    if ((panel->g_task.config_background_mask & (1 << kTaskUrgent)) == 0) {
+        panel->g_task.background[kTaskUrgent] =
+            panel->g_task.background[kTaskActive];
     }
 
     if (panel_horizontal) {
@@ -280,7 +280,7 @@ void Taskbar::InitPanel(Panel* panel) {
         panel->g_task.height_ = panel->g_task.maximum_height;
     }
 
-    for (int j = 0; j < TASK_STATE_COUNT; ++j) {
+    for (int j = 0; j < kTaskStateCount; ++j) {
         if (panel->g_task.background[j] == nullptr) {
             panel->g_task.background[j] = backgrounds.front();
         }
