@@ -92,7 +92,7 @@ Task* AddTask(Window win) {
     XSelectInput(server.dsp, new_tsk.win,
                  PropertyChangeMask | StructureNotifyMask);
 
-    GPtrArray* task_group = g_ptr_array_new();
+    TaskPtrArray task_group;
     Task* new_tsk2 = nullptr;
 
     for (int j = 0 ; j < panel1[monitor].nb_desktop_ ; j++) {
@@ -131,13 +131,11 @@ Task* AddTask(Window win) {
         new_tsk2->icon_height = new_tsk.icon_height;
         tskbar.children_.push_back(new_tsk2);
         tskbar.need_resize_ = true;
-        g_ptr_array_add(task_group, new_tsk2);
+        task_group.push_back(new_tsk2);
         //printf("add_task panel %d, desktop %d, task %s\n", i, j, new_tsk2->title);
     }
 
-    auto key = (Window*) malloc(sizeof(Window));
-    (*key) = new_tsk.win;
-    g_hash_table_insert(win_to_task_table, key, task_group);
+    win_to_task_map.insert(std::make_pair(new_tsk.win, task_group));
     SetTaskState(new_tsk2, new_tsk.current_state);
 
     if (WindowIsUrgent(win)) {
@@ -170,14 +168,14 @@ void RemoveTask(Task* tsk) {
         }
     }
 
-    Window win = tsk->win;
-    GPtrArray* task_group = (GPtrArray*) g_hash_table_lookup(win_to_task_table,
-                            &win);
+    auto it = win_to_task_map.find(tsk->win);
 
-    for (size_t i = 0; i < task_group->len; ++i) {
-        auto tsk2 = static_cast<Task*>(g_ptr_array_index(task_group, i));
+    if (it == win_to_task_map.end()) {
+        return;
+    }
+
+    for (auto tsk2 : it->second) {
         auto tskbar = reinterpret_cast<Taskbar*>(tsk2->parent_);
-
         auto tsk2_iter = std::find(tskbar->children_.begin(),
                                    tskbar->children_.end(),
                                    tsk2);
@@ -207,7 +205,7 @@ void RemoveTask(Task* tsk) {
         delete tsk2;
     }
 
-    g_hash_table_remove(win_to_task_table, &win);
+    win_to_task_map.erase(it);
 }
 
 
@@ -251,14 +249,10 @@ bool Task::UpdateTitle() {
     }
 
     title_ = new_title;
-    GPtrArray* task_group = TaskGetTasks(win);
 
-    if (task_group) {
-        for (size_t i = 0; i < task_group->len; ++i) {
-            auto tsk2 = static_cast<Task*>(g_ptr_array_index(task_group, i));
-            tsk2->title_ = title_;
-            set_task_redraw(tsk2);
-        }
+    for (auto& tsk2 : TaskGetTasks(win)) {
+        tsk2->title_ = title_;
+        set_task_redraw(tsk2);
     }
 
     return true;
@@ -327,10 +321,11 @@ void GetIcon(Task* tsk) {
                 uint w, h;
 
                 //printf("  get pixmap\n");
-                XGetGeometry(server.dsp, hints->icon_pixmap, &root, &icon_x, &icon_y, &w, &h,
-                             &border_width, &bpp);
+                XGetGeometry(server.dsp, hints->icon_pixmap, &root,
+                             &icon_x, &icon_y, &w, &h, &border_width, &bpp);
                 imlib_context_set_drawable(hints->icon_pixmap);
-                img = imlib_create_image_from_drawable(hints->icon_mask, 0, 0, w, h, 0);
+                img = imlib_create_image_from_drawable(hints->icon_mask, 0, 0,
+                                                       w, h, 0);
             }
         }
     }
@@ -360,10 +355,14 @@ void GetIcon(Task* tsk) {
         imlib_context_set_image(tsk->icon[k]);
         DATA32* data32;
 
-        if (panel->g_task.alpha[k] != 100 || panel->g_task.saturation[k] != 0
+        if (panel->g_task.alpha[k] != 100
+            || panel->g_task.saturation[k] != 0
             || panel->g_task.brightness[k] != 0) {
             data32 = imlib_image_get_data();
-            AdjustAsb(data32, tsk->icon_width, tsk->icon_height, panel->g_task.alpha[k],
+            AdjustAsb(data32,
+                      tsk->icon_width,
+                      tsk->icon_height,
+                      panel->g_task.alpha[k],
                       (float)panel->g_task.saturation[k] / 100,
                       (float)panel->g_task.brightness[k] / 100);
             imlib_image_put_back_data(data32);
@@ -373,20 +372,15 @@ void GetIcon(Task* tsk) {
     imlib_context_set_image(orig_image);
     imlib_free_image();
 
-    GPtrArray* task_group = TaskGetTasks(tsk->win);
+    for (auto& tsk2 : TaskGetTasks(tsk->win)) {
+        tsk2->icon_width = tsk->icon_width;
+        tsk2->icon_height = tsk->icon_height;
 
-    if (task_group) {
-        for (size_t i = 0; i < task_group->len; ++i) {
-            auto tsk2 = static_cast<Task*>(g_ptr_array_index(task_group, i));
-            tsk2->icon_width = tsk->icon_width;
-            tsk2->icon_height = tsk->icon_height;
-
-            for (int k = 0; k < TASK_STATE_COUNT; ++k) {
-                tsk2->icon[k] = tsk->icon[k];
-            }
-
-            set_task_redraw(tsk2);
+        for (int k = 0; k < TASK_STATE_COUNT; ++k) {
+            tsk2->icon[k] = tsk->icon[k];
         }
+
+        set_task_redraw(tsk2);
     }
 }
 
@@ -591,7 +585,7 @@ void ActiveTask() {
     //printf("Change active task %ld\n", w1);
 
     if (w1) {
-        if (!TaskGetTasks(w1)) {
+        if (TaskGetTasks(w1).empty()) {
             Window w2;
 
             while (XGetTransientForHint(server.dsp, w1, &w2)) {
@@ -610,30 +604,25 @@ void SetTaskState(Task* tsk, int state) {
     }
 
     if (tsk->current_state != state) {
-        GPtrArray* task_group = TaskGetTasks(tsk->win);
+        for (auto& tsk1 : TaskGetTasks(tsk->win)) {
+            tsk1->current_state = state;
+            tsk1->bg_ = panel1[0].g_task.background[state];
+            tsk1->pix_ = tsk1->state_pix[state];
 
-        if (task_group) {
-            for (size_t i = 0; i < task_group->len; ++i) {
-                auto tsk1 = static_cast<Task*>(g_ptr_array_index(task_group, i));
-                tsk1->current_state = state;
-                tsk1->bg_ = panel1[0].g_task.background[state];
-                tsk1->pix_ = tsk1->state_pix[state];
-
-                if (tsk1->state_pix[state] == 0) {
-                    tsk1->need_redraw_ = true;
-                }
-
-                auto it = std::find(urgent_list.begin(),
-                                    urgent_list.end(),
-                                    tsk1);
-
-                if (state == TASK_ACTIVE && it != urgent_list.end()) {
-                    tsk1->DelUrgent();
-                }
+            if (tsk1->state_pix[state] == 0) {
+                tsk1->need_redraw_ = true;
             }
 
-            panel_refresh = 1;
+            auto it = std::find(urgent_list.begin(),
+                                urgent_list.end(),
+                                tsk1);
+
+            if (state == TASK_ACTIVE && it != urgent_list.end()) {
+                tsk1->DelUrgent();
+            }
         }
+
+        panel_refresh = 1;
     }
 }
 

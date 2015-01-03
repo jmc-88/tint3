@@ -8,11 +8,17 @@
 #ifndef TASKBAR_H
 #define TASKBAR_H
 
+#include <map>
+#include <vector>
+
 #include "task.h"
 #include "taskbarbase.h"
 #include "taskbarname.h"
 
-extern GHashTable* win_to_task_table;
+using TaskPtrArray = std::vector<Task*>;
+using WindowToTaskMap = std::map<Window, TaskPtrArray>;
+extern WindowToTaskMap win_to_task_map;
+
 extern Task* task_active;
 extern Task* task_drag;
 extern int taskbar_enabled;
@@ -48,9 +54,9 @@ void CleanupTaskbar();
 
 void InitTaskbar();
 
-void TaskbarRemoveTask(gpointer key, gpointer value, gpointer user_data);
+void TaskbarRemoveTask(Window win);
 Task* TaskGetTask(Window win);
-GPtrArray* TaskGetTasks(Window win);
+TaskPtrArray TaskGetTasks(Window win);
 void TaskRefreshTasklist();
 
 

@@ -53,11 +53,13 @@ bool FindWindow(Window const needle,
 }  // namespace
 
 
-/* win_to_task_table holds for every Window an array of tasks. Usually the array contains only one
-   element. However for omnipresent windows (windows which are visible in every taskbar) the array
-   contains to every Task* on each panel a pointer (i.e. GPtrArray.len == server.nb_desktop)
-*/
-GHashTable* win_to_task_table;
+// win_to_task_map holds for every Window an array of tasks.
+// Usually the array contains only one element. However for omnipresent windows
+// (windows which are visible in every taskbar) the array contains to every
+// Task* on each panel a pointer (i.e. GPtrArray.len == server.nb_desktop)
+
+WindowToTaskMap win_to_task_map;
+
 Task* task_active;
 Task* task_drag;
 int taskbar_enabled;
@@ -104,19 +106,9 @@ Taskbar& Taskbar::set_state(size_t state) {
     return (*this);
 }
 
-guint win_hash(gconstpointer key) {
-    return (guint) * ((Window*)key);
-}
-gboolean win_compare(gconstpointer a, gconstpointer b) {
-    return (*((Window*)a) == *((Window*)b));
-}
-void free_ptr_array(gpointer data) {
-    g_ptr_array_free(static_cast<GPtrArray*>(data), 1);
-}
-
 
 void DefaultTaskbar() {
-    win_to_task_table = nullptr;
+    win_to_task_map.clear();
     urgent_timeout = nullptr;
     urgent_list.clear();
     taskbar_enabled = 0;
@@ -126,9 +118,11 @@ void DefaultTaskbar() {
 void CleanupTaskbar() {
     Taskbarname::Cleanup();
 
-    if (win_to_task_table) {
-        g_hash_table_foreach(win_to_task_table, TaskbarRemoveTask, 0);
+    for (auto const& pair : win_to_task_map) {
+        TaskbarRemoveTask(pair.first);
     }
+
+    win_to_task_map.clear();
 
     for (int i = 0 ; i < nb_panel; ++i) {
         Panel& panel = panel1[i];
@@ -156,20 +150,10 @@ void CleanupTaskbar() {
             panel.taskbar_ = nullptr;
         }
     }
-
-    if (win_to_task_table) {
-        g_hash_table_destroy(win_to_task_table);
-        win_to_task_table = 0;
-    }
 }
 
 
 void InitTaskbar() {
-    if (win_to_task_table == nullptr) {
-        win_to_task_table = g_hash_table_new_full(win_hash, win_compare, free,
-                            free_ptr_array);
-    }
-
     task_active = nullptr;
     task_drag = nullptr;
 }
@@ -366,28 +350,32 @@ void Taskbar::InitPanel(Panel* panel) {
 }
 
 
-void TaskbarRemoveTask(gpointer key, gpointer value, gpointer user_data) {
-    RemoveTask(TaskGetTask(*static_cast<Window*>(key)));
+void TaskbarRemoveTask(Window win) {
+    RemoveTask(TaskGetTask(win));
 }
 
 
 Task* TaskGetTask(Window win) {
-    GPtrArray* task_group = TaskGetTasks(win);
+    auto const& task_group = TaskGetTasks(win);
 
-    if (task_group != nullptr) {
-        return static_cast<Task*>(g_ptr_array_index(task_group, 0));
+    if (!task_group.empty()) {
+        return task_group[0];
     }
 
     return nullptr;
 }
 
 
-GPtrArray* TaskGetTasks(Window win) {
-    if (win_to_task_table && taskbar_enabled) {
-        return static_cast<GPtrArray*>(g_hash_table_lookup(win_to_task_table, &win));
+TaskPtrArray TaskGetTasks(Window win) {
+    if (taskbar_enabled && !win_to_task_map.empty()) {
+        auto it = win_to_task_map.find(win);
+
+        if (it != win_to_task_map.end()) {
+            return it->second;
+        }
     }
 
-    return 0;
+    return TaskPtrArray();
 }
 
 
@@ -405,17 +393,11 @@ void TaskRefreshTasklist() {
         return;
     }
 
-    GList* win_list = g_hash_table_get_keys(win_to_task_table);
-
-    for (GList* it = win_list; it != nullptr; it = it->next) {
-        if (!FindWindow(*static_cast<Window*>(it->data),
-                        windows.get(),
-                        num_results)) {
-            TaskbarRemoveTask(it->data, 0, 0);
+    for (auto const& pair : win_to_task_map) {
+        if (!FindWindow(pair.first, windows.get(), num_results)) {
+            TaskbarRemoveTask(pair.first);
         }
     }
-
-    g_list_free(win_list);
 
     // Add any new
     for (int i = 0; i < num_results; i++) {
