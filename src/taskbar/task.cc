@@ -175,15 +175,8 @@ void RemoveTask(Task* tsk) {
 
     for (auto tsk2 : it->second) {
         auto tskbar = reinterpret_cast<Taskbar*>(tsk2->parent_);
-        auto tsk2_iter = std::find(tskbar->children_.begin(),
-                                   tskbar->children_.end(),
-                                   tsk2);
 
-        if (tsk2_iter != tskbar->children_.end()) {
-            tskbar->children_.erase(tsk2_iter);
-        }
-
-        tskbar->need_resize_ = true;
+        tskbar->RemoveTask(tsk2);
 
         if (tsk2 == task_active) {
             task_active = 0;

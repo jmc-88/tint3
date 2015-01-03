@@ -35,6 +35,8 @@ class Taskbar : public TaskbarBase {
     void OnChangeLayout() override;
     bool Resize() override;
 
+    bool RemoveTask(Task* task);
+
     static void InitPanel(Panel* panel);
 };
 

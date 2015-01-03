@@ -407,6 +407,21 @@ void TaskRefreshTasklist() {
 }
 
 
+bool Taskbar::RemoveTask(Task* task) {
+    auto it = std::find(children_.begin(),
+                        children_.end(),
+                        task);
+
+    if (it != children_.end()) {
+        children_.erase(it);
+        need_resize_ = true;
+        return true;
+    }
+
+    return false;
+}
+
+
 void Taskbar::DrawForeground(cairo_t* /* c */) {
     size_t state = (desktop == server.desktop ? TASKBAR_ACTIVE : TASKBAR_NORMAL);
     set_state_pixmap(state, pix_);
