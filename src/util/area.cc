@@ -441,11 +441,9 @@ bool Area::RemoveArea() {
 }
 
 
-// FIXME: this should modify this object's children, not add itself to the
-// parent's children collection
-void Area::AddArea() {
-    parent_->children_.push_back(this);
-    parent_->SetRedraw();
+void Area::AddChild(Area* child) {
+    children_.push_back(child);
+    SetRedraw();
 }
 
 

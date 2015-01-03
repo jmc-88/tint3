@@ -754,7 +754,8 @@ void Launcher::LoadIcons() {
                                            : strdup(entry.exec);
             FreeDesktopEntry(&entry);
             list_icons_.push_back(launcher_icon);
-            launcher_icon->AddArea();
+
+            AddChild(launcher_icon);
         }
     }
 }
