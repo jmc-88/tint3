@@ -20,7 +20,6 @@
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <X11/Xatom.h>
-#include <glib.h>
 #include <Imlib2.h>
 
 #include <algorithm>
