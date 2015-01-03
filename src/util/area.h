@@ -134,9 +134,9 @@ class Area {
 
 
 // draw rounded rectangle
-void draw_rect(cairo_t* c, double x, double y, double w, double h, double r);
+void DrawRect(cairo_t* c, double x, double y, double w, double h, double r);
 
 // clear pixmap with transparent color
-void clear_pixmap(Pixmap p, int x, int y, int w, int h);
+void ClearPixmap(Pixmap p, int x, int y, int w, int h);
 
 #endif

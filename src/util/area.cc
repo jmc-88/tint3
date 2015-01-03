@@ -372,7 +372,7 @@ void Area::Draw() {
 
     // add layer of root pixmap (or clear pixmap if real_transparency==true)
     if (server.real_transparency) {
-        clear_pixmap(pix_, 0 , 0, width_, height_);
+        ClearPixmap(pix_, 0 , 0, width_, height_);
     }
 
     util::log::Debug()
@@ -401,9 +401,9 @@ void Area::Draw() {
 void Area::DrawBackground(cairo_t* c) {
     if (bg_->back.alpha > 0.0) {
         //printf("    draw_background (%d %d) RGBA (%lf, %lf, %lf, %lf)\n", posx, posy, pix->back.color[0], pix->back.color[1], pix->back.color[2], pix->back.alpha);
-        draw_rect(c, bg_->border.width, bg_->border.width,
-                  width_ - (2.0 * bg_->border.width), height_ - (2.0 * bg_->border.width),
-                  bg_->border.rounded - bg_->border.width / 1.571);
+        DrawRect(c, bg_->border.width, bg_->border.width,
+                 width_ - (2.0 * bg_->border.width), height_ - (2.0 * bg_->border.width),
+                 bg_->border.rounded - bg_->border.width / 1.571);
         cairo_set_source_rgba(c, bg_->back.color[0], bg_->back.color[1],
                               bg_->back.color[2], bg_->back.alpha);
         cairo_fill(c);
@@ -413,9 +413,9 @@ void Area::DrawBackground(cairo_t* c) {
         cairo_set_line_width(c, bg_->border.width);
 
         // draw border inside (x, y, width, height)
-        draw_rect(c, bg_->border.width / 2.0, bg_->border.width / 2.0,
-                  width_ - bg_->border.width, height_ - bg_->border.width,
-                  bg_->border.rounded);
+        DrawRect(c, bg_->border.width / 2.0, bg_->border.width / 2.0,
+                 width_ - bg_->border.width, height_ - bg_->border.width,
+                 bg_->border.rounded);
 
         cairo_set_source_rgba(c, bg_->border.color[0], bg_->border.color[1],
                               bg_->border.color[2], bg_->border.alpha);
@@ -481,7 +481,7 @@ void Area::OnChangeLayout() {
 }
 
 
-void draw_rect(cairo_t* c, double x, double y, double w, double h, double r) {
+void DrawRect(cairo_t* c, double x, double y, double w, double h, double r) {
     if (r > 0.0) {
         double c1 = 0.55228475 * r;
 
@@ -500,7 +500,7 @@ void draw_rect(cairo_t* c, double x, double y, double w, double h, double r) {
 }
 
 
-void clear_pixmap(Pixmap p, int x, int y, int w, int h) {
+void ClearPixmap(Pixmap p, int x, int y, int w, int h) {
     Picture pict = XRenderCreatePicture(server.dsp, p,
                                         XRenderFindVisualFormat(server.dsp, server.visual), 0, 0);
     XRenderColor col = { .red = 0, .green = 0, .blue = 0, .alpha = 0 };

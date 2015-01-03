@@ -633,7 +633,7 @@ void Panel::SetBackground() {
     }
 
     if (server.real_transparency) {
-        clear_pixmap(pix_, 0, 0, width_, height_);
+        ClearPixmap(pix_, 0, 0, width_, height_);
     } else {
         GetRootPixmap();
         // copy background (server.root_pmap) in panel.pix

@@ -287,9 +287,9 @@ void TooltipUpdate() {
     Border b = g_tooltip.bg->border;
 
     if (server.real_transparency) {
-        clear_pixmap(g_tooltip.window, 0, 0, width, height);
-        draw_rect(c, b.width, b.width, width - 2 * b.width, height - 2 * b.width,
-                  b.rounded - b.width / 1.571);
+        ClearPixmap(g_tooltip.window, 0, 0, width, height);
+        DrawRect(c, b.width, b.width, width - 2 * b.width, height - 2 * b.width,
+                 b.rounded - b.width / 1.571);
         cairo_set_source_rgba(c, bc.color[0], bc.color[1], bc.color[2], bc.alpha);
     } else {
         cairo_rectangle(c, 0., 0, width, height);
@@ -300,8 +300,8 @@ void TooltipUpdate() {
     cairo_set_line_width(c, b.width);
 
     if (server.real_transparency) {
-        draw_rect(c, b.width / 2.0, b.width / 2.0, width - b.width, height - b.width,
-                  b.rounded);
+        DrawRect(c, b.width / 2.0, b.width / 2.0, width - b.width, height - b.width,
+                 b.rounded);
     } else {
         cairo_rectangle(c, b.width / 2.0, b.width / 2.0, width - b.width,
                         height - b.width);
