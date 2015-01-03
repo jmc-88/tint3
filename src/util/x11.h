@@ -31,7 +31,7 @@ template<typename T>
 class ClientData : public std::unique_ptr<T, XFreeDeleter> {
   public:
     explicit ClientData(void* data)
-        : std::unique_ptr<T, XFreeDeleter>(static_cast<T * >(data)) {
+        : std::unique_ptr<T, XFreeDeleter>(static_cast<T* >(data)) {
     }
 };
 

@@ -507,5 +507,10 @@ bool Area::IsClickInside(int x, int y) const {
     bool inside_x = (x >= panel_x_ && x <= panel_x_ + width_);
     bool inside_y = (y >= panel_y_ && y <= panel_y_ + height_);
 
+    util::log::Debug()
+            << "Area::IsClickInside(" << x << ", " << y << ") = "
+            << "(on_screen_ = " << on_screen_ << ") &&"
+            << "(inside_x = " << inside_x << ") &&"
+            << "(inside_y = " << inside_y << ")\n";
     return on_screen_ && inside_x && inside_y;
 }

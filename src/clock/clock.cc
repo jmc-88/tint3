@@ -21,6 +21,7 @@
 #include <cairo-xlib.h>
 #include <pango/pangocairo.h>
 
+#include <algorithm>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -241,8 +242,9 @@ bool Clock::Resize() {
     }
 
     if (panel_horizontal) {
-        int new_size = (time_width > date_width) ? time_width : date_width;
-        new_size += (2 * padding_x_lr_) + (2 * bg_->border.width);
+        int new_size = std::max(time_width, date_width)
+                       + (2 * padding_x_lr_)
+                       + (2 * bg_->border.width);
 
         if (new_size > width_ || new_size < (width_ - 6)) {
             // we try to limit the number of resize
@@ -257,8 +259,8 @@ bool Clock::Resize() {
             return true;
         }
     } else {
-        int new_size = time_height + date_height + (2 * (padding_x_lr_ +
-                       bg_->border.width));
+        int new_size = time_height + date_height
+                       + (2 * (padding_x_lr_ + bg_->border.width));
 
         if (new_size != height_) {
             // we try to limit the number of resize

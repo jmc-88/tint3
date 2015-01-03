@@ -595,10 +595,13 @@ void NetMessage(XClientMessageEvent* e) {
     }
 }
 
-void systray_render_icon_now(void* t) {
+
+namespace {
+
+void SystrayRenderIconNow(void* t) {
     // we end up in this function only in real transparency mode or if systray_task_asb != 100 0 0
     // we made also sure, that we always have a 32 bit visual, i.e. we can safely create 32 bit pixmaps here
-    TrayWindow* traywin = static_cast<TrayWindow*>(t);
+    auto traywin = static_cast<TrayWindow*>(t);
     traywin->render_timeout = 0;
 
     if (traywin->width == 0 || traywin->height == 0) {
@@ -615,8 +618,8 @@ void systray_render_icon_now(void* t) {
     // Very ugly hack, but somehow imlib2 is not able to get the image from the traywindow itself,
     // so we first render the tray window onto a pixmap, and then we tell imlib2 to use this pixmap as
     // drawable. If someone knows why it does not work with the traywindow itself, please tell me ;)
-    Pixmap tmp_pmap = XCreatePixmap(server.dsp, server.root_win, traywin->width,
-                                    traywin->height, 32);
+    Pixmap tmp_pmap = XCreatePixmap(server.dsp, server.root_win,
+                                    traywin->width, traywin->height, 32);
     XRenderPictFormat* f;
 
     if (traywin->depth == 24) {
@@ -647,7 +650,7 @@ void systray_render_icon_now(void* t) {
     Imlib_Image image = imlib_create_image_from_drawable(0, 0, 0, traywin->width,
                         traywin->height, 1);
 
-    if (image == 0) {
+    if (image == nullptr) {
         return;
     }
 
@@ -661,7 +664,8 @@ void systray_render_icon_now(void* t) {
         CreateHeuristicMask(data, traywin->width, traywin->height);
     }
 
-    if (systray.alpha != 100 || systray.brightness != 0
+    if (systray.alpha != 100
+        || systray.brightness != 0
         || systray.saturation != 0) {
         AdjustAsb(data, traywin->width, traywin->height, systray.alpha,
                   (float)systray.saturation / 100, (float)systray.brightness / 100);
@@ -689,13 +693,15 @@ void systray_render_icon_now(void* t) {
     XFlush(server.dsp);
 }
 
+}  // namespace
+
 
 void SystrayRenderIcon(TrayWindow* traywin) {
     if (server.real_transparency || systray.alpha != 100 || systray.brightness != 0
         || systray.saturation != 0) {
         // wine tray icons update whenever mouse is over them, so we limit the updates to 50 ms
         if (traywin->render_timeout == 0) {
-            traywin->render_timeout = AddTimeout(50, 0, systray_render_icon_now, traywin);
+            traywin->render_timeout = AddTimeout(50, 0, SystrayRenderIconNow, traywin);
         }
     } else {
         // comment by andreas: I'm still not sure, what exactly we need to do here... Somehow trayicons which do not
@@ -704,18 +710,16 @@ void SystrayRenderIcon(TrayWindow* traywin) {
         //          Pixmap pix = XCreatePixmap(server.dsp, server.root_win, traywin->width, traywin->height, server.depth);
         //          XCopyArea(server.dsp, panel->temp_pmap, pix, server.gc, traywin->x, traywin->y, traywin->width, traywin->height, 0, 0);
         //          XSetWindowBackgroundPixmap(server.dsp, traywin->id, pix);
-        XClearArea(server.dsp, traywin->tray_id, 0, 0, traywin->width, traywin->height,
-                   True);
+        XClearArea(server.dsp, traywin->tray_id, 0, 0,
+                   traywin->width, traywin->height, True);
     }
 }
 
 
 void RefreshSystrayIcon() {
     for (auto& traywin : systray.list_icons) {
-        if (traywin->hide) {
-            continue;
+        if (!traywin->hide) {
+            SystrayRenderIcon(traywin);
         }
-
-        SystrayRenderIcon(traywin);
     }
 }
