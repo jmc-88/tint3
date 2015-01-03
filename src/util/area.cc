@@ -424,15 +424,25 @@ void Area::DrawBackground(cairo_t* c) {
 }
 
 
-void Area::RemoveArea() {
-    parent_->children_.erase(std::remove(parent_->children_.begin(),
-                                         parent_->children_.end(),
-                                         this),
-                             parent_->children_.end());
-    parent_->SetRedraw();
+// FIXME: this should modify this object's children, not commit suicide from
+// inside the parent's children collection
+bool Area::RemoveArea() {
+    auto const& it = std::find(parent_->children_.begin(),
+                               parent_->children_.end(),
+                               this);
+
+    if (it != parent_->children_.end()) {
+        parent_->children_.erase(it);
+        parent_->SetRedraw();
+        return true;
+    }
+
+    return false;
 }
 
 
+// FIXME: this should modify this object's children, not add itself to the
+// parent's children collection
 void Area::AddArea() {
     parent_->children_.push_back(this);
     parent_->SetRedraw();

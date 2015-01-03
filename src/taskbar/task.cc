@@ -37,22 +37,37 @@
 #include "util/timer.h"
 #include "util/window.h"
 
+
 namespace {
 
 const char kUntitled[] = "Untitled";
 
 }  // namespace
 
+
 Timeout* urgent_timeout;
 std::list<Task*> urgent_list;
+
 
 std::string Task::GetTooltipText() {
     return tooltip_enabled_ ? title_ : std::string();
 }
 
+
 Task& Task::SetTooltipEnabled(bool is_enabled) {
     tooltip_enabled_ = is_enabled;
     return (*this);
+}
+
+
+// FIXME: this is better as a member of Taskbar
+bool Task::RemoveArea() {
+    if (Area::RemoveArea()) {
+        parent_->need_resize_ = true;
+        return true;
+    }
+
+    return false;
 }
 
 
@@ -174,9 +189,7 @@ void RemoveTask(Task* tsk) {
     }
 
     for (auto tsk2 : it->second) {
-        auto tskbar = reinterpret_cast<Taskbar*>(tsk2->parent_);
-
-        tskbar->RemoveTask(tsk2);
+        tsk2->RemoveArea();
 
         if (tsk2 == task_active) {
             task_active = 0;

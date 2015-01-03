@@ -73,7 +73,7 @@ class Task : public Area {
 
     void DrawForeground(cairo_t* c) override;
     std::string GetTooltipText() override;
-    bool UpdateTitle(); // TODO: find a more descriptive name
+    bool UpdateTitle();  // TODO: find a more descriptive name
     std::string GetTitle() const;
     void SetTitle(std::string const& title);
     void OnChangeLayout() override;
@@ -81,6 +81,8 @@ class Task : public Area {
 
     void AddUrgent();
     void DelUrgent();
+
+    bool RemoveArea() override;
 };
 
 extern Timeout* urgent_timeout;
