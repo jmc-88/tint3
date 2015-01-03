@@ -106,7 +106,7 @@ class Area {
 
     virtual std::string GetTooltipText();
 
-    virtual bool RemoveArea();
+    virtual bool RemoveChild(Area* child);
     virtual void AddChild(Area* child);
 
     // draw pixmap

@@ -442,6 +442,16 @@ bool Taskbar::Resize() {
 }
 
 
+bool Taskbar::RemoveChild(Area* child) {
+    if (Area::RemoveChild(child)) {
+        need_resize_ = true;
+        return true;
+    }
+
+    return false;
+}
+
+
 void Taskbar::OnChangeLayout() {
     // reset Pixmap when position/size changed
     for (int k = 0; k < TASKBAR_STATE_COUNT; ++k) {

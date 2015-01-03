@@ -60,17 +60,6 @@ Task& Task::SetTooltipEnabled(bool is_enabled) {
 }
 
 
-// FIXME: this is better as a member of Taskbar
-bool Task::RemoveArea() {
-    if (Area::RemoveArea()) {
-        parent_->need_resize_ = true;
-        return true;
-    }
-
-    return false;
-}
-
-
 Task* AddTask(Window win) {
     if (win == 0 || WindowIsHidden(win)) {
         return nullptr;
@@ -189,7 +178,7 @@ void RemoveTask(Task* tsk) {
     }
 
     for (auto tsk2 : it->second) {
-        tsk2->RemoveArea();
+        tsk2->parent_->RemoveChild(tsk2);
 
         if (tsk2 == task_active) {
             task_active = 0;

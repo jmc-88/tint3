@@ -81,8 +81,6 @@ class Task : public Area {
 
     void AddUrgent();
     void DelUrgent();
-
-    bool RemoveArea() override;
 };
 
 extern Timeout* urgent_timeout;
