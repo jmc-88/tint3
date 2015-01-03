@@ -175,14 +175,14 @@ void Taskbar::InitPanel(Panel* panel) {
 
     // taskbar name
     panel->g_taskbar.bar_name_.panel_ = panel;
-    panel->g_taskbar.bar_name_.size_mode_ = SIZE_BY_CONTENT;
+    panel->g_taskbar.bar_name_.size_mode_ = kSizeByContent;
     panel->g_taskbar.bar_name_.need_resize_ = true;
     panel->g_taskbar.bar_name_.on_screen_ = true;
 
     // taskbar
     panel->g_taskbar.parent_ = panel;
     panel->g_taskbar.panel_ = panel;
-    panel->g_taskbar.size_mode_ = SIZE_BY_LAYOUT;
+    panel->g_taskbar.size_mode_ = kSizeByLayout;
     panel->g_taskbar.need_resize_ = true;
     panel->g_taskbar.on_screen_ = true;
 
@@ -200,7 +200,7 @@ void Taskbar::InitPanel(Panel* panel) {
 
     // task
     panel->g_task.panel_ = panel;
-    panel->g_task.size_mode_ = SIZE_BY_LAYOUT;
+    panel->g_task.size_mode_ = kSizeByLayout;
     panel->g_task.need_resize_ = true;
     panel->g_task.on_screen_ = true;
 

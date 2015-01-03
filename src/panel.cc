@@ -269,7 +269,7 @@ void InitPanel() {
         p->panel_ = p;
         p->on_screen_ = true;
         p->need_resize_ = true;
-        p->size_mode_ = SIZE_BY_LAYOUT;
+        p->size_mode_ = kSizeByLayout;
         p->InitSizeAndPosition();
 
         // add children according to panel_items

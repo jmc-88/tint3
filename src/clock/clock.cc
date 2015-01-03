@@ -174,7 +174,7 @@ void Clock::InitPanel(Panel* panel) {
 
     clock.parent_ = panel;
     clock.panel_ = panel;
-    clock.size_mode_ = SIZE_BY_CONTENT;
+    clock.size_mode_ = kSizeByContent;
 
     // check consistency
     if (time1_format.empty()) {

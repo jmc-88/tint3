@@ -78,7 +78,7 @@ Area& Area::CloneArea(Area const& other) {
  * The tree give the localisation of each object :
  * - tree's root is in the background while tree's leafe are foreground objects
  * - position of a node/Area depend on the layout : parent's position (posx, posy), size of previous brothers and parent's padding
- * - size of a node/Area depend on the content (SIZE_BY_CONTENT objects) or on the layout (SIZE_BY_LAYOUT objects)
+ * - size of a node/Area depend on the content (kSizeByContent objects) or on the layout (kSizeByLayout objects)
  *
  * DRAWING AND LAYERING ENGINE :
  * Redrawing an object (like the clock) could come from an 'external event' (date change)
@@ -86,11 +86,11 @@ Area& Area::CloneArea(Area const& other) {
  * The following 'drawing engine' take care of :
  * - posx/posy of all Area
  * - 'layering event' propagation between object
- * 1) browse tree SIZE_BY_CONTENT
- *  - resize SIZE_BY_CONTENT node : children are resized before parent
+ * 1) browse tree kSizeByContent
+ *  - resize kSizeByContent node : children are resized before parent
  *  - if 'size' changed then 'need_resize = true' on the parent
- * 2) browse tree SIZE_BY_LAYOUT and POSITION
- *  - resize SIZE_BY_LAYOUT node : parent is resized before children
+ * 2) browse tree kSizeByLayout and POSITION
+ *  - resize kSizeByLayout node : parent is resized before children
  *  - calculate position (posx,posy) : parent is calculated before children
  *  - if 'position' changed then 'need_redraw = 1'
  * 3) browse tree REDRAW
@@ -133,7 +133,7 @@ void Area::SizeByContent() {
     // calculate area's size
     on_changed_ = 0;
 
-    if (need_resize_ && size_mode_ == SIZE_BY_CONTENT) {
+    if (need_resize_ && size_mode_ == kSizeByContent) {
         need_resize_ = false;
 
         if (Resize()) {
@@ -153,14 +153,14 @@ void Area::SizeByLayout(int pos, int level) {
 
     // parent node is resized before its children
     // calculate area's size
-    if (need_resize_ && size_mode_ == SIZE_BY_LAYOUT) {
+    if (need_resize_ && size_mode_ == kSizeByLayout) {
         need_resize_ = false;
 
         Resize();
 
-        // resize children with SIZE_BY_LAYOUT
+        // resize children with kSizeByLayout
         for (auto& child : children_) {
-            if (child->size_mode_ == SIZE_BY_LAYOUT && child->children_.size() != 0) {
+            if (child->size_mode_ == kSizeByLayout && child->children_.size() != 0) {
                 child->need_resize_ = true;
             }
         }
@@ -238,16 +238,16 @@ int Area::ResizeByLayout(int maximum_size) {
     int size, nb_by_content = 0, nb_by_layout = 0;
 
     if (panel_horizontal) {
-        // detect free size for SIZE_BY_LAYOUT's Area
+        // detect free size for kSizeByLayout's Area
         size = width_ - (2 * (padding_x_lr_ + bg_->border.width));
 
         for (auto& child : children_) {
-            if (child->on_screen_ && child->size_mode_ == SIZE_BY_CONTENT) {
+            if (child->on_screen_ && child->size_mode_ == kSizeByContent) {
                 size -= child->width_;
                 nb_by_content++;
             }
 
-            if (child->on_screen_ && child->size_mode_ == SIZE_BY_LAYOUT) {
+            if (child->on_screen_ && child->size_mode_ == kSizeByLayout) {
                 nb_by_layout++;
             }
         }
@@ -268,9 +268,9 @@ int Area::ResizeByLayout(int maximum_size) {
             }
         }
 
-        // resize SIZE_BY_LAYOUT objects
+        // resize kSizeByLayout objects
         for (auto& child : children_) {
-            if (child->on_screen_ && child->size_mode_ == SIZE_BY_LAYOUT) {
+            if (child->on_screen_ && child->size_mode_ == kSizeByLayout) {
                 old_width = child->width_;
                 child->width_ = width;
 
@@ -285,16 +285,16 @@ int Area::ResizeByLayout(int maximum_size) {
             }
         }
     } else {
-        // detect free size for SIZE_BY_LAYOUT's Area
+        // detect free size for kSizeByLayout's Area
         size = height_ - (2 * (padding_x_lr_ + bg_->border.width));
 
         for (auto& child : children_) {
-            if (child->on_screen_ && child->size_mode_ == SIZE_BY_CONTENT) {
+            if (child->on_screen_ && child->size_mode_ == kSizeByContent) {
                 size -= child->height_;
                 nb_by_content++;
             }
 
-            if (child->on_screen_ && child->size_mode_ == SIZE_BY_LAYOUT) {
+            if (child->on_screen_ && child->size_mode_ == kSizeByLayout) {
                 nb_by_layout++;
             }
         }
@@ -315,9 +315,9 @@ int Area::ResizeByLayout(int maximum_size) {
             }
         }
 
-        // resize SIZE_BY_LAYOUT objects
+        // resize kSizeByLayout objects
         for (auto& child : children_) {
-            if (child->on_screen_ && child->size_mode_ == SIZE_BY_LAYOUT) {
+            if (child->on_screen_ && child->size_mode_ == kSizeByLayout) {
                 old_height = child->height_;
                 child->height_ = height;
 

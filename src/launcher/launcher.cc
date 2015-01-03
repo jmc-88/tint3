@@ -89,7 +89,7 @@ void Launcher::InitPanel(Panel* panel) {
 
     launcher->parent_ = panel;
     launcher->panel_ = panel;
-    launcher->size_mode_ = SIZE_BY_CONTENT;
+    launcher->size_mode_ = kSizeByContent;
     launcher->need_resize_ = true;
     launcher->need_redraw_ = true;
 
@@ -737,7 +737,7 @@ void Launcher::LoadIcons() {
             auto launcher_icon = new LauncherIcon();
             launcher_icon->parent_ = this;
             launcher_icon->panel_ = panel_;
-            launcher_icon->size_mode_ = SIZE_BY_CONTENT;
+            launcher_icon->size_mode_ = kSizeByContent;
             launcher_icon->need_resize_ = false;
             launcher_icon->need_redraw_ = true;
             launcher_icon->bg_ = backgrounds.front();

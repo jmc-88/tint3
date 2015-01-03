@@ -275,7 +275,7 @@ void Battery::InitPanel(Panel* panel) {
 
     battery.parent_ = panel;
     battery.panel_ = panel;
-    battery.size_mode_ = SIZE_BY_CONTENT;
+    battery.size_mode_ = kSizeByContent;
     battery.on_screen_ = true;
     battery.need_resize_ = true;
 }
