@@ -101,7 +101,7 @@ class Area {
     int ResizeByLayout(int);
 
     // after pos/size changed, the rendering engine will call on_change_layout()
-    int on_changed_;
+    bool on_changed_;
     virtual void OnChangeLayout();
 
     virtual std::string GetTooltipText();

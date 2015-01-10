@@ -131,7 +131,7 @@ void Area::SizeByContent() {
     }
 
     // calculate area's size
-    on_changed_ = 0;
+    on_changed_ = false;
 
     if (need_resize_ && size_mode_ == kSizeByContent) {
         need_resize_ = false;
@@ -139,7 +139,7 @@ void Area::SizeByContent() {
         if (Resize()) {
             // 'size' changed => 'need_resize = true' on the parent
             parent_->need_resize_ = true;
-            on_changed_ = 1;
+            on_changed_ = true;
         }
     }
 }
@@ -178,13 +178,13 @@ void Area::SizeByLayout(int pos, int level) {
             if (pos != child->panel_x_) {
                 // pos changed => redraw
                 child->panel_x_ = pos;
-                child->on_changed_ = 1;
+                child->on_changed_ = true;
             }
         } else {
             if (pos != child->panel_y_) {
                 // pos changed => redraw
                 child->panel_y_ = pos;
-                child->on_changed_ = 1;
+                child->on_changed_ = true;
             }
         }
 
@@ -242,13 +242,13 @@ int Area::ResizeByLayout(int maximum_size) {
         size = width_ - (2 * (padding_x_lr_ + bg_->border.width));
 
         for (auto& child : children_) {
-            if (child->on_screen_ && child->size_mode_ == kSizeByContent) {
-                size -= child->width_;
-                nb_by_content++;
-            }
-
-            if (child->on_screen_ && child->size_mode_ == kSizeByLayout) {
-                nb_by_layout++;
+            if (child->on_screen_) {
+                if (child->size_mode_ == kSizeByContent) {
+                    size -= child->width_;
+                    nb_by_content++;
+                } else if (child->size_mode_ == kSizeByLayout) {
+                    nb_by_layout++;
+                }
             }
         }
 
@@ -256,7 +256,7 @@ int Area::ResizeByLayout(int maximum_size) {
             size -= ((nb_by_content + nb_by_layout - 1) * padding_x_);
         }
 
-        int width = 0, modulo = 0, old_width;
+        int width = 0, modulo = 0;
 
         if (nb_by_layout) {
             width = size / nb_by_layout;
@@ -271,7 +271,7 @@ int Area::ResizeByLayout(int maximum_size) {
         // resize kSizeByLayout objects
         for (auto& child : children_) {
             if (child->on_screen_ && child->size_mode_ == kSizeByLayout) {
-                old_width = child->width_;
+                int old_width = child->width_;
                 child->width_ = width;
 
                 if (modulo != 0) {
@@ -280,7 +280,7 @@ int Area::ResizeByLayout(int maximum_size) {
                 }
 
                 if (child->width_ != old_width) {
-                    child->on_changed_ = 1;
+                    child->on_changed_ = true;
                 }
             }
         }
@@ -289,13 +289,13 @@ int Area::ResizeByLayout(int maximum_size) {
         size = height_ - (2 * (padding_x_lr_ + bg_->border.width));
 
         for (auto& child : children_) {
-            if (child->on_screen_ && child->size_mode_ == kSizeByContent) {
-                size -= child->height_;
-                nb_by_content++;
-            }
-
-            if (child->on_screen_ && child->size_mode_ == kSizeByLayout) {
-                nb_by_layout++;
+            if (child->on_screen_) {
+                if (child->size_mode_ == kSizeByContent) {
+                    size -= child->height_;
+                    nb_by_content++;
+                } else if (child->size_mode_ == kSizeByLayout) {
+                    nb_by_layout++;
+                }
             }
         }
 
@@ -303,7 +303,7 @@ int Area::ResizeByLayout(int maximum_size) {
             size -= ((nb_by_content + nb_by_layout - 1) * padding_x_);
         }
 
-        int height = 0, modulo = 0, old_height;
+        int height = 0, modulo = 0;
 
         if (nb_by_layout) {
             height = size / nb_by_layout;
@@ -318,7 +318,7 @@ int Area::ResizeByLayout(int maximum_size) {
         // resize kSizeByLayout objects
         for (auto& child : children_) {
             if (child->on_screen_ && child->size_mode_ == kSizeByLayout) {
-                old_height = child->height_;
+                int old_height = child->height_;
                 child->height_ = height;
 
                 if (modulo != 0) {
@@ -327,7 +327,7 @@ int Area::ResizeByLayout(int maximum_size) {
                 }
 
                 if (child->height_ != old_height) {
-                    child->on_changed_ = 1;
+                    child->on_changed_ = true;
                 }
             }
         }
@@ -520,3 +520,4 @@ bool Area::IsClickInside(int x, int y) const {
             << "(inside_y = " << inside_y << ")\n";
     return on_screen_ && inside_x && inside_y;
 }
+
