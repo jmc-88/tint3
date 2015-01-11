@@ -12,7 +12,7 @@ exec 1>&2
 
 # Reformat C++ files with Artistic Style.
 for file in $(git diff-index --name-only --cached "${against}" -- | grep -E '(\.cc|\.h)$'); do
-    exec astyle --options=.astylerc "${file}"
+    exec clang-format -i -style=google "${file}"
 done
 
 # If there are whitespace errors, print the offending file names and fail.

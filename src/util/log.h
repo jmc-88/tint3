@@ -7,44 +7,42 @@ namespace util {
 namespace log {
 
 class Logger {
-    friend Logger& Debug();
-    friend Logger& Error();
+  friend Logger& Debug();
+  friend Logger& Error();
 
-  public:
-    enum LoggerMode {
-        kDefault = 0,
-        kDisabled = 1,
-        kAutoFlush = 2,
-    };
+ public:
+  enum LoggerMode {
+    kDefault = 0,
+    kDisabled = 1,
+    kAutoFlush = 2,
+  };
 
-  private:
-    std::ostream& stream_;
-    LoggerMode mode_;
+ private:
+  std::ostream& stream_;
+  LoggerMode mode_;
 
-    Logger(std::ostream& stream, LoggerMode mode = kDefault)
-        : stream_(stream)
-        , mode_(mode) {
+  Logger(std::ostream& stream, LoggerMode mode = kDefault)
+      : stream_(stream), mode_(mode) {}
+
+ public:
+  template <typename V>
+  Logger& operator<<(V const& val) {
+    if (!(mode_ & kDisabled)) {
+      stream_ << val;
+
+      if (mode_ & kAutoFlush) {
+        stream_.flush();
+      }
     }
 
-  public:
-    template<typename V>
-    Logger& operator<<(V const& val) {
-        if (!(mode_ & kDisabled)) {
-            stream_ << val;
-
-            if (mode_ & kAutoFlush) {
-                stream_.flush();
-            }
-        }
-
-        return (*this);
-    }
+    return (*this);
+  }
 };
 
 Logger& Debug();
 Logger& Error();
 
-} // namespace log
-} // namespace util
+}  // namespace log
+}  // namespace util
 
-#endif // TINT3_UTIL_LOG_H
+#endif  // TINT3_UTIL_LOG_H

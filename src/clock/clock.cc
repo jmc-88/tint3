@@ -2,7 +2,8 @@
 *
 * Tint3 : clock
 *
-* Copyright (C) 2008 thierry lorthiois (lorthiois@bbsoft.fr) from Omega distribution
+* Copyright (C) 2008 thierry lorthiois (lorthiois@bbsoft.fr) from Omega
+*distribution
 *
 * This program is free software; you can redistribute it and/or
 * modify it under the terms of the GNU General Public License version 2
@@ -14,7 +15,8 @@
 * GNU General Public License for more details.
 * You should have received a copy of the GNU General Public License
 * along with this program; if not, write to the Free Software
-* Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+* Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+*USA.
 **************************************************************************/
 
 #include <cairo.h>
@@ -35,7 +37,6 @@
 #include "util/timer.h"
 #include "util/window.h"
 
-
 std::string time1_format;
 std::string time1_timezone;
 std::string time2_format;
@@ -53,237 +54,226 @@ static char buf_tooltip[512];
 bool clock_enabled;
 static Timeout* clock_timeout;
 
-
 void DefaultClock() {
-    clock_enabled = false;
-    clock_timeout = nullptr;
-    time1_format.clear();
-    time1_timezone.clear();
-    time2_format.clear();
-    time2_timezone.clear();
-    time_tooltip_format.clear();
-    time_tooltip_timezone.clear();
-    clock_lclick_command.clear();
-    clock_rclick_command.clear();
-    time1_font_desc = nullptr;
-    time2_font_desc = nullptr;
+  clock_enabled = false;
+  clock_timeout = nullptr;
+  time1_format.clear();
+  time1_timezone.clear();
+  time2_format.clear();
+  time2_timezone.clear();
+  time_tooltip_format.clear();
+  time_tooltip_timezone.clear();
+  clock_lclick_command.clear();
+  clock_rclick_command.clear();
+  time1_font_desc = nullptr;
+  time2_font_desc = nullptr;
 }
 
 void CleanupClock() {
-    if (time1_font_desc) {
-        pango_font_description_free(time1_font_desc);
-    }
+  if (time1_font_desc) {
+    pango_font_description_free(time1_font_desc);
+  }
 
-    if (time2_font_desc) {
-        pango_font_description_free(time2_font_desc);
-    }
+  if (time2_font_desc) {
+    pango_font_description_free(time2_font_desc);
+  }
 
-    if (clock_timeout) {
-        StopTimeout(clock_timeout);
-    }
+  if (clock_timeout) {
+    StopTimeout(clock_timeout);
+  }
 
-    time1_format.clear();
-    time1_timezone.clear();
-    time2_format.clear();
-    time2_timezone.clear();
-    time_tooltip_format.clear();
-    time_tooltip_timezone.clear();
-    clock_lclick_command.clear();
-    clock_rclick_command.clear();
+  time1_format.clear();
+  time1_timezone.clear();
+  time2_format.clear();
+  time2_timezone.clear();
+  time_tooltip_format.clear();
+  time_tooltip_timezone.clear();
+  clock_lclick_command.clear();
+  clock_rclick_command.clear();
 }
 
-
 void UpdateClockSeconds(void* arg) {
-    gettimeofday(&time_clock, 0);
+  gettimeofday(&time_clock, 0);
 
-    if (!time1_format.empty()) {
-        for (int i = 0 ; i < nb_panel ; i++) {
-            panel1[i].clock_.need_resize_ = true;
-        }
+  if (!time1_format.empty()) {
+    for (int i = 0; i < nb_panel; i++) {
+      panel1[i].clock_.need_resize_ = true;
     }
+  }
 
-    panel_refresh = 1;
+  panel_refresh = 1;
 }
 
 void UpdateClockMinutes(void* arg) {
-    // remember old_sec because after suspend/hibernate the clock should be updated directly, and not
-    // on next minute change
-    time_t old_sec = time_clock.tv_sec;
-    gettimeofday(&time_clock, 0);
+  // remember old_sec because after suspend/hibernate the clock should be
+  // updated directly, and not
+  // on next minute change
+  time_t old_sec = time_clock.tv_sec;
+  gettimeofday(&time_clock, 0);
 
-    if (time_clock.tv_sec % 60 == 0 || time_clock.tv_sec - old_sec > 60) {
-        if (!time1_format.empty()) {
-            for (int i = 0 ; i < nb_panel ; i++) {
-                panel1[i].clock_.need_resize_ = true;
-            }
-        }
-
-        panel_refresh = 1;
+  if (time_clock.tv_sec % 60 == 0 || time_clock.tv_sec - old_sec > 60) {
+    if (!time1_format.empty()) {
+      for (int i = 0; i < nb_panel; i++) {
+        panel1[i].clock_.need_resize_ = true;
+      }
     }
+
+    panel_refresh = 1;
+  }
 }
 
 struct tm* ClockGetTimeForTimezone(std::string const& timezone) {
-    if (timezone.empty()) {
-        return std::localtime(&time_clock.tv_sec);
-    }
+  if (timezone.empty()) {
+    return std::localtime(&time_clock.tv_sec);
+  }
 
-    const char* old_tz = getenv("TZ");
-    setenv("TZ", timezone.c_str(), 1);
-    struct tm* result = std::localtime(&time_clock.tv_sec);
+  const char* old_tz = getenv("TZ");
+  setenv("TZ", timezone.c_str(), 1);
+  struct tm* result = std::localtime(&time_clock.tv_sec);
 
-    if (old_tz) {
-        setenv("TZ", old_tz, 1);
-    } else {
-        unsetenv("TZ");
-    }
+  if (old_tz) {
+    setenv("TZ", old_tz, 1);
+  } else {
+    unsetenv("TZ");
+  }
 
-    return result;
+  return result;
 }
 
 std::string Clock::GetTooltipText() {
-    std::strftime(buf_tooltip, sizeof(buf_tooltip),
-                  time_tooltip_format.c_str(),
-                  ClockGetTimeForTimezone(time_tooltip_timezone));
-    return buf_tooltip;
+  std::strftime(buf_tooltip, sizeof(buf_tooltip), time_tooltip_format.c_str(),
+                ClockGetTimeForTimezone(time_tooltip_timezone));
+  return buf_tooltip;
 }
-
 
 void InitClock() {
-    if (time1_format.empty() || clock_timeout != nullptr) {
-        return;
-    }
+  if (time1_format.empty() || clock_timeout != nullptr) {
+    return;
+  }
 
-    bool has_seconds_format = time1_format.find('S') != std::string::npos
-                              || time1_format.find('T') != std::string::npos
-                              || time1_format.find('r') != std::string::npos;
+  bool has_seconds_format = time1_format.find('S') != std::string::npos ||
+                            time1_format.find('T') != std::string::npos ||
+                            time1_format.find('r') != std::string::npos;
 
-    if (has_seconds_format) {
-        clock_timeout = AddTimeout(10, 1000, UpdateClockSeconds, 0);
-    } else {
-        clock_timeout = AddTimeout(10, 1000, UpdateClockMinutes, 0);
-    }
+  if (has_seconds_format) {
+    clock_timeout = AddTimeout(10, 1000, UpdateClockSeconds, 0);
+  } else {
+    clock_timeout = AddTimeout(10, 1000, UpdateClockMinutes, 0);
+  }
 }
-
 
 void Clock::InitPanel(Panel* panel) {
-    Clock& clock = panel->clock_;
+  Clock& clock = panel->clock_;
 
-    if (clock.bg_ == nullptr) {
-        clock.bg_ = backgrounds.front();
-    }
+  if (clock.bg_ == nullptr) {
+    clock.bg_ = backgrounds.front();
+  }
 
-    clock.parent_ = panel;
-    clock.panel_ = panel;
-    clock.size_mode_ = kSizeByContent;
+  clock.parent_ = panel;
+  clock.panel_ = panel;
+  clock.size_mode_ = kSizeByContent;
 
-    // check consistency
-    if (time1_format.empty()) {
-        return;
-    }
+  // check consistency
+  if (time1_format.empty()) {
+    return;
+  }
 
-    clock.need_resize_ = true;
-    clock.on_screen_ = true;
+  clock.need_resize_ = true;
+  clock.on_screen_ = true;
 
-    if (!time_tooltip_format.empty()) {
-        std::strftime(buf_tooltip, sizeof(buf_tooltip),
-                      time_tooltip_format.c_str(),
-                      ClockGetTimeForTimezone(time_tooltip_timezone));
-    }
+  if (!time_tooltip_format.empty()) {
+    std::strftime(buf_tooltip, sizeof(buf_tooltip), time_tooltip_format.c_str(),
+                  ClockGetTimeForTimezone(time_tooltip_timezone));
+  }
 }
-
 
 void Clock::DrawForeground(cairo_t* c) {
-    util::GObjectPtr<PangoLayout> layout(pango_cairo_create_layout(c));
+  util::GObjectPtr<PangoLayout> layout(pango_cairo_create_layout(c));
 
-    // draw layout
-    pango_layout_set_font_description(layout.get(), time1_font_desc);
+  // draw layout
+  pango_layout_set_font_description(layout.get(), time1_font_desc);
+  pango_layout_set_width(layout.get(), width_ * PANGO_SCALE);
+  pango_layout_set_alignment(layout.get(), PANGO_ALIGN_CENTER);
+  pango_layout_set_text(layout.get(), buf_time, strlen(buf_time));
+
+  cairo_set_source_rgba(c, font.color[0], font.color[1], font.color[2],
+                        font.alpha);
+
+  pango_cairo_update_layout(c, layout.get());
+  cairo_move_to(c, 0, time1_posy);
+  pango_cairo_show_layout(c, layout.get());
+
+  if (!time2_format.empty()) {
+    pango_layout_set_font_description(layout.get(), time2_font_desc);
+    pango_layout_set_indent(layout.get(), 0);
+    pango_layout_set_text(layout.get(), buf_date, strlen(buf_date));
     pango_layout_set_width(layout.get(), width_ * PANGO_SCALE);
-    pango_layout_set_alignment(layout.get(), PANGO_ALIGN_CENTER);
-    pango_layout_set_text(layout.get(), buf_time, strlen(buf_time));
-
-    cairo_set_source_rgba(c, font.color[0], font.color[1],
-                          font.color[2], font.alpha);
 
     pango_cairo_update_layout(c, layout.get());
-    cairo_move_to(c, 0, time1_posy);
+    cairo_move_to(c, 0, time2_posy);
     pango_cairo_show_layout(c, layout.get());
-
-    if (!time2_format.empty()) {
-        pango_layout_set_font_description(layout.get(), time2_font_desc);
-        pango_layout_set_indent(layout.get(), 0);
-        pango_layout_set_text(layout.get(), buf_date, strlen(buf_date));
-        pango_layout_set_width(layout.get(), width_ * PANGO_SCALE);
-
-        pango_cairo_update_layout(c, layout.get());
-        cairo_move_to(c, 0, time2_posy);
-        pango_cairo_show_layout(c, layout.get());
-    }
+  }
 }
-
 
 bool Clock::Resize() {
-    need_redraw_ = true;
+  need_redraw_ = true;
 
-    std::strftime(buf_time, sizeof(buf_time),
-                  time1_format.c_str(),
-                  ClockGetTimeForTimezone(time1_timezone));
+  std::strftime(buf_time, sizeof(buf_time), time1_format.c_str(),
+                ClockGetTimeForTimezone(time1_timezone));
 
-    int time_height_ink = 0, time_height = 0, time_width = 0;
-    int date_height_ink = 0, date_height = 0, date_width = 0;
-    GetTextSize2(time1_font_desc, &time_height_ink, &time_height, &time_width,
-                 panel_->height_, panel_->width_, buf_time, strlen(buf_time));
+  int time_height_ink = 0, time_height = 0, time_width = 0;
+  int date_height_ink = 0, date_height = 0, date_width = 0;
+  GetTextSize2(time1_font_desc, &time_height_ink, &time_height, &time_width,
+               panel_->height_, panel_->width_, buf_time, strlen(buf_time));
 
-    if (!time2_format.empty()) {
-        std::strftime(buf_date, sizeof(buf_date),
-                      time2_format.c_str(),
-                      ClockGetTimeForTimezone(time2_timezone));
-        GetTextSize2(time2_font_desc, &date_height_ink, &date_height, &date_width,
-                     panel_->height_, panel_->width_, buf_date, strlen(buf_date));
+  if (!time2_format.empty()) {
+    std::strftime(buf_date, sizeof(buf_date), time2_format.c_str(),
+                  ClockGetTimeForTimezone(time2_timezone));
+    GetTextSize2(time2_font_desc, &date_height_ink, &date_height, &date_width,
+                 panel_->height_, panel_->width_, buf_date, strlen(buf_date));
+  }
+
+  if (panel_horizontal) {
+    int new_size = std::max(time_width, date_width) + (2 * padding_x_lr_) +
+                   (2 * bg_->border.width);
+
+    if (new_size > width_ || new_size < (width_ - 6)) {
+      // we try to limit the number of resize
+      width_ = new_size + 1;
+      time1_posy = (height_ - time_height) / 2;
+
+      if (!time2_format.empty()) {
+        time1_posy -= (date_height) / 2;
+        time2_posy = time1_posy + time_height;
+      }
+
+      return true;
     }
+  } else {
+    int new_size =
+        time_height + date_height + (2 * (padding_x_lr_ + bg_->border.width));
 
-    if (panel_horizontal) {
-        int new_size = std::max(time_width, date_width)
-                       + (2 * padding_x_lr_)
-                       + (2 * bg_->border.width);
+    if (new_size != height_) {
+      // we try to limit the number of resize
+      height_ = new_size;
+      time1_posy = (height_ - time_height) / 2;
 
-        if (new_size > width_ || new_size < (width_ - 6)) {
-            // we try to limit the number of resize
-            width_ = new_size + 1;
-            time1_posy = (height_ - time_height) / 2;
+      if (!time2_format.empty()) {
+        time1_posy -= (date_height) / 2;
+        time2_posy = time1_posy + time_height;
+      }
 
-            if (!time2_format.empty()) {
-                time1_posy -= (date_height) / 2;
-                time2_posy = time1_posy + time_height;
-            }
-
-            return true;
-        }
-    } else {
-        int new_size = time_height + date_height
-                       + (2 * (padding_x_lr_ + bg_->border.width));
-
-        if (new_size != height_) {
-            // we try to limit the number of resize
-            height_ = new_size;
-            time1_posy = (height_ - time_height) / 2;
-
-            if (!time2_format.empty()) {
-                time1_posy -= (date_height) / 2;
-                time2_posy = time1_posy + time_height;
-            }
-
-            return true;
-        }
+      return true;
     }
+  }
 
-    return false;
+  return false;
 }
 
-
 void ClockAction(int button) {
-    if (button == 1) {
-        TintExec(clock_lclick_command);
-    } else if (button == 2) {
-        TintExec(clock_rclick_command);
-    }
+  if (button == 1) {
+    TintExec(clock_lclick_command);
+  } else if (button == 2) {
+    TintExec(clock_rclick_command);
+  }
 }

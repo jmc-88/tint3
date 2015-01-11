@@ -22,7 +22,6 @@ namespace config {
 bool ReadFile(std::string const& path);
 bool Read();
 
-} // namespace config
+}  // namespace config
 
 #endif
-

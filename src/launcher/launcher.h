@@ -15,29 +15,29 @@
 #include "xsettings-client.h"
 
 class LauncherIcon : public Area {
-  public:
-    ~LauncherIcon();
+ public:
+  ~LauncherIcon();
 
-    Imlib_Image icon_scaled_;
-    Imlib_Image icon_original_;
-    char* cmd_;
-    char* icon_name_;
-    char* icon_path_;
-    char* icon_tooltip_;
-    int icon_size_;
-    int is_app_desktop_;
-    int x_;
-    int y_;
+  Imlib_Image icon_scaled_;
+  Imlib_Image icon_original_;
+  char* cmd_;
+  char* icon_name_;
+  char* icon_path_;
+  char* icon_tooltip_;
+  int icon_size_;
+  int is_app_desktop_;
+  int x_;
+  int y_;
 
-    void DrawForeground(cairo_t*) override;
-    std::string GetTooltipText() override;
-    void OnChangeLayout() override;
+  void DrawForeground(cairo_t*) override;
+  std::string GetTooltipText() override;
+  void OnChangeLayout() override;
 };
 
 struct DesktopEntry {
-    char* name;
-    char* exec;
-    char* icon;
+  char* name;
+  char* exec;
+  char* icon;
 };
 
 #define ICON_DIR_TYPE_SCALABLE 0
@@ -45,43 +45,43 @@ struct DesktopEntry {
 #define ICON_DIR_TYPE_THRESHOLD 2
 
 struct IconThemeDir {
-    char* name;
-    int size;
-    int type;
-    int max_size;
-    int min_size;
-    int threshold;
-    char* context;
+  char* name;
+  int size;
+  int type;
+  int max_size;
+  int min_size;
+  int threshold;
+  char* context;
 };
 
 class IconTheme {
-  public:
-    ~IconTheme();
+ public:
+  ~IconTheme();
 
-    std::string name;
-    GSList* list_inherits; // each item is a char* (theme name)
-    GSList* list_directories; // each item is an IconThemeDir*
+  std::string name;
+  GSList* list_inherits;     // each item is a char* (theme name)
+  GSList* list_directories;  // each item is an IconThemeDir*
 };
 
 class Launcher : public Area {
-    std::string GetIconPath(std::string const& icon_name, int size);
+  std::string GetIconPath(std::string const& icon_name, int size);
 
-  public:
-    std::vector<std::string> list_apps_;  // paths to .desktop files
-    std::vector<LauncherIcon*> list_icons_;
-    std::vector<IconTheme*> list_themes_;
+ public:
+  std::vector<std::string> list_apps_;  // paths to .desktop files
+  std::vector<LauncherIcon*> list_icons_;
+  std::vector<IconTheme*> list_themes_;
 
-    void CleanupTheme();
+  void CleanupTheme();
 
-    // Populates the list_themes list
-    void LoadThemes();
+  // Populates the list_themes list
+  void LoadThemes();
 
-    // Populates the list_icons list
-    void LoadIcons();
+  // Populates the list_icons list
+  void LoadIcons();
 
-    bool Resize() override;
+  bool Resize() override;
 
-    static void InitPanel(Panel* panel);
+  static void InitPanel(Panel* panel);
 };
 
 extern bool launcher_enabled;
@@ -90,7 +90,7 @@ extern int launcher_tooltip_enabled;
 extern int launcher_alpha;
 extern int launcher_saturation;
 extern int launcher_brightness;
-extern std::string icon_theme_name;   // theme name
+extern std::string icon_theme_name;  // theme name
 extern XSettingsClient* xsettings_client;
 
 // default global data

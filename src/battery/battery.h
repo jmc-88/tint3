@@ -20,37 +20,36 @@
 #include "util/area.h"
 #include "util/common.h"
 
-
 // battery drawing parameter (per panel)
 class Battery : public Area {
-  public:
-    Color font;
-    int bat1_posy;
-    int bat2_posy;
+ public:
+  Color font;
+  int bat1_posy;
+  int bat2_posy;
 
-    void DrawForeground(cairo_t*) override;
-    bool Resize() override;
+  void DrawForeground(cairo_t*) override;
+  bool Resize() override;
 
-    static void InitPanel(Panel* panel);
+  static void InitPanel(Panel* panel);
 };
 
 enum chargestate {
-    BATTERY_UNKNOWN,
-    BATTERY_CHARGING,
-    BATTERY_DISCHARGING,
-    BATTERY_FULL
+  BATTERY_UNKNOWN,
+  BATTERY_CHARGING,
+  BATTERY_DISCHARGING,
+  BATTERY_FULL
 };
 
 typedef struct battime {
-    int16_t hours;
-    int8_t minutes;
-    int8_t seconds;
+  int16_t hours;
+  int8_t minutes;
+  int8_t seconds;
 } battime;
 
 typedef struct batstate {
-    int percentage;
-    struct battime time;
-    enum chargestate state;
+  int percentage;
+  struct battime time;
+  enum chargestate state;
 } batstate;
 
 extern struct batstate battery_state;

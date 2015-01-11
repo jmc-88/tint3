@@ -12,7 +12,8 @@
 * GNU General Public License for more details.
 * You should have received a copy of the GNU General Public License
 * along with this program; if not, write to the Free Software
-* Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+* Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+*USA.
 **************************************************************************/
 
 #ifndef TOOLTIP_H
@@ -25,26 +26,25 @@
 #include "util/timer.h"
 
 class Tooltip {
-  public:
-    std::string tooltip_text;
-    Panel* panel;
-    Window window;
-    int show_timeout_msec;
-    int hide_timeout_msec;
-    Bool mapped;
-    int paddingx;
-    int paddingy;
-    PangoFontDescription* font_desc;
-    Color font_color;
-    Background* bg;
-    Timeout* timeout;
+ public:
+  std::string tooltip_text;
+  Panel* panel;
+  Window window;
+  int show_timeout_msec;
+  int hide_timeout_msec;
+  Bool mapped;
+  int paddingx;
+  int paddingy;
+  PangoFontDescription* font_desc;
+  Color font_color;
+  Background* bg;
+  Timeout* timeout;
 
-    Area* area_;
-    void CopyText(Area* area);
+  Area* area_;
+  void CopyText(Area* area);
 };
 
 extern Tooltip g_tooltip;
-
 
 // default global data
 void DefaultTooltip();
@@ -59,4 +59,4 @@ void TooltipTriggerShow(Area* area, Panel* p, XEvent* e);
 void TooltipHide(void* /*arg*/);
 void TooltipShow(void* /*arg*/);
 
-#endif // TOOLTIP_H
+#endif  // TOOLTIP_H

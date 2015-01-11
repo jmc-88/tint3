@@ -1,7 +1,8 @@
 /**************************************************************************
 * Copyright (C) 2008 thierry lorthiois (lorthiois@bbsoft.fr)
 *
-* Clock with fonctionnal data (timeval, precision) and drawing data (area, font, ...).
+* Clock with fonctionnal data (timeval, precision) and drawing data (area, font,
+*...).
 * Each panel use his own drawing data.
 *
 **************************************************************************/
@@ -16,18 +17,17 @@
 #include "common.h"
 #include "area.h"
 
-
 class Clock : public Area {
-  public:
-    Color font;
-    int time1_posy;
-    int time2_posy;
+ public:
+  Color font;
+  int time1_posy;
+  int time2_posy;
 
-    void DrawForeground(cairo_t*) override;
-    std::string GetTooltipText() override;
-    bool Resize() override;
+  void DrawForeground(cairo_t*) override;
+  std::string GetTooltipText() override;
+  bool Resize() override;
 
-    static void InitPanel(Panel* panel);
+  static void InitPanel(Panel* panel);
 };
 
 extern std::string time1_format;

@@ -6,8 +6,7 @@
 #ifndef COMMON_H
 #define COMMON_H
 
-
-#define WM_CLASS_TINT   "panel"
+#define WM_CLASS_TINT "panel"
 
 #include <Imlib2.h>
 #include <glib-object.h>
@@ -19,61 +18,53 @@
 
 #include "util/area.h"
 
-
 namespace util {
 
 class GObjectUnrefDeleter {
-  public:
-    void operator()(gpointer data) const;
+ public:
+  void operator()(gpointer data) const;
 };
 
-template<typename T>
+template <typename T>
 using GObjectPtr = std::unique_ptr<T, GObjectUnrefDeleter>;
 
 }  // namespace util
 
-
 // mouse actions
 enum MouseActionEnum {
-    NONE = 0,
-    CLOSE,
-    TOGGLE,
-    ICONIFY,
-    SHADE,
-    TOGGLE_ICONIFY,
-    MAXIMIZE_RESTORE,
-    MAXIMIZE,
-    RESTORE,
-    DESKTOP_LEFT,
-    DESKTOP_RIGHT,
-    NEXT_TASK,
-    PREV_TASK
+  NONE = 0,
+  CLOSE,
+  TOGGLE,
+  ICONIFY,
+  SHADE,
+  TOGGLE_ICONIFY,
+  MAXIMIZE_RESTORE,
+  MAXIMIZE,
+  RESTORE,
+  DESKTOP_LEFT,
+  DESKTOP_RIGHT,
+  NEXT_TASK,
+  PREV_TASK
 };
 
 extern int const ALLDESKTOP;
 
-
 class StringBuilder {
-    std::ostringstream ss_;
+  std::ostringstream ss_;
 
-  public:
-    template<typename T>
-    StringBuilder& operator<<(T const& value) {
-        ss_ << value;
-        return (*this);
-    }
+ public:
+  template <typename T>
+  StringBuilder& operator<<(T const& value) {
+    ss_ << value;
+    return (*this);
+  }
 
-    operator std::string() const {
-        return ss_.str();
-    }
+  operator std::string() const { return ss_.str(); }
 };
-
 
 std::string GetEnvironment(std::string const& variable_name);
 
-bool SignalAction(int signal_number,
-                  void signal_handler(int),
-                  int flags = 0);
+bool SignalAction(int signal_number, void signal_handler(int), int flags = 0);
 
 std::string& StringTrim(std::string& str);
 
@@ -83,14 +74,13 @@ long int StringToLongInt(std::string const& str, char** endptr = nullptr);
 // Wrapper around strtof()
 float StringToFloat(std::string const& str, char** endptr = nullptr);
 
-template<typename T>
+template <typename T>
 std::string StringRepresentation(T const& value) {
-    return StringBuilder() << value;
+  return StringBuilder() << value;
 }
 
 // execute a command by calling fork
 void TintExec(std::string const& command);
-
 
 // color conversion
 bool GetColor(const std::string& hex, double* rgb);
@@ -101,8 +91,7 @@ void ExtractValues(const std::string& value, std::string& v1, std::string& v2,
 // adjust Alpha/Saturation/Brightness on an ARGB icon
 // alpha from 0 to 100, satur from 0 to 1, bright from 0 to 1.
 void AdjustAsb(DATA32* data, unsigned int w, unsigned int h, int alpha,
-               float satur,
-               float bright);
+               float satur, float bright);
 void CreateHeuristicMask(DATA32* data, int w, int h);
 
 void RenderImage(Drawable d, int x, int y, int w, int h);

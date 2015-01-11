@@ -3,7 +3,8 @@
 * Tint3 panel
 *
 * Copyright (C) 2007 Pål Staurland (staura@gmail.com)
-* Modified (C) 2008 thierry lorthiois (lorthiois@bbsoft.fr) from Omega distribution
+* Modified (C) 2008 thierry lorthiois (lorthiois@bbsoft.fr) from Omega
+*distribution
 *
 * This program is free software; you can redistribute it and/or
 * modify it under the terms of the GNU General Public License version 2
@@ -15,7 +16,8 @@
 * GNU General Public License for more details.
 * You should have received a copy of the GNU General Public License
 * along with this program; if not, write to the Free Software
-* Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+* Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+*USA.
 **************************************************************************/
 
 #include <unistd.h>
@@ -63,1329 +65,1301 @@ Atom dnd_atom;
 int dnd_sent_request;
 char* dnd_launcher_exec;
 
-
 void Init(int argc, char* argv[]) {
-    // FIXME: remove this global data shit
-    // set global data
-    DefaultConfig();
-    DefaultTimeout();
-    DefaultSystray();
+  // FIXME: remove this global data shit
+  // set global data
+  DefaultConfig();
+  DefaultTimeout();
+  DefaultSystray();
 #ifdef ENABLE_BATTERY
-    DefaultBattery();
+  DefaultBattery();
 #endif  // ENABLE_BATTERY
-    DefaultClock();
-    DefaultLauncher();
-    DefaultTaskbar();
-    DefaultTooltip();
-    DefaultPanel();
+  DefaultClock();
+  DefaultLauncher();
+  DefaultTaskbar();
+  DefaultTooltip();
+  DefaultPanel();
 
-    // read options
-    for (int i = 1; i < argc; ++i) {
-        if (!strcmp(argv[i], "-h") || !strcmp(argv[i], "--help"))   {
-            printf("Usage: tint3 [-c] <config_file>\n");
-            std::exit(0);
-        }
-
-        if (!strcmp(argv[i], "-v") || !strcmp(argv[i], "--version"))    {
-            printf("tint3 version %s\n", VERSION_STRING);
-            std::exit(0);
-        }
-
-        if (!strcmp(argv[i], "-c")) {
-            i++;
-
-            if (i < argc) {
-                config_path = strdup(argv[i]);
-            }
-        }
-
-        if (!strcmp(argv[i], "-s")) {
-            i++;
-
-            if (i < argc) {
-                snapshot_path = strdup(argv[i]);
-            }
-        }
+  // read options
+  for (int i = 1; i < argc; ++i) {
+    if (!strcmp(argv[i], "-h") || !strcmp(argv[i], "--help")) {
+      printf("Usage: tint3 [-c] <config_file>\n");
+      std::exit(0);
     }
 
-    // Set signal handler
-    signal_pending = 0;
+    if (!strcmp(argv[i], "-v") || !strcmp(argv[i], "--version")) {
+      printf("tint3 version %s\n", VERSION_STRING);
+      std::exit(0);
+    }
 
-    auto signal_handler = [](int signal_number) -> void {
-        char const* signal_description = strsignal(signal_number);
+    if (!strcmp(argv[i], "-c")) {
+      i++;
 
-        signal_pending = signal_number;
-        util::log::Debug() << "Received signal " << signal_number;
+      if (i < argc) {
+        config_path = strdup(argv[i]);
+      }
+    }
 
-        if (signal_description != nullptr) {
-            util::log::Debug() << " (" << signal_description << ')';
-        }
+    if (!strcmp(argv[i], "-s")) {
+      i++;
 
-        util::log::Debug() << '\n';
-    };
+      if (i < argc) {
+        snapshot_path = strdup(argv[i]);
+      }
+    }
+  }
 
-    SignalAction(SIGHUP, signal_handler);
-    SignalAction(SIGINT, signal_handler);
-    SignalAction(SIGTERM, signal_handler);
-    SignalAction(SIGUSR1, signal_handler);
-    SignalAction(SIGCHLD, SIG_DFL, SA_NOCLDWAIT);
+  // Set signal handler
+  signal_pending = 0;
 
-    // BSD does not support pselect(), therefore we have to use select and hope that we do not
-    // end up in a race condition there (see 'man select()' on a linux machine for more information)
-    // block all signals, such that no race conditions occur before pselect in our main loop
-    //  sigset_t block_mask;
-    //  sigaddset(&block_mask, SIGINT);
-    //  sigaddset(&block_mask, SIGTERM);
-    //  sigaddset(&block_mask, SIGHUP);
-    //  sigaddset(&block_mask, SIGUSR1);
-    //  sigprocmask(SIG_BLOCK, &block_mask, 0);
+  auto signal_handler = [](int signal_number) -> void {
+    char const* signal_description = strsignal(signal_number);
+
+    signal_pending = signal_number;
+    util::log::Debug() << "Received signal " << signal_number;
+
+    if (signal_description != nullptr) {
+      util::log::Debug() << " (" << signal_description << ')';
+    }
+
+    util::log::Debug() << '\n';
+  };
+
+  SignalAction(SIGHUP, signal_handler);
+  SignalAction(SIGINT, signal_handler);
+  SignalAction(SIGTERM, signal_handler);
+  SignalAction(SIGUSR1, signal_handler);
+  SignalAction(SIGCHLD, SIG_DFL, SA_NOCLDWAIT);
+
+  // BSD does not support pselect(), therefore we have to use select and hope
+  // that we do not
+  // end up in a race condition there (see 'man select()' on a linux machine for
+  // more information)
+  // block all signals, such that no race conditions occur before pselect in our
+  // main loop
+  //  sigset_t block_mask;
+  //  sigaddset(&block_mask, SIGINT);
+  //  sigaddset(&block_mask, SIGTERM);
+  //  sigaddset(&block_mask, SIGHUP);
+  //  sigaddset(&block_mask, SIGUSR1);
+  //  sigprocmask(SIG_BLOCK, &block_mask, 0);
 }
 
 #ifdef HAVE_SN
 static int error_trap_depth = 0;
 
-static void
-ErrorTrapPush(SnDisplay* display,
-              Display*   xdisplay) {
-    ++error_trap_depth;
+static void ErrorTrapPush(SnDisplay* display, Display* xdisplay) {
+  ++error_trap_depth;
 }
 
-static void
-ErrorTrapPop(SnDisplay* display,
-             Display*   xdisplay) {
-    if (error_trap_depth == 0) {
-        util::log::Error() << "Error trap underflow!\n";
-        return;
-    }
+static void ErrorTrapPop(SnDisplay* display, Display* xdisplay) {
+  if (error_trap_depth == 0) {
+    util::log::Error() << "Error trap underflow!\n";
+    return;
+  }
 
-    XSync(xdisplay, False); /* get all errors out of the queue */
-    --error_trap_depth;
+  XSync(xdisplay, False); /* get all errors out of the queue */
+  --error_trap_depth;
 }
 #endif  // HAVE_SN
 
 void InitX11() {
-    server.dsp = XOpenDisplay(nullptr);
+  server.dsp = XOpenDisplay(nullptr);
 
-    if (!server.dsp) {
-        util::log::Error() << "Couldn't open display.\n";
-        std::exit(0);
-    }
+  if (!server.dsp) {
+    util::log::Error() << "Couldn't open display.\n";
+    std::exit(0);
+  }
 
-    server.InitAtoms();
-    server.screen = DefaultScreen(server.dsp);
-    server.root_win = RootWindow(server.dsp, server.screen);
-    server.desktop = server.GetCurrentDesktop();
-    server.InitVisual();
-    XSetErrorHandler(ServerCatchError);
+  server.InitAtoms();
+  server.screen = DefaultScreen(server.dsp);
+  server.root_win = RootWindow(server.dsp, server.screen);
+  server.desktop = server.GetCurrentDesktop();
+  server.InitVisual();
+  XSetErrorHandler(ServerCatchError);
 
 #ifdef HAVE_SN
-    // Initialize startup-notification
-    server.sn_dsp = sn_display_new(server.dsp, ErrorTrapPush, ErrorTrapPop);
+  // Initialize startup-notification
+  server.sn_dsp = sn_display_new(server.dsp, ErrorTrapPush, ErrorTrapPop);
 
-    // Setup a handler for child termination
-    SignalAction(SIGCHLD, [](int) -> void {
-        // Wait for all dead processes
-        pid_t pid;
+  // Setup a handler for child termination
+  SignalAction(SIGCHLD, [](int) -> void {
+    // Wait for all dead processes
+    pid_t pid;
 
-        while ((pid = waitpid(-1, nullptr, WNOHANG)) > 0) {
-            auto it = server.pids.find(pid);
+    while ((pid = waitpid(-1, nullptr, WNOHANG)) > 0) {
+      auto it = server.pids.find(pid);
 
-            if (it != server.pids.end()) {
-                sn_launcher_context_complete(it->second);
-                sn_launcher_context_unref(it->second);
-                server.pids.erase(it);
-            } else {
-                util::log::Error() << "Unknown child " << pid << " terminated!\n";
-            }
-        }
-    });
+      if (it != server.pids.end()) {
+        sn_launcher_context_complete(it->second);
+        sn_launcher_context_unref(it->second);
+        server.pids.erase(it);
+      } else {
+        util::log::Error() << "Unknown child " << pid << " terminated!\n";
+      }
+    }
+  });
 #endif  // HAVE_SN
 
-    imlib_context_set_display(server.dsp);
-    imlib_context_set_visual(server.visual);
-    imlib_context_set_colormap(server.colormap);
+  imlib_context_set_display(server.dsp);
+  imlib_context_set_visual(server.visual);
+  imlib_context_set_colormap(server.colormap);
 
-    /* Catch events */
-    XSelectInput(server.dsp, server.root_win,
-                 PropertyChangeMask | StructureNotifyMask);
+  /* Catch events */
+  XSelectInput(server.dsp, server.root_win,
+               PropertyChangeMask | StructureNotifyMask);
 
-    setlocale(LC_ALL, "");
-    // config file use '.' as decimal separator
-    setlocale(LC_NUMERIC, "POSIX");
+  setlocale(LC_ALL, "");
+  // config file use '.' as decimal separator
+  setlocale(LC_NUMERIC, "POSIX");
 
-    // load default icon
-    for (auto const& dir : util::xdg::basedir::DataDirs()) {
-        auto const& path =
-            util::fs::BuildPath({ dir, "tint3", "default_icon.png" });
+  // load default icon
+  for (auto const& dir : util::xdg::basedir::DataDirs()) {
+    auto const& path = util::fs::BuildPath({dir, "tint3", "default_icon.png"});
 
-        if (util::fs::FileExists(path)) {
-            default_icon = imlib_load_image(path.c_str());
-        }
+    if (util::fs::FileExists(path)) {
+      default_icon = imlib_load_image(path.c_str());
     }
+  }
 
-    // get monitor and desktop config
-    GetMonitors();
-    GetDesktops();
+  // get monitor and desktop config
+  GetMonitors();
+  GetDesktops();
 }
-
 
 void Cleanup() {
-    CleanupSystray();
-    CleanupTooltip();
-    CleanupClock();
-    CleanupLauncher();
+  CleanupSystray();
+  CleanupTooltip();
+  CleanupClock();
+  CleanupLauncher();
 #ifdef ENABLE_BATTERY
-    CleanupBattery();
+  CleanupBattery();
 #endif
-    CleanupPanel();
+  CleanupPanel();
 
-    if (default_icon) {
-        imlib_context_set_image(default_icon);
-        imlib_free_image();
-    }
+  if (default_icon) {
+    imlib_context_set_image(default_icon);
+    imlib_free_image();
+  }
 
-    imlib_context_disconnect_display();
+  imlib_context_disconnect_display();
 
-    server.Cleanup();
-    CleanupTimeout();
+  server.Cleanup();
+  CleanupTimeout();
 
-    if (server.dsp) {
-        XCloseDisplay(server.dsp);
-    }
+  if (server.dsp) {
+    XCloseDisplay(server.dsp);
+  }
 }
-
 
 void GetSnapshot(const char* path) {
-    Panel& panel = panel1[0];
+  Panel& panel = panel1[0];
 
-    if (panel.width_ > server.monitor[0].width) {
-        panel.width_ = server.monitor[0].width;
-    }
+  if (panel.width_ > server.monitor[0].width) {
+    panel.width_ = server.monitor[0].width;
+  }
 
-    panel.temp_pmap = XCreatePixmap(server.dsp, server.root_win, panel.width_,
-                                    panel.height_, server.depth);
-    panel.Render();
+  panel.temp_pmap = XCreatePixmap(server.dsp, server.root_win, panel.width_,
+                                  panel.height_, server.depth);
+  panel.Render();
 
-    imlib_context_set_drawable(panel.temp_pmap);
-    Imlib_Image img = imlib_create_image_from_drawable(
-                          0, 0, 0, panel.width_, panel.height_, 0);
+  imlib_context_set_drawable(panel.temp_pmap);
+  Imlib_Image img =
+      imlib_create_image_from_drawable(0, 0, 0, panel.width_, panel.height_, 0);
 
-    imlib_context_set_image(img);
+  imlib_context_set_image(img);
 
-    if (!panel_horizontal) {
-        // rotate 90° vertical panel
-        imlib_image_flip_horizontal();
-        imlib_image_flip_diagonal();
-    }
+  if (!panel_horizontal) {
+    // rotate 90° vertical panel
+    imlib_image_flip_horizontal();
+    imlib_image_flip_diagonal();
+  }
 
-    imlib_save_image(path);
-    imlib_free_image();
+  imlib_save_image(path);
+  imlib_free_image();
 }
-
 
 void WindowAction(Task* tsk, int action) {
-    if (!tsk) {
-        return;
+  if (!tsk) {
+    return;
+  }
+
+  int desk;
+
+  switch (action) {
+    case CLOSE:
+      SetClose(tsk->win);
+      break;
+
+    case TOGGLE:
+      SetActive(tsk->win);
+      break;
+
+    case ICONIFY:
+      XIconifyWindow(server.dsp, tsk->win, server.screen);
+      break;
+
+    case TOGGLE_ICONIFY:
+      if (task_active && tsk->win == task_active->win) {
+        XIconifyWindow(server.dsp, tsk->win, server.screen);
+      } else {
+        SetActive(tsk->win);
+      }
+
+      break;
+
+    case SHADE:
+      WindowToggleShade(tsk->win);
+      break;
+
+    case MAXIMIZE_RESTORE:
+      WindowMaximizeRestore(tsk->win);
+      break;
+
+    case MAXIMIZE:
+      WindowMaximizeRestore(tsk->win);
+      break;
+
+    case RESTORE:
+      WindowMaximizeRestore(tsk->win);
+      break;
+
+    case DESKTOP_LEFT:
+      if (tsk->desktop == 0) {
+        break;
+      }
+
+      desk = (tsk->desktop - 1);
+      WindowSetDesktop(tsk->win, desk);
+
+      if (desk == server.desktop) {
+        SetActive(tsk->win);
+      }
+
+      break;
+
+    case DESKTOP_RIGHT:
+      if (tsk->desktop == server.nb_desktop) {
+        break;
+      }
+
+      desk = (tsk->desktop + 1);
+      WindowSetDesktop(tsk->win, desk);
+
+      if (desk == server.desktop) {
+        SetActive(tsk->win);
+      }
+
+      break;
+
+    case NEXT_TASK: {
+      Task* tsk1 = NextTask(FindActiveTask(tsk, task_active));
+      SetActive(tsk1->win);
+    } break;
+
+    case PREV_TASK: {
+      Task* tsk1 = PreviousTask(FindActiveTask(tsk, task_active));
+      SetActive(tsk1->win);
     }
-
-    int desk;
-
-    switch (action) {
-        case CLOSE:
-            SetClose(tsk->win);
-            break;
-
-        case TOGGLE:
-            SetActive(tsk->win);
-            break;
-
-        case ICONIFY:
-            XIconifyWindow(server.dsp, tsk->win, server.screen);
-            break;
-
-        case TOGGLE_ICONIFY:
-            if (task_active && tsk->win == task_active->win) {
-                XIconifyWindow(server.dsp, tsk->win, server.screen);
-            } else {
-                SetActive(tsk->win);
-            }
-
-            break;
-
-        case SHADE:
-            WindowToggleShade(tsk->win);
-            break;
-
-        case MAXIMIZE_RESTORE:
-            WindowMaximizeRestore(tsk->win);
-            break;
-
-        case MAXIMIZE:
-            WindowMaximizeRestore(tsk->win);
-            break;
-
-        case RESTORE:
-            WindowMaximizeRestore(tsk->win);
-            break;
-
-        case DESKTOP_LEFT:
-            if (tsk->desktop == 0) {
-                break;
-            }
-
-            desk = (tsk->desktop - 1);
-            WindowSetDesktop(tsk->win, desk);
-
-            if (desk == server.desktop) {
-                SetActive(tsk->win);
-            }
-
-            break;
-
-        case DESKTOP_RIGHT:
-            if (tsk->desktop == server.nb_desktop) {
-                break;
-            }
-
-            desk = (tsk->desktop + 1);
-            WindowSetDesktop(tsk->win, desk);
-
-            if (desk == server.desktop) {
-                SetActive(tsk->win);
-            }
-
-            break;
-
-        case NEXT_TASK: {
-                Task* tsk1 = NextTask(FindActiveTask(tsk, task_active));
-                SetActive(tsk1->win);
-            }
-            break;
-
-        case PREV_TASK: {
-                Task* tsk1 = PreviousTask(FindActiveTask(tsk, task_active));
-                SetActive(tsk1->win);
-            }
-    }
+  }
 }
-
 
 void ForwardClick(XEvent* e) {
-    // forward the click to the desktop window (thanks conky)
-    XUngrabPointer(server.dsp, e->xbutton.time);
-    e->xbutton.window = server.root_win;
-    // icewm doesn't open under the mouse.
-    // and xfce doesn't open at all.
-    e->xbutton.x = e->xbutton.x_root;
-    e->xbutton.y = e->xbutton.y_root;
-    //printf("**** %d, %d\n", e->xbutton.x, e->xbutton.y);
-    //XSetInputFocus(server.dsp, e->xbutton.window, RevertToParent, e->xbutton.time);
-    XSendEvent(server.dsp, e->xbutton.window, False, ButtonPressMask, e);
+  // forward the click to the desktop window (thanks conky)
+  XUngrabPointer(server.dsp, e->xbutton.time);
+  e->xbutton.window = server.root_win;
+  // icewm doesn't open under the mouse.
+  // and xfce doesn't open at all.
+  e->xbutton.x = e->xbutton.x_root;
+  e->xbutton.y = e->xbutton.y_root;
+  // printf("**** %d, %d\n", e->xbutton.x, e->xbutton.y);
+  // XSetInputFocus(server.dsp, e->xbutton.window, RevertToParent,
+  // e->xbutton.time);
+  XSendEvent(server.dsp, e->xbutton.window, False, ButtonPressMask, e);
 }
 
-
 void EventButtonPress(XEvent* e) {
-    Panel* panel = GetPanel(e->xany.window);
+  Panel* panel = GetPanel(e->xany.window);
 
-    if (!panel) {
-        return;
-    }
+  if (!panel) {
+    return;
+  }
 
+  if (wm_menu && !panel->HandlesClick(&e->xbutton)) {
+    ForwardClick(e);
+    return;
+  }
 
-    if (wm_menu && !panel->HandlesClick(&e->xbutton)) {
-        ForwardClick(e);
-        return;
-    }
+  task_drag = panel->ClickTask(e->xbutton.x, e->xbutton.y);
 
-    task_drag = panel->ClickTask(e->xbutton.x, e->xbutton.y);
-
-    if (panel_layer == BOTTOM_LAYER) {
-        XLowerWindow(server.dsp, panel->main_win_);
-    }
+  if (panel_layer == BOTTOM_LAYER) {
+    XLowerWindow(server.dsp, panel->main_win_);
+  }
 }
 
 void EventButtonMotionNotify(XEvent* e) {
-    Panel* panel = GetPanel(e->xany.window);
+  Panel* panel = GetPanel(e->xany.window);
 
-    if (!panel || !task_drag) {
-        return;
-    }
+  if (!panel || !task_drag) {
+    return;
+  }
 
-    // Find the taskbar on the event's location
-    Taskbar* event_taskbar = panel->ClickTaskbar(e->xbutton.x, e->xbutton.y);
+  // Find the taskbar on the event's location
+  Taskbar* event_taskbar = panel->ClickTaskbar(e->xbutton.x, e->xbutton.y);
 
-    if (event_taskbar == nullptr) {
-        return;
-    }
+  if (event_taskbar == nullptr) {
+    return;
+  }
 
-    // Find the task on the event's location
-    Task* event_task = panel->ClickTask(e->xbutton.x, e->xbutton.y);
+  // Find the task on the event's location
+  Task* event_task = panel->ClickTask(e->xbutton.x, e->xbutton.y);
 
-    // If the event takes place on the same taskbar as the task being dragged
-    if (event_taskbar == (Taskbar*)task_drag->parent_) {
-        // Swap the task_drag with the task on the event's location (if they differ)
-        if (event_task && event_task != task_drag) {
-            auto& children = event_taskbar->children_;
-            auto drag_iter = std::find(children.begin(), children.end(), task_drag);
-            auto task_iter = std::find(children.begin(), children.end(), event_task);
+  // If the event takes place on the same taskbar as the task being dragged
+  if (event_taskbar == (Taskbar*)task_drag->parent_) {
+    // Swap the task_drag with the task on the event's location (if they differ)
+    if (event_task && event_task != task_drag) {
+      auto& children = event_taskbar->children_;
+      auto drag_iter = std::find(children.begin(), children.end(), task_drag);
+      auto task_iter = std::find(children.begin(), children.end(), event_task);
 
-            if (drag_iter != children.end() && task_iter != children.end()) {
-                std::iter_swap(drag_iter, task_iter);
-                event_taskbar->need_resize_ = true;
-                panel_refresh = 1;
-                task_dragged = 1;
-            }
-        }
-    } else { // The event is on another taskbar than the task being dragged
-        if (task_drag->desktop == ALLDESKTOP || panel_mode != MULTI_DESKTOP) {
-            return;
-        }
-
-        auto drag_taskbar = reinterpret_cast<Taskbar*>(task_drag->parent_);
-        auto drag_taskbar_iter = std::find(
-                                     drag_taskbar->children_.begin(),
-                                     drag_taskbar->children_.end(),
-                                     task_drag);
-
-        if (drag_taskbar_iter != drag_taskbar->children_.end()) {
-            drag_taskbar->children_.erase(drag_taskbar_iter);
-        }
-
-        if (event_taskbar->panel_x_ > drag_taskbar->panel_x_ ||
-            event_taskbar->panel_y_ > drag_taskbar->panel_y_) {
-            auto& children = event_taskbar->children_;
-            size_t i = (taskbarname_enabled) ? 1 : 0;
-            children.insert(children.begin() + i, task_drag);
-        } else {
-            event_taskbar->children_.push_back(task_drag);
-        }
-
-        // Move task to other desktop (but avoid the 'Window desktop changed' code in 'event_property_notify')
-        task_drag->parent_ = event_taskbar;
-        task_drag->desktop = event_taskbar->desktop;
-
-        WindowSetDesktop(task_drag->win, event_taskbar->desktop);
-
+      if (drag_iter != children.end() && task_iter != children.end()) {
+        std::iter_swap(drag_iter, task_iter);
         event_taskbar->need_resize_ = true;
-        drag_taskbar->need_resize_ = true;
-        task_dragged = 1;
         panel_refresh = 1;
+        task_dragged = 1;
+      }
     }
+  } else {  // The event is on another taskbar than the task being dragged
+    if (task_drag->desktop == ALLDESKTOP || panel_mode != MULTI_DESKTOP) {
+      return;
+    }
+
+    auto drag_taskbar = reinterpret_cast<Taskbar*>(task_drag->parent_);
+    auto drag_taskbar_iter =
+        std::find(drag_taskbar->children_.begin(),
+                  drag_taskbar->children_.end(), task_drag);
+
+    if (drag_taskbar_iter != drag_taskbar->children_.end()) {
+      drag_taskbar->children_.erase(drag_taskbar_iter);
+    }
+
+    if (event_taskbar->panel_x_ > drag_taskbar->panel_x_ ||
+        event_taskbar->panel_y_ > drag_taskbar->panel_y_) {
+      auto& children = event_taskbar->children_;
+      size_t i = (taskbarname_enabled) ? 1 : 0;
+      children.insert(children.begin() + i, task_drag);
+    } else {
+      event_taskbar->children_.push_back(task_drag);
+    }
+
+    // Move task to other desktop (but avoid the 'Window desktop changed' code
+    // in 'event_property_notify')
+    task_drag->parent_ = event_taskbar;
+    task_drag->desktop = event_taskbar->desktop;
+
+    WindowSetDesktop(task_drag->win, event_taskbar->desktop);
+
+    event_taskbar->need_resize_ = true;
+    drag_taskbar->need_resize_ = true;
+    task_dragged = 1;
+    panel_refresh = 1;
+  }
 }
 
 void EventButtonRelease(XEvent* e) {
-    Panel* panel = GetPanel(e->xany.window);
+  Panel* panel = GetPanel(e->xany.window);
 
-    if (!panel) {
-        return;
-    }
+  if (!panel) {
+    return;
+  }
 
-    if (wm_menu && !panel->HandlesClick(&e->xbutton)) {
-        ForwardClick(e);
+  if (wm_menu && !panel->HandlesClick(&e->xbutton)) {
+    ForwardClick(e);
 
-        if (panel_layer == BOTTOM_LAYER) {
-            XLowerWindow(server.dsp, panel->main_win_);
-        }
-
-        task_drag = nullptr;
-        return;
-    }
-
-    int action = TOGGLE_ICONIFY;
-
-    switch (e->xbutton.button) {
-        case 2:
-            action = mouse_middle;
-            break;
-
-        case 3:
-            action = mouse_right;
-            break;
-
-        case 4:
-            action = mouse_scroll_up;
-            break;
-
-        case 5:
-            action = mouse_scroll_down;
-            break;
-
-        case 6:
-            action = mouse_tilt_left;
-            break;
-
-        case 7:
-            action = mouse_tilt_right;
-            break;
-    }
-
-    if (panel->ClickClock(e->xbutton.x, e->xbutton.y)) {
-        ClockAction(e->xbutton.button);
-
-        if (panel_layer == BOTTOM_LAYER) {
-            XLowerWindow(server.dsp, panel->main_win_);
-        }
-
-        task_drag = nullptr;
-        return;
-    }
-
-    if (panel->ClickLauncher(e->xbutton.x, e->xbutton.y)) {
-        LauncherIcon* icon = panel->ClickLauncherIcon(e->xbutton.x, e->xbutton.y);
-
-        if (icon) {
-            LauncherAction(icon, e);
-        }
-
-        task_drag = nullptr;
-        return;
-    }
-
-    Taskbar* tskbar = panel->ClickTaskbar(e->xbutton.x, e->xbutton.y);
-
-    if (!tskbar) {
-        // TODO: check better solution to keep window below
-        if (panel_layer == BOTTOM_LAYER) {
-            XLowerWindow(server.dsp, panel->main_win_);
-        }
-
-        task_drag = nullptr;
-        return;
-    }
-
-    // drag and drop task
-    if (task_dragged) {
-        task_drag = nullptr;
-        task_dragged = 0;
-        return;
-    }
-
-    // switch desktop
-    if (panel_mode == MULTI_DESKTOP) {
-        if (tskbar->desktop != server.desktop && action != CLOSE
-            && action != DESKTOP_LEFT && action != DESKTOP_RIGHT) {
-            SetDesktop(tskbar->desktop);
-        }
-    }
-
-    // action on task
-    WindowAction(panel->ClickTask(e->xbutton.x, e->xbutton.y), action);
-
-    // to keep window below
     if (panel_layer == BOTTOM_LAYER) {
-        XLowerWindow(server.dsp, panel->main_win_);
+      XLowerWindow(server.dsp, panel->main_win_);
     }
-}
 
+    task_drag = nullptr;
+    return;
+  }
+
+  int action = TOGGLE_ICONIFY;
+
+  switch (e->xbutton.button) {
+    case 2:
+      action = mouse_middle;
+      break;
+
+    case 3:
+      action = mouse_right;
+      break;
+
+    case 4:
+      action = mouse_scroll_up;
+      break;
+
+    case 5:
+      action = mouse_scroll_down;
+      break;
+
+    case 6:
+      action = mouse_tilt_left;
+      break;
+
+    case 7:
+      action = mouse_tilt_right;
+      break;
+  }
+
+  if (panel->ClickClock(e->xbutton.x, e->xbutton.y)) {
+    ClockAction(e->xbutton.button);
+
+    if (panel_layer == BOTTOM_LAYER) {
+      XLowerWindow(server.dsp, panel->main_win_);
+    }
+
+    task_drag = nullptr;
+    return;
+  }
+
+  if (panel->ClickLauncher(e->xbutton.x, e->xbutton.y)) {
+    LauncherIcon* icon = panel->ClickLauncherIcon(e->xbutton.x, e->xbutton.y);
+
+    if (icon) {
+      LauncherAction(icon, e);
+    }
+
+    task_drag = nullptr;
+    return;
+  }
+
+  Taskbar* tskbar = panel->ClickTaskbar(e->xbutton.x, e->xbutton.y);
+
+  if (!tskbar) {
+    // TODO: check better solution to keep window below
+    if (panel_layer == BOTTOM_LAYER) {
+      XLowerWindow(server.dsp, panel->main_win_);
+    }
+
+    task_drag = nullptr;
+    return;
+  }
+
+  // drag and drop task
+  if (task_dragged) {
+    task_drag = nullptr;
+    task_dragged = 0;
+    return;
+  }
+
+  // switch desktop
+  if (panel_mode == MULTI_DESKTOP) {
+    if (tskbar->desktop != server.desktop && action != CLOSE &&
+        action != DESKTOP_LEFT && action != DESKTOP_RIGHT) {
+      SetDesktop(tskbar->desktop);
+    }
+  }
+
+  // action on task
+  WindowAction(panel->ClickTask(e->xbutton.x, e->xbutton.y), action);
+
+  // to keep window below
+  if (panel_layer == BOTTOM_LAYER) {
+    XLowerWindow(server.dsp, panel->main_win_);
+  }
+}
 
 void EventPropertyNotify(XEvent* e) {
-    int i;
-    Task* tsk;
-    Window win = e->xproperty.window;
-    Atom at = e->xproperty.atom;
+  int i;
+  Task* tsk;
+  Window win = e->xproperty.window;
+  Atom at = e->xproperty.atom;
 
-    if (xsettings_client) {
-        XSettingsClientProcessEvent(xsettings_client, e);
+  if (xsettings_client) {
+    XSettingsClientProcessEvent(xsettings_client, e);
+  }
+
+  if (win == server.root_win) {
+    if (!server.got_root_win) {
+      XSelectInput(server.dsp, server.root_win,
+                   PropertyChangeMask | StructureNotifyMask);
+      server.got_root_win = 1;
     }
-
-    if (win == server.root_win) {
-        if (!server.got_root_win) {
-            XSelectInput(server.dsp, server.root_win,
-                         PropertyChangeMask | StructureNotifyMask);
-            server.got_root_win = 1;
-        }
-        // Change name of desktops
-        else if (at == server.atoms_["_NET_DESKTOP_NAMES"]) {
-            if (!taskbarname_enabled) {
-                return;
-            }
-
-            auto desktop_names = ServerGetDesktopNames();
-            auto it = desktop_names.begin();
-
-            for (i = 0; i < nb_panel; ++i) {
-                for (int j = 0; j < panel1[i].nb_desktop_; ++j) {
-                    std::string name;
-
-                    if (it != desktop_names.end()) {
-                        name = (*it++);
-                    } else {
-                        name = StringRepresentation(j + 1);
-                    }
-
-                    Taskbar& tskbar = panel1[i].taskbar_[j];
-
-                    if (tskbar.bar_name.name() != name) {
-                        tskbar.bar_name.set_name(name);
-                        tskbar.bar_name.need_resize_ = true;
-                    }
-                }
-            }
-
-            panel_refresh = 1;
-        }
-        // Change number of desktops
-        else if (at == server.atoms_["_NET_NUMBER_OF_DESKTOPS"]) {
-            if (!taskbar_enabled) {
-                return;
-            }
-
-            server.nb_desktop = server.GetDesktop();
-
-            if (server.desktop >= server.nb_desktop) {
-                server.desktop = server.nb_desktop - 1;
-            }
-
-            CleanupTaskbar();
-            InitTaskbar();
-
-            for (i = 0 ; i < nb_panel ; i++) {
-                Taskbar::InitPanel(&panel1[i]);
-                panel1[i].SetItemsOrder();
-                panel1[i].UpdateTaskbarVisibility();
-                panel1[i].need_resize_ = true;
-            }
-
-            TaskRefreshTasklist();
-            ActiveTask();
-            panel_refresh = 1;
-        }
-        // Change desktop
-        else if (at == server.atoms_["_NET_CURRENT_DESKTOP"]) {
-            if (!taskbar_enabled) {
-                return;
-            }
-
-            int old_desktop = server.desktop;
-            server.desktop = server.GetCurrentDesktop();
-
-            for (i = 0 ; i < nb_panel ; i++) {
-                Panel* panel = &panel1[i];
-                panel->taskbar_[old_desktop].set_state(TASKBAR_NORMAL);
-                panel->taskbar_[server.desktop].set_state(TASKBAR_ACTIVE);
-                // check ALLDESKTOP task => resize taskbar
-                Taskbar* tskbar;
-
-                if (server.nb_desktop > old_desktop) {
-                    tskbar = &panel->taskbar_[old_desktop];
-                    auto it = tskbar->children_.begin();
-
-                    if (taskbarname_enabled) {
-                        ++it;
-                    }
-
-                    for (; it != tskbar->children_.end(); ++it) {
-                        auto tsk = static_cast<Task*>(*it);
-
-                        if (tsk->desktop == ALLDESKTOP) {
-                            tsk->on_screen_ = false;
-                            tskbar->need_resize_ = true;
-                            panel_refresh = 1;
-                        }
-                    }
-                }
-
-                tskbar = &panel->taskbar_[server.desktop];
-                auto it = tskbar->children_.begin();
-
-                if (taskbarname_enabled) {
-                    ++it;
-                }
-
-                for (; it != tskbar->children_.end(); ++it) {
-                    auto tsk = static_cast<Task*>(*it);
-
-                    if (tsk->desktop == ALLDESKTOP) {
-                        tsk->on_screen_ = true;
-                        tskbar->need_resize_ = true;
-                    }
-                }
-            }
-        }
-        // Window list
-        else if (at == server.atoms_["_NET_CLIENT_LIST"]) {
-            TaskRefreshTasklist();
-            panel_refresh = 1;
-        }
-        // Change active
-        else if (at == server.atoms_["_NET_ACTIVE_WINDOW"]) {
-            ActiveTask();
-            panel_refresh = 1;
-        } else if (at == server.atoms_["_XROOTPMAP_ID"]
-                   || at == server.atoms_["_XROOTMAP_ID"]) {
-            // change Wallpaper
-            for (i = 0 ; i < nb_panel ; i++) {
-                panel1[i].SetBackground();
-            }
-
-            panel_refresh = 1;
-        }
-    } else {
-        tsk = TaskGetTask(win);
-
-        if (!tsk) {
-            if (at != server.atoms_["_NET_WM_STATE"]) {
-                return;
-            } else {
-                // xfce4 sends _NET_WM_STATE after minimized to tray, so we need to check if window is mapped
-                // if it is mapped and not set as skip_taskbar, we must add it to our task list
-                XWindowAttributes wa;
-                XGetWindowAttributes(server.dsp, win, &wa);
-
-                if (wa.map_state == IsViewable && !WindowIsSkipTaskbar(win)) {
-                    if ((tsk = AddTask(win))) {
-                        panel_refresh = 1;
-                    } else {
-                        return;
-                    }
-                } else {
-                    return;
-                }
-            }
-        }
-
-        //printf("atom root_win = %s, %s\n", XGetAtomName(server.dsp, at), tsk->title);
-
-        // Window title changed
-        if (at == server.atoms_["_NET_WM_VISIBLE_NAME"]
-            || at == server.atoms_["_NET_WM_NAME"]
-            || at == server.atoms_["WM_NAME"]) {
-            if (tsk->UpdateTitle()) {
-                if (g_tooltip.mapped && (g_tooltip.area_ == (Area*)tsk)) {
-                    g_tooltip.CopyText(tsk);
-                    TooltipUpdate();
-                }
-
-                panel_refresh = 1;
-            }
-        }
-        // Demand attention
-        else if (at == server.atoms_["_NET_WM_STATE"]) {
-            if (WindowIsUrgent(win)) {
-                tsk->AddUrgent();
-            }
-
-            if (WindowIsSkipTaskbar(win)) {
-                RemoveTask(tsk);
-                panel_refresh = 1;
-            }
-        } else if (at == server.atoms_["WM_STATE"]) {
-            // Iconic state
-            int state = (task_active
-                         && tsk->win == task_active->win ? kTaskActive : kTaskNormal);
-
-            if (WindowIsIconified(win)) {
-                state = kTaskIconified;
-            }
-
-            SetTaskState(tsk, state);
-            panel_refresh = 1;
-        }
-        // Window icon changed
-        else if (at == server.atoms_["_NET_WM_ICON"]) {
-            GetIcon(tsk);
-            panel_refresh = 1;
-        }
-        // Window desktop changed
-        else if (at == server.atoms_["_NET_WM_DESKTOP"]) {
-            int desktop = server.GetDesktopFromWindow(win);
-
-            //printf("  Window desktop changed %d, %d\n", tsk->desktop, desktop);
-            // bug in windowmaker : send unecessary 'desktop changed' when focus changed
-            if (desktop != tsk->desktop) {
-                RemoveTask(tsk);
-                tsk = AddTask(win);
-                ActiveTask();
-                panel_refresh = 1;
-            }
-        } else if (at == server.atoms_["WM_HINTS"]) {
-            util::x11::ClientData<XWMHints> wmhints(
-                XGetWMHints(server.dsp, win));
-
-            if (wmhints != nullptr && wmhints->flags & XUrgencyHint) {
-                tsk->AddUrgent();
-            }
-        }
-
-        if (!server.got_root_win) {
-            server.root_win = RootWindow(server.dsp, server.screen);
-        }
-    }
-}
-
-
-void EventExpose(XEvent* e) {
-    Panel* panel = GetPanel(e->xany.window);
-
-    if (!panel) {
+    // Change name of desktops
+    else if (at == server.atoms_["_NET_DESKTOP_NAMES"]) {
+      if (!taskbarname_enabled) {
         return;
-    }
+      }
 
-    // TODO : one panel_refresh per panel ?
-    panel_refresh = 1;
-}
+      auto desktop_names = ServerGetDesktopNames();
+      auto it = desktop_names.begin();
 
+      for (i = 0; i < nb_panel; ++i) {
+        for (int j = 0; j < panel1[i].nb_desktop_; ++j) {
+          std::string name;
 
-void EventConfigureNotify(Window win) {
-    // change in root window (xrandr)
-    if (win == server.root_win) {
-        signal_pending = SIGUSR1;
-        return;
-    }
+          if (it != desktop_names.end()) {
+            name = (*it++);
+          } else {
+            name = StringRepresentation(j + 1);
+          }
 
-    // 'win' is a tray icon
-    for (auto& traywin : systray.list_icons) {
-        if (traywin->tray_id == win) {
-            //printf("move tray %d\n", traywin->x);
-            XMoveResizeWindow(server.dsp, traywin->id, traywin->x, traywin->y,
-                              traywin->width, traywin->height);
-            XResizeWindow(server.dsp, traywin->tray_id, traywin->width, traywin->height);
-            panel_refresh = 1;
-            return;
+          Taskbar& tskbar = panel1[i].taskbar_[j];
+
+          if (tskbar.bar_name.name() != name) {
+            tskbar.bar_name.set_name(name);
+            tskbar.bar_name.need_resize_ = true;
+          }
         }
-    }
+      }
 
-    // 'win' move in another monitor
-    if (nb_panel == 1) {
+      panel_refresh = 1;
+    }
+    // Change number of desktops
+    else if (at == server.atoms_["_NET_NUMBER_OF_DESKTOPS"]) {
+      if (!taskbar_enabled) {
         return;
-    }
+      }
 
-    Task* tsk = TaskGetTask(win);
+      server.nb_desktop = server.GetDesktop();
+
+      if (server.desktop >= server.nb_desktop) {
+        server.desktop = server.nb_desktop - 1;
+      }
+
+      CleanupTaskbar();
+      InitTaskbar();
+
+      for (i = 0; i < nb_panel; i++) {
+        Taskbar::InitPanel(&panel1[i]);
+        panel1[i].SetItemsOrder();
+        panel1[i].UpdateTaskbarVisibility();
+        panel1[i].need_resize_ = true;
+      }
+
+      TaskRefreshTasklist();
+      ActiveTask();
+      panel_refresh = 1;
+    }
+    // Change desktop
+    else if (at == server.atoms_["_NET_CURRENT_DESKTOP"]) {
+      if (!taskbar_enabled) {
+        return;
+      }
+
+      int old_desktop = server.desktop;
+      server.desktop = server.GetCurrentDesktop();
+
+      for (i = 0; i < nb_panel; i++) {
+        Panel* panel = &panel1[i];
+        panel->taskbar_[old_desktop].set_state(TASKBAR_NORMAL);
+        panel->taskbar_[server.desktop].set_state(TASKBAR_ACTIVE);
+        // check ALLDESKTOP task => resize taskbar
+        Taskbar* tskbar;
+
+        if (server.nb_desktop > old_desktop) {
+          tskbar = &panel->taskbar_[old_desktop];
+          auto it = tskbar->children_.begin();
+
+          if (taskbarname_enabled) {
+            ++it;
+          }
+
+          for (; it != tskbar->children_.end(); ++it) {
+            auto tsk = static_cast<Task*>(*it);
+
+            if (tsk->desktop == ALLDESKTOP) {
+              tsk->on_screen_ = false;
+              tskbar->need_resize_ = true;
+              panel_refresh = 1;
+            }
+          }
+        }
+
+        tskbar = &panel->taskbar_[server.desktop];
+        auto it = tskbar->children_.begin();
+
+        if (taskbarname_enabled) {
+          ++it;
+        }
+
+        for (; it != tskbar->children_.end(); ++it) {
+          auto tsk = static_cast<Task*>(*it);
+
+          if (tsk->desktop == ALLDESKTOP) {
+            tsk->on_screen_ = true;
+            tskbar->need_resize_ = true;
+          }
+        }
+      }
+    }
+    // Window list
+    else if (at == server.atoms_["_NET_CLIENT_LIST"]) {
+      TaskRefreshTasklist();
+      panel_refresh = 1;
+    }
+    // Change active
+    else if (at == server.atoms_["_NET_ACTIVE_WINDOW"]) {
+      ActiveTask();
+      panel_refresh = 1;
+    } else if (at == server.atoms_["_XROOTPMAP_ID"] ||
+               at == server.atoms_["_XROOTMAP_ID"]) {
+      // change Wallpaper
+      for (i = 0; i < nb_panel; i++) {
+        panel1[i].SetBackground();
+      }
+
+      panel_refresh = 1;
+    }
+  } else {
+    tsk = TaskGetTask(win);
 
     if (!tsk) {
+      if (at != server.atoms_["_NET_WM_STATE"]) {
         return;
+      } else {
+        // xfce4 sends _NET_WM_STATE after minimized to tray, so we need to
+        // check if window is mapped
+        // if it is mapped and not set as skip_taskbar, we must add it to our
+        // task list
+        XWindowAttributes wa;
+        XGetWindowAttributes(server.dsp, win, &wa);
+
+        if (wa.map_state == IsViewable && !WindowIsSkipTaskbar(win)) {
+          if ((tsk = AddTask(win))) {
+            panel_refresh = 1;
+          } else {
+            return;
+          }
+        } else {
+          return;
+        }
+      }
     }
 
-    Panel* p = tsk->panel_;
+    // printf("atom root_win = %s, %s\n", XGetAtomName(server.dsp, at),
+    // tsk->title);
 
-    if (p->monitor_ != WindowGetMonitor(win)) {
-        RemoveTask(tsk);
-        tsk = AddTask(win);
-
-        if (win == WindowGetActive()) {
-            SetTaskState(tsk, kTaskActive);
-            task_active = tsk;
+    // Window title changed
+    if (at == server.atoms_["_NET_WM_VISIBLE_NAME"] ||
+        at == server.atoms_["_NET_WM_NAME"] || at == server.atoms_["WM_NAME"]) {
+      if (tsk->UpdateTitle()) {
+        if (g_tooltip.mapped && (g_tooltip.area_ == (Area*)tsk)) {
+          g_tooltip.CopyText(tsk);
+          TooltipUpdate();
         }
 
         panel_refresh = 1;
+      }
     }
+    // Demand attention
+    else if (at == server.atoms_["_NET_WM_STATE"]) {
+      if (WindowIsUrgent(win)) {
+        tsk->AddUrgent();
+      }
+
+      if (WindowIsSkipTaskbar(win)) {
+        RemoveTask(tsk);
+        panel_refresh = 1;
+      }
+    } else if (at == server.atoms_["WM_STATE"]) {
+      // Iconic state
+      int state = (task_active && tsk->win == task_active->win ? kTaskActive
+                                                               : kTaskNormal);
+
+      if (WindowIsIconified(win)) {
+        state = kTaskIconified;
+      }
+
+      SetTaskState(tsk, state);
+      panel_refresh = 1;
+    }
+    // Window icon changed
+    else if (at == server.atoms_["_NET_WM_ICON"]) {
+      GetIcon(tsk);
+      panel_refresh = 1;
+    }
+    // Window desktop changed
+    else if (at == server.atoms_["_NET_WM_DESKTOP"]) {
+      int desktop = server.GetDesktopFromWindow(win);
+
+      // printf("  Window desktop changed %d, %d\n", tsk->desktop, desktop);
+      // bug in windowmaker : send unecessary 'desktop changed' when focus
+      // changed
+      if (desktop != tsk->desktop) {
+        RemoveTask(tsk);
+        tsk = AddTask(win);
+        ActiveTask();
+        panel_refresh = 1;
+      }
+    } else if (at == server.atoms_["WM_HINTS"]) {
+      util::x11::ClientData<XWMHints> wmhints(XGetWMHints(server.dsp, win));
+
+      if (wmhints != nullptr && wmhints->flags & XUrgencyHint) {
+        tsk->AddUrgent();
+      }
+    }
+
+    if (!server.got_root_win) {
+      server.root_win = RootWindow(server.dsp, server.screen);
+    }
+  }
+}
+
+void EventExpose(XEvent* e) {
+  Panel* panel = GetPanel(e->xany.window);
+
+  if (!panel) {
+    return;
+  }
+
+  // TODO : one panel_refresh per panel ?
+  panel_refresh = 1;
+}
+
+void EventConfigureNotify(Window win) {
+  // change in root window (xrandr)
+  if (win == server.root_win) {
+    signal_pending = SIGUSR1;
+    return;
+  }
+
+  // 'win' is a tray icon
+  for (auto& traywin : systray.list_icons) {
+    if (traywin->tray_id == win) {
+      // printf("move tray %d\n", traywin->x);
+      XMoveResizeWindow(server.dsp, traywin->id, traywin->x, traywin->y,
+                        traywin->width, traywin->height);
+      XResizeWindow(server.dsp, traywin->tray_id, traywin->width,
+                    traywin->height);
+      panel_refresh = 1;
+      return;
+    }
+  }
+
+  // 'win' move in another monitor
+  if (nb_panel == 1) {
+    return;
+  }
+
+  Task* tsk = TaskGetTask(win);
+
+  if (!tsk) {
+    return;
+  }
+
+  Panel* p = tsk->panel_;
+
+  if (p->monitor_ != WindowGetMonitor(win)) {
+    RemoveTask(tsk);
+    tsk = AddTask(win);
+
+    if (win == WindowGetActive()) {
+      SetTaskState(tsk, kTaskActive);
+      task_active = tsk;
+    }
+
+    panel_refresh = 1;
+  }
 }
 
 char const* GetAtomName(Display* disp, Atom a) {
-    if (a == None) {
-        return "None";
-    }
+  if (a == None) {
+    return "None";
+  }
 
-    return XGetAtomName(disp, a);
+  return XGetAtomName(disp, a);
 }
 
 struct Property {
-    unsigned char* data;
-    int format, nitems;
-    Atom type;
+  unsigned char* data;
+  int format, nitems;
+  Atom type;
 };
 
-//This fetches all the data from a property
+// This fetches all the data from a property
 Property ReadProperty(Display* disp, Window w, Atom property) {
-    Atom actual_type;
-    int actual_format;
-    unsigned long nitems;
-    unsigned long bytes_after;
-    unsigned char* ret = nullptr;
+  Atom actual_type;
+  int actual_format;
+  unsigned long nitems;
+  unsigned long bytes_after;
+  unsigned char* ret = nullptr;
 
-    int read_bytes = 1024;
+  int read_bytes = 1024;
 
-    //Keep trying to read the property until there are no
-    //bytes unread.
-    do {
-        if (ret != nullptr) {
-            XFree(ret);
-        }
-
-        XGetWindowProperty(disp, w, property, 0, read_bytes, False, AnyPropertyType,
-                           &actual_type, &actual_format, &nitems, &bytes_after,
-                           &ret);
-        read_bytes *= 2;
-    } while (bytes_after != 0);
-
-    util::log::Debug()
-            << "DnD " << __FILE__ << ':' << __LINE__ << ": Property:\n"
-            << "DnD " << __FILE__ << ':' << __LINE__
-            << ": Actual type: " << GetAtomName(disp, actual_type) << '\n'
-            << "DnD " << __FILE__ << ':' << __LINE__
-            << ": Actual format: " << actual_format << '\n'
-            << "DnD " << __FILE__ << ':' << __LINE__
-            << ": Number of items: " << nitems
-            << '\n';
-
-    Property p;
-    p.data = ret;
-    p.format = actual_format;
-    p.nitems = nitems;
-    p.type = actual_type;
-
-    return p;
-}
-
-// This function takes a list of targets which can be converted to (atom_list, nitems)
-// and a list of acceptable targets with prioritees (datatypes). It returns the highest
-// entry in datatypes which is also in atom_list: ie it finds the best match.
-Atom PickTargetFromList(Display* disp, Atom* atom_list, int nitems) {
-    Atom to_be_requested = None;
-
-    for (int i = 0; i < nitems; ++i) {
-        char const* atom_name = GetAtomName(disp, atom_list[i]);
-
-        util::log::Debug()
-                << "DnD " << __FILE__ << ':' << __LINE__
-                << ": Type " << i << " = " << atom_name
-                << '\n';
-
-        //See if this data type is allowed and of higher priority (closer to zero)
-        //than the present one.
-        if (strcmp(atom_name, "STRING") == 0) {
-            to_be_requested = atom_list[i];
-        }
+  // Keep trying to read the property until there are no
+  // bytes unread.
+  do {
+    if (ret != nullptr) {
+      XFree(ret);
     }
 
-    return to_be_requested;
+    XGetWindowProperty(disp, w, property, 0, read_bytes, False, AnyPropertyType,
+                       &actual_type, &actual_format, &nitems, &bytes_after,
+                       &ret);
+    read_bytes *= 2;
+  } while (bytes_after != 0);
+
+  util::log::Debug() << "DnD " << __FILE__ << ':' << __LINE__ << ": Property:\n"
+                     << "DnD " << __FILE__ << ':' << __LINE__
+                     << ": Actual type: " << GetAtomName(disp, actual_type)
+                     << '\n' << "DnD " << __FILE__ << ':' << __LINE__
+                     << ": Actual format: " << actual_format << '\n' << "DnD "
+                     << __FILE__ << ':' << __LINE__
+                     << ": Number of items: " << nitems << '\n';
+
+  Property p;
+  p.data = ret;
+  p.format = actual_format;
+  p.nitems = nitems;
+  p.type = actual_type;
+
+  return p;
+}
+
+// This function takes a list of targets which can be converted to (atom_list,
+// nitems)
+// and a list of acceptable targets with prioritees (datatypes). It returns the
+// highest
+// entry in datatypes which is also in atom_list: ie it finds the best match.
+Atom PickTargetFromList(Display* disp, Atom* atom_list, int nitems) {
+  Atom to_be_requested = None;
+
+  for (int i = 0; i < nitems; ++i) {
+    char const* atom_name = GetAtomName(disp, atom_list[i]);
+
+    util::log::Debug() << "DnD " << __FILE__ << ':' << __LINE__ << ": Type "
+                       << i << " = " << atom_name << '\n';
+
+    // See if this data type is allowed and of higher priority (closer to zero)
+    // than the present one.
+    if (strcmp(atom_name, "STRING") == 0) {
+      to_be_requested = atom_list[i];
+    }
+  }
+
+  return to_be_requested;
 }
 
 // Finds the best target given up to three atoms provided (any can be None).
 // Useful for part of the Xdnd protocol.
 Atom PickTargetFromAtoms(Display* disp, Atom t1, Atom t2, Atom t3) {
-    Atom atoms[3];
-    int n = 0;
+  Atom atoms[3];
+  int n = 0;
 
-    if (t1 != None) {
-        atoms[n++] = t1;
-    }
+  if (t1 != None) {
+    atoms[n++] = t1;
+  }
 
-    if (t2 != None) {
-        atoms[n++] = t2;
-    }
+  if (t2 != None) {
+    atoms[n++] = t2;
+  }
 
-    if (t3 != None) {
-        atoms[n++] = t3;
-    }
+  if (t3 != None) {
+    atoms[n++] = t3;
+  }
 
-    return PickTargetFromList(disp, atoms, n);
+  return PickTargetFromList(disp, atoms, n);
 }
 
 // Finds the best target given a local copy of a property.
 Atom PickTargetFromTargets(Display* disp, Property p) {
-    //The list of targets is a list of atoms, so it should have type XA_ATOM
-    //but it may have the type TARGETS instead.
+  // The list of targets is a list of atoms, so it should have type XA_ATOM
+  // but it may have the type TARGETS instead.
 
-    if ((p.type != XA_ATOM && p.type != server.atoms_["TARGETS"])
-        || p.format != 32) {
-        //This would be really broken. Targets have to be an atom list
-        //and applications should support this. Nevertheless, some
-        //seem broken (MATLAB 7, for instance), so ask for STRING
-        //next instead as the lowest common denominator
-        return XA_STRING;
-    } else {
-        Atom* atom_list = (Atom*)p.data;
+  if ((p.type != XA_ATOM && p.type != server.atoms_["TARGETS"]) ||
+      p.format != 32) {
+    // This would be really broken. Targets have to be an atom list
+    // and applications should support this. Nevertheless, some
+    // seem broken (MATLAB 7, for instance), so ask for STRING
+    // next instead as the lowest common denominator
+    return XA_STRING;
+  } else {
+    Atom* atom_list = (Atom*)p.data;
 
-        return PickTargetFromList(disp, atom_list, p.nitems);
-    }
+    return PickTargetFromList(disp, atom_list, p.nitems);
+  }
 }
 
 void DragAndDropEnter(XClientMessageEvent* e) {
-    dnd_atom = None;
-    int more_than_3 = e->data.l[1] & 1;
-    dnd_source_window = e->data.l[0];
-    dnd_version = (e->data.l[1] >> 24);
+  dnd_atom = None;
+  int more_than_3 = e->data.l[1] & 1;
+  dnd_source_window = e->data.l[0];
+  dnd_version = (e->data.l[1] >> 24);
 
-    util::log::Debug()
-            << "DnD " << __FILE__ << ':' << __LINE__ << ": DnDEnter\n"
-            << "DnD " << __FILE__ << ':' << __LINE__ << ": DnDEnter. Supports > 3 types = "
-            << (more_than_3 ? "yes" : "no") << '\n'
-            << "DnD " << __FILE__ << ':' << __LINE__ << ": Protocol version = " <<
-            dnd_version << '\n'
-            << "DnD " << __FILE__ << ':' << __LINE__ << ": Type 1 = " << GetAtomName(
-                server.dsp, e->data.l[2]) << '\n'
-            << "DnD " << __FILE__ << ':' << __LINE__ << ": Type 2 = " << GetAtomName(
-                server.dsp, e->data.l[3]) << '\n'
-            << "DnD " << __FILE__ << ':' << __LINE__ << ": Type 3 = " << GetAtomName(
-                server.dsp, e->data.l[4]) << '\n';
+  util::log::Debug() << "DnD " << __FILE__ << ':' << __LINE__ << ": DnDEnter\n"
+                     << "DnD " << __FILE__ << ':' << __LINE__
+                     << ": DnDEnter. Supports > 3 types = "
+                     << (more_than_3 ? "yes" : "no") << '\n' << "DnD "
+                     << __FILE__ << ':' << __LINE__
+                     << ": Protocol version = " << dnd_version << '\n' << "DnD "
+                     << __FILE__ << ':' << __LINE__
+                     << ": Type 1 = " << GetAtomName(server.dsp, e->data.l[2])
+                     << '\n' << "DnD " << __FILE__ << ':' << __LINE__
+                     << ": Type 2 = " << GetAtomName(server.dsp, e->data.l[3])
+                     << '\n' << "DnD " << __FILE__ << ':' << __LINE__
+                     << ": Type 3 = " << GetAtomName(server.dsp, e->data.l[4])
+                     << '\n';
 
-    //Query which conversions are available and pick the best
+  // Query which conversions are available and pick the best
 
-    if (more_than_3) {
-        //Fetch the list of possible conversions
-        //Notice the similarity to TARGETS with paste.
-        Property p = ReadProperty(server.dsp, dnd_source_window,
-                                  server.atoms_["XdndTypeList"]);
-        dnd_atom = PickTargetFromTargets(server.dsp, p);
-        XFree(p.data);
-    } else {
-        //Use the available list
-        dnd_atom = PickTargetFromAtoms(server.dsp, e->data.l[2], e->data.l[3],
-                                       e->data.l[4]);
-    }
+  if (more_than_3) {
+    // Fetch the list of possible conversions
+    // Notice the similarity to TARGETS with paste.
+    Property p = ReadProperty(server.dsp, dnd_source_window,
+                              server.atoms_["XdndTypeList"]);
+    dnd_atom = PickTargetFromTargets(server.dsp, p);
+    XFree(p.data);
+  } else {
+    // Use the available list
+    dnd_atom = PickTargetFromAtoms(server.dsp, e->data.l[2], e->data.l[3],
+                                   e->data.l[4]);
+  }
 
-    util::log::Debug() << "DnD " << __FILE__ << ':' << __LINE__
-                       << ": Requested type = "
-                       << GetAtomName(server.dsp, dnd_atom)
-                       << '\n';
+  util::log::Debug() << "DnD " << __FILE__ << ':' << __LINE__
+                     << ": Requested type = "
+                     << GetAtomName(server.dsp, dnd_atom) << '\n';
 }
 
 void DragAndDropPosition(XClientMessageEvent* e) {
-    bool accept = false;
+  bool accept = false;
 
-    dnd_target_window = e->window;
+  dnd_target_window = e->window;
 
-    int x = (e->data.l[2] >> 16) & 0xFFFF;
-    int y = e->data.l[2] & 0xFFFF;
-    int mapX, mapY;
-    Window child;
-    XTranslateCoordinates(server.dsp, server.root_win, e->window,
-                          x, y, &mapX, &mapY, &child);
+  int x = (e->data.l[2] >> 16) & 0xFFFF;
+  int y = e->data.l[2] & 0xFFFF;
+  int mapX, mapY;
+  Window child;
+  XTranslateCoordinates(server.dsp, server.root_win, e->window, x, y, &mapX,
+                        &mapY, &child);
 
-    Panel* panel = GetPanel(e->window);
-    Task* task = panel->ClickTask(mapX, mapY);
+  Panel* panel = GetPanel(e->window);
+  Task* task = panel->ClickTask(mapX, mapY);
 
-    if (task) {
-        if (task->desktop != server.desktop) {
-            SetDesktop(task->desktop);
-        }
-
-        WindowAction(task, TOGGLE);
-    } else {
-        LauncherIcon* icon = panel->ClickLauncherIcon(mapX, mapY);
-
-        if (icon) {
-            accept = true;
-            dnd_launcher_exec = icon->cmd_;
-        } else {
-            dnd_launcher_exec = 0;
-        }
+  if (task) {
+    if (task->desktop != server.desktop) {
+      SetDesktop(task->desktop);
     }
 
-    // send XdndStatus event to get more XdndPosition events
-    XClientMessageEvent se;
-    se.type = ClientMessage;
-    se.window = e->data.l[0];
-    se.message_type = server.atoms_["XdndStatus"];
-    se.format = 32;
-    se.data.l[0] = e->window;  // XID of the target window
-    // bit 0: accept drop, bit 1: send XdndPosition events if inside rectangle
-    se.data.l[1] = accept ? 1 : 0;
-    // Rectangle x,y for which no more XdndPosition events
-    se.data.l[2] = 0;
-    // Rectangle w,h for which no more XdndPosition events
-    se.data.l[3] = (1 << 16) | 1;
+    WindowAction(task, TOGGLE);
+  } else {
+    LauncherIcon* icon = panel->ClickLauncherIcon(mapX, mapY);
 
-    if (accept) {
-        se.data.l[4] = (dnd_version >= 2)
-                       ? e->data.l[4]
-                       : server.atoms_["XdndActionCopy"];
+    if (icon) {
+      accept = true;
+      dnd_launcher_exec = icon->cmd_;
     } else {
-        se.data.l[4] = None;       // None = drop will not be accepted
+      dnd_launcher_exec = 0;
     }
+  }
 
-    XSendEvent(server.dsp, e->data.l[0], False, NoEventMask, (XEvent*)&se);
+  // send XdndStatus event to get more XdndPosition events
+  XClientMessageEvent se;
+  se.type = ClientMessage;
+  se.window = e->data.l[0];
+  se.message_type = server.atoms_["XdndStatus"];
+  se.format = 32;
+  se.data.l[0] = e->window;  // XID of the target window
+  // bit 0: accept drop, bit 1: send XdndPosition events if inside rectangle
+  se.data.l[1] = accept ? 1 : 0;
+  // Rectangle x,y for which no more XdndPosition events
+  se.data.l[2] = 0;
+  // Rectangle w,h for which no more XdndPosition events
+  se.data.l[3] = (1 << 16) | 1;
+
+  if (accept) {
+    se.data.l[4] =
+        (dnd_version >= 2) ? e->data.l[4] : server.atoms_["XdndActionCopy"];
+  } else {
+    se.data.l[4] = None;  // None = drop will not be accepted
+  }
+
+  XSendEvent(server.dsp, e->data.l[0], False, NoEventMask, (XEvent*)&se);
 }
 
 void DragAndDropDrop(XClientMessageEvent* e) {
-    if (dnd_target_window && dnd_launcher_exec) {
-        if (dnd_version >= 1) {
-            XConvertSelection(server.dsp, server.atoms_["XdndSelection"], XA_STRING,
-                              dnd_selection, dnd_target_window, e->data.l[2]);
-        } else {
-            XConvertSelection(server.dsp, server.atoms_["XdndSelection"], XA_STRING,
-                              dnd_selection, dnd_target_window, CurrentTime);
-        }
+  if (dnd_target_window && dnd_launcher_exec) {
+    if (dnd_version >= 1) {
+      XConvertSelection(server.dsp, server.atoms_["XdndSelection"], XA_STRING,
+                        dnd_selection, dnd_target_window, e->data.l[2]);
     } else {
-        //The source is sending anyway, despite instructions to the contrary.
-        //So reply that we're not interested.
-        XClientMessageEvent m;
-        std::memset(&m, 0, sizeof(m));
-        m.type = ClientMessage;
-        m.display = e->display;
-        m.window = e->data.l[0];
-        m.message_type = server.atoms_["XdndFinished"];
-        m.format = 32;
-        m.data.l[0] = dnd_target_window;
-        m.data.l[1] = 0;
-        m.data.l[2] = None; //Failed.
-        XSendEvent(server.dsp, e->data.l[0], False, NoEventMask, (XEvent*)&m);
+      XConvertSelection(server.dsp, server.atoms_["XdndSelection"], XA_STRING,
+                        dnd_selection, dnd_target_window, CurrentTime);
     }
+  } else {
+    // The source is sending anyway, despite instructions to the contrary.
+    // So reply that we're not interested.
+    XClientMessageEvent m;
+    std::memset(&m, 0, sizeof(m));
+    m.type = ClientMessage;
+    m.display = e->display;
+    m.window = e->data.l[0];
+    m.message_type = server.atoms_["XdndFinished"];
+    m.format = 32;
+    m.data.l[0] = dnd_target_window;
+    m.data.l[1] = 0;
+    m.data.l[2] = None;  // Failed.
+    XSendEvent(server.dsp, e->data.l[0], False, NoEventMask, (XEvent*)&m);
+  }
 }
 
 int main(int argc, char* argv[]) {
 start:
-    Init(argc, argv);
-    InitX11();
+  Init(argc, argv);
+  InitX11();
 
-    bool config_read = false;
+  bool config_read = false;
 
-    if (!config_path.empty()) {
-        config_read = config::ReadFile(config_path.c_str());
+  if (!config_path.empty()) {
+    config_read = config::ReadFile(config_path.c_str());
+  } else {
+    config_read = config::Read();
+  }
+
+  if (!config_read) {
+    util::log::Error() << "usage: tint3 [-c] <config_file>\n";
+    Cleanup();
+    std::exit(1);
+  }
+
+  InitPanel();
+
+  if (!snapshot_path.empty()) {
+    GetSnapshot(snapshot_path.c_str());
+    Cleanup();
+    std::exit(0);
+  }
+
+  int damage_event, damage_error;
+  XDamageQueryExtension(server.dsp, &damage_event, &damage_error);
+  XSync(server.dsp, False);
+
+  // XDND initialization
+  dnd_source_window = 0;
+  dnd_target_window = 0;
+  dnd_version = 0;
+  dnd_selection = XInternAtom(server.dsp, "PRIMARY", 0);
+  dnd_atom = None;
+  dnd_sent_request = 0;
+  dnd_launcher_exec = 0;
+
+  //  sigset_t empty_mask;
+  //  sigemptyset(&empty_mask);
+
+  util::x11::EventLoop event_loop(&server);
+
+  event_loop.RegisterHandler(ButtonPress, [](XEvent& e) -> void {
+    TooltipHide(nullptr);
+    EventButtonPress(&e);
+  });
+
+  event_loop.RegisterHandler(ButtonRelease,
+                             [](XEvent& e) -> void { EventButtonRelease(&e); });
+
+  event_loop.RegisterHandler(MotionNotify, [](XEvent& e) -> void {
+    static constexpr unsigned int button_mask =
+        Button1Mask | Button2Mask | Button3Mask | Button4Mask | Button5Mask;
+
+    if (e.xmotion.state & button_mask) {
+      EventButtonMotionNotify(&e);
+    }
+
+    Panel* panel = GetPanel(e.xmotion.window);
+    Area* area = panel->ClickArea(e.xmotion.x, e.xmotion.y);
+    std::string tooltip = area->GetTooltipText();
+
+    if (!tooltip.empty()) {
+      TooltipTriggerShow(area, panel, &e);
     } else {
-        config_read = config::Read();
+      TooltipTriggerHide();
+    }
+  });
+
+  event_loop.RegisterHandler(LeaveNotify,
+                             [](XEvent& e) -> void { TooltipTriggerHide(); });
+
+  event_loop.RegisterHandler(Expose,
+                             [](XEvent& e) -> void { EventExpose(&e); });
+
+  event_loop.RegisterHandler(
+      PropertyNotify, [](XEvent& e) -> void { EventPropertyNotify(&e); });
+
+  event_loop.RegisterHandler(ConfigureNotify, [](XEvent& e) -> void {
+    EventConfigureNotify(e.xconfigure.window);
+  });
+
+  event_loop.RegisterHandler(ReparentNotify, [&](XEvent& e) -> void {
+    if (!systray_enabled) {
+      return;
     }
 
-    if (!config_read) {
-        util::log::Error() << "usage: tint3 [-c] <config_file>\n";
-        Cleanup();
-        std::exit(1);
+    // reparented to us
+    if (e.xany.window == systray.panel_->main_win_) {
+      return;
     }
 
-    InitPanel();
+    // FIXME: 'reparent to us' badly detected => disabled
+  });
 
-    if (!snapshot_path.empty()) {
-        GetSnapshot(snapshot_path.c_str());
-        Cleanup();
-        std::exit(0);
+  event_loop.RegisterHandler({UnmapNotify, DestroyNotify},
+                             [&](XEvent& e) -> void {
+    if (e.xany.window == server.composite_manager) {
+      // Stop real_transparency
+      signal_pending = SIGUSR1;
+      return;
     }
 
-    int damage_event, damage_error;
-    XDamageQueryExtension(server.dsp, &damage_event, &damage_error);
-    XSync(server.dsp, False);
+    if (e.xany.window == g_tooltip.window || !systray_enabled) {
+      return;
+    }
 
-    // XDND initialization
-    dnd_source_window = 0;
-    dnd_target_window = 0;
-    dnd_version = 0;
-    dnd_selection = XInternAtom(server.dsp, "PRIMARY", 0);
-    dnd_atom = None;
-    dnd_sent_request = 0;
-    dnd_launcher_exec = 0;
+    for (auto& traywin : systray.list_icons) {
+      if (traywin->tray_id == e.xany.window) {
+        systray.RemoveIcon(traywin);
+        return;
+      }
+    }
+  });
 
-    //  sigset_t empty_mask;
-    //  sigemptyset(&empty_mask);
+  event_loop.RegisterHandler(ClientMessage, [&](XEvent& e) -> void {
+    auto& ev = e.xclient;
 
-    util::x11::EventLoop event_loop(&server);
+    if (ev.data.l[1] == (long int)server.atoms_["_NET_WM_CM_S0"]) {
+      if (ev.data.l[2] == None) {
+        // Stop real_transparency
+        signal_pending = SIGUSR1;
+      } else {
+        // Start real_transparency
+        signal_pending = SIGUSR1;
+      }
+    }
 
-    event_loop.RegisterHandler(ButtonPress, [](XEvent & e) -> void {
-        TooltipHide(nullptr);
-        EventButtonPress(&e);
-    });
+    if (systray_enabled &&
+        e.xclient.message_type == server.atoms_["_NET_SYSTEM_TRAY_OPCODE"] &&
+        e.xclient.format == 32 && e.xclient.window == net_sel_win) {
+      NetMessage(&e.xclient);
+    } else if (e.xclient.message_type == server.atoms_["XdndEnter"]) {
+      DragAndDropEnter(&e.xclient);
+    } else if (e.xclient.message_type == server.atoms_["XdndPosition"]) {
+      DragAndDropPosition(&e.xclient);
+    } else if (e.xclient.message_type == server.atoms_["XdndDrop"]) {
+      DragAndDropDrop(&e.xclient);
+    }
+  });
 
-    event_loop.RegisterHandler(ButtonRelease, [](XEvent & e) -> void {
-        EventButtonRelease(&e);
-    });
+  event_loop.RegisterHandler(SelectionNotify, [&](XEvent& e) -> void {
+    Atom target = e.xselection.target;
 
-    event_loop.RegisterHandler(MotionNotify, [](XEvent & e) -> void {
-        static constexpr unsigned int button_mask =
-        Button1Mask | Button2Mask |
-        Button3Mask | Button4Mask |
-        Button5Mask;
+    util::log::Debug() << "DnD " << __FILE__ << ':' << __LINE__
+                       << ": A selection notify has arrived!\n"
+                       << "DnD " << __FILE__ << ':' << __LINE__
+                       << ": Requestor = " << e.xselectionrequest.requestor
+                       << '\n' << "DnD " << __FILE__ << ':' << __LINE__
+                       << ": Selection atom = "
+                       << GetAtomName(server.dsp, e.xselection.selection)
+                       << '\n' << "DnD " << __FILE__ << ':' << __LINE__
+                       << ": Target atom    = "
+                       << GetAtomName(server.dsp, target) << '\n' << "DnD "
+                       << __FILE__ << ':' << __LINE__ << ": Property atom  = "
+                       << GetAtomName(server.dsp, e.xselection.property)
+                       << '\n';
 
-        if (e.xmotion.state & button_mask) {
-            EventButtonMotionNotify(&e);
-        }
+    if (e.xselection.property != None && dnd_launcher_exec) {
+      Property prop =
+          ReadProperty(server.dsp, dnd_target_window, dnd_selection);
 
-        Panel* panel = GetPanel(e.xmotion.window);
-        Area* area = panel->ClickArea(e.xmotion.x, e.xmotion.y);
-        std::string tooltip = area->GetTooltipText();
+      // If we're being given a list of targets (possible conversions)
+      if (target == server.atoms_["TARGETS"] && !dnd_sent_request) {
+        dnd_sent_request = 1;
+        dnd_atom = PickTargetFromTargets(server.dsp, prop);
 
-        if (!tooltip.empty()) {
-            TooltipTriggerShow(area, panel, &e);
+        if (dnd_atom == None) {
+          util::log::Debug() << "No matching datatypes.\n";
         } else {
-            TooltipTriggerHide();
+          // Request the data type we are able to select
+          util::log::Debug() << "Now requesting type "
+                             << GetAtomName(server.dsp, dnd_atom) << '\n';
+          XConvertSelection(server.dsp, dnd_selection, dnd_atom, dnd_selection,
+                            dnd_target_window, CurrentTime);
         }
-    });
+      } else if (target == dnd_atom) {
+        // Dump the binary data
+        util::log::Debug() << "DnD " << __FILE__ << ':' << __LINE__
+                           << ": Data begins:\n";
+        util::log::Debug() << "--------\n";
 
-    event_loop.RegisterHandler(LeaveNotify, [](XEvent & e) -> void {
-        TooltipTriggerHide();
-    });
-
-    event_loop.RegisterHandler(Expose, [](XEvent & e) -> void {
-        EventExpose(&e);
-    });
-
-    event_loop.RegisterHandler(PropertyNotify, [](XEvent & e) -> void {
-        EventPropertyNotify(&e);
-    });
-
-    event_loop.RegisterHandler(ConfigureNotify, [](XEvent & e) -> void {
-        EventConfigureNotify(e.xconfigure.window);
-    });
-
-    event_loop.RegisterHandler(ReparentNotify, [&](XEvent & e) -> void {
-        if (!systray_enabled) {
-            return;
+        for (int i = 0; i < prop.nitems * prop.format / 8; i++) {
+          util::log::Debug() << ((char*)prop.data)[i];
         }
 
-        // reparented to us
-        if (e.xany.window == systray.panel_->main_win_) {
-            return;
-        }
+        util::log::Debug() << "--------\n";
 
-        // FIXME: 'reparent to us' badly detected => disabled
-    });
+        StringBuilder cmd;
+        cmd << '(' << dnd_launcher_exec << " \"";
 
-    event_loop.RegisterHandler({
-        UnmapNotify,
-        DestroyNotify
-    }, [&](XEvent & e) -> void {
-        if (e.xany.window == server.composite_manager) {
-            // Stop real_transparency
-            signal_pending = SIGUSR1;
-            return;
-        }
+        for (int i = 0; i < prop.nitems * prop.format / 8; i++) {
+          char c = ((char*)prop.data)[i];
 
-        if (e.xany.window == g_tooltip.window || !systray_enabled) {
-            return;
-        }
-
-        for (auto& traywin : systray.list_icons) {
-            if (traywin->tray_id == e.xany.window) {
-                systray.RemoveIcon(traywin);
-                return;
+          if (c == '\n') {
+            if (i < prop.nitems * prop.format / 8 - 1) {
+              cmd << "\" \"";
             }
-        }
-    });
-
-    event_loop.RegisterHandler(ClientMessage, [&](XEvent & e) -> void {
-        auto& ev = e.xclient;
-
-        if (ev.data.l[1] == (long int) server.atoms_["_NET_WM_CM_S0"]) {
-            if (ev.data.l[2] == None) {
-                // Stop real_transparency
-                signal_pending = SIGUSR1;
-            } else {
-                // Start real_transparency
-                signal_pending = SIGUSR1;
-            }
-        }
-
-        if (systray_enabled
-            && e.xclient.message_type == server.atoms_["_NET_SYSTEM_TRAY_OPCODE"]
-            && e.xclient.format == 32
-            && e.xclient.window == net_sel_win) {
-            NetMessage(&e.xclient);
-        } else if (e.xclient.message_type == server.atoms_["XdndEnter"]) {
-            DragAndDropEnter(&e.xclient);
-        } else if (e.xclient.message_type == server.atoms_["XdndPosition"]) {
-            DragAndDropPosition(&e.xclient);
-        } else if (e.xclient.message_type == server.atoms_["XdndDrop"]) {
-            DragAndDropDrop(&e.xclient);
-        }
-    });
-
-    event_loop.RegisterHandler(SelectionNotify, [&](XEvent & e) -> void {
-        Atom target = e.xselection.target;
-
-        util::log::Debug()
-                << "DnD " << __FILE__ << ':' << __LINE__
-        << ": A selection notify has arrived!\n"
-        << "DnD " << __FILE__ << ':' << __LINE__
-        << ": Requestor = " << e.xselectionrequest.requestor << '\n'
-        << "DnD " << __FILE__ << ':' << __LINE__
-        << ": Selection atom = "
-        << GetAtomName(server.dsp, e.xselection.selection) << '\n'
-        << "DnD " << __FILE__ << ':' << __LINE__
-        << ": Target atom    = "
-        << GetAtomName(server.dsp, target) << '\n'
-        << "DnD " << __FILE__ << ':' << __LINE__
-        << ": Property atom  = "
-        << GetAtomName(server.dsp, e.xselection.property) << '\n';
-
-        if (e.xselection.property != None && dnd_launcher_exec) {
-            Property prop = ReadProperty(server.dsp, dnd_target_window, dnd_selection);
-
-            //If we're being given a list of targets (possible conversions)
-            if (target == server.atoms_["TARGETS"] && !dnd_sent_request) {
-                dnd_sent_request = 1;
-                dnd_atom = PickTargetFromTargets(server.dsp, prop);
-
-                if (dnd_atom == None) {
-                    util::log::Debug() << "No matching datatypes.\n";
-                } else {
-                    //Request the data type we are able to select
-                    util::log::Debug()
-                            << "Now requesting type "
-                            << GetAtomName(server.dsp, dnd_atom)
-                            << '\n';
-                    XConvertSelection(server.dsp, dnd_selection, dnd_atom,
-                                      dnd_selection, dnd_target_window,
-                                      CurrentTime);
-                }
-            } else if (target == dnd_atom) {
-                //Dump the binary data
-                util::log::Debug() << "DnD " << __FILE__ << ':' << __LINE__ <<
-                                   ": Data begins:\n";
-                util::log::Debug() << "--------\n";
-
-                for (int i = 0; i < prop.nitems * prop.format / 8; i++) {
-                    util::log::Debug() << ((char*)prop.data)[i];
-                }
-
-                util::log::Debug() << "--------\n";
-
-                StringBuilder cmd;
-                cmd << '(' << dnd_launcher_exec << " \"";
-
-                for (int i = 0; i < prop.nitems * prop.format / 8; i++) {
-                    char c = ((char*)prop.data)[i];
-
-                    if (c == '\n') {
-                        if (i < prop.nitems * prop.format / 8 - 1) {
-                            cmd << "\" \"";
-                        }
-                    } else {
-                        if (c == '`' || c == '$' || c == '\\') {
-                            cmd << '\\';
-                        }
-
-                        cmd << c;
-                    }
-                }
-
-                cmd << "\"&";
-                util::log::Debug()
-                        << "DnD " << __FILE__ << ':' << __LINE__
-                        << ": Running command: \""
-                        << std::string(cmd)
-                        << "\"\n";
-                TintExec(cmd);
-
-                // Reply OK.
-                XClientMessageEvent m;
-                std::memset(&m, 0, sizeof(m));
-                m.type = ClientMessage;
-                m.display = server.dsp;
-                m.window = dnd_source_window;
-                m.message_type = server.atoms_["XdndFinished"];
-                m.format = 32;
-                m.data.l[0] = dnd_target_window;
-                m.data.l[1] = 1;
-                m.data.l[2] = server.atoms_["XdndActionCopy"];  //We only ever copy.
-                XSendEvent(server.dsp, dnd_source_window, False, NoEventMask, (XEvent*)&m);
-                XSync(server.dsp, False);
+          } else {
+            if (c == '`' || c == '$' || c == '\\') {
+              cmd << '\\';
             }
 
-            XFree(prop.data);
+            cmd << c;
+          }
         }
-    });
 
-    event_loop.RegisterDefaultHandler([&](XEvent & e) -> void {
-        if (e.type == XDamageNotify + damage_event) {
-            // union needed to avoid strict-aliasing warnings by gcc
-            union {
-                XEvent e;
-                XDamageNotifyEvent de;
-            } event_union = {
-                .e = e
-            };
+        cmd << "\"&";
+        util::log::Debug() << "DnD " << __FILE__ << ':' << __LINE__
+                           << ": Running command: \"" << std::string(cmd)
+                           << "\"\n";
+        TintExec(cmd);
 
-            for (auto& traywin : systray.list_icons) {
-                if (traywin->id == event_union.de.drawable) {
-                    SystrayRenderIcon(traywin);
-                    return;
-                }
-            }
-        }
-    });
+        // Reply OK.
+        XClientMessageEvent m;
+        std::memset(&m, 0, sizeof(m));
+        m.type = ClientMessage;
+        m.display = server.dsp;
+        m.window = dnd_source_window;
+        m.message_type = server.atoms_["XdndFinished"];
+        m.format = 32;
+        m.data.l[0] = dnd_target_window;
+        m.data.l[1] = 1;
+        m.data.l[2] = server.atoms_["XdndActionCopy"];  // We only ever copy.
+        XSendEvent(server.dsp, dnd_source_window, False, NoEventMask,
+                   (XEvent*)&m);
+        XSync(server.dsp, False);
+      }
 
-    if (event_loop.RunLoop()) {
-        goto start;  // brrr
+      XFree(prop.data);
     }
+  });
 
-    return 0;
+  event_loop.RegisterDefaultHandler([&](XEvent& e) -> void {
+    if (e.type == XDamageNotify + damage_event) {
+      // union needed to avoid strict-aliasing warnings by gcc
+      union {
+        XEvent e;
+        XDamageNotifyEvent de;
+      } event_union = {.e = e};
+
+      for (auto& traywin : systray.list_icons) {
+        if (traywin->id == event_union.de.drawable) {
+          SystrayRenderIcon(traywin);
+          return;
+        }
+      }
+    }
+  });
+
+  if (event_loop.RunLoop()) {
+    goto start;  // brrr
+  }
+
+  return 0;
 }
-

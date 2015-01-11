@@ -15,7 +15,6 @@
 #include <string>
 #include <vector>
 
-
 void SetActive(Window win);
 void SetDesktop(int desktop);
 void SetClose(Window win);
@@ -37,7 +36,7 @@ Window WindowGetActive();
 void GetTextSize(PangoFontDescription* font, int* height_ink, int* height,
                  int panel_height, char const* text, int len);
 void GetTextSize2(PangoFontDescription* font, int* height_ink, int* height,
-                  int* width, int panel_height, int panel_with, char const* text, int len);
-
+                  int* width, int panel_height, int panel_with,
+                  char const* text, int len);
 
 #endif

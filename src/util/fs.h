@@ -21,7 +21,7 @@ bool IsAbsolutePath(std::string const& path);
 bool ReadFileByLine(std::string const& path,
                     std::function<void(std::string const&)> fn);
 
-} // namespace fs
-} // namespace util
+}  // namespace fs
+}  // namespace util
 
-#endif // TINT3_UTIL_FS_H
+#endif  // TINT3_UTIL_FS_H

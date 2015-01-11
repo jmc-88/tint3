@@ -19,38 +19,38 @@
 #include "util/timer.h"
 
 // XEMBED messages
-#define XEMBED_EMBEDDED_NOTIFY      0
+#define XEMBED_EMBEDDED_NOTIFY 0
 // Flags for _XEMBED_INFO
-#define XEMBED_MAPPED       (1 << 0)
+#define XEMBED_MAPPED (1 << 0)
 
 struct TrayWindow {
-    Window id;
-    Window tray_id;
-    int x, y;
-    int width, height;
-    // TODO: manage icon's show/hide
-    int hide;
-    int depth;
-    Damage damage;
-    Timeout* render_timeout;
+  Window id;
+  Window tray_id;
+  int x, y;
+  int width, height;
+  // TODO: manage icon's show/hide
+  int hide;
+  int depth;
+  Damage damage;
+  Timeout* render_timeout;
 };
 
 class Systraybar : public Area {
-  public:
-    std::list<TrayWindow*> list_icons;
-    int sort;
-    int alpha, saturation, brightness;
-    int icon_size, icons_per_column, icons_per_row, margin_;
+ public:
+  std::list<TrayWindow*> list_icons;
+  int sort;
+  int alpha, saturation, brightness;
+  int icon_size, icons_per_column, icons_per_row, margin_;
 
-    void DrawForeground(cairo_t*) override;
-    void OnChangeLayout() override;
-    bool Resize() override;
+  void DrawForeground(cairo_t*) override;
+  void OnChangeLayout() override;
+  bool Resize() override;
 
-    size_t VisibleIcons();
-    bool AddIcon(Window id);
-    void RemoveIcon(TrayWindow* traywin);
+  size_t VisibleIcons();
+  bool AddIcon(Window id);
+  void RemoveIcon(TrayWindow* traywin);
 
-    static void InitPanel(Panel* panel);
+  static void InitPanel(Panel* panel);
 };
 
 // net_sel_win != None when protocol started
@@ -69,7 +69,6 @@ void CleanupSystray();
 // initialize protocol and panel position
 void InitSystray();
 
-
 // systray protocol
 // many tray icon don't manage stop/restart of the systray manager
 void StartNet();
@@ -80,4 +79,3 @@ void RefreshSystrayIcon();
 void SystrayRenderIcon(TrayWindow* traywin);
 
 #endif
-

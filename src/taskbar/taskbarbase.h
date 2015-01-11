@@ -5,21 +5,17 @@
 
 #include "util/area.h"
 
-enum TaskbarState {
-    TASKBAR_NORMAL,
-    TASKBAR_ACTIVE,
-    TASKBAR_STATE_COUNT
-};
+enum TaskbarState { TASKBAR_NORMAL, TASKBAR_ACTIVE, TASKBAR_STATE_COUNT };
 
 class TaskbarBase : public Area {
-    Pixmap state_pixmap_[TASKBAR_STATE_COUNT];
+  Pixmap state_pixmap_[TASKBAR_STATE_COUNT];
 
-  public:
-    TaskbarBase();
+ public:
+  TaskbarBase();
 
-    Pixmap state_pixmap(size_t i) const;
-    TaskbarBase& set_state_pixmap(size_t i, Pixmap value);
-    TaskbarBase& reset_state_pixmap(size_t i);
+  Pixmap state_pixmap(size_t i) const;
+  TaskbarBase& set_state_pixmap(size_t i, Pixmap value);
+  TaskbarBase& reset_state_pixmap(size_t i);
 };
 
-#endif // TASKBARBASE_H
+#endif  // TASKBARBASE_H

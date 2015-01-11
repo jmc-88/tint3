@@ -31,68 +31,65 @@ extern "C" {
  * protocol values.
  */
 typedef enum {
-    XSETTINGS_TYPE_INT     = 0,
-    XSETTINGS_TYPE_STRING  = 1,
-    XSETTINGS_TYPE_COLOR   = 2,
-    XSETTINGS_TYPE_NONE    = 0xff
+  XSETTINGS_TYPE_INT = 0,
+  XSETTINGS_TYPE_STRING = 1,
+  XSETTINGS_TYPE_COLOR = 2,
+  XSETTINGS_TYPE_NONE = 0xff
 } XSettingsType;
 
 typedef enum {
-    XSETTINGS_SUCCESS,
-    XSETTINGS_NO_MEM,
-    XSETTINGS_ACCESS,
-    XSETTINGS_FAILED,
-    XSETTINGS_NO_ENTRY,
-    XSETTINGS_DUPLICATE_ENTRY
+  XSETTINGS_SUCCESS,
+  XSETTINGS_NO_MEM,
+  XSETTINGS_ACCESS,
+  XSETTINGS_FAILED,
+  XSETTINGS_NO_ENTRY,
+  XSETTINGS_DUPLICATE_ENTRY
 } XSettingsResult;
 
 struct XSettingsColor {
-    unsigned short red, green, blue, alpha;
+  unsigned short red, green, blue, alpha;
 };
 
 struct XSettingsSetting {
-    char* name;
-    XSettingsType type;
+  char* name;
+  XSettingsType type;
 
-    union {
-        int v_int;
-        char* v_string;
-        XSettingsColor v_color;
-    } data;
+  union {
+    int v_int;
+    char* v_string;
+    XSettingsColor v_color;
+  } data;
 
-    unsigned long last_change_serial;
+  unsigned long last_change_serial;
 };
 
 struct XSettingsList {
-    XSettingsSetting* setting;
-    XSettingsList* next;
+  XSettingsSetting* setting;
+  XSettingsList* next;
 };
 
 struct XSettingsBuffer {
-    char byte_order;
-    size_t len;
-    unsigned char* data;
-    unsigned char* pos;
+  char byte_order;
+  size_t len;
+  unsigned char* data;
+  unsigned char* pos;
 };
 
-
 XSettingsSetting* XSettingsSettingCopy(XSettingsSetting* setting);
-void              XSettingsSettingFree(XSettingsSetting* setting);
-bool              XSettingsSettingEqual(XSettingsSetting* setting_a,
-                                        XSettingsSetting* setting_b);
+void XSettingsSettingFree(XSettingsSetting* setting);
+bool XSettingsSettingEqual(XSettingsSetting* setting_a,
+                           XSettingsSetting* setting_b);
 
-void              XSettingsListFree(XSettingsList*     list);
-XSettingsList*    XSettingsListCopy(XSettingsList*     list);
-XSettingsResult   XSettingsListInsert(XSettingsList**    list,
-                                      XSettingsSetting*  setting);
-XSettingsSetting* XSettingsListLookup(XSettingsList*     list,
-                                      const char*        name);
-XSettingsResult   XSettingsListDelete(XSettingsList**    list,
-                                      const char*        name);
+void XSettingsListFree(XSettingsList* list);
+XSettingsList* XSettingsListCopy(XSettingsList* list);
+XSettingsResult XSettingsListInsert(XSettingsList** list,
+                                    XSettingsSetting* setting);
+XSettingsSetting* XSettingsListLookup(XSettingsList* list, const char* name);
+XSettingsResult XSettingsListDelete(XSettingsList** list, const char* name);
 
 char XSettingsByteOrder();
 
-#define XSETTINGS_PAD(n,m) ((n + m - 1) & (~(m-1)))
+#define XSETTINGS_PAD(n, m) ((n + m - 1) & (~(m - 1)))
 
 #ifdef __cplusplus
 }

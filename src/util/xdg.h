@@ -15,8 +15,8 @@ std::string RuntimeDir();
 std::vector<std::string> DataDirs();
 std::vector<std::string> ConfigDirs();
 
-} // namespace basedir
-} // namespace xdg
-} // namespace util
+}  // namespace basedir
+}  // namespace xdg
+}  // namespace util
 
-#endif // TINT3_XDG_H
+#endif  // TINT3_XDG_H

@@ -10,26 +10,26 @@ const util::log::Logger::LoggerMode kDebugLogMode =
     util::log::Logger::kDisabled;
 #else
     util::log::Logger::kAutoFlush;
-#endif // _TINT3_DEBUG
+#endif  // _TINT3_DEBUG
 
-} // namespace
+}  // namespace
 
 namespace util {
 
 namespace log {
 
 Logger& Debug() {
-    static std::ofstream stream("/tmp/tint3.dbg",
-                                std::ofstream::out | std::ofstream::app);
-    static Logger debug(stream, kDebugLogMode);
-    return debug;
+  static std::ofstream stream("/tmp/tint3.dbg",
+                              std::ofstream::out | std::ofstream::app);
+  static Logger debug(stream, kDebugLogMode);
+  return debug;
 }
 
 Logger& Error() {
-    static Logger error(std::cerr, util::log::Logger::kAutoFlush);
-    return error;
+  static Logger error(std::cerr, util::log::Logger::kAutoFlush);
+  return error;
 }
 
-} // namespace log
+}  // namespace log
 
-} // namespace util
+}  // namespace util

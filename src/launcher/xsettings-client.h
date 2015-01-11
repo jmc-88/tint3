@@ -33,9 +33,9 @@ extern "C" {
 typedef struct _XSettingsClient XSettingsClient;
 
 typedef enum {
-    XSETTINGS_ACTION_NEW,
-    XSETTINGS_ACTION_CHANGED,
-    XSETTINGS_ACTION_DELETED
+  XSETTINGS_ACTION_NEW,
+  XSETTINGS_ACTION_CHANGED,
+  XSETTINGS_ACTION_DELETED
 } XSettingsAction;
 
 typedef void (*XSettingsNotifyFunc)(const char* name, XSettingsAction action,
@@ -44,7 +44,8 @@ typedef void (*XSettingsWatchFunc)(Window window, Bool is_start, long mask,
                                    void* cb_data);
 
 XSettingsClient* XSettingsClientNew(Display* display, int screen,
-                                    XSettingsNotifyFunc notify, XSettingsWatchFunc watch, void* cb_data);
+                                    XSettingsNotifyFunc notify,
+                                    XSettingsWatchFunc watch, void* cb_data);
 void XSettingsClientDestroy(XSettingsClient* client);
 Bool XSettingsClientProcessEvent(XSettingsClient* client, XEvent* xev);
 
@@ -52,7 +53,8 @@ void XSettingsNotifyCallback(const char* name, XSettingsAction action,
                              XSettingsSetting* setting, void* data);
 
 XSettingsResult XSettingsClientGetSetting(XSettingsClient* client,
-        const char* name, XSettingsSetting** setting);
+                                          const char* name,
+                                          XSettingsSetting** setting);
 
 #ifdef __cplusplus
 }
