@@ -40,7 +40,7 @@ class Systraybar : public Area {
     std::list<TrayWindow*> list_icons;
     int sort;
     int alpha, saturation, brightness;
-    int icon_size, icons_per_column, icons_per_row, marging;
+    int icon_size, icons_per_column, icons_per_row, margin_;
 
     void DrawForeground(cairo_t*) override;
     void OnChangeLayout() override;

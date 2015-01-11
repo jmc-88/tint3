@@ -146,7 +146,7 @@ bool Systraybar::Resize() {
         int height = height_ - 2 * bg_->border.width - 2 * padding_y_;
         // here icons_per_column always higher than 0
         icons_per_column = (height + padding_x_) / (icon_size + padding_x_);
-        marging = height - (icons_per_column - 1) * (icon_size + padding_x_) -
+        margin_ = height - (icons_per_column - 1) * (icon_size + padding_x_) -
                   icon_size;
         icons_per_row = count / icons_per_column + (count % icons_per_column != 0);
         systray.width_ = (2 * systray.bg_->border.width) + (2 * systray.padding_x_lr_) +
@@ -155,7 +155,7 @@ bool Systraybar::Resize() {
         int width = width_ - 2 * bg_->border.width - 2 * padding_y_;
         // here icons_per_row always higher than 0
         icons_per_row = (width + padding_x_) / (icon_size + padding_x_);
-        marging = width - (icons_per_row - 1) * (icon_size + padding_x_) - icon_size;
+        margin_ = width - (icons_per_row - 1) * (icon_size + padding_x_) - icon_size;
         icons_per_column = count / icons_per_row + (count % icons_per_row != 0);
         systray.height_ = (2 * systray.bg_->border.width) + (2 * systray.padding_x_lr_)
                           +
@@ -170,15 +170,17 @@ void Systraybar::OnChangeLayout() {
     // here, systray.posx/posy are defined by rendering engine. so we can calculate position of tray icon.
     int posx, posy;
     int start = panel_->bg_->border.width + panel_->padding_y_ +
-                systray.bg_->border.width + systray.padding_y_ + marging / 2;
+                systray.bg_->border.width + systray.padding_y_ + margin_ / 2;
 
     if (panel_horizontal) {
         posy = start;
-        posx = systray.panel_x_ + systray.bg_->border.width +
+        posx = systray.panel_x_ +
+               systray.bg_->border.width +
                systray.padding_x_lr_;
     } else {
         posx = start;
-        posy = systray.panel_y_ + systray.bg_->border.width +
+        posy = systray.panel_y_ +
+               systray.bg_->border.width +
                systray.padding_x_lr_;
     }
 

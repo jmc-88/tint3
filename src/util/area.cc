@@ -43,12 +43,11 @@ Area& Area::CloneArea(Area const& other) {
     pix_ = other.pix_;
     bg_ = other.bg_;
 
-    // TODO: this should probably free all Area*
-    // children before copying the others over
-    children_.clear();
-    std::copy(other.children_.begin(),
-              other.children_.end(),
-              children_.begin());
+    for (auto& child : children_) {
+        delete child;
+    }
+
+    children_ = other.children_;
 
     on_screen_ = other.on_screen_;
     size_mode_ = other.size_mode_;
@@ -400,6 +399,17 @@ void Area::Draw() {
 
 void Area::DrawBackground(cairo_t* c) {
     if (bg_->back.alpha > 0.0) {
+        util::log::Debug()
+                << "Area::DrawBackground -> draw background from ("
+                << bg_->border.width
+                << ", "
+                << bg_->border.width
+                << "), "
+                << (width_ - (2.0 * bg_->border.width))
+                << 'x'
+                << (height_ - (2.0 * bg_->border.width))
+                << '\n';
+
         //printf("    draw_background (%d %d) RGBA (%lf, %lf, %lf, %lf)\n", posx, posy, pix->back.color[0], pix->back.color[1], pix->back.color[2], pix->back.alpha);
         DrawRect(c, bg_->border.width, bg_->border.width,
                  width_ - (2.0 * bg_->border.width), height_ - (2.0 * bg_->border.width),
@@ -410,6 +420,17 @@ void Area::DrawBackground(cairo_t* c) {
     }
 
     if (bg_->border.width > 0 && bg_->border.alpha > 0.0) {
+        util::log::Debug()
+                << "Area::DrawBackground -> draw border from ("
+                << bg_->border.width
+                << ", "
+                << bg_->border.width
+                << "), "
+                << (width_ - (2.0 * bg_->border.width))
+                << 'x'
+                << (height_ - (2.0 * bg_->border.width))
+                << '\n';
+
         cairo_set_line_width(c, bg_->border.width);
 
         // draw border inside (x, y, width, height)

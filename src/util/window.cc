@@ -72,7 +72,7 @@ void WindowMaximizeRestore(Window win) {
 
 
 int WindowIsHidden(Window win) {
-    int state_count;
+    int state_count = 0;
     auto at = ServerGetProperty<Atom>(
                   win, server.atoms_["_NET_WM_STATE"],
                   XA_ATOM, &state_count);
@@ -92,7 +92,7 @@ int WindowIsHidden(Window win) {
         }
     }
 
-    int type_count;
+    int type_count = 0;
     at = ServerGetProperty<Atom>(
              win, server.atoms_["_NET_WM_WINDOW_TYPE"],
              XA_ATOM, &type_count);
@@ -149,7 +149,7 @@ int WindowGetMonitor(Window win) {
 int WindowIsIconified(Window win) {
     // EWMH specification : minimization of windows use _NET_WM_STATE_HIDDEN.
     // WM_STATE is not accurate for shaded window and in multi_desktop mode.
-    int count;
+    int count = 0;
     auto at = ServerGetProperty<Atom>(
                   win, server.atoms_["_NET_WM_STATE"],
                   XA_ATOM, &count);
@@ -165,7 +165,7 @@ int WindowIsIconified(Window win) {
 
 
 int WindowIsUrgent(Window win) {
-    int count;
+    int count = 0;
     auto at = ServerGetProperty<Atom>(
                   win, server.atoms_["_NET_WM_STATE"],
                   XA_ATOM, &count);
@@ -181,7 +181,7 @@ int WindowIsUrgent(Window win) {
 
 
 int WindowIsSkipTaskbar(Window win) {
-    int count;
+    int count = 0;
     auto at = ServerGetProperty<Atom>(
                   win, server.atoms_["_NET_WM_STATE"],
                   XA_ATOM, &count);
@@ -197,7 +197,7 @@ int WindowIsSkipTaskbar(Window win) {
 
 
 std::vector<std::string> ServerGetDesktopNames() {
-    int count;
+    int count = 0;
     auto data_ptr = ServerGetProperty<char>(
                         server.root_win, server.atoms_["_NET_DESKTOP_NAMES"],
                         server.atoms_["UTF8_STRING"], &count);
