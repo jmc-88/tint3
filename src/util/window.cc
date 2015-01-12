@@ -46,6 +46,10 @@ void SetDesktop(int desktop) {
               0, 0);
 }
 
+int WindowGetDesktop(Window win) {
+  return GetProperty32<int>(win, server.atoms_["_NET_WM_DESKTOP"], XA_CARDINAL);
+}
+
 void WindowSetDesktop(Window win, int desktop) {
   SendEvent32(win, server.atoms_["_NET_WM_DESKTOP"], desktop, 2, 0);
 }

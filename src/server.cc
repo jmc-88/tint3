@@ -301,7 +301,7 @@ void GetDesktops() {
   // detect number of desktops
   // wait 15s to leave some time for window manager startup
   for (int i = 0; i < 15; i++) {
-    server.nb_desktop = server.GetDesktop();
+    server.nb_desktop = server.GetNumberOfDesktops();
 
     if (server.nb_desktop > 0) {
       break;
@@ -322,10 +322,8 @@ int Server::GetCurrentDesktop() {
                             XA_CARDINAL);
 }
 
-int Server::GetDesktop() { return GetDesktopFromWindow(root_win); }
-
-int Server::GetDesktopFromWindow(Window win) {
-  return GetProperty32<int>(win, atoms_["_NET_NUMBER_OF_DESKTOPS"],
+int Server::GetNumberOfDesktops() {
+  return GetProperty32<int>(root_win, atoms_["_NET_NUMBER_OF_DESKTOPS"],
                             XA_CARDINAL);
 }
 

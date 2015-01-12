@@ -29,6 +29,7 @@ gulong* GetBestIcon(gulong* data, int icon_count, int num, int* iw, int* ih,
                     int best_icon_size);
 void WindowMaximizeRestore(Window win);
 void WindowToggleShade(Window win);
+int WindowGetDesktop(Window win);
 void WindowSetDesktop(Window win, int desktop);
 int WindowGetMonitor(Window win);
 Window WindowGetActive();

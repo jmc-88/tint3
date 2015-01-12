@@ -74,7 +74,7 @@ Task* AddTask(Window win) {
 
   Task new_tsk;
   new_tsk.win = win;
-  new_tsk.desktop = server.GetDesktopFromWindow(win);
+  new_tsk.desktop = WindowGetDesktop(win);
   new_tsk.panel_ = &panel1[monitor];
   new_tsk.current_state = WindowIsIconified(win) ? kTaskIconified : kTaskNormal;
 

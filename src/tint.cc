@@ -622,7 +622,7 @@ void EventPropertyNotify(XEvent* e) {
         return;
       }
 
-      server.nb_desktop = server.GetDesktop();
+      server.nb_desktop = server.GetNumberOfDesktops();
 
       if (server.desktop >= server.nb_desktop) {
         server.desktop = server.nb_desktop - 1;
@@ -782,9 +782,11 @@ void EventPropertyNotify(XEvent* e) {
     }
     // Window desktop changed
     else if (at == server.atoms_["_NET_WM_DESKTOP"]) {
-      int desktop = server.GetDesktopFromWindow(win);
+      int desktop = WindowGetDesktop(win);
 
-      // printf("  Window desktop changed %d, %d\n", tsk->desktop, desktop);
+      util::log::Debug() << "Window desktop changed from " << tsk->desktop
+                         << " to " << desktop << '\n';
+
       // bug in windowmaker : send unecessary 'desktop changed' when focus
       // changed
       if (desktop != tsk->desktop) {
