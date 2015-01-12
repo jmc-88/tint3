@@ -120,8 +120,8 @@ int WindowIsHidden(Window win) {
 int WindowGetMonitor(Window win) {
   int i, x, y;
   Window src;
-
   XTranslateCoordinates(server.dsp, win, server.root_win, 0, 0, &x, &y, &src);
+
   x += 2;
   y += 2;
 
@@ -137,9 +137,9 @@ int WindowGetMonitor(Window win) {
   // printf("window %lx : ecran %d, (%d, %d)\n", win, i, x, y);
   if (i == server.nb_monitor) {
     return 0;
-  } else {
-    return i;
   }
+
+  return i;
 }
 
 int WindowIsIconified(Window win) {

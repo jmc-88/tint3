@@ -36,12 +36,27 @@
 #include "taskbar/taskbar.h"
 #include "tooltip/tooltip.h"
 #include "util/common.h"
+#include "util/log.h"
 #include "util/timer.h"
 #include "util/window.h"
 
 namespace {
 
 const char kUntitled[] = "Untitled";
+
+int GetMonitor(Window win) {
+  int monitor = 0;
+
+  if (nb_panel > 1) {
+    monitor = WindowGetMonitor(win);
+  }
+
+  if (monitor >= nb_panel) {
+    monitor = 0;
+  }
+
+  return monitor;
+}
 
 }  // namespace
 
@@ -62,15 +77,7 @@ Task* AddTask(Window win) {
     return nullptr;
   }
 
-  int monitor = 0;
-
-  if (nb_panel > 1) {
-    monitor = WindowGetMonitor(win);
-
-    if (monitor >= nb_panel) {
-      monitor = 0;
-    }
-  }
+  int monitor = GetMonitor(win);
 
   Task new_tsk;
   new_tsk.win = win;
@@ -133,8 +140,9 @@ Task* AddTask(Window win) {
     tskbar.children_.push_back(new_tsk2);
     tskbar.need_resize_ = true;
     task_group.push_back(new_tsk2);
-    // printf("add_task panel %d, desktop %d, task %s\n", i, j,
-    // new_tsk2->title);
+
+    util::log::Debug() << "Add task (desktop " << j << ", task "
+                       << new_tsk2->GetTitle() << ")\n";
   }
 
   win_to_task_map.insert(std::make_pair(new_tsk.win, task_group));

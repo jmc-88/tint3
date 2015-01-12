@@ -571,7 +571,6 @@ void EventButtonRelease(XEvent* e) {
 }
 
 void EventPropertyNotify(XEvent* e) {
-  int i;
   Task* tsk;
   Window win = e->xproperty.window;
   Atom at = e->xproperty.atom;
@@ -595,7 +594,7 @@ void EventPropertyNotify(XEvent* e) {
       auto desktop_names = ServerGetDesktopNames();
       auto it = desktop_names.begin();
 
-      for (i = 0; i < nb_panel; ++i) {
+      for (int i = 0; i < nb_panel; ++i) {
         for (int j = 0; j < panel1[i].nb_desktop_; ++j) {
           std::string name;
 
@@ -631,7 +630,7 @@ void EventPropertyNotify(XEvent* e) {
       CleanupTaskbar();
       InitTaskbar();
 
-      for (i = 0; i < nb_panel; i++) {
+      for (int i = 0; i < nb_panel; i++) {
         Taskbar::InitPanel(&panel1[i]);
         panel1[i].SetItemsOrder();
         panel1[i].UpdateTaskbarVisibility();
@@ -651,45 +650,47 @@ void EventPropertyNotify(XEvent* e) {
       int old_desktop = server.desktop;
       server.desktop = server.GetCurrentDesktop();
 
-      for (i = 0; i < nb_panel; i++) {
-        Panel* panel = &panel1[i];
-        panel->taskbar_[old_desktop].set_state(TASKBAR_NORMAL);
-        panel->taskbar_[server.desktop].set_state(TASKBAR_ACTIVE);
+      util::log::Debug() << "Current desktop changed from " << old_desktop
+                    << " to " << server.desktop << '\n';
+
+      for (int i = 0; i < nb_panel; i++) {
+        Panel& panel = panel1[i];
+        panel.taskbar_[old_desktop].set_state(TASKBAR_NORMAL);
+        panel.taskbar_[server.desktop].set_state(TASKBAR_ACTIVE);
         // check ALLDESKTOP task => resize taskbar
-        Taskbar* tskbar;
 
         if (server.nb_desktop > old_desktop) {
-          tskbar = &panel->taskbar_[old_desktop];
-          auto it = tskbar->children_.begin();
+          Taskbar& tskbar = panel.taskbar_[old_desktop];
+          auto it = tskbar.children_.begin();
 
           if (taskbarname_enabled) {
             ++it;
           }
 
-          for (; it != tskbar->children_.end(); ++it) {
+          for (; it != tskbar.children_.end(); ++it) {
             auto tsk = static_cast<Task*>(*it);
 
             if (tsk->desktop == ALLDESKTOP) {
               tsk->on_screen_ = false;
-              tskbar->need_resize_ = true;
+              tskbar.need_resize_ = true;
               panel_refresh = 1;
             }
           }
         }
 
-        tskbar = &panel->taskbar_[server.desktop];
-        auto it = tskbar->children_.begin();
+        Taskbar& tskbar = panel.taskbar_[server.desktop];
+        auto it = tskbar.children_.begin();
 
         if (taskbarname_enabled) {
           ++it;
         }
 
-        for (; it != tskbar->children_.end(); ++it) {
+        for (; it != tskbar.children_.end(); ++it) {
           auto tsk = static_cast<Task*>(*it);
 
           if (tsk->desktop == ALLDESKTOP) {
             tsk->on_screen_ = true;
-            tskbar->need_resize_ = true;
+            tskbar.need_resize_ = true;
           }
         }
       }
@@ -706,7 +707,7 @@ void EventPropertyNotify(XEvent* e) {
     } else if (at == server.atoms_["_XROOTPMAP_ID"] ||
                at == server.atoms_["_XROOTMAP_ID"]) {
       // change Wallpaper
-      for (i = 0; i < nb_panel; i++) {
+      for (int i = 0; i < nb_panel; i++) {
         panel1[i].SetBackground();
       }
 
