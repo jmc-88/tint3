@@ -117,29 +117,33 @@ int WindowIsHidden(Window win) {
   return 0;
 }
 
+namespace {
+
+bool IsInsideMonitor(int x, int y, Monitor const& monitor) {
+  bool inside_x = (x >= monitor.x && x <= monitor.x + monitor.width);
+  bool inside_y = (y >= monitor.y && y <= monitor.y + monitor.height);
+  return (inside_x && inside_y);
+}
+
+int FindMonitorIndex(int x, int y) {
+  for (int i = 0; i < server.nb_monitor; i++) {
+    if (IsInsideMonitor(x, y, server.monitor[i])) {
+      return i;
+    }
+  }
+
+  return -1;
+}
+
+}  // namespace
+
 int WindowGetMonitor(Window win) {
-  int i, x, y;
+  int x, y;
   Window src;
   XTranslateCoordinates(server.dsp, win, server.root_win, 0, 0, &x, &y, &src);
 
-  x += 2;
-  y += 2;
-
-  for (i = 0; i < server.nb_monitor; i++) {
-    if (x >= server.monitor[i].x &&
-        x <= (server.monitor[i].x + server.monitor[i].width))
-      if (y >= server.monitor[i].y &&
-          y <= (server.monitor[i].y + server.monitor[i].height)) {
-        break;
-      }
-  }
-
-  // printf("window %lx : ecran %d, (%d, %d)\n", win, i, x, y);
-  if (i == server.nb_monitor) {
-    return 0;
-  }
-
-  return i;
+  int i = FindMonitorIndex(x + 2, y + 2);
+  return (i != -1) ? i : 0;
 }
 
 int WindowIsIconified(Window win) {
