@@ -655,8 +655,8 @@ void EventPropertyNotify(XEvent* e) {
 
       for (int i = 0; i < nb_panel; i++) {
         Panel& panel = panel1[i];
-        panel.taskbar_[old_desktop].set_state(TASKBAR_NORMAL);
-        panel.taskbar_[server.desktop].set_state(TASKBAR_ACTIVE);
+        panel.taskbar_[old_desktop].SetState(TASKBAR_NORMAL);
+        panel.taskbar_[server.desktop].SetState(TASKBAR_ACTIVE);
         // check ALLDESKTOP task => resize taskbar
 
         if (server.nb_desktop > old_desktop) {

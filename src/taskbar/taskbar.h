@@ -30,7 +30,7 @@ class Taskbar : public TaskbarBase {
   int text_width_;
   Taskbarname bar_name;
 
-  Taskbar& set_state(size_t state);
+  Taskbar& SetState(size_t state);
   void DrawForeground(cairo_t*) override;
   void OnChangeLayout() override;
   bool Resize() override;

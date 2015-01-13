@@ -62,7 +62,7 @@ Task* task_active;
 Task* task_drag;
 int taskbar_enabled;
 
-Taskbar& Taskbar::set_state(size_t state) {
+Taskbar& Taskbar::SetState(size_t state) {
   bg_ = panel1[0].g_taskbar.background[state];
   pix_ = state_pixmap(state);
 
@@ -95,7 +95,7 @@ Taskbar& Taskbar::set_state(size_t state) {
       }
 
       for (; it != children_.end(); ++it) {
-        set_task_redraw(static_cast<Task*>(*it));
+        SetTaskRedraw(static_cast<Task*>(*it));
       }
     }
   }
@@ -376,7 +376,7 @@ void TaskRefreshTasklist() {
     return;
   }
 
-  int num_results;
+  int num_results = 0;
   auto windows = ServerGetProperty<Window>(server.root_win,
                                            server.atoms_["_NET_CLIENT_LIST"],
                                            XA_WINDOW, &num_results);

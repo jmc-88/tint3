@@ -246,7 +246,7 @@ bool Task::UpdateTitle() {
 
   for (auto& tsk2 : TaskGetTasks(win)) {
     tsk2->title_ = title_;
-    set_task_redraw(tsk2);
+    SetTaskRedraw(tsk2);
   }
 
   return true;
@@ -361,7 +361,7 @@ void GetIcon(Task* tsk) {
       tsk2->icon[k] = tsk->icon[k];
     }
 
-    set_task_redraw(tsk2);
+    SetTaskRedraw(tsk2);
   }
 }
 
@@ -456,7 +456,7 @@ void Task::OnChangeLayout() {
                   XA_CARDINAL, 32, PropModeReplace, (unsigned char*)value, 4);
 
   // reset Pixmap when position/size changed
-  set_task_redraw(this);
+  SetTaskRedraw(this);
 }
 
 // Given a pointer to the active task (active_task) and a pointer
@@ -597,10 +597,8 @@ void Task::SetState(int state) {
   }
 }
 
-void set_task_redraw(Task* tsk) {
-  int k;
-
-  for (k = 0; k < kTaskStateCount; ++k) {
+void SetTaskRedraw(Task* tsk) {
+  for (int k = 0; k < kTaskStateCount; ++k) {
     if (tsk->state_pix[k]) {
       XFreePixmap(server.dsp, tsk->state_pix[k]);
     }
@@ -612,7 +610,7 @@ void set_task_redraw(Task* tsk) {
   tsk->need_redraw_ = true;
 }
 
-void blink_urgent(void* arg) {
+void BlinkUrgent(void* arg) {
   for (auto& t : urgent_list) {
     if (t->urgent_tick < max_tick_urgent) {
       if (t->urgent_tick++ % 2) {
@@ -643,7 +641,7 @@ void Task::AddUrgent() {
     urgent_list.push_front(tsk);
 
     if (urgent_timeout == nullptr) {
-      urgent_timeout = AddTimeout(10, 1000, blink_urgent, 0);
+      urgent_timeout = AddTimeout(10, 1000, BlinkUrgent, 0);
     }
   }
 }

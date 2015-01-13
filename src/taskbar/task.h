@@ -92,7 +92,7 @@ void RemoveTask(Task* tsk);
 
 void GetIcon(Task* tsk);
 void ActiveTask();
-void set_task_redraw(Task* tsk);
+void SetTaskRedraw(Task* tsk);
 
 Task* FindActiveTask(Task* current_task, Task* active_task);
 Task* NextTask(Task* tsk);

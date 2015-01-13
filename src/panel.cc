@@ -680,7 +680,7 @@ void Panel::SetBackground() {
     }
 
     std::for_each(begin, tskbar.children_.end(), [](Area* child) {
-      set_task_redraw(static_cast<Task*>(child));
+      SetTaskRedraw(static_cast<Task*>(child));
     });
   }
 }
