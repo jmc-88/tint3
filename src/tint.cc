@@ -651,7 +651,7 @@ void EventPropertyNotify(XEvent* e) {
       server.desktop = server.GetCurrentDesktop();
 
       util::log::Debug() << "Current desktop changed from " << old_desktop
-                    << " to " << server.desktop << '\n';
+                         << " to " << server.desktop << '\n';
 
       for (int i = 0; i < nb_panel; i++) {
         Panel& panel = panel1[i];
@@ -766,14 +766,15 @@ void EventPropertyNotify(XEvent* e) {
       }
     } else if (at == server.atoms_["WM_STATE"]) {
       // Iconic state
-      int state = (task_active && tsk->win == task_active->win ? kTaskActive
-                                                               : kTaskNormal);
+      int state = (task_active != nullptr && tsk->win == task_active->win)
+                      ? kTaskActive
+                      : kTaskNormal;
 
       if (WindowIsIconified(win)) {
         state = kTaskIconified;
       }
 
-      SetTaskState(tsk, state);
+      tsk->SetState(state);
       panel_refresh = 1;
     }
     // Window icon changed
@@ -859,7 +860,7 @@ void EventConfigureNotify(Window win) {
     tsk = AddTask(win);
 
     if (win == WindowGetActive()) {
-      SetTaskState(tsk, kTaskActive);
+      tsk->SetState(kTaskActive);
       task_active = tsk;
     }
 
@@ -1229,6 +1230,7 @@ start:
     auto& ev = e.xclient;
 
     if (ev.data.l[1] == (long int)server.atoms_["_NET_WM_CM_S0"]) {
+      // FIXME: just set signal_pending unconditionally
       if (ev.data.l[2] == None) {
         // Stop real_transparency
         signal_pending = SIGUSR1;

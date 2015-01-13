@@ -76,6 +76,7 @@ class Task : public Area {
   bool UpdateTitle();  // TODO: find a more descriptive name
   std::string GetTitle() const;
   void SetTitle(std::string const& title);
+  void SetState(int state);
   void OnChangeLayout() override;
   Task& SetTooltipEnabled(bool);
 
@@ -91,7 +92,6 @@ void RemoveTask(Task* tsk);
 
 void GetIcon(Task* tsk);
 void ActiveTask();
-void SetTaskState(Task* tsk, int state);
 void set_task_redraw(Task* tsk);
 
 Task* FindActiveTask(Task* current_task, Task* active_task);

@@ -146,7 +146,7 @@ Task* AddTask(Window win) {
   }
 
   win_to_task_map.insert(std::make_pair(new_tsk.win, task_group));
-  SetTaskState(new_tsk2, new_tsk.current_state);
+  new_tsk2->SetState(new_tsk.current_state);
 
   if (WindowIsUrgent(win)) {
     new_tsk2->AddUrgent();
@@ -548,11 +548,10 @@ Task* PreviousTask(Task* tsk) {
 }
 
 void ActiveTask() {
-  if (task_active) {
-    SetTaskState(task_active, WindowIsIconified(task_active->win)
-                                  ? kTaskIconified
-                                  : kTaskNormal);
-    task_active = 0;
+  if (task_active != nullptr) {
+    task_active->SetState(WindowIsIconified(task_active->win) ? kTaskIconified
+                                                              : kTaskNormal);
+    task_active = nullptr;
   }
 
   Window w1 = WindowGetActive();
@@ -567,17 +566,18 @@ void ActiveTask() {
       }
     }
 
-    SetTaskState((task_active = TaskGetTask(w1)), kTaskActive);
+    task_active = TaskGetTask(w1);
+    task_active->SetState(kTaskActive);
   }
 }
 
-void SetTaskState(Task* tsk, int state) {
-  if (tsk == 0 || state < 0 || state >= kTaskStateCount) {
+void Task::SetState(int state) {
+  if (state < 0 || state >= kTaskStateCount) {
     return;
   }
 
-  if (tsk->current_state != state) {
-    for (auto& tsk1 : TaskGetTasks(tsk->win)) {
+  if (current_state != state) {
+    for (auto& tsk1 : TaskGetTasks(win)) {
       tsk1->current_state = state;
       tsk1->bg_ = panel1[0].g_task.background[state];
       tsk1->pix_ = tsk1->state_pix[state];
@@ -616,10 +616,9 @@ void blink_urgent(void* arg) {
   for (auto& t : urgent_list) {
     if (t->urgent_tick < max_tick_urgent) {
       if (t->urgent_tick++ % 2) {
-        SetTaskState(t, kTaskUrgent);
+        t->SetState(kTaskUrgent);
       } else {
-        SetTaskState(t,
-                     WindowIsIconified(t->win) ? kTaskIconified : kTaskNormal);
+        t->SetState(WindowIsIconified(t->win) ? kTaskIconified : kTaskNormal);
       }
     }
   }
