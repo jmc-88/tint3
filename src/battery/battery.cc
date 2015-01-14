@@ -49,7 +49,7 @@
 
 PangoFontDescription* bat1_font_desc;
 PangoFontDescription* bat2_font_desc;
-struct batstate battery_state;
+struct BatteryState battery_state;
 int battery_enabled;
 int percentage_hide;
 static Timeout* battery_timeout;
@@ -273,7 +273,7 @@ void Battery::InitPanel(Panel* panel) {
 
   battery.parent_ = panel;
   battery.panel_ = panel;
-  battery.size_mode_ = kSizeByContent;
+  battery.size_mode_ = SizeMode::kByContent;
   battery.on_screen_ = true;
   battery.need_resize_ = true;
 }
@@ -382,18 +382,18 @@ void UpdateBattery() {
 
   if (fp != nullptr) {
     if (fgets(tmp, sizeof tmp, fp)) {
-      battery_state.state = BATTERY_UNKNOWN;
+      battery_state.state = ChargeState::kUnknown;
 
       if (strcasecmp(tmp, "Charging\n") == 0) {
-        battery_state.state = BATTERY_CHARGING;
+        battery_state.state = ChargeState::kCharging;
       }
 
       if (strcasecmp(tmp, "Discharging\n") == 0) {
-        battery_state.state = BATTERY_DISCHARGING;
+        battery_state.state = ChargeState::kDischarging;
       }
 
       if (strcasecmp(tmp, "Full\n") == 0) {
-        battery_state.state = BATTERY_FULL;
+        battery_state.state = ChargeState::kFull;
       }
     }
 
@@ -432,11 +432,11 @@ void UpdateBattery() {
 
   if (current_now > 0) {
     switch (battery_state.state) {
-      case BATTERY_CHARGING:
+      case ChargeState::kCharging:
         seconds = 3600 * (energy_full - energy_now) / current_now;
         break;
 
-      case BATTERY_DISCHARGING:
+      case ChargeState::kDischarging:
         seconds = 3600 * energy_now / current_now;
         break;
 
@@ -461,13 +461,14 @@ void UpdateBattery() {
   }
 
   if (battery_low_status > new_percentage &&
-      battery_state.state == BATTERY_DISCHARGING && !battery_low_cmd_send) {
+      battery_state.state == ChargeState::kDischarging &&
+      !battery_low_cmd_send) {
     TintExec(battery_low_cmd);
     battery_low_cmd_send = 1;
   }
 
   if (battery_low_status < new_percentage &&
-      battery_state.state == BATTERY_CHARGING && battery_low_cmd_send) {
+      battery_state.state == ChargeState::kCharging && battery_low_cmd_send) {
     battery_low_cmd_send = 0;
   }
 
@@ -513,7 +514,7 @@ bool Battery::Resize() {
   snprintf(buf_bat_percentage, sizeof(buf_bat_percentage), "%d%%",
            battery_state.percentage);
 
-  if (battery_state.state == BATTERY_FULL) {
+  if (battery_state.state == ChargeState::kFull) {
     strcpy(buf_bat_time, "Full");
   } else {
     snprintf(buf_bat_time, sizeof(buf_bat_time), "%02d:%02d",

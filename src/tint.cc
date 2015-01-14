@@ -279,27 +279,27 @@ void GetSnapshot(const char* path) {
   imlib_free_image();
 }
 
-void WindowAction(Task* tsk, int action) {
+void WindowAction(Task* tsk, MouseAction action) {
   if (!tsk) {
     return;
   }
 
-  int desk;
+  int desk = 0;
 
   switch (action) {
-    case CLOSE:
+    case MouseAction::kClose:
       SetClose(tsk->win);
       break;
 
-    case TOGGLE:
+    case MouseAction::kToggle:
       SetActive(tsk->win);
       break;
 
-    case ICONIFY:
+    case MouseAction::kIconify:
       XIconifyWindow(server.dsp, tsk->win, server.screen);
       break;
 
-    case TOGGLE_ICONIFY:
+    case MouseAction::kToggleIconify:
       if (task_active && tsk->win == task_active->win) {
         XIconifyWindow(server.dsp, tsk->win, server.screen);
       } else {
@@ -308,23 +308,23 @@ void WindowAction(Task* tsk, int action) {
 
       break;
 
-    case SHADE:
+    case MouseAction::kShade:
       WindowToggleShade(tsk->win);
       break;
 
-    case MAXIMIZE_RESTORE:
+    case MouseAction::kMaximizeRestore:
       WindowMaximizeRestore(tsk->win);
       break;
 
-    case MAXIMIZE:
+    case MouseAction::kMaximize:
       WindowMaximizeRestore(tsk->win);
       break;
 
-    case RESTORE:
+    case MouseAction::kRestore:
       WindowMaximizeRestore(tsk->win);
       break;
 
-    case DESKTOP_LEFT:
+    case MouseAction::kDesktopLeft:
       if (tsk->desktop == 0) {
         break;
       }
@@ -338,7 +338,7 @@ void WindowAction(Task* tsk, int action) {
 
       break;
 
-    case DESKTOP_RIGHT:
+    case MouseAction::kDesktopRight:
       if (tsk->desktop == server.nb_desktop) {
         break;
       }
@@ -352,15 +352,19 @@ void WindowAction(Task* tsk, int action) {
 
       break;
 
-    case NEXT_TASK: {
+    case MouseAction::kNextTask: {
       Task* tsk1 = NextTask(FindActiveTask(tsk, task_active));
       SetActive(tsk1->win);
     } break;
 
-    case PREV_TASK: {
+    case MouseAction::kPrevTask: {
       Task* tsk1 = PreviousTask(FindActiveTask(tsk, task_active));
       SetActive(tsk1->win);
-    }
+    } break;
+
+    // no-op for MouseActionEnum::kNone
+    default:
+      break;
   }
 }
 
@@ -392,7 +396,7 @@ void EventButtonPress(XEvent* e) {
 
   task_drag = panel->ClickTask(e->xbutton.x, e->xbutton.y);
 
-  if (panel_layer == BOTTOM_LAYER) {
+  if (panel_layer == PanelLayer::kBottom) {
     XLowerWindow(server.dsp, panel->main_win_);
   }
 }
@@ -430,7 +434,8 @@ void EventButtonMotionNotify(XEvent* e) {
       }
     }
   } else {  // The event is on another taskbar than the task being dragged
-    if (task_drag->desktop == ALLDESKTOP || panel_mode != MULTI_DESKTOP) {
+    if (task_drag->desktop == kAllDesktops ||
+        panel_mode != PanelMode::kMultiDesktop) {
       return;
     }
 
@@ -476,7 +481,7 @@ void EventButtonRelease(XEvent* e) {
   if (wm_menu && !panel->HandlesClick(&e->xbutton)) {
     ForwardClick(e);
 
-    if (panel_layer == BOTTOM_LAYER) {
+    if (panel_layer == PanelLayer::kBottom) {
       XLowerWindow(server.dsp, panel->main_win_);
     }
 
@@ -484,7 +489,7 @@ void EventButtonRelease(XEvent* e) {
     return;
   }
 
-  int action = TOGGLE_ICONIFY;
+  MouseAction action = MouseAction::kToggleIconify;
 
   switch (e->xbutton.button) {
     case 2:
@@ -515,7 +520,7 @@ void EventButtonRelease(XEvent* e) {
   if (panel->ClickClock(e->xbutton.x, e->xbutton.y)) {
     ClockAction(e->xbutton.button);
 
-    if (panel_layer == BOTTOM_LAYER) {
+    if (panel_layer == PanelLayer::kBottom) {
       XLowerWindow(server.dsp, panel->main_win_);
     }
 
@@ -538,7 +543,7 @@ void EventButtonRelease(XEvent* e) {
 
   if (!tskbar) {
     // TODO: check better solution to keep window below
-    if (panel_layer == BOTTOM_LAYER) {
+    if (panel_layer == PanelLayer::kBottom) {
       XLowerWindow(server.dsp, panel->main_win_);
     }
 
@@ -554,9 +559,11 @@ void EventButtonRelease(XEvent* e) {
   }
 
   // switch desktop
-  if (panel_mode == MULTI_DESKTOP) {
-    if (tskbar->desktop != server.desktop && action != CLOSE &&
-        action != DESKTOP_LEFT && action != DESKTOP_RIGHT) {
+  if (panel_mode == PanelMode::kMultiDesktop) {
+    if (tskbar->desktop != server.desktop &&
+        action != MouseAction::kClose &&
+        action != MouseAction::kDesktopLeft &&
+        action != MouseAction::kDesktopRight) {
       SetDesktop(tskbar->desktop);
     }
   }
@@ -565,7 +572,7 @@ void EventButtonRelease(XEvent* e) {
   WindowAction(panel->ClickTask(e->xbutton.x, e->xbutton.y), action);
 
   // to keep window below
-  if (panel_layer == BOTTOM_LAYER) {
+  if (panel_layer == PanelLayer::kBottom) {
     XLowerWindow(server.dsp, panel->main_win_);
   }
 }
@@ -655,8 +662,8 @@ void EventPropertyNotify(XEvent* e) {
 
       for (int i = 0; i < nb_panel; i++) {
         Panel& panel = panel1[i];
-        panel.taskbar_[old_desktop].SetState(TASKBAR_NORMAL);
-        panel.taskbar_[server.desktop].SetState(TASKBAR_ACTIVE);
+        panel.taskbar_[old_desktop].SetState(kTaskbarNormal);
+        panel.taskbar_[server.desktop].SetState(kTaskbarActive);
         // check ALLDESKTOP task => resize taskbar
 
         if (server.nb_desktop > old_desktop) {
@@ -670,7 +677,7 @@ void EventPropertyNotify(XEvent* e) {
           for (; it != tskbar.children_.end(); ++it) {
             auto tsk = static_cast<Task*>(*it);
 
-            if (tsk->desktop == ALLDESKTOP) {
+            if (tsk->desktop == kAllDesktops) {
               tsk->on_screen_ = false;
               tskbar.need_resize_ = true;
               panel_refresh = 1;
@@ -688,7 +695,7 @@ void EventPropertyNotify(XEvent* e) {
         for (; it != tskbar.children_.end(); ++it) {
           auto tsk = static_cast<Task*>(*it);
 
-          if (tsk->desktop == ALLDESKTOP) {
+          if (tsk->desktop == kAllDesktops) {
             tsk->on_screen_ = true;
             tskbar.need_resize_ = true;
           }
@@ -1046,7 +1053,7 @@ void DragAndDropPosition(XClientMessageEvent* e) {
       SetDesktop(task->desktop);
     }
 
-    WindowAction(task, TOGGLE);
+    WindowAction(task, MouseAction::kToggle);
   } else {
     LauncherIcon* icon = panel->ClickLauncherIcon(mapX, mapY);
 

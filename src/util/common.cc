@@ -86,7 +86,7 @@ void GObjectUnrefDeleter::operator()(gpointer data) const {
 
 }  // namespace util
 
-int const ALLDESKTOP = 0xFFFFFFFF;
+int const kAllDesktops = 0xFFFFFFFF;
 
 std::string GetEnvironment(std::string const& variable_name) {
   char* value = getenv(variable_name.c_str());

@@ -30,21 +30,21 @@ extern "C" {
 /* Types of settings possible. Enum values correspond to
  * protocol values.
  */
-typedef enum {
+enum XSettingsType {
   XSETTINGS_TYPE_INT = 0,
   XSETTINGS_TYPE_STRING = 1,
   XSETTINGS_TYPE_COLOR = 2,
   XSETTINGS_TYPE_NONE = 0xff
-} XSettingsType;
+};
 
-typedef enum {
+enum XSettingsResult {
   XSETTINGS_SUCCESS,
   XSETTINGS_NO_MEM,
   XSETTINGS_ACCESS,
   XSETTINGS_FAILED,
   XSETTINGS_NO_ENTRY,
   XSETTINGS_DUPLICATE_ENTRY
-} XSettingsResult;
+};
 
 struct XSettingsColor {
   unsigned short red, green, blue, alpha;

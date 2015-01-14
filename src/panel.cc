@@ -45,17 +45,17 @@ static char kClassHintClass[] = "Tint3";
 int signal_pending;
 // --------------------------------------------------
 // mouse events
-int mouse_middle;
-int mouse_right;
-int mouse_scroll_up;
-int mouse_scroll_down;
-int mouse_tilt_left;
-int mouse_tilt_right;
+MouseAction mouse_middle;
+MouseAction mouse_right;
+MouseAction mouse_scroll_up;
+MouseAction mouse_scroll_down;
+MouseAction mouse_tilt_left;
+MouseAction mouse_tilt_right;
 
-int panel_mode;
+PanelMode panel_mode;
 int wm_menu;
 int panel_dock;
-int panel_layer;
+PanelLayer panel_layer;
 int panel_position;
 int panel_horizontal;
 int panel_refresh;
@@ -65,7 +65,7 @@ int panel_autohide;
 int panel_autohide_show_timeout;
 int panel_autohide_hide_timeout;
 int panel_autohide_height;
-int panel_strut_policy;
+PanelStrutPolicy panel_strut_policy;
 std::string panel_items_order;
 
 int max_tick_urgent;
@@ -83,7 +83,7 @@ Imlib_Image default_icon;
 namespace {
 
 void UpdateStrut(Panel* p) {
-  if (panel_strut_policy == STRUT_NONE) {
+  if (panel_strut_policy == PanelStrutPolicy::kNone) {
     XDeleteProperty(server.dsp, p->main_win_, server.atoms_["_NET_WM_STRUT"]);
     XDeleteProperty(server.dsp, p->main_win_,
                     server.atoms_["_NET_WM_STRUT_PARTIAL"]);
@@ -102,12 +102,13 @@ void UpdateStrut(Panel* p) {
   if (panel_horizontal) {
     int height = p->height_ + p->margin_y_;
 
-    if (panel_strut_policy == STRUT_MINIMUM ||
-        (panel_strut_policy == STRUT_FOLLOW_SIZE && p->is_hidden_)) {
+    if (panel_strut_policy == PanelStrutPolicy::kMinimum ||
+        (panel_strut_policy == PanelStrutPolicy::kFollowSize &&
+         p->is_hidden_)) {
       height = p->hidden_height_;
     }
 
-    if (panel_position & TOP) {
+    if (panel_position & kTop) {
       struts[2] = height + monitor.y;
       struts[8] = p->root_x_;
       // p->width - 1 allowed full screen on monitor 2
@@ -121,12 +122,13 @@ void UpdateStrut(Panel* p) {
   } else {
     int width = p->width_ + p->margin_x_;
 
-    if (panel_strut_policy == STRUT_MINIMUM ||
-        (panel_strut_policy == STRUT_FOLLOW_SIZE && p->is_hidden_)) {
+    if (panel_strut_policy == PanelStrutPolicy::kMinimum ||
+        (panel_strut_policy == PanelStrutPolicy::kFollowSize &&
+         p->is_hidden_)) {
       width = p->hidden_width_;
     }
 
-    if (panel_position & LEFT) {
+    if (panel_position & kLeft) {
       struts[0] = width + monitor.x;
       struts[4] = p->root_y_;
       // p->width - 1 allowed full screen on monitor 2
@@ -162,15 +164,15 @@ void DefaultPanel() {
   default_icon = nullptr;
   task_dragged = 0;
   panel_horizontal = 1;
-  panel_position = CENTER;
+  panel_position = kCenter;
   panel_items_order.clear();
   panel_autohide = 0;
   panel_autohide_show_timeout = 0;
   panel_autohide_hide_timeout = 0;
   panel_autohide_height = 5;  // for vertical panels this is of course the width
-  panel_strut_policy = STRUT_FOLLOW_SIZE;
-  panel_dock = 0;              // default not in the dock
-  panel_layer = BOTTOM_LAYER;  // default is bottom layer
+  panel_strut_policy = PanelStrutPolicy::kFollowSize;
+  panel_dock = 0;                     // default not in the dock
+  panel_layer = PanelLayer::kBottom;  // default is bottom layer
   wm_menu = 0;
   max_tick_urgent = 14;
 
@@ -267,7 +269,7 @@ void InitPanel() {
     p->panel_ = p;
     p->on_screen_ = true;
     p->need_resize_ = true;
-    p->size_mode_ = kSizeByLayout;
+    p->size_mode_ = SizeMode::kByLayout;
     p->InitSizeAndPosition();
 
     // add children according to panel_items
@@ -417,10 +419,10 @@ void Panel::InitSizeAndPosition() {
   }
 
   // panel position determined here
-  if (panel_position & LEFT) {
+  if (panel_position & kLeft) {
     root_x_ = server.monitor[monitor_].x + margin_x_;
   } else {
-    if (panel_position & RIGHT) {
+    if (panel_position & kRight) {
       root_x_ = server.monitor[monitor_].x + server.monitor[monitor_].width -
                 width_ - margin_x_;
     } else {
@@ -433,10 +435,10 @@ void Panel::InitSizeAndPosition() {
     }
   }
 
-  if (panel_position & TOP) {
+  if (panel_position & kTop) {
     root_y_ = server.monitor[monitor_].y + margin_y_;
   } else {
-    if (panel_position & BOTTOM) {
+    if (panel_position & kBottom) {
       root_y_ = server.monitor[monitor_].y + server.monitor[monitor_].height -
                 height_ - margin_y_;
     } else {
@@ -463,7 +465,7 @@ void Panel::InitSizeAndPosition() {
 bool Panel::Resize() {
   ResizeByLayout(0);
 
-  if (panel_mode != MULTI_DESKTOP && taskbar_enabled) {
+  if (panel_mode != PanelMode::kMultiDesktop && taskbar_enabled) {
     // propagate width/height on hidden taskbar
     int width = taskbar_[server.desktop].width_;
     int height = taskbar_[server.desktop].height_;
@@ -542,16 +544,17 @@ void Panel::SetProperties() {
                   XA_ATOM, 32, PropModeReplace, (unsigned char*)&val, 1);
 
   // Sticky and below other window
-  val = ALLDESKTOP;
+  val = kAllDesktops;
   XChangeProperty(server.dsp, main_win_, server.atoms_["_NET_WM_DESKTOP"],
                   XA_CARDINAL, 32, PropModeReplace, (unsigned char*)&val, 1);
   Atom state[4];
   state[0] = server.atoms_["_NET_WM_STATE_SKIP_PAGER"];
   state[1] = server.atoms_["_NET_WM_STATE_SKIP_TASKBAR"];
   state[2] = server.atoms_["_NET_WM_STATE_STICKY"];
-  state[3] = panel_layer == BOTTOM_LAYER ? server.atoms_["_NET_WM_STATE_BELOW"]
-                                         : server.atoms_["_NET_WM_STATE_ABOVE"];
-  int nb_atoms = panel_layer == NORMAL_LAYER ? 3 : 4;
+  state[3] = panel_layer == PanelLayer::kBottom
+                 ? server.atoms_["_NET_WM_STATE_BELOW"]
+                 : server.atoms_["_NET_WM_STATE_ABOVE"];
+  int nb_atoms = panel_layer == PanelLayer::kNormal ? 3 : 4;
   XChangeProperty(server.dsp, main_win_, server.atoms_["_NET_WM_STATE"],
                   XA_ATOM, 32, PropModeReplace, (unsigned char*)state,
                   nb_atoms);
@@ -612,9 +615,9 @@ void Panel::SetBackground() {
 
   int xoff = 0, yoff = 0;
 
-  if (panel_horizontal && panel_position & BOTTOM) {
+  if (panel_horizontal && panel_position & kBottom) {
     yoff = height_ - hidden_height_;
-  } else if (!panel_horizontal && panel_position & RIGHT) {
+  } else if (!panel_horizontal && panel_position & kRight) {
     xoff = width_ - hidden_width_;
   }
 
@@ -665,7 +668,7 @@ void Panel::SetBackground() {
   for (int i = 0; i < nb_desktop_; i++) {
     auto& tskbar = taskbar_[i];
 
-    for (int k = 0; k < TASKBAR_STATE_COUNT; ++k) {
+    for (int k = 0; k < kTaskbarCount; ++k) {
       tskbar.reset_state_pixmap(k);
       tskbar.bar_name.reset_state_pixmap(k);
     }
@@ -689,7 +692,8 @@ void Panel::UpdateTaskbarVisibility() {
   for (int j = 0; j < nb_desktop_; j++) {
     Taskbar& tskbar = taskbar_[j];
 
-    if (panel_mode != MULTI_DESKTOP && tskbar.desktop != server.desktop) {
+    if (panel_mode != PanelMode::kMultiDesktop &&
+        tskbar.desktop != server.desktop) {
       // SINGLE_DESKTOP and not current desktop
       tskbar.on_screen_ = false;
     } else {
@@ -801,10 +805,11 @@ bool Panel::HandlesClick(XButtonEvent* e) {
   Task* task = ClickTask(e->x, e->y);
 
   if (task) {
-    return ((e->button == 1) || (e->button == 2 && mouse_middle != 0) ||
-            (e->button == 3 && mouse_right != 0) ||
-            (e->button == 4 && mouse_scroll_up != 0) ||
-            (e->button == 5 && mouse_scroll_down != 0));
+    return ((e->button == 1) ||
+            (e->button == 2 && mouse_middle != MouseAction::kNone) ||
+            (e->button == 3 && mouse_right != MouseAction::kNone) ||
+            (e->button == 4 && mouse_scroll_up != MouseAction::kNone) ||
+            (e->button == 5 && mouse_scroll_down != MouseAction::kNone));
   }
 
   LauncherIcon* icon = ClickLauncherIcon(e->x, e->y);
@@ -816,7 +821,8 @@ bool Panel::HandlesClick(XButtonEvent* e) {
   // no launcher/task clicked --> check if taskbar clicked
   Taskbar* tskbar = ClickTaskbar(e->x, e->y);
 
-  if (tskbar != nullptr && e->button == 1 && panel_mode == MULTI_DESKTOP) {
+  if (tskbar != nullptr && e->button == 1 &&
+      panel_mode == PanelMode::kMultiDesktop) {
     return 1;
   }
 
@@ -834,14 +840,14 @@ void AutohideShow(void* p) {
   StopAutohideTimeout(panel);
   panel->is_hidden_ = 0;
 
-  if (panel_strut_policy == STRUT_FOLLOW_SIZE) {
+  if (panel_strut_policy == PanelStrutPolicy::kFollowSize) {
     UpdateStrut(panel);
   }
 
   XMapSubwindows(server.dsp, panel->main_win_);  // systray windows
 
   if (panel_horizontal) {
-    if (panel_position & TOP) {
+    if (panel_position & kTop) {
       XResizeWindow(server.dsp, panel->main_win_, panel->width_,
                     panel->height_);
     } else {
@@ -849,7 +855,7 @@ void AutohideShow(void* p) {
                         panel->root_y_, panel->width_, panel->height_);
     }
   } else {
-    if (panel_position & LEFT) {
+    if (panel_position & kLeft) {
       XResizeWindow(server.dsp, panel->main_win_, panel->width_,
                     panel->height_);
     } else {
@@ -868,7 +874,7 @@ void AutohideHide(void* p) {
   StopAutohideTimeout(panel);
   panel->is_hidden_ = 1;
 
-  if (panel_strut_policy == STRUT_FOLLOW_SIZE) {
+  if (panel_strut_policy == PanelStrutPolicy::kFollowSize) {
     UpdateStrut(panel);
   }
 
@@ -879,7 +885,7 @@ void AutohideHide(void* p) {
   // printf("autohide_hide : diff %d, w %d, h %d\n", diff, panel->hidden_width,
   // panel->hidden_height);
   if (panel_horizontal) {
-    if (panel_position & TOP) {
+    if (panel_position & kTop) {
       XResizeWindow(server.dsp, panel->main_win_, panel->hidden_width_,
                     panel->hidden_height_);
     } else {
@@ -888,7 +894,7 @@ void AutohideHide(void* p) {
                         panel->hidden_height_);
     }
   } else {
-    if (panel_position & LEFT) {
+    if (panel_position & kLeft) {
       XResizeWindow(server.dsp, panel->main_win_, panel->hidden_width_,
                     panel->hidden_height_);
     } else {

@@ -43,8 +43,8 @@ class Taskbar : public TaskbarBase {
 class Global_taskbar : public TaskbarBase {
  public:
   Taskbarname bar_name_;
-  Background* background[TASKBAR_STATE_COUNT];
-  Background* background_name[TASKBAR_STATE_COUNT];
+  Background* background[kTaskbarCount];
+  Background* background_name[kTaskbarCount];
 };
 
 // default global data

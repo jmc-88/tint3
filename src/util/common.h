@@ -31,23 +31,23 @@ using GObjectPtr = std::unique_ptr<T, GObjectUnrefDeleter>;
 }  // namespace util
 
 // mouse actions
-enum MouseActionEnum {
-  NONE = 0,
-  CLOSE,
-  TOGGLE,
-  ICONIFY,
-  SHADE,
-  TOGGLE_ICONIFY,
-  MAXIMIZE_RESTORE,
-  MAXIMIZE,
-  RESTORE,
-  DESKTOP_LEFT,
-  DESKTOP_RIGHT,
-  NEXT_TASK,
-  PREV_TASK
+enum class MouseAction {
+  kNone,
+  kClose,
+  kToggle,
+  kIconify,
+  kShade,
+  kToggleIconify,
+  kMaximizeRestore,
+  kMaximize,
+  kRestore,
+  kDesktopLeft,
+  kDesktopRight,
+  kNextTask,
+  kPrevTask
 };
 
-extern int const ALLDESKTOP;
+extern int const kAllDesktops;
 
 class StringBuilder {
   std::ostringstream ss_;

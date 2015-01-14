@@ -33,26 +33,21 @@ class Battery : public Area {
   static void InitPanel(Panel* panel);
 };
 
-enum chargestate {
-  BATTERY_UNKNOWN,
-  BATTERY_CHARGING,
-  BATTERY_DISCHARGING,
-  BATTERY_FULL
-};
+enum class ChargeState { kUnknown, kCharging, kDischarging, kFull };
 
-typedef struct battime {
+struct BatteryTimestamp {
   int16_t hours;
   int8_t minutes;
   int8_t seconds;
-} battime;
+};
 
-typedef struct batstate {
+struct BatteryState {
   int percentage;
-  struct battime time;
-  enum chargestate state;
-} batstate;
+  BatteryTimestamp time;
+  ChargeState state;
+};
 
-extern struct batstate battery_state;
+extern BatteryState battery_state;
 extern PangoFontDescription* bat1_font_desc;
 extern PangoFontDescription* bat2_font_desc;
 extern int battery_enabled;

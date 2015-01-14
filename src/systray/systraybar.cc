@@ -61,7 +61,7 @@ void DefaultSystray() {
   render_background = 0;
   systray.alpha = 100;
   systray.sort = 3;
-  systray.size_mode_ = kSizeByContent;
+  systray.size_mode_ = SizeMode::kByContent;
 }
 
 void CleanupSystray() {

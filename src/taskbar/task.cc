@@ -104,7 +104,7 @@ Task* AddTask(Window win) {
   Task* new_tsk2 = nullptr;
 
   for (int j = 0; j < panel1[monitor].nb_desktop_; j++) {
-    if (new_tsk.desktop != ALLDESKTOP && new_tsk.desktop != j) {
+    if (new_tsk.desktop != kAllDesktops && new_tsk.desktop != j) {
       continue;
     }
 
@@ -122,7 +122,7 @@ Task* AddTask(Window win) {
     // to update the current state later in set_task_state...
     new_tsk2->current_state = -1;
 
-    if (new_tsk2->desktop == ALLDESKTOP && server.desktop != j) {
+    if (new_tsk2->desktop == kAllDesktops && server.desktop != j) {
       // hide ALLDESKTOP task on non-current desktop
       new_tsk2->on_screen_ = false;
     }
@@ -471,7 +471,7 @@ Task* FindActiveTask(Task* current_task, Task* active_task) {
     return current_task;
   }
 
-  if (active_task->desktop != ALLDESKTOP) {
+  if (active_task->desktop != kAllDesktops) {
     return active_task;
   }
 

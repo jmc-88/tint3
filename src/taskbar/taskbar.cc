@@ -71,8 +71,8 @@ Taskbar& Taskbar::SetState(size_t state) {
     bar_name.pix_ = bar_name.state_pixmap(state);
   }
 
-  if (panel_mode != MULTI_DESKTOP) {
-    on_screen_ = (state != TASKBAR_NORMAL);
+  if (panel_mode != PanelMode::kMultiDesktop) {
+    on_screen_ = (state != kTaskbarNormal);
   }
 
   if (on_screen_ == true) {
@@ -84,10 +84,10 @@ Taskbar& Taskbar::SetState(size_t state) {
       bar_name.need_redraw_ = true;
     }
 
-    auto normal_bg = panel1[0].g_taskbar.background[TASKBAR_NORMAL];
-    auto active_bg = panel1[0].g_taskbar.background[TASKBAR_ACTIVE];
+    auto normal_bg = panel1[0].g_taskbar.background[kTaskbarNormal];
+    auto active_bg = panel1[0].g_taskbar.background[kTaskbarActive];
 
-    if (panel_mode == MULTI_DESKTOP && normal_bg != active_bg) {
+    if (panel_mode == PanelMode::kMultiDesktop && normal_bg != active_bg) {
       auto it = children_.begin();
 
       if (taskbarname_enabled) {
@@ -127,7 +127,7 @@ void CleanupTaskbar() {
     for (int j = 0; j < panel.nb_desktop_; ++j) {
       Taskbar* tskbar = &panel.taskbar_[j];
 
-      for (int k = 0; k < TASKBAR_STATE_COUNT; ++k) {
+      for (int k = 0; k < kTaskbarCount; ++k) {
         tskbar->reset_state_pixmap(k);
       }
 
@@ -154,14 +154,14 @@ void InitTaskbar() {
 }
 
 void Taskbar::InitPanel(Panel* panel) {
-  if (panel->g_taskbar.background[TASKBAR_NORMAL] == nullptr) {
-    panel->g_taskbar.background[TASKBAR_NORMAL] = backgrounds.front();
-    panel->g_taskbar.background[TASKBAR_ACTIVE] = backgrounds.front();
+  if (panel->g_taskbar.background[kTaskbarNormal] == nullptr) {
+    panel->g_taskbar.background[kTaskbarNormal] = backgrounds.front();
+    panel->g_taskbar.background[kTaskbarActive] = backgrounds.front();
   }
 
-  if (panel->g_taskbar.background_name[TASKBAR_NORMAL] == nullptr) {
-    panel->g_taskbar.background_name[TASKBAR_NORMAL] = backgrounds.front();
-    panel->g_taskbar.background_name[TASKBAR_ACTIVE] = backgrounds.front();
+  if (panel->g_taskbar.background_name[kTaskbarNormal] == nullptr) {
+    panel->g_taskbar.background_name[kTaskbarNormal] = backgrounds.front();
+    panel->g_taskbar.background_name[kTaskbarActive] = backgrounds.front();
   }
 
   if (panel->g_task.bg_ == nullptr) {
@@ -170,14 +170,14 @@ void Taskbar::InitPanel(Panel* panel) {
 
   // taskbar name
   panel->g_taskbar.bar_name_.panel_ = panel;
-  panel->g_taskbar.bar_name_.size_mode_ = kSizeByContent;
+  panel->g_taskbar.bar_name_.size_mode_ = SizeMode::kByContent;
   panel->g_taskbar.bar_name_.need_resize_ = true;
   panel->g_taskbar.bar_name_.on_screen_ = true;
 
   // taskbar
   panel->g_taskbar.parent_ = panel;
   panel->g_taskbar.panel_ = panel;
-  panel->g_taskbar.size_mode_ = kSizeByLayout;
+  panel->g_taskbar.size_mode_ = SizeMode::kByLayout;
   panel->g_taskbar.need_resize_ = true;
   panel->g_taskbar.on_screen_ = true;
 
@@ -195,7 +195,7 @@ void Taskbar::InitPanel(Panel* panel) {
 
   // task
   panel->g_task.panel_ = panel;
-  panel->g_task.size_mode_ = kSizeByLayout;
+  panel->g_task.size_mode_ = SizeMode::kByLayout;
   panel->g_task.need_resize_ = true;
   panel->g_task.on_screen_ = true;
 
@@ -267,13 +267,13 @@ void Taskbar::InitPanel(Panel* panel) {
   if (panel_horizontal) {
     panel->g_task.panel_y_ =
         panel->g_taskbar.panel_y_ +
-        panel->g_taskbar.background[TASKBAR_NORMAL]->border.width +
+        panel->g_taskbar.background[kTaskbarNormal]->border.width +
         panel->g_taskbar.padding_y_;
     panel->g_task.height_ = panel->height_ - (2 * panel->g_task.panel_y_);
   } else {
     panel->g_task.panel_x_ =
         panel->g_taskbar.panel_x_ +
-        panel->g_taskbar.background[TASKBAR_NORMAL]->border.width +
+        panel->g_taskbar.background[kTaskbarNormal]->border.width +
         panel->g_taskbar.padding_y_;
     panel->g_task.width_ = panel->width_ - (2 * panel->g_task.panel_x_);
     panel->g_task.height_ = panel->g_task.maximum_height;
@@ -338,9 +338,9 @@ void Taskbar::InitPanel(Panel* panel) {
     tskbar->desktop = j;
 
     if (j == server.desktop) {
-      tskbar->bg_ = panel->g_taskbar.background[TASKBAR_ACTIVE];
+      tskbar->bg_ = panel->g_taskbar.background[kTaskbarActive];
     } else {
-      tskbar->bg_ = panel->g_taskbar.background[TASKBAR_NORMAL];
+      tskbar->bg_ = panel->g_taskbar.background[kTaskbarNormal];
     }
   }
 
@@ -400,7 +400,7 @@ void TaskRefreshTasklist() {
 }
 
 void Taskbar::DrawForeground(cairo_t* /* c */) {
-  size_t state = (desktop == server.desktop ? TASKBAR_ACTIVE : TASKBAR_NORMAL);
+  size_t state = (desktop == server.desktop ? kTaskbarActive : kTaskbarNormal);
   set_state_pixmap(state, pix_);
 }
 
@@ -444,7 +444,7 @@ bool Taskbar::RemoveChild(Area* child) {
 
 void Taskbar::OnChangeLayout() {
   // reset Pixmap when position/size changed
-  for (int k = 0; k < TASKBAR_STATE_COUNT; ++k) {
+  for (int k = 0; k < kTaskbarCount; ++k) {
     reset_state_pixmap(k);
   }
 

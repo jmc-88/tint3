@@ -186,11 +186,11 @@ void TooltipUpdateGeometry() {
 
   Panel* panel = g_tooltip.panel;
 
-  if (panel_horizontal && panel_position & BOTTOM) {
+  if (panel_horizontal && panel_position & kBottom) {
     y = panel->panel_y_ - height;
-  } else if (panel_horizontal && panel_position & TOP) {
+  } else if (panel_horizontal && panel_position & kTop) {
     y = panel->panel_y_ + panel->height_;
-  } else if (panel_position & LEFT) {
+  } else if (panel_position & kLeft) {
     x = panel->panel_x_ + panel->width_;
   } else {
     x = panel->panel_x_ - width;
@@ -223,12 +223,12 @@ void TooltipAdjustGeometry() {
     min_x = 0;
     max_width = server.monitor[panel->monitor_].width;
     max_height = server.monitor[panel->monitor_].height - panel->height_;
-    min_y = (panel_position & BOTTOM) ? 0 : panel->height_;
+    min_y = (panel_position & kBottom) ? 0 : panel->height_;
   } else {
     max_width = server.monitor[panel->monitor_].width - panel->width_;
     min_y = 0;
     max_height = server.monitor[panel->monitor_].height;
-    min_x = (panel_position & LEFT) ? panel->width_ : 0;
+    min_x = (panel_position & kLeft) ? panel->width_ : 0;
   }
 
   if (x + width > server.monitor[panel->monitor_].x +

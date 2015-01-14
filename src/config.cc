@@ -50,6 +50,7 @@
 #include "taskbar/taskbar.h"
 #include "taskbar/taskbarname.h"
 #include "tooltip/tooltip.h"
+#include "util/common.h"
 #include "util/fs.h"
 #include "util/log.h"
 #include "util/timer.h"
@@ -71,19 +72,19 @@ static int new_config_file;
 
 namespace {
 
-void GetAction(std::string const& event, int* action) {
-  static std::map<std::string, MouseActionEnum> eventmap = {
-      {"none", NONE},
-      {"close", CLOSE},
-      {"toggle", TOGGLE},
-      {"iconify", ICONIFY},
-      {"shade", SHADE},
-      {"toggle_iconify", TOGGLE_ICONIFY},
-      {"maximize_restore", MAXIMIZE_RESTORE},
-      {"desktop_left", DESKTOP_LEFT},
-      {"desktop_right", DESKTOP_RIGHT},
-      {"next_task", NEXT_TASK},
-      {"prev_task", PREV_TASK},
+void GetAction(std::string const& event, MouseAction* action) {
+  static std::map<std::string, MouseAction> eventmap = {
+      {"none", MouseAction::kNone},
+      {"close", MouseAction::kClose},
+      {"toggle", MouseAction::kToggle},
+      {"iconify", MouseAction::kIconify},
+      {"shade", MouseAction::kShade},
+      {"toggle_iconify", MouseAction::kToggleIconify},
+      {"maximize_restore", MouseAction::kMaximizeRestore},
+      {"desktop_left", MouseAction::kDesktopLeft},
+      {"desktop_right", MouseAction::kDesktopRight},
+      {"next_task", MouseAction::kNextTask},
+      {"prev_task", MouseAction::kPrevTask},
   };
 
   auto const& it = eventmap.find(event);
@@ -267,19 +268,19 @@ void AddEntry(std::string const& key, std::string const& value) {
     ExtractValues(value, value1, value2, value3);
 
     if (value1 == "top") {
-      panel_position = TOP;
+      panel_position = PanelPosition::kTop;
     } else if (value1 == "bottom") {
-      panel_position = BOTTOM;
+      panel_position = PanelPosition::kBottom;
     } else {
-      panel_position = CENTER;
+      panel_position = PanelPosition::kCenter;
     }
 
     if (value2 == "left") {
-      panel_position |= LEFT;
+      panel_position |= PanelPosition::kLeft;
     } else if (value2 == "right") {
-      panel_position |= RIGHT;
+      panel_position |= PanelPosition::kRight;
     } else {
-      panel_position |= CENTER;
+      panel_position |= PanelPosition::kCenter;
     }
 
     panel_horizontal = (value3 != "vertical");
@@ -295,11 +296,11 @@ void AddEntry(std::string const& key, std::string const& value) {
     max_tick_urgent = StringToLongInt(value);
   } else if (key == "panel_layer") {
     if (value == "bottom") {
-      panel_layer = BOTTOM_LAYER;
+      panel_layer = PanelLayer::kBottom;
     } else if (value == "top") {
-      panel_layer = TOP_LAYER;
+      panel_layer = PanelLayer::kTop;
     } else {
-      panel_layer = NORMAL_LAYER;
+      panel_layer = PanelLayer::kNormal;
     }
   }
 
@@ -442,9 +443,9 @@ void AddEntry(std::string const& key, std::string const& value) {
   /* Taskbar */
   else if (key == "taskbar_mode") {
     if (value == "multi_desktop") {
-      panel_mode = MULTI_DESKTOP;
+      panel_mode = PanelMode::kMultiDesktop;
     } else {
-      panel_mode = SINGLE_DESKTOP;
+      panel_mode = PanelMode::kSingleDesktop;
     }
   } else if (key == "taskbar_padding") {
     ExtractValues(value, value1, value2, value3);
@@ -459,15 +460,15 @@ void AddEntry(std::string const& key, std::string const& value) {
       panel_config.g_taskbar.padding_x_ = StringToLongInt(value3);
     }
   } else if (key == "taskbar_background_id") {
-    panel_config.g_taskbar.background[TASKBAR_NORMAL] =
+    panel_config.g_taskbar.background[kTaskbarNormal] =
         GetBackgroundFromId(StringToLongInt(value));
 
-    if (panel_config.g_taskbar.background[TASKBAR_ACTIVE] == 0) {
-      panel_config.g_taskbar.background[TASKBAR_ACTIVE] =
-          panel_config.g_taskbar.background[TASKBAR_NORMAL];
+    if (panel_config.g_taskbar.background[kTaskbarActive] == 0) {
+      panel_config.g_taskbar.background[kTaskbarActive] =
+          panel_config.g_taskbar.background[kTaskbarNormal];
     }
   } else if (key == "taskbar_active_background_id") {
-    panel_config.g_taskbar.background[TASKBAR_ACTIVE] =
+    panel_config.g_taskbar.background[kTaskbarActive] =
         GetBackgroundFromId(StringToLongInt(value));
   } else if (key == "taskbar_name") {
     taskbarname_enabled = (0 != StringToLongInt(value));
@@ -476,15 +477,15 @@ void AddEntry(std::string const& key, std::string const& value) {
     panel_config.g_taskbar.bar_name_.padding_x_lr_ =
         panel_config.g_taskbar.bar_name_.padding_x_ = StringToLongInt(value1);
   } else if (key == "taskbar_name_background_id") {
-    panel_config.g_taskbar.background_name[TASKBAR_NORMAL] =
+    panel_config.g_taskbar.background_name[kTaskbarNormal] =
         GetBackgroundFromId(StringToLongInt(value));
 
-    if (panel_config.g_taskbar.background_name[TASKBAR_ACTIVE] == 0) {
-      panel_config.g_taskbar.background_name[TASKBAR_ACTIVE] =
-          panel_config.g_taskbar.background_name[TASKBAR_NORMAL];
+    if (panel_config.g_taskbar.background_name[kTaskbarActive] == 0) {
+      panel_config.g_taskbar.background_name[kTaskbarActive] =
+          panel_config.g_taskbar.background_name[kTaskbarNormal];
     }
   } else if (key == "taskbar_name_active_background_id") {
-    panel_config.g_taskbar.background_name[TASKBAR_ACTIVE] =
+    panel_config.g_taskbar.background_name[kTaskbarActive] =
         GetBackgroundFromId(StringToLongInt(value));
   } else if (key == "taskbar_name_font") {
     taskbarname_font_desc = pango_font_description_from_string(value.c_str());
@@ -705,11 +706,11 @@ void AddEntry(std::string const& key, std::string const& value) {
     panel_autohide_hide_timeout = 1000 * StringToFloat(value);
   } else if (key == "strut_policy") {
     if (value == "follow_size") {
-      panel_strut_policy = STRUT_FOLLOW_SIZE;
+      panel_strut_policy = PanelStrutPolicy::kFollowSize;
     } else if (value == "none") {
-      panel_strut_policy = STRUT_NONE;
+      panel_strut_policy = PanelStrutPolicy::kNone;
     } else {
-      panel_strut_policy = STRUT_MINIMUM;
+      panel_strut_policy = PanelStrutPolicy::kMinimum;
     }
   } else if (key == "autohide_height") {
     panel_autohide_height = StringToLongInt(value);

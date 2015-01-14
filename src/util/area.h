@@ -46,9 +46,9 @@ struct Background {
 };
 
 // way to calculate the size
-// kSizeByLayout objects : taskbar and task
-// kSizeByContent objects : clock, battery, launcher, systray
-enum SizeMode { kSizeByLayout, kSizeByContent };
+// kByLayout objects : taskbar and task
+// kByContent objects : clock, battery, launcher, systray
+enum class SizeMode { kByLayout, kByContent };
 
 class Panel;
 class Area {
@@ -73,7 +73,7 @@ class Area {
   // An object (like systray) could be enabled but hidden (because no tray
   // icon).
   bool on_screen_;
-  // way to calculate the size (kSizeByContent or kSizeByLayout)
+  // way to calculate the size (kByContent or kByLayout)
   SizeMode size_mode_;
   // need to calculate position and width
   bool need_resize_;
@@ -94,7 +94,7 @@ class Area {
   // returns true if size changed, false otherwise.
   virtual bool Resize();
 
-  // generic resize for kSizeByLayout objects
+  // generic resize for kByLayout objects
   int ResizeByLayout(int);
 
   // after pos/size changed, the rendering engine will call on_change_layout()

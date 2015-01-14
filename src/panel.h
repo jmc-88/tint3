@@ -33,38 +33,54 @@
 extern int signal_pending;
 // --------------------------------------------------
 // mouse events
-extern int mouse_middle;
-extern int mouse_right;
-extern int mouse_scroll_up;
-extern int mouse_scroll_down;
-extern int mouse_tilt_left;
-extern int mouse_tilt_right;
+extern MouseAction mouse_middle;
+extern MouseAction mouse_right;
+extern MouseAction mouse_scroll_up;
+extern MouseAction mouse_scroll_down;
+extern MouseAction mouse_tilt_left;
+extern MouseAction mouse_tilt_right;
 
-// panel mode
-enum { SINGLE_DESKTOP = 0, MULTI_DESKTOP };
-enum { BOTTOM_LAYER, NORMAL_LAYER, TOP_LAYER };
-extern int panel_mode;
 extern int wm_menu;
 extern int panel_dock;
-extern int panel_layer;
+
+// panel mode
+enum class PanelMode { kSingleDesktop, kMultiDesktop };
+
+extern PanelMode panel_mode;
+
+// panel layer
+enum class PanelLayer { kBottom, kNormal, kTop };
+
+extern PanelLayer panel_layer;
 
 // panel position
-enum { LEFT = 0x01, RIGHT = 0x02, CENTER = 0X04, TOP = 0X08, BOTTOM = 0x10 };
+enum PanelPosition {
+  kLeft = 0x01,
+  kRight = 0x02,
+  kCenter = 0x04,
+  kTop = 0x08,
+  kBottom = 0x10
+};
+
 extern int panel_position;
+
 extern int panel_horizontal;
 
 extern int panel_refresh;
 extern int task_dragged;
 
 // panel autohide
-enum { STRUT_MINIMUM, STRUT_FOLLOW_SIZE, STRUT_NONE };
 extern int panel_autohide;
 extern int panel_autohide_show_timeout;
 extern int panel_autohide_hide_timeout;
 extern int
     panel_autohide_height;  // for vertical panels this is of course the width
-extern int panel_strut_policy;
 extern std::string panel_items_order;
+
+// panel strut policy
+enum class PanelStrutPolicy { kMinimum, kFollowSize, kNone };
+
+extern PanelStrutPolicy panel_strut_policy;
 
 extern int max_tick_urgent;
 

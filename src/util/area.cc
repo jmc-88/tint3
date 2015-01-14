@@ -81,8 +81,8 @@ Area& Area::CloneArea(Area const& other) {
  * - tree's root is in the background while tree's leafe are foreground objects
  * - position of a node/Area depend on the layout : parent's position (posx,
  *posy), size of previous brothers and parent's padding
- * - size of a node/Area depend on the content (kSizeByContent objects) or on
- *the layout (kSizeByLayout objects)
+ * - size of a node/Area depend on the content (kByContent objects) or on
+ *the layout (kByLayout objects)
  *
  * DRAWING AND LAYERING ENGINE :
  * Redrawing an object (like the clock) could come from an 'external event'
@@ -91,11 +91,11 @@ Area& Area::CloneArea(Area const& other) {
  * The following 'drawing engine' take care of :
  * - posx/posy of all Area
  * - 'layering event' propagation between object
- * 1) browse tree kSizeByContent
- *  - resize kSizeByContent node : children are resized before parent
+ * 1) browse tree kByContent
+ *  - resize kByContent node : children are resized before parent
  *  - if 'size' changed then 'need_resize = true' on the parent
- * 2) browse tree kSizeByLayout and POSITION
- *  - resize kSizeByLayout node : parent is resized before children
+ * 2) browse tree kByLayout and POSITION
+ *  - resize kByLayout node : parent is resized before children
  *  - calculate position (posx,posy) : parent is calculated before children
  *  - if 'position' changed then 'need_redraw = 1'
  * 3) browse tree REDRAW
@@ -138,7 +138,7 @@ void Area::SizeByContent() {
   // calculate area's size
   on_changed_ = false;
 
-  if (need_resize_ && size_mode_ == kSizeByContent) {
+  if (need_resize_ && size_mode_ == SizeMode::kByContent) {
     need_resize_ = false;
 
     if (Resize()) {
@@ -157,14 +157,15 @@ void Area::SizeByLayout(int pos, int level) {
 
   // parent node is resized before its children
   // calculate area's size
-  if (need_resize_ && size_mode_ == kSizeByLayout) {
+  if (need_resize_ && size_mode_ == SizeMode::kByLayout) {
     need_resize_ = false;
 
     Resize();
 
-    // resize children with kSizeByLayout
+    // resize children with kByLayout
     for (auto& child : children_) {
-      if (child->size_mode_ == kSizeByLayout && child->children_.size() != 0) {
+      if (child->size_mode_ == SizeMode::kByLayout &&
+          child->children_.size() != 0) {
         child->need_resize_ = true;
       }
     }
@@ -238,15 +239,15 @@ int Area::ResizeByLayout(int maximum_size) {
   int size, nb_by_content = 0, nb_by_layout = 0;
 
   if (panel_horizontal) {
-    // detect free size for kSizeByLayout's Area
+    // detect free size for kByLayout's Area
     size = width_ - (2 * (padding_x_lr_ + bg_->border.width));
 
     for (auto& child : children_) {
       if (child->on_screen_) {
-        if (child->size_mode_ == kSizeByContent) {
+        if (child->size_mode_ == SizeMode::kByContent) {
           size -= child->width_;
           nb_by_content++;
-        } else if (child->size_mode_ == kSizeByLayout) {
+        } else if (child->size_mode_ == SizeMode::kByLayout) {
           nb_by_layout++;
         }
       }
@@ -268,9 +269,9 @@ int Area::ResizeByLayout(int maximum_size) {
       }
     }
 
-    // resize kSizeByLayout objects
+    // resize kByLayout objects
     for (auto& child : children_) {
-      if (child->on_screen_ && child->size_mode_ == kSizeByLayout) {
+      if (child->on_screen_ && child->size_mode_ == SizeMode::kByLayout) {
         int old_width = child->width_;
         child->width_ = width;
 
@@ -285,15 +286,15 @@ int Area::ResizeByLayout(int maximum_size) {
       }
     }
   } else {
-    // detect free size for kSizeByLayout's Area
+    // detect free size for kByLayout's Area
     size = height_ - (2 * (padding_x_lr_ + bg_->border.width));
 
     for (auto& child : children_) {
       if (child->on_screen_) {
-        if (child->size_mode_ == kSizeByContent) {
+        if (child->size_mode_ == SizeMode::kByContent) {
           size -= child->height_;
           nb_by_content++;
-        } else if (child->size_mode_ == kSizeByLayout) {
+        } else if (child->size_mode_ == SizeMode::kByLayout) {
           nb_by_layout++;
         }
       }
@@ -315,9 +316,9 @@ int Area::ResizeByLayout(int maximum_size) {
       }
     }
 
-    // resize kSizeByLayout objects
+    // resize kByLayout objects
     for (auto& child : children_) {
-      if (child->on_screen_ && child->size_mode_ == kSizeByLayout) {
+      if (child->on_screen_ && child->size_mode_ == SizeMode::kByLayout) {
         int old_height = child->height_;
         child->height_ = height;
 
@@ -460,7 +461,8 @@ void Area::FreeArea() {
   }
 }
 
-void Area::DrawForeground(cairo_t*) { /* defaults to a no-op */ }
+void Area::DrawForeground(cairo_t*) { /* defaults to a no-op */
+}
 
 std::string Area::GetTooltipText() {
   /* defaults to a no-op */
@@ -472,7 +474,8 @@ bool Area::Resize() {
   return false;
 }
 
-void Area::OnChangeLayout() { /* defaults to a no-op */ }
+void Area::OnChangeLayout() { /* defaults to a no-op */
+}
 
 void DrawRect(cairo_t* c, double x, double y, double w, double h, double r) {
   if (r > 0.0) {
