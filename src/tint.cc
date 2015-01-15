@@ -419,7 +419,7 @@ void EventButtonMotionNotify(XEvent* e) {
   Task* event_task = panel->ClickTask(e->xbutton.x, e->xbutton.y);
 
   // If the event takes place on the same taskbar as the task being dragged
-  if (event_taskbar == (Taskbar*)task_drag->parent_) {
+  if (event_taskbar == task_drag->parent_) {
     // Swap the task_drag with the task on the event's location (if they differ)
     if (event_task && event_task != task_drag) {
       auto& children = event_taskbar->children_;
@@ -439,7 +439,7 @@ void EventButtonMotionNotify(XEvent* e) {
       return;
     }
 
-    auto drag_taskbar = reinterpret_cast<Taskbar*>(task_drag->parent_);
+    auto drag_taskbar = task_drag->parent_;
     auto drag_taskbar_iter =
         std::find(drag_taskbar->children_.begin(),
                   drag_taskbar->children_.end(), task_drag);
@@ -560,8 +560,7 @@ void EventButtonRelease(XEvent* e) {
 
   // switch desktop
   if (panel_mode == PanelMode::kMultiDesktop) {
-    if (tskbar->desktop != server.desktop &&
-        action != MouseAction::kClose &&
+    if (tskbar->desktop != server.desktop && action != MouseAction::kClose &&
         action != MouseAction::kDesktopLeft &&
         action != MouseAction::kDesktopRight) {
       SetDesktop(tskbar->desktop);
