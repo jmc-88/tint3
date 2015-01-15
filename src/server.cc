@@ -214,7 +214,7 @@ bool MonitorIncludes(Monitor const& m1, Monitor const& m2) {
 }
 
 void GetMonitors() {
-  int i, j, nbmonitor;
+  int nbmonitor = 0;
 
   if (XineramaIsActive(server.dsp)) {
     util::x11::ClientData<XineramaScreenInfo> info(
@@ -225,21 +225,21 @@ void GetMonitors() {
     if (res != nullptr && res->ncrtc >= nbmonitor) {
       // use xrandr to identify monitors (does not work with proprietery nvidia
       // drivers)
-      printf("xRandr: Found crtc's: %d\n", res->ncrtc);
+      util::log::Debug() << "XRandR: found CRTCs: " << res->ncrtc << '\n';
       server.monitor.resize(res->ncrtc);
 
-      for (i = 0; i < res->ncrtc; ++i) {
+      for (int i = 0; i < res->ncrtc; ++i) {
         XRRCrtcInfo* crtc_info = XRRGetCrtcInfo(server.dsp, res, res->crtcs[i]);
         server.monitor[i].x = crtc_info->x;
         server.monitor[i].y = crtc_info->y;
         server.monitor[i].width = crtc_info->width;
         server.monitor[i].height = crtc_info->height;
 
-        for (j = 0; j < crtc_info->noutput; ++j) {
+        for (int j = 0; j < crtc_info->noutput; ++j) {
           XRROutputInfo* output_info =
               XRRGetOutputInfo(server.dsp, res, crtc_info->outputs[j]);
-          printf("xRandr: Linking output %s with crtc %d\n", output_info->name,
-                 i);
+          util::log::Debug() << "XRandR: linking output " << output_info->name
+                             << " with CRTC " << i << '\n';
           server.monitor[i].names.push_back(output_info->name);
           XRRFreeOutputInfo(output_info);
         }
@@ -251,7 +251,7 @@ void GetMonitors() {
     } else if (info != nullptr && nbmonitor > 0) {
       server.monitor.resize(nbmonitor);
 
-      for (i = 0; i < nbmonitor; ++i) {
+      for (int i = 0; i < nbmonitor; ++i) {
         server.monitor[i].x = info.get()[i].x_org;
         server.monitor[i].y = info.get()[i].y_org;
         server.monitor[i].width = info.get()[i].width;
@@ -263,9 +263,11 @@ void GetMonitors() {
     // order monitors
     std::sort(server.monitor.begin(), server.monitor.end(), MonitorIncludes);
 
+    int i;
+
     // remove monitor included into another one
     for (i = 0; i < nbmonitor; ++i) {
-      for (j = 0; j < i; ++j) {
+      for (int j = 0; j < i; ++j) {
         if (!MonitorIncludes(server.monitor[i], server.monitor[j])) {
           goto next;
         }
@@ -274,7 +276,7 @@ void GetMonitors() {
 
   next:
 
-    for (j = i; j < nbmonitor; ++j) {
+    for (int j = i; j < nbmonitor; ++j) {
       server.monitor[j].names.clear();
     }
 
