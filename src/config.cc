@@ -73,7 +73,7 @@ static int new_config_file;
 namespace {
 
 void GetAction(std::string const& event, MouseAction* action) {
-  static std::map<std::string, MouseAction> eventmap = {
+  static std::map<std::string, MouseAction> eventmap{
       {"none", MouseAction::kNone},
       {"close", MouseAction::kClose},
       {"toggle", MouseAction::kToggle},
