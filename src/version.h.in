@@ -1,0 +1,8 @@
+#ifndef VERSION_H
+#define VERSION_H
+
+#define TINT3_RELEASE_VERSION "0.01"
+#define GIT_BRANCH "@GIT_BRANCH@"
+#define GIT_COMMIT_HASH "@GIT_COMMIT_HASH@"
+
+#endif  // VERSION_H

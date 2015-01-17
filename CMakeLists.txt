@@ -46,6 +46,7 @@ include_directories( ${PROJECT_BINARY_DIR}
     ${SN_INCLUDE_DIRS} )
 
 set( SOURCES
+    src/version.h.in
     src/config.cc
     src/panel.cc
     src/server.cc
@@ -88,7 +89,37 @@ set( DATADIR share CACHE PATH "Directory for shared data" )
 set( SYSCONFDIR /etc CACHE PATH "Directory for configuration files" )
 set( DOCDIR share/doc/tint3 CACHE PATH "Directory for documentation files" )
 
-add_custom_target( version ALL "${PROJECT_SOURCE_DIR}/get_svnrev.sh" "\"${PROJECT_SOURCE_DIR}\"" )
+# {{{ version.h
+#
+# This section inspired by:
+#       http://xit0.org/2013/04/cmake-use-git-branch-and-commit-details-in-project/
+
+# Get the current working branch
+execute_process(
+  COMMAND git rev-parse --abbrev-ref HEAD
+  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+  OUTPUT_VARIABLE GIT_BRANCH
+  OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+
+# Get the latest abbreviated commit hash of the working branch
+execute_process(
+  COMMAND git log -1 --format=%h
+  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+  OUTPUT_VARIABLE GIT_COMMIT_HASH
+  OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+
+configure_file(
+  ${CMAKE_SOURCE_DIR}/src/version.h.in
+  ${CMAKE_BINARY_DIR}/generated/version.h
+)
+
+include_directories(${CMAKE_BINARY_DIR}/generated)
+
+# }}} version.h
+
+add_executable(tint3 ${SOURCES})
 
 link_directories( ${X11_LIBRARY_DIRS}
     ${PANGOCAIRO_LIBRARY_DIRS}
@@ -98,7 +129,7 @@ link_directories( ${X11_LIBRARY_DIRS}
     ${GOBJECT2_LIBRARY_DIRS}
     ${IMLIB2_LIBRARY_DIRS}
     ${SN_LIBRARY_DIRS} )
-add_executable(tint3 ${SOURCES})
+
 target_link_libraries( tint3 ${X11_LIBRARIES}
     ${PANGOCAIRO_LIBRARIES}
     ${PANGO_LIBRARIES}
@@ -107,11 +138,11 @@ target_link_libraries( tint3 ${X11_LIBRARIES}
     ${GOBJECT2_LIBRARIES}
     ${IMLIB2_LIBRARIES}
     ${SN_LIBRARIES} )
+
 if( RT_LIBRARY )
     target_link_libraries( tint3 ${RT_LIBRARY} )
 endif()
 
-add_dependencies( tint3 version )
 set_target_properties(tint3 PROPERTIES COMPILE_FLAGS "-Wall -pthread -std=c++11")
 set_target_properties(tint3 PROPERTIES LINK_FLAGS "-pthread")
 

@@ -57,6 +57,21 @@
 #include "util/xdg.h"
 #include "xsettings-client.h"
 
+namespace {
+
+void PrintVersion() {
+#ifdef _TINT3_DEBUG
+  std::cout << "tint3 debug binary (built at " << GIT_BRANCH << "/"
+            << GIT_COMMIT_HASH << ")\n";
+#else  // _TINT3_DEBUG
+  std::cout << "tint3 (v" << TINT3_RELEASE_VERSION << ")\n";
+#endif  // _TINT3_DEBUG
+}
+
+void PrintUsage() { util::log::Error() << "Usage: tint3 [-c] <config_file>\n"; }
+
+}  // namespace
+
 // Drag and Drop state variables
 Window dnd_source_window;
 Window dnd_target_window;
@@ -84,12 +99,12 @@ void Init(int argc, char* argv[]) {
   // read options
   for (int i = 1; i < argc; ++i) {
     if (!strcmp(argv[i], "-h") || !strcmp(argv[i], "--help")) {
-      util::log::Error() << "Usage: tint3 [-c] <config_file>\n";
+      PrintUsage();
       std::exit(0);
     }
 
     if (!strcmp(argv[i], "-v") || !strcmp(argv[i], "--version")) {
-      std::cout << "tint3 version " << VERSION_STRING << '\n';
+      PrintVersion();
       std::exit(0);
     }
 
