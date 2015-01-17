@@ -38,6 +38,7 @@
 #include <cstdlib>
 #include <cstdint>
 #include <cstring>
+#include <iostream>
 
 #include "version.h"
 #include "server.h"
@@ -83,12 +84,12 @@ void Init(int argc, char* argv[]) {
   // read options
   for (int i = 1; i < argc; ++i) {
     if (!strcmp(argv[i], "-h") || !strcmp(argv[i], "--help")) {
-      printf("Usage: tint3 [-c] <config_file>\n");
+      util::log::Error() << "Usage: tint3 [-c] <config_file>\n";
       std::exit(0);
     }
 
     if (!strcmp(argv[i], "-v") || !strcmp(argv[i], "--version")) {
-      printf("tint3 version %s\n", VERSION_STRING);
+      std::cout << "tint3 version " << VERSION_STRING << '\n';
       std::exit(0);
     }
 
@@ -96,7 +97,7 @@ void Init(int argc, char* argv[]) {
       i++;
 
       if (i < argc) {
-        config_path = strdup(argv[i]);
+        config_path = argv[i];
       }
     }
 
