@@ -8,8 +8,9 @@ Because of this, you'll need to manually do the following:
   - symlink the `hooks` directory in:
     ```ln -s ../hooks .git/hooks
 
-The `pre-commit` script uses [clang-format](http://astyle.sourceforge.net/), so
-make sure you have that installed.
+The `pre-commit` script uses
+[clang-format](http://clang.llvm.org/docs/ClangFormat.html), so make sure you
+have that installed.
 
 # Dependencies
 
