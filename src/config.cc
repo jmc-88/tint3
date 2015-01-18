@@ -402,12 +402,12 @@ void AddEntry(std::string const& key, std::string const& value) {
     time2_font_desc = pango_font_description_from_string(value.c_str());
   } else if (key == "clock_font_color") {
     ExtractValues(value, value1, value2, value3);
-    GetColor(value1, panel_config.clock_.font.color);
+    GetColor(value1, panel_config.clock_.font_.color);
 
     if (!value2.empty()) {
-      panel_config.clock_.font.alpha = (StringToLongInt(value2) / 100.0);
+      panel_config.clock_.font_.alpha = (StringToLongInt(value2) / 100.0);
     } else {
-      panel_config.clock_.font.alpha = 0.5;
+      panel_config.clock_.font_.alpha = 0.5;
     }
   } else if (key == "clock_padding") {
     ExtractValues(value, value1, value2, value3);

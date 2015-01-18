@@ -19,9 +19,9 @@
 
 class Clock : public Area {
  public:
-  Color font;
-  int time1_posy;
-  int time2_posy;
+  Color font_;
+  int time1_posy_;
+  int time2_posy_;
 
   void DrawForeground(cairo_t*) override;
   std::string GetTooltipText() override;

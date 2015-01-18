@@ -196,11 +196,11 @@ void Clock::DrawForeground(cairo_t* c) {
   pango_layout_set_alignment(layout.get(), PANGO_ALIGN_CENTER);
   pango_layout_set_text(layout.get(), buf_time, strlen(buf_time));
 
-  cairo_set_source_rgba(c, font.color[0], font.color[1], font.color[2],
-                        font.alpha);
+  cairo_set_source_rgba(c, font_.color[0], font_.color[1], font_.color[2],
+                        font_.alpha);
 
   pango_cairo_update_layout(c, layout.get());
-  cairo_move_to(c, 0, time1_posy);
+  cairo_move_to(c, 0, time1_posy_);
   pango_cairo_show_layout(c, layout.get());
 
   if (!time2_format.empty()) {
@@ -210,7 +210,7 @@ void Clock::DrawForeground(cairo_t* c) {
     pango_layout_set_width(layout.get(), width_ * PANGO_SCALE);
 
     pango_cairo_update_layout(c, layout.get());
-    cairo_move_to(c, 0, time2_posy);
+    cairo_move_to(c, 0, time2_posy_);
     pango_cairo_show_layout(c, layout.get());
   }
 }
@@ -240,11 +240,11 @@ bool Clock::Resize() {
     if (new_size > width_ || new_size < (width_ - 6)) {
       // we try to limit the number of resize
       width_ = new_size + 1;
-      time1_posy = (height_ - time_height) / 2;
+      time1_posy_ = (height_ - time_height) / 2;
 
       if (!time2_format.empty()) {
-        time1_posy -= (date_height) / 2;
-        time2_posy = time1_posy + time_height;
+        time1_posy_ -= (date_height) / 2;
+        time2_posy_ = time1_posy_ + time_height;
       }
 
       return true;
@@ -256,11 +256,11 @@ bool Clock::Resize() {
     if (new_size != height_) {
       // we try to limit the number of resize
       height_ = new_size;
-      time1_posy = (height_ - time_height) / 2;
+      time1_posy_ = (height_ - time_height) / 2;
 
       if (!time2_format.empty()) {
-        time1_posy -= (date_height) / 2;
-        time2_posy = time1_posy + time_height;
+        time1_posy_ -= (date_height) / 2;
+        time2_posy_ = time1_posy_ + time_height;
       }
 
       return true;
