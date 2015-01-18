@@ -95,8 +95,9 @@ Task* AddTask(Window win) {
   new_tsk.UpdateTitle();
   GetIcon(&new_tsk);
 
-  // printf("task %s : desktop %d, monitor %d\n", new_tsk->title, desktop,
-  // monitor);
+  util::log::Debug() << "task: \"" << new_tsk.GetTitle()
+                     << "\", desktop: " << new_tsk.desktop
+                     << ", monitor: " << monitor << '\n';
   XSelectInput(server.dsp, new_tsk.win,
                PropertyChangeMask | StructureNotifyMask);
 
