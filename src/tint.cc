@@ -437,7 +437,7 @@ void EventButtonMotionNotify(XEvent* e) {
   // If the event takes place on the same taskbar as the task being dragged
   if (event_taskbar == task_drag->parent_) {
     // Swap the task_drag with the task on the event's location (if they differ)
-    if (event_task && event_task != task_drag) {
+    if (event_task != nullptr && event_task != task_drag) {
       auto& children = event_taskbar->children_;
       auto drag_iter = std::find(children.begin(), children.end(), task_drag);
       auto task_iter = std::find(children.begin(), children.end(), event_task);
@@ -445,8 +445,8 @@ void EventButtonMotionNotify(XEvent* e) {
       if (drag_iter != children.end() && task_iter != children.end()) {
         std::iter_swap(drag_iter, task_iter);
         event_taskbar->need_resize_ = true;
-        panel_refresh = 1;
-        task_dragged = 1;
+        task_dragged = true;
+        panel_refresh = true;
       }
     }
   } else {  // The event is on another taskbar than the task being dragged
@@ -482,8 +482,8 @@ void EventButtonMotionNotify(XEvent* e) {
 
     event_taskbar->need_resize_ = true;
     drag_taskbar->need_resize_ = true;
-    task_dragged = 1;
-    panel_refresh = 1;
+    task_dragged = true;
+    panel_refresh = true;
   }
 }
 
@@ -570,7 +570,7 @@ void EventButtonRelease(XEvent* e) {
   // drag and drop task
   if (task_dragged) {
     task_drag = nullptr;
-    task_dragged = 0;
+    task_dragged = false;
     return;
   }
 
@@ -635,7 +635,7 @@ void EventPropertyNotify(XEvent* e) {
         }
       }
 
-      panel_refresh = 1;
+      panel_refresh = true;
     }
     // Change number of desktops
     else if (at == server.atoms_["_NET_NUMBER_OF_DESKTOPS"]) {
@@ -661,7 +661,7 @@ void EventPropertyNotify(XEvent* e) {
 
       TaskRefreshTasklist();
       ActiveTask();
-      panel_refresh = 1;
+      panel_refresh = true;
     }
     // Change desktop
     else if (at == server.atoms_["_NET_CURRENT_DESKTOP"]) {
@@ -695,7 +695,7 @@ void EventPropertyNotify(XEvent* e) {
             if (tsk->desktop == kAllDesktops) {
               tsk->on_screen_ = false;
               tskbar.need_resize_ = true;
-              panel_refresh = 1;
+              panel_refresh = true;
             }
           }
         }
@@ -720,12 +720,12 @@ void EventPropertyNotify(XEvent* e) {
     // Window list
     else if (at == server.atoms_["_NET_CLIENT_LIST"]) {
       TaskRefreshTasklist();
-      panel_refresh = 1;
+      panel_refresh = true;
     }
     // Change active
     else if (at == server.atoms_["_NET_ACTIVE_WINDOW"]) {
       ActiveTask();
-      panel_refresh = 1;
+      panel_refresh = true;
     } else if (at == server.atoms_["_XROOTPMAP_ID"] ||
                at == server.atoms_["_XROOTMAP_ID"]) {
       // change Wallpaper
@@ -733,7 +733,7 @@ void EventPropertyNotify(XEvent* e) {
         panel1[i].SetBackground();
       }
 
-      panel_refresh = 1;
+      panel_refresh = true;
     }
   } else {
     tsk = TaskGetTask(win);
@@ -751,7 +751,7 @@ void EventPropertyNotify(XEvent* e) {
 
         if (wa.map_state == IsViewable && !WindowIsSkipTaskbar(win)) {
           if ((tsk = AddTask(win))) {
-            panel_refresh = 1;
+            panel_refresh = true;
           } else {
             return;
           }
@@ -773,7 +773,7 @@ void EventPropertyNotify(XEvent* e) {
           TooltipUpdate();
         }
 
-        panel_refresh = 1;
+        panel_refresh = true;
       }
     }
     // Demand attention
@@ -784,7 +784,7 @@ void EventPropertyNotify(XEvent* e) {
 
       if (WindowIsSkipTaskbar(win)) {
         RemoveTask(tsk);
-        panel_refresh = 1;
+        panel_refresh = true;
       }
     } else if (at == server.atoms_["WM_STATE"]) {
       // Iconic state
@@ -797,12 +797,12 @@ void EventPropertyNotify(XEvent* e) {
       }
 
       tsk->SetState(state);
-      panel_refresh = 1;
+      panel_refresh = true;
     }
     // Window icon changed
     else if (at == server.atoms_["_NET_WM_ICON"]) {
       GetIcon(tsk);
-      panel_refresh = 1;
+      panel_refresh = true;
     }
     // Window desktop changed
     else if (at == server.atoms_["_NET_WM_DESKTOP"]) {
@@ -817,7 +817,7 @@ void EventPropertyNotify(XEvent* e) {
         RemoveTask(tsk);
         tsk = AddTask(win);
         ActiveTask();
-        panel_refresh = 1;
+        panel_refresh = true;
       }
     } else if (at == server.atoms_["WM_HINTS"]) {
       util::x11::ClientData<XWMHints> wmhints(XGetWMHints(server.dsp, win));
@@ -841,7 +841,7 @@ void EventExpose(XEvent* e) {
   }
 
   // TODO : one panel_refresh per panel ?
-  panel_refresh = 1;
+  panel_refresh = true;
 }
 
 void EventConfigureNotify(Window win) {
@@ -859,7 +859,7 @@ void EventConfigureNotify(Window win) {
                         traywin->width, traywin->height);
       XResizeWindow(server.dsp, traywin->tray_id, traywin->width,
                     traywin->height);
-      panel_refresh = 1;
+      panel_refresh = true;
       return;
     }
   }
@@ -886,7 +886,7 @@ void EventConfigureNotify(Window win) {
       task_active = tsk;
     }
 
-    panel_refresh = 1;
+    panel_refresh = true;
   }
 }
 
@@ -1055,13 +1055,13 @@ void DragAndDropPosition(XClientMessageEvent* e) {
 
   int x = (e->data.l[2] >> 16) & 0xFFFF;
   int y = e->data.l[2] & 0xFFFF;
-  int mapX, mapY;
+  int map_x, map_y;
   Window child;
-  XTranslateCoordinates(server.dsp, server.root_win, e->window, x, y, &mapX,
-                        &mapY, &child);
+  XTranslateCoordinates(server.dsp, server.root_win, e->window, x, y, &map_x,
+                        &map_y, &child);
 
   Panel* panel = GetPanel(e->window);
-  Task* task = panel->ClickTask(mapX, mapY);
+  Task* task = panel->ClickTask(map_x, map_y);
 
   if (task) {
     if (task->desktop != server.desktop) {
@@ -1070,13 +1070,13 @@ void DragAndDropPosition(XClientMessageEvent* e) {
 
     WindowAction(task, MouseAction::kToggle);
   } else {
-    LauncherIcon* icon = panel->ClickLauncherIcon(mapX, mapY);
+    LauncherIcon* icon = panel->ClickLauncherIcon(map_x, map_y);
 
     if (icon) {
       accept = true;
       dnd_launcher_exec = icon->cmd_;
     } else {
-      dnd_launcher_exec = 0;
+      dnd_launcher_exec = nullptr;
     }
   }
 
@@ -1168,7 +1168,7 @@ start:
   dnd_selection = XInternAtom(server.dsp, "PRIMARY", 0);
   dnd_atom = None;
   dnd_sent_request = 0;
-  dnd_launcher_exec = 0;
+  dnd_launcher_exec = nullptr;
 
   //  sigset_t empty_mask;
   //  sigemptyset(&empty_mask);

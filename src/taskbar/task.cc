@@ -593,7 +593,7 @@ void Task::SetState(int state) {
       }
     }
 
-    panel_refresh = 1;
+    panel_refresh = true;
   }
 }
 
@@ -621,7 +621,7 @@ void BlinkUrgent(void* arg) {
     }
   }
 
-  panel_refresh = 1;
+  panel_refresh = true;
 }
 
 void Task::AddUrgent() {

@@ -58,8 +58,8 @@ int panel_dock;
 PanelLayer panel_layer;
 int panel_position;
 int panel_horizontal;
-int panel_refresh;
-int task_dragged;
+bool panel_refresh;
+bool task_dragged;
 
 int panel_autohide;
 int panel_autohide_show_timeout;
@@ -162,7 +162,7 @@ void DefaultPanel() {
   panel1 = nullptr;
   nb_panel = 0;
   default_icon = nullptr;
-  task_dragged = 0;
+  task_dragged = false;
   panel_horizontal = 1;
   panel_position = kCenter;
   panel_items_order.clear();
@@ -701,7 +701,7 @@ void Panel::UpdateTaskbarVisibility() {
     }
   }
 
-  panel_refresh = 1;
+  panel_refresh = true;
 }
 
 Panel* GetPanel(Window win) {
@@ -866,7 +866,7 @@ void AutohideShow(void* p) {
 
   // ugly hack, because we actually only need to call XSetBackgroundPixmap
   refresh_systray = 1;
-  panel_refresh = 1;
+  panel_refresh = true;
 }
 
 void AutohideHide(void* p) {
@@ -904,7 +904,7 @@ void AutohideHide(void* p) {
     }
   }
 
-  panel_refresh = 1;
+  panel_refresh = true;
 }
 
 void AutohideTriggerShow(Panel* p) {

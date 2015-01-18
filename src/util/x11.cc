@@ -22,7 +22,7 @@ bool EventLoop::RunLoop() {
 
   while (true) {
     if (panel_refresh) {
-      panel_refresh = 0;
+      panel_refresh = false;
 
       for (int i = 0; i < nb_panel; i++) {
         Panel& panel = panel1[i];

@@ -63,11 +63,9 @@ enum PanelPosition {
 };
 
 extern int panel_position;
-
 extern int panel_horizontal;
-
-extern int panel_refresh;
-extern int task_dragged;
+extern bool panel_refresh;
+extern bool task_dragged;
 
 // panel autohide
 extern int panel_autohide;

@@ -99,7 +99,7 @@ void Launcher::InitPanel(Panel* panel) {
   }
 
   launcher->on_screen_ = true;
-  panel_refresh = 1;
+  panel_refresh = true;
 
   launcher->LoadThemes();
   launcher->LoadIcons();

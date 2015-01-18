@@ -88,18 +88,18 @@ void UpdateBatteries(void* arg) {
     if (battery_state.percentage >= percentage_hide) {
       if (panel1[i].battery_.on_screen_ == 1) {
         panel1[i].battery_.Hide();
-        panel_refresh = 1;
+        panel_refresh = true;
       }
     } else {
       if (panel1[i].battery_.on_screen_ == 0) {
         panel1[i].battery_.Show();
-        panel_refresh = 1;
+        panel_refresh = true;
       }
     }
 
     if (panel1[i].battery_.on_screen_ == 1) {
       panel1[i].battery_.need_resize_ = true;
-      panel_refresh = 1;
+      panel_refresh = true;
     }
   }
 }

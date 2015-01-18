@@ -507,7 +507,7 @@ bool Systraybar::AddIcon(Window id) {
 
   // changed in systray
   need_resize_ = true;
-  panel_refresh = 1;
+  panel_refresh = true;
   return true;
 }
 
@@ -550,7 +550,7 @@ void Systraybar::RemoveIcon(TrayWindow* traywin) {
 
   // changed in systray
   need_resize_ = true;
-  panel_refresh = 1;
+  panel_refresh = true;
 }
 
 void NetMessage(XClientMessageEvent* e) {

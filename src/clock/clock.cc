@@ -101,7 +101,7 @@ void UpdateClockSeconds(void* arg) {
     }
   }
 
-  panel_refresh = 1;
+  panel_refresh = true;
 }
 
 void UpdateClockMinutes(void* arg) {
@@ -118,7 +118,7 @@ void UpdateClockMinutes(void* arg) {
       }
     }
 
-    panel_refresh = 1;
+    panel_refresh = true;
   }
 }
 

@@ -100,7 +100,7 @@ Taskbar& Taskbar::SetState(size_t state) {
     }
   }
 
-  panel_refresh = 1;
+  panel_refresh = true;
   return (*this);
 }
 
