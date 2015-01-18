@@ -567,7 +567,10 @@ void ActiveTask() {
     }
 
     task_active = TaskGetTask(w1);
-    task_active->SetState(kTaskActive);
+
+    if (task_active != nullptr) {
+      task_active->SetState(kTaskActive);
+    }
   }
 }
 
