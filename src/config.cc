@@ -697,7 +697,7 @@ void AddEntry(std::string const& key, std::string const& value) {
 
   /* autohide options */
   else if (key == "autohide") {
-    panel_autohide = StringToLongInt(value);
+    panel_autohide = (0 != StringToLongInt(value));
   } else if (key == "autohide_show_timeout") {
     panel_autohide_show_timeout = 1000 * StringToFloat(value);
   } else if (key == "autohide_hide_timeout") {

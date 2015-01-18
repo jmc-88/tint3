@@ -68,7 +68,7 @@ extern bool panel_refresh;
 extern bool task_dragged;
 
 // panel autohide
-extern int panel_autohide;
+extern bool panel_autohide;
 extern int panel_autohide_show_timeout;
 extern int panel_autohide_hide_timeout;
 extern int

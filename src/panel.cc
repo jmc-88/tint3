@@ -61,7 +61,7 @@ bool panel_horizontal;
 bool panel_refresh;
 bool task_dragged;
 
-int panel_autohide;
+bool panel_autohide;
 int panel_autohide_show_timeout;
 int panel_autohide_hide_timeout;
 int panel_autohide_height;
@@ -166,7 +166,7 @@ void DefaultPanel() {
   panel_horizontal = true;
   panel_position = kCenter;
   panel_items_order.clear();
-  panel_autohide = 0;
+  panel_autohide = false;
   panel_autohide_show_timeout = 0;
   panel_autohide_hide_timeout = 0;
   panel_autohide_height = 5;  // for vertical panels this is of course the width
