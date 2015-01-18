@@ -188,13 +188,13 @@ void TooltipUpdateGeometry() {
   Panel* panel = g_tooltip.panel;
 
   if (panel_horizontal && panel_position & kBottom) {
-    y = panel->panel_y_ - height;
+    y = panel->root_y_ - height;
   } else if (panel_horizontal && panel_position & kTop) {
-    y = panel->panel_y_ + panel->height_;
+    y = panel->root_y_ + panel->height_;
   } else if (panel_position & kLeft) {
-    x = panel->panel_x_ + panel->width_;
+    x = panel->root_x_ + panel->width_;
   } else {
-    x = panel->panel_x_ - width;
+    x = panel->root_x_ - width;
   }
 
   cairo_destroy(c);
