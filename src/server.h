@@ -48,7 +48,7 @@ class Server {
   // number of monitor (without monitor included into another one)
   int nb_monitor;
   std::vector<Monitor> monitor;
-  int got_root_win;
+  bool got_root_win;
   Visual* visual;
   Visual* visual32;
   // root background

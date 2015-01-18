@@ -505,32 +505,22 @@ void EventButtonRelease(XEvent* e) {
     return;
   }
 
-  MouseAction action = MouseAction::kToggleIconify;
+  static std::map<unsigned int, MouseAction> mouse_actions{
+      {2, mouse_middle},
+      {3, mouse_right},
+      {4, mouse_scroll_up},
+      {5, mouse_scroll_down},
+      {6, mouse_tilt_left},
+      {7, mouse_tilt_right},
+  };
 
-  switch (e->xbutton.button) {
-    case 2:
-      action = mouse_middle;
-      break;
+  MouseAction action = MouseAction::kNone;
+  auto it = mouse_actions.find(e->xbutton.button);
 
-    case 3:
-      action = mouse_right;
-      break;
-
-    case 4:
-      action = mouse_scroll_up;
-      break;
-
-    case 5:
-      action = mouse_scroll_down;
-      break;
-
-    case 6:
-      action = mouse_tilt_left;
-      break;
-
-    case 7:
-      action = mouse_tilt_right;
-      break;
+  if (it != mouse_actions.end()) {
+    action = it->second;
+  } else {
+    action = MouseAction::kToggleIconify;
   }
 
   if (panel->ClickClock(e->xbutton.x, e->xbutton.y)) {
@@ -605,7 +595,7 @@ void EventPropertyNotify(XEvent* e) {
     if (!server.got_root_win) {
       XSelectInput(server.dsp, server.root_win,
                    PropertyChangeMask | StructureNotifyMask);
-      server.got_root_win = 1;
+      server.got_root_win = true;
     }
     // Change name of desktops
     else if (at == server.atoms_["_NET_DESKTOP_NAMES"]) {
