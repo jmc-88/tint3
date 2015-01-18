@@ -57,7 +57,7 @@ int wm_menu;
 int panel_dock;
 PanelLayer panel_layer;
 int panel_position;
-int panel_horizontal;
+bool panel_horizontal;
 bool panel_refresh;
 bool task_dragged;
 
@@ -163,7 +163,7 @@ void DefaultPanel() {
   nb_panel = 0;
   default_icon = nullptr;
   task_dragged = false;
-  panel_horizontal = 1;
+  panel_horizontal = true;
   panel_position = kCenter;
   panel_items_order.clear();
   panel_autohide = 0;

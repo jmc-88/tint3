@@ -63,7 +63,7 @@ enum PanelPosition {
 };
 
 extern int panel_position;
-extern int panel_horizontal;
+extern bool panel_horizontal;
 extern bool panel_refresh;
 extern bool task_dragged;
 
