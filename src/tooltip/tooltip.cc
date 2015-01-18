@@ -20,6 +20,7 @@
 #include <cairo.h>
 #include <cairo-xlib.h>
 
+#include <algorithm>
 #include <cstdio>
 #include <cstring>
 #include <cstdlib>
@@ -243,21 +244,10 @@ void TooltipAdjustGeometry() {
         server.monitor[panel->monitor_].height - height;
   }
 
-  if (x < min_x) {
-    x = min_x;
-  }
-
-  if (width > max_width) {
-    width = max_width;
-  }
-
-  if (y < min_y) {
-    y = min_y;
-  }
-
-  if (height > max_height) {
-    height = max_height;
-  }
+  x = std::max(x, min_x);
+  y = std::max(y, min_y);
+  width = std::min(width, max_width);
+  height = std::min(height, max_height);
 }
 
 void TooltipUpdate() {
