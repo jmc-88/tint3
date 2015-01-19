@@ -32,6 +32,12 @@ class LauncherIcon : public Area {
   void DrawForeground(cairo_t*) override;
   std::string GetTooltipText() override;
   void OnChangeLayout() override;
+
+#ifdef _TINT3_DEBUG
+
+  std::string GetFriendlyName() const override;
+
+#endif  // _TINT3_DEBUG
 };
 
 struct DesktopEntry {
@@ -82,6 +88,12 @@ class Launcher : public Area {
   bool Resize() override;
 
   static void InitPanel(Panel* panel);
+
+#ifdef _TINT3_DEBUG
+
+  std::string GetFriendlyName() const override;
+
+#endif  // _TINT3_DEBUG
 };
 
 extern bool launcher_enabled;

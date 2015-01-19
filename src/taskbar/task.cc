@@ -659,3 +659,9 @@ void Task::DelUrgent() {
     urgent_timeout = nullptr;
   }
 }
+
+#ifdef _TINT3_DEBUG
+
+std::string Task::GetFriendlyName() const { return "Task"; }
+
+#endif  // _TINT3_DEBUG

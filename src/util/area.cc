@@ -60,7 +60,7 @@ Area& Area::CloneArea(Area const& other) {
   parent_ = other.parent_;
   panel_ = other.panel_;
   on_changed_ = other.on_changed_;
-  return *this;
+  return (*this);
 }
 
 /************************************************************
@@ -476,6 +476,30 @@ bool Area::Resize() {
 
 void Area::OnChangeLayout() { /* defaults to a no-op */
 }
+
+#ifdef _TINT3_DEBUG
+
+std::string Area::GetFriendlyName() const { return "Area"; }
+
+void Area::PrintTreeLevel(unsigned int level) const {
+  for (unsigned int i = 0; i < level; ++i) {
+    util::log::Debug() << "  ";
+  }
+
+  util::log::Debug() << GetFriendlyName() << '('
+                     << static_cast<void const*>(this) << ", "
+                     << (size_mode_ == SizeMode::kByContent ? "kByContent"
+                                                            : "kByLayout")
+                     << ")\n";
+
+  for (auto& child : children_) {
+    child->PrintTreeLevel(level + 1);
+  }
+}
+
+void Area::PrintTree() const { PrintTreeLevel(0); }
+
+#endif  // _TINT3_DEBUG
 
 void DrawRect(cairo_t* c, double x, double y, double w, double h, double r) {
   if (r > 0.0) {

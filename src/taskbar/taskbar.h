@@ -38,6 +38,12 @@ class Taskbar : public TaskbarBase {
   bool RemoveChild(Area* child) override;
 
   static void InitPanel(Panel* panel);
+
+#ifdef _TINT3_DEBUG
+
+  std::string GetFriendlyName() const override;
+
+#endif  // _TINT3_DEBUG
 };
 
 class Global_taskbar : public TaskbarBase {

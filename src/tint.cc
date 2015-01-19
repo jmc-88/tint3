@@ -1141,6 +1141,15 @@ start:
 
   InitPanel();
 
+#ifdef _TINT3_DEBUG
+
+  for (int i = 0; i < nb_panel; ++i) {
+    util::log::Debug() << "Panel " << i << ":\n";
+    panel1[i].PrintTree();
+  }
+
+#endif  // _TINT3_DEBUG
+
   if (!snapshot_path.empty()) {
     GetSnapshot(snapshot_path.c_str());
     Cleanup();

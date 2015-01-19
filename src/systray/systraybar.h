@@ -51,6 +51,12 @@ class Systraybar : public Area {
   void RemoveIcon(TrayWindow* traywin);
 
   static void InitPanel(Panel* panel);
+
+#ifdef _TINT3_DEBUG
+
+  std::string GetFriendlyName() const override;
+
+#endif  // _TINT3_DEBUG
 };
 
 // net_sel_win != None when protocol started

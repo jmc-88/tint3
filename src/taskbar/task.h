@@ -82,6 +82,12 @@ class Task : public Area {
 
   void AddUrgent();
   void DelUrgent();
+
+#ifdef _TINT3_DEBUG
+
+  std::string GetFriendlyName() const override;
+
+#endif  // _TINT3_DEBUG
 };
 
 extern Timeout* urgent_timeout;

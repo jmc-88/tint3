@@ -55,7 +55,7 @@ class Area {
  public:
   virtual ~Area() = 0;
 
-  Area& CloneArea(Area const&);
+  Area& CloneArea(Area const& other);
 
   // coordinate relative to panel window
   int panel_x_;
@@ -127,6 +127,16 @@ class Area {
   void FreeArea();
 
   bool IsClickInside(int x, int y) const;
+
+#ifdef _TINT3_DEBUG
+
+  virtual std::string GetFriendlyName() const;
+  void PrintTree() const;
+
+ private:
+  void PrintTreeLevel(unsigned int level) const;
+
+#endif  // _TINT3_DEBUG
 };
 
 // draw rounded rectangle

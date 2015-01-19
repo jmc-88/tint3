@@ -31,6 +31,12 @@ class Battery : public Area {
   bool Resize() override;
 
   static void InitPanel(Panel* panel);
+
+#ifdef _TINT3_DEBUG
+
+  std::string GetFriendlyName() const override;
+
+#endif  // _TINT3_DEBUG
 };
 
 enum class ChargeState { kUnknown, kCharging, kDischarging, kFull };

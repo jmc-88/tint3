@@ -317,6 +317,12 @@ void LauncherIcon::DrawForeground(cairo_t* c) {
   }
 }
 
+#ifdef _TINT3_DEBUG
+
+std::string LauncherIcon::GetFriendlyName() const { return "LauncherIcon"; }
+
+#endif  // _TINT3_DEBUG
+
 Imlib_Image ScaleIcon(Imlib_Image original, int icon_size) {
   Imlib_Image icon_scaled;
 
@@ -1003,3 +1009,9 @@ std::string Launcher::GetIconPath(std::string const& icon_name, int size) {
   util::log::Error() << "Could not find icon " << icon_name.c_str() << '\n';
   return std::string();
 }
+
+#ifdef _TINT3_DEBUG
+
+std::string Launcher::GetFriendlyName() const { return "Launcher"; }
+
+#endif  // _TINT3_DEBUG

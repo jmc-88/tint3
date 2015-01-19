@@ -553,6 +553,12 @@ void Systraybar::RemoveIcon(TrayWindow* traywin) {
   panel_refresh = true;
 }
 
+#ifdef _TINT3_DEBUG
+
+std::string Systraybar::GetFriendlyName() const { return "Systraybar"; }
+
+#endif  // _TINT3_DEBUG
+
 void NetMessage(XClientMessageEvent* e) {
   unsigned long opcode;
   Window id;

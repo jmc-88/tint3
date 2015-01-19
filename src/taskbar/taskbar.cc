@@ -451,3 +451,9 @@ void Taskbar::OnChangeLayout() {
   pix_ = 0;
   need_redraw_ = true;
 }
+
+#ifdef _TINT3_DEBUG
+
+std::string Taskbar::GetFriendlyName() const { return "Taskbar"; }
+
+#endif  // _TINT3_DEBUG

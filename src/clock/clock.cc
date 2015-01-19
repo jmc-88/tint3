@@ -270,6 +270,12 @@ bool Clock::Resize() {
   return false;
 }
 
+#ifdef _TINT3_DEBUG
+
+std::string Clock::GetFriendlyName() const { return "Clock"; }
+
+#endif  // _TINT3_DEBUG
+
 void ClockAction(int button) {
   if (button == 1) {
     TintExec(clock_lclick_command);

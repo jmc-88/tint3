@@ -556,3 +556,9 @@ bool Battery::Resize() {
 
   return false;
 }
+
+#ifdef _TINT3_DEBUG
+
+std::string Battery::GetFriendlyName() const { return "Battery"; }
+
+#endif  // _TINT3_DEBUG

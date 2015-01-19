@@ -28,6 +28,12 @@ class Clock : public Area {
   bool Resize() override;
 
   static void InitPanel(Panel* panel);
+
+#ifdef _TINT3_DEBUG
+
+  std::string GetFriendlyName() const override;
+
+#endif  // _TINT3_DEBUG
 };
 
 extern std::string time1_format;

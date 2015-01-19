@@ -155,6 +155,12 @@ class Panel : public Area {
 
   // show/hide taskbar according to current desktop
   void UpdateTaskbarVisibility();
+
+#ifdef _TINT3_DEBUG
+
+  std::string GetFriendlyName() const override;
+
+#endif  // _TINT3_DEBUG
 };
 
 extern Panel panel_config;

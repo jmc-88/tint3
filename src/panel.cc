@@ -835,6 +835,12 @@ bool Panel::HandlesClick(XButtonEvent* e) {
   return false;
 }
 
+#ifdef _TINT3_DEBUG
+
+std::string Panel::GetFriendlyName() const { return "Panel"; }
+
+#endif  // _TINT3_DEBUG
+
 void AutohideShow(void* p) {
   Panel* panel = static_cast<Panel*>(p);
   StopAutohideTimeout(panel);
