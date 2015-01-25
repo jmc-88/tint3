@@ -375,10 +375,6 @@ void Area::Draw() {
     ClearPixmap(pix_, 0, 0, width_, height_);
   }
 
-  util::log::Debug() << "XCopyArea(panel_x_ = " << panel_x_
-                     << ", panel_y_ = " << panel_y_ << ", width_ = " << width_
-                     << ", height_ = " << height_ << ")\n";
-
   XCopyArea(server.dsp, panel_->temp_pmap, pix_, server.gc, panel_x_, panel_y_,
             width_, height_, 0, 0);
 
