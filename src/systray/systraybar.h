@@ -63,7 +63,7 @@ class Systraybar : public Area {
 extern Window net_sel_win;
 extern Systraybar systray;
 extern int refresh_systray;
-extern int systray_enabled;
+extern bool systray_enabled;
 extern int systray_max_icon_size;
 
 // default global data

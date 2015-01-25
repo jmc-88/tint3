@@ -236,7 +236,7 @@ void AddEntry(std::string const& key, std::string const& value) {
       if (item == 'S') {
         // systray disabled in snapshot mode
         if (snapshot_path.empty()) {
-          systray_enabled = 1;
+          systray_enabled = true;
         }
       }
 
@@ -581,8 +581,8 @@ void AddEntry(std::string const& key, std::string const& value) {
 
   /* Systray */
   else if (key == "systray_padding") {
-    if (!new_config_file && systray_enabled == 0) {
-      systray_enabled = 1;
+    if (!new_config_file && !systray_enabled) {
+      systray_enabled = true;
       panel_items_order.push_back('S');
     }
 

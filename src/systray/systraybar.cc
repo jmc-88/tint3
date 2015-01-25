@@ -51,7 +51,7 @@ Window net_sel_win = None;
 // freedesktop specification doesn't allow multi systray
 Systraybar systray;
 int refresh_systray;
-int systray_enabled;
+bool systray_enabled;
 int systray_max_icon_size;
 
 // background pixmap if we render ourselves the icons
@@ -66,7 +66,7 @@ void DefaultSystray() {
 
 void CleanupSystray() {
   StopNet();
-  systray_enabled = 0;
+  systray_enabled = false;
   systray_max_icon_size = 0;
   systray.on_screen_ = false;
   systray.FreeArea();
