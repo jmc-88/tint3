@@ -66,10 +66,8 @@
 std::string config_path;
 std::string snapshot_path;
 
-// --------------------------------------------------
 // backward compatibility
-// detect if it's an old config file (==1)
-static int new_config_file;
+static bool new_config_file;
 
 namespace {
 
@@ -215,7 +213,7 @@ void AddEntry(std::string const& key, std::string const& value) {
       panel_config.height_ = StringToLongInt(value2.substr(0, b));
     }
   } else if (key == "panel_items") {
-    new_config_file = 1;
+    new_config_file = true;
     panel_items_order.assign(value);
 
     for (char item : panel_items_order) {
@@ -375,7 +373,7 @@ void AddEntry(std::string const& key, std::string const& value) {
 
   /* Clock */
   else if (key == "time1_format") {
-    if (new_config_file == 0) {
+    if (!new_config_file) {
       clock_enabled = true;
       panel_items_order.push_back('C');
     }
@@ -583,7 +581,7 @@ void AddEntry(std::string const& key, std::string const& value) {
 
   /* Systray */
   else if (key == "systray_padding") {
-    if (new_config_file == 0 && systray_enabled == 0) {
+    if (!new_config_file && systray_enabled == 0) {
       systray_enabled = 1;
       panel_items_order.push_back('S');
     }
@@ -721,7 +719,7 @@ void AddEntry(std::string const& key, std::string const& value) {
 
   // old config option
   else if (key == "systray") {
-    if (new_config_file == 0) {
+    if (!new_config_file) {
       systray_enabled = StringToLongInt(value);
 
       if (systray_enabled) {
@@ -729,7 +727,7 @@ void AddEntry(std::string const& key, std::string const& value) {
       }
     }
   } else if (key == "battery") {
-    if (new_config_file == 0) {
+    if (!new_config_file) {
       battery_enabled = StringToLongInt(value);
 
       if (battery_enabled) {
@@ -811,7 +809,7 @@ bool ReadFile(std::string const& path) {
   }
 
   // append Taskbar item
-  if (new_config_file == 0) {
+  if (!new_config_file) {
     taskbar_enabled = 1;
     panel_items_order.insert(0, "T");
   }
@@ -824,5 +822,5 @@ bool ReadFile(std::string const& path) {
 void DefaultConfig() {
   config_path.clear();
   snapshot_path.clear();
-  new_config_file = 0;
+  new_config_file = false;
 }
