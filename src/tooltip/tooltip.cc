@@ -68,13 +68,12 @@ void StopTooltipTimeout() {
 
 void DefaultTooltip() {
   // give the tooltip some reasonable default values
-  g_tooltip.area_ = nullptr;
-  g_tooltip.tooltip_text.clear();
+  g_tooltip.BindTo(nullptr);
   g_tooltip.panel = nullptr;
   g_tooltip.window = 0;
   g_tooltip.show_timeout_msec = 0;
   g_tooltip.hide_timeout_msec = 0;
-  g_tooltip.mapped = False;
+  g_tooltip.mapped_ = False;
   g_tooltip.paddingx = 0;
   g_tooltip.paddingy = 0;
   g_tooltip.font_desc = nullptr;
@@ -89,7 +88,7 @@ void DefaultTooltip() {
 void CleanupTooltip() {
   StopTooltipTimeout();
   TooltipHide(0);
-  g_tooltip.CopyText(nullptr);
+  g_tooltip.BindTo(nullptr);
 
   if (g_tooltip.window) {
     XDestroyWindow(server.dsp, g_tooltip.window);
@@ -138,11 +137,11 @@ void TooltipTriggerShow(Area* area, Panel* p, XEvent* e) {
 
   g_tooltip.panel = p;
 
-  if (g_tooltip.mapped && g_tooltip.area_ != area) {
-    g_tooltip.CopyText(area);
+  if (g_tooltip.IsBoundTo(area)) {
+    g_tooltip.BindTo(area);
     g_tooltip.Update();
     StopTooltipTimeout();
-  } else if (!g_tooltip.mapped) {
+  } else if (!g_tooltip.mapped_) {
     StartShowTimeout();
   }
 }
@@ -162,9 +161,9 @@ void TooltipShow(void* /* arg */) {
   Area* area = g_tooltip.panel->ClickArea(mx, my);
   StopTooltipTimeout();
 
-  if (!g_tooltip.mapped) {
-    g_tooltip.CopyText(area);
-    g_tooltip.mapped = True;
+  if (!g_tooltip.mapped_) {
+    g_tooltip.BindTo(area);
+    g_tooltip.mapped_ = true;
     XMapWindow(server.dsp, g_tooltip.window);
     g_tooltip.Update();
     XFlush(server.dsp);
@@ -314,8 +313,8 @@ void Tooltip::Update() {
 }
 
 void TooltipTriggerHide() {
-  if (g_tooltip.mapped) {
-    g_tooltip.CopyText(nullptr);
+  if (g_tooltip.mapped_) {
+    g_tooltip.BindTo(nullptr);
     StartHideTimeout();
   } else {
     // tooltip not visible yet, but maybe a timeout is still pending
@@ -326,14 +325,14 @@ void TooltipTriggerHide() {
 void TooltipHide(void* arg) {
   StopTooltipTimeout();
 
-  if (g_tooltip.mapped) {
-    g_tooltip.mapped = False;
+  if (g_tooltip.mapped_) {
+    g_tooltip.mapped_ = false;
     XUnmapWindow(server.dsp, g_tooltip.window);
     XFlush(server.dsp);
   }
 }
 
-void Tooltip::CopyText(Area* area) {
+void Tooltip::BindTo(Area* area) {
   tooltip_text.clear();
 
   if (area) {
@@ -346,3 +345,5 @@ void Tooltip::CopyText(Area* area) {
 
   area_ = area;
 }
+
+bool Tooltip::IsBoundTo(Area* area) const { return (mapped_ && area_ == area); }

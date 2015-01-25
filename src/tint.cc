@@ -758,8 +758,8 @@ void EventPropertyNotify(XEvent* e) {
     if (at == server.atoms_["_NET_WM_VISIBLE_NAME"] ||
         at == server.atoms_["_NET_WM_NAME"] || at == server.atoms_["WM_NAME"]) {
       if (tsk->UpdateTitle()) {
-        if (g_tooltip.mapped && (g_tooltip.area_ == (Area*)tsk)) {
-          g_tooltip.CopyText(tsk);
+        if (g_tooltip.IsBoundTo(tsk)) {
+          g_tooltip.BindTo(tsk);
           g_tooltip.Update();
         }
 

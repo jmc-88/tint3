@@ -32,7 +32,7 @@ class Tooltip {
   Window window;
   int show_timeout_msec;
   int hide_timeout_msec;
-  Bool mapped;
+  bool mapped_;
   int paddingx;
   int paddingy;
   PangoFontDescription* font_desc;
@@ -40,10 +40,13 @@ class Tooltip {
   Background* bg;
   Timeout* timeout;
 
-  Area* area_;
-  void CopyText(Area* area);
+  void BindTo(Area* area);
+  bool IsBoundTo(Area* area) const;
 
   void Update();
+
+ private:
+  Area* area_;
 };
 
 extern Tooltip g_tooltip;
