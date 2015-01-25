@@ -42,6 +42,8 @@ class Tooltip {
 
   Area* area_;
   void CopyText(Area* area);
+
+  void Update();
 };
 
 extern Tooltip g_tooltip;
@@ -53,7 +55,6 @@ void DefaultTooltip();
 void CleanupTooltip();
 
 void InitTooltip();
-void TooltipUpdate();
 void TooltipTriggerHide();
 void TooltipTriggerShow(Area* area, Panel* p, XEvent* e);
 void TooltipHide(void* /*arg*/);

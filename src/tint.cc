@@ -760,7 +760,7 @@ void EventPropertyNotify(XEvent* e) {
       if (tsk->UpdateTitle()) {
         if (g_tooltip.mapped && (g_tooltip.area_ == (Area*)tsk)) {
           g_tooltip.CopyText(tsk);
-          TooltipUpdate();
+          g_tooltip.Update();
         }
 
         panel_refresh = true;
