@@ -227,7 +227,7 @@ void AddEntry(std::string const& key, std::string const& value) {
 
       if (item == 'B') {
 #ifdef ENABLE_BATTERY
-        battery_enabled = 1;
+        battery_enabled = true;
 #else
         util::log::Error() << "tint3 is built without battery support\n";
 #endif

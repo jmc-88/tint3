@@ -50,7 +50,7 @@
 PangoFontDescription* bat1_font_desc;
 PangoFontDescription* bat2_font_desc;
 struct BatteryState battery_state;
-int battery_enabled;
+bool battery_enabled;
 int percentage_hide;
 static Timeout* battery_timeout;
 
@@ -107,7 +107,7 @@ void UpdateBatteries(void* arg) {
 }  // namespace
 
 void DefaultBattery() {
-  battery_enabled = 0;
+  battery_enabled = false;
   percentage_hide = 101;
   battery_low_cmd_send = 0;
   battery_timeout = 0;
@@ -255,7 +255,7 @@ void InitBattery() {
 
 #endif
 
-  if (battery_enabled && battery_timeout == 0) {
+  if (battery_enabled && battery_timeout == nullptr) {
     battery_timeout = AddTimeout(10, 10000, UpdateBatteries, 0);
   }
 }
