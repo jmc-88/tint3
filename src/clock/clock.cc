@@ -50,7 +50,6 @@ PangoFontDescription* time1_font_desc;
 PangoFontDescription* time2_font_desc;
 static char buf_time[256];
 static char buf_date[256];
-static char buf_tooltip[512];
 bool clock_enabled;
 static Timeout* clock_timeout;
 
@@ -141,9 +140,12 @@ struct tm* ClockGetTimeForTimezone(std::string const& timezone) {
 }
 
 std::string Clock::GetTooltipText() {
-  std::strftime(buf_tooltip, sizeof(buf_tooltip), time_tooltip_format.c_str(),
+  // FIXME: the buffer should be dynamically resizable in case the formatted
+  // string doesn't fit
+  static char tooltip[512];
+  std::strftime(tooltip, sizeof(tooltip), time_tooltip_format.c_str(),
                 ClockGetTimeForTimezone(time_tooltip_timezone));
-  return buf_tooltip;
+  return tooltip;
 }
 
 void InitClock() {
@@ -155,11 +157,9 @@ void InitClock() {
                             time1_format.find('T') != std::string::npos ||
                             time1_format.find('r') != std::string::npos;
 
-  if (has_seconds_format) {
-    clock_timeout = AddTimeout(10, 1000, UpdateClockSeconds, 0);
-  } else {
-    clock_timeout = AddTimeout(10, 1000, UpdateClockMinutes, 0);
-  }
+  auto& update_func =
+      (has_seconds_format ? UpdateClockSeconds : UpdateClockMinutes);
+  clock_timeout = AddTimeout(10, 1000, update_func, 0);
 }
 
 void Clock::InitPanel(Panel* panel) {
@@ -180,11 +180,6 @@ void Clock::InitPanel(Panel* panel) {
 
   clock.need_resize_ = true;
   clock.on_screen_ = true;
-
-  if (!time_tooltip_format.empty()) {
-    std::strftime(buf_tooltip, sizeof(buf_tooltip), time_tooltip_format.c_str(),
-                  ClockGetTimeForTimezone(time_tooltip_timezone));
-  }
 }
 
 void Clock::DrawForeground(cairo_t* c) {
