@@ -150,6 +150,9 @@ void TintExec(std::string const& command) {
       //          sigprocmask(SIG_SETMASK, &sigset, 0);
       //          sigprocmask(SIG_UNBLOCK, &sigset, 0);
       execlp(command.c_str(), command.c_str(), nullptr);
+
+      // In case execlp() fails and the process image is not replaced
+      util::log::Error() << "Failed launching \"" << command << "\".";
       _exit(1);
     }
   }
