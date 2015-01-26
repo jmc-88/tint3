@@ -167,7 +167,7 @@ void TintExec(std::string const& command) {
       execlp(command.c_str(), command.c_str(), nullptr);
 
       // In case execlp() fails and the process image is not replaced
-      util::log::Error() << "Failed launching \"" << command << "\".";
+      util::log::Error() << "Failed launching \"" << command << "\".\n";
       _exit(1);
     }
   }
