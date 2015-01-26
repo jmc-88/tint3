@@ -105,7 +105,7 @@ Area& Area::CloneArea(Area const& other) {
  * 'panel_items' parameter (in config) define the list and the order of nodes in
  *tree's panel.
  * 'panel_items = SC' define a panel with just Systray and Clock.
- * So the tree 'Panel.Area' will have 2 childs (Systray and Clock).
+ * So the tree 'Panel.Area' will have 2 children (Systray and Clock).
  *
  ************************************************************/
 
@@ -150,7 +150,7 @@ void Area::SizeByContent() {
 }
 
 void Area::SizeByLayout(int pos, int level) {
-  // don't resize hiden objects
+  // don't resize hidden objects
   if (!on_screen_) {
     return;
   }
@@ -171,23 +171,21 @@ void Area::SizeByLayout(int pos, int level) {
     }
   }
 
-  // update position of childs
+  // update position of children
   pos += padding_x_lr_ + bg_->border.width;
 
   for (auto& child : children_) {
     if (!child->on_screen_) {
-      return;
+      continue;
     }
 
     if (panel_horizontal) {
       if (pos != child->panel_x_) {
-        // pos changed => redraw
         child->panel_x_ = pos;
         child->on_changed_ = true;
       }
     } else {
       if (pos != child->panel_y_) {
-        // pos changed => redraw
         child->panel_y_ = pos;
         child->on_changed_ = true;
       }
