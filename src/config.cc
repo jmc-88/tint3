@@ -137,13 +137,6 @@ bool RegexMatch(std::string const& pattern, std::string const& string) {
   return std::regex_match(string, matches, std::regex(pattern));
 }
 
-std::vector<std::string> RegexSplit(std::string const& pattern,
-                                    std::string const& string) {
-  return {std::sregex_token_iterator(string.begin(), string.end(),
-                                     std::regex(pattern), -1),
-          std::sregex_token_iterator()};
-}
-
 Background* GetBackgroundFromId(size_t id) {
   try {
     return backgrounds.at(id);
@@ -543,7 +536,7 @@ void AddEntry(std::string const& key, std::string const& value) {
     panel_config.g_task.font_desc =
         pango_font_description_from_string(value.c_str());
   } else if (RegexMatch("task.*_font_color", key)) {
-    auto split = RegexSplit("_", key);
+    auto split = SplitString(key, '_');
     int status = GetTaskStatus(split[1]);
     ExtractValues(value, value1, value2, value3);
     float alpha = 1;
@@ -556,7 +549,7 @@ void AddEntry(std::string const& key, std::string const& value) {
     panel_config.g_task.font[status].alpha = alpha;
     panel_config.g_task.config_font_mask |= (1 << status);
   } else if (RegexMatch("task.*_icon_asb", key)) {
-    auto split = RegexSplit("_", key);
+    auto split = SplitString(key, '_');
     int status = GetTaskStatus(split[1]);
     ExtractValues(value, value1, value2, value3);
     panel_config.g_task.alpha[status] = StringToLongInt(value1);
@@ -564,7 +557,7 @@ void AddEntry(std::string const& key, std::string const& value) {
     panel_config.g_task.brightness[status] = StringToLongInt(value3);
     panel_config.g_task.config_asb_mask |= (1 << status);
   } else if (RegexMatch("task.*_background_id", key)) {
-    auto split = RegexSplit("_", key);
+    auto split = SplitString(key, '_');
     int status = GetTaskStatus(split[1]);
     panel_config.g_task.background[status] =
         GetBackgroundFromId(StringToLongInt(value));

@@ -26,6 +26,7 @@
 #include <X11/extensions/Xrender.h>
 #include <unistd.h>
 
+#include <algorithm>
 #include <cctype>
 #include <cstdio>
 #include <cstdlib>
@@ -140,6 +141,20 @@ long int StringToLongInt(std::string const& str, char** endptr) {
 
 float StringToFloat(std::string const& str, char** endptr) {
   return strtof(str.c_str(), endptr);
+}
+
+std::vector<std::string> SplitString(std::string const& str, char sep) {
+  auto beg = str.cbegin();
+  auto end = std::find(beg, str.cend(), sep);
+  std::vector<std::string> parts;
+
+  while (beg != str.cend()) {
+    parts.push_back(std::string(beg, end));
+    beg = (end != str.cend()) ? (end + 1) : end;
+    end = std::find(beg, str.cend(), sep);
+  }
+
+  return parts;
 }
 
 void TintExec(std::string const& command) {

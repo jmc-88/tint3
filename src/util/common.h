@@ -15,6 +15,7 @@
 #include <memory>
 #include <sstream>
 #include <string>
+#include <vector>
 
 #include "util/area.h"
 
@@ -78,6 +79,8 @@ template <typename T>
 std::string StringRepresentation(T const& value) {
   return StringBuilder() << value;
 }
+
+std::vector<std::string> SplitString(std::string const& str, char sep);
 
 // execute a command by calling fork
 void TintExec(std::string const& command);

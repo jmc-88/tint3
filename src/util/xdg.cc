@@ -1,4 +1,3 @@
-#include <algorithm>
 #include <cstdlib>
 #include <cstring>
 #include <functional>
@@ -13,20 +12,6 @@ namespace {
 std::function<std::string(std::string)> DefaultValue(std::string value) {
   return [value](std::string other)
       -> std::string { return (!other.empty()) ? other : value; };
-}
-
-std::vector<std::string> SplitString(std::string const& str, char sep) {
-  auto beg = str.begin();
-  auto end = std::find(beg, str.end(), sep);
-  std::vector<std::string> parts;
-
-  while (beg != str.end()) {
-    parts.push_back(std::string(beg, end));
-    beg = (end != str.end()) ? (end + 1) : end;
-    end = std::find(beg, str.end(), sep);
-  }
-
-  return parts;
 }
 
 std::string ValidatePath(std::string path) {
