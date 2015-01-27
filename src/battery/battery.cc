@@ -104,6 +104,24 @@ void UpdateBatteries(void* arg) {
   }
 }
 
+std::string GetBatteryDirectory() {
+  static std::string const kPowerSupply = "/sys/class/power_supply";
+
+  for (auto& entry : util::fs::DirectoryContents(kPowerSupply)) {
+    if (entry.substr(0, 2) == "AC") {
+      continue;
+    }
+
+    auto sys_path = util::fs::BuildPath({kPowerSupply, entry});
+
+    if (util::fs::FileExists({sys_path, "present"})) {
+      return sys_path;
+    }
+  }
+
+  return std::string();
+}
+
 }  // namespace
 
 void DefaultBattery() {
@@ -170,34 +188,7 @@ void InitBattery() {
 
 #elif !defined(__FreeBSD__)
   // check battery
-  GDir* directory = 0;
-  GError* error = nullptr;
-  const char* entryname;
-  std::string battery_dir;
-
-  directory = g_dir_open("/sys/class/power_supply", 0, &error);
-
-  if (error) {
-    g_error_free(error);
-  } else {
-    while ((entryname = g_dir_read_name(directory))) {
-      if (strncmp(entryname, "AC", 2) == 0) {
-        continue;
-      }
-
-      auto sys_path =
-          util::fs::BuildPath({"/sys/class/power_supply", entryname});
-
-      if (util::fs::FileExists({sys_path, "present"})) {
-        battery_dir = sys_path;
-        break;
-      }
-    }
-  }
-
-  if (directory) {
-    g_dir_close(directory);
-  }
+  std::string battery_dir = GetBatteryDirectory();
 
   if (battery_dir.empty()) {
     util::log::Error() << "ERROR: battery applet can't found power_supply\n";

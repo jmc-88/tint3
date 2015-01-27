@@ -1,5 +1,4 @@
 #include <pwd.h>
-#include <sys/types.h>
 #include <unistd.h>
 
 #include <algorithm>
@@ -11,8 +10,62 @@
 #include "util/fs.h"
 
 namespace util {
-
 namespace fs {
+
+DirectoryContents::DirectoryContents(const std::string& path)
+    : dir_(opendir(path.c_str())) {}
+
+DirectoryContents::~DirectoryContents() {
+  if (dir_ != nullptr) {
+    closedir(dir_);
+  }
+}
+
+DirectoryContents::iterator const DirectoryContents::begin() const {
+  return DirectoryContents::iterator(dir_);
+}
+
+DirectoryContents::iterator const DirectoryContents::end() const {
+  return DirectoryContents::iterator();
+}
+
+DirectoryContents::iterator::iterator()
+    : dir_(nullptr), entry_(nullptr), pos_(-1) {}
+
+DirectoryContents::iterator::iterator(DIR* dir)
+    : dir_(dir), entry_(nullptr), pos_(-1) {
+  if (dir_ != nullptr) {
+    pos_ = telldir(dir_);
+  }
+}
+
+DirectoryContents::iterator& DirectoryContents::iterator::operator++() {
+  if (dir_ != nullptr) {
+    entry_ = readdir(dir_);
+
+    if (entry_ != nullptr) {
+      pos_ = telldir(dir_);
+    } else {
+      dir_ = nullptr;
+      pos_ = -1;
+    }
+  }
+
+  return (*this);
+}
+
+const std::string DirectoryContents::iterator::operator*() const {
+  if (entry_ != nullptr) {
+    return entry_->d_name;
+  }
+
+  return std::string();
+}
+
+bool DirectoryContents::iterator::operator!=(
+    DirectoryContents::iterator const& other) const {
+  return (dir_ != other.dir_ || pos_ != other.pos_);
+}
 
 std::string BuildPath(std::initializer_list<std::string> parts) {
   std::ostringstream ss;
@@ -132,6 +185,5 @@ bool ReadFileByLine(std::string const& path,
   return true;
 }
 
-}  // namespace fs
-
+}  // namespace fss
 }  // namespace util
