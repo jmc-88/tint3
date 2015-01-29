@@ -1,33 +1,34 @@
-project( tint3 )
-cmake_minimum_required( VERSION 2.8 )
+project(tint3)
+cmake_minimum_required(VERSION 2.8)
 
-set(CMAKE_C_FLAGS_DEBUG   "-O0 -ggdb -D_TINT3_DEBUG")
-set(CMAKE_CXX_FLAGS_DEBUG "-O0 -ggdb -D_TINT3_DEBUG")
+# Setup some definitions for debug builds
+set(CMAKE_C_FLAGS_DEBUG   "${CMAKE_C_FLAGS_DEBUG} -D_TINT3_DEBUG")
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -D_TINT3_DEBUG")
 
-include( FindPkgConfig )
-include( CheckLibraryExists )
-pkg_check_modules( X11 REQUIRED x11 xcomposite xdamage xinerama xrender xrandr>=1.3 )
-pkg_check_modules( PANGOCAIRO REQUIRED pangocairo )
-pkg_check_modules( PANGO REQUIRED pango )
-pkg_check_modules( CAIRO REQUIRED cairo )
-pkg_check_modules( GLIB2 REQUIRED glib-2.0 )
-pkg_check_modules( GOBJECT2 REQUIRED gobject-2.0 )
-pkg_check_modules( IMLIB2 REQUIRED imlib2>=1.4.2 )
-pkg_check_modules( SN libstartup-notification-1.0>=0.12 )
-find_library( RT_LIBRARY rt )
+include(FindPkgConfig)
+include(CheckLibraryExists)
+pkg_check_modules(X11 REQUIRED x11 xcomposite xdamage xinerama xrender xrandr>=1.3)
+pkg_check_modules(PANGOCAIRO REQUIRED pangocairo)
+pkg_check_modules(PANGO REQUIRED pango)
+pkg_check_modules(CAIRO REQUIRED cairo)
+pkg_check_modules(GLIB2 REQUIRED glib-2.0)
+pkg_check_modules(GOBJECT2 REQUIRED gobject-2.0)
+pkg_check_modules(IMLIB2 REQUIRED imlib2>=1.4.2)
+pkg_check_modules(SN libstartup-notification-1.0>=0.12)
+find_library(RT_LIBRARY rt)
 
-if( NOT X11_FOUND OR NOT PANGOCAIRO_FOUND OR NOT PANGO_FOUND OR NOT CAIRO_FOUND OR NOT GLIB2_FOUND OR NOT GOBJECT2_FOUND OR NOT IMLIB2_FOUND )
-    message( FATAL_ERROR "Not all dependencies are satisfied. See README.source." )
+if(NOT X11_FOUND OR NOT PANGOCAIRO_FOUND OR NOT PANGO_FOUND OR NOT CAIRO_FOUND OR NOT GLIB2_FOUND OR NOT GOBJECT2_FOUND OR NOT IMLIB2_FOUND)
+    message(FATAL_ERROR "Not all dependencies are satisfied. See README.source.")
 endif()
 
-string( REPLACE ";" " " FLAGS_REPLACED "${IMLIB2_LDFLAGS}" )
-set( CMAKE_REQUIRED_FLAGS "${FLAGS_REPLACED}" )
-check_library_exists( "${IMLIB2_LIBRARIES}" "imlib_context_set_display" "${IMLIB2_LIBRARY_DIRS}" IMLIB_BUILD_WITH_X )
-if( NOT IMLIB_BUILD_WITH_X )
-    message( FATAL_ERROR "Imlib is not build with x support" )
+string(REPLACE ";" " " FLAGS_REPLACED "${IMLIB2_LDFLAGS}")
+set(CMAKE_REQUIRED_FLAGS "${FLAGS_REPLACED}")
+check_library_exists("${IMLIB2_LIBRARIES}" "imlib_context_set_display" "${IMLIB2_LIBRARY_DIRS}" IMLIB_BUILD_WITH_X)
+if(NOT IMLIB_BUILD_WITH_X)
+    message(FATAL_ERROR "Imlib is built without X support")
 endif()
 
-include_directories( ${PROJECT_BINARY_DIR}
+include_directories(${PROJECT_BINARY_DIR}
     src
     src/battery
     src/clock
@@ -43,9 +44,9 @@ include_directories( ${PROJECT_BINARY_DIR}
     ${GLIB2_INCLUDE_DIRS}
     ${GOBJECT2_INCLUDE_DIRS}
     ${IMLIB2_INCLUDE_DIRS}
-    ${SN_INCLUDE_DIRS} )
+    ${SN_INCLUDE_DIRS})
 
-set( SOURCES
+set(SOURCES
     src/version.h.in
     src/config.cc
     src/panel.cc
@@ -68,26 +69,26 @@ set( SOURCES
     src/util/timer.cc
     src/util/window.cc
     src/util/x11.cc
-    src/util/xdg.cc )
+    src/util/xdg.cc)
 
-option( ENABLE_BATTERY "Enable battery status plugin" ON )
-option( ENABLE_EXAMPLES "Install additional tin2rc examples" OFF )
-option( ENABLE_SN "Startup notification support" ON )
-if( ENABLE_SN )
-    if( SN_FOUND )
-        add_definitions( -DHAVE_SN -DSN_API_NOT_YET_FROZEN )
+option(ENABLE_BATTERY "Enable battery status plugin" ON)
+option(ENABLE_EXAMPLES "Install additional tin2rc examples" OFF)
+option(ENABLE_SN "Startup notification support" ON)
+if(ENABLE_SN)
+    if(SN_FOUND)
+        add_definitions(-DHAVE_SN -DSN_API_NOT_YET_FROZEN)
     endif()
 endif()
 
-if( ENABLE_BATTERY )
-    set( SOURCES ${SOURCES} src/battery/battery.cc )
-    add_definitions( -DENABLE_BATTERY )
+if(ENABLE_BATTERY)
+    set(SOURCES ${SOURCES} src/battery/battery.cc)
+    add_definitions(-DENABLE_BATTERY)
 endif()
 
-set( MANDIR share/man CACHE PATH "Directory for man pages" )
-set( DATADIR share CACHE PATH "Directory for shared data" )
-set( SYSCONFDIR /etc CACHE PATH "Directory for configuration files" )
-set( DOCDIR share/doc/tint3 CACHE PATH "Directory for documentation files" )
+set(MANDIR share/man CACHE PATH "Directory for man pages")
+set(DATADIR share CACHE PATH "Directory for shared data")
+set(SYSCONFDIR /etc CACHE PATH "Directory for configuration files")
+set(DOCDIR share/doc/tint3 CACHE PATH "Directory for documentation files")
 
 # {{{ version.h
 #
@@ -121,37 +122,37 @@ include_directories(${CMAKE_BINARY_DIR}/generated)
 
 add_executable(tint3 ${SOURCES})
 
-link_directories( ${X11_LIBRARY_DIRS}
+link_directories(${X11_LIBRARY_DIRS}
     ${PANGOCAIRO_LIBRARY_DIRS}
     ${PANGO_LIBRARY_DIRS}
     ${CAIRO_LIBRARY_DIRS}
     ${GLIB2_LIBRARY_DIRS}
     ${GOBJECT2_LIBRARY_DIRS}
     ${IMLIB2_LIBRARY_DIRS}
-    ${SN_LIBRARY_DIRS} )
+    ${SN_LIBRARY_DIRS})
 
-target_link_libraries( tint3 ${X11_LIBRARIES}
+target_link_libraries(tint3 ${X11_LIBRARIES}
     ${PANGOCAIRO_LIBRARIES}
     ${PANGO_LIBRARIES}
     ${CAIRO_LIBRARIES}
     ${GLIB2_LIBRARIES}
     ${GOBJECT2_LIBRARIES}
     ${IMLIB2_LIBRARIES}
-    ${SN_LIBRARIES} )
+    ${SN_LIBRARIES})
 
-if( RT_LIBRARY )
-    target_link_libraries( tint3 ${RT_LIBRARY} )
+if(RT_LIBRARY)
+    target_link_libraries(tint3 ${RT_LIBRARY})
 endif()
 
 set_target_properties(tint3 PROPERTIES COMPILE_FLAGS "-Wall -pthread -std=c++11")
 set_target_properties(tint3 PROPERTIES LINK_FLAGS "-pthread")
 
-install( TARGETS tint3 DESTINATION bin )
-install( FILES sample/tint3rc DESTINATION ${SYSCONFDIR}/xdg/tint3 )
-install( FILES default_icon.png DESTINATION ${DATADIR}/tint3 )
-install( FILES AUTHORS README.md DESTINATION ${DOCDIR} )
-install( FILES doc/tint3.1 DESTINATION ${MANDIR}/man1 )
-if( ENABLE_EXAMPLES )
-    file( GLOB SAMPLEFILES sample/*.tint3rc )
-    install( FILES ${SAMPLEFILES} DESTINATION ${DOCDIR}/examples )
+install(TARGETS tint3 DESTINATION bin)
+install(FILES sample/tint3rc DESTINATION ${SYSCONFDIR}/xdg/tint3)
+install(FILES default_icon.png DESTINATION ${DATADIR}/tint3)
+install(FILES AUTHORS README.md DESTINATION ${DOCDIR})
+install(FILES doc/tint3.1 DESTINATION ${MANDIR}/man1)
+if(ENABLE_EXAMPLES)
+    file(GLOB SAMPLEFILES sample/*.tint3rc)
+    install(FILES ${SAMPLEFILES} DESTINATION ${DOCDIR}/examples)
 endif()
