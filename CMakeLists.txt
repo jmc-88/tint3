@@ -71,7 +71,7 @@ set(SOURCES
     src/util/xdg.cc)
 
 option(ENABLE_BATTERY "Enable battery status plugin" ON)
-option(ENABLE_EXAMPLES "Install additional tin2rc examples" OFF)
+option(ENABLE_EXAMPLES "Install additional tint3rc examples" OFF)
 option(ENABLE_SN "Startup notification support" ON)
 if(ENABLE_SN)
     if(SN_FOUND)
