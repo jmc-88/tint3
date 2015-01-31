@@ -5,6 +5,12 @@ cmake_minimum_required(VERSION 2.8)
 set(CMAKE_C_FLAGS_DEBUG   "${CMAKE_C_FLAGS_DEBUG} -D_TINT3_DEBUG")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -D_TINT3_DEBUG")
 
+# Setup the lookup paths for local CMake modules
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
+
+# Include the necessary packages
+find_package(DBus REQUIRED)
+
 include(FindPkgConfig)
 include(CheckLibraryExists)
 pkg_check_modules(X11 REQUIRED x11 xcomposite xdamage xinerama xrender xrandr>=1.3)
@@ -36,6 +42,7 @@ include_directories(${PROJECT_BINARY_DIR}
     src/launcher
     src/tooltip
     src/util
+    ${DBUS_INCLUDE_DIRS}
     ${X11_INCLUDE_DIRS}
     ${PANGOCAIRO_INCLUDE_DIRS}
     ${PANGO_INCLUDE_DIRS}
@@ -121,7 +128,8 @@ include_directories(${CMAKE_BINARY_DIR}/generated)
 
 add_executable(tint3 ${SOURCES})
 
-link_directories(${X11_LIBRARY_DIRS}
+link_directories(
+    ${X11_LIBRARY_DIRS}
     ${PANGOCAIRO_LIBRARY_DIRS}
     ${PANGO_LIBRARY_DIRS}
     ${CAIRO_LIBRARY_DIRS}
@@ -130,7 +138,9 @@ link_directories(${X11_LIBRARY_DIRS}
     ${IMLIB2_LIBRARY_DIRS}
     ${SN_LIBRARY_DIRS})
 
-target_link_libraries(tint3 ${X11_LIBRARIES}
+target_link_libraries(tint3
+    ${DBUS_LIBRARIES}
+    ${X11_LIBRARIES}
     ${PANGOCAIRO_LIBRARIES}
     ${PANGO_LIBRARIES}
     ${CAIRO_LIBRARIES}
