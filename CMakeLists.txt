@@ -60,6 +60,7 @@ set(SOURCES
     src/tint.cc
     src/clock/clock.cc
     src/dbus/connection.cc
+    src/dbus/interface.cc
     src/systray/systraybar.cc
     src/launcher/launcher.cc
     src/launcher/xsettings-client.cc

@@ -23,24 +23,31 @@
 
 namespace dbus {
 
-Connection* Connection::SystemBus() {
+Connection Connection::SystemBus() {
   DBusError err;
   dbus_error_init(&err);
 
-  DBusConnection* conn = dbus_bus_get(DBUS_BUS_SYSTEM, &err);
+  DBusConnection* connection = dbus_bus_get(DBUS_BUS_SYSTEM, &err);
 
   if (dbus_error_is_set(&err)) {
-    util::log::Error() << "Unable to connect to the system bus: \"" << err.name
-                       << ": " << err.message << "\"\n";
+    util::log::Error() << "Unable to connect to the system bus: " << err.message
+                       << '\n';
     dbus_error_free(&err);
-    return nullptr;
   }
 
-  return new Connection(conn);
+  return Connection(connection);
 }
 
 Connection::Connection(DBusConnection* connection) : connection_(connection) {}
 
-DBusConnection* Connection::Get() const { return connection_; }
+Connection::operator bool() const { return connection_ != nullptr; }
+
+bool Connection::IsConnected() const { return connection_ != nullptr; }
+
+dbus::Interface Connection::Interface(std::string const& destination,
+                                      std::string const& path,
+                                      std::string const& interface) const {
+  return dbus::Interface(this, destination, path, interface);
+}
 
 }  // namespace dbus

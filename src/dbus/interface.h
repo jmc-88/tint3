@@ -17,38 +17,32 @@
  *
  */
 
-#ifndef TINT3_DBUS_CONNECTION_H
-#define TINT3_DBUS_CONNECTION_H
+#ifndef TINT3_DBUS_INTERFACE_H
+#define TINT3_DBUS_INTERFACE_H
 
-#include <memory>
+#include "dbus/connection.h"
+
 #include <string>
-
-#include <dbus/dbus.h>
-
-#include "dbus/interface.h"
 
 namespace dbus {
 
-class Interface;
-class Connection {
-  friend class Interface;
+class Connection;
+class Interface {
+  friend class Connection;
 
  public:
-  static Connection SystemBus();
-
-  operator bool() const;
-  bool IsConnected() const;
-
-  dbus::Interface Interface(std::string const& destination,
-                            std::string const& path,
-                            std::string const& interface) const;
+  bool Call(std::string const& method);
 
  private:
-  Connection(DBusConnection* connection);
+  Interface(Connection const* const bus, std::string const& destination,
+            std::string const& path, std::string const& interface);
 
-  DBusConnection* const connection_;
+  Connection const* const bus_;
+  std::string const destination_;
+  std::string const path_;
+  std::string const interface_;
 };
 
 }  // namespace dbus
 
-#endif  // TINT3_DBUS_CONNECTION_H
+#endif  // TINT3_DBUS_INTERFACE_H
