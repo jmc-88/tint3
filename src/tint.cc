@@ -40,21 +40,21 @@
 #include <cstring>
 #include <iostream>
 
-#include "version.h"
-#include "server.h"
-#include "window.h"
 #include "config.h"
-#include "task.h"
-#include "taskbar.h"
-#include "systraybar.h"
 #include "launcher.h"
 #include "panel.h"
+#include "server.h"
+#include "systraybar.h"
+#include "task.h"
+#include "taskbar.h"
 #include "tooltip.h"
 #include "timer.h"
 #include "util/common.h"
 #include "util/fs.h"
 #include "util/log.h"
 #include "util/xdg.h"
+#include "version.h"
+#include "window.h"
 #include "xsettings-client.h"
 
 namespace {
