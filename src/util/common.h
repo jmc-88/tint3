@@ -6,8 +6,6 @@
 #ifndef COMMON_H
 #define COMMON_H
 
-#define WM_CLASS_TINT "panel"
-
 #include <Imlib2.h>
 #include <glib-object.h>
 #include <signal.h>
