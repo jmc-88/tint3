@@ -79,7 +79,7 @@ int dnd_version;
 Atom dnd_selection;
 Atom dnd_atom;
 int dnd_sent_request;
-char* dnd_launcher_exec;
+std::string dnd_launcher_exec;
 
 void Init(int argc, char* argv[]) {
   // FIXME: remove this global data shit
@@ -1095,7 +1095,7 @@ void DragAndDropPosition(XClientMessageEvent* e) {
 }
 
 void DragAndDropDrop(XClientMessageEvent* e) {
-  if (dnd_target_window && dnd_launcher_exec) {
+  if (dnd_target_window && !dnd_launcher_exec.empty()) {
     if (dnd_version >= 1) {
       XConvertSelection(server.dsp, server.atoms_["XdndSelection"], XA_STRING,
                         dnd_selection, dnd_target_window, e->data.l[2]);
@@ -1167,7 +1167,7 @@ start:
   dnd_selection = XInternAtom(server.dsp, "PRIMARY", 0);
   dnd_atom = None;
   dnd_sent_request = 0;
-  dnd_launcher_exec = nullptr;
+  dnd_launcher_exec.clear();
 
   //  sigset_t empty_mask;
   //  sigemptyset(&empty_mask);
@@ -1291,7 +1291,7 @@ start:
                        << GetAtomName(server.dsp, e.xselection.property)
                        << '\n';
 
-    if (e.xselection.property != None && dnd_launcher_exec) {
+    if (e.xselection.property != None && !dnd_launcher_exec.empty()) {
       Property prop =
           ReadProperty(server.dsp, dnd_target_window, dnd_selection);
 

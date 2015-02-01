@@ -20,10 +20,10 @@ class LauncherIcon : public Area {
 
   Imlib_Image icon_scaled_;
   Imlib_Image icon_original_;
-  char* cmd_;
-  char* icon_name_;
-  char* icon_path_;
-  char* icon_tooltip_;
+  std::string cmd_;
+  std::string icon_name_;
+  std::string icon_path_;
+  std::string icon_tooltip_;
   int icon_size_;
   int is_app_desktop_;
   int x_;
@@ -51,13 +51,13 @@ struct DesktopEntry {
 #define ICON_DIR_TYPE_THRESHOLD 2
 
 struct IconThemeDir {
-  char* name;
+  std::string name;
+  std::string context;
   int size;
   int type;
   int max_size;
   int min_size;
   int threshold;
-  char* context;
 };
 
 class IconTheme {
@@ -65,8 +65,8 @@ class IconTheme {
   ~IconTheme();
 
   std::string name;
-  GSList* list_inherits;     // each item is a char* (theme name)
-  GSList* list_directories;  // each item is an IconThemeDir*
+  std::vector<std::string> list_inherits;
+  std::vector<IconThemeDir*> list_directories;
 };
 
 class Launcher : public Area {
