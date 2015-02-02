@@ -345,8 +345,6 @@ void InitPanel() {
       server.gc = XCreateGC(server.dsp, p->main_win_, 0, &gcv);
     }
 
-    // printf("panel %d : %d, %d, %d, %d\n", i, p->posx, p->posy, p->width,
-    // p->height);
     p->SetProperties();
     p->SetBackground();
 
@@ -382,9 +380,8 @@ void Panel::InitSizeAndPosition() {
     }
 
     if (bg_->border.rounded > height_ / 2) {
-      printf(
-          "panel_background_id rounded is too big... please fix your "
-          "tint3rc\n");
+      util::log::Error() << "panel_background_id rounded is too big: please "
+                            "fix your tint3rc.\n";
       /* backgrounds.push_back(*bg); */
       /* bg = backgrounds.back(); */
       bg_->border.rounded = height_ / 2;
@@ -409,9 +406,8 @@ void Panel::InitSizeAndPosition() {
     }
 
     if (bg_->border.rounded > width_ / 2) {
-      printf(
-          "panel_background_id rounded is too big... please fix your "
-          "tint3rc\n");
+      util::log::Error() << "panel_background_id rounded is too big: please "
+                            "fix your tint3rc.\n";
       /* backgrounds.push_back(*bg); */
       /* bg = backgrounds.back(); */
       bg_->border.rounded = width_ / 2;
@@ -457,9 +453,6 @@ void Panel::InitSizeAndPosition() {
     hidden_width_ = width_ - diff;
     hidden_height_ = height_;
   }
-
-  // printf("panel : posx %d, posy %d, width %d, height %d\n", posx, posy,
-  // width, height);
 }
 
 bool Panel::Resize() {
@@ -888,8 +881,6 @@ void AutohideHide(void* p) {
   int diff = (panel_horizontal ? panel->height_ : panel->width_) -
              panel_autohide_height;
 
-  // printf("autohide_hide : diff %d, w %d, h %d\n", diff, panel->hidden_width,
-  // panel->hidden_height);
   if (panel_horizontal) {
     if (panel_position & kTop) {
       XResizeWindow(server.dsp, panel->main_win_, panel->hidden_width_,

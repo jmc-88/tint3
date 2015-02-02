@@ -322,9 +322,6 @@ void Taskbar::InitPanel(Panel* panel) {
         (panel->g_task.height_ - panel->g_task.icon_size1) / 2;
   }
 
-  // printf("monitor %d, task_maximum_width %d\n", panel->monitor,
-  // panel->g_task.maximum_width);
-
   panel->nb_desktop_ = server.nb_desktop;
   panel->taskbar_ = new Taskbar[server.nb_desktop];
 

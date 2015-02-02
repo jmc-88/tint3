@@ -86,9 +86,8 @@ void InitSystray() {
 
   if (!server.visual32 && (systray.alpha != 100 || systray.brightness != 0 ||
                            systray.saturation != 0)) {
-    printf(
-        "No 32 bit visual for your X implementation. 'systray_asb = 100 0 0' "
-        "will be forced\n");
+    util::log::Error() << "No 32 bit visual for your X implementation. "
+                          "'systray_asb = 100 0 0' will be forced.\n";
     systray.alpha = 100;
     systray.brightness = systray.saturation = 0;
   }
@@ -195,7 +194,6 @@ void Systraybar::OnChangeLayout() {
 
     traywin->y = posy;
     traywin->x = posx;
-    // printf("systray %d : %d,%d\n", i, posx, posy);
     traywin->width = icon_size;
     traywin->height = icon_size;
 
@@ -392,9 +390,6 @@ bool Systraybar::AddIcon(Window id) {
   XSetWindowAttributes set_attr;
   Visual* visual = server.visual;
 
-  // printf("icon with depth: %d, width %d, height %d\n", attr.depth,
-  // attr.width, attr.height);
-  // printf("icon with depth: %d\n", attr.depth);
   if (attr.depth != server.depth || alpha != 100 || brightness != 0 ||
       saturation != 0) {
     visual = attr.visual;
@@ -438,11 +433,6 @@ bool Systraybar::AddIcon(Window id) {
 
     if (ret == Success) {
       if (data) {
-        if (nbitem == 2) {
-          // hide = ((data[1] & XEMBED_MAPPED) == 0);
-          // printf("hide %d\n", hide);
-        }
-
         XFree(data);
       }
     } else {
@@ -515,7 +505,6 @@ void Systraybar::RemoveIcon(TrayWindow* traywin) {
   // remove from our list
   list_icons.erase(std::remove(list_icons.begin(), list_icons.end(), traywin),
                    list_icons.end());
-  // printf("remove_icon id %lx, %d\n", traywin->id);
 
   XSelectInput(server.dsp, traywin->tray_id, NoEventMask);
 
@@ -629,7 +618,8 @@ void SystrayRenderIconNow(void* t) {
   } else if (traywin->depth == 32) {
     f = XRenderFindStandardFormat(server.dsp, PictStandardARGB32);
   } else {
-    printf("Strange tray icon found with depth: %d\n", traywin->depth);
+    util::log::Debug() << "Strange tray icon found with depth: "
+                       << traywin->depth << '\n';
     return;
   }
 

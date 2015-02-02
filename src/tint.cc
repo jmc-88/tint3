@@ -392,9 +392,6 @@ void ForwardClick(XEvent* e) {
   // and xfce doesn't open at all.
   e->xbutton.x = e->xbutton.x_root;
   e->xbutton.y = e->xbutton.y_root;
-  // printf("**** %d, %d\n", e->xbutton.x, e->xbutton.y);
-  // XSetInputFocus(server.dsp, e->xbutton.window, RevertToParent,
-  // e->xbutton.time);
   XSendEvent(server.dsp, e->xbutton.window, False, ButtonPressMask, e);
 }
 
@@ -751,9 +748,6 @@ void EventPropertyNotify(XEvent* e) {
       }
     }
 
-    // printf("atom root_win = %s, %s\n", XGetAtomName(server.dsp, at),
-    // tsk->title);
-
     // Window title changed
     if (at == server.atoms_["_NET_WM_VISIBLE_NAME"] ||
         at == server.atoms_["_NET_WM_NAME"] || at == server.atoms_["WM_NAME"]) {
@@ -844,7 +838,6 @@ void EventConfigureNotify(Window win) {
   // 'win' is a tray icon
   for (auto& traywin : systray.list_icons) {
     if (traywin->tray_id == win) {
-      // printf("move tray %d\n", traywin->x);
       XMoveResizeWindow(server.dsp, traywin->id, traywin->x, traywin->y,
                         traywin->width, traywin->height);
       XResizeWindow(server.dsp, traywin->tray_id, traywin->width,

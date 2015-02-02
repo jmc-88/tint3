@@ -136,7 +136,6 @@ void Taskbarname::DrawForeground(cairo_t* c) {
   pango_cairo_update_layout(c, layout.get());
   cairo_move_to(c, 0, panel_y_);
   pango_cairo_show_layout(c, layout.get());
-  // printf("draw_taskbarname %s ******************************\n", name);
 }
 
 bool Taskbarname::Resize() {

@@ -163,7 +163,6 @@ void RemoveTask(Task* tsk) {
 
   // free title and icon just for the first task
   // even with task_on_all_desktop and with task_on_all_panel
-  // printf("remove_task %s %d\n", tsk->title, tsk->desktop);
   tsk->SetTitle("");
 
   for (int k = 0; k < kTaskStateCount; ++k) {
@@ -306,7 +305,6 @@ void GetIcon(Task* tsk) {
         uint border_width, bpp;
         uint w, h;
 
-        // printf("  get pixmap\n");
         XGetGeometry(server.dsp, hints->icon_pixmap, &root, &icon_x, &icon_y,
                      &w, &h, &border_width, &bpp);
         imlib_context_set_drawable(hints->icon_pixmap);
@@ -401,7 +399,6 @@ void Task::DrawForeground(cairo_t* c) {
 
   int width = 0;
   int height = 0;
-  // printf("draw_task %d %d\n", posx, posy);
 
   if (panel_->g_task.text) {
     /* Layout */
@@ -556,7 +553,6 @@ void ActiveTask() {
   }
 
   Window w1 = WindowGetActive();
-  // printf("Change active task %ld\n", w1);
 
   if (w1) {
     if (TaskGetTasks(w1).empty()) {

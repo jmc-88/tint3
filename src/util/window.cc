@@ -309,7 +309,6 @@ void GetTextSize(PangoFontDescription* font, int* height_ink, int* height,
   pango_layout_get_pixel_extents(layout.get(), &rect_ink, &rect);
   (*height_ink) = rect_ink.height;
   (*height) = rect.height;
-  // printf("dimension : %d - %d\n", rect_ink.height, rect.height);
 
   cairo_destroy(c);
   cairo_surface_destroy(cs);
@@ -335,7 +334,6 @@ void GetTextSize2(PangoFontDescription* font, int* height_ink, int* height,
   (*height_ink) = rect_ink.height;
   (*height) = rect.height;
   (*width) = rect.width;
-  // printf("dimension : %d - %d\n", rect_ink.height, rect.height);
 
   cairo_destroy(c);
   cairo_surface_destroy(cs);

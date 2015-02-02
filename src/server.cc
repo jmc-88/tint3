@@ -26,6 +26,7 @@
 #include <algorithm>
 #include <cstdio>
 #include <cstdlib>
+#include <iostream>
 
 #include "server.h"
 #include "config.h"
@@ -376,14 +377,14 @@ void Server::InitVisual() {
 
     real_transparency = true;
     depth = 32;
-    printf("real transparency on... depth: %d\n", depth);
+    std::cout << "Real transparency: on, depth: " << depth << '\n';
     colormap = XCreateColormap(dsp, root_win, xvi_visual, AllocNone);
     visual = xvi_visual;
   } else {
     // no composite manager or snapshot mode => fake transparency
     real_transparency = false;
     depth = DefaultDepth(dsp, screen);
-    printf("real transparency off.... depth: %d\n", depth);
+    std::cout << "Real transparency: off, depth: " << depth << '\n';
     colormap = DefaultColormap(dsp, screen);
     visual = DefaultVisual(dsp, screen);
   }

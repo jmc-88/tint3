@@ -475,7 +475,9 @@ XSettingsClient* XSettingsClientNew(Display* display, int screen,
   CheckManagerWindow(client);
 
   if (client->manager_window == None) {
-    printf("NO XSETTINGS manager, tint3 use config 'launcher_icon_theme'.\n");
+    // TODO: translate this message to English
+    util::log::Error()
+        << "NO XSETTINGS manager, tint3 use config 'launcher_icon_theme'.\n";
     free(client);
     return nullptr;
   }

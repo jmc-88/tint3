@@ -221,7 +221,8 @@ void Area::Refresh() {
 
   // draw current Area
   if (pix_ == 0) {
-    printf("empty area posx %d, width %d\n", panel_x_, width_);
+    util::log::Debug() << "Empty area at panel_x_ = " << panel_x_
+                       << ", width = " << width_ << '\n';
   }
 
   XCopyArea(server.dsp, pix_, panel_->temp_pmap, server.gc, 0, 0, width_,
@@ -394,9 +395,6 @@ void Area::DrawBackground(cairo_t* c) {
                        << "), " << (width_ - (2.0 * bg_->border.width)) << 'x'
                        << (height_ - (2.0 * bg_->border.width)) << '\n';
 
-    // printf("    draw_background (%d %d) RGBA (%lf, %lf, %lf, %lf)\n", posx,
-    // posy, pix->back.color[0], pix->back.color[1], pix->back.color[2],
-    // pix->back.alpha);
     DrawRect(c, bg_->border.width, bg_->border.width,
              width_ - (2.0 * bg_->border.width),
              height_ - (2.0 * bg_->border.width),

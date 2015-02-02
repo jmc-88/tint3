@@ -26,7 +26,8 @@
 #include <list>
 #include <map>
 
-#include "timer.h"
+#include "util/timer.h"
+#include "util/log.h"
 
 // functions and structs for multi timeouts
 struct _multi_timeout {
@@ -367,7 +368,7 @@ void ChangeTimeout(Timeout* t, int value_msec, int interval_msec,
   bool has_multi_timeout = (multi_timeouts.find(t) != multi_timeouts.end());
 
   if (!has_timeout && !has_multi_timeout) {
-    printf("programming error: timeout already deleted...");
+    util::log::Error() << "Programming error: timeout already deleted\n";
     return;
   }
 
