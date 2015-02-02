@@ -41,9 +41,9 @@ class LauncherIcon : public Area {
 };
 
 struct DesktopEntry {
-  char* name;
-  char* exec;
-  char* icon;
+  std::string name;
+  std::string exec;
+  std::string icon;
 };
 
 #define ICON_DIR_TYPE_SCALABLE 0

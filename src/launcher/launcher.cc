@@ -58,7 +58,6 @@ const char kIconFallback[] = "application-x-executable";
 
 }  // namespace
 
-void FreeDesktopEntry(DesktopEntry* entry);
 bool LauncherReadDesktopFile(std::string const& path, DesktopEntry* entry);
 Imlib_Image ScaleIcon(Imlib_Image original, int icon_size);
 void FreeIcon(Imlib_Image icon);
@@ -440,53 +439,53 @@ void ExpandExec(DesktopEntry* entry, std::string const& path) {
   // %i -> --icon Icon
   // %c -> Name
   // %k -> path
-  if (!entry->exec) {
+  if (entry->exec.empty()) {
     return;
   }
 
-  std::string exec2;
+  std::string expanded;
 
   // p will never point to an escaped char
-  for (char const* p = entry->exec; *p != '\0'; ++p) {
-    exec2.push_back(*p);
+  for (auto c = entry->exec.begin(); c != entry->exec.end(); ++c) {
+    expanded.push_back(*c);
 
-    if (*p == '\\') {
-      ++p;
+    if (*c == '\\') {
+      ++c;
 
-      if (*p == '\0') {
+      if (*c == '\0') {
         break;
       }
 
       // Copy the escaped char
-      if (*p == '%') {  // For % we delete the backslash, i.e. write % over it
-        exec2[exec2.length() - 1] = '%';
+      if (*c == '%') {  // For % we delete the backslash, i.e. write % over it
+        expanded[expanded.length() - 1] = '%';
       } else {
-        exec2.push_back(*p);
+        expanded.push_back(*c);
       }
-    } else if (*p == '%') {
-      ++p;
+    } else if (*c == '%') {
+      ++c;
 
-      if (*p == '\0') {
+      if (*c == '\0') {
         break;
       }
 
-      if (*p == 'i' && entry->icon != nullptr) {
-        exec2.append(StringBuilder() << "--icon '" << entry->icon << '\'');
-      } else if (*p == 'c' && entry->name != nullptr) {
-        exec2.append(StringBuilder() << '\'' << entry->name << '\'');
+      if (*c == 'i' && !entry->icon.empty()) {
+        expanded.append(StringBuilder() << "--icon '" << entry->icon << '\'');
+      } else if (*c == 'c' && !entry->name.empty()) {
+        expanded.append(StringBuilder() << '\'' << entry->name << '\'');
       } else {
-        exec2.append(StringBuilder() << '\'' << path << '\'');
+        expanded.append(StringBuilder() << '\'' << path << '\'');
       }
     }
   }
 
-  // TODO:make entry->exec a string and remove these unnecessary lines
-  std::free(entry->exec);
-  entry->exec = strdup(exec2.c_str());
+  entry->exec = expanded;
 }
 
 bool LauncherReadDesktopFile(const std::string& path, DesktopEntry* entry) {
-  entry->name = entry->icon = entry->exec = nullptr;
+  entry->name.clear();
+  entry->icon.clear();
+  entry->exec.clear();
 
   gchar** languages = (gchar**)g_get_language_names();
   int i;
@@ -520,7 +519,7 @@ bool LauncherReadDesktopFile(const std::string& path, DesktopEntry* entry) {
     if (inside_desktop_entry && ParseDesktopLine(line, key, value)) {
       if (key.substr(0, 4) == "Name") {
         if (key == "Name" && lang_index > lang_index_default) {
-          entry->name = strdup(value.c_str());
+          entry->name = value;
           lang_index = lang_index_default;
         } else {
           for (i = 0; languages[i] && i < lang_index; i++) {
@@ -530,19 +529,15 @@ bool LauncherReadDesktopFile(const std::string& path, DesktopEntry* entry) {
             localized_key.append("]");
 
             if (key == localized_key) {
-              if (entry->name) {
-                free(entry->name);
-              }
-
-              entry->name = strdup(value.c_str());
+              entry->name = value;
               lang_index = i;
             }
           }
         }
-      } else if (!entry->exec && key == "Exec") {
-        entry->exec = strdup(value.c_str());
-      } else if (!entry->icon && key == "Icon") {
-        entry->icon = strdup(value.c_str());
+      } else if (entry->exec.empty() && key == "Exec") {
+        entry->exec = value;
+      } else if (entry->icon.empty() && key == "Icon") {
+        entry->icon = value;
       }
     }
   });
@@ -558,12 +553,6 @@ bool LauncherReadDesktopFile(const std::string& path, DesktopEntry* entry) {
 
   ExpandExec(entry, path);
   return true;
-}
-
-void FreeDesktopEntry(DesktopEntry* entry) {
-  free(entry->name);
-  free(entry->icon);
-  free(entry->exec);
 }
 
 IconTheme::~IconTheme() {
@@ -725,7 +714,7 @@ void Launcher::LoadIcons() {
     DesktopEntry entry;
     LauncherReadDesktopFile(app, &entry);
 
-    if (entry.exec) {
+    if (!entry.exec.empty()) {
       auto launcher_icon = new LauncherIcon();
       launcher_icon->parent_ = this;
       launcher_icon->panel_ = panel_;
@@ -736,13 +725,12 @@ void Launcher::LoadIcons() {
       launcher_icon->on_screen_ = true;
 
       launcher_icon->is_app_desktop_ = 1;
-      launcher_icon->cmd_ = strdup(entry.exec);
+      launcher_icon->cmd_ = entry.exec;
       launcher_icon->icon_name_ =
-          entry.icon ? strdup(entry.icon) : strdup(kIconFallback);
+          !entry.icon.empty() ? entry.icon : kIconFallback;
       launcher_icon->icon_size_ = 1;
       launcher_icon->icon_tooltip_ =
-          entry.name ? strdup(entry.name) : strdup(entry.exec);
-      FreeDesktopEntry(&entry);
+          !entry.name.empty() ? entry.name : entry.exec;
       list_icons_.push_back(launcher_icon);
 
       AddChild(launcher_icon);
