@@ -67,6 +67,18 @@ bool DirectoryContents::iterator::operator!=(
   return (dir_ != other.dir_ || pos_ != other.pos_);
 }
 
+Path::Path(const std::string& path) : path_(path) {}
+
+Path::Path(const char* path) : path_(path) {}
+
+Path& Path::operator/(std::string const& component) {
+  path_.append("/");
+  path_.append(component);
+  return (*this);
+}
+
+Path::operator std::string() const { return path_; }
+
 std::string BuildPath(std::initializer_list<std::string> parts) {
   std::ostringstream ss;
   bool first = true;
@@ -138,7 +150,7 @@ bool FileExists(std::initializer_list<std::string> parts) {
   return FileExists(BuildPath(parts));
 }
 
-std::string HomeDirectory() {
+Path HomeDirectory() {
   std::string home = GetEnvironment("HOME");
 
   if (!home.empty()) {

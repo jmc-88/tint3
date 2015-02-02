@@ -757,9 +757,8 @@ namespace config {
 bool Read() {
   // follow XDG specification
   // check tint3rc in user directory
-  std::string user_config_dir =
-      util::fs::BuildPath({util::xdg::basedir::ConfigHome(), "tint3"});
-  config_path = util::fs::BuildPath({user_config_dir, "tint3rc"});
+  auto user_config_dir = util::xdg::basedir::ConfigHome() / "tint3";
+  config_path = user_config_dir / "tint3rc";
 
   if (util::fs::FileExists(config_path)) {
     return config::ReadFile(config_path);
@@ -769,7 +768,7 @@ bool Read() {
   std::string system_config_file;
 
   for (auto const& system_dir : util::xdg::basedir::ConfigDirs()) {
-    system_config_file = util::fs::BuildPath({system_dir, "tint3", "tint3rc"});
+    system_config_file = util::fs::Path(system_dir) / "tint3" / "tint3rc";
 
     if (util::fs::FileExists(system_config_file)) {
       break;

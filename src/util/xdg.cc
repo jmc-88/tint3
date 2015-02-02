@@ -1,7 +1,6 @@
 #include <cstdlib>
 #include <cstring>
 #include <functional>
-#include <sstream>
 
 #include "util/common.h"
 #include "util/fs.h"
@@ -24,10 +23,7 @@ std::string ValidatePath(std::string path) {
 
 std::function<std::string(std::string)> GetDefaultDirectory(
     char const* relative_path) {
-  std::ostringstream ss;
-  ss << util::fs::HomeDirectory() << relative_path;
-
-  std::string resolved_directory = ss.str();
+  std::string resolved_directory = util::fs::HomeDirectory() / relative_path;
 
   if (util::fs::DirectoryExists(resolved_directory)) {
     return DefaultValue(resolved_directory);
@@ -44,22 +40,22 @@ namespace util {
 namespace xdg {
 namespace basedir {
 
-std::string DataHome() {
+util::fs::Path DataHome() {
   static auto default_ = GetDefaultDirectory("/.local/share");
   return ValidatePath(default_(GetEnvironment("XDG_DATA_HOME")));
 }
 
-std::string ConfigHome() {
+util::fs::Path ConfigHome() {
   static auto default_ = GetDefaultDirectory("/.config");
   return ValidatePath(default_(GetEnvironment("XDG_CONFIG_HOME")));
 }
 
-std::string CacheHome() {
+util::fs::Path CacheHome() {
   static auto default_ = GetDefaultDirectory("/.cache");
   return ValidatePath(default_(GetEnvironment("XDG_CACHE_HOME")));
 }
 
-std::string RuntimeDir() {
+util::fs::Path RuntimeDir() {
   // FIXME: the value of $XDG_CACHE_HOME is what glib defaults to if
   // $XDG_RUNTIME_DIR is empty, but the specification also mandates that the
   // runtime directory be tied to the user's session lifetime (i.e., created

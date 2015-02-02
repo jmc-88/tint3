@@ -231,7 +231,7 @@ void InitX11() {
 
   // load default icon
   for (auto const& dir : util::xdg::basedir::DataDirs()) {
-    auto const& path = util::fs::BuildPath({dir, "tint3", "default_icon.png"});
+    std::string path(util::fs::Path(dir) / "tint3" / "default_icon.png");
 
     if (util::fs::FileExists(path)) {
       default_icon = imlib_load_image(path.c_str());

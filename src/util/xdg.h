@@ -4,14 +4,16 @@
 #include <string>
 #include <vector>
 
+#include "util/fs.h"
+
 namespace util {
 namespace xdg {
 namespace basedir {
 
-std::string DataHome();
-std::string ConfigHome();
-std::string CacheHome();
-std::string RuntimeDir();
+util::fs::Path DataHome();
+util::fs::Path ConfigHome();
+util::fs::Path CacheHome();
+util::fs::Path RuntimeDir();
 std::vector<std::string> DataDirs();
 std::vector<std::string> ConfigDirs();
 

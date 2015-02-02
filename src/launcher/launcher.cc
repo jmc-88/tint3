@@ -583,15 +583,14 @@ IconTheme* LoadTheme(std::string const& name) {
     return nullptr;
   }
 
-  auto file_name = util::fs::BuildPath(
-      {util::fs::HomeDirectory(), ".icons", name, "index.theme"});
+  std::string file_name(util::fs::HomeDirectory() / ".icons" / name /
+                        "index.theme");
 
   if (!util::fs::FileExists(file_name)) {
-    file_name = util::fs::BuildPath({"/usr/share/icons", name, "index.theme"});
+    file_name = util::fs::Path("/usr/share/icons") / name / "index.theme";
 
     if (!util::fs::FileExists(file_name)) {
-      file_name =
-          util::fs::BuildPath({"/usr/share/pixmaps", name, "index.theme"});
+      file_name = util::fs::Path("/usr/share/pixmaps") / name / "index.theme";
 
       if (!util::fs::FileExists(file_name)) {
         file_name.clear();
@@ -850,10 +849,11 @@ std::string Launcher::GetIconPath(std::string const& icon_name, int size) {
   }
 
   std::vector<std::string> basenames{
-      util::fs::BuildPath({util::fs::HomeDirectory(), ".icons"}),
-      util::fs::BuildPath(
-          {util::fs::HomeDirectory(), ".local", "share", "icons"}),
-      "/usr/local/share/icons", "/usr/local/share/pixmaps", "/usr/share/icons",
+      util::fs::HomeDirectory() / ".icons",
+      util::fs::HomeDirectory() / ".local" / "share" / "icons",
+      "/usr/local/share/icons",
+      "/usr/local/share/pixmaps",
+      "/usr/share/icons",
       "/usr/share/pixmaps",
   };
 
