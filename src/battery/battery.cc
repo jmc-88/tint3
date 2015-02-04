@@ -292,20 +292,20 @@ void UpdateBattery() {
   }
 
   // best attempt at mapping to linux battery states
-  battery_state.state = BATTERY_UNKNOWN;
+  battery_state.state = ChargeState::kUnknown;
 
   switch (info.battery_state) {
     case APM_BATT_CHARGING:
-      battery_state.state = BATTERY_CHARGING;
+      battery_state.state = ChargeState::kCharging;
       break;
 
     default:
-      battery_state.state = BATTERY_DISCHARGING;
+      battery_state.state = ChargeState::kDischarging;
       break;
   }
 
   if (info.battery_life == 100) {
-    battery_state.state = BATTERY_FULL;
+    battery_state.state = ChargeState::kFull;
   }
 
   // no mapping for openbsd really
@@ -329,19 +329,19 @@ void UpdateBattery() {
   }
 
   // attemp to map the battery state to linux
-  battery_state.state = BATTERY_UNKNOWN;
+  battery_state.state = ChargeState::kUnknown;
 
   switch (sysctl_out) {
     case 1:
-      battery_state.state = BATTERY_DISCHARGING;
+      battery_state.state = ChargeState::kDischarging;
       break;
 
     case 2:
-      battery_state.state = BATTERY_CHARGING;
+      battery_state.state = ChargeState::kCharging;
       break;
 
     default:
-      battery_state.state = BATTERY_FULL;
+      battery_state.state = ChargeState::kFull;
       break;
   }
 
