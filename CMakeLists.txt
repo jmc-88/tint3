@@ -119,8 +119,6 @@ include_directories(${CMAKE_BINARY_DIR}/generated)
 
 # }}} version.h
 
-add_executable(tint3 ${SOURCES})
-
 link_directories( ${X11_LIBRARY_DIRS}
     ${PANGOCAIRO_LIBRARY_DIRS}
     ${PANGO_LIBRARY_DIRS}
@@ -129,6 +127,8 @@ link_directories( ${X11_LIBRARY_DIRS}
     ${GOBJECT2_LIBRARY_DIRS}
     ${IMLIB2_LIBRARY_DIRS}
     ${SN_LIBRARY_DIRS} )
+
+add_executable(tint3 ${SOURCES})
 
 target_link_libraries( tint3 ${X11_LIBRARIES}
     ${PANGOCAIRO_LIBRARIES}
