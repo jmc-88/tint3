@@ -784,6 +784,7 @@ bool Read() {
     return config::ReadFile(config_path);
   }
 
+  util::log::Error() << "Couldn't find the configuration file.\n";
   return false;
 }
 
@@ -797,6 +798,7 @@ bool ReadFile(std::string const& path) {
   });
 
   if (!read) {
+    util::log::Error() << "Couldn't read the configuration file.\n";
     return false;
   }
 
