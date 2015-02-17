@@ -56,7 +56,8 @@ PanelMode panel_mode;
 int wm_menu;
 int panel_dock;
 PanelLayer panel_layer;
-int panel_position;
+PanelHorizontalPosition panel_horizontal_position;
+PanelVerticalPosition panel_vertical_position;
 bool panel_horizontal;
 bool panel_refresh;
 bool task_dragged;
@@ -108,7 +109,7 @@ void UpdateStrut(Panel* p) {
       height = p->hidden_height_;
     }
 
-    if (panel_position & kTop) {
+    if (panel_vertical_position == PanelVerticalPosition::kTop) {
       struts[2] = height + monitor.y;
       struts[8] = p->root_x_;
       // p->width - 1 allowed full screen on monitor 2
@@ -128,7 +129,7 @@ void UpdateStrut(Panel* p) {
       width = p->hidden_width_;
     }
 
-    if (panel_position & kLeft) {
+    if (panel_horizontal_position == PanelHorizontalPosition::kLeft) {
       struts[0] = width + monitor.x;
       struts[4] = p->root_y_;
       // p->width - 1 allowed full screen on monitor 2
@@ -164,7 +165,8 @@ void DefaultPanel() {
   default_icon = nullptr;
   task_dragged = false;
   panel_horizontal = true;
-  panel_position = kCenter;
+  panel_vertical_position = PanelVerticalPosition::kBottom;
+  panel_horizontal_position = PanelHorizontalPosition::kCenter;
   panel_items_order.clear();
   panel_autohide = false;
   panel_autohide_show_timeout = 0;
@@ -415,32 +417,28 @@ void Panel::InitSizeAndPosition() {
   }
 
   // panel position determined here
-  if (panel_position & kLeft) {
+  if (panel_horizontal_position == PanelHorizontalPosition::kLeft) {
     root_x_ = server.monitor[monitor_].x + margin_x_;
+  } else if (panel_horizontal_position == PanelHorizontalPosition::kRight) {
+    root_x_ = server.monitor[monitor_].x + server.monitor[monitor_].width -
+              width_ - margin_x_;
   } else {
-    if (panel_position & kRight) {
-      root_x_ = server.monitor[monitor_].x + server.monitor[monitor_].width -
-                width_ - margin_x_;
+    if (panel_horizontal) {
+      root_x_ = server.monitor[monitor_].x +
+                ((server.monitor[monitor_].width - width_) / 2);
     } else {
-      if (panel_horizontal) {
-        root_x_ = server.monitor[monitor_].x +
-                  ((server.monitor[monitor_].width - width_) / 2);
-      } else {
-        root_x_ = server.monitor[monitor_].x + margin_x_;
-      }
+      root_x_ = server.monitor[monitor_].x + margin_x_;
     }
   }
 
-  if (panel_position & kTop) {
+  if (panel_vertical_position == PanelVerticalPosition::kTop) {
     root_y_ = server.monitor[monitor_].y + margin_y_;
+  } else if (panel_vertical_position == PanelVerticalPosition::kBottom) {
+    root_y_ = server.monitor[monitor_].y + server.monitor[monitor_].height -
+              height_ - margin_y_;
   } else {
-    if (panel_position & kBottom) {
-      root_y_ = server.monitor[monitor_].y + server.monitor[monitor_].height -
-                height_ - margin_y_;
-    } else {
-      root_y_ = server.monitor[monitor_].y +
-                ((server.monitor[monitor_].height - height_) / 2);
-    }
+    root_y_ = server.monitor[monitor_].y +
+              ((server.monitor[monitor_].height - height_) / 2);
   }
 
   // autohide or strut_policy=minimum
@@ -608,9 +606,11 @@ void Panel::SetBackground() {
 
   int xoff = 0, yoff = 0;
 
-  if (panel_horizontal && panel_position & kBottom) {
+  if (panel_horizontal &&
+      panel_vertical_position == PanelVerticalPosition::kBottom) {
     yoff = height_ - hidden_height_;
-  } else if (!panel_horizontal && panel_position & kRight) {
+  } else if (!panel_horizontal &&
+             panel_horizontal_position == PanelHorizontalPosition::kRight) {
     xoff = width_ - hidden_width_;
   }
 
@@ -846,7 +846,7 @@ void AutohideShow(void* p) {
   XMapSubwindows(server.dsp, panel->main_win_);  // systray windows
 
   if (panel_horizontal) {
-    if (panel_position & kTop) {
+    if (panel_vertical_position == PanelVerticalPosition::kTop) {
       XResizeWindow(server.dsp, panel->main_win_, panel->width_,
                     panel->height_);
     } else {
@@ -854,7 +854,7 @@ void AutohideShow(void* p) {
                         panel->root_y_, panel->width_, panel->height_);
     }
   } else {
-    if (panel_position & kLeft) {
+    if (panel_horizontal_position == PanelHorizontalPosition::kLeft) {
       XResizeWindow(server.dsp, panel->main_win_, panel->width_,
                     panel->height_);
     } else {
@@ -882,7 +882,7 @@ void AutohideHide(void* p) {
              panel_autohide_height;
 
   if (panel_horizontal) {
-    if (panel_position & kTop) {
+    if (panel_vertical_position == PanelVerticalPosition::kTop) {
       XResizeWindow(server.dsp, panel->main_win_, panel->hidden_width_,
                     panel->hidden_height_);
     } else {
@@ -891,7 +891,7 @@ void AutohideHide(void* p) {
                         panel->hidden_height_);
     }
   } else {
-    if (panel_position & kLeft) {
+    if (panel_horizontal_position == PanelHorizontalPosition::kLeft) {
       XResizeWindow(server.dsp, panel->main_win_, panel->hidden_width_,
                     panel->hidden_height_);
     } else {

@@ -260,19 +260,19 @@ void AddEntry(std::string const& key, std::string const& value) {
     ExtractValues(value, value1, value2, value3);
 
     if (value1 == "top") {
-      panel_position = PanelPosition::kTop;
+      panel_vertical_position = PanelVerticalPosition::kTop;
     } else if (value1 == "bottom") {
-      panel_position = PanelPosition::kBottom;
+      panel_vertical_position = PanelVerticalPosition::kBottom;
     } else {
-      panel_position = PanelPosition::kCenter;
+      panel_vertical_position = PanelVerticalPosition::kCenter;
     }
 
     if (value2 == "left") {
-      panel_position |= PanelPosition::kLeft;
+      panel_horizontal_position = PanelHorizontalPosition::kLeft;
     } else if (value2 == "right") {
-      panel_position |= PanelPosition::kRight;
+      panel_horizontal_position = PanelHorizontalPosition::kRight;
     } else {
-      panel_position |= PanelPosition::kCenter;
+      panel_horizontal_position = PanelHorizontalPosition::kCenter;
     }
 
     panel_horizontal = (value3 != "vertical");

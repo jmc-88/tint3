@@ -54,15 +54,11 @@ enum class PanelLayer { kBottom, kNormal, kTop };
 extern PanelLayer panel_layer;
 
 // panel position
-enum PanelPosition {
-  kLeft = 0x01,
-  kRight = 0x02,
-  kCenter = 0x04,
-  kTop = 0x08,
-  kBottom = 0x10
-};
+enum class PanelVerticalPosition { kTop, kBottom, kCenter };
+enum class PanelHorizontalPosition { kLeft, kRight, kCenter };
 
-extern int panel_position;
+extern PanelVerticalPosition panel_vertical_position;
+extern PanelHorizontalPosition panel_horizontal_position;
 extern bool panel_horizontal;
 extern bool panel_refresh;
 extern bool task_dragged;
