@@ -238,21 +238,17 @@ void InitPanel() {
   InitTaskbar();
 
   // number of panels (one monitor or 'all' monitors)
-  if (panel_config.monitor_ >= 0) {
-    nb_panel = 1;
-  } else {
-    nb_panel = server.nb_monitor;
-  }
-
+  nb_panel = (panel_config.monitor_ >= 0) ? 1 : server.nb_monitor;
   panel1 = new Panel[nb_panel];
 
   for (int i = 0; i < nb_panel; i++) {
     panel1[i] = panel_config;
   }
 
-  util::log::Debug() << "tint3: nb monitor " << server.nb_monitor
-                     << ", nb monitor used " << nb_panel << ", nb desktop "
-                     << server.nb_desktop << '\n';
+  util::log::Debug() << "tint3: nb_monitor = " << server.nb_monitor
+                     << ", nb_panel = " << nb_panel
+                     << ", nb_desktop = " << server.nb_desktop
+                     << '\n';
 
   for (int i = 0; i < nb_panel; i++) {
     auto p = &panel1[i];
