@@ -36,8 +36,11 @@ class Connection {
  public:
   static Connection SystemBus();
 
+  ~Connection();
+
   operator bool() const;
   bool IsConnected() const;
+  bool HasIncomingMessages() const;
 
   dbus::Interface Interface(std::string const& destination,
                             std::string const& path,
@@ -46,7 +49,11 @@ class Connection {
  private:
   Connection(DBusConnection* connection);
 
-  DBusConnection* const connection_;
+  bool SetWatchFunctions();
+  void SetDispatchStatusFunction();
+
+  DBusConnection* connection_;
+  bool should_dispatch_;
 };
 
 }  // namespace dbus
