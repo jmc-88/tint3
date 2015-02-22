@@ -53,7 +53,8 @@ int DBusWatchGetFileDescriptor(DBusWatch* watch) {
 
 }  // namespace
 
-Connection::Connection(DBusConnection* connection) : connection_(connection), should_dispatch_(false) {
+Connection::Connection(DBusConnection* connection)
+    : connection_(connection), should_dispatch_(false) {
   if (connection_ == nullptr) {
     return;
   }
@@ -83,7 +84,8 @@ bool Connection::SetWatchFunctions() {
     int fd = DBusWatchGetFileDescriptor(watch);
     unsigned int flags = dbus_watch_get_flags(watch);
 
-    util::log::Debug() << "DBusWatch: add fd " << fd << ", flags " << flags << '\n';
+    util::log::Debug() << "DBusWatch: add fd " << fd << ", flags " << flags
+                       << '\n';
 
     // TODO: implement
     return TRUE;
@@ -98,25 +100,21 @@ bool Connection::SetWatchFunctions() {
   };
 
   dbus_bool_t ret = dbus_connection_set_watch_functions(
-    connection_, add_function, remove_function, toggled_function, nullptr,
-    nullptr);
+      connection_, add_function, remove_function, toggled_function, nullptr,
+      nullptr);
 
   return (ret == TRUE);
 }
 
 void Connection::SetDispatchStatusFunction() {
-  auto dispatch_status_function = [](DBusConnection*,
-                                     DBusDispatchStatus new_status,
-                                     void* data) -> void {
+  auto dispatch_status_function =
+      [](DBusConnection*, DBusDispatchStatus new_status, void* data) -> void {
     auto connection = reinterpret_cast<Connection*>(data);
     connection->should_dispatch_ = (new_status == DBUS_DISPATCH_DATA_REMAINS);
   };
 
   dbus_connection_set_dispatch_status_function(
-    connection_,
-    dispatch_status_function,
-    this,
-    nullptr);
+      connection_, dispatch_status_function, this, nullptr);
 }
 
 Connection::operator bool() const { return connection_ != nullptr; }
