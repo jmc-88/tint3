@@ -1,6 +1,9 @@
 # Don't include ctags in the repository
 /tags
 
+# Don't include local build directories, if any
+/build
+
 # Don't include IDE-specific files in the repository
 *.kdev4
 /.kdev4
