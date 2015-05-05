@@ -1059,7 +1059,7 @@ void DragAndDropPosition(XClientMessageEvent* e) {
       accept = true;
       dnd_launcher_exec = icon->cmd_;
     } else {
-      dnd_launcher_exec = nullptr;
+      dnd_launcher_exec.clear();
     }
   }
 
@@ -1220,25 +1220,25 @@ start:
     // FIXME: 'reparent to us' badly detected => disabled
   });
 
-  event_loop.RegisterHandler({UnmapNotify, DestroyNotify},
-                             [&](XEvent& e) -> void {
-    if (e.xany.window == server.composite_manager) {
-      // Stop real_transparency
-      signal_pending = SIGUSR1;
-      return;
-    }
+  event_loop.RegisterHandler(
+      {UnmapNotify, DestroyNotify}, [&](XEvent& e) -> void {
+        if (e.xany.window == server.composite_manager) {
+          // Stop real_transparency
+          signal_pending = SIGUSR1;
+          return;
+        }
 
-    if (e.xany.window == g_tooltip.window || !systray_enabled) {
-      return;
-    }
+        if (e.xany.window == g_tooltip.window || !systray_enabled) {
+          return;
+        }
 
-    for (auto& traywin : systray.list_icons) {
-      if (traywin->tray_id == e.xany.window) {
-        systray.RemoveIcon(traywin);
-        return;
-      }
-    }
-  });
+        for (auto& traywin : systray.list_icons) {
+          if (traywin->tray_id == e.xany.window) {
+            systray.RemoveIcon(traywin);
+            return;
+          }
+        }
+      });
 
   event_loop.RegisterHandler(ClientMessage, [&](XEvent& e) -> void {
     auto& ev = e.xclient;
