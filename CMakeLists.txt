@@ -1,5 +1,5 @@
-project( tint3 )
-cmake_minimum_required( VERSION 2.8 )
+project(tint3)
+cmake_minimum_required(VERSION 2.8)
 
 set(CMAKE_C_FLAGS_DEBUG   "${CMAKE_C_FLAGS_DEBUG} -O0 -D_TINT3_DEBUG")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 -D_TINT3_DEBUG")
@@ -7,26 +7,26 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -pthread")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -pthread -std=c++11")
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -pthread")
 
-include( FindPkgConfig )
-include( CheckLibraryExists )
-pkg_check_modules( X11 REQUIRED x11 xcomposite xdamage xinerama xrender xrandr>=1.3 )
-pkg_check_modules( PANGOCAIRO REQUIRED pangocairo )
-pkg_check_modules( PANGO REQUIRED pango )
-pkg_check_modules( CAIRO REQUIRED cairo )
-pkg_check_modules( GLIB2 REQUIRED glib-2.0 )
-pkg_check_modules( GOBJECT2 REQUIRED gobject-2.0 )
-pkg_check_modules( IMLIB2 REQUIRED imlib2>=1.4.2 )
-find_library( RT_LIBRARY rt )
+include(FindPkgConfig)
+include(CheckLibraryExists)
+pkg_check_modules(X11 REQUIRED x11 xcomposite xdamage xinerama xrender xrandr>=1.3)
+pkg_check_modules(PANGOCAIRO REQUIRED pangocairo)
+pkg_check_modules(PANGO REQUIRED pango)
+pkg_check_modules(CAIRO REQUIRED cairo)
+pkg_check_modules(GLIB2 REQUIRED glib-2.0)
+pkg_check_modules(GOBJECT2 REQUIRED gobject-2.0)
+pkg_check_modules(IMLIB2 REQUIRED imlib2>=1.4.2)
+find_library(RT_LIBRARY rt)
 
-if( NOT X11_FOUND OR NOT PANGOCAIRO_FOUND OR NOT PANGO_FOUND OR NOT CAIRO_FOUND OR NOT GLIB2_FOUND OR NOT GOBJECT2_FOUND OR NOT IMLIB2_FOUND )
-    message( FATAL_ERROR "Not all dependencies are satisfied. See README.source." )
+if(NOT X11_FOUND OR NOT PANGOCAIRO_FOUND OR NOT PANGO_FOUND OR NOT CAIRO_FOUND OR NOT GLIB2_FOUND OR NOT GOBJECT2_FOUND OR NOT IMLIB2_FOUND)
+    message(FATAL_ERROR "Not all dependencies are satisfied. See README.source.")
 endif()
 
-string( REPLACE ";" " " FLAGS_REPLACED "${IMLIB2_LDFLAGS}" )
-set( CMAKE_REQUIRED_FLAGS "${FLAGS_REPLACED}" )
-check_library_exists( "${IMLIB2_LIBRARIES}" "imlib_context_set_display" "${IMLIB2_LIBRARY_DIRS}" IMLIB_BUILT_WITH_X )
-if( NOT IMLIB_BUILT_WITH_X )
-    message( FATAL_ERROR "Imlib is not built with x support" )
+string(REPLACE ";" " " FLAGS_REPLACED "${IMLIB2_LDFLAGS}")
+set(CMAKE_REQUIRED_FLAGS "${FLAGS_REPLACED}")
+check_library_exists("${IMLIB2_LIBRARIES}" "imlib_context_set_display" "${IMLIB2_LIBRARY_DIRS}" IMLIB_BUILT_WITH_X)
+if(NOT IMLIB_BUILT_WITH_X)
+    message(FATAL_ERROR "Imlib is not built with x support")
 endif()
 
 include_directories(${PROJECT_BINARY_DIR}
@@ -56,7 +56,7 @@ link_directories(${X11_LIBRARY_DIRS}
                  ${IMLIB2_LIBRARY_DIRS}
                  ${SN_LIBRARY_DIRS})
 
-# This is purposedly excluding src/tint3.cc as these sources are shared with
+# This is purposely excluding src/tint3.cc as these sources are shared with
 # test case definitions, which redefine their own main() entry point.
 set(TINT3_SOURCES
     src/version.h.in
@@ -85,9 +85,9 @@ set(TINT3_SOURCES
 option(ENABLE_BATTERY "Enable battery status plugin" ON)
 option(ENABLE_EXAMPLES "Install additional tint2rc examples" OFF)
 option(ENABLE_SN "Startup notification support" ON)
-if( ENABLE_SN )
+if(ENABLE_SN)
     pkg_check_modules(SN REQUIRED libstartup-notification-1.0>=0.12)
-    add_definitions( -DHAVE_SN -DSN_API_NOT_YET_FROZEN )
+    add_definitions(-DHAVE_SN -DSN_API_NOT_YET_FROZEN)
 endif()
 
 if(ENABLE_BATTERY)
@@ -110,21 +110,18 @@ execute_process(
   COMMAND git rev-parse --abbrev-ref HEAD
   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
   OUTPUT_VARIABLE GIT_BRANCH
-  OUTPUT_STRIP_TRAILING_WHITESPACE
-)
+  OUTPUT_STRIP_TRAILING_WHITESPACE)
 
 # Get the latest abbreviated commit hash of the working branch
 execute_process(
   COMMAND git log -1 --format=%h
   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
   OUTPUT_VARIABLE GIT_COMMIT_HASH
-  OUTPUT_STRIP_TRAILING_WHITESPACE
-)
+  OUTPUT_STRIP_TRAILING_WHITESPACE)
 
 configure_file(
   ${CMAKE_SOURCE_DIR}/src/version.h.in
-  ${CMAKE_BINARY_DIR}/generated/version.h
-)
+  ${CMAKE_BINARY_DIR}/generated/version.h)
 
 include_directories(${CMAKE_BINARY_DIR}/generated)
 
@@ -169,14 +166,14 @@ add_test(NAME util_common_test
 
 # {{{ install rules
 
-install( TARGETS tint3 DESTINATION bin )
-install( FILES sample/tint3rc DESTINATION ${SYSCONFDIR}/xdg/tint3 )
-install( FILES default_icon.png DESTINATION ${DATADIR}/tint3 )
-install( FILES AUTHORS README.md DESTINATION ${DOCDIR} )
-install( FILES doc/tint3.1 DESTINATION ${MANDIR}/man1 )
-if( ENABLE_EXAMPLES )
-    file( GLOB SAMPLEFILES sample/*.tint3rc )
-    install( FILES ${SAMPLEFILES} DESTINATION ${DOCDIR}/examples )
+install(TARGETS tint3 DESTINATION bin)
+install(FILES sample/tint3rc DESTINATION ${SYSCONFDIR}/xdg/tint3)
+install(FILES default_icon.png DESTINATION ${DATADIR}/tint3)
+install(FILES AUTHORS README.md DESTINATION ${DOCDIR})
+install(FILES doc/tint3.1 DESTINATION ${MANDIR}/man1)
+if(ENABLE_EXAMPLES)
+    file(GLOB SAMPLEFILES sample/*.tint3rc)
+    install(FILES ${SAMPLEFILES} DESTINATION ${DOCDIR}/examples)
 endif()
 
 # }}} install rules
