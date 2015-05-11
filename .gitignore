@@ -1,3 +1,6 @@
+# Don't include the build directory in the repository
+/build
+
 # Don't include ctags in the repository
 /tags
 
