@@ -1,10 +1,10 @@
 project(tint3)
 cmake_minimum_required(VERSION 2.8)
 
-set(CMAKE_C_FLAGS_DEBUG   "${CMAKE_C_FLAGS_DEBUG} -O0 -D_TINT3_DEBUG")
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 -D_TINT3_DEBUG")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -pthread")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -pthread -std=c++11")
+set(CMAKE_C_FLAGS_DEBUG    "${CMAKE_C_FLAGS_DEBUG} -O0 -D_TINT3_DEBUG")
+set(CMAKE_CXX_FLAGS_DEBUG  "${CMAKE_CXX_FLAGS_DEBUG} -O0 -D_TINT3_DEBUG")
+set(CMAKE_C_FLAGS          "${CMAKE_C_FLAGS} -Wall -pthread")
+set(CMAKE_CXX_FLAGS        "${CMAKE_CXX_FLAGS} -Wall -pthread -std=c++11")
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -pthread")
 
 include(FindPkgConfig)
@@ -18,7 +18,13 @@ pkg_check_modules(GOBJECT2 REQUIRED gobject-2.0)
 pkg_check_modules(IMLIB2 REQUIRED imlib2>=1.4.2)
 find_library(RT_LIBRARY rt)
 
-if(NOT X11_FOUND OR NOT PANGOCAIRO_FOUND OR NOT PANGO_FOUND OR NOT CAIRO_FOUND OR NOT GLIB2_FOUND OR NOT GOBJECT2_FOUND OR NOT IMLIB2_FOUND)
+if(NOT X11_FOUND OR
+   NOT PANGOCAIRO_FOUND OR
+   NOT PANGO_FOUND OR
+   NOT CAIRO_FOUND OR
+   NOT GLIB2_FOUND OR
+   NOT GOBJECT2_FOUND OR
+   NOT IMLIB2_FOUND)
     message(FATAL_ERROR "Not all dependencies are satisfied. See README.source.")
 endif()
 
@@ -26,7 +32,7 @@ string(REPLACE ";" " " FLAGS_REPLACED "${IMLIB2_LDFLAGS}")
 set(CMAKE_REQUIRED_FLAGS "${FLAGS_REPLACED}")
 check_library_exists("${IMLIB2_LIBRARIES}" "imlib_context_set_display" "${IMLIB2_LIBRARY_DIRS}" IMLIB_BUILT_WITH_X)
 if(NOT IMLIB_BUILT_WITH_X)
-    message(FATAL_ERROR "Imlib is not built with x support")
+    message(FATAL_ERROR "Imlib is not built with X11 support")
 endif()
 
 include_directories(${PROJECT_BINARY_DIR}
@@ -159,8 +165,7 @@ include_directories(test)
 
 add_executable(util_common_test src/util/common_test.cc  ${TINT3_SOURCES})
 target_link_libraries(util_common_test ${TINT3_LINK_LIBRARIES})
-add_test(NAME util_common_test
-         COMMAND util_common_test)
+add_test(NAME util_common_test COMMAND util_common_test)
 
 # }}} test rules
 
