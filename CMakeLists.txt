@@ -35,70 +35,12 @@ if(NOT IMLIB_BUILT_WITH_X)
     message(FATAL_ERROR "Imlib is not built with X11 support")
 endif()
 
-include_directories(${PROJECT_BINARY_DIR}
-                    src
-                    src/battery
-                    src/clock
-                    src/systray
-                    src/taskbar
-                    src/launcher
-                    src/tooltip
-                    src/util
-                    ${X11_INCLUDE_DIRS}
-                    ${PANGOCAIRO_INCLUDE_DIRS}
-                    ${PANGO_INCLUDE_DIRS}
-                    ${CAIRO_INCLUDE_DIRS}
-                    ${GLIB2_INCLUDE_DIRS}
-                    ${GOBJECT2_INCLUDE_DIRS}
-                    ${IMLIB2_INCLUDE_DIRS}
-                    ${SN_INCLUDE_DIRS})
-
-link_directories(${X11_LIBRARY_DIRS}
-                 ${PANGOCAIRO_LIBRARY_DIRS}
-                 ${PANGO_LIBRARY_DIRS}
-                 ${CAIRO_LIBRARY_DIRS}
-                 ${GLIB2_LIBRARY_DIRS}
-                 ${GOBJECT2_LIBRARY_DIRS}
-                 ${IMLIB2_LIBRARY_DIRS}
-                 ${SN_LIBRARY_DIRS})
-
-# This is purposely excluding src/tint3.cc as these sources are shared with
-# test case definitions, which redefine their own main() entry point.
-set(TINT3_SOURCES
-    src/version.h.in
-    src/config.cc
-    src/panel.cc
-    src/server.cc
-    src/clock/clock.cc
-    src/systray/systraybar.cc
-    src/launcher/launcher.cc
-    src/launcher/xsettings-client.cc
-    src/launcher/xsettings-common.cc
-    src/taskbar/task.cc
-    src/taskbar/taskbar.cc
-    src/taskbar/taskbarbase.cc
-    src/taskbar/taskbarname.cc
-    src/tooltip/tooltip.cc
-    src/util/area.cc
-    src/util/common.cc
-    src/util/fs.cc
-    src/util/log.cc
-    src/util/timer.cc
-    src/util/window.cc
-    src/util/x11.cc
-    src/util/xdg.cc)
-
 option(ENABLE_BATTERY "Enable battery status plugin" ON)
 option(ENABLE_EXAMPLES "Install additional tint2rc examples" OFF)
 option(ENABLE_SN "Startup notification support" ON)
 if(ENABLE_SN)
     pkg_check_modules(SN REQUIRED libstartup-notification-1.0>=0.12)
     add_definitions(-DHAVE_SN -DSN_API_NOT_YET_FROZEN)
-endif()
-
-if(ENABLE_BATTERY)
-    set(TINT3_SOURCES ${TINT3_SOURCES} src/battery/battery.cc)
-    add_definitions(-DENABLE_BATTERY)
 endif()
 
 set(MANDIR share/man CACHE PATH "Directory for man pages")
@@ -135,6 +77,33 @@ include_directories(${CMAKE_BINARY_DIR}/generated)
 
 # {{{ common rules
 
+include_directories(${PROJECT_BINARY_DIR}
+                    src
+                    src/battery
+                    src/clock
+                    src/systray
+                    src/taskbar
+                    src/launcher
+                    src/tooltip
+                    src/util
+                    ${X11_INCLUDE_DIRS}
+                    ${PANGOCAIRO_INCLUDE_DIRS}
+                    ${PANGO_INCLUDE_DIRS}
+                    ${CAIRO_INCLUDE_DIRS}
+                    ${GLIB2_INCLUDE_DIRS}
+                    ${GOBJECT2_INCLUDE_DIRS}
+                    ${IMLIB2_INCLUDE_DIRS}
+                    ${SN_INCLUDE_DIRS})
+
+link_directories(${X11_LIBRARY_DIRS}
+                 ${PANGOCAIRO_LIBRARY_DIRS}
+                 ${PANGO_LIBRARY_DIRS}
+                 ${CAIRO_LIBRARY_DIRS}
+                 ${GLIB2_LIBRARY_DIRS}
+                 ${GOBJECT2_LIBRARY_DIRS}
+                 ${IMLIB2_LIBRARY_DIRS}
+                 ${SN_LIBRARY_DIRS})
+
 set(TINT3_LINK_LIBRARIES
     ${X11_LIBRARIES}
     ${PANGOCAIRO_LIBRARIES}
@@ -144,6 +113,37 @@ set(TINT3_LINK_LIBRARIES
     ${GOBJECT2_LIBRARIES}
     ${IMLIB2_LIBRARIES}
     ${SN_LIBRARIES})
+
+# This is purposely excluding src/tint3.cc as these sources are shared with
+# test case definitions, which redefine their own main() entry point.
+set(TINT3_SOURCES
+    src/version.h.in
+    src/config.cc
+    src/panel.cc
+    src/server.cc
+    src/clock/clock.cc
+    src/systray/systraybar.cc
+    src/launcher/launcher.cc
+    src/launcher/xsettings-client.cc
+    src/launcher/xsettings-common.cc
+    src/taskbar/task.cc
+    src/taskbar/taskbar.cc
+    src/taskbar/taskbarbase.cc
+    src/taskbar/taskbarname.cc
+    src/tooltip/tooltip.cc
+    src/util/area.cc
+    src/util/common.cc
+    src/util/fs.cc
+    src/util/log.cc
+    src/util/timer.cc
+    src/util/window.cc
+    src/util/x11.cc
+    src/util/xdg.cc)
+
+if(ENABLE_BATTERY)
+    set(TINT3_SOURCES ${TINT3_SOURCES} src/battery/battery.cc)
+    add_definitions(-DENABLE_BATTERY)
+endif()
 
 # }}} common rules
 

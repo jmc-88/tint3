@@ -221,9 +221,9 @@ void AddEntry(std::string const& key, std::string const& value) {
       if (item == 'B') {
 #ifdef ENABLE_BATTERY
         battery_enabled = true;
-#else
+#else   // ENABLE_BATTERY
         util::log::Error() << "tint3 is built without battery support\n";
-#endif
+#endif  // ENABLE_BATTERY
       }
 
       if (item == 'S') {
@@ -304,24 +304,21 @@ void AddEntry(std::string const& key, std::string const& value) {
     if (battery_low_status < 0 || battery_low_status > 100) {
       battery_low_status = 0;
     }
-
-#endif
+#endif  // ENABLE_BATTERY
   } else if (key == "battery_low_cmd") {
 #ifdef ENABLE_BATTERY
-
     if (!value.empty()) {
       battery_low_cmd = value;
     }
-
-#endif
+#endif  // ENABLE_BATTERY
   } else if (key == "bat1_font") {
 #ifdef ENABLE_BATTERY
     bat1_font_desc = pango_font_description_from_string(value.c_str());
-#endif
+#endif  // ENABLE_BATTERY
   } else if (key == "bat2_font") {
 #ifdef ENABLE_BATTERY
     bat2_font_desc = pango_font_description_from_string(value.c_str());
-#endif
+#endif  // ENABLE_BATTERY
   } else if (key == "battery_font_color") {
 #ifdef ENABLE_BATTERY
     ExtractValues(value, value1, value2, value3);
@@ -332,8 +329,7 @@ void AddEntry(std::string const& key, std::string const& value) {
     } else {
       panel_config.battery_.font.alpha = 0.5;
     }
-
-#endif
+#endif  // ENABLE_BATTERY
   } else if (key == "battery_padding") {
 #ifdef ENABLE_BATTERY
     ExtractValues(value, value1, value2, value3);
@@ -347,12 +343,11 @@ void AddEntry(std::string const& key, std::string const& value) {
     if (!value3.empty()) {
       panel_config.battery_.padding_x_ = StringToLongInt(value3);
     }
-
-#endif
+#endif  // ENABLE_BATTERY
   } else if (key == "battery_background_id") {
 #ifdef ENABLE_BATTERY
     panel_config.battery_.bg_ = GetBackgroundFromId(StringToLongInt(value));
-#endif
+#endif  // ENABLE_BATTERY
   } else if (key == "battery_hide") {
 #ifdef ENABLE_BATTERY
     percentage_hide = StringToLongInt(value);
@@ -360,8 +355,7 @@ void AddEntry(std::string const& key, std::string const& value) {
     if (percentage_hide == 0) {
       percentage_hide = 101;
     }
-
-#endif
+#endif  // ENABLE_BATTERY
   }
 
   /* Clock */
@@ -720,6 +714,7 @@ void AddEntry(std::string const& key, std::string const& value) {
       }
     }
   } else if (key == "battery") {
+#ifdef ENABLE_BATTERY
     if (!new_config_file) {
       battery_enabled = StringToLongInt(value);
 
@@ -727,6 +722,7 @@ void AddEntry(std::string const& key, std::string const& value) {
         panel_items_order.push_back('B');
       }
     }
+#endif  // ENABLE_BATTERY
   } else {
     std::cerr
         << "tint3: invalid option \"" << key
