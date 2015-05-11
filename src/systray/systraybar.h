@@ -36,6 +36,8 @@ struct TrayWindow {
 };
 
 class Systraybar : public Area {
+  void RemoveIconInternal(TrayWindow* traywin);
+
  public:
   std::list<TrayWindow*> list_icons;
   int sort;
@@ -49,6 +51,7 @@ class Systraybar : public Area {
   size_t VisibleIcons();
   bool AddIcon(Window id);
   void RemoveIcon(TrayWindow* traywin);
+  void Clear();
 
   static void InitPanel(Panel* panel);
 

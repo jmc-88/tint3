@@ -91,6 +91,8 @@ void InitSystray() {
     systray.alpha = 100;
     systray.brightness = systray.saturation = 0;
   }
+
+  systray.list_icons.clear();
 }
 
 void Systraybar::InitPanel(Panel* panel) {
@@ -501,11 +503,7 @@ bool Systraybar::AddIcon(Window id) {
   return true;
 }
 
-void Systraybar::RemoveIcon(TrayWindow* traywin) {
-  // remove from our list
-  list_icons.erase(std::remove(list_icons.begin(), list_icons.end(), traywin),
-                   list_icons.end());
-
+void Systraybar::RemoveIconInternal(TrayWindow* traywin) {
   XSelectInput(server.dsp, traywin->tray_id, NoEventMask);
 
   if (traywin->damage) {
@@ -531,6 +529,31 @@ void Systraybar::RemoveIcon(TrayWindow* traywin) {
   }
 
   delete traywin;
+}
+
+void Systraybar::RemoveIcon(TrayWindow* traywin) {
+  RemoveIconInternal(traywin);
+
+  // remove from our list
+  list_icons.erase(std::remove(list_icons.begin(), list_icons.end(), traywin),
+                   list_icons.end());
+
+  // check empty systray
+  if (VisibleIcons() == 0) {
+    Hide();
+  }
+
+  // changed in systray
+  need_resize_ = true;
+  panel_refresh = true;
+}
+
+void Systraybar::Clear() {
+  for (auto& traywin : list_icons) {
+    RemoveIconInternal(traywin);
+  }
+
+  list_icons.clear();
 
   // check empty systray
   if (VisibleIcons() == 0) {

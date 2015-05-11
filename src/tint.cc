@@ -1380,5 +1380,9 @@ start:
     goto start;  // brrr
   }
 
+  // Make sure we reparent all the tray icon windows to the server root window
+  // before we exit the program and destroy our own tray window.
+  // FIXME: this wouldn't need manual deletion if there was no global state.
+  systray.Clear();
   return 0;
 }
