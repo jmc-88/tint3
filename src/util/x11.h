@@ -1,6 +1,7 @@
 #ifndef X11_H
 #define X11_H
 
+#include <sys/types.h>
 #include <X11/Xlib.h>
 
 #include <initializer_list>
@@ -52,6 +53,16 @@ class EventLoop {
   EventHandler default_handler_;
   std::map<int, EventHandler> handler_map_;
 };
+
+pid_t GetWindowPID(Window window);
+int SetWindowPID(Window window);
+Window CreateSimpleWindow(Window parent, int x, int y, unsigned int width,
+                          unsigned int height, unsigned int border_width,
+                          unsigned long border, unsigned long background);
+Window CreateWindow(Window parent, int x, int y, unsigned int width,
+                    unsigned int height, unsigned int border_width, int depth,
+                    unsigned int window_class, Visual* visual,
+                    unsigned long valuemask, XSetWindowAttributes* attributes);
 
 }  // namespace x11
 }  // namespace util

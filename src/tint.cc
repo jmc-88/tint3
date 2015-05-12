@@ -1257,7 +1257,7 @@ start:
     if (systray_enabled &&
         e.xclient.message_type == server.atoms_["_NET_SYSTEM_TRAY_OPCODE"] &&
         e.xclient.format == 32 && e.xclient.window == net_sel_win) {
-      NetMessage(&e.xclient);
+      systray.NetMessage(&e.xclient);
     } else if (e.xclient.message_type == server.atoms_["XdndEnter"]) {
       DragAndDropEnter(&e.xclient);
     } else if (e.xclient.message_type == server.atoms_["XdndPosition"]) {
@@ -1377,6 +1377,7 @@ start:
   });
 
   if (event_loop.RunLoop()) {
+    systray.Clear();
     goto start;  // brrr
   }
 

@@ -1,8 +1,10 @@
 #include "server.h"
 #include "panel.h"
+#include "util/log.h"
 #include "util/x11.h"
 
 #include <sys/select.h>
+#include <unistd.h>
 
 namespace util {
 namespace x11 {
@@ -158,6 +160,50 @@ EventLoop& EventLoop::RegisterHandler(std::initializer_list<int> event_list,
 EventLoop& EventLoop::RegisterDefaultHandler(EventLoop::EventHandler handler) {
   default_handler_ = handler;
   return (*this);
+}
+
+pid_t GetWindowPID(Window window) {
+  unsigned char* prop = nullptr;
+  Atom actual_type;
+  int actual_format;
+  unsigned long nitems;
+  unsigned long bytes_after;
+  int ret = XGetWindowProperty(server.dsp, window, server.atoms_["_NET_WM_PID"],
+                               0, 1024, False, AnyPropertyType, &actual_type,
+                               &actual_format, &nitems, &bytes_after, &prop);
+
+  if (ret == Success && prop != nullptr) {
+    return (prop[1] << 8) | prop[0];
+  }
+
+  return -1;
+}
+
+int SetWindowPID(Window window) {
+  pid_t pid = getpid();
+  return XChangeProperty(server.dsp, window, server.atoms_["_NET_WM_PID"],
+                         XA_CARDINAL, 32, PropModeReplace,
+                         reinterpret_cast<unsigned char*>(&pid), 1);
+}
+
+Window CreateSimpleWindow(Window parent, int x, int y, unsigned int width,
+                          unsigned int height, unsigned int border_width,
+                          unsigned long border, unsigned long background) {
+  Window window = XCreateSimpleWindow(server.dsp, parent, x, y, width, height,
+                                      border_width, border, background);
+  SetWindowPID(window);
+  return window;
+}
+
+Window CreateWindow(Window parent, int x, int y, unsigned int width,
+                    unsigned int height, unsigned int border_width, int depth,
+                    unsigned int window_class, Visual* visual,
+                    unsigned long valuemask, XSetWindowAttributes* attributes) {
+  Window window =
+      XCreateWindow(server.dsp, parent, x, y, width, height, border_width,
+                    depth, window_class, visual, valuemask, attributes);
+  SetWindowPID(window);
+  return window;
 }
 
 }  // namespace x11

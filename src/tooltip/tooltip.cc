@@ -30,6 +30,7 @@
 #include "tooltip/tooltip.h"
 #include "util/common.h"
 #include "util/timer.h"
+#include "util/x11.h"
 
 static int x, y, width, height;
 
@@ -122,8 +123,8 @@ void InitTooltip() {
   }
 
   g_tooltip.window =
-      XCreateWindow(server.dsp, server.root_win, 0, 0, 100, 20, 0, server.depth,
-                    InputOutput, server.visual, mask, &attr);
+      util::x11::CreateWindow(server.root_win, 0, 0, 100, 20, 0, server.depth,
+                              InputOutput, server.visual, mask, &attr);
 }
 
 void TooltipTriggerShow(Area* area, Panel* p, XEvent* e) {

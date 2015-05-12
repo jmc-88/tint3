@@ -22,9 +22,6 @@
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <X11/Xatom.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <glib.h>
 #include <Imlib2.h>
 #include <X11/extensions/Xdamage.h>
@@ -32,13 +29,15 @@
 #include <X11/extensions/Xrender.h>
 
 #include <algorithm>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 
 #include "systraybar.h"
 #include "server.h"
 #include "panel.h"
 #include "util/log.h"
-
-GSList* icons;
+#include "util/x11.h"
 
 /* defined in the systray spec */
 #define SYSTEM_TRAY_REQUEST_DOCK 0
@@ -65,7 +64,7 @@ void DefaultSystray() {
 }
 
 void CleanupSystray() {
-  StopNet();
+  systray.StopNet();
   systray_enabled = false;
   systray_max_icon_size = 0;
   systray.on_screen_ = false;
@@ -78,7 +77,7 @@ void CleanupSystray() {
 }
 
 void InitSystray() {
-  StartNet();
+  systray.StartNet();
 
   if (!systray_enabled) {
     return;
@@ -237,7 +236,16 @@ size_t Systraybar::VisibleIcons() {
 // ***********************************************
 // systray protocol
 
-void StartNet() {
+namespace {
+
+Window GetSystemTrayOwner() {
+  return XGetSelectionOwner(server.dsp,
+                            server.atoms_["_NET_SYSTEM_TRAY_SCREEN"]);
+}
+
+}  // namespace
+
+void Systraybar::StartNet() {
   if (net_sel_win) {
     // protocol already started
     if (!systray_enabled) {
@@ -249,35 +257,23 @@ void StartNet() {
     return;
   }
 
-  Window win =
-      XGetSelectionOwner(server.dsp, server.atoms_["_NET_SYSTEM_TRAY_SCREEN"]);
+  Window window = GetSystemTrayOwner();
 
   // freedesktop systray specification
-  if (win != None) {
-    // search pid
-    unsigned char* prop = nullptr;
-    Atom actual_type;
-    int actual_format;
-    unsigned long nitems;
-    unsigned long bytes_after;
-    int ret = XGetWindowProperty(server.dsp, win, server.atoms_["_NET_WM_PID"],
-                                 0, 1024, False, AnyPropertyType, &actual_type,
-                                 &actual_format, &nitems, &bytes_after, &prop);
+  if (window != None) {
+    pid_t pid = util::x11::GetWindowPID(window);
 
     util::log::Error() << "tint3: another systray is running";
-
-    if (ret == Success && prop != nullptr) {
-      pid_t pid = (prop[1] << 8) + prop[0];
+    if (pid != -1) {
       util::log::Error() << " (pid " << pid << ')';
     }
-
     util::log::Error() << '\n';
     return;
   }
 
   // init systray protocol
   net_sel_win =
-      XCreateSimpleWindow(server.dsp, server.root_win, -1, -1, 1, 1, 0, 0, 0);
+      util::x11::CreateSimpleWindow(server.root_win, -1, -1, 1, 1, 0, 0, 0);
 
   // v0.3 trayer specification. tint3 always horizontal.
   // Vertical panel will draw the systray horizontal.
@@ -325,13 +321,13 @@ void StartNet() {
              (XEvent*)&ev);
 }
 
-void StopNet() {
+void Systraybar::StopNet() {
   // remove_icon change systray.list_icons
   for (auto& icon : systray.list_icons) {
-    systray.RemoveIcon(icon);
+    RemoveIconInternal(icon);
   }
 
-  systray.list_icons.clear();
+  list_icons.clear();
 
   if (net_sel_win != None) {
     XDestroyWindow(server.dsp, net_sel_win);
@@ -405,8 +401,8 @@ bool Systraybar::AddIcon(Window id) {
   }
 
   Window parent_window =
-      XCreateWindow(server.dsp, panel_->main_win_, 0, 0, 30, 30, 0, attr.depth,
-                    InputOutput, visual, mask, &set_attr);
+      util::x11::CreateWindow(panel_->main_win_, 0, 0, 30, 30, 0, attr.depth,
+                              InputOutput, visual, mask, &set_attr);
 
   {
     error = false;
@@ -571,7 +567,7 @@ std::string Systraybar::GetFriendlyName() const { return "Systraybar"; }
 
 #endif  // _TINT3_DEBUG
 
-void NetMessage(XClientMessageEvent* e) {
+void Systraybar::NetMessage(XClientMessageEvent* e) {
   unsigned long opcode;
   Window id;
 

@@ -34,6 +34,7 @@
 #include "panel.h"
 #include "tooltip.h"
 #include "util/log.h"
+#include "util/x11.h"
 
 namespace {
 
@@ -318,9 +319,9 @@ void InitPanel() {
 
       unsigned long mask =
           CWEventMask | CWColormap | CWBackPixel | CWBorderPixel;
-      p->main_win_ = XCreateWindow(
-          server.dsp, server.root_win, p->root_x_, p->root_y_, p->width_,
-          p->height_, 0, server.depth, InputOutput, server.visual, mask, &attr);
+      p->main_win_ = util::x11::CreateWindow(
+          server.root_win, p->root_x_, p->root_y_, p->width_, p->height_, 0,
+          server.depth, InputOutput, server.visual, mask, &attr);
     }
 
     long event_mask =

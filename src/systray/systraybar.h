@@ -53,6 +53,12 @@ class Systraybar : public Area {
   void RemoveIcon(TrayWindow* traywin);
   void Clear();
 
+  // systray protocol
+  // many tray icon don't manage stop/restart of the systray manager
+  void StartNet();
+  void StopNet();
+  void NetMessage(XClientMessageEvent* e);
+
   static void InitPanel(Panel* panel);
 
 #ifdef _TINT3_DEBUG
@@ -77,12 +83,6 @@ void CleanupSystray();
 
 // initialize protocol and panel position
 void InitSystray();
-
-// systray protocol
-// many tray icon don't manage stop/restart of the systray manager
-void StartNet();
-void StopNet();
-void NetMessage(XClientMessageEvent* e);
 
 void RefreshSystrayIcon();
 void SystrayRenderIcon(TrayWindow* traywin);
