@@ -114,6 +114,10 @@ set(TINT3_LINK_LIBRARIES
     ${IMLIB2_LIBRARIES}
     ${SN_LIBRARIES})
 
+if(RT_LIBRARY)
+    set(TINT3_LINK_LIBRARIES ${TINT3_LINK_LIBRARIES} ${RT_LIBRARY})
+endif()
+
 # This is purposely excluding src/tint3.cc as these sources are shared with
 # test case definitions, which redefine their own main() entry point.
 set(TINT3_SOURCES
@@ -153,10 +157,6 @@ add_library(tint3_common_lib STATIC ${TINT3_SOURCES})
 
 add_executable(tint3 src/tint.cc)
 target_link_libraries(tint3 tint3_common_lib ${TINT3_LINK_LIBRARIES})
-
-if(RT_LIBRARY)
-    target_link_libraries(tint3 ${RT_LIBRARY})
-endif()
 
 # }}} build rules
 
