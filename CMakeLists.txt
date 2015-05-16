@@ -145,12 +145,14 @@ if(ENABLE_BATTERY)
     add_definitions(-DENABLE_BATTERY)
 endif()
 
+add_library(tint3_common_lib STATIC ${TINT3_SOURCES})
+
 # }}} common rules
 
 # {{{ build rules
 
-add_executable(tint3 src/tint.cc ${TINT3_SOURCES})
-target_link_libraries(tint3 ${TINT3_LINK_LIBRARIES})
+add_executable(tint3 src/tint.cc)
+target_link_libraries(tint3 tint3_common_lib ${TINT3_LINK_LIBRARIES})
 
 if(RT_LIBRARY)
     target_link_libraries(tint3 ${RT_LIBRARY})
@@ -163,8 +165,8 @@ endif()
 enable_testing()
 include_directories(test)
 
-add_executable(util_common_test src/util/common_test.cc  ${TINT3_SOURCES})
-target_link_libraries(util_common_test ${TINT3_LINK_LIBRARIES})
+add_executable(util_common_test src/util/common_test.cc)
+target_link_libraries(util_common_test tint3_common_lib ${TINT3_LINK_LIBRARIES})
 add_test(NAME util_common_test COMMAND util_common_test)
 
 # }}} test rules
