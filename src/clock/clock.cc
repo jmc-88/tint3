@@ -126,17 +126,8 @@ struct tm* ClockGetTimeForTimezone(std::string const& timezone) {
     return std::localtime(&time_clock.tv_sec);
   }
 
-  const char* old_tz = getenv("TZ");
-  setenv("TZ", timezone.c_str(), 1);
-  struct tm* result = std::localtime(&time_clock.tv_sec);
-
-  if (old_tz) {
-    setenv("TZ", old_tz, 1);
-  } else {
-    unsetenv("TZ");
-  }
-
-  return result;
+  util::ScopedEnvironmentOverride tz{"TZ", timezone};
+  return std::localtime(&time_clock.tv_sec);
 }
 
 std::string Clock::GetTooltipText() {
