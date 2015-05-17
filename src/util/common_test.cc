@@ -13,6 +13,48 @@ TEST_CASE("GetEnvironment", "Reading from the environment is sane") {
   REQUIRE(GetEnvironment("__BOGUS_NAME__").empty());
 }
 
+TEST_CASE("SetEnvironment", "Writing to the environment works") {
+  REQUIRE(getenv("__BOGUS_NAME__") == nullptr);
+  REQUIRE(SetEnvironment("__BOGUS_NAME__", "__BOGUS_VALUE__"));
+  REQUIRE(std::strcmp(getenv("__BOGUS_NAME__"), "__BOGUS_VALUE__") == 0);
+}
+
+TEST_CASE("UnsetEnvironment", "Deleting from the environment works") {
+  setenv("__BOGUS_NAME__", "__BOGUS_VALUE__", 1);
+  REQUIRE(std::strcmp(getenv("__BOGUS_NAME__"), "__BOGUS_VALUE__") == 0);
+  REQUIRE(UnsetEnvironment("__BOGUS_NAME__"));
+  REQUIRE(getenv("__BOGUS_NAME__") == nullptr);
+}
+
+TEST_CASE("ScopedEnvironmentOverride",
+          "Temporary environment overrides work as expected") {
+  SECTION("An pre-existing variable gets overwritten, then restored") {
+    setenv("__BOGUS_NAME__", "__BOGUS_VALUE__", 1);
+    REQUIRE(std::strcmp(getenv("__BOGUS_NAME__"), "__BOGUS_VALUE__") == 0);
+
+    {
+      util::ScopedEnvironmentOverride new_value{"__BOGUS_NAME__",
+                                                "__NEW_VALUE__"};
+      REQUIRE(std::strcmp(getenv("__BOGUS_NAME__"), "__NEW_VALUE__") == 0);
+    }
+
+    REQUIRE(std::strcmp(getenv("__BOGUS_NAME__"), "__BOGUS_VALUE__") == 0);
+  }
+
+  SECTION("A non-existing variable gets set, then unset") {
+    unsetenv("__BOGUS_NAME__");
+    REQUIRE(getenv("__BOGUS_NAME__") == nullptr);
+
+    {
+      util::ScopedEnvironmentOverride new_value{"__BOGUS_NAME__",
+                                                "__NEW_VALUE__"};
+      REQUIRE(std::strcmp(getenv("__BOGUS_NAME__"), "__NEW_VALUE__") == 0);
+    }
+
+    REQUIRE(getenv("__BOGUS_NAME__") == nullptr);
+  }
+}
+
 TEST_CASE("StringTrim", "Removing trailing spaces from strings should work") {
   std::string s;
 
