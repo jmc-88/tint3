@@ -7,6 +7,15 @@ compiler:
 os: linux
 
 install:
+    # g++ 4.8
+    - if [ "$CXX" = "g++" ]; then sudo apt-get install -qq g++-4.8; fi
+    - if [ "$CXX" = "g++" ]; then export CXX="g++-4.8"; fi
+
+    # clang 3.5
+    - if [ "$CXX" == "clang++" ]; then sudo apt-get install --allow-unauthenticated -qq clang-3.5; fi
+    - if [ "$CXX" == "clang++" ]; then export CXX="clang++-3.5"; fi
+
+    # Required libraries
     - sudo apt-get install libcairo2-dev libpango1.0-dev libglib2.0-dev libimlib2-dev libgtk2.0-dev libxinerama-dev libx11-dev libxdamage-dev libxcomposite-dev libxrender-dev libxrandr-dev librsvg2-dev libstartup-notification0-dev
 
 before_script:
@@ -16,5 +25,4 @@ before_script:
 
 script:
     - cd "${TRAVIS_BUILD_DIR}/build"
-    - make
-    - make test
+    - make all test
