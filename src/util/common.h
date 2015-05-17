@@ -88,9 +88,6 @@ void TintExec(std::string const& command);
 // color conversion
 bool GetColor(const std::string& hex, double* rgb);
 
-void ExtractValues(const std::string& value, std::string& v1, std::string& v2,
-                   std::string& v3);
-
 // adjust Alpha/Saturation/Brightness on an ARGB icon
 // alpha from 0 to 100, satur from 0 to 1, bright from 0 to 1.
 void AdjustAsb(DATA32* data, unsigned int w, unsigned int h, int alpha,

@@ -186,31 +186,6 @@ bool GetColor(std::string const& hex, double* rgb) {
   return true;
 }
 
-void ExtractValues(std::string const& value, std::string& v1, std::string& v2,
-                   std::string& v3) {
-  v1.clear();
-  v2.clear();
-  v3.clear();
-
-  size_t first_space = value.find_first_of(' ');
-  size_t second_space = std::string::npos;
-
-  v1.assign(value, 0, first_space);
-  StringTrim(v1);
-
-  if (first_space != std::string::npos) {
-    second_space = value.find_first_of(' ', first_space + 1);
-
-    v2.assign(value, first_space + 1, second_space - first_space);
-    StringTrim(v2);
-  }
-
-  if (second_space != std::string::npos) {
-    v3.assign(value, second_space + 1, std::string::npos);
-    StringTrim(v3);
-  }
-}
-
 void AdjustAsb(DATA32* data, unsigned int w, unsigned int h, int alpha,
                float satur, float bright) {
   for (unsigned int y = 0; y < h; ++y) {

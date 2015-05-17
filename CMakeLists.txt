@@ -165,6 +165,10 @@ target_link_libraries(tint3 tint3_common_lib ${TINT3_LINK_LIBRARIES})
 enable_testing()
 include_directories(test)
 
+add_executable(config_test src/config_test.cc)
+target_link_libraries(config_test tint3_common_lib ${TINT3_LINK_LIBRARIES})
+add_test(NAME config_test COMMAND config_test)
+
 add_executable(util_common_test src/util/common_test.cc)
 target_link_libraries(util_common_test tint3_common_lib ${TINT3_LINK_LIBRARIES})
 add_test(NAME util_common_test COMMAND util_common_test)

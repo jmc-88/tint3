@@ -158,7 +158,7 @@ void AddEntry(std::string const& key, std::string const& value) {
     backgrounds.back()->border.width = StringToLongInt(value);
   } else if (key == "background_color") {
     auto bg = backgrounds.back();
-    ExtractValues(value, value1, value2, value3);
+    config::ExtractValues(value, value1, value2, value3);
     GetColor(value1, bg->back.color);
 
     if (!value2.empty()) {
@@ -168,7 +168,7 @@ void AddEntry(std::string const& key, std::string const& value) {
     }
   } else if (key == "border_color") {
     auto bg = backgrounds.back();
-    ExtractValues(value, value1, value2, value3);
+    config::ExtractValues(value, value1, value2, value3);
     GetColor(value1, bg->border.color);
 
     if (!value2.empty()) {
@@ -182,7 +182,7 @@ void AddEntry(std::string const& key, std::string const& value) {
   else if (key == "panel_monitor") {
     panel_config.monitor_ = ConfigGetMonitor(value);
   } else if (key == "panel_size") {
-    ExtractValues(value, value1, value2, value3);
+    config::ExtractValues(value, value1, value2, value3);
 
     size_t b = value1.find_first_of('%');
 
@@ -238,14 +238,14 @@ void AddEntry(std::string const& key, std::string const& value) {
       }
     }
   } else if (key == "panel_margin") {
-    ExtractValues(value, value1, value2, value3);
+    config::ExtractValues(value, value1, value2, value3);
     panel_config.margin_x_ = StringToLongInt(value1);
 
     if (!value2.empty()) {
       panel_config.margin_y_ = StringToLongInt(value2);
     }
   } else if (key == "panel_padding") {
-    ExtractValues(value, value1, value2, value3);
+    config::ExtractValues(value, value1, value2, value3);
     panel_config.padding_x_lr_ = panel_config.padding_x_ =
         StringToLongInt(value1);
 
@@ -257,7 +257,7 @@ void AddEntry(std::string const& key, std::string const& value) {
       panel_config.padding_x_ = StringToLongInt(value3);
     }
   } else if (key == "panel_position") {
-    ExtractValues(value, value1, value2, value3);
+    config::ExtractValues(value, value1, value2, value3);
 
     if (value1 == "top") {
       panel_vertical_position = PanelVerticalPosition::kTop;
@@ -321,7 +321,7 @@ void AddEntry(std::string const& key, std::string const& value) {
 #endif  // ENABLE_BATTERY
   } else if (key == "battery_font_color") {
 #ifdef ENABLE_BATTERY
-    ExtractValues(value, value1, value2, value3);
+    config::ExtractValues(value, value1, value2, value3);
     GetColor(value1, panel_config.battery_.font.color);
 
     if (!value2.empty()) {
@@ -332,7 +332,7 @@ void AddEntry(std::string const& key, std::string const& value) {
 #endif  // ENABLE_BATTERY
   } else if (key == "battery_padding") {
 #ifdef ENABLE_BATTERY
-    ExtractValues(value, value1, value2, value3);
+    config::ExtractValues(value, value1, value2, value3);
     panel_config.battery_.padding_x_lr_ = panel_config.battery_.padding_x_ =
         StringToLongInt(value1);
 
@@ -386,7 +386,7 @@ void AddEntry(std::string const& key, std::string const& value) {
   } else if (key == "time2_font") {
     time2_font_desc = pango_font_description_from_string(value.c_str());
   } else if (key == "clock_font_color") {
-    ExtractValues(value, value1, value2, value3);
+    config::ExtractValues(value, value1, value2, value3);
     GetColor(value1, panel_config.clock_.font_.color);
 
     if (!value2.empty()) {
@@ -395,7 +395,7 @@ void AddEntry(std::string const& key, std::string const& value) {
       panel_config.clock_.font_.alpha = 0.5;
     }
   } else if (key == "clock_padding") {
-    ExtractValues(value, value1, value2, value3);
+    config::ExtractValues(value, value1, value2, value3);
     panel_config.clock_.padding_x_lr_ = panel_config.clock_.padding_x_ =
         StringToLongInt(value1);
 
@@ -434,7 +434,7 @@ void AddEntry(std::string const& key, std::string const& value) {
       panel_mode = PanelMode::kSingleDesktop;
     }
   } else if (key == "taskbar_padding") {
-    ExtractValues(value, value1, value2, value3);
+    config::ExtractValues(value, value1, value2, value3);
     panel_config.g_taskbar.padding_x_lr_ = panel_config.g_taskbar.padding_x_ =
         StringToLongInt(value1);
 
@@ -459,7 +459,7 @@ void AddEntry(std::string const& key, std::string const& value) {
   } else if (key == "taskbar_name") {
     taskbarname_enabled = (0 != StringToLongInt(value));
   } else if (key == "taskbar_name_padding") {
-    ExtractValues(value, value1, value2, value3);
+    config::ExtractValues(value, value1, value2, value3);
     panel_config.g_taskbar.bar_name_.padding_x_lr_ =
         panel_config.g_taskbar.bar_name_.padding_x_ = StringToLongInt(value1);
   } else if (key == "taskbar_name_background_id") {
@@ -476,7 +476,7 @@ void AddEntry(std::string const& key, std::string const& value) {
   } else if (key == "taskbar_name_font") {
     taskbarname_font_desc = pango_font_description_from_string(value.c_str());
   } else if (key == "taskbar_name_font_color") {
-    ExtractValues(value, value1, value2, value3);
+    config::ExtractValues(value, value1, value2, value3);
     GetColor(value1, taskbarname_font.color);
 
     if (!value2.empty()) {
@@ -485,7 +485,7 @@ void AddEntry(std::string const& key, std::string const& value) {
       taskbarname_font.alpha = 0.5;
     }
   } else if (key == "taskbar_name_active_font_color") {
-    ExtractValues(value, value1, value2, value3);
+    config::ExtractValues(value, value1, value2, value3);
     GetColor(value1, taskbarname_active_font.color);
 
     if (!value2.empty()) {
@@ -507,7 +507,7 @@ void AddEntry(std::string const& key, std::string const& value) {
     panel_config.g_task.maximum_width = StringToLongInt(value);
     panel_config.g_task.maximum_height = 30;
   } else if (key == "task_maximum_size") {
-    ExtractValues(value, value1, value2, value3);
+    config::ExtractValues(value, value1, value2, value3);
     panel_config.g_task.maximum_width = StringToLongInt(value1);
     panel_config.g_task.maximum_height = 30;
 
@@ -515,7 +515,7 @@ void AddEntry(std::string const& key, std::string const& value) {
       panel_config.g_task.maximum_height = StringToLongInt(value2);
     }
   } else if (key == "task_padding") {
-    ExtractValues(value, value1, value2, value3);
+    config::ExtractValues(value, value1, value2, value3);
     panel_config.g_task.padding_x_lr_ = panel_config.g_task.padding_x_ =
         StringToLongInt(value1);
 
@@ -532,7 +532,7 @@ void AddEntry(std::string const& key, std::string const& value) {
   } else if (RegexMatch("task.*_font_color", key)) {
     auto split = SplitString(key, '_');
     int status = GetTaskStatus(split[1]);
-    ExtractValues(value, value1, value2, value3);
+    config::ExtractValues(value, value1, value2, value3);
     float alpha = 1;
 
     if (!value2.empty()) {
@@ -545,7 +545,7 @@ void AddEntry(std::string const& key, std::string const& value) {
   } else if (RegexMatch("task.*_icon_asb", key)) {
     auto split = SplitString(key, '_');
     int status = GetTaskStatus(split[1]);
-    ExtractValues(value, value1, value2, value3);
+    config::ExtractValues(value, value1, value2, value3);
     panel_config.g_task.alpha[status] = StringToLongInt(value1);
     panel_config.g_task.saturation[status] = StringToLongInt(value2);
     panel_config.g_task.brightness[status] = StringToLongInt(value3);
@@ -573,7 +573,7 @@ void AddEntry(std::string const& key, std::string const& value) {
       panel_items_order.push_back('S');
     }
 
-    ExtractValues(value, value1, value2, value3);
+    config::ExtractValues(value, value1, value2, value3);
     systray.padding_x_lr_ = systray.padding_x_ = StringToLongInt(value1);
 
     if (!value2.empty()) {
@@ -598,7 +598,7 @@ void AddEntry(std::string const& key, std::string const& value) {
   } else if (key == "systray_icon_size") {
     systray_max_icon_size = StringToLongInt(value);
   } else if (key == "systray_icon_asb") {
-    ExtractValues(value, value1, value2, value3);
+    config::ExtractValues(value, value1, value2, value3);
     systray.alpha = StringToLongInt(value1);
     systray.saturation = StringToLongInt(value2);
     systray.brightness = StringToLongInt(value3);
@@ -606,7 +606,7 @@ void AddEntry(std::string const& key, std::string const& value) {
 
   /* Launcher */
   else if (key == "launcher_padding") {
-    ExtractValues(value, value1, value2, value3);
+    config::ExtractValues(value, value1, value2, value3);
     panel_config.launcher_.padding_x_lr_ = panel_config.launcher_.padding_x_ =
         StringToLongInt(value1);
 
@@ -629,7 +629,7 @@ void AddEntry(std::string const& key, std::string const& value) {
       icon_theme_name = value;
     }
   } else if (key == "launcher_icon_asb") {
-    ExtractValues(value, value1, value2, value3);
+    config::ExtractValues(value, value1, value2, value3);
     launcher_alpha = StringToLongInt(value1);
     launcher_saturation = StringToLongInt(value2);
     launcher_brightness = StringToLongInt(value3);
@@ -645,7 +645,7 @@ void AddEntry(std::string const& key, std::string const& value) {
     int timeout_msec = 1000 * StringToFloat(value);
     g_tooltip.hide_timeout_msec = timeout_msec;
   } else if (key == "tooltip_padding") {
-    ExtractValues(value, value1, value2, value3);
+    config::ExtractValues(value, value1, value2, value3);
 
     if (!value1.empty()) {
       g_tooltip.paddingx = StringToLongInt(value1);
@@ -657,7 +657,7 @@ void AddEntry(std::string const& key, std::string const& value) {
   } else if (key == "tooltip_background_id") {
     g_tooltip.bg = GetBackgroundFromId(StringToLongInt(value));
   } else if (key == "tooltip_font_color") {
-    ExtractValues(value, value1, value2, value3);
+    config::ExtractValues(value, value1, value2, value3);
     GetColor(value1, g_tooltip.font_color.color);
 
     if (!value2.empty()) {
@@ -749,6 +749,31 @@ bool ParseLine(std::string const& line, std::string& key, std::string& value) {
 }  // namespace
 
 namespace config {
+
+void ExtractValues(std::string const& value, std::string& v1, std::string& v2,
+                   std::string& v3) {
+  v1.clear();
+  v2.clear();
+  v3.clear();
+
+  size_t first_space = value.find_first_of(' ');
+  size_t second_space = std::string::npos;
+
+  v1.assign(value, 0, first_space);
+  StringTrim(v1);
+
+  if (first_space != std::string::npos) {
+    second_space = value.find_first_of(' ', first_space + 1);
+
+    v2.assign(value, first_space + 1, second_space - first_space);
+    StringTrim(v2);
+  }
+
+  if (second_space != std::string::npos) {
+    v3.assign(value, second_space + 1, std::string::npos);
+    StringTrim(v3);
+  }
+}
 
 bool Read() {
   // follow XDG specification

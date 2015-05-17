@@ -19,6 +19,8 @@ void DefaultConfig();
 
 namespace config {
 
+void ExtractValues(const std::string& value, std::string& v1, std::string& v2,
+                   std::string& v3);
 bool ReadFile(std::string const& path);
 bool Read();
 
