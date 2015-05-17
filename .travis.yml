@@ -1,0 +1,20 @@
+language: cpp
+
+compiler:
+    - clang
+    - gcc
+
+os: linux
+
+install:
+    - sudo apt-get install libcairo2-dev libpango1.0-dev libglib2.0-dev libimlib2-dev libgtk2.0-dev libxinerama-dev libx11-dev libxdamage-dev libxcomposite-dev libxrender-dev libxrandr-dev librsvg2-dev libstartup-notification0-dev
+
+before_script:
+    - mkdir "${TRAVIS_BUILD_DIR}/build"
+    - cd "${TRAVIS_BUILD_DIR}/build"
+    - cmake "${TRAVIS_BUILD_DIR}" -DCMAKE_BUILD_TYPE=Release
+
+script:
+    - cd "${TRAVIS_BUILD_DIR}/build"
+    - make
+    - make test
