@@ -96,4 +96,6 @@ void CreateHeuristicMask(DATA32* data, int w, int h);
 
 void RenderImage(Drawable d, int x, int y, int w, int h);
 
+bool RegexMatch(std::string const& pattern, std::string const& string);
+
 #endif

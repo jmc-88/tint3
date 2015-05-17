@@ -121,3 +121,29 @@ TEST_CASE("GetColor", "Parsing a CSS hex triplet should work") {
     REQUIRE(rgb[2] == 1.0);
   }
 }
+
+TEST_CASE("RegexMatch",
+          "Matching a string by a regular expression should work") {
+  SECTION("Character classes") {
+    REQUIRE(RegexMatch("[0-9]", "0"));
+    REQUIRE(!RegexMatch("[0-9]", "Z"));
+  }
+
+  SECTION("Any numer of occurrences (Kleene star)") {
+    REQUIRE(RegexMatch("test[0-9]*", "test"));
+    REQUIRE(RegexMatch("test[0-9]*", "test0"));
+    REQUIRE(RegexMatch("test[0-9]*", "test01"));
+  }
+
+  SECTION("One or more occurrences (Kleene plus)") {
+    REQUIRE(!RegexMatch("test[0-9]+", "test"));
+    REQUIRE(RegexMatch("test[0-9]+", "test0"));
+    REQUIRE(RegexMatch("test[0-9]+", "test01"));
+  }
+
+  SECTION("At most one occurrence") {
+    REQUIRE(RegexMatch("test[0-9]?", "test"));
+    REQUIRE(RegexMatch("test[0-9]?", "test0"));
+    REQUIRE(!RegexMatch("test[0-9]?", "test01"));
+  }
+}

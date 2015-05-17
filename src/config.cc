@@ -39,7 +39,6 @@
 #include <cctype>
 #include <iostream>
 #include <stdexcept>
-#include <regex>
 
 #include "server.h"
 #include "panel.h"
@@ -130,11 +129,6 @@ int ConfigGetMonitor(std::string const& monitor_name) {
 
   // monitor == "all" or monitor not found or xrandr can't identify monitors
   return -1;
-}
-
-bool RegexMatch(std::string const& pattern, std::string const& string) {
-  std::smatch matches;
-  return std::regex_match(string, matches, std::regex(pattern));
 }
 
 Background* GetBackgroundFromId(size_t id) {

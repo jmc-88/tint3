@@ -31,6 +31,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <regex>
 
 #include "server.h"
 #include "util/common.h"
@@ -396,4 +397,9 @@ void RenderImage(Drawable d, int x, int y, int w, int h) {
   XFreePixmap(server.dsp, pmap_tmp);
   XRenderFreePicture(server.dsp, pict_image);
   XRenderFreePicture(server.dsp, pict_drawable);
+}
+
+bool RegexMatch(std::string const& pattern, std::string const& string) {
+  std::smatch matches;
+  return std::regex_match(string, matches, std::regex(pattern));
 }
