@@ -137,6 +137,7 @@ set(TINT3_SOURCES
     src/tooltip/tooltip.cc
     src/util/area.cc
     src/util/common.cc
+    src/util/environment.cc
     src/util/fs.cc
     src/util/log.cc
     src/util/timer.cc
@@ -168,6 +169,10 @@ include_directories(test)
 add_executable(config_test src/config_test.cc)
 target_link_libraries(config_test tint3_common_lib ${TINT3_LINK_LIBRARIES})
 add_test(NAME config_test COMMAND config_test)
+
+add_executable(util_environment_test src/util/environment_test.cc)
+target_link_libraries(util_environment_test tint3_common_lib ${TINT3_LINK_LIBRARIES})
+add_test(NAME util_environment_test COMMAND util_environment_test)
 
 add_executable(util_common_test src/util/common_test.cc)
 target_link_libraries(util_common_test tint3_common_lib ${TINT3_LINK_LIBRARIES})

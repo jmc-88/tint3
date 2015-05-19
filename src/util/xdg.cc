@@ -3,6 +3,7 @@
 #include <functional>
 
 #include "util/common.h"
+#include "util/environment.h"
 #include "util/fs.h"
 #include "util/xdg.h"
 
@@ -42,17 +43,17 @@ namespace basedir {
 
 util::fs::Path DataHome() {
   static auto default_ = GetDefaultDirectory("/.local/share");
-  return ValidatePath(default_(GetEnvironment("XDG_DATA_HOME")));
+  return ValidatePath(default_(environment::Get("XDG_DATA_HOME")));
 }
 
 util::fs::Path ConfigHome() {
   static auto default_ = GetDefaultDirectory("/.config");
-  return ValidatePath(default_(GetEnvironment("XDG_CONFIG_HOME")));
+  return ValidatePath(default_(environment::Get("XDG_CONFIG_HOME")));
 }
 
 util::fs::Path CacheHome() {
   static auto default_ = GetDefaultDirectory("/.cache");
-  return ValidatePath(default_(GetEnvironment("XDG_CACHE_HOME")));
+  return ValidatePath(default_(environment::Get("XDG_CACHE_HOME")));
 }
 
 util::fs::Path RuntimeDir() {
@@ -62,17 +63,17 @@ util::fs::Path RuntimeDir() {
   // at user login time, and fully removed at user logout time), so there
   // might be a better choice for this default value
   static auto default_ = DefaultValue(CacheHome());
-  return ValidatePath(default_(GetEnvironment("XDG_RUNTIME_DIR")));
+  return ValidatePath(default_(environment::Get("XDG_RUNTIME_DIR")));
 }
 
 std::vector<std::string> DataDirs() {
   static auto default_ = DefaultValue("/usr/local/share:/usr/share");
-  return SplitString(default_(GetEnvironment("XDG_DATA_DIRS")), ':');
+  return SplitString(default_(environment::Get("XDG_DATA_DIRS")), ':');
 }
 
 std::vector<std::string> ConfigDirs() {
   static auto default_ = DefaultValue("/usr/local/etc/xdg:/etc/xdg");
-  return SplitString(default_(GetEnvironment("XDG_CONFIG_DIRS")), ':');
+  return SplitString(default_(environment::Get("XDG_CONFIG_DIRS")), ':');
 }
 
 }  // namespace basedir

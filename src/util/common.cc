@@ -90,53 +90,6 @@ void GObjectUnrefDeleter::operator()(gpointer data) const {
 
 int const kAllDesktops = 0xFFFFFFFF;
 
-std::string GetEnvironment(std::string const& key) {
-  char* value = getenv(key.c_str());
-  std::string result;
-
-  if (value != nullptr) {
-    result.assign(value);
-  }
-
-  return result;
-}
-
-bool SetEnvironment(std::string const& key, std::string const& value) {
-  if (setenv(key.c_str(), value.c_str(), 1) != 0) {
-    util::log::Error() << "setenv(): " << std::strerror(errno) << '\n';
-    return false;
-  }
-
-  return true;
-}
-
-bool UnsetEnvironment(std::string const& key) {
-  if (unsetenv(key.c_str()) != 0) {
-    util::log::Error() << "unsetenv(): " << std::strerror(errno) << '\n';
-    return false;
-  }
-
-  return true;
-}
-
-namespace util {
-
-ScopedEnvironmentOverride::ScopedEnvironmentOverride(const std::string& key,
-                                                     const std::string& value)
-    : key_(key), original_value_(GetEnvironment(key)) {
-  SetEnvironment(key, value);
-}
-
-ScopedEnvironmentOverride::~ScopedEnvironmentOverride() {
-  if (!original_value_.empty()) {
-    SetEnvironment(key_, original_value_);
-  } else {
-    UnsetEnvironment(key_);
-  }
-}
-
-}  // namespace util
-
 bool SignalAction(int signal_number, void signal_handler(int), int flags) {
   struct sigaction sa;
   std::memset(&sa, 0, sizeof(sa));

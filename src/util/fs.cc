@@ -7,6 +7,7 @@
 #include <sstream>
 
 #include "util/common.h"
+#include "util/environment.h"
 #include "util/fs.h"
 
 namespace util {
@@ -151,7 +152,7 @@ bool FileExists(std::initializer_list<std::string> parts) {
 }
 
 Path HomeDirectory() {
-  std::string home = GetEnvironment("HOME");
+  std::string home = environment::Get("HOME");
 
   if (!home.empty()) {
     return home;

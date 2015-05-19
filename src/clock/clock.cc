@@ -34,6 +34,7 @@
 #include "panel.h"
 #include "clock/clock.h"
 #include "util/common.h"
+#include "util/environment.h"
 #include "util/timer.h"
 #include "util/window.h"
 
@@ -126,7 +127,7 @@ struct tm* ClockGetTimeForTimezone(std::string const& timezone) {
     return std::localtime(&time_clock.tv_sec);
   }
 
-  util::ScopedEnvironmentOverride tz{"TZ", timezone};
+  environment::ScopedOverride tz{"TZ", timezone};
   return std::localtime(&time_clock.tv_sec);
 }
 

@@ -63,24 +63,6 @@ class StringBuilder {
   operator std::string() const { return ss_.str(); }
 };
 
-std::string GetEnvironment(std::string const& key);
-bool SetEnvironment(std::string const& key, std::string const& value);
-bool UnsetEnvironment(std::string const& key);
-
-namespace util {
-
-class ScopedEnvironmentOverride {
- public:
-  ScopedEnvironmentOverride(std::string const& key, std::string const& value);
-  ~ScopedEnvironmentOverride();
-
- private:
-  std::string key_;
-  std::string original_value_;
-};
-
-}  // namespace util
-
 bool SignalAction(int signal_number, void signal_handler(int), int flags = 0);
 
 std::string& StringTrim(std::string& str);
