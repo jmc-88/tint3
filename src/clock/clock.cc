@@ -27,7 +27,6 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#include <ctime>
 #include <string>
 
 #include "server.h"
@@ -35,7 +34,6 @@
 #include "clock/clock.h"
 #include "clock/time_utils.h"
 #include "util/common.h"
-#include "util/environment.h"
 #include "util/timer.h"
 #include "util/window.h"
 
@@ -121,22 +119,10 @@ void UpdateClockMinutes(void* arg) {
   }
 }
 
-struct tm* ClockGetTimeForTimezone(std::string const& timezone) {
-  if (timezone.empty()) {
-    return std::localtime(&time_clock.tv_sec);
-  }
-
-  environment::ScopedOverride tz{"TZ", timezone};
-  return std::localtime(&time_clock.tv_sec);
-}
-
 std::string Clock::GetTooltipText() {
-  // FIXME: the buffer should be dynamically resizable in case the formatted
-  // string doesn't fit
-  static char tooltip[512];
-  std::strftime(tooltip, sizeof(tooltip), time_tooltip_format.c_str(),
-                ClockGetTimeForTimezone(time_tooltip_timezone));
-  return tooltip;
+  return FormatTime(
+      time_tooltip_format,
+      ClockGetTimeForTimezone(time_tooltip_timezone, &time_clock.tv_sec));
 }
 
 void InitClock() {
@@ -207,12 +193,14 @@ bool Clock::Resize() {
   int time_height_ink = 0, time_height = 0, time_width = 0;
   int date_height_ink = 0, date_height = 0, date_width = 0;
 
-  time1_ = FormatTime(time1_format, ClockGetTimeForTimezone(time1_timezone));
+  time1_ = FormatTime(time1_format, ClockGetTimeForTimezone(
+                                        time1_timezone, &time_clock.tv_sec));
   GetTextSize2(time1_font_desc, &time_height_ink, &time_height, &time_width,
                panel_->height_, panel_->width_, time1_.c_str(), time1_.size());
 
   if (!time2_format.empty()) {
-    time2_ = FormatTime(time2_format, ClockGetTimeForTimezone(time2_timezone));
+    time2_ = FormatTime(time2_format, ClockGetTimeForTimezone(
+                                          time2_timezone, &time_clock.tv_sec));
     GetTextSize2(time2_font_desc, &date_height_ink, &date_height, &date_width,
                  panel_->height_, panel_->width_, time2_.c_str(),
                  time2_.size());

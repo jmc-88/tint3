@@ -1,6 +1,15 @@
-#include <string>
-
 #include "clock/time_utils.h"
+#include "util/environment.h"
+
+struct tm* ClockGetTimeForTimezone(std::string const& timezone,
+                                   time_t const* time_ptr) {
+  if (timezone.empty()) {
+    return std::localtime(time_ptr);
+  }
+
+  environment::ScopedOverride tz{"TZ", timezone};
+  return std::localtime(time_ptr);
+}
 
 std::string FormatTime(std::string format, struct tm const* timeptr) {
   // %p can return a zero-length string, and a returned size of 0 is also used
