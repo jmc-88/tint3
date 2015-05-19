@@ -16,7 +16,8 @@ TEST_CASE("FormatTime", "The interface to strftime() works as expected") {
   }
 }
 
-TEST_CASE("ClockGetTimeForTimezone", "") {
+TEST_CASE("ClockGetTimeForTimezone",
+          "Can reliably retrive a time in a certain timezone") {
   // 1970-01-01 08:00 AM UTC
   time_t elapsed = (60 * 60 * 8);
   struct tm* tm1 = std::gmtime(&elapsed);
