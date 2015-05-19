@@ -171,6 +171,10 @@ add_executable(config_test src/config_test.cc)
 target_link_libraries(config_test tint3_common_lib ${TINT3_LINK_LIBRARIES})
 add_test(NAME config_test COMMAND config_test)
 
+add_executable(clock_time_utils_test src/clock/time_utils_test.cc)
+target_link_libraries(clock_time_utils_test tint3_common_lib ${TINT3_LINK_LIBRARIES})
+add_test(NAME clock_time_utils_test COMMAND clock_time_utils_test)
+
 add_executable(util_environment_test src/util/environment_test.cc)
 target_link_libraries(util_environment_test tint3_common_lib ${TINT3_LINK_LIBRARIES})
 add_test(NAME util_environment_test COMMAND util_environment_test)
