@@ -33,6 +33,7 @@
 #include "server.h"
 #include "panel.h"
 #include "clock/clock.h"
+#include "clock/time_utils.h"
 #include "util/common.h"
 #include "util/environment.h"
 #include "util/timer.h"
@@ -49,8 +50,6 @@ std::string clock_rclick_command;
 struct timeval time_clock;
 PangoFontDescription* time1_font_desc;
 PangoFontDescription* time2_font_desc;
-static char buf_time[256];
-static char buf_date[256];
 bool clock_enabled;
 static Timeout* clock_timeout;
 
@@ -181,7 +180,7 @@ void Clock::DrawForeground(cairo_t* c) {
   pango_layout_set_font_description(layout.get(), time1_font_desc);
   pango_layout_set_width(layout.get(), width_ * PANGO_SCALE);
   pango_layout_set_alignment(layout.get(), PANGO_ALIGN_CENTER);
-  pango_layout_set_text(layout.get(), buf_time, strlen(buf_time));
+  pango_layout_set_text(layout.get(), time1_.c_str(), time1_.size());
 
   cairo_set_source_rgba(c, font_.color[0], font_.color[1], font_.color[2],
                         font_.alpha);
@@ -193,7 +192,7 @@ void Clock::DrawForeground(cairo_t* c) {
   if (!time2_format.empty()) {
     pango_layout_set_font_description(layout.get(), time2_font_desc);
     pango_layout_set_indent(layout.get(), 0);
-    pango_layout_set_text(layout.get(), buf_date, strlen(buf_date));
+    pango_layout_set_text(layout.get(), time2_.c_str(), time2_.size());
     pango_layout_set_width(layout.get(), width_ * PANGO_SCALE);
 
     pango_cairo_update_layout(c, layout.get());
@@ -205,19 +204,18 @@ void Clock::DrawForeground(cairo_t* c) {
 bool Clock::Resize() {
   need_redraw_ = true;
 
-  std::strftime(buf_time, sizeof(buf_time), time1_format.c_str(),
-                ClockGetTimeForTimezone(time1_timezone));
-
   int time_height_ink = 0, time_height = 0, time_width = 0;
   int date_height_ink = 0, date_height = 0, date_width = 0;
+
+  time1_ = FormatTime(time1_format, ClockGetTimeForTimezone(time1_timezone));
   GetTextSize2(time1_font_desc, &time_height_ink, &time_height, &time_width,
-               panel_->height_, panel_->width_, buf_time, strlen(buf_time));
+               panel_->height_, panel_->width_, time1_.c_str(), time1_.size());
 
   if (!time2_format.empty()) {
-    std::strftime(buf_date, sizeof(buf_date), time2_format.c_str(),
-                  ClockGetTimeForTimezone(time2_timezone));
+    time2_ = FormatTime(time2_format, ClockGetTimeForTimezone(time2_timezone));
     GetTextSize2(time2_font_desc, &date_height_ink, &date_height, &date_width,
-                 panel_->height_, panel_->width_, buf_date, strlen(buf_date));
+                 panel_->height_, panel_->width_, time2_.c_str(),
+                 time2_.size());
   }
 
   if (panel_horizontal) {

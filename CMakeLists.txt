@@ -126,6 +126,7 @@ set(TINT3_SOURCES
     src/panel.cc
     src/server.cc
     src/clock/clock.cc
+    src/clock/time_utils.cc
     src/systray/systraybar.cc
     src/launcher/launcher.cc
     src/launcher/xsettings-client.cc

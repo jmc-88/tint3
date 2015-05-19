@@ -34,6 +34,10 @@ class Clock : public Area {
   std::string GetFriendlyName() const override;
 
 #endif  // _TINT3_DEBUG
+
+ private:
+  std::string time1_;
+  std::string time2_;
 };
 
 extern std::string time1_format;
