@@ -1244,14 +1244,7 @@ start:
     auto& ev = e.xclient;
 
     if (ev.data.l[1] == (long int)server.atoms_["_NET_WM_CM_S0"]) {
-      // FIXME: just set signal_pending unconditionally
-      if (ev.data.l[2] == None) {
-        // Stop real_transparency
-        signal_pending = SIGUSR1;
-      } else {
-        // Start real_transparency
-        signal_pending = SIGUSR1;
-      }
+      signal_pending = SIGUSR1;
     }
 
     if (systray_enabled &&
