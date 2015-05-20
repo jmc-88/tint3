@@ -89,7 +89,7 @@ void CleanupClock() {
   clock_rclick_command.clear();
 }
 
-void UpdateClockSeconds(void* arg) {
+void UpdateClockSeconds() {
   gettimeofday(&time_clock, 0);
 
   if (!time1_format.empty()) {
@@ -101,7 +101,7 @@ void UpdateClockSeconds(void* arg) {
   panel_refresh = true;
 }
 
-void UpdateClockMinutes(void* arg) {
+void UpdateClockMinutes() {
   // remember old_sec because after suspend/hibernate the clock should be
   // updated directly, and not
   // on next minute change
@@ -136,7 +136,7 @@ void InitClock() {
 
   auto& update_func =
       (has_seconds_format ? UpdateClockSeconds : UpdateClockMinutes);
-  clock_timeout = AddTimeout(10, 1000, update_func, 0);
+  clock_timeout = AddTimeout(10, 1000, update_func);
 }
 
 void Clock::InitPanel(Panel* panel) {

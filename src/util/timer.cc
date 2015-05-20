@@ -154,10 +154,9 @@ bool AlignWithExistingTimeouts(Timeout* t) {
 }
 
 void AddTimeoutInternal(int value_msec, int interval_msec,
-                        void (*_callback)(void*), void* arg, Timeout* t) {
+                        std::function<void()> callback, Timeout* t) {
   t->interval_msec = interval_msec;
-  t->_callback = _callback;
-  t->arg = arg;
+  t->callback = callback;
   struct timespec cur_time;
   clock_gettime(CLOCK_MONOTONIC, &cur_time);
   t->timeout_expires = AddMsecToTimespec(cur_time, value_msec);
@@ -221,7 +220,7 @@ void CallbackMultiTimeout(void* arg) {
   for (auto& t : mth->timeout_list) {
     if (++t->multi_timeout->current_count >=
         t->multi_timeout->count_to_expiration) {
-      t->_callback(t->arg);
+      t->callback();
       t->multi_timeout->current_count = 0;
       t->timeout_expires = AddMsecToTimespec(cur_time, t->interval_msec);
     }
@@ -257,8 +256,9 @@ void UpdateMultiTimeoutValues(MultiTimeoutHandler* mth) {
   timeout_list.erase(std::remove(timeout_list.begin(), timeout_list.end(),
                                  mth->parent_timeout),
                      timeout_list.end());
-  AddTimeoutInternal(next_timeout_msec, interval, CallbackMultiTimeout, mth,
-                     mth->parent_timeout);
+  AddTimeoutInternal(next_timeout_msec, interval, [mth]() {
+    CallbackMultiTimeout(mth);
+  }, mth->parent_timeout);
 }
 
 void RemoveFromMultiTimeout(Timeout* t) {
@@ -291,8 +291,7 @@ void RemoveFromMultiTimeout(Timeout* t) {
     int msec_to_expiration =
         diff_time.tv_sec * 1000 + diff_time.tv_nsec / 1000000;
     AddTimeoutInternal(msec_to_expiration, last_timeout->interval_msec,
-                       last_timeout->_callback, last_timeout->arg,
-                       last_timeout);
+                       last_timeout->callback, last_timeout);
   } else {
     UpdateMultiTimeoutValues(mth);
   }
@@ -334,7 +333,7 @@ void CleanupTimeout() {
   multi_timeouts.clear();
 }
 
-/** Implementation notes for timeouts: The timeouts are kept in a GSList sorted
+/** Implementation notes for timeouts: The timeouts are kept in a list sorted
 *by their
     * expiration time.
     * That means that update_next_timeout() only have to consider the first
@@ -353,16 +352,16 @@ void CleanupTimeout() {
     * however it's save to call it.
 **/
 
-Timeout* AddTimeout(int value_msec, int interval_msec, void (*_callback)(void*),
-                    void* arg) {
+Timeout* AddTimeout(int value_msec, int interval_msec,
+                    std::function<void()> callback) {
   auto t = new Timeout();
   t->multi_timeout = 0;
-  AddTimeoutInternal(value_msec, interval_msec, _callback, arg, t);
+  AddTimeoutInternal(value_msec, interval_msec, callback, t);
   return t;
 }
 
 void ChangeTimeout(Timeout* t, int value_msec, int interval_msec,
-                   void (*_callback)(void*), void* arg) {
+                   std::function<void()> callback) {
   auto timeout_it = std::find(timeout_list.begin(), timeout_list.end(), t);
   bool has_timeout = (timeout_it != timeout_list.end());
   bool has_multi_timeout = (multi_timeouts.find(t) != multi_timeouts.end());
@@ -378,7 +377,7 @@ void ChangeTimeout(Timeout* t, int value_msec, int interval_msec,
     timeout_list.erase(timeout_it);
   }
 
-  AddTimeoutInternal(value_msec, interval_msec, _callback, arg, t);
+  AddTimeoutInternal(value_msec, interval_msec, callback, t);
 }
 
 struct timeval* UpdateNextTimeout() {
@@ -423,11 +422,11 @@ void CallbackTimeoutExpired() {
     }
 
     // it's time for the callback function
-    t->_callback(t->arg);
+    t->callback();
 
     auto pos = std::find(timeout_list.begin(), timeout_list.end(), t);
 
-    // if _callback() calls stop_timeout(t) the timeout 't' was freed and is not
+    // if callback() calls stop_timeout(t) the timeout 't' was freed and is not
     // in the timeout_list
     // FIXME: make all of this less ugly
     if (pos == timeout_list.end()) {
@@ -436,8 +435,7 @@ void CallbackTimeoutExpired() {
       it = timeout_list.erase(pos);
 
       if (t->interval_msec > 0) {
-        AddTimeoutInternal(t->interval_msec, t->interval_msec, t->_callback,
-                           t->arg, t);
+        AddTimeoutInternal(t->interval_msec, t->interval_msec, t->callback, t);
       } else {
         delete t;
       }

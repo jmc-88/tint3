@@ -41,20 +41,18 @@ namespace {
 void StartShowTimeout() {
   if (g_tooltip.timeout != nullptr) {
     ChangeTimeout(g_tooltip.timeout, g_tooltip.show_timeout_msec, 0,
-                  TooltipShow, 0);
+                  TooltipShow);
   } else {
-    g_tooltip.timeout =
-        AddTimeout(g_tooltip.show_timeout_msec, 0, TooltipShow, 0);
+    g_tooltip.timeout = AddTimeout(g_tooltip.show_timeout_msec, 0, TooltipShow);
   }
 }
 
 void StartHideTimeout() {
   if (g_tooltip.timeout != nullptr) {
     ChangeTimeout(g_tooltip.timeout, g_tooltip.hide_timeout_msec, 0,
-                  TooltipHide, 0);
+                  TooltipHide);
   } else {
-    g_tooltip.timeout =
-        AddTimeout(g_tooltip.hide_timeout_msec, 0, TooltipHide, 0);
+    g_tooltip.timeout = AddTimeout(g_tooltip.hide_timeout_msec, 0, TooltipHide);
   }
 }
 
@@ -88,7 +86,7 @@ void DefaultTooltip() {
 
 void CleanupTooltip() {
   StopTooltipTimeout();
-  TooltipHide(0);
+  TooltipHide();
   g_tooltip.BindTo(nullptr);
 
   if (g_tooltip.window) {
@@ -147,7 +145,7 @@ void TooltipTriggerShow(Area* area, Panel* p, XEvent* e) {
   }
 }
 
-void TooltipShow(void* /* arg */) {
+void TooltipShow() {
   int mx, my;
   Window w;
   XTranslateCoordinates(server.dsp, server.root_win, g_tooltip.panel->main_win_,
@@ -258,7 +256,7 @@ void TooltipAdjustGeometry() {
 
 void Tooltip::Update() {
   if (tooltip_text.empty()) {
-    TooltipHide(0);
+    TooltipHide();
     return;
   }
 
@@ -329,7 +327,7 @@ void TooltipTriggerHide() {
   }
 }
 
-void TooltipHide(void* arg) {
+void TooltipHide() {
   StopTooltipTimeout();
 
   if (g_tooltip.mapped_) {

@@ -714,7 +714,7 @@ void SystrayRenderIcon(TrayWindow* traywin) {
     // updates to 50 ms
     if (traywin->render_timeout == 0) {
       traywin->render_timeout =
-          AddTimeout(50, 0, SystrayRenderIconNow, traywin);
+          AddTimeout(50, 0, [&traywin]() { SystrayRenderIconNow(traywin); });
     }
   } else {
     // comment by andreas: I'm still not sure, what exactly we need to do

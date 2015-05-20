@@ -357,7 +357,7 @@ void InitPanel() {
     }
 
     if (panel_autohide) {
-      AddTimeout(panel_autohide_hide_timeout, 0, AutohideHide, p);
+      AddTimeout(panel_autohide_hide_timeout, 0, [&p]() { AutohideHide(p); });
     }
 
     p->UpdateTaskbarVisibility();
@@ -912,10 +912,10 @@ void AutohideTriggerShow(Panel* p) {
 
   if (p->autohide_timeout_ != nullptr) {
     ChangeTimeout(p->autohide_timeout_, panel_autohide_show_timeout, 0,
-                  AutohideShow, p);
+                  [&p]() { AutohideShow(p); });
   } else {
     p->autohide_timeout_ =
-        AddTimeout(panel_autohide_show_timeout, 0, AutohideShow, p);
+        AddTimeout(panel_autohide_show_timeout, 0, [&p]() { AutohideShow(p); });
   }
 }
 
@@ -937,9 +937,9 @@ void AutohideTriggerHide(Panel* p) {
 
   if (p->autohide_timeout_ != nullptr) {
     ChangeTimeout(p->autohide_timeout_, panel_autohide_hide_timeout, 0,
-                  AutohideHide, p);
+                  [&p]() { AutohideHide(p); });
   } else {
     p->autohide_timeout_ =
-        AddTimeout(panel_autohide_hide_timeout, 0, AutohideHide, p);
+        AddTimeout(panel_autohide_hide_timeout, 0, [&p]() { AutohideHide(p); });
   }
 }

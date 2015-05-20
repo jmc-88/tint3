@@ -1168,7 +1168,7 @@ start:
   util::x11::EventLoop event_loop(&server);
 
   event_loop.RegisterHandler(ButtonPress, [](XEvent& e) -> void {
-    TooltipHide(nullptr);
+    TooltipHide();
     EventButtonPress(&e);
   });
 

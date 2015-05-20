@@ -19,6 +19,8 @@
 #ifndef TIMER_H
 #define TIMER_H
 
+#include <functional>
+
 extern struct timeval next_timeout;
 
 struct _multi_timeout;
@@ -27,8 +29,7 @@ typedef struct _multi_timeout MultiTimeout;
 typedef struct {
   int interval_msec;
   struct timespec timeout_expires;
-  void (*_callback)(void*);
-  void* arg;
+  std::function<void()> callback;
   MultiTimeout* multi_timeout;
 } Timeout;
 
@@ -51,16 +52,16 @@ void CleanupTimeout();
 
 /** installs a timeout with the first timeout of 'value_msec' and then a
 *periodic timeout with
-  * 'interval_msec'. '_callback' is the callback function when the timer reaches
+  * 'interval_msec'. 'callback' is the callback function when the timer reaches
 *the timeout.
   * returns a pointer to the timeout, which is needed for stopping it again
 **/
-Timeout* AddTimeout(int value_msec, int interval_msec, void (*_callback)(void*),
-                    void* arg);
+Timeout* AddTimeout(int value_msec, int interval_msec,
+                    std::function<void()> callback);
 
 /** changes timeout 't'. If timeout 't' does not exist, nothing happens **/
 void ChangeTimeout(Timeout* t, int value_msec, int interval_msec,
-                   void (*_callback)(void*), void* arg);
+                   std::function<void()> callback);
 
 /** stops the timeout 't' **/
 void StopTimeout(Timeout* t);

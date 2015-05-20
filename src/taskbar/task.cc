@@ -610,7 +610,7 @@ void SetTaskRedraw(Task* tsk) {
   tsk->need_redraw_ = true;
 }
 
-void BlinkUrgent(void* arg) {
+void BlinkUrgent() {
   for (auto& t : urgent_list) {
     if (t->urgent_tick < max_tick_urgent) {
       if (t->urgent_tick++ % 2) {
@@ -641,7 +641,7 @@ void Task::AddUrgent() {
     urgent_list.push_front(tsk);
 
     if (urgent_timeout == nullptr) {
-      urgent_timeout = AddTimeout(10, 1000, BlinkUrgent, 0);
+      urgent_timeout = AddTimeout(10, 1000, BlinkUrgent);
     }
   }
 }

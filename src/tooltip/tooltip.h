@@ -60,7 +60,7 @@ void CleanupTooltip();
 void InitTooltip();
 void TooltipTriggerHide();
 void TooltipTriggerShow(Area* area, Panel* p, XEvent* e);
-void TooltipHide(void* /*arg*/);
-void TooltipShow(void* /*arg*/);
+void TooltipHide();
+void TooltipShow();
 
 #endif  // TOOLTIP_H
