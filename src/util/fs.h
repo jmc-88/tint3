@@ -61,6 +61,8 @@ bool FileExists(std::string const& path);
 bool FileExists(std::initializer_list<std::string> parts);
 Path HomeDirectory();
 bool IsAbsolutePath(std::string const& path);
+bool ReadFile(std::string const& path,
+              std::function<void(std::string const&)> fn);
 bool ReadFileByLine(std::string const& path,
                     std::function<void(std::string const&)> fn);
 

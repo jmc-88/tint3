@@ -147,7 +147,10 @@ set(TINT3_SOURCES
     src/util/xdg.cc)
 
 if(ENABLE_BATTERY)
-    set(TINT3_SOURCES ${TINT3_SOURCES} src/battery/battery.cc)
+    set(TINT3_SOURCES
+        ${TINT3_SOURCES}
+        src/battery/battery.cc
+        src/battery/linux_sysfs.cc)
     add_definitions(-DENABLE_BATTERY)
 endif()
 

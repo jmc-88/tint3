@@ -39,21 +39,6 @@ class Battery : public Area {
 #endif  // _TINT3_DEBUG
 };
 
-enum class ChargeState { kUnknown, kCharging, kDischarging, kFull };
-
-struct BatteryTimestamp {
-  int16_t hours;
-  int8_t minutes;
-  int8_t seconds;
-};
-
-struct BatteryState {
-  int percentage;
-  BatteryTimestamp time;
-  ChargeState state;
-};
-
-extern BatteryState battery_state;
 extern PangoFontDescription* bat1_font_desc;
 extern PangoFontDescription* bat2_font_desc;
 extern bool battery_enabled;

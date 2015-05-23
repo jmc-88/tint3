@@ -181,6 +181,37 @@ bool IsAbsolutePath(std::string const& path) {
   return is_absolute;
 }
 
+bool ReadFile(std::string const& path,
+              std::function<void(std::string const&)> fn) {
+  std::ifstream is(path);
+  std::string contents;
+
+  if (!is.good()) {
+    return false;
+  }
+
+  is.seekg(0, is.end);
+  std::streamsize num_bytes_to_read = is.tellg();
+  is.seekg(0, is.beg);
+
+  while (!is.eof() && num_bytes_to_read != 0) {
+    std::streamsize buf_size = std::min(num_bytes_to_read, 1L << 20L);
+    char buf[buf_size + 1];
+
+    if (is.read(buf, buf_size).bad()) {
+      return false;
+    }
+
+    std::streamsize num_bytes_read = is.gcount();
+    num_bytes_to_read -= num_bytes_read;
+    buf[num_bytes_read] = '\0';
+    contents.append(buf);
+  }
+
+  fn(contents);
+  return true;
+}
+
 bool ReadFileByLine(std::string const& path,
                     std::function<void(std::string const&)> fn) {
   std::ifstream is(path);

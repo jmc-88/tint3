@@ -37,10 +37,13 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <memory>
 
 #include "panel.h"
 #include "server.h"
 #include "battery/battery.h"
+#include "battery/battery_interface.h"
+#include "battery/linux_sysfs.h"
 #include "util/common.h"
 #include "util/fs.h"
 #include "util/log.h"
@@ -49,7 +52,8 @@
 
 PangoFontDescription* bat1_font_desc;
 PangoFontDescription* bat2_font_desc;
-struct BatteryState battery_state;
+std::unique_ptr<BatteryInterface> battery_ptr;
+BatteryState battery_state;
 bool battery_enabled;
 int percentage_hide;
 static Timeout* battery_timeout;
@@ -102,24 +106,6 @@ void UpdateBatteries() {
       panel_refresh = true;
     }
   }
-}
-
-std::string GetBatteryDirectory() {
-  static std::string const kPowerSupply = "/sys/class/power_supply";
-
-  for (auto& entry : util::fs::DirectoryContents(kPowerSupply)) {
-    if (entry.substr(0, 2) == "AC") {
-      continue;
-    }
-
-    auto sys_path = util::fs::BuildPath({kPowerSupply, entry});
-
-    if (util::fs::FileExists({sys_path, "present"})) {
-      return sys_path;
-    }
-  }
-
-  return std::string();
 }
 
 }  // namespace
@@ -177,6 +163,8 @@ void InitBattery() {
     return;
   }
 
+  battery_ptr.reset();
+
 #if defined(__OpenBSD__) || defined(__NetBSD__)
   apm_fd = open("/dev/apm", O_RDONLY);
 
@@ -188,62 +176,21 @@ void InitBattery() {
 
 #elif !defined(__FreeBSD__)
   // check battery
-  std::string battery_dir = GetBatteryDirectory();
+  auto battery_dirs = linux_sysfs::GetBatteryDirectories();
 
-  if (battery_dir.empty()) {
-    util::log::Error() << "ERROR: battery applet can't found power_supply\n";
+  if (battery_dirs.empty()) {
+    util::log::Error() << "ERROR: battery applet can't find power_supply\n";
     DefaultBattery();
     return;
   }
 
-  if (util::fs::FileExists({battery_dir, "energy_now"})) {
-    path_energy_now = util::fs::BuildPath({battery_dir, "energy_now"});
-    path_energy_full = util::fs::BuildPath({battery_dir, "energy_full"});
-  } else if (util::fs::FileExists({battery_dir, "charge_now"})) {
-    path_energy_now = util::fs::BuildPath({battery_dir, "charge_now"});
-    path_energy_full = util::fs::BuildPath({battery_dir, "charge_full"});
-  } else {
-    util::log::Error() << "ERROR: can't found energy_* or charge_*\n";
+  // FIXME: this should handle all the batteries present
+  battery_ptr.reset(new linux_sysfs::Battery(battery_dirs.front()));
+
+  if (!battery_ptr->Found()) {
+    util::log::Error() << "Can't initialize battery status.\n";
+    return;
   }
-
-  path_current_now = util::fs::BuildPath({battery_dir, "power_now"});
-
-  if (!util::fs::FileExists(path_current_now)) {
-    path_current_now = util::fs::BuildPath({battery_dir, "current_now"});
-  }
-
-  if (!path_energy_now.empty() && !path_energy_full.empty()) {
-    path_status = util::fs::BuildPath({battery_dir, "status"});
-
-    // check file
-    FILE* fp1 = fopen(path_energy_now.c_str(), "r");
-    FILE* fp2 = fopen(path_energy_full.c_str(), "r");
-    FILE* fp3 = fopen(path_current_now.c_str(), "r");
-    FILE* fp4 = fopen(path_status.c_str(), "r");
-
-    if (fp1 == nullptr || fp2 == nullptr || fp3 == nullptr || fp4 == nullptr) {
-      CleanupBattery();
-      DefaultBattery();
-      util::log::Error() << "ERROR: battery applet can't open energy_now\n";
-    }
-
-    if (fp1) {
-      fclose(fp1);
-    }
-
-    if (fp2) {
-      fclose(fp2);
-    }
-
-    if (fp3) {
-      fclose(fp3);
-    }
-
-    if (fp4) {
-      fclose(fp4);
-    }
-  }
-
 #endif
 
   if (battery_enabled && battery_timeout == nullptr) {
@@ -270,19 +217,16 @@ void Battery::InitPanel(Panel* panel) {
 }
 
 void UpdateBattery() {
-#if !defined(__OpenBSD__) && !defined(__NetBSD__) && !defined(__FreeBSD__)
-  // unused on OpenBSD, silence compiler warnings
-  FILE* fp;
-  char tmp[25];
-  int64_t current_now = 0;
+#if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
+  int64_t energy_now = 0, energy_full = 0;
 #endif
+
 #if defined(__FreeBSD__)
   int sysctl_out = 0;
   size_t len = 0;
 #endif
-  int64_t energy_now = 0, energy_full = 0;
-  int seconds = 0;
-  int8_t new_percentage = 0;
+
+  unsigned int seconds = 0;
 
 #if defined(__OpenBSD__) || defined(__NetBSD__)
   struct apm_power_info info;
@@ -311,14 +255,13 @@ void UpdateBattery() {
   // no mapping for openbsd really
   energy_full = 0;
   energy_now = 0;
+  seconds = -1;
 
   if (info.minutes_left != -1) {
     seconds = info.minutes_left * 60;
-  } else {
-    seconds = -1;
   }
 
-  new_percentage = info.battery_life;
+  battery_state.percentage = info.battery_life;
 
 #elif defined(__FreeBSD__)
   len = sizeof(sysctl_out);
@@ -349,126 +292,39 @@ void UpdateBattery() {
   energy_full = 0;
   energy_now = 0;
 
-  if (sysctlbyname("hw.acpi.battery.time", &sysctl_out, &len, nullptr, 0) !=
+  seconds = 0;
+
+  if (sysctlbyname("hw.acpi.battery.time", &sysctl_out, &len, nullptr, 0) ==
       0) {
-    seconds = -1;
-  } else {
     seconds = sysctl_out * 60;
   }
 
-  // charging or error
-  if (seconds < 0) {
-    seconds = 0;
-  }
+  battery_state.percentage = -1;
 
-  if (sysctlbyname("hw.acpi.battery.life", &sysctl_out, &len, nullptr, 0) !=
+  if (sysctlbyname("hw.acpi.battery.life", &sysctl_out, &len, nullptr, 0) ==
       0) {
-    new_percentage = -1;
-  } else {
-    new_percentage = sysctl_out;
+    battery_state.percentage = sysctl_out;
   }
-
 #else
-  fp = fopen(path_status.c_str(), "r");
-
-  if (fp != nullptr) {
-    if (fgets(tmp, sizeof tmp, fp)) {
-      battery_state.state = ChargeState::kUnknown;
-
-      if (strcasecmp(tmp, "Charging\n") == 0) {
-        battery_state.state = ChargeState::kCharging;
-      }
-
-      if (strcasecmp(tmp, "Discharging\n") == 0) {
-        battery_state.state = ChargeState::kDischarging;
-      }
-
-      if (strcasecmp(tmp, "Full\n") == 0) {
-        battery_state.state = ChargeState::kFull;
-      }
-    }
-
-    fclose(fp);
-  }
-
-  fp = fopen(path_energy_now.c_str(), "r");
-
-  if (fp != nullptr) {
-    if (fgets(tmp, sizeof tmp, fp)) {
-      energy_now = atoi(tmp);
-    }
-
-    fclose(fp);
-  }
-
-  fp = fopen(path_energy_full.c_str(), "r");
-
-  if (fp != nullptr) {
-    if (fgets(tmp, sizeof tmp, fp)) {
-      energy_full = atoi(tmp);
-    }
-
-    fclose(fp);
-  }
-
-  fp = fopen(path_current_now.c_str(), "r");
-
-  if (fp != nullptr) {
-    if (fgets(tmp, sizeof tmp, fp)) {
-      current_now = atoi(tmp);
-    }
-
-    fclose(fp);
-  }
-
-  if (current_now > 0) {
-    switch (battery_state.state) {
-      case ChargeState::kCharging:
-        seconds = 3600 * (energy_full - energy_now) / current_now;
-        break;
-
-      case ChargeState::kDischarging:
-        seconds = 3600 * energy_now / current_now;
-        break;
-
-      default:
-        seconds = 0;
-        break;
-    }
-  } else {
-    seconds = 0;
-  }
-
+  battery_ptr->Update();
+  battery_state.percentage = battery_ptr->charge_percentage();
+  seconds = battery_ptr->seconds_to_charge();
 #endif
 
-  battery_state.time.hours = seconds / 3600;
-  seconds -= 3600 * battery_state.time.hours;
-  battery_state.time.minutes = seconds / 60;
-  seconds -= 60 * battery_state.time.minutes;
-  battery_state.time.seconds = seconds;
+  battery_state.time.seconds = (seconds % 60);
+  battery_state.time.minutes = ((seconds / 60) % 60);
+  battery_state.time.hours = (seconds / 3660);
 
-  if (energy_full > 0) {
-    new_percentage = (energy_now * 100) / energy_full;
-  }
-
-  if (battery_low_status > new_percentage &&
+  if (battery_low_status > battery_state.percentage &&
       battery_state.state == ChargeState::kDischarging &&
       !battery_low_cmd_send) {
     TintExec(battery_low_cmd);
     battery_low_cmd_send = 1;
   }
 
-  if (battery_low_status < new_percentage &&
+  if (battery_low_status < battery_state.percentage &&
       battery_state.state == ChargeState::kCharging && battery_low_cmd_send) {
     battery_low_cmd_send = 0;
-  }
-
-  battery_state.percentage = new_percentage;
-
-  // clamp percentage to 100 in case battery is misreporting that its current
-  // charge is more than its max
-  if (battery_state.percentage > 100) {
-    battery_state.percentage = 100;
   }
 }
 
