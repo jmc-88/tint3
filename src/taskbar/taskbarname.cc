@@ -143,8 +143,7 @@ bool Taskbarname::Resize() {
 
   int name_height, name_width, name_height_ink;
   GetTextSize2(taskbarname_font_desc, &name_height_ink, &name_height,
-               &name_width, panel_->height_, panel_->width_, name().c_str(),
-               name().length());
+               &name_width, panel_->height_, panel_->width_, name());
 
   if (panel_horizontal) {
     int new_size = name_width + (2 * (padding_x_lr_ + bg_->border.width));

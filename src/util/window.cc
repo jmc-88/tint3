@@ -293,7 +293,7 @@ gulong* GetBestIcon(gulong* data, int icon_count, int num, int* iw, int* ih,
 }
 
 void GetTextSize(PangoFontDescription* font, int* height_ink, int* height,
-                 int panel_height, char const* text, int len) {
+                 int panel_height, std::string const& text) {
   auto pmap = XCreatePixmap(server.dsp, server.root_win, panel_height,
                             panel_height, server.depth);
 
@@ -303,7 +303,7 @@ void GetTextSize(PangoFontDescription* font, int* height_ink, int* height,
 
   util::GObjectPtr<PangoLayout> layout(pango_cairo_create_layout(c));
   pango_layout_set_font_description(layout.get(), font);
-  pango_layout_set_text(layout.get(), text, len);
+  pango_layout_set_text(layout.get(), text.c_str(), text.length());
 
   PangoRectangle rect_ink, rect;
   pango_layout_get_pixel_extents(layout.get(), &rect_ink, &rect);
@@ -317,7 +317,7 @@ void GetTextSize(PangoFontDescription* font, int* height_ink, int* height,
 
 void GetTextSize2(PangoFontDescription* font, int* height_ink, int* height,
                   int* width, int panel_height, int panel_width,
-                  char const* text, int len) {
+                  std::string const& text) {
   auto pmap = XCreatePixmap(server.dsp, server.root_win, panel_height,
                             panel_height, server.depth);
 
@@ -327,7 +327,7 @@ void GetTextSize2(PangoFontDescription* font, int* height_ink, int* height,
 
   util::GObjectPtr<PangoLayout> layout(pango_cairo_create_layout(c));
   pango_layout_set_font_description(layout.get(), font);
-  pango_layout_set_text(layout.get(), text, len);
+  pango_layout_set_text(layout.get(), text.c_str(), text.length());
 
   PangoRectangle rect_ink, rect;
   pango_layout_get_pixel_extents(layout.get(), &rect_ink, &rect);
