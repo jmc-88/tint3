@@ -632,10 +632,10 @@ void AddEntry(std::string const& key, std::string const& value) {
 
   /* Tooltip */
   else if (key == "tooltip_show_timeout") {
-    int timeout_msec = 1000 * StringToFloat(value);
+    int timeout_msec = 1000 * std::stof(value);
     g_tooltip.show_timeout_msec = timeout_msec;
   } else if (key == "tooltip_hide_timeout") {
-    int timeout_msec = 1000 * StringToFloat(value);
+    int timeout_msec = 1000 * std::stof(value);
     g_tooltip.hide_timeout_msec = timeout_msec;
   } else if (key == "tooltip_padding") {
     config::ExtractValues(value, value1, value2, value3);
@@ -677,9 +677,9 @@ void AddEntry(std::string const& key, std::string const& value) {
   else if (key == "autohide") {
     panel_autohide = (0 != std::stol(value));
   } else if (key == "autohide_show_timeout") {
-    panel_autohide_show_timeout = 1000 * StringToFloat(value);
+    panel_autohide_show_timeout = 1000 * std::stof(value);
   } else if (key == "autohide_hide_timeout") {
-    panel_autohide_hide_timeout = 1000 * StringToFloat(value);
+    panel_autohide_hide_timeout = 1000 * std::stof(value);
   } else if (key == "strut_policy") {
     if (value == "follow_size") {
       panel_strut_policy = PanelStrutPolicy::kFollowSize;

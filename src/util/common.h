@@ -67,9 +67,6 @@ bool SignalAction(int signal_number, void signal_handler(int), int flags = 0);
 
 std::string& StringTrim(std::string& str);
 
-// Wrapper around strtof()
-float StringToFloat(std::string const& str, char** endptr = nullptr);
-
 template <typename T>
 std::string StringRepresentation(T const& value) {
   return StringBuilder() << value;

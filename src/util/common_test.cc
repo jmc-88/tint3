@@ -24,29 +24,6 @@ TEST_CASE("StringTrim", "Removing trailing spaces from strings should work") {
   }
 }
 
-TEST_CASE("StringToFloat",
-          "Parsing a string containing a floating point value should work") {
-  char* endptr = nullptr;
-
-  SECTION("A valid string produces no errors") {
-    std::string value{"1.23"};
-    REQUIRE(StringToFloat(value, &endptr) == 1.23f);
-    REQUIRE(*endptr == '\0');
-  }
-
-  SECTION("A partially valid string returns a value and an error") {
-    std::string value{"1.23this is not a number!"};
-    REQUIRE(StringToFloat(value, &endptr) == 1.23f);
-    REQUIRE(*endptr == 't');
-  }
-
-  SECTION("An entirely invalid string returns a null value and an error") {
-    std::string value{"this is not a number!"};
-    REQUIRE(StringToFloat(value, &endptr) == 0.0f);
-    REQUIRE(*endptr == 't');
-  }
-}
-
 TEST_CASE("SplitString",
           "Splitting a string using a character separator should work") {
   std::string s{"This is a string"};

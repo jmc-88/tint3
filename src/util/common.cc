@@ -125,10 +125,6 @@ std::string& StringTrim(std::string& str) {
   return str;
 }
 
-float StringToFloat(std::string const& str, char** endptr) {
-  return strtof(str.c_str(), endptr);
-}
-
 std::vector<std::string> SplitString(std::string const& str, char sep) {
   auto beg = str.cbegin();
   auto end = std::find(beg, str.cend(), sep);
