@@ -128,6 +128,7 @@ set(TINT3_SOURCES
     src/clock/clock.cc
     src/clock/time_utils.cc
     src/systray/systraybar.cc
+    src/systray/tray_window.cc
     src/launcher/launcher.cc
     src/launcher/xsettings-client.cc
     src/launcher/xsettings-common.cc

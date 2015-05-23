@@ -17,23 +17,12 @@
 #include "util/common.h"
 #include "util/area.h"
 #include "util/timer.h"
+#include "systray/tray_window.h"
 
 // XEMBED messages
 #define XEMBED_EMBEDDED_NOTIFY 0
 // Flags for _XEMBED_INFO
 #define XEMBED_MAPPED (1 << 0)
-
-struct TrayWindow {
-  Window id;
-  Window tray_id;
-  int x, y;
-  int width, height;
-  // TODO: manage icon's show/hide
-  int hide;
-  int depth;
-  Damage damage;
-  Timeout* render_timeout;
-};
 
 class Systraybar : public Area {
   void RemoveIconInternal(TrayWindow* traywin);

@@ -19,12 +19,10 @@
 *USA.
 **************************************************************************/
 
-#include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <X11/Xatom.h>
 #include <glib.h>
 #include <Imlib2.h>
-#include <X11/extensions/Xdamage.h>
 #include <X11/extensions/Xcomposite.h>
 #include <X11/extensions/Xrender.h>
 
@@ -33,11 +31,12 @@
 #include <cstdlib>
 #include <cstring>
 
-#include "systraybar.h"
 #include "server.h"
 #include "panel.h"
 #include "util/log.h"
 #include "util/x11.h"
+#include "systray/systraybar.h"
+#include "systray/tray_window.h"
 
 /* defined in the systray spec */
 #define SYSTEM_TRAY_REQUEST_DOCK 0
@@ -375,8 +374,6 @@ bool CompareTrayWindows(gconstpointer a, gconstpointer b) {
 }
 
 bool Systraybar::AddIcon(Window id) {
-  int hide = 0;
-
   error = false;
   XWindowAttributes attr;
 
@@ -456,10 +453,8 @@ bool Systraybar::AddIcon(Window id) {
     XSendEvent(server.dsp, id, False, 0xFFFFFF, &e);
   }
 
-  auto traywin = new TrayWindow();
-  traywin->id = parent_window;
-  traywin->tray_id = id;
-  traywin->hide = hide;
+  auto traywin = new TrayWindow(parent_window, id);
+  traywin->hide = false;
   traywin->depth = attr.depth;
   traywin->damage = 0;
 
@@ -601,12 +596,11 @@ void Systraybar::NetMessage(XClientMessageEvent* e) {
 
 namespace {
 
-void SystrayRenderIconNow(void* t) {
+void SystrayRenderIconNow(TrayWindow* traywin) {
   // we end up in this function only in real transparency mode or if
   // systray_task_asb != 100 0 0
   // we made also sure, that we always have a 32 bit visual, i.e. we can safely
   // create 32 bit pixmaps here
-  auto traywin = static_cast<TrayWindow*>(t);
   traywin->render_timeout = 0;
 
   if (traywin->width == 0 || traywin->height == 0) {
@@ -630,7 +624,7 @@ void SystrayRenderIconNow(void* t) {
   // please tell me ;)
   Pixmap tmp_pmap = XCreatePixmap(server.dsp, server.root_win, traywin->width,
                                   traywin->height, 32);
-  XRenderPictFormat* f;
+  XRenderPictFormat* f = nullptr;
 
   if (traywin->depth == 24) {
     f = XRenderFindStandardFormat(server.dsp, PictStandardRGB24);
@@ -642,12 +636,8 @@ void SystrayRenderIconNow(void* t) {
     return;
   }
 
-  Picture pict_image;
-  // if (server.real_transparency)
-  // pict_image = XRenderCreatePicture(server.dsp, traywin->id, f, 0, 0);
-  // reverted Rev 407 because here it's breaking alls icon with systray +
-  // xcompmgr
-  pict_image = XRenderCreatePicture(server.dsp, traywin->tray_id, f, 0, 0);
+  Picture pict_image =
+      XRenderCreatePicture(server.dsp, traywin->tray_id, f, 0, 0);
   Picture pict_drawable = XRenderCreatePicture(
       server.dsp, tmp_pmap,
       XRenderFindVisualFormat(server.dsp, server.visual32), 0, 0);
@@ -714,7 +704,7 @@ void SystrayRenderIcon(TrayWindow* traywin) {
     // updates to 50 ms
     if (traywin->render_timeout == 0) {
       traywin->render_timeout =
-          AddTimeout(50, 0, [&traywin]() { SystrayRenderIconNow(traywin); });
+          AddTimeout(50, 0, [traywin]() { SystrayRenderIconNow(traywin); });
     }
   } else {
     // comment by andreas: I'm still not sure, what exactly we need to do
