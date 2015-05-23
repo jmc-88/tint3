@@ -125,10 +125,6 @@ std::string& StringTrim(std::string& str) {
   return str;
 }
 
-long int StringToLongInt(std::string const& str, char** endptr) {
-  return strtol(str.c_str(), endptr, 10);
-}
-
 float StringToFloat(std::string const& str, char** endptr) {
   return strtof(str.c_str(), endptr);
 }

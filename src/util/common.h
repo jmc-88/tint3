@@ -67,9 +67,6 @@ bool SignalAction(int signal_number, void signal_handler(int), int flags = 0);
 
 std::string& StringTrim(std::string& str);
 
-// Wrapper around strtol()
-long int StringToLongInt(std::string const& str, char** endptr = nullptr);
-
 // Wrapper around strtof()
 float StringToFloat(std::string const& str, char** endptr = nullptr);
 

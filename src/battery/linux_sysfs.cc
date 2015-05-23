@@ -77,10 +77,10 @@ bool Battery::Update() {
   long int energy_now = 0;
 
   util::fs::ReadFile(path_energy_now_, [&](std::string const& contents) {
-    char* endptr = nullptr;
-    long int value = StringToLongInt(contents, &endptr);
+    std::size_t end;
+    long int value = std::stol(contents, &end);
 
-    if (*endptr == '\n') {
+    if (contents[end] == '\n') {
       energy_now = value;
     }
   });
@@ -88,10 +88,10 @@ bool Battery::Update() {
   long int energy_full = 0;
 
   util::fs::ReadFile(path_energy_full_, [&](std::string const& contents) {
-    char* endptr = nullptr;
-    long int value = StringToLongInt(contents, &endptr);
+    std::size_t end;
+    long int value = std::stol(contents, &end);
 
-    if (*endptr == '\n') {
+    if (contents[end] == '\n') {
       energy_full = value;
     }
   });
@@ -99,10 +99,10 @@ bool Battery::Update() {
   long int current_now = 0;
 
   util::fs::ReadFile(path_current_now_, [&](std::string const& contents) {
-    char* endptr = nullptr;
-    long int value = StringToLongInt(contents, &endptr);
+    std::size_t end;
+    long int value = std::stol(contents, &end);
 
-    if (*endptr == '\n') {
+    if (contents[end] == '\n') {
       current_now = value;
     }
   });

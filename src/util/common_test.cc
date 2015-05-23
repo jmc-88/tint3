@@ -24,29 +24,6 @@ TEST_CASE("StringTrim", "Removing trailing spaces from strings should work") {
   }
 }
 
-TEST_CASE("StringToLongInt",
-          "Parsing a string containing an integer value should work") {
-  char* endptr = nullptr;
-
-  SECTION("A valid string produces no errors") {
-    std::string value{"123"};
-    REQUIRE(StringToLongInt(value, &endptr) == 123L);
-    REQUIRE(*endptr == '\0');
-  }
-
-  SECTION("A partially valid string returns a value and an error") {
-    std::string value{"123this is not a number!"};
-    REQUIRE(StringToLongInt(value, &endptr) == 123L);
-    REQUIRE(*endptr == 't');
-  }
-
-  SECTION("An entirely invalid string returns a null value and an error") {
-    std::string value{"this is not a number!"};
-    REQUIRE(StringToLongInt(value, &endptr) == 0L);
-    REQUIRE(*endptr == 't');
-  }
-}
-
 TEST_CASE("StringToFloat",
           "Parsing a string containing a floating point value should work") {
   char* endptr = nullptr;
