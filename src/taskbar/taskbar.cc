@@ -28,6 +28,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <list>
 
 #include "server.h"
 #include "panel.h"
@@ -382,10 +383,16 @@ void TaskRefreshTasklist() {
     return;
   }
 
+  std::list<Window> windows_to_remove;
+
   for (auto const& pair : win_to_task_map) {
     if (!FindWindow(pair.first, windows.get(), num_results)) {
-      TaskbarRemoveTask(pair.first);
+      windows_to_remove.push_back(pair.first);
     }
+  }
+
+  for (auto const& w : windows_to_remove) {
+    TaskbarRemoveTask(w);
   }
 
   // Add any new
