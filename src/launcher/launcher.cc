@@ -632,7 +632,7 @@ IconTheme* LoadTheme(std::string const& name) {
 
           while (token != nullptr) {
             auto dir = new IconThemeDir();
-            dir->name = strdup(token);
+            dir->name = token;
             dir->max_size = dir->min_size = dir->size = -1;
             dir->type = ICON_DIR_TYPE_THRESHOLD;
             dir->threshold = 2;
@@ -678,7 +678,7 @@ IconTheme* LoadTheme(std::string const& name) {
         } else if (key == "Context") {
           // usual values: Actions, Applications, Devices, FileSystems,
           // MimeTypes
-          current_dir->context = strdup(value.c_str());
+          current_dir->context = value;
         }
       }
     }
@@ -752,12 +752,11 @@ void Launcher::LoadThemes() {
 
   std::list<std::string> queue{icon_theme_name};
   std::set<std::string> queued{icon_theme_name};
-  bool hicolor_loaded = false;
 
-  while (!queue.empty() || !hicolor_loaded) {
+  while (!queue.empty()) {
     if (queue.empty()) {
       if (queued.count("hicolor") != 0) {
-        hicolor_loaded = true;
+        // hicolor loaded
         break;
       }
 
@@ -839,9 +838,7 @@ std::string Launcher::GetIconPath(std::string const& icon_name, int size) {
   std::vector<std::string> basenames{
       util::fs::HomeDirectory() / ".icons",
       util::fs::HomeDirectory() / ".local" / "share" / "icons",
-      "/usr/local/share/icons",
-      "/usr/local/share/pixmaps",
-      "/usr/share/icons",
+      "/usr/local/share/icons", "/usr/local/share/pixmaps", "/usr/share/icons",
       "/usr/share/pixmaps",
   };
 

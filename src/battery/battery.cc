@@ -58,9 +58,6 @@ bool battery_enabled;
 int percentage_hide;
 static Timeout* battery_timeout;
 
-static char buf_bat_percentage[10];
-static char buf_bat_time[20];
-
 int8_t battery_low_status;
 unsigned char battery_low_cmd_send;
 std::string battery_low_cmd;
@@ -125,6 +122,8 @@ void DefaultBattery() {
   battery_state.percentage = 0;
   battery_state.time.hours = 0;
   battery_state.time.minutes = 0;
+  battery_state.time.seconds = 0;
+
 #if defined(__OpenBSD__) || defined(__NetBSD__)
   apm_fd = -1;
 #endif
@@ -335,8 +334,8 @@ void Battery::DrawForeground(cairo_t* c) {
   pango_layout_set_font_description(layout.get(), bat1_font_desc);
   pango_layout_set_width(layout.get(), width_ * PANGO_SCALE);
   pango_layout_set_alignment(layout.get(), PANGO_ALIGN_CENTER);
-  pango_layout_set_text(layout.get(), buf_bat_percentage,
-                        strlen(buf_bat_percentage));
+  pango_layout_set_text(layout.get(), battery_percentage_.c_str(),
+                        battery_percentage_.length());
 
   cairo_set_source_rgba(c, font.color[0], font.color[1], font.color[2],
                         font.alpha);
@@ -347,7 +346,8 @@ void Battery::DrawForeground(cairo_t* c) {
 
   pango_layout_set_font_description(layout.get(), bat2_font_desc);
   pango_layout_set_indent(layout.get(), 0);
-  pango_layout_set_text(layout.get(), buf_bat_time, strlen(buf_bat_time));
+  pango_layout_set_text(layout.get(), battery_time_.c_str(),
+                        battery_time_.length());
   pango_layout_set_width(layout.get(), width_ * PANGO_SCALE);
 
   pango_cairo_update_layout(c, layout.get());
@@ -358,25 +358,30 @@ void Battery::DrawForeground(cairo_t* c) {
 bool Battery::Resize() {
   need_redraw_ = true;
 
+  char buf_bat_percentage[10];
   snprintf(buf_bat_percentage, sizeof(buf_bat_percentage), "%d%%",
            battery_state.percentage);
+  battery_percentage_ = buf_bat_percentage;
 
   if (battery_state.state == ChargeState::kFull) {
-    strcpy(buf_bat_time, "Full");
+    battery_time_ = "Full";
   } else {
+    char buf_bat_time[20];
     snprintf(buf_bat_time, sizeof(buf_bat_time), "%02d:%02d",
              battery_state.time.hours, battery_state.time.minutes);
+    battery_time_ = buf_bat_time;
   }
 
   int bat_percentage_height, bat_percentage_width, bat_percentage_height_ink;
   GetTextSize2(bat1_font_desc, &bat_percentage_height_ink,
                &bat_percentage_height, &bat_percentage_width, panel_->height_,
-               panel_->width_, buf_bat_percentage, strlen(buf_bat_percentage));
+               panel_->width_, battery_percentage_.c_str(),
+               battery_percentage_.length());
 
   int bat_time_height, bat_time_width, bat_time_height_ink;
   GetTextSize2(bat2_font_desc, &bat_time_height_ink, &bat_time_height,
-               &bat_time_width, panel_->height_, panel_->width_, buf_bat_time,
-               strlen(buf_bat_time));
+               &bat_time_width, panel_->height_, panel_->width_,
+               battery_time_.c_str(), battery_time_.length());
 
   if (panel_horizontal) {
     int new_size = std::max(bat_percentage_width, bat_time_width) +

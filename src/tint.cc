@@ -120,7 +120,7 @@ void Init(int argc, char* argv[]) {
       i++;
 
       if (i < argc) {
-        snapshot_path = strdup(argv[i]);
+        snapshot_path = argv[i];
       }
     }
   }

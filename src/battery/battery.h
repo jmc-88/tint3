@@ -37,6 +37,10 @@ class Battery : public Area {
   std::string GetFriendlyName() const override;
 
 #endif  // _TINT3_DEBUG
+
+ private:
+  std::string battery_percentage_;
+  std::string battery_time_;
 };
 
 extern PangoFontDescription* bat1_font_desc;
