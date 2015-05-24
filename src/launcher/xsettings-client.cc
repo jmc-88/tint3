@@ -188,19 +188,16 @@ static XSettingsResult FetchCard8(XSettingsBuffer* buffer, CARD8* result) {
 #define XSETTINGS_PAD(n, m) ((n + m - 1) & (~(m - 1)))
 
 static XSettingsList* ParseSettings(unsigned char* data, size_t len) {
-  XSettingsBuffer buffer;
   XSettingsResult result = XSETTINGS_SUCCESS;
+  XSettingsBuffer buffer;
   XSettingsList* settings = nullptr;
-  CARD32 serial;
-  CARD32 n_entries;
-  CARD32 i;
   XSettingsSetting* setting = nullptr;
 
   local_byte_order = XSettingsByteOrder();
 
+  std::memset(&buffer, 0, sizeof(buffer));
   buffer.pos = buffer.data = data;
   buffer.len = len;
-
   result = FetchCard8(&buffer, (CARD8*)&buffer.byte_order);
 
   if (buffer.byte_order != MSBFirst && buffer.byte_order != LSBFirst) {
@@ -212,19 +209,21 @@ static XSettingsList* ParseSettings(unsigned char* data, size_t len) {
 
   buffer.pos += 3;
 
+  CARD32 serial;
   result = FetchCard32(&buffer, &serial);
 
   if (result != XSETTINGS_SUCCESS) {
     goto out;
   }
 
+  CARD32 n_entries;
   result = FetchCard32(&buffer, &n_entries);
 
   if (result != XSETTINGS_SUCCESS) {
     goto out;
   }
 
-  for (i = 0; i < n_entries; i++) {
+  for (CARD32 i = 0; i < n_entries; i++) {
     CARD8 type;
     CARD16 name_len;
     CARD32 v_int;

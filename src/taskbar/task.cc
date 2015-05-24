@@ -272,7 +272,7 @@ void GetIcon(Task* tsk) {
   }
 
   Imlib_Image img = nullptr;
-  int i;
+  int i = 0;
   auto data = ServerGetProperty<gulong>(tsk->win, server.atoms_["_NET_WM_ICON"],
                                         XA_CARDINAL, &i);
 
