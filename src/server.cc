@@ -38,48 +38,38 @@ namespace {
 
 static constexpr char const* const kAtomList[] = {
     /* X11 */
-    "_XEMBED",                         "_XEMBED_INFO",
-    "_XROOTMAP_ID",                    "_XROOTPMAP_ID",
+    "_XEMBED", "_XEMBED_INFO", "_XROOTMAP_ID", "_XROOTPMAP_ID",
     "_XSETTINGS_SETTINGS",
 
     /* NETWM */
-    "_NET_ACTIVE_WINDOW",              "_NET_CLIENT_LIST",
-    "_NET_CLOSE_WINDOW",               "_NET_CURRENT_DESKTOP",
-    "_NET_DESKTOP_GEOMETRY",           "_NET_DESKTOP_NAMES",
-    "_NET_DESKTOP_VIEWPORT",           "_NET_NUMBER_OF_DESKTOPS",
-    "_NET_SUPPORTING_WM_CHECK",        "_NET_SYSTEM_TRAY_MESSAGE_DATA",
-    "_NET_SYSTEM_TRAY_OPCODE",         "_NET_SYSTEM_TRAY_ORIENTATION",
-    "_NET_SYSTEM_TRAY_VISUAL",         "_NET_WM_CM_S0",
-    "_NET_WM_DESKTOP",                 "_NET_WM_ICON",
-    "_NET_WM_ICON_GEOMETRY",           "_NET_WM_NAME",
-    "_NET_WM_PID",                     "_NET_WM_STATE",
-    "_NET_WM_STATE_ABOVE",             "_NET_WM_STATE_BELOW",
+    "_NET_ACTIVE_WINDOW", "_NET_CLIENT_LIST", "_NET_CLOSE_WINDOW",
+    "_NET_CURRENT_DESKTOP", "_NET_DESKTOP_GEOMETRY", "_NET_DESKTOP_NAMES",
+    "_NET_DESKTOP_VIEWPORT", "_NET_NUMBER_OF_DESKTOPS",
+    "_NET_SUPPORTING_WM_CHECK", "_NET_SYSTEM_TRAY_MESSAGE_DATA",
+    "_NET_SYSTEM_TRAY_OPCODE", "_NET_SYSTEM_TRAY_ORIENTATION",
+    "_NET_SYSTEM_TRAY_VISUAL", "_NET_WM_CM_S0", "_NET_WM_DESKTOP",
+    "_NET_WM_ICON", "_NET_WM_ICON_GEOMETRY", "_NET_WM_NAME", "_NET_WM_PID",
+    "_NET_WM_STATE", "_NET_WM_STATE_ABOVE", "_NET_WM_STATE_BELOW",
     "_NET_WM_STATE_DEMANDS_ATTENTION", "_NET_WM_STATE_HIDDEN",
-    "_NET_WM_STATE_MAXIMIZED_HORZ",    "_NET_WM_STATE_MAXIMIZED_VERT",
-    "_NET_WM_STATE_MODAL",             "_NET_WM_STATE_SHADED",
-    "_NET_WM_STATE_SKIP_PAGER",        "_NET_WM_STATE_SKIP_TASKBAR",
-    "_NET_WM_STATE_STICKY",            "_NET_WM_STRUT",
-    "_NET_WM_STRUT_PARTIAL",           "_NET_WM_VISIBLE_NAME",
-    "_NET_WM_WINDOW_TYPE",             "_NET_WM_WINDOW_TYPE_DESKTOP",
-    "_NET_WM_WINDOW_TYPE_DIALOG",      "_NET_WM_WINDOW_TYPE_DOCK",
-    "_NET_WM_WINDOW_TYPE_MENU",        "_NET_WM_WINDOW_TYPE_NORMAL",
-    "_NET_WM_WINDOW_TYPE_SPLASH",      "_NET_WM_WINDOW_TYPE_TOOLBAR",
+    "_NET_WM_STATE_MAXIMIZED_HORZ", "_NET_WM_STATE_MAXIMIZED_VERT",
+    "_NET_WM_STATE_MODAL", "_NET_WM_STATE_SHADED", "_NET_WM_STATE_SKIP_PAGER",
+    "_NET_WM_STATE_SKIP_TASKBAR", "_NET_WM_STATE_STICKY", "_NET_WM_STRUT",
+    "_NET_WM_STRUT_PARTIAL", "_NET_WM_VISIBLE_NAME", "_NET_WM_WINDOW_TYPE",
+    "_NET_WM_WINDOW_TYPE_DESKTOP", "_NET_WM_WINDOW_TYPE_DIALOG",
+    "_NET_WM_WINDOW_TYPE_DOCK", "_NET_WM_WINDOW_TYPE_MENU",
+    "_NET_WM_WINDOW_TYPE_NORMAL", "_NET_WM_WINDOW_TYPE_SPLASH",
+    "_NET_WM_WINDOW_TYPE_TOOLBAR",
 
     /* Window Manager */
-    "WM_HINTS",                        "WM_NAME",
-    "WM_STATE",
+    "WM_HINTS", "WM_NAME", "WM_STATE",
 
     /* Drag and Drop */
-    "TARGETS",                         "XdndActionCopy",
-    "XdndAware",                       "XdndDrop",
-    "XdndEnter",                       "XdndFinished",
-    "XdndLeave",                       "XdndPosition",
-    "XdndSelection",                   "XdndStatus",
+    "TARGETS", "XdndActionCopy", "XdndAware", "XdndDrop", "XdndEnter",
+    "XdndFinished", "XdndLeave", "XdndPosition", "XdndSelection", "XdndStatus",
     "XdndTypeList",
 
     /* Miscellaneous */
-    "MANAGER",                         "UTF8_STRING",
-    "_MOTIF_WM_HINTS",                 "__SWM_VROOT"};
+    "MANAGER", "UTF8_STRING", "_MOTIF_WM_HINTS", "__SWM_VROOT"};
 
 static constexpr int kAtomCount = (sizeof(kAtomList) / sizeof(kAtomList[0]));
 
@@ -108,9 +98,6 @@ void Server::InitAtoms() {
 
   for (int i = 0; i < kAtomCount; ++i) {
     atoms_.insert(std::make_pair(kAtomList[i], atom_list[i]));
-
-    util::log::Debug() << "Atom " << kAtomList[i] << " = "
-                       << atoms_[kAtomList[i]] << '\n';
   }
 
   std::string name;
@@ -120,9 +107,6 @@ void Server::InitAtoms() {
   atom = XInternAtom(dsp, name.c_str(), False);
   atoms_.insert(std::make_pair("_XSETTINGS_SCREEN", atom));
 
-  util::log::Debug() << "Atom _XSETTINGS_SCREEN (" << name
-                     << ") = " << atoms_["_XSETTINGS_SCREEN"] << '\n';
-
   if (atom == None) {
     util::log::Error() << "tint3: XInternAtom(\"" << name << "\") failed\n";
   }
@@ -130,9 +114,6 @@ void Server::InitAtoms() {
   name.assign(StringBuilder() << "_NET_SYSTEM_TRAY_S" << DefaultScreen(dsp));
   atom = XInternAtom(dsp, name.c_str(), False);
   atoms_.insert(std::make_pair("_NET_SYSTEM_TRAY_SCREEN", atom));
-
-  util::log::Debug() << "Atom _NET_SYSTEM_TRAY_SCREEN (" << name
-                     << ") = " << atoms_["_NET_SYSTEM_TRAY_SCREEN"] << '\n';
 
   if (atom == None) {
     util::log::Error() << "tint3: XInternAtom(\"" << name << "\") failed\n";
