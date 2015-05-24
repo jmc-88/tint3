@@ -38,6 +38,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <memory>
+#include <string>
 
 #include "panel.h"
 #include "server.h"

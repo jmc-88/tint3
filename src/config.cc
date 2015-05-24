@@ -38,7 +38,7 @@
 #include <cstring>
 #include <cctype>
 #include <iostream>
-#include <stdexcept>
+#include <string>
 
 #include "server.h"
 #include "panel.h"
