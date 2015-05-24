@@ -162,9 +162,8 @@ void GetRootPixmap() {
   Atom pixmap_atoms[] = {server.atoms_["_XROOTPMAP_ID"],
                          server.atoms_["_XROOTMAP_ID"]};
 
-  for (size_t i = 0; i < sizeof(pixmap_atoms) / sizeof(Atom); ++i) {
-    auto res = ServerGetProperty<Pixmap>(server.root_win, pixmap_atoms[i],
-                                         XA_PIXMAP, 0);
+  for (Atom const& atom : pixmap_atoms) {
+    auto res = ServerGetProperty<Pixmap>(server.root_win, atom, XA_PIXMAP, 0);
 
     if (res != nullptr) {
       ret = (*res);
