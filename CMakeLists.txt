@@ -1,11 +1,19 @@
+cmake_minimum_required(VERSION 3.1 FATAL_ERROR)
 project(tint3)
-cmake_minimum_required(VERSION 2.8)
 
+# Additional CMake modules
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
+
+# Custom compiler flags
 set(CMAKE_C_FLAGS_DEBUG    "${CMAKE_C_FLAGS_DEBUG} -O0 -D_TINT3_DEBUG")
 set(CMAKE_CXX_FLAGS_DEBUG  "${CMAKE_CXX_FLAGS_DEBUG} -O0 -D_TINT3_DEBUG")
 set(CMAKE_C_FLAGS          "${CMAKE_C_FLAGS} -Wall -pthread")
-set(CMAKE_CXX_FLAGS        "${CMAKE_CXX_FLAGS} -Wall -pthread -std=c++11")
+set(CMAKE_CXX_FLAGS        "${CMAKE_CXX_FLAGS} -Wall -pthread")
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -pthread")
+
+# Require C++11 support
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 include(FindPkgConfig)
 include(CheckLibraryExists)
@@ -163,29 +171,28 @@ add_library(tint3_common_lib STATIC ${TINT3_SOURCES})
 
 add_executable(tint3 src/tint.cc)
 target_link_libraries(tint3 tint3_common_lib ${TINT3_LINK_LIBRARIES})
+set_target_properties(tint3 PROPERTIES
+                      LINK_FLAGS "-fsanitize=address -fno-omit-frame-pointer")
 
 # }}} build rules
 
 # {{{ test rules
 
+include(TestTarget)
 enable_testing()
 include_directories(test)
 
-add_executable(config_test src/config_test.cc)
+test_target(config_test src/config_test.cc)
 target_link_libraries(config_test tint3_common_lib ${TINT3_LINK_LIBRARIES})
-add_test(NAME config_test COMMAND config_test)
 
-add_executable(clock_time_utils_test src/clock/time_utils_test.cc)
+test_target(clock_time_utils_test src/clock/time_utils_test.cc)
 target_link_libraries(clock_time_utils_test tint3_common_lib ${TINT3_LINK_LIBRARIES})
-add_test(NAME clock_time_utils_test COMMAND clock_time_utils_test)
 
-add_executable(util_environment_test src/util/environment_test.cc)
+test_target(util_environment_test src/util/environment_test.cc)
 target_link_libraries(util_environment_test tint3_common_lib ${TINT3_LINK_LIBRARIES})
-add_test(NAME util_environment_test COMMAND util_environment_test)
 
-add_executable(util_common_test src/util/common_test.cc)
+test_target(util_common_test src/util/common_test.cc)
 target_link_libraries(util_common_test tint3_common_lib ${TINT3_LINK_LIBRARIES})
-add_test(NAME util_common_test COMMAND util_common_test)
 
 # }}} test rules
 
