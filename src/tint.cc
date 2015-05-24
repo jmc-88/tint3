@@ -1371,6 +1371,7 @@ start:
 
   if (event_loop.RunLoop()) {
     systray.Clear();
+    Cleanup();
     goto start;  // brrr
   }
 
@@ -1378,5 +1379,6 @@ start:
   // before we exit the program and destroy our own tray window.
   // FIXME: this wouldn't need manual deletion if there was no global state.
   systray.Clear();
+  Cleanup();
   return 0;
 }

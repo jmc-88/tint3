@@ -5,7 +5,7 @@
 namespace linux_sysfs {
 
 std::vector<std::string> GetBatteryDirectories() {
-  static std::string const kPowerSupply = "/sys/class/power_supply";
+  static std::string const kPowerSupply{"/sys/class/power_supply"};
 
   std::vector<std::string> directories;
 

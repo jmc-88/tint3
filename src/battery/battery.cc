@@ -155,6 +155,10 @@ void CleanupBattery() {
   }
 
 #endif
+
+#if defined(__linux__)
+  battery_ptr.reset();
+#endif
 }
 
 void InitBattery() {
