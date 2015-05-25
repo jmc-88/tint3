@@ -42,6 +42,7 @@
 #include "launcher.h"
 #include "util/fs.h"
 #include "util/log.h"
+#include "util/std_polyfill.h"
 
 bool launcher_enabled = false;
 int launcher_max_icon_size;

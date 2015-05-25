@@ -56,6 +56,19 @@ set(DATADIR share CACHE PATH "Directory for shared data")
 set(SYSCONFDIR /etc CACHE PATH "Directory for configuration files")
 set(DOCDIR share/doc/tint3 CACHE PATH "Directory for documentation files")
 
+# {{{ compiler_features.h
+
+# See if the compiler is utterly broken or not
+include(FindCompilerFeatures)
+
+configure_file(
+  ${CMAKE_SOURCE_DIR}/src/compiler_features.h.in
+  ${CMAKE_BINARY_DIR}/generated/compiler_features.h)
+
+include_directories(${CMAKE_BINARY_DIR}/generated)
+
+# }}} compiler_features.h
+
 # {{{ version.h
 #
 # This section inspired by:
@@ -150,6 +163,7 @@ set(TINT3_SOURCES
     src/util/environment.cc
     src/util/fs.cc
     src/util/log.cc
+    src/util/std_polyfill.cc
     src/util/timer.cc
     src/util/window.cc
     src/util/x11.cc

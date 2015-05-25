@@ -56,6 +56,7 @@
 #include "util/timer.h"
 #include "util/window.h"
 #include "util/xdg.h"
+#include "util/std_polyfill.h"
 
 #ifdef ENABLE_BATTERY
 #include "battery/battery.h"
