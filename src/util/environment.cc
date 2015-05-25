@@ -1,3 +1,5 @@
+#include <cerrno>
+#include <cstdlib>
 #include <cstring>
 
 #include "util/environment.h"
