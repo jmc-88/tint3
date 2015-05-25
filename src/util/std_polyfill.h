@@ -4,17 +4,20 @@
 #include <cstdlib>
 #include <string>
 
+#include "compiler_features.h"
+
 namespace std {
-  int stoi(std::string const& str,
-           std::size_t* pos = nullptr,
-           int base = 10);
+#ifndef HAVE_STD_STOI
+int stoi(std::string const& str, std::size_t* pos = nullptr, int base = 10);
+#endif  // HAVE_STD_STOI
 
-  long stol(std::string const& str,
-            std::size_t* pos = nullptr,
-            int base = 10);
+#ifndef HAVE_STD_STOL
+long stol(std::string const& str, std::size_t* pos = nullptr, int base = 10);
+#endif  // HAVE_STD_STOL
 
-  float stof(std::string const& str,
-             std::size_t* pos = nullptr);
+#ifndef HAVE_STD_STOF
+float stof(std::string const& str, std::size_t* pos = nullptr);
+#endif  // HAVE_STD_STOF
 }  // namespace std
 
 #endif  // STD_POLYFILL_H
