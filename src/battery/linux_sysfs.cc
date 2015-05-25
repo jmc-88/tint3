@@ -1,6 +1,7 @@
 #include "battery/linux_sysfs.h"
 #include "util/common.h"
 #include "util/fs.h"
+#include "util/std_polyfill.h"
 
 namespace linux_sysfs {
 
