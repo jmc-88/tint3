@@ -23,7 +23,8 @@
 
 #if defined(__OpenBSD__) || defined(__NetBSD__)
 #include <err.h>
-#include <machine/apmvar.h>
+#include <dev/apm/apmbios.h>
+#include <dev/apm/apmio.h>
 #include <sys/ioctl.h>
 #include <unistd.h>
 #endif
@@ -234,7 +235,7 @@ void UpdateBattery() {
 #if defined(__OpenBSD__) || defined(__NetBSD__)
   struct apm_power_info info;
 
-  if (ioctl(apm_fd, APM_IOC_GETPOWER, &(info)) < 0) {
+  if (ioctl(apm_fd, APM_IOC_GETPOWER, &info) < 0) {
     warn("power update: APM_IOC_GETPOWER");
   }
 
@@ -258,11 +259,7 @@ void UpdateBattery() {
   // no mapping for openbsd really
   energy_full = 0;
   energy_now = 0;
-  seconds = -1;
-
-  if (info.minutes_left != -1) {
-    seconds = info.minutes_left * 60;
-  }
+  seconds = info.minutes_left * 60;
 
   battery_state.percentage = info.battery_life;
 
