@@ -171,8 +171,6 @@ add_library(tint3_common_lib STATIC ${TINT3_SOURCES})
 
 add_executable(tint3 src/tint.cc)
 target_link_libraries(tint3 tint3_common_lib ${TINT3_LINK_LIBRARIES})
-set_target_properties(tint3 PROPERTIES
-                      LINK_FLAGS "-fsanitize=address -fno-omit-frame-pointer")
 
 # }}} build rules
 
