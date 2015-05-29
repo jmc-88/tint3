@@ -180,7 +180,7 @@ bool Launcher::Resize() {
           launcher_icon->icon_original_ =
               imlib_load_image(new_icon_path.c_str());
 
-          util::log::Error() << "launcher.c :" << __LINE__ << ": Using icon "
+          util::log::Error() << __FILE__ << ':' << __LINE__ << ": Using icon "
                              << new_icon_path.c_str() << '\n';
         }
 
@@ -196,7 +196,7 @@ bool Launcher::Resize() {
         launcher_icon->icon_scaled_ =
             ScaleIcon(launcher_icon->icon_original_, icon_size);
 
-        util::log::Error() << "launcher.c " << __LINE__ << ": Using icon "
+        util::log::Error() << __FILE__ << ':' << __LINE__ << ": Using icon "
                            << launcher_icon->icon_path_ << '\n';
       } else {
         // Free the old files
@@ -208,7 +208,7 @@ bool Launcher::Resize() {
             ScaleIcon(launcher_icon->icon_original_, launcher_icon->icon_size_);
         launcher_icon->icon_path_ = new_icon_path;
 
-        util::log::Error() << "launcher.c " << __LINE__ << ": Using icon "
+        util::log::Error() << __FILE__ << ':' << __LINE__ << ": Using icon "
                            << launcher_icon->icon_path_ << '\n';
       }
     }

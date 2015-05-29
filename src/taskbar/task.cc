@@ -314,8 +314,17 @@ void GetIcon(Task* tsk) {
   }
 
   if (img == nullptr) {
-    imlib_context_set_image(default_icon);
-    img = imlib_clone_image();
+    if (default_icon != nullptr) {
+      imlib_context_set_image(default_icon);
+      img = imlib_clone_image();
+    } else {
+      img = imlib_create_image(48, 48);
+      if (img) {
+        imlib_context_set_image(img);
+        imlib_context_set_color(0, 0, 0, 255);
+        imlib_image_fill_rectangle(0, 0, 48, 48);
+      }
+    }
   }
 
   // transform icons
@@ -336,11 +345,10 @@ void GetIcon(Task* tsk) {
     imlib_context_set_image(orig_image);
     tsk->icon[k] = imlib_clone_image();
     imlib_context_set_image(tsk->icon[k]);
-    DATA32* data32;
 
     if (panel->g_task.alpha[k] != 100 || panel->g_task.saturation[k] != 0 ||
         panel->g_task.brightness[k] != 0) {
-      data32 = imlib_image_get_data();
+      DATA32* data32 = imlib_image_get_data();
       AdjustAsb(data32, tsk->icon_width, tsk->icon_height,
                 panel->g_task.alpha[k],
                 (float)panel->g_task.saturation[k] / 100,

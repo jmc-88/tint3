@@ -42,20 +42,20 @@
 
 #include "version.h"
 #include "server.h"
-#include "window.h"
 #include "config.h"
-#include "task.h"
-#include "taskbar.h"
-#include "systraybar.h"
-#include "launcher.h"
+#include "launcher/launcher.h"
+#include "launcher/xsettings-client.h"
 #include "panel.h"
-#include "tooltip.h"
-#include "timer.h"
+#include "systray/systraybar.h"
+#include "taskbar/task.h"
+#include "taskbar/taskbar.h"
+#include "tooltip/tooltip.h"
 #include "util/common.h"
 #include "util/fs.h"
 #include "util/log.h"
+#include "util/timer.h"
+#include "util/window.h"
 #include "util/xdg.h"
-#include "xsettings-client.h"
 
 namespace {
 
@@ -236,6 +236,22 @@ void InitX11() {
     if (util::fs::FileExists(path)) {
       default_icon = imlib_load_image(path.c_str());
     }
+  }
+
+  if (default_icon == nullptr) {
+    util::log::Error()
+        << "Couldn't load the default icon, falling back to an empty image.\n";
+    default_icon = imlib_create_image(48, 48);
+    if (default_icon) {
+      imlib_context_set_image(default_icon);
+      imlib_context_set_color(0, 0, 0, 255);
+      imlib_image_fill_rectangle(0, 0, 48, 48);
+    }
+  }
+
+  if (default_icon == nullptr) {
+    util::log::Error() << "Couldn't even create a default icon image, "
+                          "admitting defeat! The application may misbehave.\n";
   }
 
   // get monitor and desktop config
