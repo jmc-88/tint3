@@ -1,10 +1,5 @@
-/**************************************************************************
-* Common declarations
-*
-**************************************************************************/
-
-#ifndef COMMON_H
-#define COMMON_H
+#ifndef TINT3_UTIL_COMMON_H
+#define TINT3_UTIL_COMMON_H
 
 #define WM_CLASS_TINT "panel"
 
@@ -90,4 +85,4 @@ void RenderImage(Drawable d, int x, int y, int w, int h);
 
 bool RegexMatch(std::string const& pattern, std::string const& string);
 
-#endif
+#endif  // TINT3_UTIL_COMMON_H

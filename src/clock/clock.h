@@ -1,14 +1,5 @@
-/**************************************************************************
-* Copyright (C) 2008 thierry lorthiois (lorthiois@bbsoft.fr)
-*
-* Clock with fonctionnal data (timeval, precision) and drawing data (area, font,
-*...).
-* Each panel use his own drawing data.
-*
-**************************************************************************/
-
-#ifndef CLOCK_H
-#define CLOCK_H
+#ifndef TINT3_CLOCK_CLOCK_H
+#define TINT3_CLOCK_CLOCK_H
 
 #include <sys/time.h>
 
@@ -63,4 +54,4 @@ void InitClock();
 
 void ClockAction(int button);
 
-#endif
+#endif  // TINT3_CLOCK_CLOCK_H

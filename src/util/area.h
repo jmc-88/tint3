@@ -1,24 +1,5 @@
-/**************************************************************************
-* Copyright (C) 2008 thierry lorthiois (lorthiois@bbsoft.fr)
-*
-* base class for all graphical objects (panel, taskbar, task, systray, clock,
-*...).
-* Area is at the begining of each object (&object == &area).
-*
-* Area manage the background and border drawing, size and padding.
-* Each Area has one Pixmap (pix).
-*
-* Area manage the tree of all objects. Parent object drawn before child object.
-*   panel -> taskbars -> tasks
-*         -> systray -> icons
-*         -> clock
-*
-* draw_foreground(obj) and resize(obj) are virtual function.
-*
-**************************************************************************/
-
-#ifndef AREA_H
-#define AREA_H
+#ifndef TINT3_UTIL_AREA_H
+#define TINT3_UTIL_AREA_H
 
 #include <glib.h>
 #include <X11/Xlib.h>
@@ -145,4 +126,4 @@ void DrawRect(cairo_t* c, double x, double y, double w, double h, double r);
 // clear pixmap with transparent color
 void ClearPixmap(Pixmap p, int x, int y, int w, int h);
 
-#endif
+#endif  // TINT3_UTIL_AREA_H

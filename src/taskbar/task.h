@@ -1,11 +1,5 @@
-/**************************************************************************
-* task :
-* -
-*
-**************************************************************************/
-
-#ifndef TASK_H
-#define TASK_H
+#ifndef TINT3_TASKBAR_TASK_H
+#define TINT3_TASKBAR_TASK_H
 
 #include <X11/Xlib.h>
 #include <pango/pangocairo.h>
@@ -104,4 +98,4 @@ Task* FindActiveTask(Task* current_task, Task* active_task);
 Task* NextTask(Task* tsk);
 Task* PreviousTask(Task* tsk);
 
-#endif
+#endif  // TINT3_TASKBAR_TASK_H

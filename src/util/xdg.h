@@ -1,5 +1,5 @@
-#ifndef TINT3_XDG_H
-#define TINT3_XDG_H
+#ifndef TINT3_UTIL_XDG_H
+#define TINT3_UTIL_XDG_H
 
 #include <string>
 #include <vector>
@@ -21,4 +21,4 @@ std::vector<std::string> ConfigDirs();
 }  // namespace xdg
 }  // namespace util
 
-#endif  // TINT3_XDG_H
+#endif  // TINT3_UTIL_XDG_H

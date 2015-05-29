@@ -1,12 +1,5 @@
-/**************************************************************************
-* Copyright (C) 2008 thierry lorthiois (lorthiois@bbsoft.fr)
-*
-* taskbar
-*
-**************************************************************************/
-
-#ifndef TASKBAR_H
-#define TASKBAR_H
+#ifndef TINT3_TASKBAR_TASKBAR_H
+#define TINT3_TASKBAR_TASKBAR_H
 
 #include <map>
 #include <vector>
@@ -66,4 +59,4 @@ Task* TaskGetTask(Window win);
 TaskPtrArray TaskGetTasks(Window win);
 void TaskRefreshTasklist();
 
-#endif
+#endif  // TINT3_TASKBAR_TASKBAR_H

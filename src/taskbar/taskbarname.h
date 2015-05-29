@@ -1,9 +1,5 @@
-/**************************************************************************
-* Copyright (C) 2008 thierry lorthiois (lorthiois@bbsoft.fr)
-**************************************************************************/
-
-#ifndef TASKBARNAME_H
-#define TASKBARNAME_H
+#ifndef TINT3_TASKBAR_TASKBARNAME_H
+#define TINT3_TASKBAR_TASKBARNAME_H
 
 #include "taskbar/taskbarbase.h"
 #include "util/common.h"
@@ -29,4 +25,4 @@ class Taskbarname : public TaskbarBase {
   static void InitPanel(Panel* panel);
 };
 
-#endif
+#endif  // TINT3_TASKBAR_TASKBARNAME_H

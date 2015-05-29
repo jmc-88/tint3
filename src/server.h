@@ -1,13 +1,5 @@
-/**************************************************************************
-* server :
-* -
-*
-* Check COPYING file for Copyright
-*
-**************************************************************************/
-
-#ifndef SERVER_H
-#define SERVER_H
+#ifndef TINT3_SERVER_H
+#define TINT3_SERVER_H
 
 #include <X11/Xatom.h>
 #include <X11/Xlib.h>
@@ -123,4 +115,4 @@ T GetProperty32(Window win, Atom at, Atom type) {
   return T();
 }
 
-#endif
+#endif  // TINT3_SERVER_H

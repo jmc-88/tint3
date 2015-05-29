@@ -20,15 +20,16 @@
  *
  * Author:  Owen Taylor, Red Hat, Inc.
  */
-#ifndef XSETTINGS_CLIENT_H
-#define XSETTINGS_CLIENT_H
+
+#ifndef TINT3_LAUNCHER_XSETTINGS_CLIENT_H
+#define TINT3_LAUNCHER_XSETTINGS_CLIENT_H
 
 #include <X11/Xlib.h>
 #include "xsettings-common.h"
 
 #ifdef __cplusplus
 extern "C" {
-#endif /* __cplusplus */
+#endif  // __cplusplus
 
 typedef struct _XSettingsClient XSettingsClient;
 
@@ -58,6 +59,6 @@ XSettingsResult XSettingsClientGetSetting(XSettingsClient* client,
 
 #ifdef __cplusplus
 }
-#endif /* __cplusplus */
+#endif  // __cplusplus
 
-#endif /* XSETTINGS_CLIENT_H */
+#endif  // TINT3_LAUNCHER_XSETTINGS_CLIENT_H

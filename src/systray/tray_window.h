@@ -1,5 +1,5 @@
-#ifndef TRAY_WINDOW_H
-#define TRAY_WINDOW_H
+#ifndef TINT3_SYSTRAYBAR_TRAY_WINDOW_H
+#define TINT3_SYSTRAYBAR_TRAY_WINDOW_H
 
 #include <X11/Xlib.h>
 #include <X11/extensions/Xdamage.h>
@@ -21,4 +21,4 @@ class TrayWindow {
   Timeout* render_timeout;
 };
 
-#endif  // TRAY_WINDOW_H
+#endif  // TINT3_SYSTRAYBAR_TRAY_WINDOW_H

@@ -1,13 +1,5 @@
-/**************************************************************************
-* window :
-* -
-*
-* Check COPYING file for Copyright
-*
-**************************************************************************/
-
-#ifndef WINDOW_H
-#define WINDOW_H
+#ifndef TINT3_UTIL_WINDOW_H
+#define TINT3_UTIL_WINDOW_H
 
 #include <glib.h>
 #include <pango/pangocairo.h>
@@ -40,4 +32,4 @@ void GetTextSize2(PangoFontDescription* font, int* height_ink, int* height,
                   int* width, int panel_height, int panel_with,
                   std::string const& text);
 
-#endif
+#endif  // TINT3_UTIL_WINDOW_H

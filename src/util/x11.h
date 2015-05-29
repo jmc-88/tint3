@@ -1,5 +1,5 @@
-#ifndef X11_H
-#define X11_H
+#ifndef TINT3_UTIL_X11_H
+#define TINT3_UTIL_X11_H
 
 #include <sys/types.h>
 #include <X11/Xlib.h>
@@ -67,4 +67,4 @@ Window CreateWindow(Window parent, int x, int y, unsigned int width,
 }  // namespace x11
 }  // namespace util
 
-#endif  // X11_H
+#endif  // TINT3_UTIL_X11_H

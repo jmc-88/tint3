@@ -1,5 +1,5 @@
-#ifndef ENVIRONMENT_H
-#define ENVIRONMENT_H
+#ifndef TINT3_UTIL_ENVIRONMENT_H
+#define TINT3_UTIL_ENVIRONMENT_H
 
 #include <string>
 
@@ -21,4 +21,4 @@ class ScopedOverride {
 
 }  // namespace environment
 
-#endif  // ENVIRONMENT_H
+#endif  // TINT3_UTIL_ENVIRONMENT_H

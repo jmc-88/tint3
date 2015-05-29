@@ -1,15 +1,5 @@
-/**************************************************************************
-* Copyright (C) 2008 Pål Staurland (staura@gmail.com)
-* Modified (C) 2008/2009 thierry lorthiois (lorthiois@bbsoft.fr)
-*
-* panel :
-* - draw panel and all objects according to panel_layout
-*
-*
-**************************************************************************/
-
-#ifndef PANEL_H
-#define PANEL_H
+#ifndef TINT3_PANEL_H
+#define TINT3_PANEL_H
 
 #include <pango/pangocairo.h>
 #include <sys/time.h>
@@ -181,4 +171,4 @@ void AutohideHide(void* p);
 void AutohideTriggerShow(Panel* p);
 void AutohideTriggerHide(Panel* p);
 
-#endif
+#endif  // TINT3_PANEL_H

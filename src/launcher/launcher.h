@@ -1,11 +1,5 @@
-/**************************************************************************
- * Copyright (C) 2010       (mrovi@interfete-web-club.com)
- *
- *
- **************************************************************************/
-
-#ifndef LAUNCHER_H
-#define LAUNCHER_H
+#ifndef TINT3_LAUNCHER_LAUNCHER_H
+#define TINT3_LAUNCHER_LAUNCHER_H
 
 #include <string>
 #include <vector>
@@ -114,4 +108,4 @@ void CleanupLauncher();
 
 void LauncherAction(LauncherIcon* launcher_icon, XEvent* evt);
 
-#endif
+#endif  // TINT3_LAUNCHER_LAUNCHER_H

@@ -1,13 +1,5 @@
-/**************************************************************************
-* config :
-* - parse config file in Panel struct.
-*
-* Check COPYING file for Copyright
-*
-**************************************************************************/
-
-#ifndef CONFIG_H
-#define CONFIG_H
+#ifndef TINT3_CONFIG_H
+#define TINT3_CONFIG_H
 
 #include <string>
 
@@ -26,4 +18,4 @@ bool Read();
 
 }  // namespace config
 
-#endif
+#endif  // TINT3_CONFIG_H

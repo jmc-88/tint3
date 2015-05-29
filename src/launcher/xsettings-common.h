@@ -20,12 +20,13 @@
  *
  * Author:  Owen Taylor, Red Hat, Inc.
  */
-#ifndef XSETTINGS_COMMON_H
-#define XSETTINGS_COMMON_H
+
+#ifndef TINT3_LAUNCHER_XSETTINGS_COMMON_H
+#define TINT3_LAUNCHER_XSETTINGS_COMMON_H
 
 #ifdef __cplusplus
 extern "C" {
-#endif /* __cplusplus */
+#endif  // __cplusplus
 
 /* Types of settings possible. Enum values correspond to
  * protocol values.
@@ -93,6 +94,6 @@ char XSettingsByteOrder();
 
 #ifdef __cplusplus
 }
-#endif /* __cplusplus */
+#endif  // __cplusplus
 
-#endif /* XSETTINGS_COMMON_H */
+#endif  // TINT3_LAUNCHER_XSETTINGS_COMMON_H

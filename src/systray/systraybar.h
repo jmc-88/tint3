@@ -1,14 +1,5 @@
-/**************************************************************************
-* Copyright (C) 2009 thierry lorthiois (lorthiois@bbsoft.fr)
-*
-* systraybar
-* systray implementation come from 'docker-1.5' by Ben Jansens,
-* and from systray/xembed specification (freedesktop.org).
-*
-**************************************************************************/
-
-#ifndef SYSTRAYBAR_H
-#define SYSTRAYBAR_H
+#ifndef TINT3_SYSTRAYBAR_SYSTRAYBAR_H
+#define TINT3_SYSTRAYBAR_SYSTRAYBAR_H
 
 #include <X11/extensions/Xdamage.h>
 
@@ -76,4 +67,4 @@ void InitSystray();
 void RefreshSystrayIcon();
 void SystrayRenderIcon(TrayWindow* traywin);
 
-#endif
+#endif  // TINT3_SYSTRAYBAR_SYSTRAYBAR_H

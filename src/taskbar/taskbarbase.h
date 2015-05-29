@@ -1,5 +1,5 @@
-#ifndef TASKBARBASE_H
-#define TASKBARBASE_H
+#ifndef TINT3_TASKBAR_TASKBARBASE_H
+#define TINT3_TASKBAR_TASKBARBASE_H
 
 #include <cstdlib>
 
@@ -19,4 +19,4 @@ class TaskbarBase : public Area {
   Pixmap state_pixmap_[kTaskbarCount];
 };
 
-#endif  // TASKBARBASE_H
+#endif  // TINT3_TASKBAR_TASKBARBASE_H

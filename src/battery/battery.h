@@ -1,14 +1,5 @@
-/**************************************************************************
-* Copyright (C) 2009 Sebastian Reichel <elektranox@gmail.com>
-*
-* Battery with functional data (percentage, time to life) and drawing data
-* (area, font, ...). Each panel use his own drawing data.
-* Need kernel > 2.6.23.
-*
-**************************************************************************/
-
-#ifndef BATTERY_H
-#define BATTERY_H
+#ifndef TINT3_BATTERY_BATTERY_H
+#define TINT3_BATTERY_BATTERY_H
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -66,4 +57,4 @@ void UpdateBattery();
 
 void InitBattery();
 
-#endif
+#endif  // TINT3_BATTERY_BATTERY_H
