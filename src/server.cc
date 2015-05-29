@@ -133,6 +133,12 @@ void Server::Cleanup() {
 
   if (gc) {
     XFreeGC(dsp, gc);
+    gc = nullptr;
+  }
+
+  if (dsp) {
+    XCloseDisplay(dsp);
+    dsp = nullptr;
   }
 }
 
@@ -308,6 +314,13 @@ int Server::GetCurrentDesktop() {
 int Server::GetNumberOfDesktops() {
   return GetProperty32<int>(root_win, atoms_["_NET_NUMBER_OF_DESKTOPS"],
                             XA_CARDINAL);
+}
+
+void Server::InitGC(Window win) {
+  if (!gc) {
+    XGCValues gcv;
+    gc = XCreateGC(dsp, win, 0, &gcv);
+  }
 }
 
 void Server::InitVisual() {

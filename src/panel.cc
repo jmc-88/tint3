@@ -343,11 +343,7 @@ void InitPanel() {
       XChangeWindowAttributes(server.dsp, p->main_win_, CWEventMask, &attr);
     }
 
-    if (!server.gc) {
-      XGCValues gcv;
-      server.gc = XCreateGC(server.dsp, p->main_win_, 0, &gcv);
-    }
-
+    server.InitGC(p->main_win_);
     p->SetProperties();
     p->SetBackground();
 

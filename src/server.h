@@ -65,6 +65,7 @@ class Server {
   void Cleanup();
   int GetCurrentDesktop();
   int GetNumberOfDesktops();
+  void InitGC(Window win);
   void InitAtoms();
   void InitVisual();
 };

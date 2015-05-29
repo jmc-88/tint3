@@ -260,12 +260,8 @@ void Cleanup() {
 
   imlib_context_disconnect_display();
 
-  server.Cleanup();
   CleanupTimeout();
-
-  if (server.dsp) {
-    XCloseDisplay(server.dsp);
-  }
+  server.Cleanup();
 }
 
 void GetSnapshot(const char* path) {
