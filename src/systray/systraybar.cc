@@ -684,6 +684,7 @@ void SystrayRenderIconNow(TrayWindow* traywin) {
             traywin->x - systray.panel_x_, traywin->y - systray.panel_y_,
             traywin->width, traywin->height, traywin->x, traywin->y);
   imlib_free_image_and_decache();
+
   XFreePixmap(server.dsp, tmp_pmap);
   imlib_context_set_visual(server.visual);
   imlib_context_set_colormap(server.colormap);

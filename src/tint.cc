@@ -22,7 +22,6 @@
 
 #include <unistd.h>
 #include <sys/stat.h>
-#include <Imlib2.h>
 #include <X11/Xutil.h>
 #include <X11/Xatom.h>
 #include <X11/Xlocale.h>
@@ -52,6 +51,7 @@
 #include "tooltip/tooltip.h"
 #include "util/common.h"
 #include "util/fs.h"
+#include "util/imlib2.h"
 #include "util/log.h"
 #include "util/timer.h"
 #include "util/window.h"
@@ -242,7 +242,7 @@ void InitX11() {
     util::log::Error()
         << "Couldn't load the default icon, falling back to an empty image.\n";
     default_icon = imlib_create_image(48, 48);
-    if (default_icon) {
+    if (default_icon != nullptr) {
       imlib_context_set_image(default_icon);
       imlib_context_set_color(0, 0, 0, 255);
       imlib_image_fill_rectangle(0, 0, 48, 48);
@@ -269,11 +269,6 @@ void Cleanup() {
 #endif
   CleanupPanel();
 
-  if (default_icon) {
-    imlib_context_set_image(default_icon);
-    imlib_free_image();
-  }
-
   imlib_context_disconnect_display();
 
   CleanupTimeout();
@@ -292,8 +287,8 @@ void GetSnapshot(const char* path) {
   panel.Render();
 
   imlib_context_set_drawable(panel.temp_pmap);
-  Imlib_Image img =
-      imlib_create_image_from_drawable(0, 0, 0, panel.width_, panel.height_, 0);
+  util::imlib2::Image img{imlib_create_image_from_drawable(
+      0, 0, 0, panel.width_, panel.height_, 0)};
 
   imlib_context_set_image(img);
 
@@ -304,7 +299,6 @@ void GetSnapshot(const char* path) {
   }
 
   imlib_save_image(path);
-  imlib_free_image();
 }
 
 void WindowAction(Task* tsk, MouseAction action) {

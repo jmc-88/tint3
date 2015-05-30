@@ -59,8 +59,7 @@ const char kIconFallback[] = "application-x-executable";
 }  // namespace
 
 bool LauncherReadDesktopFile(std::string const& path, DesktopEntry* entry);
-Imlib_Image ScaleIcon(Imlib_Image original, int icon_size);
-void FreeIcon(Imlib_Image icon);
+util::imlib2::Image ScaleIcon(Imlib_Image original, int icon_size);
 void FreeIconTheme(IconTheme* theme);
 
 void DefaultLauncher() {
@@ -170,10 +169,8 @@ bool Launcher::Resize() {
 
       if (new_icon_path.empty()) {
         // Draw a blank icon
-        FreeIcon(launcher_icon->icon_original_);
-        launcher_icon->icon_original_ = nullptr;
-        FreeIcon(launcher_icon->icon_scaled_);
-        launcher_icon->icon_scaled_ = nullptr;
+        launcher_icon->icon_original_.Free();
+        launcher_icon->icon_scaled_.Free();
         new_icon_path = GetIconPath(kIconFallback, launcher_icon->icon_size_);
 
         if (!new_icon_path.empty()) {
@@ -192,16 +189,12 @@ bool Launcher::Resize() {
       if (!launcher_icon->icon_path_.empty() &&
           new_icon_path == launcher_icon->icon_path_) {
         // If it's the same file just rescale
-        FreeIcon(launcher_icon->icon_scaled_);
         launcher_icon->icon_scaled_ =
             ScaleIcon(launcher_icon->icon_original_, icon_size);
 
         util::log::Error() << __FILE__ << ':' << __LINE__ << ": Using icon "
                            << launcher_icon->icon_path_ << '\n';
       } else {
-        // Free the old files
-        FreeIcon(launcher_icon->icon_original_);
-        FreeIcon(launcher_icon->icon_scaled_);
         // Load the new file and scale
         launcher_icon->icon_original_ = imlib_load_image(new_icon_path.c_str());
         launcher_icon->icon_scaled_ =
@@ -285,11 +278,6 @@ bool Launcher::Resize() {
   return 1;
 }
 
-LauncherIcon::~LauncherIcon() {
-  FreeIcon(icon_scaled_);
-  FreeIcon(icon_original_);
-}
-
 // Here we override the default layout of the icons; normally Area layouts its
 // children
 // in a stack; we need to layout them in a kind of table
@@ -320,7 +308,7 @@ std::string LauncherIcon::GetFriendlyName() const { return "LauncherIcon"; }
 
 #endif  // _TINT3_DEBUG
 
-Imlib_Image ScaleIcon(Imlib_Image original, int icon_size) {
+util::imlib2::Image ScaleIcon(Imlib_Image original, int icon_size) {
   Imlib_Image icon_scaled;
 
   if (original) {
@@ -343,13 +331,6 @@ Imlib_Image ScaleIcon(Imlib_Image original, int icon_size) {
   }
 
   return icon_scaled;
-}
-
-void FreeIcon(Imlib_Image icon) {
-  if (icon) {
-    imlib_context_set_image(icon);
-    imlib_free_image();
-  }
 }
 
 void LauncherAction(LauncherIcon* launcher_icon, XEvent* evt) {

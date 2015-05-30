@@ -10,11 +10,12 @@
 
 #include "clock/clock.h"
 #include "launcher/launcher.h"
-#include "util/area.h"
-#include "util/common.h"
 #include "systray/systraybar.h"
 #include "taskbar/task.h"
 #include "taskbar/taskbar.h"
+#include "util/area.h"
+#include "util/common.h"
+#include "util/imlib2.h"
 
 #ifdef ENABLE_BATTERY
 #include "battery/battery.h"
@@ -70,7 +71,7 @@ extern int max_tick_urgent;
 
 extern std::vector<Background*> backgrounds;
 
-extern Imlib_Image default_icon;
+extern util::imlib2::Image default_icon;
 
 // tint3 use one panel per monitor and one taskbar per desktop.
 class Panel : public Area {

@@ -4,16 +4,15 @@
 #include <string>
 #include <vector>
 
-#include "common.h"
-#include "area.h"
-#include "xsettings-client.h"
+#include "launcher/xsettings-client.h"
+#include "util/area.h"
+#include "util/common.h"
+#include "util/imlib2.h"
 
 class LauncherIcon : public Area {
  public:
-  ~LauncherIcon();
-
-  Imlib_Image icon_scaled_;
-  Imlib_Image icon_original_;
+  util::imlib2::Image icon_scaled_;
+  util::imlib2::Image icon_original_;
   std::string cmd_;
   std::string icon_name_;
   std::string icon_path_;

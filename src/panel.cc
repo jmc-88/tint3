@@ -80,7 +80,7 @@ int nb_panel;
 
 std::vector<Background*> backgrounds;
 
-Imlib_Image default_icon;
+util::imlib2::Image default_icon;
 
 namespace {
 
@@ -163,7 +163,7 @@ void StopAutohideTimeout(Panel* p) {
 void DefaultPanel() {
   panel1 = nullptr;
   nb_panel = 0;
-  default_icon = nullptr;
+  default_icon.Free();
   task_dragged = false;
   panel_horizontal = true;
   panel_vertical_position = PanelVerticalPosition::kBottom;
