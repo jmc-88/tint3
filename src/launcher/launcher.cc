@@ -416,10 +416,6 @@ bool ParseThemeLine(std::string const& line, std::string& key,
 }
 
 void ExpandExec(DesktopEntry* entry, std::string const& path) {
-  // Expand % in exec
-  // %i -> --icon Icon
-  // %c -> Name
-  // %k -> path
   if (entry->exec.empty()) {
     return;
   }
@@ -428,8 +424,6 @@ void ExpandExec(DesktopEntry* entry, std::string const& path) {
 
   // p will never point to an escaped char
   for (auto c = entry->exec.begin(); c != entry->exec.end(); ++c) {
-    expanded.push_back(*c);
-
     if (*c == '\\') {
       ++c;
 
@@ -438,11 +432,11 @@ void ExpandExec(DesktopEntry* entry, std::string const& path) {
       }
 
       // Copy the escaped char
-      if (*c == '%') {  // For % we delete the backslash, i.e. write % over it
-        expanded[expanded.length() - 1] = '%';
-      } else {
-        expanded.push_back(*c);
+      if (*c != '%') {
+        expanded.push_back('\\');
       }
+
+      expanded.push_back(*c);
     } else if (*c == '%') {
       ++c;
 
@@ -454,9 +448,17 @@ void ExpandExec(DesktopEntry* entry, std::string const& path) {
         expanded.append(StringBuilder() << "--icon '" << entry->icon << '\'');
       } else if (*c == 'c' && !entry->name.empty()) {
         expanded.append(StringBuilder() << '\'' << entry->name << '\'');
-      } else {
-        expanded.append(StringBuilder() << '\'' << path << '\'');
+      } else if (*c == 'f' || *c == 'F') {
+        // Ignore the expansions in this case, we have no files to pass to the
+        // executable.
+        // TODO: this could not be true in cases of Drag and Drop.
+      } else if (*c == 'u' || *c == 'U') {
+        // Ignore the expansions in this case, we have no URLs to pass to the
+        // executable.
+        // TODO: this could not be true in cases of Drag and Drop.
       }
+    } else {
+      expanded.push_back(*c);
     }
   }
 
