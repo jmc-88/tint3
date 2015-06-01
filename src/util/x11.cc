@@ -1,8 +1,7 @@
 #include "server.h"
 #include "panel.h"
 #include "util/x11.h"
-
-#include <sys/select.h>
+#include "util/select.h"
 
 namespace util {
 namespace x11 {
@@ -61,13 +60,10 @@ bool EventLoop::RunLoop() {
       }
     }
 
-    fd_set fdset;
-    FD_ZERO(&fdset);
-    FD_SET(x11_file_descriptor_, &fdset);
+    util::SyncIoMux mux;
+    mux.read_fdset().Add(x11_file_descriptor_);
 
-    auto timeout = UpdateNextTimeout();
-
-    if (select(x11_file_descriptor_ + 1, &fdset, 0, 0, timeout) > 0) {
+    if (mux.Select(UpdateNextTimeout())) {
       while (XPending(server_->dsp)) {
         XEvent e;
         XNextEvent(server_->dsp, &e);
@@ -132,7 +128,6 @@ bool EventLoop::RunLoop() {
       // We're asked to restart tint3.
       // SIGUSR1 is used in case of user-sent signal, composite manager
       // stop/start or XRandR
-      FD_CLR(x11_file_descriptor_, &fdset);
       return true;
     }
   }

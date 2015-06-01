@@ -74,6 +74,7 @@ set(SOURCES
     src/util/common.cc
     src/util/fs.cc
     src/util/log.cc
+    src/util/select.cc
     src/util/timer.cc
     src/util/window.cc
     src/util/x11.cc
