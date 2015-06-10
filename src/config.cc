@@ -700,7 +700,7 @@ void AddEntry(std::string const& key, std::string const& value) {
   // old config option
   else if (key == "systray") {
     if (!new_config_file) {
-      systray_enabled = std::stol(value);
+      systray_enabled = (0 != std::stol(value));
 
       if (systray_enabled) {
         panel_items_order.push_back('S');
@@ -709,7 +709,7 @@ void AddEntry(std::string const& key, std::string const& value) {
   } else if (key == "battery") {
 #ifdef ENABLE_BATTERY
     if (!new_config_file) {
-      battery_enabled = std::stol(value);
+      battery_enabled = (0 != std::stol(value));
 
       if (battery_enabled) {
         panel_items_order.push_back('B');
