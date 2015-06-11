@@ -180,6 +180,7 @@ void DefaultPanel() {
   max_tick_urgent = 14;
 
   // append full transparency background
+  backgrounds.clear();
   backgrounds.push_back(new Background());
 }
 
@@ -221,6 +222,13 @@ void CleanupPanel() {
   if (panel_config.g_task.font_desc) {
     pango_font_description_free(panel_config.g_task.font_desc);
   }
+
+  // clean up backgrounds
+  for (auto& b : backgrounds) {
+    delete b;
+  }
+
+  backgrounds.clear();
 }
 
 void InitPanel() {
