@@ -183,6 +183,8 @@ bool IsAbsolutePath(std::string const& path) {
 
 bool ReadFile(std::string const& path,
               std::function<void(std::string const&)> fn) {
+  static std::streamsize kMaxBytesToRead = (1 << 20);
+
   std::ifstream is(path);
   std::string contents;
 
@@ -195,7 +197,7 @@ bool ReadFile(std::string const& path,
   is.seekg(0, is.beg);
 
   while (!is.eof() && num_bytes_to_read != 0) {
-    std::streamsize buf_size = std::min(num_bytes_to_read, 1L << 20L);
+    std::streamsize buf_size = std::min(num_bytes_to_read, kMaxBytesToRead);
     char buf[buf_size + 1];
 
     if (is.read(buf, buf_size).bad()) {
