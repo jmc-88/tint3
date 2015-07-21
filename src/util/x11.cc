@@ -141,7 +141,8 @@ bool EventLoop::RunLoop() {
       next_timeval = ToTimeval(duration);
     }
 
-    if (select(max_fd_ + 1, &fdset, 0, 0, next_timeval.get()) > 0) {
+    if (XPending(server_->dsp) ||
+        select(max_fd_ + 1, &fdset, 0, 0, next_timeval.get()) > 0) {
       // Remove bytes written by WakeUp()
       if (FD_ISSET(self_pipe_[0], &fdset)) {
         while (true) {
