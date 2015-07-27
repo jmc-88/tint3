@@ -31,5 +31,9 @@ before_script:
   - cmake "${TRAVIS_BUILD_DIR}" -DCMAKE_BUILD_TYPE=Release
 
 script:
+  # Verify tint3 builds and passes tests
   - cd "${TRAVIS_BUILD_DIR}/build"
   - make all test
+
+  # Verify the installation script works, then clean up
+  - sudo make install DESTDIR=/opt/tint3 && sudo rm -rf /opt/tint3
