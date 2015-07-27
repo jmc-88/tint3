@@ -264,7 +264,7 @@ bool Launcher::Resize() {
         posx += (icon_size + padding_x_);
       }
     } else {
-      if (i % icons_per_column) {
+      if (i % icons_per_row) {
         posx += (icon_size + padding_x_);
       } else {
         posx = start;
