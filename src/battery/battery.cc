@@ -60,7 +60,7 @@ int percentage_hide;
 static Timeout* battery_timeout;
 
 int8_t battery_low_status;
-unsigned char battery_low_cmd_send;
+bool battery_low_cmd_send;
 std::string battery_low_cmd;
 std::string path_energy_now;
 std::string path_energy_full;
@@ -111,7 +111,7 @@ void UpdateBatteries() {
 void DefaultBattery() {
   battery_enabled = false;
   percentage_hide = 101;
-  battery_low_cmd_send = 0;
+  battery_low_cmd_send = false;
   battery_timeout = 0;
   bat1_font_desc = 0;
   bat2_font_desc = 0;
@@ -323,12 +323,12 @@ void UpdateBattery() {
       battery_state.state == ChargeState::kDischarging &&
       !battery_low_cmd_send) {
     TintExec(battery_low_cmd);
-    battery_low_cmd_send = 1;
+    battery_low_cmd_send = true;
   }
 
   if (battery_low_status < battery_state.percentage &&
       battery_state.state == ChargeState::kCharging && battery_low_cmd_send) {
-    battery_low_cmd_send = 0;
+    battery_low_cmd_send = false;
   }
 }
 
