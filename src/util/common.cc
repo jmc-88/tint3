@@ -139,14 +139,18 @@ std::vector<std::string> SplitString(std::string const& str, char sep) {
   return parts;
 }
 
-void TintExec(std::string const& command) {
+void TintShellExec(std::string const& command) {
   if (!command.empty()) {
     if (fork() == 0) {
       // change for the fork the signal mask
       //          sigset_t sigset;
       //          sigprocmask(SIG_SETMASK, &sigset, 0);
       //          sigprocmask(SIG_UNBLOCK, &sigset, 0);
-      execlp(command.c_str(), command.c_str(), nullptr);
+
+      // "/bin/sh" should be guaranteed to be a POSIX-compliant shell
+      // accepting the "-c" flag:
+      //   http://pubs.opengroup.org/onlinepubs/9699919799/utilities/sh.html
+      execlp("/bin/sh", "sh", "-c", command.c_str(), nullptr);
 
       // In case execlp() fails and the process image is not replaced
       util::log::Error() << "Failed launching \"" << command << "\".\n";

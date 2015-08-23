@@ -69,8 +69,8 @@ std::string StringRepresentation(T const& value) {
 
 std::vector<std::string> SplitString(std::string const& str, char sep);
 
-// execute a command by calling fork
-void TintExec(std::string const& command);
+// fork and execute a shell script
+void TintShellExec(std::string const& command);
 
 // color conversion
 bool GetColor(const std::string& hex, double* rgb);

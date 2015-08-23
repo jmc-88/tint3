@@ -322,7 +322,7 @@ void UpdateBattery() {
   if (battery_low_status > battery_state.percentage &&
       battery_state.state == ChargeState::kDischarging &&
       !battery_low_cmd_send) {
-    TintExec(battery_low_cmd);
+    TintShellExec(battery_low_cmd);
     battery_low_cmd_send = true;
   }
 

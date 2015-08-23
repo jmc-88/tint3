@@ -250,8 +250,8 @@ std::string Clock::GetFriendlyName() const { return "Clock"; }
 
 void ClockAction(int button) {
   if (button == 1) {
-    TintExec(clock_lclick_command);
+    TintShellExec(clock_lclick_command);
   } else if (button == 2) {
-    TintExec(clock_rclick_command);
+    TintShellExec(clock_rclick_command);
   }
 }
