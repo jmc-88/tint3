@@ -6,7 +6,7 @@ Because of this, you'll need to manually do the following:
   - remove the default `.git/hooks`, which only contains example scripts:
     ```rm -rf .git/hooks```
   - symlink the `hooks` directory in:
-    ```ln -s ../hooks .git/hooks
+    ```ln -s ../hooks .git/hooks```
 
 The `pre-commit` script uses
 [clang-format](http://clang.llvm.org/docs/ClangFormat.html), so make sure you
