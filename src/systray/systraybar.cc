@@ -19,24 +19,24 @@
 *USA.
 **************************************************************************/
 
-#include <X11/Xutil.h>
-#include <X11/Xatom.h>
-#include <glib.h>
 #include <Imlib2.h>
+#include <X11/Xatom.h>
+#include <X11/Xutil.h>
 #include <X11/extensions/Xcomposite.h>
 #include <X11/extensions/Xrender.h>
+#include <glib.h>
 
 #include <algorithm>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
 
-#include "server.h"
 #include "panel.h"
-#include "util/log.h"
-#include "util/x11.h"
+#include "server.h"
 #include "systray/systraybar.h"
 #include "systray/tray_window.h"
+#include "util/log.h"
+#include "util/x11.h"
 
 /* defined in the systray spec */
 #define SYSTEM_TRAY_REQUEST_DOCK 0
@@ -64,6 +64,11 @@ void DefaultSystray() {
 
 void CleanupSystray() {
   systray.StopNet();
+
+  if (systray_enabled) {
+    systray.Clear();
+  }
+
   systray_enabled = false;
   systray_max_icon_size = 0;
   systray.on_screen_ = false;

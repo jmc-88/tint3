@@ -20,12 +20,12 @@
 *USA.
 **************************************************************************/
 
-#include <unistd.h>
-#include <sys/stat.h>
-#include <X11/Xutil.h>
 #include <X11/Xatom.h>
 #include <X11/Xlocale.h>
+#include <X11/Xutil.h>
 #include <X11/extensions/Xdamage.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 #ifdef HAVE_SN
 #include <sys/wait.h>
@@ -33,18 +33,17 @@
 
 #include <algorithm>
 #include <csignal>
+#include <cstdint>
 #include <cstdio>
 #include <cstdlib>
-#include <cstdint>
 #include <cstring>
 #include <iostream>
 
-#include "version.h"
-#include "server.h"
 #include "config.h"
 #include "launcher/launcher.h"
 #include "launcher/xsettings-client.h"
 #include "panel.h"
+#include "server.h"
 #include "systray/systraybar.h"
 #include "taskbar/task.h"
 #include "taskbar/taskbar.h"
@@ -56,6 +55,7 @@
 #include "util/timer.h"
 #include "util/window.h"
 #include "util/xdg.h"
+#include "version.h"
 
 namespace {
 
@@ -509,12 +509,8 @@ void EventButtonRelease(XEvent* e) {
   }
 
   static std::map<unsigned int, MouseAction> mouse_actions{
-      {2, mouse_middle},
-      {3, mouse_right},
-      {4, mouse_scroll_up},
-      {5, mouse_scroll_down},
-      {6, mouse_tilt_left},
-      {7, mouse_tilt_right},
+      {2, mouse_middle},      {3, mouse_right},     {4, mouse_scroll_up},
+      {5, mouse_scroll_down}, {6, mouse_tilt_left}, {7, mouse_tilt_right},
   };
 
   MouseAction action = MouseAction::kNone;
@@ -919,9 +915,10 @@ Property ReadProperty(Display* disp, Window w, Atom property) {
   util::log::Debug() << "DnD " << __FILE__ << ':' << __LINE__ << ": Property:\n"
                      << "DnD " << __FILE__ << ':' << __LINE__
                      << ": Actual type: " << GetAtomName(disp, actual_type)
-                     << '\n' << "DnD " << __FILE__ << ':' << __LINE__
-                     << ": Actual format: " << actual_format << '\n' << "DnD "
-                     << __FILE__ << ':' << __LINE__
+                     << '\n'
+                     << "DnD " << __FILE__ << ':' << __LINE__
+                     << ": Actual format: " << actual_format << '\n'
+                     << "DnD " << __FILE__ << ':' << __LINE__
                      << ": Number of items: " << nitems << '\n';
 
   Property p;
@@ -1006,14 +1003,16 @@ void DragAndDropEnter(XClientMessageEvent* e) {
   util::log::Debug() << "DnD " << __FILE__ << ':' << __LINE__ << ": DnDEnter\n"
                      << "DnD " << __FILE__ << ':' << __LINE__
                      << ": DnDEnter. Supports > 3 types = "
-                     << (more_than_3 ? "yes" : "no") << '\n' << "DnD "
-                     << __FILE__ << ':' << __LINE__
-                     << ": Protocol version = " << dnd_version << '\n' << "DnD "
-                     << __FILE__ << ':' << __LINE__
+                     << (more_than_3 ? "yes" : "no") << '\n'
+                     << "DnD " << __FILE__ << ':' << __LINE__
+                     << ": Protocol version = " << dnd_version << '\n'
+                     << "DnD " << __FILE__ << ':' << __LINE__
                      << ": Type 1 = " << GetAtomName(server.dsp, e->data.l[2])
-                     << '\n' << "DnD " << __FILE__ << ':' << __LINE__
+                     << '\n'
+                     << "DnD " << __FILE__ << ':' << __LINE__
                      << ": Type 2 = " << GetAtomName(server.dsp, e->data.l[3])
-                     << '\n' << "DnD " << __FILE__ << ':' << __LINE__
+                     << '\n'
+                     << "DnD " << __FILE__ << ':' << __LINE__
                      << ": Type 3 = " << GetAtomName(server.dsp, e->data.l[4])
                      << '\n';
 
@@ -1227,7 +1226,8 @@ start:
   });
 
   event_loop.RegisterHandler(
-      {UnmapNotify, DestroyNotify}, [&](XEvent& e) -> void {
+      {UnmapNotify, DestroyNotify},
+      [&](XEvent& e) -> void {
         if (e.xany.window == server.composite_manager) {
           // Stop real_transparency
           signal_pending = SIGUSR1;
@@ -1269,19 +1269,17 @@ start:
   event_loop.RegisterHandler(SelectionNotify, [&](XEvent& e) -> void {
     Atom target = e.xselection.target;
 
-    util::log::Debug() << "DnD " << __FILE__ << ':' << __LINE__
-                       << ": A selection notify has arrived!\n"
-                       << "DnD " << __FILE__ << ':' << __LINE__
-                       << ": Requestor = " << e.xselectionrequest.requestor
-                       << '\n' << "DnD " << __FILE__ << ':' << __LINE__
-                       << ": Selection atom = "
-                       << GetAtomName(server.dsp, e.xselection.selection)
-                       << '\n' << "DnD " << __FILE__ << ':' << __LINE__
-                       << ": Target atom    = "
-                       << GetAtomName(server.dsp, target) << '\n' << "DnD "
-                       << __FILE__ << ':' << __LINE__ << ": Property atom  = "
-                       << GetAtomName(server.dsp, e.xselection.property)
-                       << '\n';
+    util::log::Debug()
+        << "DnD " << __FILE__ << ':' << __LINE__
+        << ": A selection notify has arrived!\n"
+        << "DnD " << __FILE__ << ':' << __LINE__
+        << ": Requestor = " << e.xselectionrequest.requestor << '\n'
+        << "DnD " << __FILE__ << ':' << __LINE__ << ": Selection atom = "
+        << GetAtomName(server.dsp, e.xselection.selection) << '\n'
+        << "DnD " << __FILE__ << ':' << __LINE__
+        << ": Target atom    = " << GetAtomName(server.dsp, target) << '\n'
+        << "DnD " << __FILE__ << ':' << __LINE__ << ": Property atom  = "
+        << GetAtomName(server.dsp, e.xselection.property) << '\n';
 
     if (e.xselection.property != None && !dnd_launcher_exec.empty()) {
       Property prop =
@@ -1384,7 +1382,6 @@ start:
   // Make sure we reparent all the tray icon windows to the server root window
   // before we exit the program and destroy our own tray window.
   // FIXME: this wouldn't need manual deletion if there was no global state.
-  systray.Clear();
   Cleanup();
   return 0;
 }
