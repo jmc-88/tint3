@@ -16,18 +16,18 @@
 *USA.
 **************************************************************************/
 
-#include <time.h>
-#include <sys/time.h>
-#include <stdlib.h>
-#include <stdio.h>
 #include <glib.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/time.h>
+#include <time.h>
 
 #include <algorithm>
 #include <list>
 #include <map>
 
-#include "util/timer.h"
 #include "util/log.h"
+#include "util/timer.h"
 
 // functions and structs for multi timeouts
 struct _multi_timeout {
@@ -211,9 +211,7 @@ int CalcMultiTimeoutInterval(MultiTimeoutHandler* mth) {
   return min_interval;
 }
 
-void CallbackMultiTimeout(void* arg) {
-  auto mth = static_cast<MultiTimeoutHandler*>(arg);
-
+void CallbackMultiTimeout(MultiTimeoutHandler* mth) {
   struct timespec cur_time;
   clock_gettime(CLOCK_MONOTONIC, &cur_time);
 
@@ -256,9 +254,9 @@ void UpdateMultiTimeoutValues(MultiTimeoutHandler* mth) {
   timeout_list.erase(std::remove(timeout_list.begin(), timeout_list.end(),
                                  mth->parent_timeout),
                      timeout_list.end());
-  AddTimeoutInternal(next_timeout_msec, interval, [mth]() {
-    CallbackMultiTimeout(mth);
-  }, mth->parent_timeout);
+  AddTimeoutInternal(next_timeout_msec, interval,
+                     [mth]() { CallbackMultiTimeout(mth); },
+                     mth->parent_timeout);
 }
 
 void RemoveFromMultiTimeout(Timeout* t) {
