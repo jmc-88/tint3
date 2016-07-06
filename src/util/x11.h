@@ -1,11 +1,11 @@
 #ifndef TINT3_UTIL_X11_H
 #define TINT3_UTIL_X11_H
 
-#include <sys/types.h>
 #include <X11/Xlib.h>
+#include <sys/types.h>
 
-#include <initializer_list>
 #include <functional>
+#include <initializer_list>
 #include <map>
 #include <memory>
 

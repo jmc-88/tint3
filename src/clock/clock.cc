@@ -19,8 +19,8 @@
 *USA.
 **************************************************************************/
 
-#include <cairo.h>
 #include <cairo-xlib.h>
+#include <cairo.h>
 #include <pango/pangocairo.h>
 
 #include <algorithm>
@@ -29,10 +29,10 @@
 #include <cstring>
 #include <string>
 
-#include "server.h"
-#include "panel.h"
 #include "clock/clock.h"
 #include "clock/time_utils.h"
+#include "panel.h"
+#include "server.h"
 #include "util/common.h"
 #include "util/timer.h"
 #include "util/window.h"

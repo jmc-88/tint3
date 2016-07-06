@@ -16,17 +16,17 @@
 *USA.
 **************************************************************************/
 
-#include <unistd.h>
-#include <cairo.h>
 #include <cairo-xlib.h>
+#include <cairo.h>
+#include <unistd.h>
 
 #include <algorithm>
 #include <cstdio>
-#include <cstring>
 #include <cstdlib>
+#include <cstring>
 
-#include "server.h"
 #include "panel.h"
+#include "server.h"
 #include "tooltip/tooltip.h"
 #include "util/common.h"
 #include "util/timer.h"

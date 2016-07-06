@@ -19,17 +19,17 @@
 *USA.
 **************************************************************************/
 
-#include <unistd.h>
-#include <X11/extensions/Xrender.h>
 #include <X11/extensions/Xrandr.h>
+#include <X11/extensions/Xrender.h>
+#include <unistd.h>
 
 #include <algorithm>
 #include <cstdio>
 #include <cstdlib>
 #include <iostream>
 
-#include "server.h"
 #include "config.h"
+#include "server.h"
 #include "util/common.h"
 #include "util/log.h"
 #include "util/window.h"

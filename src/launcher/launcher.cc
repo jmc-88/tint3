@@ -17,11 +17,11 @@
 *USA.
 **************************************************************************/
 
-#include <cairo.h>
 #include <cairo-xlib.h>
-#include <unistd.h>
-#include <signal.h>
+#include <cairo.h>
 #include <glib/gi18n.h>
+#include <signal.h>
+#include <unistd.h>
 
 #ifdef HAVE_SN
 #include <libsn/sn.h>
@@ -36,10 +36,10 @@
 #include <set>
 #include <string>
 
-#include "server.h"
-#include "panel.h"
-#include "taskbar.h"
 #include "launcher.h"
+#include "panel.h"
+#include "server.h"
+#include "taskbar.h"
 #include "util/fs.h"
 #include "util/log.h"
 
@@ -821,7 +821,9 @@ std::string Launcher::GetIconPath(std::string const& icon_name, int size) {
   std::vector<std::string> basenames{
       util::fs::HomeDirectory() / ".icons",
       util::fs::HomeDirectory() / ".local" / "share" / "icons",
-      "/usr/local/share/icons", "/usr/local/share/pixmaps", "/usr/share/icons",
+      "/usr/local/share/icons",
+      "/usr/local/share/pixmaps",
+      "/usr/share/icons",
       "/usr/share/pixmaps",
   };
 

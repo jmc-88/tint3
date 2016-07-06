@@ -1,8 +1,8 @@
 #define CATCH_CONFIG_MAIN
 #include "catch.hpp"
 
-#include "config.h"
 #include <string>
+#include "config.h"
 
 using namespace config;
 

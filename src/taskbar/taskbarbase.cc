@@ -1,7 +1,7 @@
 #include <cstring>
 
-#include "taskbarbase.h"
 #include "server.h"
+#include "taskbarbase.h"
 
 TaskbarBase::TaskbarBase() {
   std::memset(&state_pixmap_, 0, sizeof(state_pixmap_));

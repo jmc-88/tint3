@@ -1,9 +1,9 @@
 #define CATCH_CONFIG_MAIN
 #include "catch.hpp"
 
-#include "util/common.h"
 #include <string>
 #include <vector>
+#include "util/common.h"
 
 TEST_CASE("StringTrim", "Removing trailing spaces from strings should work") {
   std::string s;

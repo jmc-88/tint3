@@ -2,8 +2,8 @@
 #define TINT3_TASKBAR_TASKBARNAME_H
 
 #include "taskbar/taskbarbase.h"
-#include "util/common.h"
 #include "util/area.h"
+#include "util/common.h"
 
 extern bool taskbarname_enabled;
 extern PangoFontDescription* taskbarname_font_desc;

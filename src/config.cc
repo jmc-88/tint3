@@ -20,32 +20,32 @@
 *USA.
 **************************************************************************/
 
-#include <sys/stat.h>
-#include <sys/time.h>
-#include <unistd.h>
-#include <cairo.h>
-#include <cairo-xlib.h>
+#include <Imlib2.h>
+#include <X11/Xatom.h>
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
-#include <X11/Xatom.h>
+#include <cairo-xlib.h>
+#include <cairo.h>
 #include <glib/gstdio.h>
 #include <pango/pangocairo.h>
 #include <pango/pangoxft.h>
-#include <Imlib2.h>
+#include <sys/stat.h>
+#include <sys/time.h>
+#include <unistd.h>
 
+#include <cctype>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#include <cctype>
 #include <iostream>
 #include <string>
 
-#include "server.h"
-#include "panel.h"
-#include "systraybar.h"
 #include "clock.h"
 #include "config.h"
 #include "launcher/launcher.h"
+#include "panel.h"
+#include "server.h"
+#include "systraybar.h"
 #include "taskbar/task.h"
 #include "taskbar/taskbar.h"
 #include "taskbar/taskbarname.h"

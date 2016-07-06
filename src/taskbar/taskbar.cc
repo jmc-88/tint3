@@ -19,10 +19,10 @@
 *USA.
 **************************************************************************/
 
+#include <Imlib2.h>
+#include <X11/Xatom.h>
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
-#include <X11/Xatom.h>
-#include <Imlib2.h>
 
 #include <algorithm>
 #include <cstdio>
@@ -30,12 +30,12 @@
 #include <cstring>
 #include <list>
 
-#include "server.h"
 #include "panel.h"
+#include "server.h"
 #include "taskbar/task.h"
 #include "taskbar/taskbar.h"
-#include "util/window.h"
 #include "util/log.h"
+#include "util/window.h"
 
 namespace {
 

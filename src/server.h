@@ -10,8 +10,8 @@
 #include <vector>
 
 #ifdef HAVE_SN
-#include <libsn/sn.h>
 #include <glib.h>
+#include <libsn/sn.h>
 #endif
 
 #include "util/x11.h"

@@ -30,12 +30,12 @@
 #include <X11/Xlib.h>
 #include <X11/Xmd.h> /* For CARD16 */
 
-#include "xsettings-client.h"
-#include "server.h"
-#include "panel.h"
 #include "launcher.h"
+#include "panel.h"
+#include "server.h"
 #include "util/log.h"
 #include "util/x11.h"
+#include "xsettings-client.h"
 
 struct _XSettingsClient {
   Display* display;

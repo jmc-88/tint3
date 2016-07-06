@@ -20,9 +20,9 @@
 *USA.
 **************************************************************************/
 
+#include <X11/Xatom.h>
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
-#include <X11/Xatom.h>
 #include <unistd.h>
 
 #include <algorithm>
@@ -30,8 +30,8 @@
 #include <cstdlib>
 #include <cstring>
 
-#include "server.h"
 #include "panel.h"
+#include "server.h"
 #include "taskbar/task.h"
 #include "taskbar/taskbar.h"
 #include "tooltip/tooltip.h"

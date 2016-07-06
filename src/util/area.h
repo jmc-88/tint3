@@ -1,10 +1,10 @@
 #ifndef TINT3_UTIL_AREA_H
 #define TINT3_UTIL_AREA_H
 
-#include <glib.h>
 #include <X11/Xlib.h>
-#include <cairo.h>
 #include <cairo-xlib.h>
+#include <cairo.h>
+#include <glib.h>
 
 #include <string>
 #include <vector>

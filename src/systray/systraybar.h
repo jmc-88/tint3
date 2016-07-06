@@ -5,10 +5,10 @@
 
 #include <list>
 
-#include "util/common.h"
-#include "util/area.h"
-#include "util/timer.h"
 #include "systray/tray_window.h"
+#include "util/area.h"
+#include "util/common.h"
+#include "util/timer.h"
 
 // XEMBED messages
 #define XEMBED_EMBEDDED_NOTIFY 0

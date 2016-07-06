@@ -10,8 +10,9 @@
 namespace {
 
 std::function<std::string(std::string)> DefaultValue(std::string value) {
-  return [value](std::string other)
-      -> std::string { return (!other.empty()) ? other : value; };
+  return [value](std::string other) -> std::string {
+    return (!other.empty()) ? other : value;
+  };
 }
 
 std::string ValidatePath(std::string path) {

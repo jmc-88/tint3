@@ -1,15 +1,18 @@
 #ifndef TINT3_BATTERY_BATTERY_H
 #define TINT3_BATTERY_BATTERY_H
 
-#include <sys/types.h>
-#include <sys/stat.h>
 #include <fcntl.h>
+#include <pango/pangocairo.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 
 #include <string>
 
-#include "panel.h"
 #include "util/area.h"
 #include "util/common.h"
+
+// forward declarations
+class Panel;
 
 // battery drawing parameter (per panel)
 class Battery : public Area {

@@ -18,19 +18,19 @@
 *USA.
 **************************************************************************/
 
-#include <cairo.h>
 #include <cairo-xlib.h>
+#include <cairo.h>
 
 #if defined(__OpenBSD__) || defined(__NetBSD__)
-#include <machine/apmvar.h>
 #include <err.h>
+#include <machine/apmvar.h>
 #include <sys/ioctl.h>
 #include <unistd.h>
 #endif
 
 #if defined(__FreeBSD__)
-#include <sys/types.h>
 #include <sys/sysctl.h>
+#include <sys/types.h>
 #endif
 
 #include <algorithm>
@@ -40,11 +40,11 @@
 #include <memory>
 #include <string>
 
-#include "panel.h"
-#include "server.h"
 #include "battery/battery.h"
 #include "battery/battery_interface.h"
 #include "battery/linux_sysfs.h"
+#include "panel.h"
+#include "server.h"
 #include "util/common.h"
 #include "util/fs.h"
 #include "util/log.h"

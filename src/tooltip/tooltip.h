@@ -3,8 +3,8 @@
 
 #include <string>
 
-#include "task.h"
 #include "panel.h"
+#include "task.h"
 #include "util/timer.h"
 
 class Tooltip {

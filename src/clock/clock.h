@@ -5,8 +5,8 @@
 
 #include <string>
 
-#include "common.h"
 #include "area.h"
+#include "common.h"
 
 class Clock : public Area {
  public:

@@ -1,15 +1,15 @@
 #ifndef TINT3_TASKBAR_TASK_H
 #define TINT3_TASKBAR_TASK_H
 
+#include <Imlib2.h>
 #include <X11/Xlib.h>
 #include <pango/pangocairo.h>
-#include <Imlib2.h>
 
 #include <list>
 
+#include "util/area.h"
 #include "util/common.h"
 #include "util/timer.h"
-#include "util/area.h"
 
 enum TaskState {
   kTaskNormal,

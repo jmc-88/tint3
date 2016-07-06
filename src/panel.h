@@ -1,9 +1,9 @@
 #ifndef TINT3_PANEL_H
 #define TINT3_PANEL_H
 
+#include <X11/Xlib.h>
 #include <pango/pangocairo.h>
 #include <sys/time.h>
-#include <X11/Xlib.h>
 
 #include <string>
 #include <vector>

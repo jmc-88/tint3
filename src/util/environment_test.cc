@@ -1,9 +1,9 @@
 #define CATCH_CONFIG_MAIN
 #include "catch.hpp"
 
-#include "util/environment.h"
 #include <cstdlib>
 #include <cstring>
+#include "util/environment.h"
 
 TEST_CASE("Get", "Reading from the environment is sane") {
   setenv("__BOGUS_NAME__", "__BOGUS_VALUE__", 1);
