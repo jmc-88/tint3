@@ -18,20 +18,20 @@
 *USA.
 **************************************************************************/
 
+#include <X11/Xatom.h>
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
-#include <X11/Xatom.h>
-#include <cairo.h>
 #include <cairo-xlib.h>
+#include <cairo.h>
 #include <pango/pangocairo.h>
 
 #include <algorithm>
 #include <cstdlib>
 #include <cstring>
 
-#include "server.h"
 #include "config.h"
 #include "panel.h"
+#include "server.h"
 #include "tooltip.h"
 #include "util/log.h"
 #include "util/x11.h"
@@ -361,7 +361,7 @@ void InitPanel() {
     }
 
     if (panel_autohide) {
-      AddTimeout(panel_autohide_hide_timeout, 0, [&p]() { AutohideHide(p); });
+      AddTimeout(panel_autohide_hide_timeout, 0, [p]() { AutohideHide(p); });
     }
 
     p->UpdateTaskbarVisibility();
@@ -916,10 +916,10 @@ void AutohideTriggerShow(Panel* p) {
 
   if (p->autohide_timeout_ != nullptr) {
     ChangeTimeout(p->autohide_timeout_, panel_autohide_show_timeout, 0,
-                  [&p]() { AutohideShow(p); });
+                  [p]() { AutohideShow(p); });
   } else {
     p->autohide_timeout_ =
-        AddTimeout(panel_autohide_show_timeout, 0, [&p]() { AutohideShow(p); });
+        AddTimeout(panel_autohide_show_timeout, 0, [p]() { AutohideShow(p); });
   }
 }
 
@@ -941,9 +941,9 @@ void AutohideTriggerHide(Panel* p) {
 
   if (p->autohide_timeout_ != nullptr) {
     ChangeTimeout(p->autohide_timeout_, panel_autohide_hide_timeout, 0,
-                  [&p]() { AutohideHide(p); });
+                  [p]() { AutohideHide(p); });
   } else {
     p->autohide_timeout_ =
-        AddTimeout(panel_autohide_hide_timeout, 0, [&p]() { AutohideHide(p); });
+        AddTimeout(panel_autohide_hide_timeout, 0, [p]() { AutohideHide(p); });
   }
 }
