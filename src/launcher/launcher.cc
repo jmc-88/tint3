@@ -215,7 +215,8 @@ bool Launcher::Resize() {
     if (count != 0) {
       int height = height_ - 2 * bg_->border.width - 2 * padding_y_;
       // here icons_per_column always higher than 0
-      icons_per_column = (height + padding_x_) / (icon_size + padding_x_);
+      icons_per_column =
+          std::max(1, (height + padding_x_) / (icon_size + padding_x_));
       margin = height - (icons_per_column - 1) * (icon_size + padding_x_) -
                icon_size;
       icons_per_row =
@@ -229,7 +230,8 @@ bool Launcher::Resize() {
     if (count != 0) {
       int width = width_ - 2 * bg_->border.width - 2 * padding_y_;
       // here icons_per_row always higher than 0
-      icons_per_row = (width + padding_x_) / (icon_size + padding_x_);
+      icons_per_row =
+          std::max(1, (width + padding_x_) / (icon_size + padding_x_));
       margin =
           width - (icons_per_row - 1) * (icon_size + padding_x_) - icon_size;
       icons_per_column = count / icons_per_row + (count % icons_per_row != 0);
