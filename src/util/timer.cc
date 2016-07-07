@@ -44,6 +44,12 @@ std::list<Timeout*> timeout_list;
 struct timeval next_timeout;
 std::map<Timeout*, MultiTimeoutHandler*> multi_timeouts;
 
+struct timespec GetCurrentTime() {
+  struct timespec current_time;
+  clock_gettime(CLOCK_MONOTONIC, &current_time);
+  return current_time;
+}
+
 namespace {
 
 void UpdateMultiTimeoutValues(MultiTimeoutHandler* mth);
@@ -157,9 +163,7 @@ void AddTimeoutInternal(int value_msec, int interval_msec,
                         std::function<void()> callback, Timeout* t) {
   t->interval_msec = interval_msec;
   t->callback = callback;
-  struct timespec cur_time;
-  clock_gettime(CLOCK_MONOTONIC, &cur_time);
-  t->timeout_expires = AddMsecToTimespec(cur_time, value_msec);
+  t->timeout_expires = AddMsecToTimespec(GetCurrentTime(), value_msec);
 
   bool can_align = false;
 
@@ -212,15 +216,14 @@ int CalcMultiTimeoutInterval(MultiTimeoutHandler* mth) {
 }
 
 void CallbackMultiTimeout(MultiTimeoutHandler* mth) {
-  struct timespec cur_time;
-  clock_gettime(CLOCK_MONOTONIC, &cur_time);
+  struct timespec current_time = GetCurrentTime();
 
   for (auto& t : mth->timeout_list) {
     if (++t->multi_timeout->current_count >=
         t->multi_timeout->count_to_expiration) {
       t->callback();
       t->multi_timeout->current_count = 0;
-      t->timeout_expires = AddMsecToTimespec(cur_time, t->interval_msec);
+      t->timeout_expires = AddMsecToTimespec(current_time, t->interval_msec);
     }
   }
 }
@@ -229,14 +232,12 @@ void UpdateMultiTimeoutValues(MultiTimeoutHandler* mth) {
   int interval = CalcMultiTimeoutInterval(mth);
   int next_timeout_msec = interval;
 
-  struct timespec cur_time;
-  clock_gettime(CLOCK_MONOTONIC, &cur_time);
-
   for (auto& t : mth->timeout_list) {
     t->multi_timeout->count_to_expiration = t->interval_msec / interval;
 
+    struct timespec current_time = GetCurrentTime();
     struct timespec diff_time;
-    TimespecSubtract(&diff_time, &t->timeout_expires, &cur_time);
+    TimespecSubtract(&diff_time, &t->timeout_expires, &current_time);
 
     int msec_to_expiration =
         diff_time.tv_sec * 1000 + diff_time.tv_nsec / 1000000;
@@ -283,9 +284,9 @@ void RemoveFromMultiTimeout(Timeout* t) {
     StopTimeout(mth->parent_timeout);
     delete mth;
 
-    struct timespec cur_time, diff_time;
-    clock_gettime(CLOCK_MONOTONIC, &cur_time);
-    TimespecSubtract(&diff_time, &t->timeout_expires, &cur_time);
+    struct timespec current_time = GetCurrentTime();
+    struct timespec diff_time;
+    TimespecSubtract(&diff_time, &t->timeout_expires, &current_time);
     int msec_to_expiration =
         diff_time.tv_sec * 1000 + diff_time.tv_nsec / 1000000;
     AddTimeoutInternal(msec_to_expiration, last_timeout->interval_msec,
@@ -385,10 +386,9 @@ struct timeval* UpdateNextTimeout() {
     struct timespec next_timeout2 = {.tv_sec = next_timeout.tv_sec,
                                      .tv_nsec = next_timeout.tv_usec * 1000};
 
-    struct timespec cur_time;
-    clock_gettime(CLOCK_MONOTONIC, &cur_time);
+    struct timespec current_time = GetCurrentTime();
 
-    if (TimespecSubtract(&next_timeout2, &t->timeout_expires, &cur_time)) {
+    if (TimespecSubtract(&next_timeout2, &t->timeout_expires, &current_time)) {
       next_timeout.tv_sec = 0;
       next_timeout.tv_usec = 0;
     } else {
@@ -407,15 +407,13 @@ struct timeval* UpdateNextTimeout() {
 }
 
 void CallbackTimeoutExpired() {
+  struct timespec current_time = GetCurrentTime();
   auto it = timeout_list.begin();
 
   while (it != timeout_list.end()) {
     auto t = (*it);
 
-    struct timespec cur_time;
-    clock_gettime(CLOCK_MONOTONIC, &cur_time);
-
-    if (CompareTimespecs(t->timeout_expires, cur_time) > 0) {
+    if (CompareTimespecs(t->timeout_expires, current_time) > 0) {
       return;
     }
 
