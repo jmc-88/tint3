@@ -196,11 +196,14 @@ target_link_libraries(config_test tint3_common_lib ${TINT3_LINK_LIBRARIES})
 test_target(clock_time_utils_test src/clock/time_utils_test.cc)
 target_link_libraries(clock_time_utils_test tint3_common_lib ${TINT3_LINK_LIBRARIES})
 
+test_target(util_common_test src/util/common_test.cc)
+target_link_libraries(util_common_test tint3_common_lib ${TINT3_LINK_LIBRARIES})
+
 test_target(util_environment_test src/util/environment_test.cc)
 target_link_libraries(util_environment_test tint3_common_lib ${TINT3_LINK_LIBRARIES})
 
-test_target(util_common_test src/util/common_test.cc)
-target_link_libraries(util_common_test tint3_common_lib ${TINT3_LINK_LIBRARIES})
+test_target(util_timer_test src/util/timer_test.cc)
+target_link_libraries(util_timer_test tint3_common_lib ${TINT3_LINK_LIBRARIES})
 
 # }}} test rules
 
