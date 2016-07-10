@@ -158,8 +158,8 @@ extern int nb_panel;
 // default global data
 void DefaultPanel();
 
-// freed memory
-void CleanupPanel();
+// free memory
+void CleanupPanel(ChronoTimer& timer);
 
 // realloc panels according to number of monitor
 // use panel_config as default value

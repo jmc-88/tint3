@@ -184,12 +184,12 @@ void DefaultPanel() {
   backgrounds.push_back(new Background());
 }
 
-void CleanupPanel() {
+void CleanupPanel(ChronoTimer& timer) {
   if (!panel1) {
     return;
   }
 
-  CleanupTaskbar();
+  CleanupTaskbar(timer);
 
   // taskbarname_font_desc freed here because cleanup_taskbarname() called on
   // _NET_NUMBER_OF_DESKTOPS
@@ -367,7 +367,7 @@ void InitPanel(ChronoTimer& timer) {
     p->UpdateTaskbarVisibility();
   }
 
-  TaskRefreshTasklist();
+  TaskRefreshTasklist(timer);
   ActiveTask();
 }
 

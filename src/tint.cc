@@ -267,7 +267,7 @@ void Cleanup(ChronoTimer& timer) {
 #ifdef ENABLE_BATTERY
   CleanupBattery(timer);
 #endif
-  CleanupPanel();
+  CleanupPanel(timer);
 
   imlib_context_disconnect_display();
 
@@ -581,7 +581,7 @@ void EventButtonRelease(XEvent* e) {
   }
 }
 
-void EventPropertyNotify(XEvent* e) {
+void EventPropertyNotify(XEvent* e, ChronoTimer& timer) {
   Task* tsk;
   Window win = e->xproperty.window;
   Atom at = e->xproperty.atom;
@@ -638,7 +638,7 @@ void EventPropertyNotify(XEvent* e) {
         server.desktop = server.nb_desktop - 1;
       }
 
-      CleanupTaskbar();
+      CleanupTaskbar(timer);
       InitTaskbar();
 
       for (int i = 0; i < nb_panel; i++) {
@@ -648,7 +648,7 @@ void EventPropertyNotify(XEvent* e) {
         panel1[i].need_resize_ = true;
       }
 
-      TaskRefreshTasklist();
+      TaskRefreshTasklist(timer);
       ActiveTask();
       panel_refresh = true;
     }
@@ -708,7 +708,7 @@ void EventPropertyNotify(XEvent* e) {
     }
     // Window list
     else if (at == server.atoms_["_NET_CLIENT_LIST"]) {
-      TaskRefreshTasklist();
+      TaskRefreshTasklist(timer);
       panel_refresh = true;
     }
     // Change active
@@ -739,7 +739,7 @@ void EventPropertyNotify(XEvent* e) {
         XGetWindowAttributes(server.dsp, win, &wa);
 
         if (wa.map_state == IsViewable && !WindowIsSkipTaskbar(win)) {
-          if ((tsk = AddTask(win))) {
+          if ((tsk = AddTask(win, timer))) {
             panel_refresh = true;
           } else {
             return;
@@ -769,7 +769,7 @@ void EventPropertyNotify(XEvent* e) {
       }
 
       if (WindowIsSkipTaskbar(win)) {
-        RemoveTask(tsk);
+        RemoveTask(tsk, timer);
         panel_refresh = true;
       }
     } else if (at == server.atoms_["WM_STATE"]) {
@@ -800,8 +800,8 @@ void EventPropertyNotify(XEvent* e) {
       // bug in windowmaker : send unecessary 'desktop changed' when focus
       // changed
       if (desktop != tsk->desktop) {
-        RemoveTask(tsk);
-        tsk = AddTask(win);
+        RemoveTask(tsk, timer);
+        tsk = AddTask(win, timer);
         ActiveTask();
         panel_refresh = true;
       }
@@ -830,7 +830,7 @@ void EventExpose(XEvent* e) {
   panel_refresh = true;
 }
 
-void EventConfigureNotify(Window win) {
+void EventConfigureNotify(Window win, ChronoTimer& timer) {
   // change in root window (xrandr)
   if (win == server.root_win) {
     signal_pending = SIGUSR1;
@@ -863,8 +863,8 @@ void EventConfigureNotify(Window win) {
   Panel* p = tsk->panel_;
 
   if (p->monitor_ != WindowGetMonitor(win)) {
-    RemoveTask(tsk);
-    tsk = AddTask(win);
+    RemoveTask(tsk, timer);
+    tsk = AddTask(win, timer);
 
     if (win == WindowGetActive()) {
       tsk->SetState(kTaskActive);
@@ -1205,11 +1205,12 @@ start:
   event_loop.RegisterHandler(Expose,
                              [](XEvent& e) -> void { EventExpose(&e); });
 
-  event_loop.RegisterHandler(
-      PropertyNotify, [](XEvent& e) -> void { EventPropertyNotify(&e); });
+  event_loop.RegisterHandler(PropertyNotify, [&timer](XEvent& e) -> void {
+    EventPropertyNotify(&e, timer);
+  });
 
-  event_loop.RegisterHandler(ConfigureNotify, [](XEvent& e) -> void {
-    EventConfigureNotify(e.xconfigure.window);
+  event_loop.RegisterHandler(ConfigureNotify, [&timer](XEvent& e) -> void {
+    EventConfigureNotify(e.xconfigure.window, timer);
   });
 
   event_loop.RegisterHandler(ReparentNotify, [&](XEvent& e) -> void {

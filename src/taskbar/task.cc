@@ -60,8 +60,10 @@ int GetMonitor(Window win) {
 
 }  // namespace
 
-Timeout* urgent_timeout;
+Interval* urgent_timeout;
 std::list<Task*> urgent_list;
+
+Task::Task(ChronoTimer& timer) : timer_(timer) {}
 
 std::string Task::GetTooltipText() {
   return tooltip_enabled_ ? title_ : std::string();
@@ -72,14 +74,14 @@ Task& Task::SetTooltipEnabled(bool is_enabled) {
   return (*this);
 }
 
-Task* AddTask(Window win) {
+Task* AddTask(Window win, ChronoTimer& timer) {
   if (win == 0 || WindowIsHidden(win)) {
     return nullptr;
   }
 
   int monitor = GetMonitor(win);
 
-  Task new_tsk;
+  Task new_tsk{timer};
   new_tsk.win = win;
   new_tsk.desktop = WindowGetDesktop(win);
   new_tsk.panel_ = &panel1[monitor];
@@ -110,7 +112,7 @@ Task* AddTask(Window win) {
     }
 
     Taskbar& tskbar = panel1[monitor].taskbar_[j];
-    new_tsk2 = new Task();
+    new_tsk2 = new Task{timer};
 
     // TODO: nuke this from planet Earth ASAP - horrible hack to mimick the
     // original memcpy() call
@@ -156,7 +158,7 @@ Task* AddTask(Window win) {
   return new_tsk2;
 }
 
-void RemoveTask(Task* tsk) {
+void RemoveTask(Task* tsk, ChronoTimer& timer) {
   if (!tsk) {
     return;
   }
@@ -618,7 +620,7 @@ void SetTaskRedraw(Task* tsk) {
   tsk->need_redraw_ = true;
 }
 
-void BlinkUrgent() {
+bool BlinkUrgent() {
   for (auto& t : urgent_list) {
     if (t->urgent_tick < max_tick_urgent) {
       if (t->urgent_tick++ % 2) {
@@ -630,6 +632,7 @@ void BlinkUrgent() {
   }
 
   panel_refresh = true;
+  return true;
 }
 
 void Task::AddUrgent() {
@@ -648,8 +651,9 @@ void Task::AddUrgent() {
     // not yet in the list, so we have to add it
     urgent_list.push_front(tsk);
 
-    if (urgent_timeout == nullptr) {
-      urgent_timeout = AddTimeout(10, 1000, BlinkUrgent);
+    if (!urgent_timeout) {
+      urgent_timeout = timer_.SetInterval(std::chrono::seconds(1), BlinkUrgent);
+      BlinkUrgent();
     }
   }
 }
@@ -659,7 +663,7 @@ void Task::DelUrgent() {
                     urgent_list.end());
 
   if (urgent_list.empty()) {
-    StopTimeout(urgent_timeout);
+    timer_.ClearInterval(urgent_timeout);
     urgent_timeout = nullptr;
   }
 }

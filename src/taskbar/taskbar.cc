@@ -113,11 +113,11 @@ void DefaultTaskbar() {
   Taskbarname::Default();
 }
 
-void CleanupTaskbar() {
+void CleanupTaskbar(ChronoTimer& timer) {
   Taskbarname::Cleanup();
 
   for (auto const& pair : win_to_task_map) {
-    TaskbarRemoveTask(pair.first);
+    TaskbarRemoveTask(pair.first, timer);
   }
 
   win_to_task_map.clear();
@@ -345,7 +345,9 @@ void Taskbar::InitPanel(Panel* panel) {
   Taskbarname::InitPanel(panel);
 }
 
-void TaskbarRemoveTask(Window win) { RemoveTask(TaskGetTask(win)); }
+void TaskbarRemoveTask(Window win, ChronoTimer& timer) {
+  RemoveTask(TaskGetTask(win), timer);
+}
 
 Task* TaskGetTask(Window win) {
   auto const& task_group = TaskGetTasks(win);
@@ -369,7 +371,7 @@ TaskPtrArray TaskGetTasks(Window win) {
   return TaskPtrArray();
 }
 
-void TaskRefreshTasklist() {
+void TaskRefreshTasklist(ChronoTimer& timer) {
   if (!taskbar_enabled) {
     return;
   }
@@ -392,13 +394,13 @@ void TaskRefreshTasklist() {
   }
 
   for (auto const& w : windows_to_remove) {
-    TaskbarRemoveTask(w);
+    TaskbarRemoveTask(w, timer);
   }
 
   // Add any new
   for (int i = 0; i < num_results; i++) {
     if (!TaskGetTask(windows.get()[i])) {
-      AddTask(windows.get()[i]);
+      AddTask(windows.get()[i], timer);
     }
   }
 }

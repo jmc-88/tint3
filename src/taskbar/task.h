@@ -49,12 +49,9 @@ class Global_task : public Area {
 
 // TODO: make this inherit from a common base class that exposes state_pixmap
 class Task : public Area {
-  bool tooltip_enabled_;
-  std::string title_;
-
-  void DrawIcon(int);
-
  public:
+  Task(ChronoTimer& timer);
+
   // TODO: group task with list of windows here
   Window win;
   int desktop;
@@ -82,13 +79,20 @@ class Task : public Area {
   std::string GetFriendlyName() const override;
 
 #endif  // _TINT3_DEBUG
+
+ private:
+  bool tooltip_enabled_;
+  std::string title_;
+  ChronoTimer& timer_;
+
+  void DrawIcon(int);
 };
 
-extern Timeout* urgent_timeout;
+extern Interval* urgent_timeout;
 extern std::list<Task*> urgent_list;
 
-Task* AddTask(Window win);
-void RemoveTask(Task* tsk);
+Task* AddTask(Window win, ChronoTimer& timer);
+void RemoveTask(Task* tsk, ChronoTimer& timer);
 
 void GetIcon(Task* tsk);
 void ActiveTask();
