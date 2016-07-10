@@ -455,3 +455,108 @@ void StopTimeout(Timeout* t) {
     delete t;
   }
 }
+
+Interval::Interval(TimePoint time_point, Duration repeat_interval,
+                   Callback callback)
+    : time_point_(time_point),
+      repeat_interval_(repeat_interval),
+      callback_(callback) {}
+
+void Interval::InvokeCallback() const { callback_(); }
+
+TimePoint Interval::GetTimePoint() const { return time_point_; }
+
+Duration Interval::GetRepeatInterval() const { return repeat_interval_; }
+
+bool CompareIntervals::operator()(Interval const* lhs,
+                                  Interval const* rhs) const {
+  return lhs->GetTimePoint() < rhs->GetTimePoint();
+}
+
+ChronoTimer::ChronoTimer()
+    : get_current_time_(std::chrono::steady_clock::now) {}
+
+ChronoTimer::ChronoTimer(TimerCallback get_current_time_callback)
+    : get_current_time_(get_current_time_callback) {}
+
+ChronoTimer::~ChronoTimer() {
+  for (Interval* interval : timeouts_) {
+    delete interval;
+  }
+  timeouts_.clear();
+
+  for (Interval* interval : intervals_) {
+    delete interval;
+  }
+  intervals_.clear();
+}
+
+Interval* ChronoTimer::SetTimeout(Duration timeout_interval,
+                                  Interval::Callback callback) {
+  Interval* interval = new Interval(get_current_time_() + timeout_interval,
+                                    std::chrono::milliseconds(0), callback);
+  if (interval) {
+    timeouts_.insert(interval);
+  }
+  return interval;
+}
+
+Interval* ChronoTimer::SetInterval(Duration repeat_interval,
+                                   Interval::Callback callback) {
+  Interval* interval = new Interval(get_current_time_() + repeat_interval,
+                                    repeat_interval, callback);
+  if (interval) {
+    intervals_.insert(interval);
+  }
+  return interval;
+}
+
+bool ChronoTimer::ClearInterval(Interval* interval) {
+  size_t erased_count = 0;
+
+  if (interval->repeat_interval_ == interval->repeat_interval_.zero()) {
+    erased_count = timeouts_.erase(interval);
+  } else {
+    erased_count = intervals_.erase(interval);
+  }
+
+  if (erased_count != 0) {
+    delete interval;
+    return true;
+  }
+
+  return false;
+}
+
+void ChronoTimer::ProcessExpiredIntervals() {
+  TimePoint now = get_current_time_();
+
+  for (auto it = timeouts_.begin(); it != timeouts_.end();) {
+    Interval* interval = (*it);
+
+    if (interval->time_point_ <= now) {
+      interval->InvokeCallback();
+      it = timeouts_.erase(it);
+    } else {
+      ++it;
+    }
+  }
+
+  for (auto it = intervals_.begin(); it != intervals_.end();) {
+    Interval* interval = (*it);
+
+    if (interval->time_point_ <= now) {
+      bool should_keep = interval->callback_();
+      if (should_keep) {
+        do {
+          interval->time_point_ += interval->repeat_interval_;
+        } while (interval->time_point_ < now);
+        ++it;
+      } else {
+        it = timeouts_.erase(it);
+      }
+    } else {
+      ++it;
+    }
+  }
+}
