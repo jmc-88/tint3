@@ -231,7 +231,7 @@ void CleanupPanel() {
   backgrounds.clear();
 }
 
-void InitPanel() {
+void InitPanel(ChronoTimer& timer) {
   if (panel_config.monitor_ > server.nb_monitor - 1) {
     // server.nb_monitor minimum value is 1 (see get_monitors())
     util::log::Error() << "warning: monitor not found, "
@@ -242,7 +242,7 @@ void InitPanel() {
   InitTooltip();
   InitSystray();
   InitLauncher();
-  InitClock();
+  InitClock(timer);
 #ifdef ENABLE_BATTERY
   InitBattery();
 #endif

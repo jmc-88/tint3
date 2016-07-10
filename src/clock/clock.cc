@@ -49,7 +49,7 @@ struct timeval time_clock;
 PangoFontDescription* time1_font_desc;
 PangoFontDescription* time2_font_desc;
 bool clock_enabled;
-static Timeout* clock_timeout;
+static Interval* clock_timeout;
 
 void DefaultClock() {
   clock_enabled = false;
@@ -66,7 +66,7 @@ void DefaultClock() {
   time2_font_desc = nullptr;
 }
 
-void CleanupClock() {
+void CleanupClock(ChronoTimer& timer) {
   if (time1_font_desc) {
     pango_font_description_free(time1_font_desc);
   }
@@ -76,7 +76,7 @@ void CleanupClock() {
   }
 
   if (clock_timeout) {
-    StopTimeout(clock_timeout);
+    timer.ClearInterval(clock_timeout);
   }
 
   time1_format.clear();
@@ -89,7 +89,7 @@ void CleanupClock() {
   clock_rclick_command.clear();
 }
 
-void UpdateClockSeconds() {
+bool UpdateClockSeconds() {
   gettimeofday(&time_clock, 0);
 
   if (!time1_format.empty()) {
@@ -99,9 +99,10 @@ void UpdateClockSeconds() {
   }
 
   panel_refresh = true;
+  return true;
 }
 
-void UpdateClockMinutes() {
+bool UpdateClockMinutes() {
   // remember old_sec because after suspend/hibernate the clock should be
   // updated directly, and not
   // on next minute change
@@ -117,6 +118,7 @@ void UpdateClockMinutes() {
 
     panel_refresh = true;
   }
+  return true;
 }
 
 std::string Clock::GetTooltipText() {
@@ -125,7 +127,7 @@ std::string Clock::GetTooltipText() {
       ClockGetTimeForTimezone(time_tooltip_timezone, &time_clock.tv_sec));
 }
 
-void InitClock() {
+void InitClock(ChronoTimer& timer) {
   if (time1_format.empty() || clock_timeout != nullptr) {
     return;
   }
@@ -136,7 +138,8 @@ void InitClock() {
 
   auto& update_func =
       (has_seconds_format ? UpdateClockSeconds : UpdateClockMinutes);
-  clock_timeout = AddTimeout(10, 1000, update_func);
+  clock_timeout = timer.SetInterval(std::chrono::seconds(1), update_func);
+  update_func();
 }
 
 void Clock::InitPanel(Panel* panel) {

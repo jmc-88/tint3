@@ -9,6 +9,8 @@
 #include <map>
 #include <memory>
 
+#include "util/timer.h"
+
 class Server;
 
 namespace util {
@@ -39,7 +41,7 @@ class EventLoop {
  public:
   using EventHandler = std::function<void(XEvent&)>;
 
-  EventLoop(Server const* const server);
+  EventLoop(Server const* const server, ChronoTimer& timer);
 
   bool RunLoop();
   EventLoop& RegisterHandler(int event, EventHandler handler);
@@ -50,6 +52,7 @@ class EventLoop {
  private:
   Server const* const server_;
   int x11_file_descriptor_;
+  ChronoTimer& timer_;
   EventHandler default_handler_;
   std::map<int, EventHandler> handler_map_;
 };

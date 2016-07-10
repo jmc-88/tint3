@@ -259,10 +259,10 @@ void InitX11() {
   GetDesktops();
 }
 
-void Cleanup() {
+void Cleanup(ChronoTimer& timer) {
   CleanupSystray();
   CleanupTooltip();
-  CleanupClock();
+  CleanupClock(timer);
   CleanupLauncher();
 #ifdef ENABLE_BATTERY
   CleanupBattery();
@@ -1123,6 +1123,7 @@ start:
   Init(argc, argv);
   InitX11();
 
+  ChronoTimer timer;
   bool config_read = false;
 
   if (!config_path.empty()) {
@@ -1133,11 +1134,11 @@ start:
 
   if (!config_read) {
     util::log::Error() << "usage: tint3 [-c] <config_file>\n";
-    Cleanup();
+    Cleanup(timer);
     std::exit(1);
   }
 
-  InitPanel();
+  InitPanel(timer);
 
 #ifdef _TINT3_DEBUG
 
@@ -1150,7 +1151,7 @@ start:
 
   if (!snapshot_path.empty()) {
     GetSnapshot(snapshot_path.c_str());
-    Cleanup();
+    Cleanup(timer);
     std::exit(0);
   }
 
@@ -1170,13 +1171,12 @@ start:
   //  sigset_t empty_mask;
   //  sigemptyset(&empty_mask);
 
-  util::x11::EventLoop event_loop(&server);
+  util::x11::EventLoop event_loop(&server, timer);
 
   event_loop.RegisterHandler(ButtonPress, [](XEvent& e) -> void {
     TooltipHide();
     EventButtonPress(&e);
   });
-
   event_loop.RegisterHandler(ButtonRelease,
                              [](XEvent& e) -> void { EventButtonRelease(&e); });
 
@@ -1375,13 +1375,13 @@ start:
 
   if (event_loop.RunLoop()) {
     systray.Clear();
-    Cleanup();
+    Cleanup(timer);
     goto start;  // brrr
   }
 
   // Make sure we reparent all the tray icon windows to the server root window
   // before we exit the program and destroy our own tray window.
   // FIXME: this wouldn't need manual deletion if there was no global state.
-  Cleanup();
+  Cleanup(timer);
   return 0;
 }

@@ -16,8 +16,10 @@ ScopedErrorHandler::~ScopedErrorHandler() { XSetErrorHandler(old_handler_); }
 
 void XFreeDeleter::operator()(void* data) const { XFree(data); }
 
-EventLoop::EventLoop(Server const* const server)
-    : server_(server), x11_file_descriptor_(ConnectionNumber(server_->dsp)) {}
+EventLoop::EventLoop(Server const* const server, ChronoTimer& timer)
+    : server_(server),
+      x11_file_descriptor_(ConnectionNumber(server_->dsp)),
+      timer_(timer) {}
 
 bool EventLoop::RunLoop() {
   bool hidden_dnd = true;
@@ -122,6 +124,7 @@ bool EventLoop::RunLoop() {
     }
 
     CallbackTimeoutExpired();
+    timer_.ProcessExpiredIntervals();
 
     if (signal_pending) {
       // FIXME: why is this even needed here?

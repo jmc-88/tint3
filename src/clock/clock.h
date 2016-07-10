@@ -5,8 +5,9 @@
 
 #include <string>
 
-#include "area.h"
-#include "common.h"
+#include "util/area.h"
+#include "util/common.h"
+#include "util/timer.h"
 
 class Clock : public Area {
  public:
@@ -47,10 +48,10 @@ extern bool clock_enabled;
 void DefaultClock();
 
 // freed memory
-void CleanupClock();
+void CleanupClock(ChronoTimer& timer);
 
 // initialize clock : y position, precision, ...
-void InitClock();
+void InitClock(ChronoTimer& timer);
 
 void ClockAction(int button);
 

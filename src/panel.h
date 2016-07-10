@@ -16,6 +16,7 @@
 #include "util/area.h"
 #include "util/common.h"
 #include "util/imlib2.h"
+#include "util/timer.h"
 
 #ifdef ENABLE_BATTERY
 #include "battery/battery.h"
@@ -162,7 +163,7 @@ void CleanupPanel();
 
 // realloc panels according to number of monitor
 // use panel_config as default value
-void InitPanel();
+void InitPanel(ChronoTimer& timer);
 
 // detect wich panel
 Panel* GetPanel(Window win);
