@@ -10,6 +10,7 @@
 
 #include "util/area.h"
 #include "util/common.h"
+#include "util/timer.h"
 
 // forward declarations
 class Panel;
@@ -52,12 +53,12 @@ extern std::string path_status;
 // default global data
 void DefaultBattery();
 
-// freed memory
-void CleanupBattery();
+// free memory
+void CleanupBattery(ChronoTimer& timer);
 
 // initialize clock : y position, ...
 void UpdateBattery();
 
-void InitBattery();
+void InitBattery(ChronoTimer& timer);
 
 #endif  // TINT3_BATTERY_BATTERY_H

@@ -265,7 +265,7 @@ void Cleanup(ChronoTimer& timer) {
   CleanupClock(timer);
   CleanupLauncher();
 #ifdef ENABLE_BATTERY
-  CleanupBattery();
+  CleanupBattery(timer);
 #endif
   CleanupPanel();
 

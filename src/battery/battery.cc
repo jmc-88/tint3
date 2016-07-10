@@ -57,7 +57,7 @@ std::unique_ptr<BatteryInterface> battery_ptr;
 BatteryState battery_state;
 bool battery_enabled;
 int percentage_hide;
-static Timeout* battery_timeout;
+static Interval* battery_timeout;
 
 int8_t battery_low_status;
 bool battery_low_cmd_send;
@@ -73,7 +73,7 @@ int apm_fd;
 
 namespace {
 
-void UpdateBatteries() {
+bool UpdateBatteries() {
   int old_percentage = battery_state.percentage;
   int16_t old_hours = battery_state.time.hours;
   int8_t old_minutes = battery_state.time.minutes;
@@ -83,7 +83,7 @@ void UpdateBatteries() {
   if (old_percentage == battery_state.percentage &&
       old_hours == battery_state.time.hours &&
       old_minutes == battery_state.time.minutes) {
-    return;
+    return true;
   }
 
   for (int i = 0; i < nb_panel; i++) {
@@ -104,6 +104,8 @@ void UpdateBatteries() {
       panel_refresh = true;
     }
   }
+
+  return true;
 }
 
 }  // namespace
@@ -112,7 +114,7 @@ void DefaultBattery() {
   battery_enabled = false;
   percentage_hide = 101;
   battery_low_cmd_send = false;
-  battery_timeout = 0;
+  battery_timeout = nullptr;
   bat1_font_desc = 0;
   bat2_font_desc = 0;
   battery_low_cmd.clear();
@@ -130,7 +132,7 @@ void DefaultBattery() {
 #endif
 }
 
-void CleanupBattery() {
+void CleanupBattery(ChronoTimer& timer) {
   if (bat1_font_desc) {
     pango_font_description_free(bat1_font_desc);
   }
@@ -146,7 +148,7 @@ void CleanupBattery() {
   path_status.clear();
 
   if (battery_timeout) {
-    StopTimeout(battery_timeout);
+    timer.ClearInterval(battery_timeout);
   }
 
 #if defined(__OpenBSD__) || defined(__NetBSD__)
@@ -162,7 +164,7 @@ void CleanupBattery() {
 #endif
 }
 
-void InitBattery() {
+void InitBattery(ChronoTimer& timer) {
   if (!battery_enabled) {
     return;
   }
@@ -198,7 +200,9 @@ void InitBattery() {
 #endif
 
   if (battery_enabled && battery_timeout == nullptr) {
-    battery_timeout = AddTimeout(10, 10000, UpdateBatteries);
+    battery_timeout =
+        timer.SetInterval(std::chrono::seconds(10), UpdateBatteries);
+    UpdateBatteries();
   }
 }
 

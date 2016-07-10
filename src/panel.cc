@@ -244,7 +244,7 @@ void InitPanel(ChronoTimer& timer) {
   InitLauncher();
   InitClock(timer);
 #ifdef ENABLE_BATTERY
-  InitBattery();
+  InitBattery(timer);
 #endif
   InitTaskbar();
 
