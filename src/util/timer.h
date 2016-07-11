@@ -125,6 +125,9 @@ class ChronoTimer {
   // updating the expiration times.
   void ProcessExpiredIntervals();
 
+  // Returns the next registered interval, if any, otherwise nullptr.
+  Interval* GetNextInterval() const;
+
  private:
   TimerCallback get_current_time_;
 

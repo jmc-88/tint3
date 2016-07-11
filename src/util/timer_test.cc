@@ -151,4 +151,23 @@ TEST_CASE("ChronoTimer", "Test the ChronoTimer class") {
     REQUIRE(interval->GetTimePoint() ==
             TimePoint(std::chrono::milliseconds(1000)));
   }
+
+  SECTION("correctly returns the next registered interval") {
+    // No registered intervals should result in a null pointer
+    REQUIRE(timer.GetNextInterval() == nullptr);
+
+    // Unordered insertion should still return the first interval
+    Interval* second_timeout =
+        timer.SetTimeout(std::chrono::milliseconds(250), no_op_callback);
+    Interval* third_timeout =
+        timer.SetTimeout(std::chrono::milliseconds(500), no_op_callback);
+    Interval* first_timeout =
+        timer.SetTimeout(std::chrono::milliseconds(175), no_op_callback);
+    REQUIRE(timer.GetNextInterval() == first_timeout);
+
+    // The same applies to repeating intervals
+    Interval* first_interval =
+        timer.SetInterval(std::chrono::milliseconds(100), no_op_callback);
+    REQUIRE(timer.GetNextInterval() == first_interval);
+  }
 }

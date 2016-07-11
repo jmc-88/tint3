@@ -560,3 +560,24 @@ void ChronoTimer::ProcessExpiredIntervals() {
     }
   }
 }
+
+Interval* ChronoTimer::GetNextInterval() const {
+  auto first_timeout = timeouts_.begin();
+  auto first_interval = intervals_.begin();
+
+  if (first_timeout == timeouts_.end()) {
+    if (first_interval == intervals_.end()) {
+      return nullptr;
+    }
+    return (*first_interval);
+  } else if (first_interval == intervals_.end()) {
+    if (first_timeout == timeouts_.end()) {
+      return nullptr;
+    }
+    return (*first_timeout);
+  } else {
+    CompareIntervals less_than;
+    return (less_than(*first_timeout, *first_interval) ? (*first_timeout)
+                                                       : (*first_interval));
+  }
+}
