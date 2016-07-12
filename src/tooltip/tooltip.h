@@ -20,12 +20,12 @@ class Tooltip {
   PangoFontDescription* font_desc;
   Color font_color;
   Background* bg;
-  Timeout* timeout;
+  Interval* timeout;
 
   void BindTo(Area* area);
   bool IsBoundTo(Area* area) const;
 
-  void Update();
+  void Update(ChronoTimer& timer);
 
  private:
   Area* area_;
@@ -37,12 +37,12 @@ extern Tooltip g_tooltip;
 void DefaultTooltip();
 
 // freed memory
-void CleanupTooltip();
+void CleanupTooltip(ChronoTimer& timer);
 
 void InitTooltip();
-void TooltipTriggerHide();
-void TooltipTriggerShow(Area* area, Panel* p, XEvent* e);
-void TooltipHide();
-void TooltipShow();
+void TooltipTriggerHide(ChronoTimer& timer);
+void TooltipTriggerShow(Area* area, Panel* p, XEvent* e, ChronoTimer& timer);
+bool TooltipHide(ChronoTimer& timer);
+bool TooltipShow(ChronoTimer& timer);
 
 #endif  // TINT3_TOOLTIP_TOOLTIP_H

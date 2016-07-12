@@ -261,7 +261,7 @@ void InitX11() {
 
 void Cleanup(ChronoTimer& timer) {
   CleanupSystray();
-  CleanupTooltip();
+  CleanupTooltip(timer);
   CleanupClock(timer);
   CleanupLauncher();
 #ifdef ENABLE_BATTERY
@@ -756,7 +756,7 @@ void EventPropertyNotify(XEvent* e, ChronoTimer& timer) {
       if (tsk->UpdateTitle()) {
         if (g_tooltip.IsBoundTo(tsk)) {
           g_tooltip.BindTo(tsk);
-          g_tooltip.Update();
+          g_tooltip.Update(timer);
         }
 
         panel_refresh = true;
@@ -1173,14 +1173,14 @@ start:
 
   util::x11::EventLoop event_loop(&server, timer);
 
-  event_loop.RegisterHandler(ButtonPress, [](XEvent& e) -> void {
-    TooltipHide();
+  event_loop.RegisterHandler(ButtonPress, [&timer](XEvent& e) -> void {
+    TooltipHide(timer);
     EventButtonPress(&e);
   });
   event_loop.RegisterHandler(ButtonRelease,
                              [](XEvent& e) -> void { EventButtonRelease(&e); });
 
-  event_loop.RegisterHandler(MotionNotify, [](XEvent& e) -> void {
+  event_loop.RegisterHandler(MotionNotify, [&timer](XEvent& e) -> void {
     static constexpr unsigned int button_mask =
         Button1Mask | Button2Mask | Button3Mask | Button4Mask | Button5Mask;
 
@@ -1193,14 +1193,14 @@ start:
     std::string tooltip = area->GetTooltipText();
 
     if (!tooltip.empty()) {
-      TooltipTriggerShow(area, panel, &e);
+      TooltipTriggerShow(area, panel, &e, timer);
     } else {
-      TooltipTriggerHide();
+      TooltipTriggerHide(timer);
     }
   });
 
-  event_loop.RegisterHandler(LeaveNotify,
-                             [](XEvent& e) -> void { TooltipTriggerHide(); });
+  event_loop.RegisterHandler(
+      LeaveNotify, [&timer](XEvent& e) -> void { TooltipTriggerHide(timer); });
 
   event_loop.RegisterHandler(Expose,
                              [](XEvent& e) -> void { EventExpose(&e); });

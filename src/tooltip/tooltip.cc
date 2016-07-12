@@ -24,6 +24,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <functional>
 
 #include "panel.h"
 #include "server.h"
@@ -38,29 +39,23 @@ Tooltip g_tooltip;
 
 namespace {
 
-void StartShowTimeout() {
+void StopTooltipTimeout(ChronoTimer& timer) {
   if (g_tooltip.timeout != nullptr) {
-    ChangeTimeout(g_tooltip.timeout, g_tooltip.show_timeout_msec, 0,
-                  TooltipShow);
-  } else {
-    g_tooltip.timeout = AddTimeout(g_tooltip.show_timeout_msec, 0, TooltipShow);
-  }
-}
-
-void StartHideTimeout() {
-  if (g_tooltip.timeout != nullptr) {
-    ChangeTimeout(g_tooltip.timeout, g_tooltip.hide_timeout_msec, 0,
-                  TooltipHide);
-  } else {
-    g_tooltip.timeout = AddTimeout(g_tooltip.hide_timeout_msec, 0, TooltipHide);
-  }
-}
-
-void StopTooltipTimeout() {
-  if (g_tooltip.timeout != nullptr) {
-    StopTimeout(g_tooltip.timeout);
+    timer.ClearInterval(g_tooltip.timeout);
     g_tooltip.timeout = nullptr;
   }
+}
+
+void StartShowTimeout(ChronoTimer& timer) {
+  g_tooltip.timeout =
+      timer.SetTimeout(std::chrono::milliseconds(g_tooltip.show_timeout_msec),
+                       [&timer]() -> bool { return TooltipShow(timer); });
+}
+
+void StartHideTimeout(ChronoTimer& timer) {
+  g_tooltip.timeout =
+      timer.SetTimeout(std::chrono::milliseconds(g_tooltip.hide_timeout_msec),
+                       [&timer]() -> bool { return TooltipHide(timer); });
 }
 
 }  // namespace
@@ -84,9 +79,9 @@ void DefaultTooltip() {
   g_tooltip.font_color.alpha = 1;
 }
 
-void CleanupTooltip() {
-  StopTooltipTimeout();
-  TooltipHide();
+void CleanupTooltip(ChronoTimer& timer) {
+  StopTooltipTimeout(timer);
+  TooltipHide(timer);
   g_tooltip.BindTo(nullptr);
 
   if (g_tooltip.window) {
@@ -125,7 +120,7 @@ void InitTooltip() {
                               InputOutput, server.visual, mask, &attr);
 }
 
-void TooltipTriggerShow(Area* area, Panel* p, XEvent* e) {
+void TooltipTriggerShow(Area* area, Panel* p, XEvent* e, ChronoTimer& timer) {
   // Position the tooltip in the center of the area
   x = area->panel_x_ + area->width_ / 2 + e->xmotion.x_root - e->xmotion.x;
   y = area->panel_y_ + area->height_ / 2 + e->xmotion.y_root - e->xmotion.y;
@@ -138,14 +133,14 @@ void TooltipTriggerShow(Area* area, Panel* p, XEvent* e) {
 
   if (g_tooltip.IsBoundTo(area)) {
     g_tooltip.BindTo(area);
-    g_tooltip.Update();
-    StopTooltipTimeout();
+    g_tooltip.Update(timer);
+    StopTooltipTimeout(timer);
   } else if (!g_tooltip.mapped_) {
-    StartShowTimeout();
+    StartShowTimeout(timer);
   }
 }
 
-void TooltipShow() {
+bool TooltipShow(ChronoTimer& timer) {
   int mx, my;
   Window w;
   XTranslateCoordinates(server.dsp, server.root_win, g_tooltip.panel->main_win_,
@@ -158,15 +153,16 @@ void TooltipShow() {
   }
 
   Area* area = g_tooltip.panel->ClickArea(mx, my);
-  StopTooltipTimeout();
 
   if (!g_tooltip.mapped_) {
     g_tooltip.BindTo(area);
     g_tooltip.mapped_ = true;
     XMapWindow(server.dsp, g_tooltip.window);
-    g_tooltip.Update();
+    g_tooltip.Update(timer);
     XFlush(server.dsp);
   }
+
+  return false;
 }
 
 void TooltipUpdateGeometry() {
@@ -254,9 +250,9 @@ void TooltipAdjustGeometry() {
   height = std::min(height, max_height);
 }
 
-void Tooltip::Update() {
+void Tooltip::Update(ChronoTimer& timer) {
   if (tooltip_text.empty()) {
-    TooltipHide();
+    TooltipHide(timer);
     return;
   }
 
@@ -317,24 +313,24 @@ void Tooltip::Update() {
   cairo_surface_destroy(cs);
 }
 
-void TooltipTriggerHide() {
+void TooltipTriggerHide(ChronoTimer& timer) {
   if (g_tooltip.mapped_) {
     g_tooltip.BindTo(nullptr);
-    StartHideTimeout();
+    StartHideTimeout(timer);
   } else {
     // tooltip not visible yet, but maybe a timeout is still pending
-    StopTooltipTimeout();
+    StopTooltipTimeout(timer);
   }
 }
 
-void TooltipHide() {
-  StopTooltipTimeout();
-
+bool TooltipHide(ChronoTimer& timer) {
   if (g_tooltip.mapped_) {
     g_tooltip.mapped_ = false;
     XUnmapWindow(server.dsp, g_tooltip.window);
     XFlush(server.dsp);
   }
+
+  return false;
 }
 
 void Tooltip::BindTo(Area* area) {
