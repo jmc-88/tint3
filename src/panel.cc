@@ -151,13 +151,6 @@ void UpdateStrut(Panel* p) {
                   PropModeReplace, (unsigned char*)&struts, 12);
 }
 
-void StopAutohideTimeout(Panel* p) {
-  if (p->autohide_timeout_ != nullptr) {
-    StopTimeout(p->autohide_timeout_);
-    p->autohide_timeout_ = nullptr;
-  }
-}
-
 }  // namespace
 
 void DefaultPanel() {
@@ -361,7 +354,8 @@ void InitPanel(ChronoTimer& timer) {
     }
 
     if (panel_autohide) {
-      AddTimeout(panel_autohide_hide_timeout, 0, [p]() { AutohideHide(p); });
+      timer.SetTimeout(std::chrono::milliseconds(panel_autohide_hide_timeout),
+                       [p]() -> bool { return AutohideHide(p); });
     }
 
     p->UpdateTaskbarVisibility();
@@ -839,9 +833,7 @@ std::string Panel::GetFriendlyName() const { return "Panel"; }
 
 #endif  // _TINT3_DEBUG
 
-void AutohideShow(void* p) {
-  Panel* panel = static_cast<Panel*>(p);
-  StopAutohideTimeout(panel);
+bool AutohideShow(Panel* panel) {
   panel->is_hidden_ = 0;
 
   if (panel_strut_policy == PanelStrutPolicy::kFollowSize) {
@@ -871,11 +863,10 @@ void AutohideShow(void* p) {
   // ugly hack, because we actually only need to call XSetBackgroundPixmap
   refresh_systray = 1;
   panel_refresh = true;
+  return false;
 }
 
-void AutohideHide(void* p) {
-  Panel* panel = static_cast<Panel*>(p);
-  StopAutohideTimeout(panel);
+bool AutohideHide(Panel* panel) {
   panel->is_hidden_ = 1;
 
   if (panel_strut_policy == PanelStrutPolicy::kFollowSize) {
@@ -907,23 +898,20 @@ void AutohideHide(void* p) {
   }
 
   panel_refresh = true;
+  return false;
 }
 
-void AutohideTriggerShow(Panel* p) {
+void AutohideTriggerShow(Panel* p, ChronoTimer& timer) {
   if (!p) {
     return;
   }
 
-  if (p->autohide_timeout_ != nullptr) {
-    ChangeTimeout(p->autohide_timeout_, panel_autohide_show_timeout, 0,
-                  [p]() { AutohideShow(p); });
-  } else {
-    p->autohide_timeout_ =
-        AddTimeout(panel_autohide_show_timeout, 0, [p]() { AutohideShow(p); });
-  }
+  p->autohide_timeout_ =
+      timer.SetTimeout(std::chrono::milliseconds(panel_autohide_show_timeout),
+                       [p]() -> bool { return AutohideShow(p); });
 }
 
-void AutohideTriggerHide(Panel* p) {
+void AutohideTriggerHide(Panel* p, ChronoTimer& timer) {
   if (!p) {
     return;
   }
@@ -939,11 +927,7 @@ void AutohideTriggerHide(Panel* p) {
     }
   }
 
-  if (p->autohide_timeout_ != nullptr) {
-    ChangeTimeout(p->autohide_timeout_, panel_autohide_hide_timeout, 0,
-                  [p]() { AutohideHide(p); });
-  } else {
-    p->autohide_timeout_ =
-        AddTimeout(panel_autohide_hide_timeout, 0, [p]() { AutohideHide(p); });
-  }
+  p->autohide_timeout_ =
+      timer.SetTimeout(std::chrono::milliseconds(panel_autohide_hide_timeout),
+                       [p]() -> bool { return AutohideHide(p); });
 }

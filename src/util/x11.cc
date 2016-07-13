@@ -69,9 +69,19 @@ bool EventLoop::RunLoop() {
     FD_ZERO(&fdset);
     FD_SET(x11_file_descriptor_, &fdset);
 
-    auto timeout = UpdateNextTimeout();
+    auto next_interval = timer_.GetNextInterval();
+    std::unique_ptr<struct timeval> next_timeval;
 
-    if (select(x11_file_descriptor_ + 1, &fdset, 0, 0, timeout) > 0) {
+    if (next_interval) {
+      auto now = timer_.Now();
+      auto until = next_interval->GetTimePoint();
+
+      Duration duration{until - now};
+      next_timeval = ToTimeval(duration);
+    }
+
+    if (select(x11_file_descriptor_ + 1, &fdset, 0, 0, next_timeval.get()) >
+        0) {
       while (XPending(server_->dsp)) {
         XEvent e;
         XNextEvent(server_->dsp, &e);
@@ -84,9 +94,9 @@ bool EventLoop::RunLoop() {
 
         if (panel != nullptr && panel_autohide) {
           if (e.type == EnterNotify) {
-            AutohideTriggerShow(panel);
+            AutohideTriggerShow(panel, timer_);
           } else if (e.type == LeaveNotify) {
-            AutohideTriggerHide(panel);
+            AutohideTriggerHide(panel, timer_);
           }
 
           auto XdndPosition = server_->atoms_.at("XdndPosition");
@@ -123,7 +133,6 @@ bool EventLoop::RunLoop() {
       }
     }
 
-    CallbackTimeoutExpired();
     timer_.ProcessExpiredIntervals();
 
     if (signal_pending) {

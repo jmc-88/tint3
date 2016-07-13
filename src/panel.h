@@ -118,7 +118,7 @@ class Panel : public Area {
   int is_hidden_;
   int hidden_width_, hidden_height_;
   Pixmap hidden_pixmap_;
-  Timeout* autohide_timeout_;
+  Interval* autohide_timeout_;
 
   Taskbar* ClickTaskbar(int x, int y);
   Task* ClickTask(int x, int y);
@@ -168,9 +168,9 @@ void InitPanel(ChronoTimer& timer);
 // detect wich panel
 Panel* GetPanel(Window win);
 
-void AutohideShow(void* p);
-void AutohideHide(void* p);
-void AutohideTriggerShow(Panel* p);
-void AutohideTriggerHide(Panel* p);
+bool AutohideShow(Panel* panel);
+bool AutohideHide(Panel* panel);
+void AutohideTriggerShow(Panel* p, ChronoTimer& timer);
+void AutohideTriggerHide(Panel* p, ChronoTimer& timer);
 
 #endif  // TINT3_PANEL_H

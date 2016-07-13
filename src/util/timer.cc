@@ -473,6 +473,22 @@ bool CompareIntervals::operator()(Interval const* lhs,
   return lhs->GetTimePoint() < rhs->GetTimePoint();
 }
 
+std::unique_ptr<struct timeval> ToTimeval(Duration duration) {
+  std::chrono::microseconds const usec =
+      std::chrono::duration_cast<std::chrono::microseconds>(duration);
+  struct timeval* tv = nullptr;
+
+  if (usec != std::chrono::microseconds(0)) {
+    tv = new struct timeval;
+    tv->tv_sec =
+        std::chrono::duration_cast<std::chrono::seconds>(duration - usec)
+            .count();
+    tv->tv_usec = usec.count();
+  }
+
+  return std::unique_ptr<struct timeval>(tv);
+}
+
 ChronoTimer::ChronoTimer()
     : get_current_time_(std::chrono::steady_clock::now) {}
 
@@ -491,9 +507,11 @@ ChronoTimer::~ChronoTimer() {
   intervals_.clear();
 }
 
+TimePoint ChronoTimer::Now() const { return get_current_time_(); }
+
 Interval* ChronoTimer::SetTimeout(Duration timeout_interval,
                                   Interval::Callback callback) {
-  Interval* interval = new Interval(get_current_time_() + timeout_interval,
+  Interval* interval = new Interval(Now() + timeout_interval,
                                     std::chrono::milliseconds(0), callback);
   if (interval) {
     timeouts_.insert(interval);
@@ -503,8 +521,8 @@ Interval* ChronoTimer::SetTimeout(Duration timeout_interval,
 
 Interval* ChronoTimer::SetInterval(Duration repeat_interval,
                                    Interval::Callback callback) {
-  Interval* interval = new Interval(get_current_time_() + repeat_interval,
-                                    repeat_interval, callback);
+  Interval* interval =
+      new Interval(Now() + repeat_interval, repeat_interval, callback);
   if (interval) {
     intervals_.insert(interval);
   }

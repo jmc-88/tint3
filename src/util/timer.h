@@ -1,8 +1,11 @@
 #ifndef TINT3_UTIL_TIMER_H
 #define TINT3_UTIL_TIMER_H
 
+#include <sys/select.h>
+
 #include <chrono>
 #include <functional>
+#include <memory>
 #include <set>
 
 extern struct timeval next_timeout;
@@ -59,7 +62,7 @@ void CallbackTimeoutExpired();
 
 // Rewrite using std::chrono
 using TimePoint = std::chrono::steady_clock::time_point;
-using Duration = std::chrono::milliseconds;
+using Duration = std::chrono::nanoseconds;
 
 class ChronoTimer;
 class Interval {
@@ -85,6 +88,8 @@ class CompareIntervals {
   bool operator()(Interval const* lhs, Interval const* rhs) const;
 };
 
+std::unique_ptr<struct timeval> ToTimeval(Duration duration);
+
 using IntervalSet = std::set<Interval*, CompareIntervals>;
 
 class ChronoTimerTestUtils;
@@ -96,6 +101,9 @@ class ChronoTimer {
   ChronoTimer();
   ChronoTimer(TimerCallback get_current_time_callback);
   ~ChronoTimer();
+
+  // Returns the current time point as given by the registered callback.
+  TimePoint Now() const;
 
   // Registers a new single-shot callback.
   // Will be called at (or after) now + timeout_interval.
