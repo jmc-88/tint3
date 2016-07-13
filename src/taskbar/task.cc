@@ -63,7 +63,7 @@ int GetMonitor(Window win) {
 Interval* urgent_timeout;
 std::list<Task*> urgent_list;
 
-Task::Task(ChronoTimer& timer) : timer_(timer) {}
+Task::Task(Timer& timer) : timer_(timer) {}
 
 std::string Task::GetTooltipText() {
   return tooltip_enabled_ ? title_ : std::string();
@@ -74,7 +74,7 @@ Task& Task::SetTooltipEnabled(bool is_enabled) {
   return (*this);
 }
 
-Task* AddTask(Window win, ChronoTimer& timer) {
+Task* AddTask(Window win, Timer& timer) {
   if (win == 0 || WindowIsHidden(win)) {
     return nullptr;
   }
@@ -158,7 +158,7 @@ Task* AddTask(Window win, ChronoTimer& timer) {
   return new_tsk2;
 }
 
-void RemoveTask(Task* tsk, ChronoTimer& timer) {
+void RemoveTask(Task* tsk, Timer& timer) {
   if (!tsk) {
     return;
   }

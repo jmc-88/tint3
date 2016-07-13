@@ -113,7 +113,7 @@ void DefaultTaskbar() {
   Taskbarname::Default();
 }
 
-void CleanupTaskbar(ChronoTimer& timer) {
+void CleanupTaskbar(Timer& timer) {
   Taskbarname::Cleanup();
 
   for (auto const& pair : win_to_task_map) {
@@ -345,7 +345,7 @@ void Taskbar::InitPanel(Panel* panel) {
   Taskbarname::InitPanel(panel);
 }
 
-void TaskbarRemoveTask(Window win, ChronoTimer& timer) {
+void TaskbarRemoveTask(Window win, Timer& timer) {
   RemoveTask(TaskGetTask(win), timer);
 }
 
@@ -371,7 +371,7 @@ TaskPtrArray TaskGetTasks(Window win) {
   return TaskPtrArray();
 }
 
-void TaskRefreshTasklist(ChronoTimer& timer) {
+void TaskRefreshTasklist(Timer& timer) {
   if (!taskbar_enabled) {
     return;
   }

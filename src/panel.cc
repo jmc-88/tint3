@@ -177,7 +177,7 @@ void DefaultPanel() {
   backgrounds.push_back(new Background());
 }
 
-void CleanupPanel(ChronoTimer& timer) {
+void CleanupPanel(Timer& timer) {
   if (!panel1) {
     return;
   }
@@ -224,7 +224,7 @@ void CleanupPanel(ChronoTimer& timer) {
   backgrounds.clear();
 }
 
-void InitPanel(ChronoTimer& timer) {
+void InitPanel(Timer& timer) {
   if (panel_config.monitor_ > server.nb_monitor - 1) {
     // server.nb_monitor minimum value is 1 (see get_monitors())
     util::log::Error() << "warning: monitor not found, "
@@ -901,7 +901,7 @@ bool AutohideHide(Panel* panel) {
   return false;
 }
 
-void AutohideTriggerShow(Panel* p, ChronoTimer& timer) {
+void AutohideTriggerShow(Panel* p, Timer& timer) {
   if (!p) {
     return;
   }
@@ -911,7 +911,7 @@ void AutohideTriggerShow(Panel* p, ChronoTimer& timer) {
                        [p]() -> bool { return AutohideShow(p); });
 }
 
-void AutohideTriggerHide(Panel* p, ChronoTimer& timer) {
+void AutohideTriggerHide(Panel* p, Timer& timer) {
   if (!p) {
     return;
   }

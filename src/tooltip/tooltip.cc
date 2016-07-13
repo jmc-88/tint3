@@ -39,20 +39,20 @@ Tooltip g_tooltip;
 
 namespace {
 
-void StopTooltipTimeout(ChronoTimer& timer) {
+void StopTooltipTimeout(Timer& timer) {
   if (g_tooltip.timeout != nullptr) {
     timer.ClearInterval(g_tooltip.timeout);
     g_tooltip.timeout = nullptr;
   }
 }
 
-void StartShowTimeout(ChronoTimer& timer) {
+void StartShowTimeout(Timer& timer) {
   g_tooltip.timeout =
       timer.SetTimeout(std::chrono::milliseconds(g_tooltip.show_timeout_msec),
                        [&timer]() -> bool { return TooltipShow(timer); });
 }
 
-void StartHideTimeout(ChronoTimer& timer) {
+void StartHideTimeout(Timer& timer) {
   g_tooltip.timeout =
       timer.SetTimeout(std::chrono::milliseconds(g_tooltip.hide_timeout_msec),
                        [&timer]() -> bool { return TooltipHide(timer); });
@@ -79,7 +79,7 @@ void DefaultTooltip() {
   g_tooltip.font_color.alpha = 1;
 }
 
-void CleanupTooltip(ChronoTimer& timer) {
+void CleanupTooltip(Timer& timer) {
   StopTooltipTimeout(timer);
   TooltipHide(timer);
   g_tooltip.BindTo(nullptr);
@@ -120,7 +120,7 @@ void InitTooltip() {
                               InputOutput, server.visual, mask, &attr);
 }
 
-void TooltipTriggerShow(Area* area, Panel* p, XEvent* e, ChronoTimer& timer) {
+void TooltipTriggerShow(Area* area, Panel* p, XEvent* e, Timer& timer) {
   // Position the tooltip in the center of the area
   x = area->panel_x_ + area->width_ / 2 + e->xmotion.x_root - e->xmotion.x;
   y = area->panel_y_ + area->height_ / 2 + e->xmotion.y_root - e->xmotion.y;
@@ -140,7 +140,7 @@ void TooltipTriggerShow(Area* area, Panel* p, XEvent* e, ChronoTimer& timer) {
   }
 }
 
-bool TooltipShow(ChronoTimer& timer) {
+bool TooltipShow(Timer& timer) {
   int mx, my;
   Window w;
   XTranslateCoordinates(server.dsp, server.root_win, g_tooltip.panel->main_win_,
@@ -250,7 +250,7 @@ void TooltipAdjustGeometry() {
   height = std::min(height, max_height);
 }
 
-void Tooltip::Update(ChronoTimer& timer) {
+void Tooltip::Update(Timer& timer) {
   if (tooltip_text.empty()) {
     TooltipHide(timer);
     return;
@@ -313,7 +313,7 @@ void Tooltip::Update(ChronoTimer& timer) {
   cairo_surface_destroy(cs);
 }
 
-void TooltipTriggerHide(ChronoTimer& timer) {
+void TooltipTriggerHide(Timer& timer) {
   if (g_tooltip.mapped_) {
     g_tooltip.BindTo(nullptr);
     StartHideTimeout(timer);
@@ -323,7 +323,7 @@ void TooltipTriggerHide(ChronoTimer& timer) {
   }
 }
 
-bool TooltipHide(ChronoTimer& timer) {
+bool TooltipHide(Timer& timer) {
   if (g_tooltip.mapped_) {
     g_tooltip.mapped_ = false;
     XUnmapWindow(server.dsp, g_tooltip.window);

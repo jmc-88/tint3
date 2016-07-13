@@ -11,10 +11,10 @@
 using TimePoint = std::chrono::steady_clock::time_point;
 using Duration = std::chrono::nanoseconds;
 
-class ChronoTimer;
+class Timer;
 class Interval {
  public:
-  friend class ChronoTimer;
+  friend class Timer;
   using Callback = std::function<bool()>;
 
   Interval() = delete;
@@ -40,14 +40,14 @@ std::unique_ptr<struct timeval> ToTimeval(Duration duration);
 using IntervalSet = std::set<Interval*, CompareIntervals>;
 
 class ChronoTimerTestUtils;
-class ChronoTimer {
+class Timer {
  public:
   friend class ChronoTimerTestUtils;
   using TimerCallback = std::function<TimePoint()>;
 
-  ChronoTimer();
-  ChronoTimer(TimerCallback get_current_time_callback);
-  ~ChronoTimer();
+  Timer();
+  Timer(TimerCallback get_current_time_callback);
+  ~Timer();
 
   // Returns the current time point as given by the registered callback.
   TimePoint Now() const;

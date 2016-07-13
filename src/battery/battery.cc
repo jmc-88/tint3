@@ -132,7 +132,7 @@ void DefaultBattery() {
 #endif
 }
 
-void CleanupBattery(ChronoTimer& timer) {
+void CleanupBattery(Timer& timer) {
   if (bat1_font_desc) {
     pango_font_description_free(bat1_font_desc);
   }
@@ -164,7 +164,7 @@ void CleanupBattery(ChronoTimer& timer) {
 #endif
 }
 
-void InitBattery(ChronoTimer& timer) {
+void InitBattery(Timer& timer) {
   if (!battery_enabled) {
     return;
   }

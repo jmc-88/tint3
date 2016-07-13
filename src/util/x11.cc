@@ -16,7 +16,7 @@ ScopedErrorHandler::~ScopedErrorHandler() { XSetErrorHandler(old_handler_); }
 
 void XFreeDeleter::operator()(void* data) const { XFree(data); }
 
-EventLoop::EventLoop(Server const* const server, ChronoTimer& timer)
+EventLoop::EventLoop(Server const* const server, Timer& timer)
     : server_(server),
       x11_file_descriptor_(ConnectionNumber(server_->dsp)),
       timer_(timer) {}

@@ -25,7 +25,7 @@ class Tooltip {
   void BindTo(Area* area);
   bool IsBoundTo(Area* area) const;
 
-  void Update(ChronoTimer& timer);
+  void Update(Timer& timer);
 
  private:
   Area* area_;
@@ -37,12 +37,12 @@ extern Tooltip g_tooltip;
 void DefaultTooltip();
 
 // freed memory
-void CleanupTooltip(ChronoTimer& timer);
+void CleanupTooltip(Timer& timer);
 
 void InitTooltip();
-void TooltipTriggerHide(ChronoTimer& timer);
-void TooltipTriggerShow(Area* area, Panel* p, XEvent* e, ChronoTimer& timer);
-bool TooltipHide(ChronoTimer& timer);
-bool TooltipShow(ChronoTimer& timer);
+void TooltipTriggerHide(Timer& timer);
+void TooltipTriggerShow(Area* area, Panel* p, XEvent* e, Timer& timer);
+bool TooltipHide(Timer& timer);
+bool TooltipShow(Timer& timer);
 
 #endif  // TINT3_TOOLTIP_TOOLTIP_H

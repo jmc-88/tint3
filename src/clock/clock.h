@@ -48,10 +48,10 @@ extern bool clock_enabled;
 void DefaultClock();
 
 // freed memory
-void CleanupClock(ChronoTimer& timer);
+void CleanupClock(Timer& timer);
 
 // initialize clock : y position, precision, ...
-void InitClock(ChronoTimer& timer);
+void InitClock(Timer& timer);
 
 void ClockAction(int button);
 

@@ -66,7 +66,7 @@ void DefaultClock() {
   time2_font_desc = nullptr;
 }
 
-void CleanupClock(ChronoTimer& timer) {
+void CleanupClock(Timer& timer) {
   if (time1_font_desc) {
     pango_font_description_free(time1_font_desc);
   }
@@ -127,7 +127,7 @@ std::string Clock::GetTooltipText() {
       ClockGetTimeForTimezone(time_tooltip_timezone, &time_clock.tv_sec));
 }
 
-void InitClock(ChronoTimer& timer) {
+void InitClock(Timer& timer) {
   if (time1_format.empty() || clock_timeout != nullptr) {
     return;
   }

@@ -159,18 +159,18 @@ extern int nb_panel;
 void DefaultPanel();
 
 // free memory
-void CleanupPanel(ChronoTimer& timer);
+void CleanupPanel(Timer& timer);
 
 // realloc panels according to number of monitor
 // use panel_config as default value
-void InitPanel(ChronoTimer& timer);
+void InitPanel(Timer& timer);
 
 // detect wich panel
 Panel* GetPanel(Window win);
 
 bool AutohideShow(Panel* panel);
 bool AutohideHide(Panel* panel);
-void AutohideTriggerShow(Panel* p, ChronoTimer& timer);
-void AutohideTriggerHide(Panel* p, ChronoTimer& timer);
+void AutohideTriggerShow(Panel* p, Timer& timer);
+void AutohideTriggerHide(Panel* p, Timer& timer);
 
 #endif  // TINT3_PANEL_H

@@ -5,7 +5,7 @@
 #include <functional>
 #include "util/timer.h"
 
-class FakeClock : public ChronoTimer {
+class FakeClock : public Timer {
  public:
   FakeClock() = delete;
   FakeClock(FakeClock& other) = delete;
@@ -67,18 +67,18 @@ class ChronoTimerTestUtils {
  public:
   virtual ~ChronoTimerTestUtils() = 0;
 
-  static IntervalSet const& GetTimeouts(ChronoTimer& timer) {
+  static IntervalSet const& GetTimeouts(Timer& timer) {
     return timer.timeouts_;
   }
 
-  static IntervalSet const& GetIntervals(ChronoTimer& timer) {
+  static IntervalSet const& GetIntervals(Timer& timer) {
     return timer.intervals_;
   }
 };
 
-TEST_CASE("ChronoTimer", "Test the ChronoTimer class") {
+TEST_CASE("Timer", "Test the Timer class") {
   FakeClock fake_clock{0};
-  ChronoTimer timer{std::bind(&FakeClock::Now, &fake_clock)};
+  Timer timer{std::bind(&FakeClock::Now, &fake_clock)};
   auto no_op_callback = []() -> bool { return true; };
 
   SECTION("correctly registers/unregisters an interval (single)") {

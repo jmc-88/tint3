@@ -50,13 +50,13 @@ class Global_taskbar : public TaskbarBase {
 void DefaultTaskbar();
 
 // freed memory
-void CleanupTaskbar(ChronoTimer& timer);
+void CleanupTaskbar(Timer& timer);
 
 void InitTaskbar();
 
-void TaskbarRemoveTask(Window win, ChronoTimer& timer);
+void TaskbarRemoveTask(Window win, Timer& timer);
 Task* TaskGetTask(Window win);
 TaskPtrArray TaskGetTasks(Window win);
-void TaskRefreshTasklist(ChronoTimer& timer);
+void TaskRefreshTasklist(Timer& timer);
 
 #endif  // TINT3_TASKBAR_TASKBAR_H

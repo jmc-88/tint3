@@ -56,13 +56,12 @@ std::unique_ptr<struct timeval> ToTimeval(Duration duration) {
   return std::unique_ptr<struct timeval>(tv);
 }
 
-ChronoTimer::ChronoTimer()
-    : get_current_time_(std::chrono::steady_clock::now) {}
+Timer::Timer() : get_current_time_(std::chrono::steady_clock::now) {}
 
-ChronoTimer::ChronoTimer(TimerCallback get_current_time_callback)
+Timer::Timer(TimerCallback get_current_time_callback)
     : get_current_time_(get_current_time_callback) {}
 
-ChronoTimer::~ChronoTimer() {
+Timer::~Timer() {
   for (Interval* interval : timeouts_) {
     delete interval;
   }
@@ -74,10 +73,10 @@ ChronoTimer::~ChronoTimer() {
   intervals_.clear();
 }
 
-TimePoint ChronoTimer::Now() const { return get_current_time_(); }
+TimePoint Timer::Now() const { return get_current_time_(); }
 
-Interval* ChronoTimer::SetTimeout(Duration timeout_interval,
-                                  Interval::Callback callback) {
+Interval* Timer::SetTimeout(Duration timeout_interval,
+                            Interval::Callback callback) {
   Interval* interval = new Interval(Now() + timeout_interval,
                                     std::chrono::milliseconds(0), callback);
   if (interval) {
@@ -86,8 +85,8 @@ Interval* ChronoTimer::SetTimeout(Duration timeout_interval,
   return interval;
 }
 
-Interval* ChronoTimer::SetInterval(Duration repeat_interval,
-                                   Interval::Callback callback) {
+Interval* Timer::SetInterval(Duration repeat_interval,
+                             Interval::Callback callback) {
   Interval* interval =
       new Interval(Now() + repeat_interval, repeat_interval, callback);
   if (interval) {
@@ -96,7 +95,7 @@ Interval* ChronoTimer::SetInterval(Duration repeat_interval,
   return interval;
 }
 
-bool ChronoTimer::ClearInterval(Interval* interval) {
+bool Timer::ClearInterval(Interval* interval) {
   size_t erased_count = 0;
 
   if (interval->repeat_interval_ == interval->repeat_interval_.zero()) {
@@ -113,7 +112,7 @@ bool ChronoTimer::ClearInterval(Interval* interval) {
   return false;
 }
 
-void ChronoTimer::ProcessExpiredIntervals() {
+void Timer::ProcessExpiredIntervals() {
   TimePoint now = get_current_time_();
 
   for (auto it = timeouts_.begin(); it != timeouts_.end();) {
@@ -146,7 +145,7 @@ void ChronoTimer::ProcessExpiredIntervals() {
   }
 }
 
-Interval* ChronoTimer::GetNextInterval() const {
+Interval* Timer::GetNextInterval() const {
   auto first_timeout = timeouts_.begin();
   auto first_interval = intervals_.begin();
 

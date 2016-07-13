@@ -41,7 +41,7 @@ class EventLoop {
  public:
   using EventHandler = std::function<void(XEvent&)>;
 
-  EventLoop(Server const* const server, ChronoTimer& timer);
+  EventLoop(Server const* const server, Timer& timer);
 
   bool RunLoop();
   EventLoop& RegisterHandler(int event, EventHandler handler);
@@ -52,7 +52,7 @@ class EventLoop {
  private:
   Server const* const server_;
   int x11_file_descriptor_;
-  ChronoTimer& timer_;
+  Timer& timer_;
   EventHandler default_handler_;
   std::map<int, EventHandler> handler_map_;
 };

@@ -54,11 +54,11 @@ extern std::string path_status;
 void DefaultBattery();
 
 // free memory
-void CleanupBattery(ChronoTimer& timer);
+void CleanupBattery(Timer& timer);
 
 // initialize clock : y position, ...
 void UpdateBattery();
 
-void InitBattery(ChronoTimer& timer);
+void InitBattery(Timer& timer);
 
 #endif  // TINT3_BATTERY_BATTERY_H

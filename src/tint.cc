@@ -258,7 +258,7 @@ void InitX11() {
   GetDesktops();
 }
 
-void Cleanup(ChronoTimer& timer) {
+void Cleanup(Timer& timer) {
   CleanupSystray(timer);
   CleanupTooltip(timer);
   CleanupClock(timer);
@@ -579,7 +579,7 @@ void EventButtonRelease(XEvent* e) {
   }
 }
 
-void EventPropertyNotify(XEvent* e, ChronoTimer& timer) {
+void EventPropertyNotify(XEvent* e, Timer& timer) {
   Task* tsk;
   Window win = e->xproperty.window;
   Atom at = e->xproperty.atom;
@@ -828,7 +828,7 @@ void EventExpose(XEvent* e) {
   panel_refresh = true;
 }
 
-void EventConfigureNotify(Window win, ChronoTimer& timer) {
+void EventConfigureNotify(Window win, Timer& timer) {
   // change in root window (xrandr)
   if (win == server.root_win) {
     signal_pending = SIGUSR1;
@@ -1121,7 +1121,7 @@ start:
   Init(argc, argv);
   InitX11();
 
-  ChronoTimer timer;
+  Timer timer;
   bool config_read = false;
 
   if (!config_path.empty()) {

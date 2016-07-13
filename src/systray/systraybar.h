@@ -16,7 +16,7 @@
 #define XEMBED_MAPPED (1 << 0)
 
 class Systraybar : public Area {
-  void RemoveIconInternal(TrayWindow* traywin, ChronoTimer& timer);
+  void RemoveIconInternal(TrayWindow* traywin, Timer& timer);
 
  public:
   std::list<TrayWindow*> list_icons;
@@ -30,13 +30,13 @@ class Systraybar : public Area {
 
   size_t VisibleIcons();
   bool AddIcon(Window id);
-  void RemoveIcon(TrayWindow* traywin, ChronoTimer& timer);
-  void Clear(ChronoTimer& timer);
+  void RemoveIcon(TrayWindow* traywin, Timer& timer);
+  void Clear(Timer& timer);
 
   // systray protocol
   // many tray icon don't manage stop/restart of the systray manager
-  void StartNet(ChronoTimer& timer);
-  void StopNet(ChronoTimer& timer);
+  void StartNet(Timer& timer);
+  void StopNet(Timer& timer);
   void NetMessage(XClientMessageEvent* e);
 
   static void InitPanel(Panel* panel);
@@ -59,12 +59,12 @@ extern int systray_max_icon_size;
 void DefaultSystray();
 
 // freed memory
-void CleanupSystray(ChronoTimer& timer);
+void CleanupSystray(Timer& timer);
 
 // initialize protocol and panel position
-void InitSystray(ChronoTimer& timer);
+void InitSystray(Timer& timer);
 
-void RefreshSystrayIcon(ChronoTimer& timer);
-void SystrayRenderIcon(TrayWindow* traywin, ChronoTimer& timer);
+void RefreshSystrayIcon(Timer& timer);
+void SystrayRenderIcon(TrayWindow* traywin, Timer& timer);
 
 #endif  // TINT3_SYSTRAYBAR_SYSTRAYBAR_H
