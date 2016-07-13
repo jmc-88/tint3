@@ -260,7 +260,7 @@ void InitX11() {
 }
 
 void Cleanup(ChronoTimer& timer) {
-  CleanupSystray();
+  CleanupSystray(timer);
   CleanupTooltip(timer);
   CleanupClock(timer);
   CleanupLauncher();
@@ -1241,7 +1241,7 @@ start:
 
         for (auto& traywin : systray.list_icons) {
           if (traywin->tray_id == e.xany.window) {
-            systray.RemoveIcon(traywin);
+            systray.RemoveIcon(traywin, timer);
             return;
           }
         }
@@ -1367,7 +1367,7 @@ start:
 
       for (auto& traywin : systray.list_icons) {
         if (traywin->id == event_union.de.drawable) {
-          SystrayRenderIcon(traywin);
+          SystrayRenderIcon(traywin, timer);
           return;
         }
       }
@@ -1375,7 +1375,7 @@ start:
   });
 
   if (event_loop.RunLoop()) {
-    systray.Clear();
+    systray.Clear(timer);
     Cleanup(timer);
     goto start;  // brrr
   }

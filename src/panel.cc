@@ -240,7 +240,7 @@ void InitPanel(ChronoTimer& timer) {
   }
 
   InitTooltip();
-  InitSystray();
+  InitSystray(timer);
   InitLauncher();
   InitClock(timer);
 #ifdef ENABLE_BATTERY

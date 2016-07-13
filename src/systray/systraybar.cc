@@ -62,11 +62,11 @@ void DefaultSystray() {
   systray.size_mode_ = SizeMode::kByContent;
 }
 
-void CleanupSystray() {
-  systray.StopNet();
+void CleanupSystray(ChronoTimer& timer) {
+  systray.StopNet(timer);
 
   if (systray_enabled) {
-    systray.Clear();
+    systray.Clear(timer);
   }
 
   systray_enabled = false;
@@ -80,8 +80,8 @@ void CleanupSystray() {
   }
 }
 
-void InitSystray() {
-  systray.StartNet();
+void InitSystray(ChronoTimer& timer) {
+  systray.StartNet(timer);
 
   if (!systray_enabled) {
     return;
@@ -249,11 +249,11 @@ Window GetSystemTrayOwner() {
 
 }  // namespace
 
-void Systraybar::StartNet() {
+void Systraybar::StartNet(ChronoTimer& timer) {
   if (net_sel_win) {
     // protocol already started
     if (!systray_enabled) {
-      StopNet();
+      StopNet(timer);
     }
 
     return;
@@ -307,7 +307,7 @@ void Systraybar::StartNet() {
 
   if (owner != net_sel_win) {
     util::log::Error() << "Can't get systray manager.\n";
-    StopNet();
+    StopNet(timer);
     return;
   }
 
@@ -325,10 +325,10 @@ void Systraybar::StartNet() {
              (XEvent*)&ev);
 }
 
-void Systraybar::StopNet() {
+void Systraybar::StopNet(ChronoTimer& timer) {
   // remove_icon change systray.list_icons
   for (auto& icon : systray.list_icons) {
-    RemoveIconInternal(icon);
+    RemoveIconInternal(icon, timer);
   }
 
   list_icons.clear();
@@ -499,7 +499,7 @@ bool Systraybar::AddIcon(Window id) {
   return true;
 }
 
-void Systraybar::RemoveIconInternal(TrayWindow* traywin) {
+void Systraybar::RemoveIconInternal(TrayWindow* traywin, ChronoTimer& timer) {
   XSelectInput(server.dsp, traywin->tray_id, NoEventMask);
 
   if (traywin->damage) {
@@ -521,14 +521,14 @@ void Systraybar::RemoveIconInternal(TrayWindow* traywin) {
   }
 
   if (traywin->render_timeout) {
-    StopTimeout(traywin->render_timeout);
+    timer.ClearInterval(traywin->render_timeout);
   }
 
   delete traywin;
 }
 
-void Systraybar::RemoveIcon(TrayWindow* traywin) {
-  RemoveIconInternal(traywin);
+void Systraybar::RemoveIcon(TrayWindow* traywin, ChronoTimer& timer) {
+  RemoveIconInternal(traywin, timer);
 
   // remove from our list
   list_icons.erase(std::remove(list_icons.begin(), list_icons.end(), traywin),
@@ -544,9 +544,9 @@ void Systraybar::RemoveIcon(TrayWindow* traywin) {
   panel_refresh = true;
 }
 
-void Systraybar::Clear() {
+void Systraybar::Clear(ChronoTimer& timer) {
   for (auto& traywin : list_icons) {
-    RemoveIconInternal(traywin);
+    RemoveIconInternal(traywin, timer);
   }
 
   list_icons.clear();
@@ -601,17 +601,17 @@ void Systraybar::NetMessage(XClientMessageEvent* e) {
 
 namespace {
 
-void SystrayRenderIconNow(TrayWindow* traywin) {
+void SystrayRenderIconNow(TrayWindow* traywin, ChronoTimer& timer) {
   // we end up in this function only in real transparency mode or if
   // systray_task_asb != 100 0 0
   // we made also sure, that we always have a 32 bit visual, i.e. we can safely
   // create 32 bit pixmaps here
-  traywin->render_timeout = 0;
+  traywin->render_timeout = nullptr;
 
   if (traywin->width == 0 || traywin->height == 0) {
     // reschedule rendering since the geometry information has not yet been
     // processed (can happen on slow cpu)
-    SystrayRenderIcon(traywin);
+    SystrayRenderIcon(traywin, timer);
     return;
   }
 
@@ -703,14 +703,17 @@ void SystrayRenderIconNow(TrayWindow* traywin) {
 
 }  // namespace
 
-void SystrayRenderIcon(TrayWindow* traywin) {
+void SystrayRenderIcon(TrayWindow* traywin, ChronoTimer& timer) {
   if (server.real_transparency || systray.alpha != 100 ||
       systray.brightness != 0 || systray.saturation != 0) {
     // wine tray icons update whenever mouse is over them, so we limit the
     // updates to 50 ms
-    if (traywin->render_timeout == 0) {
-      traywin->render_timeout =
-          AddTimeout(50, 0, [traywin]() { SystrayRenderIconNow(traywin); });
+    if (!traywin->render_timeout) {
+      traywin->render_timeout = timer.SetTimeout(
+          std::chrono::milliseconds(50), [traywin, &timer]() -> bool {
+            SystrayRenderIconNow(traywin, timer);
+            return true;
+          });
     }
   } else {
     // comment by andreas: I'm still not sure, what exactly we need to do
@@ -728,10 +731,10 @@ void SystrayRenderIcon(TrayWindow* traywin) {
   }
 }
 
-void RefreshSystrayIcon() {
+void RefreshSystrayIcon(ChronoTimer& timer) {
   for (auto& traywin : systray.list_icons) {
     if (!traywin->hide) {
-      SystrayRenderIcon(traywin);
+      SystrayRenderIcon(traywin, timer);
     }
   }
 }
