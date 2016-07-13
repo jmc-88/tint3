@@ -85,7 +85,6 @@ void Init(int argc, char* argv[]) {
   // FIXME: remove this global data shit
   // set global data
   DefaultConfig();
-  DefaultTimeout();
   DefaultSystray();
 #ifdef ENABLE_BATTERY
   DefaultBattery();
@@ -271,7 +270,6 @@ void Cleanup(ChronoTimer& timer) {
 
   imlib_context_disconnect_display();
 
-  CleanupTimeout();
   server.Cleanup();
 }
 
