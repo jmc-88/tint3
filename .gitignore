@@ -1,5 +1,6 @@
-# Don't include the build directory in the repository
+# Don't include the build directories in the repository
 /build
+/scan-build
 
 # Don't include ctags in the repository
 /tags
