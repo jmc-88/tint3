@@ -390,11 +390,6 @@ void Area::Draw() {
 
 void Area::DrawBackground(cairo_t* c) {
   if (bg_->back.alpha > 0.0) {
-    util::log::Debug() << "Area::DrawBackground -> draw background from ("
-                       << bg_->border.width << ", " << bg_->border.width
-                       << "), " << (width_ - (2.0 * bg_->border.width)) << 'x'
-                       << (height_ - (2.0 * bg_->border.width)) << '\n';
-
     DrawRect(c, bg_->border.width, bg_->border.width,
              width_ - (2.0 * bg_->border.width),
              height_ - (2.0 * bg_->border.width),
@@ -405,11 +400,6 @@ void Area::DrawBackground(cairo_t* c) {
   }
 
   if (bg_->border.width > 0 && bg_->border.alpha > 0.0) {
-    util::log::Debug() << "Area::DrawBackground -> draw border from ("
-                       << bg_->border.width << ", " << bg_->border.width
-                       << "), " << (width_ - (2.0 * bg_->border.width)) << 'x'
-                       << (height_ - (2.0 * bg_->border.width)) << '\n';
-
     cairo_set_line_width(c, bg_->border.width);
 
     // draw border inside (x, y, width, height)
