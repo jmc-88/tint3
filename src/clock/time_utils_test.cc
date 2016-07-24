@@ -26,7 +26,7 @@ TEST_CASE("ClockGetTimeForTimezone",
   time_t tm_8am_elapsed = (60 * 60 * 8);
   struct tm tm_8am = (*std::gmtime(&tm_8am_elapsed));
 
-  auto same_time = [](struct tm lhs, struct tm rhs) -> bool {
+  auto same_time = [](struct tm const& lhs, struct tm const& rhs) -> bool {
     return lhs.tm_sec == rhs.tm_sec && lhs.tm_min == rhs.tm_min &&
            lhs.tm_hour == rhs.tm_hour && lhs.tm_mday == rhs.tm_mday &&
            lhs.tm_mon == rhs.tm_mon && lhs.tm_year == rhs.tm_year &&
