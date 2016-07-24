@@ -32,13 +32,13 @@ TEST_CASE("ClockGetTimeForTimezone",
 
   SECTION("Empty timezone") {
     environment::ScopedOverride tz{"TZ", "UTC"};
-    struct tm* tm2 = ClockGetTimeForTimezone("", &elapsed);
+    struct tm* tm2 = ClockGetTimeForTimezone("", elapsed);
     REQUIRE(same_time(tm1, tm2));
   }
 
   SECTION("Timezone override works and doesn't change the environment") {
     environment::ScopedOverride tz{"TZ", "UTC"};
-    struct tm* tm2 = ClockGetTimeForTimezone("US/Pacific", &elapsed);
+    struct tm* tm2 = ClockGetTimeForTimezone("US/Pacific", elapsed);
     REQUIRE(same_time(tm1, tm2));
     REQUIRE(environment::Get("TZ") == "UTC");
   }

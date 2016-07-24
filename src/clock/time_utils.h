@@ -4,8 +4,7 @@
 #include <ctime>
 #include <string>
 
-struct tm* ClockGetTimeForTimezone(std::string const& timezone,
-                                   time_t const* time_ptr);
+struct tm* ClockGetTimeForTimezone(std::string const& timezone, time_t timer);
 std::string FormatTime(std::string format, struct tm const* timeptr);
 
 #endif  // TINT3_CLOCK_TIME_UTILS_H

@@ -1,8 +1,6 @@
 #ifndef TINT3_CLOCK_CLOCK_H
 #define TINT3_CLOCK_CLOCK_H
 
-#include <sys/time.h>
-
 #include <string>
 
 #include "util/area.h"

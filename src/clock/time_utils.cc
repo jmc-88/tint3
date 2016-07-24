@@ -1,14 +1,13 @@
 #include "clock/time_utils.h"
 #include "util/environment.h"
 
-struct tm* ClockGetTimeForTimezone(std::string const& timezone,
-                                   time_t const* time_ptr) {
+struct tm* ClockGetTimeForTimezone(std::string const& timezone, time_t timer) {
   if (timezone.empty()) {
-    return std::localtime(time_ptr);
+    return std::localtime(&timer);
   }
 
   environment::ScopedOverride tz{"TZ", timezone};
-  return std::localtime(time_ptr);
+  return std::localtime(&timer);
 }
 
 std::string FormatTime(std::string format, struct tm const* timeptr) {

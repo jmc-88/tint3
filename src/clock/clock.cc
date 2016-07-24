@@ -27,6 +27,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <ctime>
 #include <string>
 
 #include "clock/clock.h"
@@ -45,7 +46,7 @@ std::string time_tooltip_format;
 std::string time_tooltip_timezone;
 std::string clock_lclick_command;
 std::string clock_rclick_command;
-struct timeval time_clock;
+time_t time_clock;
 PangoFontDescription* time1_font_desc;
 PangoFontDescription* time2_font_desc;
 bool clock_enabled;
@@ -90,7 +91,7 @@ void CleanupClock(Timer& timer) {
 }
 
 bool UpdateClockSeconds() {
-  gettimeofday(&time_clock, 0);
+  time(&time_clock);
 
   if (!time1_format.empty()) {
     for (int i = 0; i < nb_panel; i++) {
@@ -103,28 +104,26 @@ bool UpdateClockSeconds() {
 }
 
 bool UpdateClockMinutes() {
-  // remember old_sec because after suspend/hibernate the clock should be
-  // updated directly, and not
-  // on next minute change
-  time_t old_sec = time_clock.tv_sec;
-  gettimeofday(&time_clock, 0);
+  // remember old_time because after suspend/hibernate the clock should be
+  // updated directly, and not on the next minute change
+  time_t old_time = time_clock;
+  time(&time_clock);
 
-  if (time_clock.tv_sec % 60 == 0 || time_clock.tv_sec - old_sec > 60) {
+  if (time_clock % 60 == 0 || time_clock - old_time > 60) {
     if (!time1_format.empty()) {
       for (int i = 0; i < nb_panel; i++) {
         panel1[i].clock_.need_resize_ = true;
       }
     }
-
     panel_refresh = true;
   }
+
   return true;
 }
 
 std::string Clock::GetTooltipText() {
-  return FormatTime(
-      time_tooltip_format,
-      ClockGetTimeForTimezone(time_tooltip_timezone, &time_clock.tv_sec));
+  return FormatTime(time_tooltip_format,
+                    ClockGetTimeForTimezone(time_tooltip_timezone, time_clock));
 }
 
 void InitClock(Timer& timer) {
@@ -196,14 +195,14 @@ bool Clock::Resize() {
   int time_height_ink = 0, time_height = 0, time_width = 0;
   int date_height_ink = 0, date_height = 0, date_width = 0;
 
-  time1_ = FormatTime(time1_format, ClockGetTimeForTimezone(
-                                        time1_timezone, &time_clock.tv_sec));
+  time1_ = FormatTime(time1_format,
+                      ClockGetTimeForTimezone(time1_timezone, time_clock));
   GetTextSize2(time1_font_desc, &time_height_ink, &time_height, &time_width,
                panel_->height_, panel_->width_, time1_);
 
   if (!time2_format.empty()) {
-    time2_ = FormatTime(time2_format, ClockGetTimeForTimezone(
-                                          time2_timezone, &time_clock.tv_sec));
+    time2_ = FormatTime(time2_format,
+                        ClockGetTimeForTimezone(time2_timezone, time_clock));
     GetTextSize2(time2_font_desc, &date_height_ink, &date_height, &date_width,
                  panel_->height_, panel_->width_, time2_);
   }
