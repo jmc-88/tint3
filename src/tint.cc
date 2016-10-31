@@ -81,12 +81,13 @@ Atom dnd_atom;
 int dnd_sent_request;
 std::string dnd_launcher_exec;
 
-void Init(int argc, char* argv[]) {
+void Init(int argc, char* argv[], std::string* config_path,
+          std::string* snapshot_path) {
+  config_path->clear();
+  snapshot_path->clear();
+
   // FIXME: remove this global data shit
   // set global data
-  config_path.clear();
-  snapshot_path.clear();
-
   DefaultSystray();
 #ifdef ENABLE_BATTERY
   DefaultBattery();
@@ -113,7 +114,7 @@ void Init(int argc, char* argv[]) {
       i++;
 
       if (i < argc) {
-        config_path = argv[i];
+        config_path->assign(argv[i]);
       }
     }
 
@@ -121,7 +122,7 @@ void Init(int argc, char* argv[]) {
       i++;
 
       if (i < argc) {
-        snapshot_path = argv[i];
+        snapshot_path->assign(argv[i]);
       }
     }
   }
@@ -180,7 +181,7 @@ static void ErrorTrapPop(SnDisplay* display, Display* xdisplay) {
 }
 #endif  // HAVE_SN
 
-void InitX11() {
+void InitX11(bool snapshot_mode) {
   server.dsp = XOpenDisplay(nullptr);
 
   if (!server.dsp) {
@@ -192,7 +193,7 @@ void InitX11() {
   server.screen = DefaultScreen(server.dsp);
   server.root_win = RootWindow(server.dsp, server.screen);
   server.desktop = server.GetCurrentDesktop();
-  server.InitVisual();
+  server.InitVisual(snapshot_mode);
   XSetErrorHandler(ServerCatchError);
 
 #ifdef HAVE_SN
@@ -1120,12 +1121,16 @@ void DragAndDropDrop(XClientMessageEvent* e) {
 
 int main(int argc, char* argv[]) {
 start:
-  Init(argc, argv);
-  InitX11();
+  std::string config_path;
+  std::string snapshot_path;
+  Init(argc, argv, &config_path, &snapshot_path);
+
+  bool snapshot_mode = (!snapshot_path.empty());
+  InitX11(snapshot_mode);
 
   Timer timer;
 
-  config::Reader config_reader{&server};
+  config::Reader config_reader{&server, snapshot_mode};
   bool config_read = false;
 
   if (!config_path.empty()) {
@@ -1140,7 +1145,7 @@ start:
     std::exit(1);
   }
 
-  InitPanel(timer);
+  InitPanel(timer, snapshot_mode);
 
 #ifdef _TINT3_DEBUG
 
@@ -1151,7 +1156,7 @@ start:
 
 #endif  // _TINT3_DEBUG
 
-  if (!snapshot_path.empty()) {
+  if (snapshot_mode) {
     GetSnapshot(snapshot_path.c_str());
     Cleanup(timer);
     std::exit(0);

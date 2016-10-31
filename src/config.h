@@ -5,9 +5,6 @@
 
 #include "server.h"
 
-extern std::string config_path;
-extern std::string snapshot_path;
-
 namespace test {
 
 class ConfigReader;
@@ -21,7 +18,7 @@ void ExtractValues(const std::string& value, std::string& v1, std::string& v2,
 
 class Reader {
  public:
-  explicit Reader(Server* server);
+  Reader(Server* server, bool snapshot_mode);
 
   bool LoadFromFile(std::string const& path);
   bool LoadFromDefaults();
@@ -31,6 +28,7 @@ class Reader {
 
   Server* server_;
   bool new_config_file_;
+  bool snapshot_mode_;
 
   bool ParseLine(std::string const& line, std::string& key,
                  std::string& value) const;

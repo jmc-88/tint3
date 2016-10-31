@@ -61,7 +61,7 @@ class MockServer : public Server {
 
 class ConfigReader : public config::Reader {
  public:
-  ConfigReader() : config::Reader(&server_) {}
+  ConfigReader() : config::Reader(&server_, false) {}
 
   MockServer& server() { return server_; }
 

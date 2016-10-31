@@ -60,10 +60,6 @@
 #include "battery/battery.h"
 #endif
 
-// TODO: remove these global variables
-std::string config_path;
-std::string snapshot_path;
-
 namespace {
 
 void GetAction(std::string const& event, MouseAction* action) {
@@ -141,13 +137,14 @@ void ExtractValues(std::string const& value, std::string& v1, std::string& v2,
   }
 }
 
-Reader::Reader(Server* server) : server_(server), new_config_file_(false) {}
+Reader::Reader(Server* server, bool snapshot_mode)
+    : server_(server), new_config_file_(false), snapshot_mode_(snapshot_mode) {}
 
 bool Reader::LoadFromDefaults() {
   // follow XDG specification
   // check tint3rc in user directory
   auto user_config_dir = util::xdg::basedir::ConfigHome() / "tint3";
-  config_path = user_config_dir / "tint3rc";
+  auto config_path = user_config_dir / "tint3rc";
 
   if (util::fs::FileExists(config_path)) {
     return LoadFromFile(config_path);
@@ -300,9 +297,7 @@ void Reader::AddEntry(std::string const& key, std::string const& value) {
 
       if (item == 'S') {
         // systray disabled in snapshot mode
-        if (snapshot_path.empty()) {
-          systray_enabled = true;
-        }
+        systray_enabled = !snapshot_mode_;
       }
 
       if (item == 'C') {

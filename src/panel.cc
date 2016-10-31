@@ -224,7 +224,7 @@ void CleanupPanel(Timer& timer) {
   backgrounds.clear();
 }
 
-void InitPanel(Timer& timer) {
+void InitPanel(Timer& timer, bool snapshot_mode) {
   if (panel_config.monitor_ > server.nb_monitor - 1) {
     // server.nb_monitor minimum value is 1 (see get_monitors())
     util::log::Error() << "warning: monitor not found, "
@@ -348,7 +348,7 @@ void InitPanel(Timer& timer) {
     p->SetProperties();
     p->SetBackground();
 
-    if (snapshot_path.empty()) {
+    if (!snapshot_mode) {
       // if we are not in 'snapshot' mode then map new panel
       XMapWindow(server.dsp, p->main_win_);
     }

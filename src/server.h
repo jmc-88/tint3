@@ -59,7 +59,7 @@ class Server {
   int GetNumberOfDesktops();
   void InitGC(Window win);
   void InitAtoms();
-  void InitVisual();
+  void InitVisual(bool snapshot_mode);
 };
 
 extern Server server;

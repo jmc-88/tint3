@@ -163,7 +163,7 @@ void CleanupPanel(Timer& timer);
 
 // realloc panels according to number of monitor
 // use panel_config as default value
-void InitPanel(Timer& timer);
+void InitPanel(Timer& timer, bool snapshot_mode);
 
 // detect wich panel
 Panel* GetPanel(Window win);

@@ -323,7 +323,7 @@ void Server::InitGC(Window win) {
   }
 }
 
-void Server::InitVisual() {
+void Server::InitVisual(bool snapshot_mode) {
   // inspired by freedesktops fdclock ;)
   XVisualInfo templ;
   templ.screen = screen;
@@ -363,7 +363,7 @@ void Server::InitVisual() {
     colormap32 = XCreateColormap(dsp, root_win, xvi_visual, AllocNone);
   }
 
-  if (xvi_visual && composite_manager != None && snapshot_path.empty()) {
+  if (xvi_visual && composite_manager != None && !snapshot_mode) {
     XSetWindowAttributes attrs;
     attrs.event_mask = StructureNotifyMask;
     XChangeWindowAttributes(dsp, composite_manager, CWEventMask, &attrs);
