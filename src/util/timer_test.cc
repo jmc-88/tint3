@@ -169,5 +169,11 @@ TEST_CASE("Timer", "Test the Timer class") {
     Interval* first_interval =
         timer.SetInterval(std::chrono::milliseconds(100), no_op_callback);
     REQUIRE(timer.GetNextInterval() == first_interval);
+
+    // Cleanup
+    timer.ClearInterval(first_timeout);
+    timer.ClearInterval(second_timeout);
+    timer.ClearInterval(third_timeout);
+    timer.ClearInterval(first_interval);
   }
 }
