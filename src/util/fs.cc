@@ -231,5 +231,5 @@ bool ReadFileByLine(std::string const& path,
   return true;
 }
 
-}  // namespace fss
+}  // namespace fs
 }  // namespace util
