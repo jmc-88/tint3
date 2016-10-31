@@ -44,7 +44,6 @@
 #include "config.h"
 #include "launcher/launcher.h"
 #include "panel.h"
-#include "server.h"
 #include "systraybar.h"
 #include "taskbar/task.h"
 #include "taskbar/taskbar.h"
@@ -61,12 +60,9 @@
 #include "battery/battery.h"
 #endif
 
-// global path
+// TODO: remove these global variables
 std::string config_path;
 std::string snapshot_path;
-
-// backward compatibility
-static bool new_config_file;
 
 namespace {
 
@@ -108,29 +104,6 @@ int GetTaskStatus(std::string const& status) {
   return kTaskNormal;
 }
 
-int ConfigGetMonitor(std::string const& monitor_name) {
-  if (monitor_name != "all") {
-    std::size_t end;
-    int ret_int = std::stol(monitor_name, &end);
-
-    if (monitor_name[end] != '\0') {
-      return (ret_int - 1);
-    }
-
-    // monitor specified by name, not by index
-    for (int i = 0; i < server.nb_monitor; ++i) {
-      for (auto& name : server.monitor[i].names) {
-        if (name == monitor_name) {
-          return i;
-        }
-      }
-    }
-  }
-
-  // monitor == "all" or monitor not found or xrandr can't identify monitors
-  return -1;
-}
-
 Background* GetBackgroundFromId(size_t id) {
   try {
     return backgrounds.at(id);
@@ -139,7 +112,112 @@ Background* GetBackgroundFromId(size_t id) {
   }
 }
 
-void AddEntry(std::string const& key, std::string const& value) {
+}  // namespace
+
+namespace config {
+
+void ExtractValues(std::string const& value, std::string& v1, std::string& v2,
+                   std::string& v3) {
+  v1.clear();
+  v2.clear();
+  v3.clear();
+
+  size_t first_space = value.find_first_of(' ');
+  size_t second_space = std::string::npos;
+
+  v1.assign(value, 0, first_space);
+  StringTrim(v1);
+
+  if (first_space != std::string::npos) {
+    second_space = value.find_first_of(' ', first_space + 1);
+
+    v2.assign(value, first_space + 1, second_space - first_space);
+    StringTrim(v2);
+  }
+
+  if (second_space != std::string::npos) {
+    v3.assign(value, second_space + 1, std::string::npos);
+    StringTrim(v3);
+  }
+}
+
+Reader::Reader(Server* server) : server_(server), new_config_file_(false) {}
+
+bool Reader::LoadFromDefaults() {
+  // follow XDG specification
+  // check tint3rc in user directory
+  auto user_config_dir = util::xdg::basedir::ConfigHome() / "tint3";
+  config_path = user_config_dir / "tint3rc";
+
+  if (util::fs::FileExists(config_path)) {
+    return LoadFromFile(config_path);
+  }
+
+  // copy tint3rc from system directory to user directory
+  std::string system_config_file;
+
+  for (auto const& system_dir : util::xdg::basedir::ConfigDirs()) {
+    system_config_file = util::fs::Path(system_dir) / "tint3" / "tint3rc";
+
+    if (util::fs::FileExists(system_config_file)) {
+      break;
+    }
+
+    system_config_file.clear();
+  }
+
+  if (!system_config_file.empty()) {
+    // copy file in user directory
+    util::fs::CreateDirectory(user_config_dir);
+    util::fs::CopyFile(system_config_file, config_path);
+    return LoadFromFile(config_path);
+  }
+
+  util::log::Error() << "Couldn't find the configuration file.\n";
+  return false;
+}
+
+bool Reader::LoadFromFile(std::string const& path) {
+  bool read = util::fs::ReadFileByLine(path, [this](std::string const& line) {
+    std::string key, value;
+
+    if (ParseLine(line, key, value)) {
+      AddEntry(key, value);
+    }
+  });
+
+  if (!read) {
+    util::log::Error() << "Couldn't read the configuration file.\n";
+    return false;
+  }
+
+  // append Taskbar item
+  if (!new_config_file_) {
+    taskbar_enabled = 1;
+    panel_items_order.insert(0, "T");
+  }
+
+  return true;
+}
+
+bool Reader::ParseLine(std::string const& line, std::string& key,
+                       std::string& value) const {
+  if (line.empty() || line[0] == '#') {
+    return false;
+  }
+
+  auto equals_pos = line.find('=');
+
+  if (equals_pos == std::string::npos) {
+    return false;
+  }
+
+  StringTrim(key.assign(line, 0, equals_pos));
+  StringTrim(value.assign(line, equals_pos + 1, std::string::npos));
+  return true;
+}
+
+void Reader::AddEntry(std::string const& key, std::string const& value) {
   std::string value1, value2, value3;
 
   /* Background and border */
@@ -174,7 +252,7 @@ void AddEntry(std::string const& key, std::string const& value) {
 
   /* Panel */
   else if (key == "panel_monitor") {
-    panel_config.monitor_ = ConfigGetMonitor(value);
+    panel_config.monitor_ = GetMonitor(value);
   } else if (key == "panel_size") {
     config::ExtractValues(value, value1, value2, value3);
 
@@ -200,7 +278,7 @@ void AddEntry(std::string const& key, std::string const& value) {
       panel_config.height_ = std::stol(value2.substr(0, b));
     }
   } else if (key == "panel_items") {
-    new_config_file = true;
+    new_config_file_ = true;
     panel_items_order.assign(value);
 
     for (char item : panel_items_order) {
@@ -353,7 +431,7 @@ void AddEntry(std::string const& key, std::string const& value) {
 
   /* Clock */
   else if (key == "time1_format") {
-    if (!new_config_file) {
+    if (!new_config_file_) {
       clock_enabled = true;
       panel_items_order.push_back('C');
     }
@@ -561,7 +639,7 @@ void AddEntry(std::string const& key, std::string const& value) {
 
   /* Systray */
   else if (key == "systray_padding") {
-    if (!new_config_file && !systray_enabled) {
+    if (!new_config_file_ && !systray_enabled) {
       systray_enabled = true;
       panel_items_order.push_back('S');
     }
@@ -699,7 +777,7 @@ void AddEntry(std::string const& key, std::string const& value) {
 
   // old config option
   else if (key == "systray") {
-    if (!new_config_file) {
+    if (!new_config_file_) {
       systray_enabled = (0 != std::stol(value));
 
       if (systray_enabled) {
@@ -708,7 +786,7 @@ void AddEntry(std::string const& key, std::string const& value) {
     }
   } else if (key == "battery") {
 #ifdef ENABLE_BATTERY
-    if (!new_config_file) {
+    if (!new_config_file_) {
       battery_enabled = (0 != std::stol(value));
 
       if (battery_enabled) {
@@ -723,112 +801,27 @@ void AddEntry(std::string const& key, std::string const& value) {
   }
 }
 
-bool ParseLine(std::string const& line, std::string& key, std::string& value) {
-  if (line.empty() || line[0] == '#') {
-    return false;
-  }
+int Reader::GetMonitor(std::string const& monitor_name) const {
+  if (monitor_name != "all") {
+    std::size_t end;
+    int ret_int = std::stol(monitor_name, &end);
 
-  auto equals_pos = line.find('=');
-
-  if (equals_pos == std::string::npos) {
-    return false;
-  }
-
-  StringTrim(key.assign(line, 0, equals_pos));
-  StringTrim(value.assign(line, equals_pos + 1, std::string::npos));
-  return true;
-}
-
-}  // namespace
-
-namespace config {
-
-void ExtractValues(std::string const& value, std::string& v1, std::string& v2,
-                   std::string& v3) {
-  v1.clear();
-  v2.clear();
-  v3.clear();
-
-  size_t first_space = value.find_first_of(' ');
-  size_t second_space = std::string::npos;
-
-  v1.assign(value, 0, first_space);
-  StringTrim(v1);
-
-  if (first_space != std::string::npos) {
-    second_space = value.find_first_of(' ', first_space + 1);
-
-    v2.assign(value, first_space + 1, second_space - first_space);
-    StringTrim(v2);
-  }
-
-  if (second_space != std::string::npos) {
-    v3.assign(value, second_space + 1, std::string::npos);
-    StringTrim(v3);
-  }
-}
-
-bool Read() {
-  // follow XDG specification
-  // check tint3rc in user directory
-  auto user_config_dir = util::xdg::basedir::ConfigHome() / "tint3";
-  config_path = user_config_dir / "tint3rc";
-
-  if (util::fs::FileExists(config_path)) {
-    return config::ReadFile(config_path);
-  }
-
-  // copy tint3rc from system directory to user directory
-  std::string system_config_file;
-
-  for (auto const& system_dir : util::xdg::basedir::ConfigDirs()) {
-    system_config_file = util::fs::Path(system_dir) / "tint3" / "tint3rc";
-
-    if (util::fs::FileExists(system_config_file)) {
-      break;
+    if (monitor_name[end] != '\0') {
+      return (ret_int - 1);
     }
 
-    system_config_file.clear();
-  }
-
-  if (!system_config_file.empty()) {
-    // copy file in user directory
-    util::fs::CreateDirectory(user_config_dir);
-    util::fs::CopyFile(system_config_file, config_path);
-    return config::ReadFile(config_path);
-  }
-
-  util::log::Error() << "Couldn't find the configuration file.\n";
-  return false;
-}
-
-bool ReadFile(std::string const& path) {
-  bool read = util::fs::ReadFileByLine(path, [](std::string const& line) {
-    std::string key, value;
-
-    if (ParseLine(line, key, value)) {
-      AddEntry(key, value);
+    // monitor specified by name, not by index
+    for (int i = 0; i < server_->nb_monitor; ++i) {
+      for (auto& name : server_->monitor[i].names) {
+        if (name == monitor_name) {
+          return i;
+        }
+      }
     }
-  });
-
-  if (!read) {
-    util::log::Error() << "Couldn't read the configuration file.\n";
-    return false;
   }
 
-  // append Taskbar item
-  if (!new_config_file) {
-    taskbar_enabled = 1;
-    panel_items_order.insert(0, "T");
-  }
-
-  return true;
+  // monitor == "all" or monitor not found or xrandr can't identify monitors
+  return -1;
 }
 
 }  // namespace config
-
-void DefaultConfig() {
-  config_path.clear();
-  snapshot_path.clear();
-  new_config_file = false;
-}

@@ -84,7 +84,9 @@ std::string dnd_launcher_exec;
 void Init(int argc, char* argv[]) {
   // FIXME: remove this global data shit
   // set global data
-  DefaultConfig();
+  config_path.clear();
+  snapshot_path.clear();
+
   DefaultSystray();
 #ifdef ENABLE_BATTERY
   DefaultBattery();
@@ -1122,12 +1124,14 @@ start:
   InitX11();
 
   Timer timer;
+
+  config::Reader config_reader{&server};
   bool config_read = false;
 
   if (!config_path.empty()) {
-    config_read = config::ReadFile(config_path.c_str());
+    config_read = config_reader.LoadFromFile(config_path.c_str());
   } else {
-    config_read = config::Read();
+    config_read = config_reader.LoadFromDefaults();
   }
 
   if (!config_read) {
@@ -1225,8 +1229,7 @@ start:
   });
 
   event_loop.RegisterHandler(
-      {UnmapNotify, DestroyNotify},
-      [&](XEvent& e) -> void {
+      {UnmapNotify, DestroyNotify}, [&](XEvent& e) -> void {
         if (e.xany.window == server.composite_manager) {
           // Stop real_transparency
           signal_pending = SIGUSR1;
