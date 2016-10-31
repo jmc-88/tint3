@@ -77,8 +77,9 @@ TimePoint Timer::Now() const { return get_current_time_(); }
 
 Interval* Timer::SetTimeout(Duration timeout_interval,
                             Interval::Callback callback) {
-  Interval* interval = new Interval(Now() + timeout_interval,
-                                    std::chrono::milliseconds(0), callback);
+  Interval* interval =
+      new Interval(Now() + timeout_interval, std::chrono::milliseconds(0),
+                   std::move(callback));
   if (interval) {
     timeouts_.insert(interval);
   }
@@ -87,8 +88,8 @@ Interval* Timer::SetTimeout(Duration timeout_interval,
 
 Interval* Timer::SetInterval(Duration repeat_interval,
                              Interval::Callback callback) {
-  Interval* interval =
-      new Interval(Now() + repeat_interval, repeat_interval, callback);
+  Interval* interval = new Interval(Now() + repeat_interval, repeat_interval,
+                                    std::move(callback));
   if (interval) {
     intervals_.insert(interval);
   }

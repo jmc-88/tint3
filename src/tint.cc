@@ -802,7 +802,7 @@ void EventPropertyNotify(XEvent* e, Timer& timer) {
       // changed
       if (desktop != tsk->desktop) {
         RemoveTask(tsk, timer);
-        tsk = AddTask(win, timer);
+        AddTask(win, timer);
         ActiveTask();
         panel_refresh = true;
       }

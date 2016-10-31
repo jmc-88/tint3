@@ -156,7 +156,7 @@ bool EventLoop::RunLoop() {
 
 EventLoop& EventLoop::RegisterHandler(int event,
                                       EventLoop::EventHandler handler) {
-  handler_map_[event] = handler;
+  handler_map_[event] = std::move(handler);
   return (*this);
 }
 
@@ -170,7 +170,7 @@ EventLoop& EventLoop::RegisterHandler(std::initializer_list<int> event_list,
 }
 
 EventLoop& EventLoop::RegisterDefaultHandler(EventLoop::EventHandler handler) {
-  default_handler_ = handler;
+  default_handler_ = std::move(handler);
   return (*this);
 }
 
