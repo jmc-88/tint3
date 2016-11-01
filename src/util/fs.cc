@@ -6,9 +6,9 @@
 #include <fstream>
 #include <sstream>
 
-#include "util/common.h"
-#include "util/environment.h"
-#include "util/fs.h"
+#include "util/common.hh"
+#include "util/environment.hh"
+#include "util/fs.hh"
 
 namespace util {
 namespace fs {

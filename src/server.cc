@@ -28,11 +28,11 @@
 #include <cstdlib>
 #include <iostream>
 
-#include "config.h"
-#include "server.h"
-#include "util/common.h"
-#include "util/log.h"
-#include "util/window.h"
+#include "config.hh"
+#include "server.hh"
+#include "util/common.hh"
+#include "util/log.hh"
+#include "util/window.hh"
 
 namespace {
 

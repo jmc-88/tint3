@@ -1,10 +1,10 @@
-#ifndef TINT3_BATTERY_LINUX_SYSFS_H
-#define TINT3_BATTERY_LINUX_SYSFS_H
+#ifndef TINT3_BATTERY_LINUX_SYSFS_HH
+#define TINT3_BATTERY_LINUX_SYSFS_HH
 
 #include <string>
 #include <vector>
 
-#include "battery/battery_interface.h"
+#include "battery/battery_interface.hh"
 
 namespace linux_sysfs {
 
@@ -33,4 +33,4 @@ class Battery : public BatteryInterface {
 
 }  // namespace linux_sysfs
 
-#endif  // TINT3_BATTERY_LINUX_SYSFS_H
+#endif  // TINT3_BATTERY_LINUX_SYSFS_HH

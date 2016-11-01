@@ -3,7 +3,7 @@
 
 #include <string>
 #include <vector>
-#include "util/common.h"
+#include "util/common.hh"
 
 TEST_CASE("StringTrim", "Removing trailing spaces from strings should work") {
   std::string s;

@@ -1,14 +1,14 @@
-#ifndef TINT3_SYSTRAYBAR_SYSTRAYBAR_H
-#define TINT3_SYSTRAYBAR_SYSTRAYBAR_H
+#ifndef TINT3_SYSTRAYBAR_SYSTRAYBAR_HH
+#define TINT3_SYSTRAYBAR_SYSTRAYBAR_HH
 
 #include <X11/extensions/Xdamage.h>
 
 #include <list>
 
-#include "systray/tray_window.h"
-#include "util/area.h"
-#include "util/common.h"
-#include "util/timer.h"
+#include "systray/tray_window.hh"
+#include "util/area.hh"
+#include "util/common.hh"
+#include "util/timer.hh"
 
 // XEMBED messages
 #define XEMBED_EMBEDDED_NOTIFY 0
@@ -67,4 +67,4 @@ void InitSystray(Timer& timer);
 void RefreshSystrayIcon(Timer& timer);
 void SystrayRenderIcon(TrayWindow* traywin, Timer& timer);
 
-#endif  // TINT3_SYSTRAYBAR_SYSTRAYBAR_H
+#endif  // TINT3_SYSTRAYBAR_SYSTRAYBAR_HH

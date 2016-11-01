@@ -1,9 +1,9 @@
-#ifndef TINT3_TASKBAR_TASKBARBASE_H
-#define TINT3_TASKBAR_TASKBARBASE_H
+#ifndef TINT3_TASKBAR_TASKBARBASE_HH
+#define TINT3_TASKBAR_TASKBARBASE_HH
 
 #include <cstdlib>
 
-#include "util/area.h"
+#include "util/area.hh"
 
 enum TaskbarState { kTaskbarNormal, kTaskbarActive, kTaskbarCount };
 
@@ -19,4 +19,4 @@ class TaskbarBase : public Area {
   Pixmap state_pixmap_[kTaskbarCount];
 };
 
-#endif  // TINT3_TASKBAR_TASKBARBASE_H
+#endif  // TINT3_TASKBAR_TASKBARBASE_HH

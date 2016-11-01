@@ -1,5 +1,5 @@
-#ifndef TINT3_UTIL_TIMER_H
-#define TINT3_UTIL_TIMER_H
+#ifndef TINT3_UTIL_TIMER_HH
+#define TINT3_UTIL_TIMER_HH
 
 #include <sys/select.h>
 
@@ -90,4 +90,4 @@ class Timer {
   IntervalSet intervals_;
 };
 
-#endif  // TINT3_UTIL_TIMER_H
+#endif  // TINT3_UTIL_TIMER_HH

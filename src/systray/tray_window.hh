@@ -1,10 +1,10 @@
-#ifndef TINT3_SYSTRAYBAR_TRAY_WINDOW_H
-#define TINT3_SYSTRAYBAR_TRAY_WINDOW_H
+#ifndef TINT3_SYSTRAYBAR_TRAY_WINDOW_HH
+#define TINT3_SYSTRAYBAR_TRAY_WINDOW_HH
 
 #include <X11/Xlib.h>
 #include <X11/extensions/Xdamage.h>
 
-#include "util/timer.h"
+#include "util/timer.hh"
 
 class TrayWindow {
  public:
@@ -21,4 +21,4 @@ class TrayWindow {
   Interval* render_timeout;
 };
 
-#endif  // TINT3_SYSTRAYBAR_TRAY_WINDOW_H
+#endif  // TINT3_SYSTRAYBAR_TRAY_WINDOW_HH

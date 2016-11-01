@@ -1,8 +1,8 @@
 #define CATCH_CONFIG_MAIN
 #include "catch.hpp"
 
-#include "clock/time_utils.h"
-#include "util/environment.h"
+#include "clock/time_utils.hh"
+#include "util/environment.hh"
 
 TEST_CASE("FormatTime", "The interface to strftime() works as expected") {
   // 1970-01-01 00:00 AM UTC

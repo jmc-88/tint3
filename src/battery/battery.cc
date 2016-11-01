@@ -40,16 +40,16 @@
 #include <memory>
 #include <string>
 
-#include "battery/battery.h"
-#include "battery/battery_interface.h"
-#include "battery/linux_sysfs.h"
-#include "panel.h"
-#include "server.h"
-#include "util/common.h"
-#include "util/fs.h"
-#include "util/log.h"
-#include "util/timer.h"
-#include "util/window.h"
+#include "battery/battery.hh"
+#include "battery/battery_interface.hh"
+#include "battery/linux_sysfs.hh"
+#include "panel.hh"
+#include "server.hh"
+#include "util/common.hh"
+#include "util/fs.hh"
+#include "util/log.hh"
+#include "util/timer.hh"
+#include "util/window.hh"
 
 PangoFontDescription* bat1_font_desc;
 PangoFontDescription* bat2_font_desc;

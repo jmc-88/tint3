@@ -20,13 +20,13 @@
  *
  * Author:  Owen Taylor, Red Hat, Inc.
  */
-#include "stdlib.h"
-#include "string.h"
+#include <cstdlib>
+#include <cstring>
 
 #include <X11/Xlib.h>
 #include <X11/Xmd.h> /* For CARD32 */
 
-#include "xsettings-common.h"
+#include "xsettings-common.hh"
 
 XSettingsSetting* XSettingsSettingCopy(XSettingsSetting* setting) {
   XSettingsSetting* result = (XSettingsSetting*)malloc(sizeof *result);

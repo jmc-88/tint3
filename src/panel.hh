@@ -1,5 +1,5 @@
-#ifndef TINT3_PANEL_H
-#define TINT3_PANEL_H
+#ifndef TINT3_PANEL_HH
+#define TINT3_PANEL_HH
 
 #include <X11/Xlib.h>
 #include <pango/pangocairo.h>
@@ -8,18 +8,18 @@
 #include <string>
 #include <vector>
 
-#include "clock/clock.h"
-#include "launcher/launcher.h"
-#include "systray/systraybar.h"
-#include "taskbar/task.h"
-#include "taskbar/taskbar.h"
-#include "util/area.h"
-#include "util/common.h"
-#include "util/imlib2.h"
-#include "util/timer.h"
+#include "clock/clock.hh"
+#include "launcher/launcher.hh"
+#include "systray/systraybar.hh"
+#include "taskbar/task.hh"
+#include "taskbar/taskbar.hh"
+#include "util/area.hh"
+#include "util/common.hh"
+#include "util/imlib2.hh"
+#include "util/timer.hh"
 
 #ifdef ENABLE_BATTERY
-#include "battery/battery.h"
+#include "battery/battery.hh"
 #endif
 
 extern int signal_pending;
@@ -173,4 +173,4 @@ bool AutohideHide(Panel* panel);
 void AutohideTriggerShow(Panel* p, Timer& timer);
 void AutohideTriggerHide(Panel* p, Timer& timer);
 
-#endif  // TINT3_PANEL_H
+#endif  // TINT3_PANEL_HH

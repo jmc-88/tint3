@@ -1,5 +1,5 @@
-#include "clock/time_utils.h"
-#include "util/environment.h"
+#include "clock/time_utils.hh"
+#include "util/environment.hh"
 
 struct tm ClockGetTimeForTimezone(std::string const& timezone, time_t timer) {
   if (timezone.empty()) {

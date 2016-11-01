@@ -1,5 +1,5 @@
-#ifndef TINT3_UTIL_FS_H
-#define TINT3_UTIL_FS_H
+#ifndef TINT3_UTIL_FS_HH
+#define TINT3_UTIL_FS_HH
 
 #include <dirent.h>
 #include <sys/stat.h>
@@ -69,4 +69,4 @@ bool ReadFileByLine(std::string const& path,
 }  // namespace fs
 }  // namespace util
 
-#endif  // TINT3_UTIL_FS_H
+#endif  // TINT3_UTIL_FS_HH

@@ -21,8 +21,8 @@
  * Author:  Owen Taylor, Red Hat, Inc.
  */
 
-#ifndef TINT3_LAUNCHER_XSETTINGS_COMMON_H
-#define TINT3_LAUNCHER_XSETTINGS_COMMON_H
+#ifndef TINT3_LAUNCHER_XSETTINGS_COMMON_HH
+#define TINT3_LAUNCHER_XSETTINGS_COMMON_HH
 
 #ifdef __cplusplus
 extern "C" {
@@ -96,4 +96,4 @@ char XSettingsByteOrder();
 }
 #endif  // __cplusplus
 
-#endif  // TINT3_LAUNCHER_XSETTINGS_COMMON_H
+#endif  // TINT3_LAUNCHER_XSETTINGS_COMMON_HH

@@ -31,11 +31,11 @@
 #include <cstdlib>
 #include <cstring>
 
-#include "panel.h"
-#include "server.h"
-#include "taskbar/taskbar.h"
-#include "util/common.h"
-#include "util/window.h"
+#include "panel.hh"
+#include "server.hh"
+#include "taskbar/taskbar.hh"
+#include "util/common.hh"
+#include "util/window.hh"
 
 void SetActive(Window win) {
   SendEvent32(win, server.atoms_["_NET_ACTIVE_WINDOW"], 2, CurrentTime, 0);

@@ -1,5 +1,5 @@
-#ifndef TINT3_UTIL_LOG_H
-#define TINT3_UTIL_LOG_H
+#ifndef TINT3_UTIL_LOG_HH
+#define TINT3_UTIL_LOG_HH
 
 #include <ostream>
 
@@ -45,4 +45,4 @@ Logger& Error();
 }  // namespace log
 }  // namespace util
 
-#endif  // TINT3_UTIL_LOG_H
+#endif  // TINT3_UTIL_LOG_HH

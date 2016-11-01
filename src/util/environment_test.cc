@@ -3,7 +3,7 @@
 
 #include <cstdlib>
 #include <cstring>
-#include "util/environment.h"
+#include "util/environment.hh"
 
 TEST_CASE("Get", "Reading from the environment is sane") {
   setenv("__BOGUS_NAME__", "__BOGUS_VALUE__", 1);

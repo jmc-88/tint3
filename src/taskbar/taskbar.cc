@@ -30,12 +30,12 @@
 #include <cstring>
 #include <list>
 
-#include "panel.h"
-#include "server.h"
-#include "taskbar/task.h"
-#include "taskbar/taskbar.h"
-#include "util/log.h"
-#include "util/window.h"
+#include "panel.hh"
+#include "server.hh"
+#include "taskbar/task.hh"
+#include "taskbar/taskbar.hh"
+#include "util/log.hh"
+#include "util/window.hh"
 
 namespace {
 

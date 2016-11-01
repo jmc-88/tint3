@@ -1,5 +1,5 @@
-#ifndef TINT3_BATTERY_BATTERY_INTERFACE_H
-#define TINT3_BATTERY_BATTERY_INTERFACE_H
+#ifndef TINT3_BATTERY_BATTERY_INTERFACE_HH
+#define TINT3_BATTERY_BATTERY_INTERFACE_HH
 enum class ChargeState { kUnknown, kCharging, kDischarging, kFull };
 
 struct BatteryTimestamp {
@@ -23,4 +23,4 @@ class BatteryInterface {
   virtual unsigned int seconds_to_charge() const = 0;
 };
 
-#endif  // TINT3_BATTERY_BATTERY_INTERFACE_H
+#endif  // TINT3_BATTERY_BATTERY_INTERFACE_HH

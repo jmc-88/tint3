@@ -1,11 +1,11 @@
-#ifndef TINT3_TOOLTIP_TOOLTIP_H
-#define TINT3_TOOLTIP_TOOLTIP_H
+#ifndef TINT3_TOOLTIP_TOOLTIP_HH
+#define TINT3_TOOLTIP_TOOLTIP_HH
 
 #include <string>
 
-#include "panel.h"
-#include "task.h"
-#include "util/timer.h"
+#include "panel.hh"
+#include "task.hh"
+#include "util/timer.hh"
 
 class Tooltip {
  public:
@@ -45,4 +45,4 @@ void TooltipTriggerShow(Area* area, Panel* p, XEvent* e, Timer& timer);
 bool TooltipHide(Timer& timer);
 bool TooltipShow(Timer& timer);
 
-#endif  // TINT3_TOOLTIP_TOOLTIP_H
+#endif  // TINT3_TOOLTIP_TOOLTIP_HH

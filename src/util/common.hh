@@ -1,5 +1,5 @@
-#ifndef TINT3_UTIL_COMMON_H
-#define TINT3_UTIL_COMMON_H
+#ifndef TINT3_UTIL_COMMON_HH
+#define TINT3_UTIL_COMMON_HH
 
 #define WM_CLASS_TINT "panel"
 
@@ -12,7 +12,7 @@
 #include <string>
 #include <vector>
 
-#include "util/area.h"
+#include "util/area.hh"
 
 namespace util {
 
@@ -85,4 +85,4 @@ void RenderImage(Drawable d, int x, int y, int w, int h);
 
 bool RegexMatch(std::string const& pattern, std::string const& string);
 
-#endif  // TINT3_UTIL_COMMON_H
+#endif  // TINT3_UTIL_COMMON_HH

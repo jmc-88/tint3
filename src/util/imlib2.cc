@@ -1,6 +1,6 @@
 #include <algorithm>
 
-#include "util/imlib2.h"
+#include "util/imlib2.hh"
 
 namespace util {
 namespace imlib2 {

@@ -33,9 +33,9 @@
 #include <cstring>
 #include <regex>
 
-#include "server.h"
-#include "util/common.h"
-#include "util/log.h"
+#include "server.hh"
+#include "util/common.hh"
+#include "util/log.hh"
 
 namespace {
 

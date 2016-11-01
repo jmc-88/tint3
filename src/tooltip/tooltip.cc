@@ -26,12 +26,12 @@
 #include <cstring>
 #include <functional>
 
-#include "panel.h"
-#include "server.h"
-#include "tooltip/tooltip.h"
-#include "util/common.h"
-#include "util/timer.h"
-#include "util/x11.h"
+#include "panel.hh"
+#include "server.hh"
+#include "tooltip/tooltip.hh"
+#include "util/common.hh"
+#include "util/timer.hh"
+#include "util/x11.hh"
 
 static int x, y, width, height;
 

@@ -29,10 +29,10 @@
 
 #include <algorithm>
 
-#include "panel.h"
-#include "server.h"
-#include "util/area.h"
-#include "util/log.h"
+#include "panel.hh"
+#include "server.hh"
+#include "util/area.hh"
+#include "util/log.hh"
 
 Area::~Area() {}
 

@@ -30,13 +30,13 @@
 #include <ctime>
 #include <string>
 
-#include "clock/clock.h"
-#include "clock/time_utils.h"
-#include "panel.h"
-#include "server.h"
-#include "util/common.h"
-#include "util/timer.h"
-#include "util/window.h"
+#include "clock/clock.hh"
+#include "clock/time_utils.hh"
+#include "panel.hh"
+#include "server.hh"
+#include "util/common.hh"
+#include "util/timer.hh"
+#include "util/window.hh"
 
 std::string time1_format;
 std::string time1_timezone;

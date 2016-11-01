@@ -1,5 +1,5 @@
-#ifndef TINT3_BATTERY_BATTERY_H
-#define TINT3_BATTERY_BATTERY_H
+#ifndef TINT3_BATTERY_BATTERY_HH
+#define TINT3_BATTERY_BATTERY_HH
 
 #include <fcntl.h>
 #include <pango/pangocairo.h>
@@ -8,9 +8,9 @@
 
 #include <string>
 
-#include "util/area.h"
-#include "util/common.h"
-#include "util/timer.h"
+#include "util/area.hh"
+#include "util/common.hh"
+#include "util/timer.hh"
 
 // forward declarations
 class Panel;
@@ -61,4 +61,4 @@ void UpdateBattery();
 
 void InitBattery(Timer& timer);
 
-#endif  // TINT3_BATTERY_BATTERY_H
+#endif  // TINT3_BATTERY_BATTERY_HH

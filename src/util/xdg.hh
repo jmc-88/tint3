@@ -1,10 +1,10 @@
-#ifndef TINT3_UTIL_XDG_H
-#define TINT3_UTIL_XDG_H
+#ifndef TINT3_UTIL_XDG_HH
+#define TINT3_UTIL_XDG_HH
 
 #include <string>
 #include <vector>
 
-#include "util/fs.h"
+#include "util/fs.hh"
 
 namespace util {
 namespace xdg {
@@ -21,4 +21,4 @@ std::vector<std::string> ConfigDirs();
 }  // namespace xdg
 }  // namespace util
 
-#endif  // TINT3_UTIL_XDG_H
+#endif  // TINT3_UTIL_XDG_HH

@@ -1,5 +1,5 @@
-#ifndef TINT3_TASKBAR_TASK_H
-#define TINT3_TASKBAR_TASK_H
+#ifndef TINT3_TASKBAR_TASK_HH
+#define TINT3_TASKBAR_TASK_HH
 
 #include <Imlib2.h>
 #include <X11/Xlib.h>
@@ -7,9 +7,9 @@
 
 #include <list>
 
-#include "util/area.h"
-#include "util/common.h"
-#include "util/timer.h"
+#include "util/area.hh"
+#include "util/common.hh"
+#include "util/timer.hh"
 
 enum TaskState {
   kTaskNormal,
@@ -102,4 +102,4 @@ Task* FindActiveTask(Task* current_task, Task* active_task);
 Task* NextTask(Task* tsk);
 Task* PreviousTask(Task* tsk);
 
-#endif  // TINT3_TASKBAR_TASK_H
+#endif  // TINT3_TASKBAR_TASK_HH

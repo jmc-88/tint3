@@ -3,7 +3,7 @@
 
 #include <chrono>
 #include <functional>
-#include "util/timer.h"
+#include "util/timer.hh"
 
 class FakeClock : public Timer {
  public:

@@ -1,9 +1,9 @@
-#ifndef TINT3_TASKBAR_TASKBARNAME_H
-#define TINT3_TASKBAR_TASKBARNAME_H
+#ifndef TINT3_TASKBAR_TASKBARNAME_HH
+#define TINT3_TASKBAR_TASKBARNAME_HH
 
-#include "taskbar/taskbarbase.h"
-#include "util/area.h"
-#include "util/common.h"
+#include "taskbar/taskbarbase.hh"
+#include "util/area.hh"
+#include "util/common.hh"
 
 extern bool taskbarname_enabled;
 extern PangoFontDescription* taskbarname_font_desc;
@@ -25,4 +25,4 @@ class Taskbarname : public TaskbarBase {
   static void InitPanel(Panel* panel);
 };
 
-#endif  // TINT3_TASKBAR_TASKBARNAME_H
+#endif  // TINT3_TASKBAR_TASKBARNAME_HH

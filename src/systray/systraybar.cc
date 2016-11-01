@@ -31,12 +31,12 @@
 #include <cstdlib>
 #include <cstring>
 
-#include "panel.h"
-#include "server.h"
-#include "systray/systraybar.h"
-#include "systray/tray_window.h"
-#include "util/log.h"
-#include "util/x11.h"
+#include "panel.hh"
+#include "server.hh"
+#include "systray/systraybar.hh"
+#include "systray/tray_window.hh"
+#include "util/log.hh"
+#include "util/x11.hh"
 
 /* defined in the systray spec */
 #define SYSTEM_TRAY_REQUEST_DOCK 0

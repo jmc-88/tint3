@@ -20,8 +20,8 @@
 #include <list>
 #include <map>
 
-#include "util/log.h"
-#include "util/timer.h"
+#include "util/log.hh"
+#include "util/timer.hh"
 
 Interval::Interval(TimePoint time_point, Duration repeat_interval,
                    Callback callback)

@@ -40,24 +40,24 @@
 #include <iostream>
 #include <string>
 
-#include "clock.h"
-#include "config.h"
-#include "launcher/launcher.h"
-#include "panel.h"
-#include "systraybar.h"
-#include "taskbar/task.h"
-#include "taskbar/taskbar.h"
-#include "taskbar/taskbarname.h"
-#include "tooltip/tooltip.h"
-#include "util/common.h"
-#include "util/fs.h"
-#include "util/log.h"
-#include "util/timer.h"
-#include "util/window.h"
-#include "util/xdg.h"
+#include "clock.hh"
+#include "config.hh"
+#include "launcher/launcher.hh"
+#include "panel.hh"
+#include "systraybar.hh"
+#include "taskbar/task.hh"
+#include "taskbar/taskbar.hh"
+#include "taskbar/taskbarname.hh"
+#include "tooltip/tooltip.hh"
+#include "util/common.hh"
+#include "util/fs.hh"
+#include "util/log.hh"
+#include "util/timer.hh"
+#include "util/window.hh"
+#include "util/xdg.hh"
 
 #ifdef ENABLE_BATTERY
-#include "battery/battery.h"
+#include "battery/battery.hh"
 #endif
 
 namespace {

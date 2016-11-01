@@ -2,10 +2,10 @@
 #include <cstring>
 #include <functional>
 
-#include "util/common.h"
-#include "util/environment.h"
-#include "util/fs.h"
-#include "util/xdg.h"
+#include "util/common.hh"
+#include "util/environment.hh"
+#include "util/fs.hh"
+#include "util/xdg.hh"
 
 namespace {
 

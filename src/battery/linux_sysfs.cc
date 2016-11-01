@@ -1,6 +1,6 @@
-#include "battery/linux_sysfs.h"
-#include "util/common.h"
-#include "util/fs.h"
+#include "battery/linux_sysfs.hh"
+#include "util/common.hh"
+#include "util/fs.hh"
 
 namespace linux_sysfs {
 

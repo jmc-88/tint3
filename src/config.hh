@@ -1,9 +1,9 @@
-#ifndef TINT3_CONFIG_H
-#define TINT3_CONFIG_H
+#ifndef TINT3_CONFIG_HH
+#define TINT3_CONFIG_HH
 
 #include <string>
 
-#include "server.h"
+#include "server.hh"
 
 namespace test {
 
@@ -38,4 +38,4 @@ class Reader {
 
 }  // namespace config
 
-#endif  // TINT3_CONFIG_H
+#endif  // TINT3_CONFIG_HH

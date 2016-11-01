@@ -1,12 +1,12 @@
-#ifndef TINT3_TASKBAR_TASKBAR_H
-#define TINT3_TASKBAR_TASKBAR_H
+#ifndef TINT3_TASKBAR_TASKBAR_HH
+#define TINT3_TASKBAR_TASKBAR_HH
 
 #include <map>
 #include <vector>
 
-#include "task.h"
-#include "taskbarbase.h"
-#include "taskbarname.h"
+#include "task.hh"
+#include "taskbarbase.hh"
+#include "taskbarname.hh"
 
 using TaskPtrArray = std::vector<Task*>;
 using WindowToTaskMap = std::map<Window, TaskPtrArray>;
@@ -59,4 +59,4 @@ Task* TaskGetTask(Window win);
 TaskPtrArray TaskGetTasks(Window win);
 void TaskRefreshTasklist(Timer& timer);
 
-#endif  // TINT3_TASKBAR_TASKBAR_H
+#endif  // TINT3_TASKBAR_TASKBAR_HH

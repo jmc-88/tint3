@@ -36,12 +36,12 @@
 #include <set>
 #include <string>
 
-#include "launcher.h"
-#include "panel.h"
-#include "server.h"
-#include "taskbar.h"
-#include "util/fs.h"
-#include "util/log.h"
+#include "launcher.hh"
+#include "panel.hh"
+#include "server.hh"
+#include "taskbar.hh"
+#include "util/fs.hh"
+#include "util/log.hh"
 
 bool launcher_enabled = false;
 int launcher_max_icon_size;

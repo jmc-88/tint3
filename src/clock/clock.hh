@@ -1,11 +1,11 @@
-#ifndef TINT3_CLOCK_CLOCK_H
-#define TINT3_CLOCK_CLOCK_H
+#ifndef TINT3_CLOCK_CLOCK_HH
+#define TINT3_CLOCK_CLOCK_HH
 
 #include <string>
 
-#include "util/area.h"
-#include "util/common.h"
-#include "util/timer.h"
+#include "util/area.hh"
+#include "util/common.hh"
+#include "util/timer.hh"
 
 class Clock : public Area {
  public:
@@ -53,4 +53,4 @@ void InitClock(Timer& timer);
 
 void ClockAction(int button);
 
-#endif  // TINT3_CLOCK_CLOCK_H
+#endif  // TINT3_CLOCK_CLOCK_HH

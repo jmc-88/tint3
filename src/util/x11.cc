@@ -1,7 +1,7 @@
-#include "util/x11.h"
-#include "panel.h"
-#include "server.h"
-#include "util/log.h"
+#include "util/x11.hh"
+#include "panel.hh"
+#include "server.hh"
+#include "util/log.hh"
 
 #include <sys/select.h>
 #include <unistd.h>

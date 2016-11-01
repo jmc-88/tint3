@@ -1,13 +1,13 @@
-#ifndef TINT3_LAUNCHER_LAUNCHER_H
-#define TINT3_LAUNCHER_LAUNCHER_H
+#ifndef TINT3_LAUNCHER_LAUNCHER_HH
+#define TINT3_LAUNCHER_LAUNCHER_HH
 
 #include <string>
 #include <vector>
 
-#include "launcher/xsettings-client.h"
-#include "util/area.h"
-#include "util/common.h"
-#include "util/imlib2.h"
+#include "launcher/xsettings-client.hh"
+#include "util/area.hh"
+#include "util/common.hh"
+#include "util/imlib2.hh"
 
 class LauncherIcon : public Area {
  public:
@@ -107,4 +107,4 @@ void CleanupLauncher();
 
 void LauncherAction(LauncherIcon* launcher_icon, XEvent* evt);
 
-#endif  // TINT3_LAUNCHER_LAUNCHER_H
+#endif  // TINT3_LAUNCHER_LAUNCHER_HH

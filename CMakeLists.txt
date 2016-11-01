@@ -65,7 +65,7 @@ set(DATADIR share CACHE PATH "Directory for shared data")
 set(SYSCONFDIR /etc CACHE PATH "Directory for configuration files")
 set(DOCDIR share/doc/tint3 CACHE PATH "Directory for documentation files")
 
-# {{{ version.h
+# {{{ version.hh
 #
 # This section inspired by:
 #       http://xit0.org/2013/04/cmake-use-git-branch-and-commit-details-in-project/
@@ -85,12 +85,12 @@ execute_process(
   OUTPUT_STRIP_TRAILING_WHITESPACE)
 
 configure_file(
-  ${CMAKE_SOURCE_DIR}/src/version.h.in
-  ${CMAKE_BINARY_DIR}/generated/version.h)
+  ${CMAKE_SOURCE_DIR}/src/version.hh.in
+  ${CMAKE_BINARY_DIR}/generated/version.hh)
 
 include_directories(${CMAKE_BINARY_DIR}/generated)
 
-# }}} version.h
+# }}} version.hh
 
 # {{{ common rules
 
@@ -138,7 +138,7 @@ endif()
 # This is purposely excluding src/tint3.cc as these sources are shared with
 # test case definitions, which redefine their own main() entry point.
 set(TINT3_SOURCES
-    src/version.h.in
+    src/version.hh.in
     src/config.cc
     src/panel.cc
     src/server.cc

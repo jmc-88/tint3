@@ -29,12 +29,12 @@
 #include <cstdlib>
 #include <cstring>
 
-#include "config.h"
-#include "panel.h"
-#include "server.h"
-#include "tooltip.h"
-#include "util/log.h"
-#include "util/x11.h"
+#include "config.hh"
+#include "panel.hh"
+#include "server.hh"
+#include "tooltip.hh"
+#include "util/log.hh"
+#include "util/x11.hh"
 
 namespace {
 

@@ -1,5 +1,5 @@
-#ifndef TINT3_UTIL_AREA_H
-#define TINT3_UTIL_AREA_H
+#ifndef TINT3_UTIL_AREA_HH
+#define TINT3_UTIL_AREA_HH
 
 #include <X11/Xlib.h>
 #include <cairo-xlib.h>
@@ -126,4 +126,4 @@ void DrawRect(cairo_t* c, double x, double y, double w, double h, double r);
 // clear pixmap with transparent color
 void ClearPixmap(Pixmap p, int x, int y, int w, int h);
 
-#endif  // TINT3_UTIL_AREA_H
+#endif  // TINT3_UTIL_AREA_HH

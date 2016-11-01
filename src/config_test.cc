@@ -4,8 +4,8 @@
 #include <initializer_list>
 #include <string>
 
-#include "config.h"
-#include "server.h"
+#include "config.hh"
+#include "server.hh"
 
 using namespace config;
 

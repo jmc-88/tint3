@@ -30,15 +30,15 @@
 #include <cstdlib>
 #include <cstring>
 
-#include "panel.h"
-#include "server.h"
-#include "taskbar/task.h"
-#include "taskbar/taskbar.h"
-#include "tooltip/tooltip.h"
-#include "util/common.h"
-#include "util/log.h"
-#include "util/timer.h"
-#include "util/window.h"
+#include "panel.hh"
+#include "server.hh"
+#include "taskbar/task.hh"
+#include "taskbar/taskbar.hh"
+#include "tooltip/tooltip.hh"
+#include "util/common.hh"
+#include "util/log.hh"
+#include "util/timer.hh"
+#include "util/window.hh"
 
 namespace {
 

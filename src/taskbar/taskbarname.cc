@@ -30,12 +30,12 @@
 #include <cstdlib>
 #include <cstring>
 
-#include "panel.h"
-#include "server.h"
-#include "taskbar.h"
-#include "taskbar/taskbarname.h"
-#include "util/common.h"
-#include "util/window.h"
+#include "panel.hh"
+#include "server.hh"
+#include "taskbar.hh"
+#include "taskbar/taskbarname.hh"
+#include "util/common.hh"
+#include "util/window.hh"
 
 bool taskbarname_enabled;
 PangoFontDescription* taskbarname_font_desc;

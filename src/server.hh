@@ -1,5 +1,5 @@
-#ifndef TINT3_SERVER_H
-#define TINT3_SERVER_H
+#ifndef TINT3_SERVER_HH
+#define TINT3_SERVER_HH
 
 #include <X11/Xatom.h>
 #include <X11/Xlib.h>
@@ -14,7 +14,7 @@
 #include <libsn/sn.h>
 #endif
 
-#include "util/x11.h"
+#include "util/x11.hh"
 
 struct Monitor {
   int x;
@@ -115,4 +115,4 @@ T GetProperty32(Window win, Atom at, Atom type) {
   return T();
 }
 
-#endif  // TINT3_SERVER_H
+#endif  // TINT3_SERVER_HH

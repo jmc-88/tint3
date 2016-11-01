@@ -1,5 +1,5 @@
-#ifndef TINT3_UTIL_X11_H
-#define TINT3_UTIL_X11_H
+#ifndef TINT3_UTIL_X11_HH
+#define TINT3_UTIL_X11_HH
 
 #include <X11/Xlib.h>
 #include <sys/types.h>
@@ -9,7 +9,7 @@
 #include <map>
 #include <memory>
 
-#include "util/timer.h"
+#include "util/timer.hh"
 
 class Server;
 
@@ -70,4 +70,4 @@ Window CreateWindow(Window parent, int x, int y, unsigned int width,
 }  // namespace x11
 }  // namespace util
 
-#endif  // TINT3_UTIL_X11_H
+#endif  // TINT3_UTIL_X11_HH

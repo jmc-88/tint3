@@ -1,7 +1,7 @@
 #include <cstring>
 
-#include "util/environment.h"
-#include "util/log.h"
+#include "util/environment.hh"
+#include "util/log.hh"
 
 namespace environment {
 
