@@ -405,11 +405,7 @@ bool ParseDesktopLine(std::string const& line, std::string& key,
     }
   }
 
-  if (!found || key.empty() || value.empty()) {
-    return false;
-  }
-
-  return true;
+  return (found && !key.empty() && !value.empty());
 }
 
 bool ParseThemeLine(std::string const& line, std::string& key,
