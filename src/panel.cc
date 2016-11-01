@@ -38,8 +38,8 @@
 
 namespace {
 
-static char kClassHintName[] = "tint3";
-static char kClassHintClass[] = "Tint3";
+char kClassHintName[] = "tint3";
+char kClassHintClass[] = "Tint3";
 
 }  // namespace
 
