@@ -189,24 +189,6 @@ void InitX11(bool snapshot_mode) {
 #ifdef HAVE_SN
   // Initialize startup-notification
   server.sn_dsp = sn_display_new(server.dsp, ErrorTrapPush, ErrorTrapPop);
-
-  // Setup a handler for child termination
-  SignalAction(SIGCHLD, [](int) -> void {
-    // Wait for all dead processes
-    pid_t pid;
-
-    while ((pid = waitpid(-1, nullptr, WNOHANG)) > 0) {
-      auto it = server.pids.find(pid);
-
-      if (it != server.pids.end()) {
-        sn_launcher_context_complete(it->second);
-        sn_launcher_context_unref(it->second);
-        server.pids.erase(it);
-      } else {
-        util::log::Error() << "Unknown child " << pid << " terminated!\n";
-      }
-    }
-  });
 #endif  // HAVE_SN
 
   imlib_context_set_display(server.dsp);
@@ -1165,10 +1147,27 @@ start:
   dnd_sent_request = 0;
   dnd_launcher_exec.clear();
 
-  //  sigset_t empty_mask;
-  //  sigemptyset(&empty_mask);
-
   util::x11::EventLoop event_loop(&server, timer);
+
+  // Setup a handler for child termination
+  SignalAction(SIGCHLD, [](int) -> void {
+    // Wait for all dead processes
+    pid_t pid;
+
+    while ((pid = waitpid(-1, nullptr, WNOHANG)) > 0) {
+#ifdef HAVE_SN
+      auto it = server.pids.find(pid);
+
+      if (it != server.pids.end()) {
+        sn_launcher_context_complete(it->second);
+        sn_launcher_context_unref(it->second);
+        server.pids.erase(it);
+      } else {
+        util::log::Error() << "Unknown child " << pid << " terminated!\n";
+      }
+#endif  // HAVE_SN
+    }
+  });
 
   event_loop.RegisterHandler(ButtonPress, [&timer](XEvent& e) -> void {
     TooltipHide(timer);
