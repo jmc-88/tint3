@@ -8,6 +8,8 @@
 #include <sys/select.h>
 #include <unistd.h>
 
+int signal_pending;
+
 namespace util {
 namespace x11 {
 

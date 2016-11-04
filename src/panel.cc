@@ -43,7 +43,6 @@ char kClassHintClass[] = "Tint3";
 
 }  // namespace
 
-int signal_pending;
 // --------------------------------------------------
 // mouse events
 MouseAction mouse_middle;

@@ -11,6 +11,8 @@
 
 #include "util/timer.hh"
 
+extern int signal_pending;
+
 class Server;
 
 namespace util {

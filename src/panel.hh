@@ -22,7 +22,6 @@
 #include "battery/battery.hh"
 #endif
 
-extern int signal_pending;
 // --------------------------------------------------
 // mouse events
 extern MouseAction mouse_middle;
