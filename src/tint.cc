@@ -1149,6 +1149,11 @@ start:
 
   util::x11::EventLoop event_loop(&server, timer);
 
+  if (!event_loop.IsAlive()) {
+    Cleanup(timer);
+    std::exit(1);
+  }
+
   // Setup a handler for child termination
   SignalAction(SIGCHLD, [](int) -> void {
     // Wait for all dead processes

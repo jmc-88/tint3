@@ -3,6 +3,8 @@
 #include "server.hh"
 #include "util/log.hh"
 
+#include <cstring>
+
 #include <sys/select.h>
 #include <unistd.h>
 
@@ -17,9 +19,31 @@ ScopedErrorHandler::~ScopedErrorHandler() { XSetErrorHandler(old_handler_); }
 void XFreeDeleter::operator()(void* data) const { XFree(data); }
 
 EventLoop::EventLoop(Server const* const server, Timer& timer)
-    : server_(server),
+    : alive_(true),
+      server_(server),
       x11_file_descriptor_(ConnectionNumber(server_->dsp)),
-      timer_(timer) {}
+      timer_(timer) {
+  if (pipe(self_pipe_) != 0) {
+    util::log::Error() << "Failed to create self pipe: " << std::strerror(errno)
+                       << '\n';
+    alive_ = false;
+  }
+
+  if (fcntl(self_pipe_[1], F_SETFL, O_NONBLOCK) != 0) {
+    util::log::Error() << "Failed to flag write end of self pipe "
+                       << "as non blocking: " << std::strerror(errno) << '\n';
+    alive_ = false;
+  }
+}
+
+EventLoop::~EventLoop() {
+  if (alive_) {
+    close(self_pipe_[0]);
+    close(self_pipe_[1]);
+  }
+}
+
+bool EventLoop::IsAlive() const { return alive_; }
 
 bool EventLoop::RunLoop() {
   bool hidden_dnd = true;
@@ -68,6 +92,7 @@ bool EventLoop::RunLoop() {
     fd_set fdset;
     FD_ZERO(&fdset);
     FD_SET(x11_file_descriptor_, &fdset);
+    FD_SET(self_pipe_[0], &fdset);
 
     auto next_interval = timer_.GetNextInterval();
     std::unique_ptr<struct timeval> next_timeval;
@@ -153,6 +178,8 @@ bool EventLoop::RunLoop() {
 
   return false;
 }
+
+void EventLoop::WakeUp() { write(self_pipe_[1], "1", 1); }
 
 EventLoop& EventLoop::RegisterHandler(int event,
                                       EventLoop::EventHandler handler) {

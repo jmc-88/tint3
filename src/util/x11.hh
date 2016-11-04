@@ -42,16 +42,21 @@ class EventLoop {
   using EventHandler = std::function<void(XEvent&)>;
 
   EventLoop(Server const* const server, Timer& timer);
+  ~EventLoop();
 
+  bool IsAlive() const;
   bool RunLoop();
+  void WakeUp();
   EventLoop& RegisterHandler(int event, EventHandler handler);
   EventLoop& RegisterHandler(std::initializer_list<int> event_list,
                              EventHandler handler);
   EventLoop& RegisterDefaultHandler(EventHandler handler);
 
  private:
+  bool alive_;
   Server const* const server_;
   int x11_file_descriptor_;
+  int self_pipe_[2];
   Timer& timer_;
   EventHandler default_handler_;
   std::map<int, EventHandler> handler_map_;
