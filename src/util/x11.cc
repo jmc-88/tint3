@@ -9,7 +9,8 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
-// For select and pipe
+// For select, pipe and fcntl
+#include <fcntl.h>
 #include <sys/select.h>
 #include <unistd.h>
 
@@ -35,12 +36,39 @@ EventLoop::EventLoop(Server const* const server, Timer& timer)
     util::log::Error() << "Failed to create self pipe: " << std::strerror(errno)
                        << '\n';
     alive_ = false;
+    return;
   }
 
-  if (fcntl(self_pipe_[1], F_SETFL, O_NONBLOCK) != 0) {
+  int flags = -1;
+
+  flags = fcntl(self_pipe_[0], F_GETFL);
+  if (flags == -1) {
+    util::log::Error() << "Failed to retrieve flags on read end of self pipe: "
+                       << std::strerror(errno) << '\n';
+    alive_ = false;
+    return;
+  }
+
+  if (fcntl(self_pipe_[0], F_SETFL, flags | O_NONBLOCK) == -1) {
+    util::log::Error() << "Failed to flag read end of self pipe "
+                       << "as non blocking: " << std::strerror(errno) << '\n';
+    alive_ = false;
+    return;
+  }
+
+  flags = fcntl(self_pipe_[1], F_GETFL);
+  if (flags == -1) {
+    util::log::Error() << "Failed to retrieve flags on write end of self pipe: "
+                       << std::strerror(errno) << '\n';
+    alive_ = false;
+    return;
+  }
+
+  if (fcntl(self_pipe_[1], F_SETFL, flags | O_NONBLOCK) == -1) {
     util::log::Error() << "Failed to flag write end of self pipe "
                        << "as non blocking: " << std::strerror(errno) << '\n';
     alive_ = false;
+    return;
   }
 }
 
@@ -116,9 +144,25 @@ bool EventLoop::RunLoop() {
     }
 
     if (select(max_fd_ + 1, &fdset, 0, 0, next_timeval.get()) > 0) {
+      // Remove bytes written by WakeUp()
+      if (FD_ISSET(self_pipe_[0], &fdset)) {
+        while (true) {
+          char byte;
+          if (read(self_pipe_[0], &byte, 1) == -1) {
+            if (errno != EAGAIN) {
+              util::log::Error()
+                  << "Failed reading from self pipe: " << strerror(errno)
+                  << '\n';
+            }
+            break;
+          }
+        }
+      }
+
       if (pending_children) {
         ReapChildPIDs();
       }
+
       while (XPending(server_->dsp)) {
         XEvent e;
         XNextEvent(server_->dsp, &e);
