@@ -73,10 +73,8 @@ EventLoop::EventLoop(Server const* const server, Timer& timer)
 }
 
 EventLoop::~EventLoop() {
-  if (alive_) {
-    close(self_pipe_[0]);
-    close(self_pipe_[1]);
-  }
+  close(self_pipe_[0]);
+  close(self_pipe_[1]);
 }
 
 bool EventLoop::IsAlive() const { return alive_; }
