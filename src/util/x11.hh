@@ -10,6 +10,7 @@
 #include <memory>
 
 #include "util/timer.hh"
+#include "util/pipe.hh"
 
 extern int signal_pending;
 extern bool pending_children;
@@ -45,7 +46,6 @@ class EventLoop {
   using EventHandler = std::function<void(XEvent&)>;
 
   EventLoop(Server const* const server, Timer& timer);
-  ~EventLoop();
 
   bool IsAlive() const;
   bool RunLoop();
@@ -59,7 +59,7 @@ class EventLoop {
   bool alive_;
   Server const* const server_;
   int x11_file_descriptor_;
-  int self_pipe_[2];
+  util::SelfPipe self_pipe_;
   Timer& timer_;
   EventHandler default_handler_;
   std::map<int, EventHandler> handler_map_;

@@ -158,8 +158,9 @@ set(TINT3_SOURCES
     src/util/common.cc
     src/util/environment.cc
     src/util/fs.cc
-    src/util/log.cc
     src/util/imlib2.cc
+    src/util/log.cc
+    src/util/pipe.cc
     src/util/timer.cc
     src/util/window.cc
     src/util/x11.cc

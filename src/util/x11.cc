@@ -32,49 +32,10 @@ EventLoop::EventLoop(Server const* const server, Timer& timer)
       server_(server),
       x11_file_descriptor_(ConnectionNumber(server_->dsp)),
       timer_(timer) {
-  if (pipe(self_pipe_) != 0) {
-    util::log::Error() << "Failed to create self pipe: " << std::strerror(errno)
-                       << '\n';
+  if (!self_pipe_.IsAlive()) {
     alive_ = false;
     return;
   }
-
-  int flags = -1;
-
-  flags = fcntl(self_pipe_[0], F_GETFL);
-  if (flags == -1) {
-    util::log::Error() << "Failed to retrieve flags on read end of self pipe: "
-                       << std::strerror(errno) << '\n';
-    alive_ = false;
-    return;
-  }
-
-  if (fcntl(self_pipe_[0], F_SETFL, flags | O_NONBLOCK) == -1) {
-    util::log::Error() << "Failed to flag read end of self pipe "
-                       << "as non blocking: " << std::strerror(errno) << '\n';
-    alive_ = false;
-    return;
-  }
-
-  flags = fcntl(self_pipe_[1], F_GETFL);
-  if (flags == -1) {
-    util::log::Error() << "Failed to retrieve flags on write end of self pipe: "
-                       << std::strerror(errno) << '\n';
-    alive_ = false;
-    return;
-  }
-
-  if (fcntl(self_pipe_[1], F_SETFL, flags | O_NONBLOCK) == -1) {
-    util::log::Error() << "Failed to flag write end of self pipe "
-                       << "as non blocking: " << std::strerror(errno) << '\n';
-    alive_ = false;
-    return;
-  }
-}
-
-EventLoop::~EventLoop() {
-  close(self_pipe_[0]);
-  close(self_pipe_[1]);
 }
 
 bool EventLoop::IsAlive() const { return alive_; }
@@ -126,9 +87,9 @@ bool EventLoop::RunLoop() {
     fd_set fdset;
     FD_ZERO(&fdset);
     FD_SET(x11_file_descriptor_, &fdset);
-    FD_SET(self_pipe_[0], &fdset);
+    FD_SET(self_pipe_.ReadEnd(), &fdset);
 
-    int max_fd_ = std::max(x11_file_descriptor_, self_pipe_[0]);
+    int max_fd_ = std::max(x11_file_descriptor_, self_pipe_.ReadEnd());
 
     auto next_interval = timer_.GetNextInterval();
     std::unique_ptr<struct timeval> next_timeval;
@@ -144,18 +105,8 @@ bool EventLoop::RunLoop() {
     if (XPending(server_->dsp) ||
         select(max_fd_ + 1, &fdset, 0, 0, next_timeval.get()) > 0) {
       // Remove bytes written by WakeUp()
-      if (FD_ISSET(self_pipe_[0], &fdset)) {
-        while (true) {
-          char byte;
-          if (read(self_pipe_[0], &byte, 1) == -1) {
-            if (errno != EAGAIN) {
-              util::log::Error()
-                  << "Failed reading from self pipe: " << strerror(errno)
-                  << '\n';
-            }
-            break;
-          }
-        }
+      if (FD_ISSET(self_pipe_.ReadEnd(), &fdset)) {
+        self_pipe_.ReadPendingBytes();
       }
 
       if (pending_children) {
@@ -234,7 +185,7 @@ bool EventLoop::RunLoop() {
   return false;
 }
 
-void EventLoop::WakeUp() { write(self_pipe_[1], "1", 1); }
+void EventLoop::WakeUp() { self_pipe_.WriteOneByte(); }
 
 EventLoop& EventLoop::RegisterHandler(int event,
                                       EventLoop::EventHandler handler) {
