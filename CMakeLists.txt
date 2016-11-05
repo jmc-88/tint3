@@ -200,6 +200,9 @@ target_link_libraries(clock_time_utils_test tint3_common_lib ${TINT3_LINK_LIBRAR
 test_target(util_common_test src/util/common_test.cc)
 target_link_libraries(util_common_test tint3_common_lib ${TINT3_LINK_LIBRARIES})
 
+test_target(util_pipe_test src/util/pipe_test.cc)
+target_link_libraries(util_pipe_test tint3_common_lib ${TINT3_LINK_LIBRARIES})
+
 test_target(util_environment_test src/util/environment_test.cc)
 target_link_libraries(util_environment_test tint3_common_lib ${TINT3_LINK_LIBRARIES})
 

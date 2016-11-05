@@ -1,6 +1,12 @@
 #ifndef TINT3_UTIL_PIPE_HH
 #define TINT3_UTIL_PIPE_HH
 
+namespace test {
+
+class MockSelfPipe;
+
+}  // namespace test
+
 namespace util {
 
 class Pipe {
@@ -13,6 +19,8 @@ public:
   int WriteEnd() const;
 
 private:
+  friend class test::MockSelfPipe;
+
   bool alive_;
   int pipe_fd_[2];
 };
@@ -26,6 +34,8 @@ public:
   void ReadPendingBytes();
 
 private:
+  friend class test::MockSelfPipe;
+
   bool alive_;
 };
 

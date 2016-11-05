@@ -76,8 +76,9 @@ void SelfPipe::WriteOneByte() { write(WriteEnd(), "1", 1); }
 void SelfPipe::ReadPendingBytes() {
   while (true) {
     char byte;
-    if (read(ReadEnd(), &byte, 1) == -1) {
-      if (errno != EAGAIN) {
+    int ret = read(ReadEnd(), &byte, 1);
+    if (ret <= 0) {
+      if (ret == -1 && errno != EAGAIN) {
         util::log::Error() << "Failed reading from self pipe: "
                            << strerror(errno) << '\n';
       }
