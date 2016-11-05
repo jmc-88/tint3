@@ -5,10 +5,16 @@
 
 #include <cstring>
 
+// For waitpid
+#include <sys/types.h>
+#include <sys/wait.h>
+
+// For select and pipe
 #include <sys/select.h>
 #include <unistd.h>
 
 int signal_pending;
+bool pending_children;
 
 namespace util {
 namespace x11 {
@@ -96,6 +102,8 @@ bool EventLoop::RunLoop() {
     FD_SET(x11_file_descriptor_, &fdset);
     FD_SET(self_pipe_[0], &fdset);
 
+    int max_fd_ = std::max(x11_file_descriptor_, self_pipe_[0]);
+
     auto next_interval = timer_.GetNextInterval();
     std::unique_ptr<struct timeval> next_timeval;
 
@@ -107,8 +115,10 @@ bool EventLoop::RunLoop() {
       next_timeval = ToTimeval(duration);
     }
 
-    if (select(x11_file_descriptor_ + 1, &fdset, 0, 0, next_timeval.get()) >
-        0) {
+    if (select(max_fd_ + 1, &fdset, 0, 0, next_timeval.get()) > 0) {
+      if (pending_children) {
+        ReapChildPIDs();
+      }
       while (XPending(server_->dsp)) {
         XEvent e;
         XNextEvent(server_->dsp, &e);
@@ -201,6 +211,23 @@ EventLoop& EventLoop::RegisterHandler(std::initializer_list<int> event_list,
 EventLoop& EventLoop::RegisterDefaultHandler(EventLoop::EventHandler handler) {
   default_handler_ = std::move(handler);
   return (*this);
+}
+
+void EventLoop::ReapChildPIDs() const {
+  pid_t pid;
+  while ((pid = waitpid(-1, nullptr, WNOHANG)) > 0) {
+#ifdef HAVE_SN
+    auto it = server.pids.find(pid);
+
+    if (it != server.pids.end()) {
+      sn_launcher_context_complete(it->second);
+      sn_launcher_context_unref(it->second);
+      server.pids.erase(it);
+    } else {
+      util::log::Error() << "Unknown child " << pid << " terminated!\n";
+    }
+#endif  // HAVE_SN
+  }
 }
 
 pid_t GetWindowPID(Window window) {

@@ -12,6 +12,7 @@
 #include "util/timer.hh"
 
 extern int signal_pending;
+extern bool pending_children;
 
 class Server;
 
@@ -62,6 +63,8 @@ class EventLoop {
   Timer& timer_;
   EventHandler default_handler_;
   std::map<int, EventHandler> handler_map_;
+
+  void ReapChildPIDs() const;
 };
 
 pid_t GetWindowPID(Window window);

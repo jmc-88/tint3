@@ -27,10 +27,6 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-#ifdef HAVE_SN
-#include <sys/wait.h>
-#endif
-
 #include <algorithm>
 #include <csignal>
 #include <cstdint>
@@ -1155,24 +1151,8 @@ start:
   }
 
   // Setup a handler for child termination
-  SignalAction(SIGCHLD, [](int) -> void {
-    // Wait for all dead processes
-    pid_t pid;
-
-    while ((pid = waitpid(-1, nullptr, WNOHANG)) > 0) {
-#ifdef HAVE_SN
-      auto it = server.pids.find(pid);
-
-      if (it != server.pids.end()) {
-        sn_launcher_context_complete(it->second);
-        sn_launcher_context_unref(it->second);
-        server.pids.erase(it);
-      } else {
-        util::log::Error() << "Unknown child " << pid << " terminated!\n";
-      }
-#endif  // HAVE_SN
-    }
-  });
+  pending_children = false;
+  SignalAction(SIGCHLD, [](int) -> void { pending_children = true; });
 
   event_loop.RegisterHandler(ButtonPress, [&timer](XEvent& e) -> void {
     TooltipHide(timer);
