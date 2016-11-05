@@ -581,7 +581,7 @@ void EventPropertyNotify(XEvent* e, Timer& timer) {
           if (it != desktop_names.end()) {
             name = (*it++);
           } else {
-            name = StringRepresentation(j + 1);
+            name = util::string::Representation(j + 1);
           }
 
           Taskbar& tskbar = panel1[i].taskbar_[j];
@@ -1292,7 +1292,7 @@ start:
 
         util::log::Debug() << "--------\n";
 
-        StringBuilder cmd;
+        util::string::Builder cmd;
         cmd << '(' << dnd_launcher_exec << " \"";
 
         for (int i = 0; i < prop.nitems * prop.format / 8; i++) {

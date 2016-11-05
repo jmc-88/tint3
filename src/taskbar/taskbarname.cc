@@ -70,7 +70,7 @@ void Taskbarname::InitPanel(Panel* panel) {
     if (it != desktop_names.end()) {
       tskbar.bar_name.set_name(*it++);
     } else {
-      tskbar.bar_name.set_name(StringRepresentation(j + 1));
+      tskbar.bar_name.set_name(util::string::Representation(j + 1));
     }
 
     // append the name at the beginning of taskbar

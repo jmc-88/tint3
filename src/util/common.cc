@@ -86,6 +86,45 @@ void GObjectUnrefDeleter::operator()(gpointer data) const {
   g_object_unref(data);
 }
 
+namespace string {
+
+std::string& Trim(std::string& str) {
+  static char const* space_chars = " \f\n\r\t\v";
+
+  auto first = str.find_first_not_of(space_chars);
+
+  if (first == std::string::npos) {
+    str.clear();
+    return str;
+  }
+
+  auto last = str.find_last_not_of(space_chars);
+
+  str.erase(0, first);
+  str.erase(last - first + 1, std::string::npos);
+  return str;
+}
+
+std::vector<std::string> Split(std::string const& str, char sep) {
+  auto beg = str.cbegin();
+  auto end = std::find(beg, str.cend(), sep);
+  std::vector<std::string> parts;
+
+  while (beg != str.cend()) {
+    parts.push_back(std::string(beg, end));
+    beg = (end != str.cend()) ? (end + 1) : end;
+    end = std::find(beg, str.cend(), sep);
+  }
+
+  return parts;
+}
+
+bool RegexMatch(std::string const& pattern, std::string const& string) {
+  std::smatch matches;
+  return std::regex_match(string, matches, std::regex(pattern));
+}
+
+}  // namespace string
 }  // namespace util
 
 int const kAllDesktops = 0xFFFFFFFF;
@@ -106,37 +145,6 @@ bool SignalAction(int signal_number, void signal_handler(int), int flags) {
   }
 
   return true;
-}
-
-std::string& StringTrim(std::string& str) {
-  static char const* space_chars = " \f\n\r\t\v";
-
-  auto first = str.find_first_not_of(space_chars);
-
-  if (first == std::string::npos) {
-    str.clear();
-    return str;
-  }
-
-  auto last = str.find_last_not_of(space_chars);
-
-  str.erase(0, first);
-  str.erase(last - first + 1, std::string::npos);
-  return str;
-}
-
-std::vector<std::string> SplitString(std::string const& str, char sep) {
-  auto beg = str.cbegin();
-  auto end = std::find(beg, str.cend(), sep);
-  std::vector<std::string> parts;
-
-  while (beg != str.cend()) {
-    parts.push_back(std::string(beg, end));
-    beg = (end != str.cend()) ? (end + 1) : end;
-    end = std::find(beg, str.cend(), sep);
-  }
-
-  return parts;
 }
 
 void TintShellExec(std::string const& command) {
@@ -382,9 +390,4 @@ void RenderImage(Drawable d, int x, int y, int w, int h) {
   XFreePixmap(server.dsp, pmap_tmp);
   XRenderFreePicture(server.dsp, pict_image);
   XRenderFreePicture(server.dsp, pict_drawable);
-}
-
-bool RegexMatch(std::string const& pattern, std::string const& string) {
-  std::smatch matches;
-  return std::regex_match(string, matches, std::regex(pattern));
 }

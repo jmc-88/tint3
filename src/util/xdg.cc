@@ -69,12 +69,13 @@ util::fs::Path RuntimeDir() {
 
 std::vector<std::string> DataDirs() {
   static auto default_ = DefaultValue("/usr/local/share:/usr/share");
-  return SplitString(default_(environment::Get("XDG_DATA_DIRS")), ':');
+  return util::string::Split(default_(environment::Get("XDG_DATA_DIRS")), ':');
 }
 
 std::vector<std::string> ConfigDirs() {
   static auto default_ = DefaultValue("/usr/local/etc/xdg:/etc/xdg");
-  return SplitString(default_(environment::Get("XDG_CONFIG_DIRS")), ':');
+  return util::string::Split(default_(environment::Get("XDG_CONFIG_DIRS")),
+                             ':');
 }
 
 }  // namespace basedir

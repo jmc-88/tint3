@@ -103,7 +103,7 @@ void Server::InitAtoms() {
   std::string name;
   Atom atom;
 
-  name.assign(StringBuilder() << "_XSETTINGS_S" << DefaultScreen(dsp));
+  name.assign(util::string::Builder() << "_XSETTINGS_S" << DefaultScreen(dsp));
   atom = XInternAtom(dsp, name.c_str(), False);
   atoms_.insert(std::make_pair("_XSETTINGS_SCREEN", atom));
 
@@ -111,7 +111,8 @@ void Server::InitAtoms() {
     util::log::Error() << "tint3: XInternAtom(\"" << name << "\") failed\n";
   }
 
-  name.assign(StringBuilder() << "_NET_SYSTEM_TRAY_S" << DefaultScreen(dsp));
+  name.assign(util::string::Builder() << "_NET_SYSTEM_TRAY_S"
+                                      << DefaultScreen(dsp));
   atom = XInternAtom(dsp, name.c_str(), False);
   atoms_.insert(std::make_pair("_NET_SYSTEM_TRAY_SCREEN", atom));
 

@@ -10,17 +10,17 @@ TEST_CASE("StringTrim", "Removing trailing spaces from strings should work") {
 
   SECTION("Removes spaces from the left end") {
     s = "      text";
-    REQUIRE(StringTrim(s) == "text");
+    REQUIRE(util::string::Trim(s) == "text");
   }
 
   SECTION("Removes spaces from the right end") {
     s = "text      ";
-    REQUIRE(StringTrim(s) == "text");
+    REQUIRE(util::string::Trim(s) == "text");
   }
 
   SECTION("Removes spaces from both ends") {
     s = "   text   ";
-    REQUIRE(StringTrim(s) == "text");
+    REQUIRE(util::string::Trim(s) == "text");
   }
 }
 
@@ -28,7 +28,7 @@ TEST_CASE("SplitString",
           "Splitting a string using a character separator should work") {
   std::string s{"This is a string"};
   std::vector<std::string> v{"This", "is", "a", "string"};
-  REQUIRE(SplitString(s, ' ') == v);
+  REQUIRE(util::string::Split(s, ' ') == v);
 }
 
 TEST_CASE("GetColor", "Parsing a CSS hex triplet should work") {
@@ -71,25 +71,25 @@ TEST_CASE("GetColor", "Parsing a CSS hex triplet should work") {
 TEST_CASE("RegexMatch",
           "Matching a string by a regular expression should work") {
   SECTION("Character classes") {
-    REQUIRE(RegexMatch("[0-9]", "0"));
-    REQUIRE(!RegexMatch("[0-9]", "Z"));
+    REQUIRE(util::string::RegexMatch("[0-9]", "0"));
+    REQUIRE(!util::string::RegexMatch("[0-9]", "Z"));
   }
 
   SECTION("Any numer of occurrences (Kleene star)") {
-    REQUIRE(RegexMatch("test[0-9]*", "test"));
-    REQUIRE(RegexMatch("test[0-9]*", "test0"));
-    REQUIRE(RegexMatch("test[0-9]*", "test01"));
+    REQUIRE(util::string::RegexMatch("test[0-9]*", "test"));
+    REQUIRE(util::string::RegexMatch("test[0-9]*", "test0"));
+    REQUIRE(util::string::RegexMatch("test[0-9]*", "test01"));
   }
 
   SECTION("One or more occurrences (Kleene plus)") {
-    REQUIRE(!RegexMatch("test[0-9]+", "test"));
-    REQUIRE(RegexMatch("test[0-9]+", "test0"));
-    REQUIRE(RegexMatch("test[0-9]+", "test01"));
+    REQUIRE(!util::string::RegexMatch("test[0-9]+", "test"));
+    REQUIRE(util::string::RegexMatch("test[0-9]+", "test0"));
+    REQUIRE(util::string::RegexMatch("test[0-9]+", "test01"));
   }
 
   SECTION("At most one occurrence") {
-    REQUIRE(RegexMatch("test[0-9]?", "test"));
-    REQUIRE(RegexMatch("test[0-9]?", "test0"));
-    REQUIRE(!RegexMatch("test[0-9]?", "test01"));
+    REQUIRE(util::string::RegexMatch("test[0-9]?", "test"));
+    REQUIRE(util::string::RegexMatch("test[0-9]?", "test0"));
+    REQUIRE(!util::string::RegexMatch("test[0-9]?", "test01"));
   }
 }

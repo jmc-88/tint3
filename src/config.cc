@@ -122,18 +122,18 @@ void ExtractValues(std::string const& value, std::string& v1, std::string& v2,
   size_t second_space = std::string::npos;
 
   v1.assign(value, 0, first_space);
-  StringTrim(v1);
+  util::string::Trim(v1);
 
   if (first_space != std::string::npos) {
     second_space = value.find_first_of(' ', first_space + 1);
 
     v2.assign(value, first_space + 1, second_space - first_space);
-    StringTrim(v2);
+    util::string::Trim(v2);
   }
 
   if (second_space != std::string::npos) {
     v3.assign(value, second_space + 1, std::string::npos);
-    StringTrim(v3);
+    util::string::Trim(v3);
   }
 }
 
@@ -209,8 +209,8 @@ bool Reader::ParseLine(std::string const& line, std::string& key,
     return false;
   }
 
-  StringTrim(key.assign(line, 0, equals_pos));
-  StringTrim(value.assign(line, equals_pos + 1, std::string::npos));
+  util::string::Trim(key.assign(line, 0, equals_pos));
+  util::string::Trim(value.assign(line, equals_pos + 1, std::string::npos));
   return true;
 }
 
@@ -595,8 +595,8 @@ void Reader::AddEntry(std::string const& key, std::string const& value) {
   } else if (key == "task_font") {
     panel_config.g_task.font_desc =
         pango_font_description_from_string(value.c_str());
-  } else if (RegexMatch("task.*_font_color", key)) {
-    auto split = SplitString(key, '_');
+  } else if (util::string::RegexMatch("task.*_font_color", key)) {
+    auto split = util::string::Split(key, '_');
     int status = GetTaskStatus(split[1]);
     config::ExtractValues(value, value1, value2, value3);
     float alpha = 1;
@@ -608,16 +608,16 @@ void Reader::AddEntry(std::string const& key, std::string const& value) {
     GetColor(value1, panel_config.g_task.font[status].color);
     panel_config.g_task.font[status].alpha = alpha;
     panel_config.g_task.config_font_mask |= (1 << status);
-  } else if (RegexMatch("task.*_icon_asb", key)) {
-    auto split = SplitString(key, '_');
+  } else if (util::string::RegexMatch("task.*_icon_asb", key)) {
+    auto split = util::string::Split(key, '_');
     int status = GetTaskStatus(split[1]);
     config::ExtractValues(value, value1, value2, value3);
     panel_config.g_task.alpha[status] = std::stol(value1);
     panel_config.g_task.saturation[status] = std::stol(value2);
     panel_config.g_task.brightness[status] = std::stol(value3);
     panel_config.g_task.config_asb_mask |= (1 << status);
-  } else if (RegexMatch("task.*_background_id", key)) {
-    auto split = SplitString(key, '_');
+  } else if (util::string::RegexMatch("task.*_background_id", key)) {
+    auto split = util::string::Split(key, '_');
     int status = GetTaskStatus(split[1]);
     panel_config.g_task.background[status] =
         GetBackgroundFromId(std::stol(value));

@@ -443,9 +443,10 @@ void ExpandExec(DesktopEntry* entry, std::string const& path) {
       }
 
       if (*c == 'i' && !entry->icon.empty()) {
-        expanded.append(StringBuilder() << "--icon '" << entry->icon << '\'');
+        expanded.append(util::string::Builder() << "--icon '" << entry->icon
+                                                << '\'');
       } else if (*c == 'c' && !entry->name.empty()) {
-        expanded.append(StringBuilder() << '\'' << entry->name << '\'');
+        expanded.append(util::string::Builder() << '\'' << entry->name << '\'');
       } else if (*c == 'f' || *c == 'F') {
         // Ignore the expansions in this case, we have no files to pass to the
         // executable.
@@ -485,7 +486,7 @@ bool LauncherReadDesktopFile(const std::string& path, DesktopEntry* entry) {
   bool inside_desktop_entry = false;
   bool read = util::fs::ReadFileByLine(path, [&](std::string const& data) {
     std::string line(data);
-    StringTrim(line);
+    util::string::Trim(line);
 
     if (line.empty()) {
       return;
@@ -582,7 +583,7 @@ IconTheme* LoadTheme(std::string const& name) {
 
   bool read = util::fs::ReadFileByLine(file_name, [&](std::string const& data) {
     std::string line(data);
-    StringTrim(line);
+    util::string::Trim(line);
 
     if (line.empty()) {
       return;
