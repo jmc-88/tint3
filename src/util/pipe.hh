@@ -14,7 +14,7 @@ public:
 
 private:
   bool alive_;
-  int pipe_fd_[0];
+  int pipe_fd_[2];
 };
 
 class SelfPipe : public Pipe {
