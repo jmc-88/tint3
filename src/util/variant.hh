@@ -22,12 +22,12 @@ struct static_max;
 
 template<size_t arg>
 struct static_max<arg> {
-	static const size_t value = arg;
+  static const size_t value = arg;
 };
 
 template<size_t arg1, size_t arg2, size_t ... others>
 struct static_max<arg1, arg2, others...> {
-	static const size_t value = (arg1 >= arg2)
+  static const size_t value = (arg1 >= arg2)
       ? static_max<arg1, others...>::value
       : static_max<arg2, others...>::value;
 };
@@ -43,29 +43,29 @@ template<> struct variant_helper<>  {
 
 template<typename T, typename... Ts>
 struct variant_helper<T, Ts...> {
-	inline static void destroy(size_t type_id, void* ptr) {
-		if (type_id == typeid(T).hash_code()) {
+  inline static void destroy(size_t type_id, void* ptr) {
+    if (type_id == typeid(T).hash_code()) {
       reinterpret_cast<T*>(ptr)->~T();
     } else {
-			variant_helper<Ts...>::destroy(type_id, ptr);
+      variant_helper<Ts...>::destroy(type_id, ptr);
     }
-	}
+  }
 
-	inline static void move(size_t type_id, void* old_ptr, void* new_ptr) {
+  inline static void move(size_t type_id, void* old_ptr, void* new_ptr) {
     if (type_id == typeid(T).hash_code()) {
-			new (new_ptr) T(std::move(*reinterpret_cast<T*>(old_ptr)));
-		} else {
+      new (new_ptr) T(std::move(*reinterpret_cast<T*>(old_ptr)));
+    } else {
       variant_helper<Ts...>::move(type_id, old_ptr, new_ptr);
     }
-	}
+  }
 
   inline static void copy(size_t type_id, const void* old_ptr, void* new_ptr) {
     if (type_id == typeid(T).hash_code()) {
-			new (new_ptr) T(*reinterpret_cast<const T*>(old_ptr));
-		} else {
+      new (new_ptr) T(*reinterpret_cast<const T*>(old_ptr));
+    } else {
       variant_helper<Ts...>::copy(type_id, old_ptr, new_ptr);
     }
-	}
+  }
 };
 
 }  // namespace
@@ -82,12 +82,12 @@ public:
   }
 
   Value(const Value<Ts...>& other) : type_id_(other.type_id_) {
-		VariantHelper::copy(other.type_id_, &other.storage_, &storage_);
-	}
+    VariantHelper::copy(other.type_id_, &other.storage_, &storage_);
+  }
 
-	Value(Value<Ts...>&& other) : type_id_(other.type_id_) {
-		VariantHelper::move(other.type_id_, &other.storage_, &storage_);
-	}
+  Value(Value<Ts...>&& other) : type_id_(other.type_id_) {
+    VariantHelper::move(other.type_id_, &other.storage_, &storage_);
+  }
 
   ~Value() {
     VariantHelper::destroy(type_id_, &storage_);
@@ -106,19 +106,19 @@ public:
   }
 
   template<typename T>
-	T& Get() {
+  T& Get() {
     if (!Is<T>()) {
       throw std::bad_cast();
     }
     return *reinterpret_cast<T*>(&storage_);
-	}
+  }
 
   template<typename T, typename... Args>
-	void Set(Args&&... args) {
+  void Set(Args&&... args) {
     VariantHelper::destroy(type_id_, &storage_);
     new (&storage_) T(std::forward<Args>(args)...);
     type_id_ = typeid(T).hash_code();
-	}
+  }
 
 private:
   using VariantHelper = variant_helper<Ts...>;
