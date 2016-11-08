@@ -98,6 +98,7 @@ include_directories(${PROJECT_BINARY_DIR}
                     src
                     src/battery
                     src/clock
+                    src/parser
                     src/systray
                     src/taskbar
                     src/launcher
@@ -144,6 +145,7 @@ set(TINT3_SOURCES
     src/server.cc
     src/clock/clock.cc
     src/clock/time_utils.cc
+    src/parser/lexer.cc
     src/systray/systraybar.cc
     src/systray/tray_window.cc
     src/launcher/launcher.cc
@@ -196,6 +198,9 @@ target_link_libraries(config_test tint3_common_lib ${TINT3_LINK_LIBRARIES})
 
 test_target(clock_time_utils_test src/clock/time_utils_test.cc)
 target_link_libraries(clock_time_utils_test tint3_common_lib ${TINT3_LINK_LIBRARIES})
+
+test_target(parser_lexer_test src/parser/lexer_test.cc)
+target_link_libraries(parser_lexer_test tint3_common_lib ${TINT3_LINK_LIBRARIES})
 
 test_target(util_common_test src/util/common_test.cc)
 target_link_libraries(util_common_test tint3_common_lib ${TINT3_LINK_LIBRARIES})
