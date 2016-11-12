@@ -50,15 +50,20 @@ public:
 class Lexer {
 public:
   using Result = std::vector<Token>;
+  using MatchPair = std::pair<TokenMatcher, Symbol>;
 
-  explicit Lexer(std::initializer_list<std::pair<TokenMatcher, Symbol>> const& match_map);
+  Lexer(Lexer const& other);
+  Lexer(Lexer&& other);
+  explicit Lexer(std::initializer_list<MatchPair> const& match_map);
+
+  Lexer& operator=(Lexer other);
 
   bool ProcessContents(std::string const& buffer, Result* result) const;
 
 private:
   // This could be an std::map for brevity, but we want to preserve the
   // given matcher ordering.
-  std::vector<std::pair<TokenMatcher, Symbol>> matcher_to_symbol_;
+  std::vector<MatchPair> matcher_to_symbol_;
 };
 
 }  // namespace parser

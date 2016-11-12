@@ -146,6 +146,7 @@ set(TINT3_SOURCES
     src/clock/clock.cc
     src/clock/time_utils.cc
     src/parser/lexer.cc
+    src/parser/parser.cc
     src/systray/systraybar.cc
     src/systray/tray_window.cc
     src/launcher/launcher.cc
@@ -201,6 +202,9 @@ target_link_libraries(clock_time_utils_test tint3_common_lib ${TINT3_LINK_LIBRAR
 
 test_target(parser_lexer_test src/parser/lexer_test.cc)
 target_link_libraries(parser_lexer_test tint3_common_lib ${TINT3_LINK_LIBRARIES})
+
+test_target(parser_parser_test src/parser/parser_test.cc)
+target_link_libraries(parser_parser_test tint3_common_lib ${TINT3_LINK_LIBRARIES})
 
 test_target(util_common_test src/util/common_test.cc)
 target_link_libraries(util_common_test tint3_common_lib ${TINT3_LINK_LIBRARIES})

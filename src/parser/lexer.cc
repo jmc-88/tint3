@@ -1,6 +1,7 @@
 #include "parser/lexer.hh"
 
 #include <regex>
+#include <utility>
 
 namespace parser {
 
@@ -63,9 +64,19 @@ Token::Token(Symbol symbol, unsigned int begin, unsigned int end,
              std::string const& match)
     : symbol(symbol), begin(begin), end(end), match(match) {}
 
-Lexer::Lexer(
-    std::initializer_list<std::pair<TokenMatcher, Symbol>> const& match_map)
+Lexer::Lexer(Lexer const& other)
+    : matcher_to_symbol_(other.matcher_to_symbol_) {}
+
+Lexer::Lexer(Lexer&& other)
+    : matcher_to_symbol_(std::move(other.matcher_to_symbol_)) {}
+
+Lexer::Lexer(std::initializer_list<Lexer::MatchPair> const& match_map)
     : matcher_to_symbol_(match_map) {}
+
+Lexer& Lexer::operator=(Lexer other) {
+  std::swap(matcher_to_symbol_, other.matcher_to_symbol_);
+  return *this;
+}
 
 bool Lexer::ProcessContents(std::string const& buffer, Result* result) const {
   unsigned int length = buffer.length();
