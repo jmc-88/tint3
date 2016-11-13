@@ -46,6 +46,7 @@ std::string Representation(T const& value) {
 
 std::string& Trim(std::string& str);
 std::vector<std::string> Split(std::string const& str, char sep);
+bool StartsWith(std::string const& str, std::string const& other);
 bool RegexMatch(std::string const& pattern, std::string const& string);
 
 }  // namespace string
