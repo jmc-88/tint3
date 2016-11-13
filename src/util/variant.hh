@@ -101,7 +101,7 @@ public:
   }
 
   template<typename T>
-  bool Is() {
+  bool Is() const {
     return (type_id_ == typeid(T).hash_code());
   }
 
