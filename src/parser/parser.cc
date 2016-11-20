@@ -6,11 +6,14 @@ namespace parser {
 
 TokenList::TokenList(Lexer::Result tokens) : tokens_(tokens), current_(0) {}
 
-Token const& TokenList::Current() const { return tokens_[current_]; }
+Token const& TokenList::Current() const { return tokens_.at(current_); }
 
 bool TokenList::Accept(Symbol symbol) {
   if (Current().symbol == symbol) {
-    Next();
+    // Skip over the current symbol, unless we're at the end of file.
+    if (symbol != kEOF) {
+      Next();
+    }
     return true;
   }
   return false;
