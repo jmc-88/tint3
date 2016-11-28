@@ -1,8 +1,9 @@
 #define CATCH_CONFIG_MAIN
 #include "catch.hpp"
 
-#include "launcher/desktop_entry.hh"
 #include "parser/parser.hh"
+
+#include "launcher/desktop_entry.hh"
 
 // Example Desktop Entry File, as seen in the specification:
 //  https://specifications.freedesktop.org/desktop-entry-spec/latest/apa.html
@@ -29,14 +30,15 @@ Name=Create a new Foo!
 Icon=fooview-new
 )EOF";
 
-TEST_CASE("Parser", "Correctly parses a valid .desktop entry file") {
+TEST_CASE("ExampleContents", "Correctly parses a valid .desktop entry file") {
   launcher::desktop_entry::Parser desktop_entry_parser;
   parser::Parser p{launcher::desktop_entry::kLexer, &desktop_entry_parser};
 
+  // This should parse correctly.
   REQUIRE(p.Parse(kExampleContents));
 
-  std::vector<launcher::desktop_entry::Group> groups{
-      desktop_entry_parser.GetGroups()};
+  launcher::desktop_entry::DesktopEntry groups{
+      desktop_entry_parser.GetDesktopEntry()};
   REQUIRE(groups.size() == 3);
   REQUIRE(groups[0].GetName() == "Desktop Entry");
   REQUIRE(groups[1].GetName() == "Desktop Action Gallery");
@@ -50,10 +52,12 @@ TEST_CASE("Parser", "Correctly parses a valid .desktop entry file") {
   REQUIRE(groups[0].GetEntry<std::string>("TryExec") == "fooview");
   REQUIRE(groups[0].GetEntry<std::string>("Exec") == "fooview %F");
   REQUIRE(groups[0].GetEntry<std::string>("Icon") == "fooview");
-  REQUIRE(groups[0].GetEntry<std::string>("MimeType") ==
-          "image/x-foo;");  // TODO: stringlist
-  REQUIRE(groups[0].GetEntry<std::string>("Actions") ==
-          "Gallery;Create;");  // TODO: stringlist
+
+  using StringList = launcher::desktop_entry::Group::StringList;
+  auto mime_type = groups[0].GetEntry<StringList>("MimeType");
+  REQUIRE(mime_type == (StringList{"image/x-foo"}));
+  auto actions = groups[0].GetEntry<StringList>("Actions");
+  REQUIRE(actions == (StringList{"Gallery", "Create"}));
 
   // Desktop Action Gallery
   REQUIRE(groups[1].GetEntry<std::string>("Exec") == "fooview --gallery");
@@ -63,4 +67,212 @@ TEST_CASE("Parser", "Correctly parses a valid .desktop entry file") {
   REQUIRE(groups[2].GetEntry<std::string>("Exec") == "fooview --create-new");
   REQUIRE(groups[2].GetEntry<std::string>("Name") == "Create a new Foo!");
   REQUIRE(groups[2].GetEntry<std::string>("Icon") == "fooview-new");
+
+  // It should also validate correctly.
+  REQUIRE(launcher::desktop_entry::Validate(&groups));
+}
+
+static constexpr char kInvalidGroupOrder[] =
+    u8R"EOF(
+[Desktop Action In The Wrong Position]
+Exec=/bin/true
+Name=Whoops.
+
+[Desktop Entry]
+Type=Application
+Name=Foo Viewer
+)EOF";
+
+TEST_CASE("InvalidGroupOrder", "Refuses entries with the wrong group order") {
+  launcher::desktop_entry::Parser desktop_entry_parser;
+  parser::Parser p{launcher::desktop_entry::kLexer, &desktop_entry_parser};
+
+  REQUIRE(p.Parse(kInvalidGroupOrder));
+
+  launcher::desktop_entry::DesktopEntry groups{
+      desktop_entry_parser.GetDesktopEntry()};
+  REQUIRE(!launcher::desktop_entry::Validate(&groups));
+}
+
+static constexpr char kInvalidActionGroups[] =
+    u8R"EOF(
+[Desktop Entry]
+Type=Application
+Name=Foo Viewer
+
+[Desktop Action Something]
+Exec=/bin/true
+Name=Something
+
+[Desktop Action Something Else]
+Exec=/bin/sleep 3600
+Name=Zzz
+)EOF";
+
+TEST_CASE("InvalidActionGroups", "Ignores invalid action groups") {
+  launcher::desktop_entry::Parser desktop_entry_parser;
+  parser::Parser p{launcher::desktop_entry::kLexer, &desktop_entry_parser};
+
+  REQUIRE(p.Parse(kInvalidActionGroups));
+
+  launcher::desktop_entry::DesktopEntry groups{
+      desktop_entry_parser.GetDesktopEntry()};
+
+  // Before: all three groups are parsed and returned.
+  REQUIRE(groups.size() == 3);
+  REQUIRE(groups[0].GetName() == "Desktop Entry");
+  REQUIRE(groups[1].GetName() == "Desktop Action Something");
+  REQUIRE(groups[2].GetName() == "Desktop Action Something Else");
+
+  // Run the validation.
+  REQUIRE(launcher::desktop_entry::Validate(&groups));
+
+  // After: only the main "Desktop Entry" group should be retained, the others
+  // should be removed as they don't match any item in the "Action" entry.
+  REQUIRE(groups.size() == 1);
+  REQUIRE(groups[0].GetName() == "Desktop Entry");
+}
+
+static constexpr char kValueTypes[] =
+    u8R"EOF(
+[Desktop Entry]
+Type=Application
+Name=Foo Viewer
+StartupNotify=false
+)EOF";
+
+TEST_CASE("ValueTypes", "Correctly parses all supported value types") {
+  launcher::desktop_entry::Parser desktop_entry_parser;
+  parser::Parser p{launcher::desktop_entry::kLexer, &desktop_entry_parser};
+
+  REQUIRE(p.Parse(kValueTypes));
+
+  launcher::desktop_entry::DesktopEntry groups{
+      desktop_entry_parser.GetDesktopEntry()};
+  REQUIRE(launcher::desktop_entry::Validate(&groups));
+
+  // Boolean value.
+  REQUIRE(groups[0].HasEntry("StartupNotify"));
+  REQUIRE(groups[0].IsEntry<bool>("StartupNotify"));
+  REQUIRE(groups[0].GetEntry<bool>("StartupNotify") == false);
+}
+
+static constexpr char kLocalizedContents[] =
+    u8R"EOF(
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Foo Viewer
+Name[it]=Visualizzatore di Foo
+Name[fr]=Visionneuse de Foo
+)EOF";
+
+TEST_CASE("LocalizedContents", "Localized strings are handled correctly") {
+  launcher::desktop_entry::Parser desktop_entry_parser;
+  parser::Parser p{launcher::desktop_entry::kLexer, &desktop_entry_parser};
+
+  REQUIRE(p.Parse(kLocalizedContents));
+
+  launcher::desktop_entry::DesktopEntry groups{
+      desktop_entry_parser.GetDesktopEntry()};
+  REQUIRE(launcher::desktop_entry::Validate(&groups));
+
+  // Locale string.
+  using LocaleString = launcher::desktop_entry::Group::LocaleString;
+  REQUIRE(groups[0].HasEntry("Name"));
+  REQUIRE(groups[0].IsEntry<LocaleString>("Name"));
+
+  LocaleString& str = groups[0].GetEntry<LocaleString>("Name");
+  REQUIRE(str[""] == "Foo Viewer");
+  REQUIRE(str["it"] == "Visualizzatore di Foo");
+  REQUIRE(str["fr"] == "Visionneuse de Foo");
+}
+
+TEST_CASE("ParseBooleanValue", "Only accepts 'true' and 'false'") {
+  bool value_boolean;
+
+  REQUIRE(launcher::desktop_entry::ParseBooleanValue("true", &value_boolean));
+  REQUIRE(value_boolean);
+
+  REQUIRE(launcher::desktop_entry::ParseBooleanValue("1", &value_boolean));
+  REQUIRE(value_boolean);
+
+  REQUIRE(launcher::desktop_entry::ParseBooleanValue("false", &value_boolean));
+  REQUIRE(!value_boolean);
+
+  REQUIRE(launcher::desktop_entry::ParseBooleanValue("0", &value_boolean));
+  REQUIRE(!value_boolean);
+
+  REQUIRE(launcher::desktop_entry::ParseBooleanValue(" true ", &value_boolean));
+  REQUIRE(value_boolean);
+
+  REQUIRE(!launcher::desktop_entry::ParseBooleanValue("", &value_boolean));
+  REQUIRE(!launcher::desktop_entry::ParseBooleanValue("yes", &value_boolean));
+}
+
+TEST_CASE("ParseNumericValue", "Correctly parses strings containing floats") {
+  float value_numeric;
+
+  REQUIRE(launcher::desktop_entry::ParseNumericValue("10.123", &value_numeric));
+  REQUIRE(value_numeric == 10.123f);
+
+  REQUIRE(launcher::desktop_entry::ParseNumericValue("0.0001", &value_numeric));
+  REQUIRE(value_numeric == 0.0001f);
+
+  REQUIRE(launcher::desktop_entry::ParseNumericValue(" 1.1 ", &value_numeric));
+  REQUIRE(value_numeric == 1.1f);
+
+  REQUIRE(!launcher::desktop_entry::ParseNumericValue("", &value_numeric));
+  REQUIRE(!launcher::desktop_entry::ParseNumericValue("pea", &value_numeric));
+  REQUIRE(!launcher::desktop_entry::ParseNumericValue("1.1 2.2 3.3",
+                                                      &value_numeric));
+}
+
+TEST_CASE("ParseStringValue", "Correctly reads escape sequences") {
+  std::string value_string;
+
+  value_string = "plain";
+  REQUIRE(launcher::desktop_entry::ParseStringValue(&value_string));
+
+  value_string = u8R"S(hey\;\\some\sescape\tsequences\nhere\r)S";
+  REQUIRE(launcher::desktop_entry::ParseStringValue(&value_string));
+  REQUIRE(value_string == "hey;\\some escape\tsequences\nhere\r");
+
+  value_string = u8R"S(invalid escape sequence: \%)S";
+  REQUIRE(!launcher::desktop_entry::ParseStringValue(&value_string));
+
+  value_string = "control characters: \n";
+  REQUIRE(!launcher::desktop_entry::ParseStringValue(&value_string));
+}
+
+TEST_CASE("ParseStringListValue", "Correctly reads string lists") {
+  using StringList = launcher::desktop_entry::Group::StringList;
+  StringList value_string_list;
+  std::string value_string;
+
+  value_string = "plain";
+  REQUIRE(launcher::desktop_entry::ParseStringListValue(value_string,
+                                                        &value_string_list));
+  REQUIRE(value_string_list == (StringList{"plain"}));
+
+  value_string = ";leading semicolon";
+  REQUIRE(launcher::desktop_entry::ParseStringListValue(value_string,
+                                                        &value_string_list));
+  REQUIRE(value_string_list == (StringList{"", "leading semicolon"}));
+
+  value_string = "trailing semicolon;";
+  REQUIRE(launcher::desktop_entry::ParseStringListValue(value_string,
+                                                        &value_string_list));
+  REQUIRE(value_string_list == (StringList{"trailing semicolon"}));
+
+  value_string = "multiple;elements;";
+  REQUIRE(launcher::desktop_entry::ParseStringListValue(value_string,
+                                                        &value_string_list));
+  REQUIRE(value_string_list == (StringList{"multiple", "elements"}));
+
+  value_string = u8R"S(semicolons\; they are handled correctly;)S";
+  REQUIRE(launcher::desktop_entry::ParseStringListValue(value_string,
+                                                        &value_string_list));
+  REQUIRE(value_string_list ==
+          (StringList{"semicolons; they are handled correctly"}));
 }

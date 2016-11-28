@@ -48,13 +48,24 @@ public:
 
   std::string const& GetName() const;
 
+  bool HasEntry(std::string const& key) const;
+
   template<typename T>
-  T const& GetEntry(std::string const& key) {
-    return entries_[key].Get<T>();
+  bool IsEntry(std::string const& key) {
+    return HasEntry(key) && entries_.at(key).Is<T>();
+  }
+
+  template<typename T>
+  T& GetEntry(std::string const& key) {
+    return entries_.at(key).Get<T>();
   }
 
   template<typename T>
   void AddEntry(std::string const& key, T const& value) {
+    auto it = entries_.find(key);
+    if (it != entries_.end()) {
+      entries_.erase(it);
+    }
     entries_.emplace(key, value);
   }
 
@@ -62,6 +73,9 @@ private:
   std::string name_;
   std::map<std::string, Value> entries_;
 };
+
+// A Desktop Entry is a list of groups and their key/value entries.
+using DesktopEntry = std::vector<Group>;
 
 class Parser : public parser::ParseCallback {
   //  desktop_entry ::= '\n' desktop_entry
@@ -81,18 +95,27 @@ public:
   Parser();
 
   bool operator()(parser::TokenList* tokens);
-  std::vector<Group> GetGroups() const;
+  DesktopEntry GetDesktopEntry() const;
 
 private:
   Group current_group_;
-  std::vector<Group> groups_;
+  DesktopEntry groups_;
 
-  bool DesktopEntry(parser::TokenList* tokens);
+  bool DesktopEntryParser(parser::TokenList* tokens);
   bool Comment(parser::TokenList* tokens);
   bool GroupParser(parser::TokenList* tokens);
   bool GroupHeader(parser::TokenList* tokens);
   bool GroupEntry(parser::TokenList* tokens);
+  bool AddKeyValue(std::string key, std::string value, std::string locale);
 };
+
+bool ParseBooleanValue(std::string value_string, bool* value_boolean);
+bool ParseNumericValue(std::string value_string, float* value_numeric);
+bool ParseStringValue(std::string* value_string);
+bool ParseStringListValue(std::string value_string,
+                          Group::StringList* value_string_list);
+
+bool Validate(DesktopEntry* entry);
 
 }  // namespace desktop_entry
 }  // namespace launcher
