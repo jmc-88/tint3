@@ -37,6 +37,7 @@
 #include <string>
 
 #include "launcher.hh"
+#include "launcher/desktop_entry.hh"
 #include "panel.hh"
 #include "server.hh"
 #include "taskbar.hh"
@@ -385,15 +386,11 @@ void LauncherAction(LauncherIcon* launcher_icon, XEvent* evt) {
 #endif  // HAVE_SN
 }
 
-/***************** Freedesktop app.desktop and icon theme handling
- * *********************/
-/* http://standards.freedesktop.org/desktop-entry-spec/ */
-/* http://standards.freedesktop.org/icon-theme-spec/ */
-
 // Splits line at first '=' and returns 1 if successful, and parts are not empty
 // key and value point to the parts
-bool ParseDesktopLine(std::string const& line, std::string& key,
-                      std::string& value) {
+// http://standards.freedesktop.org/icon-theme-spec/
+bool ParseThemeLine(std::string const& line, std::string& key,
+                    std::string& value) {
   bool found = false;
 
   for (auto it = line.cbegin(); it != line.cend(); ++it) {
@@ -406,135 +403,6 @@ bool ParseDesktopLine(std::string const& line, std::string& key,
   }
 
   return (found && !key.empty() && !value.empty());
-}
-
-bool ParseThemeLine(std::string const& line, std::string& key,
-                    std::string& value) {
-  return ParseDesktopLine(line, key, value);
-}
-
-void ExpandExec(DesktopEntry* entry, std::string const& path) {
-  if (entry->exec.empty()) {
-    return;
-  }
-
-  std::string expanded;
-
-  // p will never point to an escaped char
-  for (auto c = entry->exec.begin(); c != entry->exec.end(); ++c) {
-    if (*c == '\\') {
-      ++c;
-
-      if (*c == '\0') {
-        break;
-      }
-
-      // Copy the escaped char
-      if (*c != '%') {
-        expanded.push_back('\\');
-      }
-
-      expanded.push_back(*c);
-    } else if (*c == '%') {
-      ++c;
-
-      if (*c == '\0') {
-        break;
-      }
-
-      if (*c == 'i' && !entry->icon.empty()) {
-        expanded.append(util::string::Builder() << "--icon '" << entry->icon
-                                                << '\'');
-      } else if (*c == 'c' && !entry->name.empty()) {
-        expanded.append(util::string::Builder() << '\'' << entry->name << '\'');
-      } else if (*c == 'f' || *c == 'F') {
-        // Ignore the expansions in this case, we have no files to pass to the
-        // executable.
-        // TODO: this could not be true in cases of Drag and Drop.
-      } else if (*c == 'u' || *c == 'U') {
-        // Ignore the expansions in this case, we have no URLs to pass to the
-        // executable.
-        // TODO: this could not be true in cases of Drag and Drop.
-      }
-    } else {
-      expanded.push_back(*c);
-    }
-  }
-
-  entry->exec = expanded;
-}
-
-bool LauncherReadDesktopFile(const std::string& path, DesktopEntry* entry) {
-  entry->name.clear();
-  entry->icon.clear();
-  entry->exec.clear();
-
-  gchar** languages = (gchar**)g_get_language_names();
-  int i;
-
-  for (i = 0; languages[i]; ++i) {
-  }
-
-  // lang_index_default is a constant that encodes the Name key without a
-  // language
-  int lang_index_default = i;
-  // lang_index is the index of the language for the best Name key in the
-  // language vector
-  // we currently do not know about any Name key at all, so use an invalid index
-  int lang_index = lang_index_default + 1;
-
-  bool inside_desktop_entry = false;
-  bool read = util::fs::ReadFileByLine(path, [&](std::string const& data) {
-    std::string line(data);
-    util::string::Trim(line);
-
-    if (line.empty()) {
-      return;
-    }
-
-    if (line[0] == '[') {
-      inside_desktop_entry = (line == "[Desktop Entry]");
-    }
-
-    std::string key, value;
-
-    if (inside_desktop_entry && ParseDesktopLine(line, key, value)) {
-      if (key.substr(0, 4) == "Name") {
-        if (key == "Name" && lang_index > lang_index_default) {
-          entry->name = value;
-          lang_index = lang_index_default;
-        } else {
-          for (i = 0; languages[i] && i < lang_index; i++) {
-            std::string localized_key;
-            localized_key.append("Name[");
-            localized_key.append(languages[i]);
-            localized_key.append("]");
-
-            if (key == localized_key) {
-              entry->name = value;
-              lang_index = i;
-            }
-          }
-        }
-      } else if (entry->exec.empty() && key == "Exec") {
-        entry->exec = value;
-      } else if (entry->icon.empty() && key == "Icon") {
-        entry->icon = value;
-      }
-    }
-  });
-
-  if (!read) {
-    util::log::Error() << "Could not open file " << path << '\n';
-    return false;
-  }
-
-  // From this point:
-  // entry->name, entry->icon, entry->exec will never be empty strings (can be
-  // nullptr though)
-
-  ExpandExec(entry, path);
-  return true;
 }
 
 IconTheme::~IconTheme() {
@@ -689,34 +557,134 @@ IconTheme* LoadTheme(std::string const& name) {
   return theme;
 }
 
+namespace {
+
+void ExpandExec(launcher::desktop_entry::Group* group,
+                std::string const& path) {
+  if (!group->HasEntry("Exec")) {
+    return;
+  }
+
+  std::string exec{group->GetEntry<std::string>("Exec")};
+  std::string expanded;
+
+  for (auto c = exec.begin(); c != exec.end(); ++c) {
+    if (*c == '\\') {
+      ++c;
+
+      if (*c == '\0') {
+        break;
+      }
+
+      // Copy the escaped char
+      if (*c != '%') {
+        expanded.push_back('\\');
+      }
+
+      expanded.push_back(*c);
+    } else if (*c == '%') {
+      ++c;
+
+      if (*c == '\0') {
+        break;
+      }
+
+      if (*c == 'i' && group->HasEntry("Icon")) {
+        // TODO: this should really be a vector of args, otherwise we need to
+        // introduce proper escaping too...
+        expanded.append(util::string::Builder()
+                        << "--icon '" << group->GetEntry<std::string>("Icon")
+                        << '\'');
+      } else if (*c == 'c' && group->HasEntry("Name")) {
+        expanded.append(util::string::Builder()
+                        << '\'' << group->GetEntry<std::string>("Name")
+                        << '\'');
+      } else if (*c == 'f' || *c == 'F') {
+        // Ignore the expansions in this case, we have no files to pass to the
+        // executable.
+        // TODO: this could not be true in cases of Drag and Drop.
+      } else if (*c == 'u' || *c == 'U') {
+        // Ignore the expansions in this case, we have no URLs to pass to the
+        // executable.
+        // TODO: this could not be true in cases of Drag and Drop.
+      }
+    } else {
+      expanded.push_back(*c);
+    }
+  }
+
+  group->AddEntry("Exec", expanded);
+}
+
+bool ParseDesktopFile(std::string const& contents,
+                      launcher::desktop_entry::DesktopEntry* output) {
+  launcher::desktop_entry::Parser desktop_entry_parser;
+  parser::Parser p{launcher::desktop_entry::kLexer, &desktop_entry_parser};
+  if (!p.Parse(contents)) {
+    return false;
+  }
+
+  launcher::desktop_entry::DesktopEntry desktop_entry{
+      desktop_entry_parser.GetDesktopEntry()};
+  output->assign(desktop_entry.begin(), desktop_entry.end());
+  return true;
+}
+
+}  // namespace
+
 // Populates the list_icons list
 void Launcher::LoadIcons() {
   // Load apps (.desktop style launcher items)
-  for (auto const& app : list_apps_) {
-    DesktopEntry entry;
-    LauncherReadDesktopFile(app, &entry);
+  for (auto const& path : list_apps_) {
+    util::fs::ReadFile(path, [&](std::string const& contents) {
+      launcher::desktop_entry::DesktopEntry entry;
+      if (!ParseDesktopFile(contents, &entry)) {
+        util::log::Error() << "Failed parsing \"" << path << "\", skipping.\n";
+        return;
+      }
 
-    if (!entry.exec.empty()) {
-      auto launcher_icon = new LauncherIcon();
-      launcher_icon->parent_ = this;
-      launcher_icon->panel_ = panel_;
-      launcher_icon->size_mode_ = SizeMode::kByContent;
-      launcher_icon->need_resize_ = false;
-      launcher_icon->need_redraw_ = true;
-      launcher_icon->bg_ = backgrounds.front();
-      launcher_icon->on_screen_ = true;
+      // Reference to the first group, "Desktop Entry".
+      auto& de = entry[0];
 
-      launcher_icon->is_app_desktop_ = 1;
-      launcher_icon->cmd_ = entry.exec;
-      launcher_icon->icon_name_ =
-          !entry.icon.empty() ? entry.icon : kIconFallback;
-      launcher_icon->icon_size_ = 1;
-      launcher_icon->icon_tooltip_ =
-          !entry.name.empty() ? entry.name : entry.exec;
-      list_icons_.push_back(launcher_icon);
+      if (!de.IsEntry<std::string>("Type") ||
+          de.GetEntry<std::string>("Type") != "Application") {
+        util::log::Error() << "Desktop entry \"" << path << "\" not of type "
+                           << "\"Application\", skipping.\n";
+        return;
+      }
 
-      AddChild(launcher_icon);
-    }
+      if (de.IsEntry<std::string>("Exec")) {
+        ExpandExec(&de, path);
+
+        auto launcher_icon = new LauncherIcon();
+        launcher_icon->parent_ = this;
+        launcher_icon->panel_ = panel_;
+        launcher_icon->size_mode_ = SizeMode::kByContent;
+        launcher_icon->need_resize_ = false;
+        launcher_icon->need_redraw_ = true;
+        launcher_icon->bg_ = backgrounds.front();
+        launcher_icon->on_screen_ = true;
+
+        launcher_icon->is_app_desktop_ = 1;
+        launcher_icon->cmd_ = de.GetEntry<std::string>("Exec");
+        launcher_icon->icon_name_ = de.HasEntry("Icon")
+                                        ? de.GetEntry<std::string>("Icon")
+                                        : kIconFallback;
+        launcher_icon->icon_size_ = 1;
+        if (de.HasEntry("Comment")) {
+          launcher_icon->icon_tooltip_ =
+              launcher::desktop_entry::BestLocalizedEntry(de, "Comment");
+        } else if (de.HasEntry("Name")) {
+          launcher_icon->icon_tooltip_ =
+              launcher::desktop_entry::BestLocalizedEntry(de, "Name");
+        } else {
+          launcher_icon->icon_tooltip_ = de.GetEntry<std::string>("Exec");
+        }
+
+        list_icons_.push_back(launcher_icon);
+        AddChild(launcher_icon);
+      }
+    });
   }
 }
 
