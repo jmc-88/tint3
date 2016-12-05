@@ -117,6 +117,8 @@ bool ParseStringListValue(std::string value_string,
 
 bool Validate(DesktopEntry* entry);
 
+std::string BestLocalizedEntry(Group& group, std::string const& key);
+
 }  // namespace desktop_entry
 }  // namespace launcher
 

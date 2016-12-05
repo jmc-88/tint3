@@ -1,6 +1,8 @@
 #define CATCH_CONFIG_MAIN
 #include "catch.hpp"
 
+#include <clocale>
+
 #include "parser/parser.hh"
 
 #include "launcher/desktop_entry.hh"
@@ -275,4 +277,41 @@ TEST_CASE("ParseStringListValue", "Correctly reads string lists") {
                                                         &value_string_list));
   REQUIRE(value_string_list ==
           (StringList{"semicolons; they are handled correctly"}));
+}
+
+TEST_CASE("BestLocalizedEntry", "Picks the best value for the current locale") {
+  using LocaleString = launcher::desktop_entry::Group::LocaleString;
+
+  SECTION("Non-localized entry") {
+    launcher::desktop_entry::Group entry{"Mock Entry"};
+    entry.AddEntry<std::string>("Key", "Non-localized");
+    REQUIRE(launcher::desktop_entry::BestLocalizedEntry(entry, "Key") ==
+            "Non-localized");
+  }
+
+  SECTION("Localized entry, C locale") {
+    launcher::desktop_entry::Group entry{"Mock Entry"};
+    entry.AddEntry<LocaleString>("Key",
+                                 LocaleString{
+                                     {"", "Non-localized"}, {"C", "C locale"},
+                                 });
+
+    // "C" appears in the above map, return the proper string.
+    setlocale(LC_MESSAGES, "C");
+    REQUIRE(launcher::desktop_entry::BestLocalizedEntry(entry, "Key") ==
+            "C locale");
+  }
+
+  SECTION("Localized entry, unknown locale") {
+    launcher::desktop_entry::Group entry{"Mock Entry"};
+    entry.AddEntry<LocaleString>(
+        "Key", LocaleString{
+                   {"", "Non-localized"}, {"xx_XX", "Unknown locale"},
+               });
+
+    // "C" doesn't appear in the above map, fall back to non-localized string.
+    setlocale(LC_MESSAGES, "C");
+    REQUIRE(launcher::desktop_entry::BestLocalizedEntry(entry, "Key") ==
+            "Non-localized");
+  }
 }

@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <cctype>
+#include <clocale>
 #include <sstream>
 #include <utility>
 
@@ -426,6 +427,17 @@ bool Validate(DesktopEntry* entry) {
   }
 
   return true;
+}
+
+std::string BestLocalizedEntry(Group& group, std::string const& key) {
+  if (group.IsEntry<std::string>(key)) {
+    return group.GetEntry<std::string>(key);
+  }
+
+  auto& localized_name = group.GetEntry<Group::LocaleString>(key);
+  auto current_locale = setlocale(LC_MESSAGES, nullptr);
+  auto it = localized_name.find(current_locale);
+  return (it != localized_name.end()) ? it->second : localized_name.at("");
 }
 
 }  // namespace desktop_entry
