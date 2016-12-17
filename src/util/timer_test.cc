@@ -78,7 +78,7 @@ class ChronoTimerTestUtils {
 
 TEST_CASE("Timer", "Test the Timer class") {
   FakeClock fake_clock{0};
-  Timer timer{std::bind(&FakeClock::Now, &fake_clock)};
+  Timer timer{[&]() { return fake_clock.Now(); }};
   auto no_op_callback = []() -> bool { return true; };
 
   SECTION("correctly registers/unregisters an interval (single)") {

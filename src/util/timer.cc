@@ -121,6 +121,7 @@ void Timer::ProcessExpiredIntervals() {
 
     if (interval->time_point_ <= now) {
       interval->InvokeCallback();
+      delete interval;
       it = timeouts_.erase(it);
     } else {
       ++it;
@@ -138,6 +139,7 @@ void Timer::ProcessExpiredIntervals() {
         } while (interval->time_point_ < now);
         ++it;
       } else {
+        delete interval;
         it = timeouts_.erase(it);
       }
     } else {
