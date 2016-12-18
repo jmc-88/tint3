@@ -9,5 +9,4 @@ TrayWindow::TrayWindow(Window parent_id, Window tray_id)
       height(0),
       hide(false),
       depth(0),
-      damage(0),
-      render_timeout(nullptr) {}
+      damage(0) {}

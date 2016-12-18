@@ -17,11 +17,22 @@
 **************************************************************************/
 
 #include <algorithm>
+#include <atomic>
 #include <list>
 #include <map>
+#include <utility>
 
 #include "util/log.hh"
 #include "util/timer.hh"
+
+namespace {
+
+// Atomic counter for Interval identifiers.
+std::atomic<uint64_t> interval_id_counter;
+
+}  // namespace
+
+Interval::Interval() {}
 
 Interval::Interval(TimePoint time_point, Duration repeat_interval,
                    Callback callback)
@@ -29,15 +40,36 @@ Interval::Interval(TimePoint time_point, Duration repeat_interval,
       repeat_interval_(repeat_interval),
       callback_(callback) {}
 
+Interval::Interval(Interval const& other)
+    : time_point_(other.time_point_),
+      repeat_interval_(other.repeat_interval_),
+      callback_(other.callback_) {}
+
+Interval::Interval(Interval&& other)
+    : time_point_(std::move(other.time_point_)),
+      repeat_interval_(std::move(other.repeat_interval_)),
+      callback_(std::move(other.callback_)) {}
+
+Interval& Interval::operator=(Interval other) {
+  std::swap(time_point_, other.time_point_);
+  std::swap(repeat_interval_, other.repeat_interval_);
+  std::swap(callback_, other.callback_);
+  return *this;
+}
+
 void Interval::InvokeCallback() const { callback_(); }
 
 TimePoint Interval::GetTimePoint() const { return time_point_; }
 
 Duration Interval::GetRepeatInterval() const { return repeat_interval_; }
 
-bool CompareIntervals::operator()(Interval const* lhs,
-                                  Interval const* rhs) const {
-  return lhs->GetTimePoint() < rhs->GetTimePoint();
+bool operator<(Interval const& lhs, Interval const& rhs) {
+  return lhs.GetTimePoint() < rhs.GetTimePoint();
+}
+
+bool CompareIds::operator()(Interval::Id const& lhs,
+                            Interval::Id const& rhs) const {
+  return static_cast<uint64_t>(lhs) < static_cast<uint64_t>(rhs);
 }
 
 std::unique_ptr<struct timeval> ToTimeval(Duration duration) {
@@ -61,52 +93,36 @@ Timer::Timer() : get_current_time_(std::chrono::steady_clock::now) {}
 Timer::Timer(TimerCallback get_current_time_callback)
     : get_current_time_(get_current_time_callback) {}
 
-Timer::~Timer() {
-  for (Interval* interval : timeouts_) {
-    delete interval;
-  }
-  timeouts_.clear();
-
-  for (Interval* interval : intervals_) {
-    delete interval;
-  }
-  intervals_.clear();
-}
-
 TimePoint Timer::Now() const { return get_current_time_(); }
 
-Interval* Timer::SetTimeout(Duration timeout_interval,
-                            Interval::Callback callback) {
-  Interval* interval =
-      new Interval(Now() + timeout_interval, std::chrono::milliseconds(0),
-                   std::move(callback));
-  if (interval) {
-    timeouts_.insert(interval);
-  }
-  return interval;
+Interval::Id Timer::SetTimeout(Duration timeout_interval,
+                               Interval::Callback callback) {
+  Interval::Id id{++interval_id_counter};
+  timeouts_.insert(std::make_pair(
+      id, Interval{Now() + timeout_interval, std::chrono::milliseconds(0),
+                   std::move(callback)}));
+  return id;
 }
 
-Interval* Timer::SetInterval(Duration repeat_interval,
-                             Interval::Callback callback) {
-  Interval* interval = new Interval(Now() + repeat_interval, repeat_interval,
-                                    std::move(callback));
-  if (interval) {
-    intervals_.insert(interval);
-  }
-  return interval;
+Interval::Id Timer::SetInterval(Duration repeat_interval,
+                                Interval::Callback callback) {
+  Interval::Id id{++interval_id_counter};
+  intervals_.insert(std::make_pair(
+      id,
+      Interval{Now() + repeat_interval, repeat_interval, std::move(callback)}));
+  return id;
 }
 
-bool Timer::ClearInterval(Interval* interval) {
-  size_t erased_count = 0;
-
-  if (interval->repeat_interval_ == interval->repeat_interval_.zero()) {
-    erased_count = timeouts_.erase(interval);
-  } else {
-    erased_count = intervals_.erase(interval);
+bool Timer::ClearInterval(Interval::Id interval_id) {
+  auto timeouts_it = timeouts_.find(interval_id);
+  if (timeouts_it != timeouts_.end()) {
+    timeouts_.erase(timeouts_it);
+    return true;
   }
 
-  if (erased_count != 0) {
-    delete interval;
+  auto intervals_it = intervals_.find(interval_id);
+  if (intervals_it != intervals_.end()) {
+    intervals_.erase(intervals_it);
     return true;
   }
 
@@ -117,11 +133,10 @@ void Timer::ProcessExpiredIntervals() {
   TimePoint now = get_current_time_();
 
   for (auto it = timeouts_.begin(); it != timeouts_.end();) {
-    Interval* interval = (*it);
+    Interval& interval = it->second;
 
-    if (interval->time_point_ <= now) {
-      interval->InvokeCallback();
-      delete interval;
+    if (interval.time_point_ <= now) {
+      interval.InvokeCallback();
       it = timeouts_.erase(it);
     } else {
       ++it;
@@ -129,17 +144,16 @@ void Timer::ProcessExpiredIntervals() {
   }
 
   for (auto it = intervals_.begin(); it != intervals_.end();) {
-    Interval* interval = (*it);
+    Interval& interval = it->second;
 
-    if (interval->time_point_ <= now) {
-      bool should_keep = interval->callback_();
+    if (interval.time_point_ <= now) {
+      bool should_keep = interval.callback_();
       if (should_keep) {
         do {
-          interval->time_point_ += interval->repeat_interval_;
-        } while (interval->time_point_ < now);
+          interval.time_point_ += interval.repeat_interval_;
+        } while (interval.time_point_ < now);
         ++it;
       } else {
-        delete interval;
         it = timeouts_.erase(it);
       }
     } else {
@@ -148,23 +162,37 @@ void Timer::ProcessExpiredIntervals() {
   }
 }
 
-Interval* Timer::GetNextInterval() const {
-  auto first_timeout = timeouts_.begin();
-  auto first_interval = intervals_.begin();
+util::Nullable<Interval> Timer::GetNextInterval() const {
+  auto timeout_it = timeouts_.begin();
+  auto interval_it = intervals_.begin();
+  util::Nullable<Interval> next;
 
-  if (first_timeout == timeouts_.end()) {
-    if (first_interval == intervals_.end()) {
-      return nullptr;
+  while (timeout_it != timeouts_.end() || interval_it != intervals_.end()) {
+    if (timeout_it == timeouts_.end()) {
+      if (!next) {
+        next = interval_it->second;
+      } else {
+        next = std::min(next.Unwrap(), interval_it->second);
+      }
+      ++interval_it;
+    } else if (interval_it == intervals_.end()) {
+      if (!next) {
+        next = timeout_it->second;
+      } else {
+        next = std::min(next.Unwrap(), timeout_it->second);
+      }
+      ++timeout_it;
+    } else {
+      if (!next) {
+        next = std::min(timeout_it->second, interval_it->second);
+      } else {
+        next =
+            std::min({next.Unwrap(), timeout_it->second, interval_it->second});
+      }
+      ++timeout_it;
+      ++interval_it;
     }
-    return (*first_interval);
-  } else if (first_interval == intervals_.end()) {
-    if (first_timeout == timeouts_.end()) {
-      return nullptr;
-    }
-    return (*first_timeout);
-  } else {
-    CompareIntervals less_than;
-    return (less_than(*first_timeout, *first_interval) ? (*first_timeout)
-                                                       : (*first_interval));
   }
+
+  return next;
 }

@@ -85,11 +85,11 @@ TEST_CASE("Timer", "Test the Timer class") {
     auto const& timeouts = ChronoTimerTestUtils::GetTimeouts(timer);
     REQUIRE(timeouts.empty());
 
-    Interval* interval =
+    Interval::Id interval =
         timer.SetTimeout(std::chrono::milliseconds(100), no_op_callback);
     REQUIRE(timeouts.size() == 1);
 
-    timer.ClearInterval(interval);
+    REQUIRE(timer.ClearInterval(interval));
     REQUIRE(timeouts.empty());
   }
 
@@ -97,11 +97,11 @@ TEST_CASE("Timer", "Test the Timer class") {
     auto const& intervals = ChronoTimerTestUtils::GetIntervals(timer);
     REQUIRE(intervals.empty());
 
-    Interval* interval =
+    Interval::Id interval =
         timer.SetInterval(std::chrono::milliseconds(100), no_op_callback);
     REQUIRE(intervals.size() == 1);
 
-    timer.ClearInterval(interval);
+    REQUIRE(timer.ClearInterval(interval));
     REQUIRE(intervals.empty());
   }
 
@@ -126,54 +126,57 @@ TEST_CASE("Timer", "Test the Timer class") {
 
   SECTION("correctly processes an interval (repeating)") {
     unsigned int invocations_count = 0;
-    Interval* interval = timer.SetInterval(std::chrono::milliseconds(250),
-                                           [&invocations_count]() -> bool {
-                                             ++invocations_count;
-                                             return true;
-                                           });
+    timer.SetInterval(std::chrono::milliseconds(250),
+                      [&invocations_count]() -> bool {
+                        ++invocations_count;
+                        return true;
+                      });
 
+    // time: 0 ms
+    // next invocation: >= 250 ms
+    // no invocations yet, interval is present
     auto const& intervals = ChronoTimerTestUtils::GetIntervals(timer);
     timer.ProcessExpiredIntervals();
     REQUIRE(invocations_count == 0);
     REQUIRE(intervals.size() == 1);
 
+    // time: skip to 600 ms
+    // next invocation: >= 750 ms
+    // 1 invocation, interval was not erased
     fake_clock.AdvanceBy(std::chrono::milliseconds(600));
     timer.ProcessExpiredIntervals();
     REQUIRE(invocations_count == 1);
     REQUIRE(intervals.size() == 1);
-    REQUIRE(interval->GetTimePoint() ==
-            TimePoint(std::chrono::milliseconds(750)));
 
+    // time: skip to 900 ms
+    // next invocation: >= 1000 ms
+    // 2 invocations, interval was not erased
     fake_clock.AdvanceBy(std::chrono::milliseconds(300));
     timer.ProcessExpiredIntervals();
     REQUIRE(invocations_count == 2);
     REQUIRE(intervals.size() == 1);
-    REQUIRE(interval->GetTimePoint() ==
-            TimePoint(std::chrono::milliseconds(1000)));
   }
 
   SECTION("correctly returns the next registered interval") {
-    // No registered intervals should result in a null pointer
-    REQUIRE(timer.GetNextInterval() == nullptr);
+    // No registered intervals should result in a nulled-out object
+    REQUIRE(timer.GetNextInterval() == false);
 
     // Unordered insertion should still return the first interval
-    Interval* second_timeout =
-        timer.SetTimeout(std::chrono::milliseconds(250), no_op_callback);
-    Interval* third_timeout =
-        timer.SetTimeout(std::chrono::milliseconds(500), no_op_callback);
-    Interval* first_timeout =
-        timer.SetTimeout(std::chrono::milliseconds(175), no_op_callback);
-    REQUIRE(timer.GetNextInterval() == first_timeout);
+    timer.SetTimeout(std::chrono::milliseconds(250), no_op_callback);
+    timer.SetTimeout(std::chrono::milliseconds(500), no_op_callback);
+    timer.SetTimeout(std::chrono::milliseconds(175), no_op_callback);
+
+    auto next_timeout = timer.GetNextInterval();
+    REQUIRE(next_timeout);
+    REQUIRE(next_timeout.Unwrap().GetTimePoint() ==
+            TimePoint(std::chrono::milliseconds(175)));
 
     // The same applies to repeating intervals
-    Interval* first_interval =
-        timer.SetInterval(std::chrono::milliseconds(100), no_op_callback);
-    REQUIRE(timer.GetNextInterval() == first_interval);
+    timer.SetInterval(std::chrono::milliseconds(100), no_op_callback);
 
-    // Cleanup
-    timer.ClearInterval(first_timeout);
-    timer.ClearInterval(second_timeout);
-    timer.ClearInterval(third_timeout);
-    timer.ClearInterval(first_interval);
+    auto next_interval = timer.GetNextInterval();
+    REQUIRE(next_interval);
+    REQUIRE(next_interval.Unwrap().GetRepeatInterval() ==
+            Duration(std::chrono::milliseconds(100)));
   }
 }

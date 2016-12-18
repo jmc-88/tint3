@@ -60,7 +60,7 @@ int GetMonitor(Window win) {
 
 }  // namespace
 
-Interval* urgent_timeout;
+Interval::Id urgent_timeout;
 std::list<Task*> urgent_list;
 
 Task::Task(Timer& timer) : timer_(timer) {}
@@ -664,7 +664,7 @@ void Task::DelUrgent() {
 
   if (urgent_list.empty()) {
     timer_.ClearInterval(urgent_timeout);
-    urgent_timeout = nullptr;
+    urgent_timeout.Clear();
   }
 }
 

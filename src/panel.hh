@@ -117,7 +117,7 @@ class Panel : public Area {
   int is_hidden_;
   int hidden_width_, hidden_height_;
   Pixmap hidden_pixmap_;
-  Interval* autohide_timeout_;
+  Interval::Id autohide_timeout_;
 
   Taskbar* ClickTaskbar(int x, int y);
   Task* ClickTask(int x, int y);

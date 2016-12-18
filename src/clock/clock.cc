@@ -50,11 +50,11 @@ time_t time_clock;
 PangoFontDescription* time1_font_desc;
 PangoFontDescription* time2_font_desc;
 bool clock_enabled;
-static Interval* clock_timeout;
+static Interval::Id clock_timeout;
 
 void DefaultClock() {
   clock_enabled = false;
-  clock_timeout = nullptr;
+  clock_timeout.Clear();
   time1_format.clear();
   time1_timezone.clear();
   time2_format.clear();
@@ -127,7 +127,7 @@ std::string Clock::GetTooltipText() {
 }
 
 void InitClock(Timer& timer) {
-  if (time1_format.empty() || clock_timeout != nullptr) {
+  if (time1_format.empty() || clock_timeout) {
     return;
   }
 

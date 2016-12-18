@@ -57,7 +57,7 @@ std::unique_ptr<BatteryInterface> battery_ptr;
 BatteryState battery_state;
 bool battery_enabled;
 int percentage_hide;
-static Interval* battery_timeout;
+static Interval::Id battery_timeout;
 
 int8_t battery_low_status;
 bool battery_low_cmd_send;
@@ -114,7 +114,7 @@ void DefaultBattery() {
   battery_enabled = false;
   percentage_hide = 101;
   battery_low_cmd_send = false;
-  battery_timeout = nullptr;
+  battery_timeout.Clear();
   bat1_font_desc = 0;
   bat2_font_desc = 0;
   battery_low_cmd.clear();
@@ -199,7 +199,7 @@ void InitBattery(Timer& timer) {
   }
 #endif
 
-  if (battery_enabled && battery_timeout == nullptr) {
+  if (battery_enabled && !battery_timeout) {
     battery_timeout =
         timer.SetInterval(std::chrono::seconds(10), UpdateBatteries);
     UpdateBatteries();

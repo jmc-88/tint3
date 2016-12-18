@@ -107,7 +107,7 @@ Taskbar& Taskbar::SetState(size_t state) {
 
 void DefaultTaskbar() {
   win_to_task_map.clear();
-  urgent_timeout = nullptr;
+  urgent_timeout.Clear();
   urgent_list.clear();
   taskbar_enabled = 0;
   Taskbarname::Default();

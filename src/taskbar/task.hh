@@ -88,7 +88,7 @@ class Task : public Area {
   void DrawIcon(int);
 };
 
-extern Interval* urgent_timeout;
+extern Interval::Id urgent_timeout;
 extern std::list<Task*> urgent_list;
 
 Task* AddTask(Window win, Timer& timer);

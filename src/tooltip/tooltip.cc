@@ -40,9 +40,9 @@ Tooltip g_tooltip;
 namespace {
 
 void StopTooltipTimeout(Timer& timer) {
-  if (g_tooltip.timeout != nullptr) {
+  if (g_tooltip.timeout) {
     timer.ClearInterval(g_tooltip.timeout);
-    g_tooltip.timeout = nullptr;
+    g_tooltip.timeout.Clear();
   }
 }
 
@@ -72,7 +72,7 @@ void DefaultTooltip() {
   g_tooltip.paddingy = 0;
   g_tooltip.font_desc = nullptr;
   g_tooltip.bg = nullptr;
-  g_tooltip.timeout = nullptr;
+  g_tooltip.timeout.Clear();
   g_tooltip.font_color.color[0] = 1;
   g_tooltip.font_color.color[1] = 1;
   g_tooltip.font_color.color[2] = 1;

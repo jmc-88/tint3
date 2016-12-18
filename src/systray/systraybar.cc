@@ -606,7 +606,7 @@ void SystrayRenderIconNow(TrayWindow* traywin, Timer& timer) {
   // systray_task_asb != 100 0 0
   // we made also sure, that we always have a 32 bit visual, i.e. we can safely
   // create 32 bit pixmaps here
-  traywin->render_timeout = nullptr;
+  traywin->render_timeout.Clear();
 
   if (traywin->width == 0 || traywin->height == 0) {
     // reschedule rendering since the geometry information has not yet been

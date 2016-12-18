@@ -20,7 +20,7 @@ class Tooltip {
   PangoFontDescription* font_desc;
   Color font_color;
   Background* bg;
-  Interval* timeout;
+  Interval::Id timeout;
 
   void BindTo(Area* area);
   bool IsBoundTo(Area* area) const;

@@ -18,7 +18,7 @@ class TrayWindow {
   bool hide;
   int depth;
   Damage damage;
-  Interval* render_timeout;
+  Interval::Id render_timeout;
 };
 
 #endif  // TINT3_SYSTRAYBAR_TRAY_WINDOW_HH
