@@ -48,7 +48,7 @@ Window net_sel_win = None;
 
 // freedesktop specification doesn't allow multi systray
 Systraybar systray;
-int refresh_systray;
+bool refresh_systray;
 bool systray_enabled;
 int systray_max_icon_size;
 
@@ -112,7 +112,7 @@ void Systraybar::InitPanel(Panel* panel) {
     systray.Show();
   }
 
-  refresh_systray = 0;
+  refresh_systray = false;
 }
 
 void Systraybar::DrawForeground(cairo_t* /* c */) {
@@ -129,7 +129,7 @@ void Systraybar::DrawForeground(cairo_t* /* c */) {
               systray.width_, systray.height_, 0, 0);
   }
 
-  refresh_systray = 1;
+  refresh_systray = true;
 }
 
 bool Systraybar::Resize() {
@@ -225,15 +225,13 @@ void Systraybar::OnChangeLayout() {
   }
 }
 
-size_t Systraybar::VisibleIcons() {
+size_t Systraybar::VisibleIcons() const {
   size_t count = 0;
-
   for (auto& traywin : list_icons) {
     if (!traywin->hide) {
       ++count;
     }
   }
-
   return count;
 }
 
@@ -250,14 +248,15 @@ Window GetSystemTrayOwner() {
 }  // namespace
 
 void Systraybar::StartNet(Timer& timer) {
+  if (!systray_enabled) {
+    return;
+  }
+
   if (net_sel_win) {
     // protocol already started
     if (!systray_enabled) {
       StopNet(timer);
     }
-
-    return;
-  } else if (!systray_enabled) {
     return;
   }
 

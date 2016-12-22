@@ -75,7 +75,7 @@ bool EventLoop::RunLoop() {
       Panel* panel = systray.panel_;
 
       if (refresh_systray && panel != nullptr && !panel->is_hidden_) {
-        refresh_systray = 0;
+        refresh_systray = false;
         // tint3 doesn't draw systray icons. it just redraw background.
         XSetWindowBackgroundPixmap(server_->dsp, panel->main_win_,
                                    panel->temp_pmap);

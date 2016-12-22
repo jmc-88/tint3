@@ -28,7 +28,7 @@ class Systraybar : public Area {
   void OnChangeLayout() override;
   bool Resize() override;
 
-  size_t VisibleIcons();
+  size_t VisibleIcons() const;
   bool AddIcon(Window id);
   void RemoveIcon(TrayWindow* traywin, Timer& timer);
   void Clear(Timer& timer);
@@ -51,7 +51,7 @@ class Systraybar : public Area {
 // net_sel_win != None when protocol started
 extern Window net_sel_win;
 extern Systraybar systray;
-extern int refresh_systray;
+extern bool refresh_systray;
 extern bool systray_enabled;
 extern int systray_max_icon_size;
 
