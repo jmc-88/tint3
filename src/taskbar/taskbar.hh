@@ -14,7 +14,7 @@ extern WindowToTaskMap win_to_task_map;
 
 extern Task* task_active;
 extern Task* task_drag;
-extern int taskbar_enabled;
+extern bool taskbar_enabled;
 
 // tint3 uses one taskbar per desktop.
 class Taskbar : public TaskbarBase {

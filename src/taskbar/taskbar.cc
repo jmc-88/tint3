@@ -61,7 +61,7 @@ WindowToTaskMap win_to_task_map;
 
 Task* task_active;
 Task* task_drag;
-int taskbar_enabled;
+bool taskbar_enabled;
 
 Taskbar& Taskbar::SetState(size_t state) {
   bg_ = panel1[0].g_taskbar.background[state];
@@ -109,7 +109,7 @@ void DefaultTaskbar() {
   win_to_task_map.clear();
   urgent_timeout.Clear();
   urgent_list.clear();
-  taskbar_enabled = 0;
+  taskbar_enabled = false;
   Taskbarname::Default();
 }
 

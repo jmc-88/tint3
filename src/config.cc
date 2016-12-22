@@ -190,7 +190,7 @@ bool Reader::LoadFromFile(std::string const& path) {
 
   // append Taskbar item
   if (!new_config_file_) {
-    taskbar_enabled = 1;
+    taskbar_enabled = true;
     panel_items_order.insert(0, "T");
   }
 
@@ -284,7 +284,7 @@ void Reader::AddEntry(std::string const& key, std::string const& value) {
       }
 
       if (item == 'T') {
-        taskbar_enabled = 1;
+        taskbar_enabled = true;
       }
 
       if (item == 'B') {
