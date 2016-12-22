@@ -24,6 +24,9 @@ class Systraybar : public Area {
   int alpha, saturation, brightness;
   int icon_size, icons_per_column, icons_per_row, margin_;
 
+  bool should_refresh() const;
+  void set_should_refresh(bool should_refresh);
+
   void DrawForeground(cairo_t*) override;
   void OnChangeLayout() override;
   bool Resize() override;
@@ -46,12 +49,14 @@ class Systraybar : public Area {
   std::string GetFriendlyName() const override;
 
 #endif  // _TINT3_DEBUG
+
+ private:
+  bool should_refresh_;
 };
 
 // net_sel_win != None when protocol started
 extern Window net_sel_win;
 extern Systraybar systray;
-extern bool refresh_systray;
 extern bool systray_enabled;
 extern int systray_max_icon_size;
 

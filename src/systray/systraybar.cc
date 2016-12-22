@@ -48,7 +48,6 @@ Window net_sel_win = None;
 
 // freedesktop specification doesn't allow multi systray
 Systraybar systray;
-bool refresh_systray;
 bool systray_enabled;
 int systray_max_icon_size;
 
@@ -98,6 +97,12 @@ void InitSystray(Timer& timer) {
   systray.list_icons.clear();
 }
 
+bool Systraybar::should_refresh() const { return should_refresh_; }
+
+void Systraybar::set_should_refresh(bool should_refresh) {
+  should_refresh_ = should_refresh;
+}
+
 void Systraybar::InitPanel(Panel* panel) {
   systray.parent_ = panel;
   systray.panel_ = panel;
@@ -112,7 +117,7 @@ void Systraybar::InitPanel(Panel* panel) {
     systray.Show();
   }
 
-  refresh_systray = false;
+  systray.set_should_refresh(false);
 }
 
 void Systraybar::DrawForeground(cairo_t* /* c */) {
@@ -129,7 +134,7 @@ void Systraybar::DrawForeground(cairo_t* /* c */) {
               systray.width_, systray.height_, 0, 0);
   }
 
-  refresh_systray = true;
+  should_refresh_ = true;
 }
 
 bool Systraybar::Resize() {

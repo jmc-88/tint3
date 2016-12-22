@@ -299,7 +299,7 @@ void InitPanel(Timer& timer, bool snapshot_mode) {
         // TODO : check systray is only on 1 panel
         // at the moment only on panel1[0] allowed
         Systraybar::InitPanel(p);
-        refresh_systray = true;
+        systray.set_should_refresh(true);
       }
 
       if (item == 'C') {
@@ -860,7 +860,7 @@ bool AutohideShow(Panel* panel) {
   }
 
   // ugly hack, because we actually only need to call XSetBackgroundPixmap
-  refresh_systray = true;
+  systray.set_should_refresh(true);
   panel_refresh = true;
   return false;
 }
