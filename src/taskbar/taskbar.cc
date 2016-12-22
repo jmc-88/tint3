@@ -116,11 +116,9 @@ void DefaultTaskbar() {
 void CleanupTaskbar() {
   Taskbarname::Cleanup();
 
-  for (auto const& pair : win_to_task_map) {
-    TaskbarRemoveTask(pair.first);
+  while (!win_to_task_map.empty()) {
+    TaskbarRemoveTask(win_to_task_map.begin()->first);
   }
-
-  win_to_task_map.clear();
 
   for (int i = 0; i < nb_panel; ++i) {
     Panel& panel = panel1[i];
