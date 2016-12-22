@@ -39,7 +39,7 @@ TEST_CASE("Interval", "Test the Interval class") {
 
   SECTION("correctly invokes the registered callback_") {
     bool was_invoked = false;
-    Interval interval{fake_clock.Now(), std::chrono::milliseconds(0),
+    Interval interval{123, fake_clock.Now(), std::chrono::milliseconds(0),
                       [&was_invoked]() -> bool {
                         was_invoked = true;
                         return true;
@@ -51,14 +51,14 @@ TEST_CASE("Interval", "Test the Interval class") {
   }
 
   SECTION("correctly initializes time_point_") {
-    Interval interval{fake_clock.Now() + std::chrono::seconds(5),
+    Interval interval{123, fake_clock.Now() + std::chrono::seconds(5),
                       std::chrono::milliseconds(0), no_op_callback};
     REQUIRE(interval.GetTimePoint() == FakeClock::SecondsFromEpoch(15));
   }
 
   SECTION("correctly initializes repeat_interval_") {
     Duration _100ms = std::chrono::milliseconds(100);
-    Interval interval{fake_clock.Now(), _100ms, no_op_callback};
+    Interval interval{123, fake_clock.Now(), _100ms, no_op_callback};
     REQUIRE(interval.GetRepeatInterval() == _100ms);
   }
 }

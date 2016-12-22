@@ -7,24 +7,27 @@
 #include <cstdint>
 #include <functional>
 #include <memory>
-#include <map>
 
 #include "util/nullable.hh"
+#include "util/bimap.hh"
 
 using TimePoint = std::chrono::steady_clock::time_point;
 using Duration = std::chrono::nanoseconds;
 
 class Timer;
+class CompareIntervals;
 class Interval {
  public:
   friend class Timer;
+  friend class CompareIntervals;
   friend bool operator<(Interval const& lhs, Interval const& rhs);
 
   using Id = util::Nullable<uint64_t>;
   using Callback = std::function<bool()>;
 
   Interval();
-  Interval(TimePoint time_point, Duration repeat_interval, Callback callback);
+  Interval(Interval::Id interval_id, TimePoint time_point,
+           Duration repeat_interval, Callback callback);
   Interval(Interval const& other);
   Interval(Interval&& other);
 
@@ -35,6 +38,7 @@ class Interval {
   Duration GetRepeatInterval() const;
 
  private:
+  Id id_;
   TimePoint time_point_;
   Duration repeat_interval_;
   Callback callback_;
@@ -47,9 +51,15 @@ class CompareIds {
   bool operator()(Interval::Id const& lhs, Interval::Id const& rhs) const;
 };
 
+class CompareIntervals {
+ public:
+  bool operator()(Interval const& lhs, Interval const& rhs) const;
+};
+
 std::unique_ptr<struct timeval> ToTimeval(Duration duration);
 
-using IntervalSet = std::map<Interval::Id, Interval, CompareIds>;
+using IntervalSet = util::bimap<
+  Interval::Id, Interval, CompareIds, CompareIntervals>;
 
 class ChronoTimerTestUtils;
 class Timer {
