@@ -298,7 +298,7 @@ void InitPanel(Timer& timer, bool snapshot_mode) {
       if (item == 'S' && i == 0) {
         // TODO : check systray is only on 1 panel
         // at the moment only on panel1[0] allowed
-        Systraybar::InitPanel(p);
+        systray.SetParentPanel(p);
         systray.set_should_refresh(true);
       }
 

@@ -103,21 +103,21 @@ void Systraybar::set_should_refresh(bool should_refresh) {
   should_refresh_ = should_refresh;
 }
 
-void Systraybar::InitPanel(Panel* panel) {
-  systray.parent_ = panel;
-  systray.panel_ = panel;
+void Systraybar::SetParentPanel(Panel* panel) {
+  parent_ = panel;
+  panel_ = panel;
 
-  if (systray.bg_ == 0) {
-    systray.bg_ = backgrounds.front();
+  if (bg_ == 0) {
+    bg_ = backgrounds.front();
   }
 
-  if (systray.VisibleIcons() == 0) {
-    systray.Hide();
+  if (VisibleIcons() == 0) {
+    Hide();
   } else {
-    systray.Show();
+    Show();
   }
 
-  systray.set_should_refresh(false);
+  set_should_refresh(false);
 }
 
 void Systraybar::DrawForeground(cairo_t* /* c */) {

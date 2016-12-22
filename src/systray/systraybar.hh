@@ -27,6 +27,8 @@ class Systraybar : public Area {
   bool should_refresh() const;
   void set_should_refresh(bool should_refresh);
 
+  void SetParentPanel(Panel* panel);
+
   void DrawForeground(cairo_t*) override;
   void OnChangeLayout() override;
   bool Resize() override;
@@ -41,8 +43,6 @@ class Systraybar : public Area {
   void StartNet(Timer& timer);
   void StopNet(Timer& timer);
   void NetMessage(XClientMessageEvent* e);
-
-  static void InitPanel(Panel* panel);
 
 #ifdef _TINT3_DEBUG
 
