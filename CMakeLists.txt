@@ -210,6 +210,9 @@ target_link_libraries(parser_lexer_test tint3_common_lib ${TINT3_LINK_LIBRARIES}
 test_target(parser_parser_test src/parser/parser_test.cc)
 target_link_libraries(parser_parser_test tint3_common_lib ${TINT3_LINK_LIBRARIES})
 
+test_target(util_bimap_test src/util/bimap_test.cc)
+target_link_libraries(util_bimap_test tint3_common_lib ${TINT3_LINK_LIBRARIES})
+
 test_target(util_common_test src/util/common_test.cc)
 target_link_libraries(util_common_test tint3_common_lib ${TINT3_LINK_LIBRARIES})
 
