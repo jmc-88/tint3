@@ -4,26 +4,7 @@
 #include <chrono>
 #include <functional>
 #include "util/timer.hh"
-
-class FakeClock : public Timer {
- public:
-  FakeClock() = delete;
-  FakeClock(FakeClock& other) = delete;
-
-  explicit FakeClock(unsigned int seconds_from_epoch)
-      : current_time_(std::chrono::seconds(seconds_from_epoch)) {}
-
-  TimePoint Now() const { return current_time_; }
-
-  void AdvanceBy(std::chrono::milliseconds amount) { current_time_ += amount; }
-
-  static TimePoint SecondsFromEpoch(unsigned int seconds) {
-    return TimePoint(std::chrono::seconds(seconds));
-  }
-
- private:
-  TimePoint current_time_;
-};
+#include "util/timer_test_utils.hh"
 
 TEST_CASE("FakeClock", "Test the fake clock has a sane implementation") {
   FakeClock fake_clock{0};
