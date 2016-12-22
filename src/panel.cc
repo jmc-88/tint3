@@ -176,12 +176,12 @@ void DefaultPanel() {
   backgrounds.push_back(new Background());
 }
 
-void CleanupPanel(Timer& timer) {
+void CleanupPanel() {
   if (!panel1) {
     return;
   }
 
-  CleanupTaskbar(timer);
+  CleanupTaskbar();
 
   // taskbarname_font_desc freed here because cleanup_taskbarname() called on
   // _NET_NUMBER_OF_DESKTOPS

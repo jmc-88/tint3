@@ -49,12 +49,12 @@ class Global_taskbar : public TaskbarBase {
 // default global data
 void DefaultTaskbar();
 
-// freed memory
-void CleanupTaskbar(Timer& timer);
+// free memory
+void CleanupTaskbar();
 
 void InitTaskbar();
 
-void TaskbarRemoveTask(Window win, Timer& timer);
+void TaskbarRemoveTask(Window win);
 Task* TaskGetTask(Window win);
 TaskPtrArray TaskGetTasks(Window win);
 void TaskRefreshTasklist(Timer& timer);

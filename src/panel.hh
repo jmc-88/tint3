@@ -158,7 +158,7 @@ extern int nb_panel;
 void DefaultPanel();
 
 // free memory
-void CleanupPanel(Timer& timer);
+void CleanupPanel();
 
 // realloc panels according to number of monitor
 // use panel_config as default value

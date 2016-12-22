@@ -113,11 +113,11 @@ void DefaultTaskbar() {
   Taskbarname::Default();
 }
 
-void CleanupTaskbar(Timer& timer) {
+void CleanupTaskbar() {
   Taskbarname::Cleanup();
 
   for (auto const& pair : win_to_task_map) {
-    TaskbarRemoveTask(pair.first, timer);
+    TaskbarRemoveTask(pair.first);
   }
 
   win_to_task_map.clear();
@@ -345,9 +345,7 @@ void Taskbar::InitPanel(Panel* panel) {
   Taskbarname::InitPanel(panel);
 }
 
-void TaskbarRemoveTask(Window win, Timer& timer) {
-  RemoveTask(TaskGetTask(win), timer);
-}
+void TaskbarRemoveTask(Window win) { RemoveTask(TaskGetTask(win)); }
 
 Task* TaskGetTask(Window win) {
   auto const& task_group = TaskGetTasks(win);
@@ -394,7 +392,7 @@ void TaskRefreshTasklist(Timer& timer) {
   }
 
   for (auto const& w : windows_to_remove) {
-    TaskbarRemoveTask(w, timer);
+    TaskbarRemoveTask(w);
   }
 
   // Add any new

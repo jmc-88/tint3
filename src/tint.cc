@@ -237,7 +237,7 @@ void Cleanup(Timer& timer) {
 #ifdef ENABLE_BATTERY
   CleanupBattery(timer);
 #endif
-  CleanupPanel(timer);
+  CleanupPanel();
 
   imlib_context_disconnect_display();
 
@@ -607,7 +607,7 @@ void EventPropertyNotify(XEvent* e, Timer& timer) {
         server.desktop = server.nb_desktop - 1;
       }
 
-      CleanupTaskbar(timer);
+      CleanupTaskbar();
       InitTaskbar();
 
       for (int i = 0; i < nb_panel; i++) {
@@ -738,7 +738,7 @@ void EventPropertyNotify(XEvent* e, Timer& timer) {
       }
 
       if (WindowIsSkipTaskbar(win)) {
-        RemoveTask(tsk, timer);
+        RemoveTask(tsk);
         panel_refresh = true;
       }
     } else if (at == server.atoms_["WM_STATE"]) {
@@ -769,7 +769,7 @@ void EventPropertyNotify(XEvent* e, Timer& timer) {
       // bug in windowmaker : send unecessary 'desktop changed' when focus
       // changed
       if (desktop != tsk->desktop) {
-        RemoveTask(tsk, timer);
+        RemoveTask(tsk);
         AddTask(win, timer);
         ActiveTask();
         panel_refresh = true;
@@ -832,7 +832,7 @@ void EventConfigureNotify(Window win, Timer& timer) {
   Panel* p = tsk->panel_;
 
   if (p->monitor_ != WindowGetMonitor(win)) {
-    RemoveTask(tsk, timer);
+    RemoveTask(tsk);
     tsk = AddTask(win, timer);
 
     if (win == WindowGetActive()) {
@@ -1208,7 +1208,8 @@ start:
   });
 
   event_loop.RegisterHandler(
-      {UnmapNotify, DestroyNotify}, [&](XEvent& e) -> void {
+      {UnmapNotify, DestroyNotify},
+      [&](XEvent& e) -> void {
         if (e.xany.window == server.composite_manager) {
           // Stop real_transparency
           signal_pending = SIGUSR1;

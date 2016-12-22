@@ -92,7 +92,7 @@ extern Interval::Id urgent_timeout;
 extern std::list<Task*> urgent_list;
 
 Task* AddTask(Window win, Timer& timer);
-void RemoveTask(Task* tsk, Timer& timer);
+void RemoveTask(Task* tsk);
 
 void GetIcon(Task* tsk);
 void ActiveTask();

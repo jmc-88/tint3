@@ -158,7 +158,7 @@ Task* AddTask(Window win, Timer& timer) {
   return new_tsk2;
 }
 
-void RemoveTask(Task* tsk, Timer& timer) {
+void RemoveTask(Task* tsk) {
   if (!tsk) {
     return;
   }
