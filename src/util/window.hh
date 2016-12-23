@@ -29,7 +29,7 @@ Window WindowGetActive();
 void GetTextSize(PangoFontDescription* font, int* height_ink, int* height,
                  int panel_height, std::string const& text);
 void GetTextSize2(PangoFontDescription* font, int* height_ink, int* height,
-                  int* width, int panel_height, int panel_with,
+                  int* width, int panel_height, int panel_width,
                   std::string const& text);
 
 #endif  // TINT3_UTIL_WINDOW_HH
