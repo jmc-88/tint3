@@ -48,7 +48,7 @@ int GetMonitor(Window win) {
   int monitor = 0;
 
   if (nb_panel > 1) {
-    monitor = WindowGetMonitor(win);
+    monitor = util::window::GetMonitor(win);
   }
 
   if (monitor >= nb_panel) {
@@ -75,7 +75,7 @@ Task& Task::SetTooltipEnabled(bool is_enabled) {
 }
 
 Task* AddTask(Window win, Timer& timer) {
-  if (win == 0 || WindowIsHidden(win)) {
+  if (win == 0 || util::window::IsHidden(win)) {
     return nullptr;
   }
 
@@ -83,9 +83,10 @@ Task* AddTask(Window win, Timer& timer) {
 
   Task new_tsk{timer};
   new_tsk.win = win;
-  new_tsk.desktop = WindowGetDesktop(win);
+  new_tsk.desktop = util::window::GetDesktop(win);
   new_tsk.panel_ = &panel1[monitor];
-  new_tsk.current_state = WindowIsIconified(win) ? kTaskIconified : kTaskNormal;
+  new_tsk.current_state =
+      util::window::IsIconified(win) ? kTaskIconified : kTaskNormal;
 
   // allocate only one title and one icon
   // even with task_on_all_desktop and with task_on_all_panel
@@ -151,7 +152,7 @@ Task* AddTask(Window win, Timer& timer) {
   win_to_task_map.insert(std::make_pair(new_tsk.win, task_group));
   new_tsk2->SetState(new_tsk.current_state);
 
-  if (WindowIsUrgent(win)) {
+  if (util::window::IsUrgent(win)) {
     new_tsk2->AddUrgent();
   }
 
@@ -557,12 +558,13 @@ Task* PreviousTask(Task* tsk) {
 
 void ActiveTask() {
   if (task_active != nullptr) {
-    task_active->SetState(WindowIsIconified(task_active->win) ? kTaskIconified
-                                                              : kTaskNormal);
+    task_active->SetState(util::window::IsIconified(task_active->win)
+                              ? kTaskIconified
+                              : kTaskNormal);
     task_active = nullptr;
   }
 
-  Window w1 = WindowGetActive();
+  Window w1 = util::window::GetActive();
 
   if (w1) {
     if (TaskGetTasks(w1).empty()) {
@@ -626,7 +628,8 @@ bool BlinkUrgent() {
       if (t->urgent_tick++ % 2) {
         t->SetState(kTaskUrgent);
       } else {
-        t->SetState(WindowIsIconified(t->win) ? kTaskIconified : kTaskNormal);
+        t->SetState(util::window::IsIconified(t->win) ? kTaskIconified
+                                                      : kTaskNormal);
       }
     }
   }

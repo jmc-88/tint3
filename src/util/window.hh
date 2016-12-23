@@ -7,24 +7,33 @@
 #include <string>
 #include <vector>
 
+namespace util {
+namespace window {
+
 void SetActive(Window win);
-void SetDesktop(int desktop);
 void SetClose(Window win);
-std::vector<std::string> ServerGetDesktopNames();
-int WindowIsIconified(Window win);
-int WindowIsUrgent(Window win);
-int WindowIsHidden(Window win);
-int WindowIsActive(Window win);
-int WindowIsSkipTaskbar(Window win);
+int IsIconified(Window win);
+int IsUrgent(Window win);
+int IsHidden(Window win);
+int IsActive(Window win);
+int IsSkipTaskbar(Window win);
+void MaximizeRestore(Window win);
+void ToggleShade(Window win);
+int GetDesktop(Window win);
+void SetDesktop(Window win, int desktop);
+int GetMonitor(Window win);
+Window GetActive();
+
+}  // namespace window
+}  // namespace util
+
+void SetDesktop(int desktop);
+
 int GetIconCount(gulong* data, int num);
 gulong* GetBestIcon(gulong* data, int icon_count, int num, int* iw, int* ih,
                     int best_icon_size);
-void WindowMaximizeRestore(Window win);
-void WindowToggleShade(Window win);
-int WindowGetDesktop(Window win);
-void WindowSetDesktop(Window win, int desktop);
-int WindowGetMonitor(Window win);
-Window WindowGetActive();
+
+std::vector<std::string> ServerGetDesktopNames();
 
 void GetTextSize(PangoFontDescription* font, int* height_ink, int* height,
                  int panel_height, std::string const& text);

@@ -279,11 +279,11 @@ void WindowAction(Task* tsk, MouseAction action) {
 
   switch (action) {
     case MouseAction::kClose:
-      SetClose(tsk->win);
+      util::window::SetClose(tsk->win);
       break;
 
     case MouseAction::kToggle:
-      SetActive(tsk->win);
+      util::window::SetActive(tsk->win);
       break;
 
     case MouseAction::kIconify:
@@ -294,25 +294,25 @@ void WindowAction(Task* tsk, MouseAction action) {
       if (task_active && tsk->win == task_active->win) {
         XIconifyWindow(server.dsp, tsk->win, server.screen);
       } else {
-        SetActive(tsk->win);
+        util::window::SetActive(tsk->win);
       }
 
       break;
 
     case MouseAction::kShade:
-      WindowToggleShade(tsk->win);
+      util::window::ToggleShade(tsk->win);
       break;
 
     case MouseAction::kMaximizeRestore:
-      WindowMaximizeRestore(tsk->win);
+      util::window::MaximizeRestore(tsk->win);
       break;
 
     case MouseAction::kMaximize:
-      WindowMaximizeRestore(tsk->win);
+      util::window::MaximizeRestore(tsk->win);
       break;
 
     case MouseAction::kRestore:
-      WindowMaximizeRestore(tsk->win);
+      util::window::MaximizeRestore(tsk->win);
       break;
 
     case MouseAction::kDesktopLeft:
@@ -321,10 +321,10 @@ void WindowAction(Task* tsk, MouseAction action) {
       }
 
       desk = (tsk->desktop - 1);
-      WindowSetDesktop(tsk->win, desk);
+      util::window::SetDesktop(tsk->win, desk);
 
       if (desk == server.desktop) {
-        SetActive(tsk->win);
+        util::window::SetActive(tsk->win);
       }
 
       break;
@@ -335,22 +335,22 @@ void WindowAction(Task* tsk, MouseAction action) {
       }
 
       desk = (tsk->desktop + 1);
-      WindowSetDesktop(tsk->win, desk);
+      util::window::SetDesktop(tsk->win, desk);
 
       if (desk == server.desktop) {
-        SetActive(tsk->win);
+        util::window::SetActive(tsk->win);
       }
 
       break;
 
     case MouseAction::kNextTask: {
       Task* tsk1 = NextTask(FindActiveTask(tsk, task_active));
-      SetActive(tsk1->win);
+      util::window::SetActive(tsk1->win);
     } break;
 
     case MouseAction::kPrevTask: {
       Task* tsk1 = PreviousTask(FindActiveTask(tsk, task_active));
-      SetActive(tsk1->win);
+      util::window::SetActive(tsk1->win);
     } break;
 
     // no-op for MouseActionEnum::kNone
@@ -450,7 +450,7 @@ void EventButtonMotionNotify(XEvent* e) {
     task_drag->parent_ = event_taskbar;
     task_drag->desktop = event_taskbar->desktop;
 
-    WindowSetDesktop(task_drag->win, event_taskbar->desktop);
+    util::window::SetDesktop(task_drag->win, event_taskbar->desktop);
 
     event_taskbar->need_resize_ = true;
     drag_taskbar->need_resize_ = true;
@@ -707,7 +707,7 @@ void EventPropertyNotify(XEvent* e, Timer& timer) {
         XWindowAttributes wa;
         XGetWindowAttributes(server.dsp, win, &wa);
 
-        if (wa.map_state == IsViewable && !WindowIsSkipTaskbar(win)) {
+        if (wa.map_state == IsViewable && !util::window::IsSkipTaskbar(win)) {
           if ((tsk = AddTask(win, timer))) {
             panel_refresh = true;
           } else {
@@ -733,11 +733,11 @@ void EventPropertyNotify(XEvent* e, Timer& timer) {
     }
     // Demand attention
     else if (at == server.atoms_["_NET_WM_STATE"]) {
-      if (WindowIsUrgent(win)) {
+      if (util::window::IsUrgent(win)) {
         tsk->AddUrgent();
       }
 
-      if (WindowIsSkipTaskbar(win)) {
+      if (util::window::IsSkipTaskbar(win)) {
         RemoveTask(tsk);
         panel_refresh = true;
       }
@@ -747,7 +747,7 @@ void EventPropertyNotify(XEvent* e, Timer& timer) {
                       ? kTaskActive
                       : kTaskNormal;
 
-      if (WindowIsIconified(win)) {
+      if (util::window::IsIconified(win)) {
         state = kTaskIconified;
       }
 
@@ -761,7 +761,7 @@ void EventPropertyNotify(XEvent* e, Timer& timer) {
     }
     // Window desktop changed
     else if (at == server.atoms_["_NET_WM_DESKTOP"]) {
-      int desktop = WindowGetDesktop(win);
+      int desktop = util::window::GetDesktop(win);
 
       util::log::Debug() << "Window desktop changed from " << tsk->desktop
                          << " to " << desktop << '\n';
@@ -831,11 +831,11 @@ void EventConfigureNotify(Window win, Timer& timer) {
 
   Panel* p = tsk->panel_;
 
-  if (p->monitor_ != WindowGetMonitor(win)) {
+  if (p->monitor_ != util::window::GetMonitor(win)) {
     RemoveTask(tsk);
     tsk = AddTask(win, timer);
 
-    if (win == WindowGetActive()) {
+    if (win == util::window::GetActive()) {
       tsk->SetState(kTaskActive);
       task_active = tsk;
     }

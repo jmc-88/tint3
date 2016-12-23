@@ -37,20 +37,18 @@
 #include "util/common.hh"
 #include "util/window.hh"
 
+namespace util {
+namespace window {
+
 void SetActive(Window win) {
   SendEvent32(win, server.atoms_["_NET_ACTIVE_WINDOW"], 2, CurrentTime, 0);
 }
 
-void SetDesktop(int desktop) {
-  SendEvent32(server.root_win, server.atoms_["_NET_CURRENT_DESKTOP"], desktop,
-              0, 0);
-}
-
-int WindowGetDesktop(Window win) {
+int GetDesktop(Window win) {
   return GetProperty32<int>(win, server.atoms_["_NET_WM_DESKTOP"], XA_CARDINAL);
 }
 
-void WindowSetDesktop(Window win, int desktop) {
+void SetDesktop(Window win, int desktop) {
   SendEvent32(win, server.atoms_["_NET_WM_DESKTOP"], desktop, 2, 0);
 }
 
@@ -58,19 +56,19 @@ void SetClose(Window win) {
   SendEvent32(win, server.atoms_["_NET_CLOSE_WINDOW"], 0, 2, 0);
 }
 
-void WindowToggleShade(Window win) {
+void ToggleShade(Window win) {
   SendEvent32(win, server.atoms_["_NET_WM_STATE"], 2,
               server.atoms_["_NET_WM_STATE_SHADED"], 0);
 }
 
-void WindowMaximizeRestore(Window win) {
+void MaximizeRestore(Window win) {
   SendEvent32(win, server.atoms_["_NET_WM_STATE"], 2,
               server.atoms_["_NET_WM_STATE_MAXIMIZED_VERT"], 0);
   SendEvent32(win, server.atoms_["_NET_WM_STATE"], 2,
               server.atoms_["_NET_WM_STATE_MAXIMIZED_HORZ"], 0);
 }
 
-int WindowIsHidden(Window win) {
+int IsHidden(Window win) {
   int state_count = 0;
   auto at = ServerGetProperty<Atom>(win, server.atoms_["_NET_WM_STATE"],
                                     XA_ATOM, &state_count);
@@ -137,7 +135,7 @@ int FindMonitorIndex(int x, int y) {
 
 }  // namespace
 
-int WindowGetMonitor(Window win) {
+int GetMonitor(Window win) {
   int x, y;
   Window src;
   XTranslateCoordinates(server.dsp, win, server.root_win, 0, 0, &x, &y, &src);
@@ -146,7 +144,7 @@ int WindowGetMonitor(Window win) {
   return (i != -1) ? i : 0;
 }
 
-int WindowIsIconified(Window win) {
+int IsIconified(Window win) {
   // EWMH specification : minimization of windows use _NET_WM_STATE_HIDDEN.
   // WM_STATE is not accurate for shaded window and in multi_desktop mode.
   int count = 0;
@@ -162,7 +160,7 @@ int WindowIsIconified(Window win) {
   return 0;
 }
 
-int WindowIsUrgent(Window win) {
+int IsUrgent(Window win) {
   int count = 0;
   auto at = ServerGetProperty<Atom>(win, server.atoms_["_NET_WM_STATE"],
                                     XA_ATOM, &count);
@@ -176,7 +174,7 @@ int WindowIsUrgent(Window win) {
   return 0;
 }
 
-int WindowIsSkipTaskbar(Window win) {
+int IsSkipTaskbar(Window win) {
   int count = 0;
   auto at = ServerGetProperty<Atom>(win, server.atoms_["_NET_WM_STATE"],
                                     XA_ATOM, &count);
@@ -190,37 +188,20 @@ int WindowIsSkipTaskbar(Window win) {
   return 0;
 }
 
-std::vector<std::string> ServerGetDesktopNames() {
-  int count = 0;
-  auto data_ptr = ServerGetProperty<char>(server.root_win,
-                                          server.atoms_["_NET_DESKTOP_NAMES"],
-                                          server.atoms_["UTF8_STRING"], &count);
-
-  std::vector<std::string> names;
-
-  // data_ptr contains strings separated by NUL characters, so we can just add
-  // one and add its length to a counter, then repeat until the data has been
-  // fully consumed
-  if (data_ptr != nullptr) {
-    names.push_back(data_ptr.get());
-
-    int j = (names.back().length() + 1);
-
-    while (j < count - 1) {
-      names.push_back(data_ptr.get() + j);
-      j += (names.back().length() + 1);
-    }
-  }
-
-  return names;
-}
-
-Window WindowGetActive() {
+Window GetActive() {
   return GetProperty32<Window>(server.root_win,
                                server.atoms_["_NET_ACTIVE_WINDOW"], XA_WINDOW);
 }
 
-int WindowIsActive(Window win) { return WindowGetActive() == win; }
+int IsActive(Window win) { return GetActive() == win; }
+
+}  // namespace util
+}  // namespace window
+
+void SetDesktop(int desktop) {
+  SendEvent32(server.root_win, server.atoms_["_NET_CURRENT_DESKTOP"], desktop,
+              0, 0);
+}
 
 int GetIconCount(gulong* data, int num) {
   int count = 0;
@@ -290,6 +271,31 @@ gulong* GetBestIcon(gulong* data, int icon_count, int num, int* iw, int* ih,
   (*iw) = width[icon_num];
   (*ih) = height[icon_num];
   return icon_data[icon_num];
+}
+
+std::vector<std::string> ServerGetDesktopNames() {
+  int count = 0;
+  auto data_ptr = ServerGetProperty<char>(server.root_win,
+                                          server.atoms_["_NET_DESKTOP_NAMES"],
+                                          server.atoms_["UTF8_STRING"], &count);
+
+  std::vector<std::string> names;
+
+  // data_ptr contains strings separated by NUL characters, so we can just add
+  // one and add its length to a counter, then repeat until the data has been
+  // fully consumed
+  if (data_ptr != nullptr) {
+    names.push_back(data_ptr.get());
+
+    int j = (names.back().length() + 1);
+
+    while (j < count - 1) {
+      names.push_back(data_ptr.get() + j);
+      j += (names.back().length() + 1);
+    }
+  }
+
+  return names;
 }
 
 void GetTextSize(PangoFontDescription* font, int* height_ink, int* height,
