@@ -40,7 +40,7 @@ bool TokenList::SkipOver(Symbol symbol, std::vector<Token>* output) {
 }
 
 bool TokenList::SkipUntil(Symbol symbol, std::vector<Token>* output) {
-  while (Current().symbol != symbol) {
+  while (Current().symbol != symbol && Current().symbol != kEOF) {
     if (output != nullptr) {
       output->push_back(Current());
     }
