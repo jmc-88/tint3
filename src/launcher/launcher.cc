@@ -454,7 +454,7 @@ IconTheme* LoadTheme(std::string const& name) {
     util::string::Trim(line);
 
     if (line.empty()) {
-      return;
+      return false;
     }
 
     std::string key, value;
@@ -546,6 +546,8 @@ IconTheme* LoadTheme(std::string const& name) {
         }
       }
     }
+
+    return true;
   });
 
   if (!read) {
@@ -640,7 +642,7 @@ void Launcher::LoadIcons() {
       launcher::desktop_entry::DesktopEntry entry;
       if (!ParseDesktopFile(contents, &entry)) {
         util::log::Error() << "Failed parsing \"" << path << "\", skipping.\n";
-        return;
+        return false;
       }
 
       // Reference to the first group, "Desktop Entry".
@@ -650,7 +652,7 @@ void Launcher::LoadIcons() {
           de.GetEntry<std::string>("Type") != "Application") {
         util::log::Error() << "Desktop entry \"" << path << "\" not of type "
                            << "\"Application\", skipping.\n";
-        return;
+        return false;
       }
 
       if (de.IsEntry<std::string>("Exec")) {
@@ -684,6 +686,8 @@ void Launcher::LoadIcons() {
         list_icons_.push_back(launcher_icon);
         AddChild(launcher_icon);
       }
+
+      return true;
     });
   }
 }

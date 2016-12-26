@@ -182,7 +182,7 @@ bool IsAbsolutePath(std::string const& path) {
 }
 
 bool ReadFile(std::string const& path,
-              std::function<void(std::string const&)> const& fn) {
+              std::function<bool(std::string const&)> const& fn) {
   static std::streamsize kMaxBytesToRead = (1 << 20);
 
   std::ifstream is(path);
@@ -210,12 +210,11 @@ bool ReadFile(std::string const& path,
     contents.append(buf);
   }
 
-  fn(contents);
-  return true;
+  return fn(contents);
 }
 
 bool ReadFileByLine(std::string const& path,
-                    std::function<void(std::string const&)> const& fn) {
+                    std::function<bool(std::string const&)> const& fn) {
   std::ifstream is(path);
 
   if (!is.good()) {
@@ -225,7 +224,9 @@ bool ReadFileByLine(std::string const& path,
   while (!is.eof()) {
     std::string line;
     std::getline(is, line);
-    fn(line);
+    if (!fn(line)) {
+      return false;
+    }
   }
 
   return true;

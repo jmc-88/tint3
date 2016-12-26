@@ -62,9 +62,9 @@ bool FileExists(std::initializer_list<std::string> parts);
 Path HomeDirectory();
 bool IsAbsolutePath(std::string const& path);
 bool ReadFile(std::string const& path,
-              std::function<void(std::string const&)> const& fn);
+              std::function<bool(std::string const&)> const& fn);
 bool ReadFileByLine(std::string const& path,
-                    std::function<void(std::string const&)> const& fn);
+                    std::function<bool(std::string const&)> const& fn);
 
 }  // namespace fs
 }  // namespace util

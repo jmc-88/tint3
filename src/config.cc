@@ -33,12 +33,14 @@
 #include <sys/time.h>
 #include <unistd.h>
 
+#include <algorithm>
 #include <cctype>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
 #include <string>
+#include <utility>
 
 #include "clock.hh"
 #include "config.hh"
@@ -112,6 +114,92 @@ Background* GetBackgroundFromId(size_t id) {
 
 namespace config {
 
+const parser::Lexer kLexer{
+    std::make_pair('\n', kNewLine),
+    std::make_pair("\\s+", kWhitespace),
+    std::make_pair('#', kPoundSign),
+    std::make_pair('=', kEqualsSign),
+    std::make_pair("[A-Za-z][A-Za-z0-9_]*", kIdentifier),
+    std::make_pair(".", kAny),
+};
+
+Parser::Parser(Reader* reader) : reader_(reader) {}
+
+bool Parser::operator()(parser::TokenList* tokens) {
+  return ConfigEntryParser(tokens);
+}
+
+bool Parser::ConfigEntryParser(parser::TokenList* tokens) {
+  // end of file, stop parsing
+  if (tokens->Accept(parser::kEOF)) {
+    return true;
+  }
+
+  // empty line
+  if (tokens->Accept(kNewLine)) {
+    return ConfigEntryParser(tokens);
+  }
+
+  // comment line
+  if (tokens->Current().symbol == kPoundSign) {
+    Comment(tokens);
+    return ConfigEntryParser(tokens);
+  }
+
+  // assignment, or fail
+  return Assignment(tokens);
+}
+
+bool Parser::Comment(parser::TokenList* tokens) {
+  // comment, skip entire line
+  if (!tokens->Accept(kPoundSign)) {
+    return false;
+  }
+  tokens->SkipUntil(kNewLine);
+  return true;
+}
+
+bool Parser::Assignment(parser::TokenList* tokens) {
+  tokens->SkipOver(kWhitespace);
+
+  std::string key{tokens->Current().match};
+  std::transform(key.begin(), key.end(), key.begin(),
+                 [](char c) { return std::tolower(c); });
+  if (!tokens->Accept(kIdentifier)) {
+    return false;
+  }
+
+  tokens->SkipOver(kWhitespace);
+
+  if (!tokens->Accept(kEqualsSign)) {
+    return false;
+  }
+
+  tokens->SkipOver(kWhitespace);
+
+  std::vector<parser::Token> skipped;
+  if (!tokens->SkipUntil(kNewLine, &skipped)) {
+    return false;
+  }
+
+  std::string value{parser::TokenList::JoinSkipped(skipped)};
+  util::string::Trim(value);
+
+  if (!AddKeyValue(key, value)) {
+    return false;
+  }
+
+  // skip over the actual newline
+  tokens->Next();
+
+  return ConfigEntryParser(tokens);
+}
+
+bool Parser::AddKeyValue(std::string key, std::string value) {
+  reader_->AddEntry(key, value);
+  return true;
+}
+
 void ExtractValues(std::string const& value, std::string& v1, std::string& v2,
                    std::string& v3) {
   v1.clear();
@@ -175,12 +263,10 @@ bool Reader::LoadFromDefaults() {
 }
 
 bool Reader::LoadFromFile(std::string const& path) {
-  bool read = util::fs::ReadFileByLine(path, [this](std::string const& line) {
-    std::string key, value;
-
-    if (ParseLine(line, key, value)) {
-      AddEntry(key, value);
-    }
+  bool read = util::fs::ReadFile(path, [=](std::string const& contents) {
+    config::Parser config_entry_parser{this};
+    parser::Parser p{config::kLexer, &config_entry_parser};
+    return p.Parse(contents);
   });
 
   if (!read) {
@@ -194,23 +280,6 @@ bool Reader::LoadFromFile(std::string const& path) {
     panel_items_order.insert(0, "T");
   }
 
-  return true;
-}
-
-bool Reader::ParseLine(std::string const& line, std::string& key,
-                       std::string& value) const {
-  if (line.empty() || line[0] == '#') {
-    return false;
-  }
-
-  auto equals_pos = line.find('=');
-
-  if (equals_pos == std::string::npos) {
-    return false;
-  }
-
-  util::string::Trim(key.assign(line, 0, equals_pos));
-  util::string::Trim(value.assign(line, equals_pos + 1, std::string::npos));
   return true;
 }
 

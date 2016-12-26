@@ -72,6 +72,7 @@ bool Battery::Update() {
     } else if (kStatusFull == contents) {
       charge_state_ = ChargeState::kFull;
     }
+    return true;
   });
 
   long int energy_now = 0;
@@ -79,10 +80,10 @@ bool Battery::Update() {
   util::fs::ReadFile(path_energy_now_, [&](std::string const& contents) {
     std::size_t end;
     long int value = std::stol(contents, &end);
-
     if (contents[end] == '\n') {
       energy_now = value;
     }
+    return true;
   });
 
   long int energy_full = 0;
@@ -90,10 +91,10 @@ bool Battery::Update() {
   util::fs::ReadFile(path_energy_full_, [&](std::string const& contents) {
     std::size_t end;
     long int value = std::stol(contents, &end);
-
     if (contents[end] == '\n') {
       energy_full = value;
     }
+    return true;
   });
 
   long int current_now = 0;
@@ -101,10 +102,10 @@ bool Battery::Update() {
   util::fs::ReadFile(path_current_now_, [&](std::string const& contents) {
     std::size_t end;
     long int value = std::stol(contents, &end);
-
     if (contents[end] == '\n') {
       current_now = value;
     }
+    return true;
   });
 
   if (energy_full > 0) {
