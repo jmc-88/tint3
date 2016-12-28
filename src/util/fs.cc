@@ -68,9 +68,22 @@ bool DirectoryContents::iterator::operator!=(
   return (dir_ != other.dir_ || pos_ != other.pos_);
 }
 
-Path::Path(const std::string& path) : path_(path) {}
+namespace {
 
-Path::Path(const char* path) : path_(path) {}
+std::string StripTrailingSlash(std::string path) {
+  // Remove the trailing '/' if this is not a path to the filesystem root.
+  if (path.length() > 1 && path[path.length() - 1] == '/') {
+    return path.substr(0, path.length() - 1);
+  }
+
+  return path;
+}
+
+}  // namespace
+
+Path::Path(std::string const& path) : path_(StripTrailingSlash(path)) {}
+
+Path::Path(const char* path) : path_(StripTrailingSlash(path)) {}
 
 Path& Path::operator/(std::string const& component) {
   path_.append("/");
