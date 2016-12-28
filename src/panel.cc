@@ -77,7 +77,7 @@ Panel panel_config;
 Panel* panel1;
 int nb_panel;
 
-std::vector<Background*> backgrounds;
+std::vector<Background> backgrounds;
 
 util::imlib2::Image default_icon;
 
@@ -173,7 +173,7 @@ void DefaultPanel() {
 
   // append full transparency background
   backgrounds.clear();
-  backgrounds.push_back(new Background());
+  backgrounds.push_back(Background{});
 }
 
 void CleanupPanel() {
@@ -213,11 +213,6 @@ void CleanupPanel() {
 
   if (panel_config.g_task.font_desc) {
     pango_font_description_free(panel_config.g_task.font_desc);
-  }
-
-  // clean up backgrounds
-  for (auto& b : backgrounds) {
-    delete b;
   }
 
   backgrounds.clear();
@@ -262,10 +257,6 @@ void InitPanel(Timer& timer, bool snapshot_mode) {
 
     if (panel_config.monitor_ < 0) {
       p->monitor_ = i;
-    }
-
-    if (p->bg_ == nullptr) {
-      p->bg_ = backgrounds.front();
     }
 
     p->parent_ = p;
@@ -379,12 +370,10 @@ void Panel::InitSizeAndPosition() {
       width_ = server.monitor[monitor_].width - margin_x_;
     }
 
-    if (bg_->border.rounded > height_ / 2) {
+    if (bg_.border.rounded > height_ / 2) {
       util::log::Error() << "panel_background_id rounded is too big: please "
                             "fix your tint3rc.\n";
-      /* backgrounds.push_back(*bg); */
-      /* bg = backgrounds.back(); */
-      bg_->border.rounded = height_ / 2;
+      bg_.border.rounded = height_ / 2;
     }
   } else {
     int old_panel_height = height_;
@@ -405,12 +394,10 @@ void Panel::InitSizeAndPosition() {
       height_ = server.monitor[monitor_].height - margin_y_;
     }
 
-    if (bg_->border.rounded > width_ / 2) {
+    if (bg_.border.rounded > width_ / 2) {
       util::log::Error() << "panel_background_id rounded is too big: please "
                             "fix your tint3rc.\n";
-      /* backgrounds.push_back(*bg); */
-      /* bg = backgrounds.back(); */
-      bg_->border.rounded = width_ / 2;
+      bg_.border.rounded = width_ / 2;
     }
   }
 

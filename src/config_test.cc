@@ -252,12 +252,4 @@ TEST_CASE("ConfigParserEmptyAssignment", "Doesn't choke on empty assignments") {
   CleanupTooltip(timer);  // TODO: decouple from config loading
   CleanupClock(timer);    // TODO: decouple from config loading
   CleanupPanel();         // TODO: decouple from config loading
-
-  // CleanupPanel won't do much since panel1==nullptr at this point, thus we
-  // need to clean up the leftover default background manually.
-  // TODO: use smart pointers and/or remove the use of pointers altogether.
-  for (auto& b : backgrounds) {
-    delete b;
-  }
-  backgrounds.clear();
 }

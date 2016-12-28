@@ -23,16 +23,39 @@
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <X11/extensions/Xrender.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 
 #include <algorithm>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 
 #include "panel.hh"
 #include "server.hh"
 #include "util/area.hh"
 #include "util/log.hh"
+
+bool Border::operator==(Border const& other) const {
+  return (color[0] == other.color[0] && color[1] == other.color[1] &&
+          color[2] == other.color[2] && alpha == other.alpha &&
+          width == other.width && rounded == other.rounded);
+}
+
+bool Border::operator!=(Border const& other) const { return !(*this == other); }
+
+bool Color::operator==(Color const& other) const {
+  return (color[0] == other.color[0] && color[1] == other.color[1] &&
+          color[2] == other.color[2] && alpha == other.alpha);
+}
+
+bool Color::operator!=(Color const& other) const { return !(*this == other); }
+
+bool Background::operator==(Background const& other) const {
+  return (back == other.back) && (border == other.border);
+}
+
+bool Background::operator!=(Background const& other) const {
+  return !(*this == other);
+}
 
 Area::~Area() {}
 
@@ -113,12 +136,12 @@ void Area::InitRendering(int pos) {
   // initialize fixed position/size
   for (auto& child : children_) {
     if (panel_horizontal) {
-      child->panel_y_ = pos + bg_->border.width + padding_y_;
-      child->height_ = height_ - (2 * (bg_->border.width + padding_y_));
+      child->panel_y_ = pos + bg_.border.width + padding_y_;
+      child->height_ = height_ - (2 * (bg_.border.width + padding_y_));
       child->InitRendering(child->panel_y_);
     } else {
-      child->panel_x_ = pos + bg_->border.width + padding_y_;
-      child->width_ = width_ - (2 * (bg_->border.width + padding_y_));
+      child->panel_x_ = pos + bg_.border.width + padding_y_;
+      child->width_ = width_ - (2 * (bg_.border.width + padding_y_));
       child->InitRendering(child->panel_x_);
     }
   }
@@ -172,7 +195,7 @@ void Area::SizeByLayout(int pos, int level) {
   }
 
   // update position of children
-  pos += padding_x_lr_ + bg_->border.width;
+  pos += padding_x_lr_ + bg_.border.width;
 
   for (auto& child : children_) {
     if (!child->on_screen_) {
@@ -239,7 +262,7 @@ int Area::ResizeByLayout(int maximum_size) {
 
   if (panel_horizontal) {
     // detect free size for kByLayout's Area
-    size = width_ - (2 * (padding_x_lr_ + bg_->border.width));
+    size = width_ - (2 * (padding_x_lr_ + bg_.border.width));
 
     for (auto& child : children_) {
       if (child->on_screen_) {
@@ -286,7 +309,7 @@ int Area::ResizeByLayout(int maximum_size) {
     }
   } else {
     // detect free size for kByLayout's Area
-    size = height_ - (2 * (padding_x_lr_ + bg_->border.width));
+    size = height_ - (2 * (padding_x_lr_ + bg_.border.width));
 
     for (auto& child : children_) {
       if (child->on_screen_) {
@@ -389,26 +412,26 @@ void Area::Draw() {
 }
 
 void Area::DrawBackground(cairo_t* c) {
-  if (bg_->back.alpha > 0.0) {
-    DrawRect(c, bg_->border.width, bg_->border.width,
-             width_ - (2.0 * bg_->border.width),
-             height_ - (2.0 * bg_->border.width),
-             bg_->border.rounded - bg_->border.width / 1.571);
-    cairo_set_source_rgba(c, bg_->back.color[0], bg_->back.color[1],
-                          bg_->back.color[2], bg_->back.alpha);
+  if (bg_.back.alpha > 0.0) {
+    DrawRect(c, bg_.border.width, bg_.border.width,
+             width_ - (2.0 * bg_.border.width),
+             height_ - (2.0 * bg_.border.width),
+             bg_.border.rounded - bg_.border.width / 1.571);
+    cairo_set_source_rgba(c, bg_.back.color[0], bg_.back.color[1],
+                          bg_.back.color[2], bg_.back.alpha);
     cairo_fill(c);
   }
 
-  if (bg_->border.width > 0 && bg_->border.alpha > 0.0) {
-    cairo_set_line_width(c, bg_->border.width);
+  if (bg_.border.width > 0 && bg_.border.alpha > 0.0) {
+    cairo_set_line_width(c, bg_.border.width);
 
     // draw border inside (x, y, width, height)
-    DrawRect(c, bg_->border.width / 2.0, bg_->border.width / 2.0,
-             width_ - bg_->border.width, height_ - bg_->border.width,
-             bg_->border.rounded);
+    DrawRect(c, bg_.border.width / 2.0, bg_.border.width / 2.0,
+             width_ - bg_.border.width, height_ - bg_.border.width,
+             bg_.border.rounded);
 
-    cairo_set_source_rgba(c, bg_->border.color[0], bg_->border.color[1],
-                          bg_->border.color[2], bg_->border.alpha);
+    cairo_set_source_rgba(c, bg_.border.color[0], bg_.border.color[1],
+                          bg_.border.color[2], bg_.border.alpha);
     cairo_stroke(c);
   }
 }

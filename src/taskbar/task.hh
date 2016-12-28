@@ -23,6 +23,8 @@ enum TaskState {
 // global task parameter
 class Global_task : public Area {
  public:
+  Global_task();
+
   int text;
   int icon;
   int centered;
@@ -35,7 +37,7 @@ class Global_task : public Area {
   int saturation[kTaskStateCount];
   int brightness[kTaskStateCount];
   int config_asb_mask;
-  Background* background[kTaskStateCount];
+  Background background[kTaskStateCount];
   int config_background_mask;
   // starting position for text ~ task_padding + task_border + icon_size
   double text_posx, text_height;

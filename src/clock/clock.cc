@@ -142,11 +142,6 @@ void InitClock(Timer& timer) {
 
 void Clock::InitPanel(Panel* panel) {
   Clock& clock = panel->clock_;
-
-  if (clock.bg_ == nullptr) {
-    clock.bg_ = backgrounds.front();
-  }
-
   clock.parent_ = panel;
   clock.panel_ = panel;
   clock.size_mode_ = SizeMode::kByContent;
@@ -208,7 +203,7 @@ bool Clock::Resize() {
 
   if (panel_horizontal) {
     int new_size = std::max(time_width, date_width) + (2 * padding_x_lr_) +
-                   (2 * bg_->border.width);
+                   (2 * bg_.border.width);
 
     if (new_size > width_ || new_size < (width_ - 6)) {
       // we try to limit the number of resize
@@ -224,7 +219,7 @@ bool Clock::Resize() {
     }
   } else {
     int new_size =
-        time_height + date_height + (2 * (padding_x_lr_ + bg_->border.width));
+        time_height + date_height + (2 * (padding_x_lr_ + bg_.border.width));
 
     if (new_size != height_) {
       // we try to limit the number of resize

@@ -212,11 +212,6 @@ void Battery::InitPanel(Panel* panel) {
   }
 
   Battery& battery = panel->battery_;
-
-  if (battery.bg_ == 0) {
-    battery.bg_ = backgrounds.front();
-  }
-
   battery.parent_ = panel;
   battery.panel_ = panel;
   battery.size_mode_ = SizeMode::kByContent;
@@ -392,7 +387,7 @@ bool Battery::Resize() {
 
   if (panel_horizontal) {
     int new_size = std::max(bat_percentage_width, bat_time_width) +
-                   (2 * padding_x_lr_) + (2 * bg_->border.width);
+                   (2 * padding_x_lr_) + (2 * bg_.border.width);
 
     if (new_size > width_ || new_size < (width_ - 2)) {
       // we try to limit the number of resize
@@ -403,7 +398,7 @@ bool Battery::Resize() {
     }
   } else {
     int new_size = bat_percentage_height + bat_time_height +
-                   (2 * (padding_x_lr_ + bg_->border.width));
+                   (2 * (padding_x_lr_ + bg_.border.width));
 
     if (new_size > height_ || new_size < (height_ - 2)) {
       height_ = new_size;

@@ -102,7 +102,7 @@ int GetTaskStatus(std::string const& status) {
   return kTaskNormal;
 }
 
-Background* GetBackgroundFromId(size_t id) {
+Background& GetBackgroundFromId(size_t id) {
   try {
     return backgrounds.at(id);
   } catch (std::out_of_range) {
@@ -289,30 +289,30 @@ void Reader::AddEntry(std::string const& key, std::string const& value) {
   /* Background and border */
   if (key == "rounded") {
     // 'rounded' is the first parameter => alloc a new background
-    auto bg = new Background();
-    bg->border.rounded = std::stol(value);
+    Background bg;
+    bg.border.rounded = std::stol(value);
     backgrounds.push_back(bg);
   } else if (key == "border_width") {
-    backgrounds.back()->border.width = std::stol(value);
+    backgrounds.back().border.width = std::stol(value);
   } else if (key == "background_color") {
-    auto bg = backgrounds.back();
+    auto& bg = backgrounds.back();
     config::ExtractValues(value, value1, value2, value3);
-    GetColor(value1, bg->back.color);
+    GetColor(value1, bg.back.color);
 
     if (!value2.empty()) {
-      bg->back.alpha = (std::stol(value2) / 100.0);
+      bg.back.alpha = (std::stol(value2) / 100.0);
     } else {
-      bg->back.alpha = 0.5;
+      bg.back.alpha = 0.5;
     }
   } else if (key == "border_color") {
-    auto bg = backgrounds.back();
+    auto& bg = backgrounds.back();
     config::ExtractValues(value, value1, value2, value3);
-    GetColor(value1, bg->border.color);
+    GetColor(value1, bg.border.color);
 
     if (!value2.empty()) {
-      bg->border.alpha = (std::stol(value2) / 100.0);
+      bg.border.alpha = (std::stol(value2) / 100.0);
     } else {
-      bg->border.alpha = 0.5;
+      bg.border.alpha = 0.5;
     }
   }
 
@@ -584,7 +584,7 @@ void Reader::AddEntry(std::string const& key, std::string const& value) {
     panel_config.g_taskbar.background[kTaskbarNormal] =
         GetBackgroundFromId(std::stol(value));
 
-    if (panel_config.g_taskbar.background[kTaskbarActive] == 0) {
+    if (panel_config.g_taskbar.background[kTaskbarActive] == Background{}) {
       panel_config.g_taskbar.background[kTaskbarActive] =
           panel_config.g_taskbar.background[kTaskbarNormal];
     }
@@ -601,7 +601,8 @@ void Reader::AddEntry(std::string const& key, std::string const& value) {
     panel_config.g_taskbar.background_name[kTaskbarNormal] =
         GetBackgroundFromId(std::stol(value));
 
-    if (panel_config.g_taskbar.background_name[kTaskbarActive] == 0) {
+    if (panel_config.g_taskbar.background_name[kTaskbarActive] ==
+        Background{}) {
       panel_config.g_taskbar.background_name[kTaskbarActive] =
           panel_config.g_taskbar.background_name[kTaskbarNormal];
     }

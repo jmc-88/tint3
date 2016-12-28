@@ -71,7 +71,7 @@ void DefaultTooltip() {
   g_tooltip.paddingx = 0;
   g_tooltip.paddingy = 0;
   g_tooltip.font_desc = nullptr;
-  g_tooltip.bg = nullptr;
+  g_tooltip.bg = Background{};
   g_tooltip.timeout.Clear();
   g_tooltip.font_color.color[0] = 1;
   g_tooltip.font_color.color[1] = 1;
@@ -96,10 +96,6 @@ void CleanupTooltip(Timer& timer) {
 void InitTooltip() {
   if (!g_tooltip.font_desc) {
     g_tooltip.font_desc = pango_font_description_from_string("sans 10");
-  }
-
-  if (g_tooltip.bg == nullptr) {
-    g_tooltip.bg = backgrounds.front();
   }
 
   XSetWindowAttributes attr;
@@ -176,8 +172,8 @@ void TooltipUpdateGeometry() {
 
   PangoRectangle r1, r2;
   pango_layout_get_pixel_extents(layout.get(), &r1, &r2);
-  width = 2 * g_tooltip.bg->border.width + 2 * g_tooltip.paddingx + r2.width;
-  height = 2 * g_tooltip.bg->border.width + 2 * g_tooltip.paddingy + r2.height;
+  width = 2 * g_tooltip.bg.border.width + 2 * g_tooltip.paddingx + r2.width;
+  height = 2 * g_tooltip.bg.border.width + 2 * g_tooltip.paddingy + r2.height;
 
   Panel* panel = g_tooltip.panel;
 
@@ -264,8 +260,8 @@ void Tooltip::Update(Timer& timer) {
   auto cs = cairo_xlib_surface_create(server.dsp, window, server.visual, width,
                                       height);
   auto c = cairo_create(cs);
-  Color& bc = bg->back;
-  Border& b = bg->border;
+  Color& bc = bg.back;
+  Border& b = bg.border;
 
   if (server.real_transparency) {
     ClearPixmap(window, 0, 0, width, height);
@@ -305,8 +301,8 @@ void Tooltip::Update(Timer& timer) {
   pango_layout_set_ellipsize(layout.get(), PANGO_ELLIPSIZE_END);
   // I do not know why this is the right way, but with the below cairo_move_to
   // it seems to be centered (horiz. and vert.)
-  cairo_move_to(c, -r1.x / 2 + bg->border.width + paddingx,
-                -r1.y / 2 + bg->border.width + paddingy);
+  cairo_move_to(c, -r1.x / 2 + bg.border.width + paddingx,
+                -r1.y / 2 + bg.border.width + paddingy);
   pango_cairo_show_layout(c, layout.get());
 
   cairo_destroy(c);

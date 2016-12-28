@@ -63,6 +63,12 @@ int GetMonitor(Window win) {
 Interval::Id urgent_timeout;
 std::list<Task*> urgent_list;
 
+Global_task::Global_task() {
+  for (int i = 0; i < kTaskStateCount; ++i) {
+    background[i] = Background{};
+  }
+}
+
 Task::Task(Timer& timer) : timer_(timer) {}
 
 std::string Task::GetTooltipText() {
@@ -390,7 +396,7 @@ void Task::DrawIcon(int text_width) {
       pos_x = (width_ - panel_->g_task.icon_size1) / 2;
     }
   } else {
-    pos_x = panel_->g_task.padding_x_lr_ + bg_->border.width;
+    pos_x = panel_->g_task.padding_x_lr_ + bg_.border.width;
   }
 
   // Render

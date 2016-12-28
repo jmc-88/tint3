@@ -69,7 +69,7 @@ extern PanelStrutPolicy panel_strut_policy;
 
 extern int max_tick_urgent;
 
-extern std::vector<Background*> backgrounds;
+extern std::vector<Background> backgrounds;
 
 extern util::imlib2::Image default_icon;
 

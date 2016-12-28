@@ -10,18 +10,30 @@
 #include <vector>
 
 struct Border {
+public:
+  bool operator==(Border const& other) const;
+  bool operator!=(Border const& other) const;
+
   double color[3];
   double alpha;
   int width;
   int rounded;
 };
 
-struct Color {
+class Color {
+public:
+  bool operator==(Color const& other) const;
+  bool operator!=(Color const& other) const;
+
   double color[3];
   double alpha;
 };
 
-struct Background {
+class Background {
+public:
+  bool operator==(Background const& other) const;
+  bool operator!=(Background const& other) const;
+
   Color back;
   Border border;
 };
@@ -45,7 +57,7 @@ class Area {
   int width_;
   int height_;
   Pixmap pix_;
-  Background* bg_;
+  Background bg_;
 
   // list of children Area objects
   std::vector<Area*> children_;

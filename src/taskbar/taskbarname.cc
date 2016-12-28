@@ -146,7 +146,7 @@ bool Taskbarname::Resize() {
                &name_width, panel_->height_, panel_->width_, name());
 
   if (panel_horizontal) {
-    int new_size = name_width + (2 * (padding_x_lr_ + bg_->border.width));
+    int new_size = name_width + (2 * (padding_x_lr_ + bg_.border.width));
 
     if (new_size != width_) {
       width_ = new_size;
@@ -154,7 +154,7 @@ bool Taskbarname::Resize() {
       return true;
     }
   } else {
-    int new_size = name_height + (2 * (padding_x_lr_ + bg_->border.width));
+    int new_size = name_height + (2 * (padding_x_lr_ + bg_.border.width));
 
     if (new_size != height_) {
       height_ = new_size;

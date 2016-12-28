@@ -19,7 +19,7 @@ class Tooltip {
   int paddingy;
   PangoFontDescription* font_desc;
   Color font_color;
-  Background* bg;
+  Background bg;
   Interval::Id timeout;
 
   void BindTo(Area* area);
