@@ -21,7 +21,6 @@
 
 #include <cairo-xlib.h>
 #include <cairo.h>
-#include <pango/pangocairo.h>
 
 #include <algorithm>
 #include <cstdio>

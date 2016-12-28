@@ -1,6 +1,8 @@
 #ifndef TINT3_CLOCK_CLOCK_HH
 #define TINT3_CLOCK_CLOCK_HH
 
+#include <pango/pangocairo.h>
+
 #include <string>
 
 #include "util/area.hh"
