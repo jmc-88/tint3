@@ -5,6 +5,7 @@
 #include <cstring>
 #include <fstream>
 #include <sstream>
+#include <utility>
 
 #include "util/common.hh"
 #include "util/environment.hh"
@@ -90,11 +91,24 @@ std::string StripTrailingSlash(std::string path) {
 
 }  // namespace
 
+Path::Path(Path const& other) : path_(other.path_) {}
+
+Path::Path(Path&& other) : path_(std::move(other.path_)) {}
+
 Path::Path(std::string const& path) : path_(StripTrailingSlash(path)) {}
 
 Path::Path(const char* path) : path_(StripTrailingSlash(path)) {}
 
-Path& Path::operator/(std::string const& component) {
+Path& Path::operator=(Path other) {
+  std::swap(path_, other.path_);
+  return (*this);
+}
+
+Path Path::operator/(std::string const& component) {
+  return Path{*this} /= component;
+}
+
+Path& Path::operator/=(std::string const& component) {
   if (!path_.empty() && path_ != "/") {
     path_.append("/");
   }
@@ -111,7 +125,7 @@ std::ostream& operator<<(std::ostream& os, Path const& path) {
 std::string BuildPath(std::initializer_list<std::string> parts) {
   Path path;
   for (auto const& p : parts) {
-    path / p;
+    path /= p;
   }
   return path;
 }

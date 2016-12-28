@@ -47,10 +47,14 @@ class Path {
   friend std::ostream& operator<<(std::ostream& os, Path const& path);
 
   Path() = default;
+  Path(Path const& other);
+  Path(Path&& other);
   Path(std::string const& path);
   Path(char const* path);
 
-  Path& operator/(std::string const& component);
+  Path& operator=(Path other);
+  Path operator/(std::string const& component);
+  Path& operator/=(std::string const& component);
   operator std::string() const;
 
  private:
