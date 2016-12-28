@@ -195,7 +195,7 @@ include(TestTarget)
 enable_testing()
 include_directories(test)
 
-test_target(config_test src/config_test.cc)
+test_target(config_test src/config_test.cc src/util/timer_test_utils.cc)
 target_link_libraries(config_test tint3_common_lib ${TINT3_LINK_LIBRARIES})
 
 test_target(clock_time_utils_test src/clock/time_utils_test.cc)

@@ -4,9 +4,12 @@
 #include <initializer_list>
 #include <string>
 
+#include "clock/clock.hh"  // TODO: decouple from config loading
 #include "config.hh"
 #include "panel.hh"  // TODO: decouple from config loading
 #include "server.hh"
+#include "tooltip/tooltip.hh"  // TODO: decouple from config loading
+#include "util/timer_test_utils.hh"
 
 using namespace config;
 
@@ -217,4 +220,44 @@ TEST_CASE("ConfigParser", "Correctly loads a valid configuration file") {
   REQUIRE(p.Parse(kConfigFile));
 
   CleanupPanel();  // TODO: decouple from config loading
+}
+
+static constexpr char kEmptyAssignment[] =
+    u8R"EOF(
+clock_tooltip =
+clock_padding = 10 6
+)EOF";
+
+TEST_CASE("ConfigParserEmptyAssignment", "Doesn't choke on empty assignments") {
+  DefaultPanel();    // TODO: decouple from config loading
+  DefaultClock();    // TODO: decouple from config loading
+  DefaultTooltip();  // TODO: decouple from config loading
+
+  test::ConfigReader reader;
+  config::Parser config_entry_parser{&reader};
+  parser::Parser p{config::kLexer, &config_entry_parser};
+
+  REQUIRE(p.Parse(kEmptyAssignment));
+
+  // We expect the tooltip to stay empty -- the parser shouldn't skip the
+  // whitespace after the equals sign as that would also skip the newline and
+  // consume the following "clock_padding" line.
+  REQUIRE(time_tooltip_format.empty());
+  // Ensure the clock padding was parsed too.
+  REQUIRE(panel_config.clock_.padding_x_lr_ == 10);
+  REQUIRE(panel_config.clock_.padding_x_ == 10);
+  REQUIRE(panel_config.clock_.padding_y_ == 6);
+
+  FakeClock timer{0};
+  CleanupTooltip(timer);  // TODO: decouple from config loading
+  CleanupClock(timer);    // TODO: decouple from config loading
+  CleanupPanel();         // TODO: decouple from config loading
+
+  // CleanupPanel won't do much since panel1==nullptr at this point, thus we
+  // need to clean up the leftover default background manually.
+  // TODO: use smart pointers and/or remove the use of pointers altogether.
+  for (auto& b : backgrounds) {
+    delete b;
+  }
+  backgrounds.clear();
 }
