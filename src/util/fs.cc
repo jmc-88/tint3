@@ -70,6 +70,15 @@ bool DirectoryContents::iterator::operator!=(
 
 namespace {
 
+std::string StripLeadingSlash(std::string path) {
+  // Remove the leading '/' if this is not a path to the filesystem root.
+  if (path.length() > 1 && path[0] == '/') {
+    return path.substr(1);
+  }
+
+  return path;
+}
+
 std::string StripTrailingSlash(std::string path) {
   // Remove the trailing '/' if this is not a path to the filesystem root.
   if (path.length() > 1 && path[path.length() - 1] == '/') {
@@ -87,7 +96,7 @@ Path::Path(const char* path) : path_(StripTrailingSlash(path)) {}
 
 Path& Path::operator/(std::string const& component) {
   path_.append("/");
-  path_.append(component);
+  path_.append(StripLeadingSlash(component));
   return (*this);
 }
 
