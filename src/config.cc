@@ -253,8 +253,16 @@ bool Reader::LoadFromDefaults() {
 
   if (!system_config_file.empty()) {
     // copy file in user directory
-    util::fs::CreateDirectory(user_config_dir);
-    util::fs::CopyFile(system_config_file, config_path);
+    if (!util::fs::CreateDirectory(user_config_dir)) {
+      util::log::Error() << "Couldn't create the \"" << user_config_dir
+                         << "\" directory.\n";
+      return false;
+    }
+    if (!util::fs::CopyFile(system_config_file, config_path)) {
+      util::log::Error() << "Couldn't copy \"" << system_config_file
+                         << "\" to \"" << config_path << "\".\n";
+      return false;
+    }
     return LoadFromFile(config_path);
   }
 
