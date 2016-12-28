@@ -142,7 +142,7 @@ bool CreateDirectory(std::string const& path, mode_t mode) {
     return true;
   }
 
-  return mkdir(path.c_str(), mode);
+  return mkdir(path.c_str(), mode) == 0;
 }
 
 bool DirectoryExists(std::string const& path) {
