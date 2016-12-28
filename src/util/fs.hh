@@ -46,6 +46,7 @@ class Path {
  public:
   friend std::ostream& operator<<(std::ostream& os, Path const& path);
 
+  Path() = default;
   Path(std::string const& path);
   Path(char const* path);
 

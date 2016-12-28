@@ -95,7 +95,9 @@ Path::Path(std::string const& path) : path_(StripTrailingSlash(path)) {}
 Path::Path(const char* path) : path_(StripTrailingSlash(path)) {}
 
 Path& Path::operator/(std::string const& component) {
-  path_.append("/");
+  if (!path_.empty() && path_ != "/") {
+    path_.append("/");
+  }
   path_.append(StripLeadingSlash(component));
   return (*this);
 }
@@ -107,21 +109,11 @@ std::ostream& operator<<(std::ostream& os, Path const& path) {
 }
 
 std::string BuildPath(std::initializer_list<std::string> parts) {
-  std::ostringstream ss;
-  bool first = true;
-
+  Path path;
   for (auto const& p : parts) {
-    if (!first) {
-      // tint2 has only ever supported Unix systems, so it's probably not
-      // worth bothering with other kinds of path separators at all
-      ss << '/';
-    }
-
-    first = false;
-    ss << p;
+    path / p;
   }
-
-  return ss.str();
+  return path;
 }
 
 bool CopyFile(std::string const& from_path, std::string const& to_path) {
