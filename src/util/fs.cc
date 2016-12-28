@@ -80,6 +80,10 @@ Path& Path::operator/(std::string const& component) {
 
 Path::operator std::string() const { return path_; }
 
+std::ostream& operator<<(std::ostream& os, Path const& path) {
+  return os << path.path_;
+}
+
 std::string BuildPath(std::initializer_list<std::string> parts) {
   std::ostringstream ss;
   bool first = true;

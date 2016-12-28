@@ -7,6 +7,7 @@
 
 #include <functional>
 #include <initializer_list>
+#include <ostream>
 #include <string>
 
 namespace util {
@@ -43,6 +44,8 @@ class DirectoryContents {
 
 class Path {
  public:
+  friend std::ostream& operator<<(std::ostream& os, Path const& path);
+
   Path(std::string const& path);
   Path(char const* path);
 
@@ -52,6 +55,8 @@ class Path {
  private:
   std::string path_;
 };
+
+std::ostream& operator<<(std::ostream& os, Path const& path);
 
 std::string BuildPath(std::initializer_list<std::string> parts);
 bool CopyFile(std::string const& from_path, std::string const& to_path);
