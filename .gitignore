@@ -1,6 +1,8 @@
 # Don't include the build directories in the repository
 /build
+/package-build
 /scan-build
+/_CPack_Packages
 
 # Don't include ctags in the repository
 /tags
@@ -8,3 +10,7 @@
 # Don't include IDE-specific files in the repository
 *.kdev4
 /.kdev4
+
+# Don't include built packages
+*.deb
+*.rpm
