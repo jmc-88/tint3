@@ -12,7 +12,12 @@ Pretty stable. I use it daily and I haven't seen issues in a while, but if you h
 
 ## Is it packaged for my Linux distribution?
 
-Most likely, it's not. There's a user-contributed package for ArchLinux in AUR, [tint3-cpp-git](https://aur.archlinux.org/packages/tint3-cpp-git).
+ * There's a user-contributed package for Arch Linux in AUR,
+ [tint3-cpp-git](https://aur.archlinux.org/packages/tint3-cpp-git).
+ * You can easily obtain a `.deb` or `.rpm` package through
+ [CPack](https://cmake.org/Wiki/CMake:Packaging_With_CPack). Check the build
+ instructions at [README.source.md](README.source.md) for more info.
+ * Other distributions: please build and install it manually.
 
 ## How do I build it?
 
