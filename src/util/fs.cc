@@ -152,11 +152,23 @@ bool CopyFile(std::string const& from_path, std::string const& to_path) {
 }
 
 bool CreateDirectory(std::string const& path, mode_t mode) {
-  if (DirectoryExists(path)) {
-    return true;
-  }
+  auto components = util::string::Split(path, '/');
+  Path partial_path{"/"};
 
-  return mkdir(path.c_str(), mode) == 0;
+  for (std::string const& component : components) {
+    if (component.empty()) {
+      continue;
+    }
+    partial_path /= component;
+    if (DirectoryExists(partial_path)) {
+      continue;
+    }
+    std::string missing_directory{partial_path};
+    if (mkdir(missing_directory.c_str(), mode) != 0) {
+      return false;
+    }
+  }
+  return true;
 }
 
 bool DirectoryExists(std::string const& path) {
