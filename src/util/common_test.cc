@@ -26,9 +26,26 @@ TEST_CASE("StringTrim", "Removing trailing spaces from strings should work") {
 
 TEST_CASE("SplitString",
           "Splitting a string using a character separator should work") {
-  std::string s{"This is a string"};
-  std::vector<std::string> v{"This", "is", "a", "string"};
-  REQUIRE(util::string::Split(s, ' ') == v);
+  // Empty string: no matter the separator, results in a vector with an
+  // empty string in it.
+  REQUIRE(util::string::Split("", '*') == std::vector<std::string>{""});
+  // Non-empty string, separator not found: results in a vector with the string
+  // itself in it.
+  REQUIRE(util::string::Split("test", '*') == std::vector<std::string>{"test"});
+  // Non-empty string, separator found: separated as intuitively expected.
+  REQUIRE(util::string::Split("This is a string", ' ') ==
+          std::vector<std::string>({"This", "is", "a", "string"}));
+  // String composed of the separator only: results in a vector with two
+  // empty strings in it (the empty left and right halves).
+  REQUIRE(util::string::Split("/", '/') == std::vector<std::string>({"", ""}));
+  // String with the separator at the end: results in a vector with the left
+  // substring, and an empty string.
+  REQUIRE(util::string::Split("something//something", '/') ==
+          std::vector<std::string>({"something", "", "something"}));
+  // String with two continguous separators: results in a vector with the left
+  // substring, an empty string, and the right substring.
+  REQUIRE(util::string::Split("something//something", '/') ==
+          std::vector<std::string>({"something", "", "something"}));
 }
 
 TEST_CASE("GetColor", "Parsing a CSS hex triplet should work") {
