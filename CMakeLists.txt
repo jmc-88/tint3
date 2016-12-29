@@ -234,7 +234,7 @@ target_link_libraries(util_timer_test tint3_common_lib ${TINT3_LINK_LIBRARIES})
 
 install(TARGETS tint3 DESTINATION bin)
 install(FILES sample/tint3rc DESTINATION ${SYSCONFDIR}/xdg/tint3)
-install(FILES default_icon.png DESTINATION ${DATADIR}/tint3)
+install(FILES data/default_icon.png DESTINATION ${DATADIR}/tint3)
 install(FILES AUTHORS.md README.md DESTINATION ${DOCDIR})
 install(FILES doc/tint3.1 DESTINATION ${MANDIR}/man1)
 if(ENABLE_EXAMPLES)
