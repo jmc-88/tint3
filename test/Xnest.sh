@@ -15,9 +15,11 @@ if [ $# -ne 1 ]; then
   exit 1
 fi
 
-declare -r _DISPLAY="${1}"
-declare -r _ROOT="$(cd "$(dirname "${0}")/.."; pwd)"
-declare _XNEST_PID _OPENBOX_PID _TINT3_PID
+_DISPLAY="${1}"
+_ROOT="$(cd "$(dirname "${0}")/.."; pwd)"
+_XNEST_PID=""
+_OPENBOX_PID=""
+_TINT3_PID=""
 
 if ! which Xnest >/dev/null 2>&1; then
   echo " ✘  Xnest not found!" >&2
@@ -36,7 +38,7 @@ fi
 
 # {{{ cleanup
 
-function kill_running_processes() {
+kill_running_processes() {
   if [ -n "${_TINT3_PID}" ]; then
     echo " ⌛  Sending SIGTERM to tint3..."
     kill "${_TINT3_PID}" 2>/dev/null
@@ -58,7 +60,7 @@ function kill_running_processes() {
 
 trap kill_running_processes EXIT
 
-function gracefully_terminate() {
+gracefully_terminate() {
   echo " >> Caught SIGINT, will now terminate."
   exit 0
 }
@@ -69,31 +71,44 @@ trap gracefully_terminate INT
 
 # {{{ launch
 
-if ! Xnest "${_DISPLAY}" >/tmp/Xnest.log 2>&1 & then
+alive() {
+  kill -s 0 "${1}" 2>/dev/null
+}
+
+Xnest "${_DISPLAY}" >/tmp/Xnest.log 2>&1 &
+_XNEST_PID="${!}"
+
+if alive "${_XNEST_PID}"; then
+  echo " ✔  Launched Xnest as PID ${_XNEST_PID}."
+  sleep 1
+else
   echo " ✘  Launching Xnest failed." >&2
   exit 1
 fi
 
-_XNEST_PID="${!}"
-echo " ✔  Launched Xnest as PID ${_XNEST_PID}."
+env -i DISPLAY="${_DISPLAY}" \
+  openbox >/tmp/openbox.log 2>&1 &
+_OPENBOX_PID="${!}"
 
-if ! env -i DISPLAY="${_DISPLAY}" \
-     openbox >/tmp/openbox.log 2>&1 & then
+if alive "${_OPENBOX_PID}"; then
+  echo " ✔  Launched openbox as PID ${_OPENBOX_PID}."
+  sleep 1
+else
   echo " ✘  Launching openbox failed." >&2
   exit 1
 fi
 
-_OPENBOX_PID="${!}"
-echo " ✔  Launched openbox as PID ${_OPENBOX_PID}."
+env -i DISPLAY="${_DISPLAY}" \
+  "${_ROOT}/build/tint3" >/tmp/tint3.log 2>&1 &
+_TINT3_PID="${!}"
 
-if ! env -i DISPLAY="${_DISPLAY}" \
-     "${_ROOT}/build/tint3" >/tmp/tint3.log 2>&1 & then
+if alive "${_TINT3_PID}"; then
+  echo " ✔  Launched tint3 as PID ${_TINT3_PID}."
+  sleep 1
+else
   echo " ✘  Launching tint3 failed." >&2
   exit 1
 fi
-
-_TINT3_PID="${!}"
-echo " ✔  Launched tint3 as PID ${_TINT3_PID}."
 
 # }}} launch
 
