@@ -1,0 +1,10 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=tint3
+Icon=tint3
+GenericName=Lightweight X11 panel
+Categories=Utility;
+Keywords=panel;taskbar;systray;system tray;clock;battery;
+TryExec=tint3
+Exec=tint3

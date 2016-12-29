@@ -234,9 +234,20 @@ target_link_libraries(util_timer_test tint3_common_lib ${TINT3_LINK_LIBRARIES})
 
 install(TARGETS tint3 DESTINATION bin)
 install(FILES sample/tint3rc DESTINATION ${SYSCONFDIR}/xdg/tint3)
-install(FILES data/default_icon.png DESTINATION ${DATADIR}/tint3)
 install(FILES AUTHORS.md README.md DESTINATION ${DOCDIR})
 install(FILES doc/tint3.1 DESTINATION ${MANDIR}/man1)
+
+install(FILES data/tint3.desktop DESTINATION ${DATADIR}/applications/tint3)
+install(FILES data/default_icon.png DESTINATION ${DATADIR}/tint3)
+
+install(FILES data/logo/tint3.svg
+        DESTINATION ${DATADIR}/icons/hicolor/scalable/apps)
+foreach(size 16 32 48 64 128 256)
+  install(FILES data/logo/tint3-${size}.png
+          DESTINATION ${DATADIR}/icons/hicolor/${size}x${size}/apps
+          RENAME tint3.png)
+endforeach()
+
 if(ENABLE_EXAMPLES)
     file(GLOB SAMPLEFILES sample/*.tint3rc)
     install(FILES ${SAMPLEFILES} DESTINATION ${DOCDIR}/examples)
