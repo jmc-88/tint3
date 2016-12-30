@@ -16,7 +16,11 @@ body {
   background-color: #fdfdfd;
 }
 
-h1, h2, h3, h4, h5, h6 { font-weight: 400; }
+h1, h2, h3, h4, h5, h6 {
+  padding: .5em 0;
+  font-weight: 400;
+}
+
 h1 { font-size: 150%; }
 
 a         { color: #2a7ae2; text-decoration: none; }
@@ -426,18 +430,37 @@ a:visited { color: #205caa; }
 
 }
 
+/* package */
+/* ----------------------------------------------------------*/
+
+a.package,
+a.package:visited,
+a.package:hover {
+  font-weight: bold;
+  font-size: 150%;
+  color: black;
+  outline: 0;
+}
+
+a.package {
+  display: inline-block;
+  text-align: center;
+  padding: 1em;
+}
+
+a.package > img {
+  display: block;
+  margin: auto;
+  width: 65px;
+  height: 65px;
+}
+
 /* screenshot */
 /* ----------------------------------------------------------*/
 
-.screenshot {
-  margin: 1em auto;
+.thumbnail {
   width: 256px;
   height: 192px;
-}
-
-.thumbnail {
-  width: 100%;
-  height: 100%;
 }
 
 /*
