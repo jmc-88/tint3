@@ -11,6 +11,8 @@ for more information.
 
 ## packages
 
+Packages provided here are for tint3 **v0.1.0**.
+
 <!-- Important! No spaces between anchors, or Markdown will render them in
      separate <p> tags, breaking the alignment -->
 <a class="package" target="source"
