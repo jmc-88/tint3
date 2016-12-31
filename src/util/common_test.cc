@@ -48,43 +48,6 @@ TEST_CASE("SplitString",
           std::vector<std::string>({"something", "", "something"}));
 }
 
-TEST_CASE("GetColor", "Parsing a CSS hex triplet should work") {
-  double rgb[3];
-
-  SECTION("Malformed expressions get rejected") {
-    REQUIRE(!GetColor("oh hai", rgb));
-    REQUIRE(!GetColor("ff007f", rgb));
-  }
-
-  SECTION("Black is black") {
-    REQUIRE(GetColor("#000000", rgb));
-    REQUIRE(rgb[0] == 0.0);
-    REQUIRE(rgb[1] == 0.0);
-    REQUIRE(rgb[2] == 0.0);
-  }
-
-  SECTION("Gray is gray") {
-    REQUIRE(GetColor("#666666", rgb));
-    REQUIRE(rgb[0] == 0.4);
-    REQUIRE(rgb[1] == 0.4);
-    REQUIRE(rgb[2] == 0.4);
-  }
-
-  SECTION("White is white") {
-    REQUIRE(GetColor("#FFFFFF", rgb));
-    REQUIRE(rgb[0] == 1.0);
-    REQUIRE(rgb[1] == 1.0);
-    REQUIRE(rgb[2] == 1.0);
-  }
-
-  SECTION("Mixed case also works") {
-    REQUIRE(GetColor("#fFffFf", rgb));
-    REQUIRE(rgb[0] == 1.0);
-    REQUIRE(rgb[1] == 1.0);
-    REQUIRE(rgb[2] == 1.0);
-  }
-}
-
 TEST_CASE("StartsWith",
           "Checking if a string has a prefix works even in corner cases") {
   // normal case: left string longer

@@ -167,12 +167,12 @@ void Taskbar::InitPanel(Panel* panel) {
   panel->g_taskbar.on_screen_ = true;
 
   if (panel_horizontal) {
-    panel->g_taskbar.panel_y_ = (panel->bg_.border.width + panel->padding_y_);
+    panel->g_taskbar.panel_y_ = panel->bg_.border().width() + panel->padding_y_;
     panel->g_taskbar.height_ = panel->height_ - (2 * panel->g_taskbar.panel_y_);
     panel->g_taskbar.bar_name_.panel_y_ = panel->g_taskbar.panel_y_;
     panel->g_taskbar.bar_name_.height_ = panel->g_taskbar.height_;
   } else {
-    panel->g_taskbar.panel_x_ = panel->bg_.border.width + panel->padding_y_;
+    panel->g_taskbar.panel_x_ = panel->bg_.border().width() + panel->padding_y_;
     panel->g_taskbar.width_ = panel->width_ - (2 * panel->g_taskbar.panel_x_);
     panel->g_taskbar.bar_name_.panel_x_ = panel->g_taskbar.panel_x_;
     panel->g_taskbar.bar_name_.width_ = panel->g_taskbar.width_;
@@ -215,7 +215,7 @@ void Taskbar::InitPanel(Panel* panel) {
   }
 
   if ((panel->g_task.config_font_mask & (1 << kTaskNormal)) == 0) {
-    panel->g_task.font[kTaskNormal] = (Color){{0, 0, 0}, 0};
+    panel->g_task.font[kTaskNormal] = Color{};
   }
 
   if ((panel->g_task.config_font_mask & (1 << kTaskActive)) == 0) {
@@ -252,13 +252,13 @@ void Taskbar::InitPanel(Panel* panel) {
   if (panel_horizontal) {
     panel->g_task.panel_y_ =
         panel->g_taskbar.panel_y_ +
-        panel->g_taskbar.background[kTaskbarNormal].border.width +
+        panel->g_taskbar.background[kTaskbarNormal].border().width() +
         panel->g_taskbar.padding_y_;
     panel->g_task.height_ = panel->height_ - (2 * panel->g_task.panel_y_);
   } else {
     panel->g_task.panel_x_ =
         panel->g_taskbar.panel_x_ +
-        panel->g_taskbar.background[kTaskbarNormal].border.width +
+        panel->g_taskbar.background[kTaskbarNormal].border().width() +
         panel->g_taskbar.padding_y_;
     panel->g_task.width_ = panel->width_ - (2 * panel->g_task.panel_x_);
     panel->g_task.height_ = panel->g_task.maximum_height;
@@ -267,7 +267,7 @@ void Taskbar::InitPanel(Panel* panel) {
   for (int j = 0; j < kTaskStateCount; ++j) {
     auto half_height = (panel->g_task.height_ / 2);
 
-    if (panel->g_task.background[j].border.rounded > half_height) {
+    if (panel->g_task.background[j].border().rounded() > half_height) {
       std::string separator =
           (j == 0 ? "_" : (j == 1 ? "_active_"
                                   : (j == 2 ? "_iconified_" : "_urgent_")));
@@ -275,7 +275,7 @@ void Taskbar::InitPanel(Panel* panel) {
       util::log::Error() << "task" << separator << "background_id "
                          << "has a too large rounded value. "
                          << "Please fix your tint3rc.\n";
-      panel->g_task.background[j].border.rounded = half_height;
+      panel->g_task.background[j].border().set_rounded(half_height);
     }
   }
 
@@ -288,8 +288,8 @@ void Taskbar::InitPanel(Panel* panel) {
     panel->g_task.maximum_width = server.monitor[panel->monitor_].width;
   }
 
-  panel->g_task.text_posx =
-      panel->g_task.background[0].border.width + panel->g_task.padding_x_lr_;
+  panel->g_task.text_posx = panel->g_task.background[0].border().width() +
+                            panel->g_task.padding_x_lr_;
   panel->g_task.text_height =
       panel->g_task.height_ - (2 * panel->g_task.padding_y_);
 
@@ -388,7 +388,7 @@ void Taskbar::DrawForeground(cairo_t* /* c */) {
 
 bool Taskbar::Resize() {
   int horizontal_size =
-      (panel_->g_task.text_posx + panel_->g_task.bg_.border.width +
+      (panel_->g_task.text_posx + panel_->g_task.bg_.border().width() +
        panel_->g_task.padding_x_);
 
   if (panel_horizontal) {

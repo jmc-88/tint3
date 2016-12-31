@@ -28,29 +28,223 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <utility>
 
 #include "panel.hh"
 #include "server.hh"
 #include "util/area.hh"
+#include "util/common.hh"
 #include "util/log.hh"
 
-bool Border::operator==(Border const& other) const {
-  return (color[0] == other.color[0] && color[1] == other.color[1] &&
-          color[2] == other.color[2] && alpha == other.alpha &&
-          width == other.width && rounded == other.rounded);
+namespace {
+
+unsigned int HexCharToInt(char c) {
+  c = std::tolower(c);
+  if (c >= '0' && c <= '9') {
+    return c - '0';
+  }
+  if (c >= 'a' && c <= 'f') {
+    return c - 'a' + 10;
+  }
+  return 0;
 }
 
-bool Border::operator!=(Border const& other) const { return !(*this == other); }
+bool HexToRgb(std::string const& hex, unsigned int* r, unsigned int* g,
+              unsigned int* b) {
+  if (hex.empty() || hex[0] != '#') {
+    return false;
+  }
+
+  if (hex.length() == 3 + 1) {
+    (*r) = HexCharToInt(hex[1]);
+    (*g) = HexCharToInt(hex[2]);
+    (*b) = HexCharToInt(hex[3]);
+  } else if (hex.length() == 6 + 1) {
+    (*r) = HexCharToInt(hex[1]) * 16 + HexCharToInt(hex[2]);
+    (*g) = HexCharToInt(hex[3]) * 16 + HexCharToInt(hex[4]);
+    (*b) = HexCharToInt(hex[5]) * 16 + HexCharToInt(hex[6]);
+  } else if (hex.length() == 12 + 1) {
+    (*r) = HexCharToInt(hex[1]) * 16 + HexCharToInt(hex[2]);
+    (*g) = HexCharToInt(hex[5]) * 16 + HexCharToInt(hex[6]);
+    (*b) = HexCharToInt(hex[9]) * 16 + HexCharToInt(hex[10]);
+  } else {
+    return false;
+  }
+
+  return true;
+}
+
+}  // namespace
+
+Color::Color() : color_(), alpha_() {}
+
+Color::Color(std::array<double, 3> const& color, double alpha)
+    : color_(color), alpha_(alpha) {}
+
+Color::Color(Color const& other) : color_(other.color_), alpha_(other.alpha_) {}
+
+Color::Color(Color&& other)
+    : color_(std::move(other.color_)), alpha_(std::move(other.alpha_)) {}
+
+Color& Color::operator=(Color other) {
+  std::swap(color_, other.color_);
+  std::swap(alpha_, other.alpha_);
+  return (*this);
+}
+
+bool Color::SetColorFromHexString(std::string const& hex) {
+  unsigned int r, g, b;
+  if (!HexToRgb(hex, &r, &g, &b)) {
+    return false;
+  }
+
+  color_[0] = (r / 255.0);
+  color_[1] = (g / 255.0);
+  color_[2] = (b / 255.0);
+  return true;
+}
+
+double Color::operator[](unsigned int i) const { return color_.at(i); }
+
+double Color::alpha() const { return alpha_; }
+
+void Color::set_alpha(double alpha) { alpha_ = alpha; }
 
 bool Color::operator==(Color const& other) const {
-  return (color[0] == other.color[0] && color[1] == other.color[1] &&
-          color[2] == other.color[2] && alpha == other.alpha);
+  return (color_[0] == other.color_[0] && color_[1] == other.color_[1] &&
+          color_[2] == other.color_[2] && alpha_ == other.alpha_);
 }
 
 bool Color::operator!=(Color const& other) const { return !(*this == other); }
 
+std::ostream& operator<<(std::ostream& os, Color const& color) {
+  unsigned char r = (color[0] * 255);
+  unsigned char g = (color[1] * 255);
+  unsigned char b = (color[2] * 255);
+  return os << "rgba(" << static_cast<unsigned int>(r) << ", "
+            << static_cast<unsigned int>(g) << ", "
+            << static_cast<unsigned int>(b) << ", " << color.alpha() << ")";
+}
+
+Border::Border() : width_(0), rounded_(0) {}
+
+Border::Border(Border const& other)
+    : width_(other.width_), rounded_(other.rounded_) {}
+
+Border::Border(Border&& other)
+    : width_(std::move(other.width_)), rounded_(std::move(other.rounded_)) {}
+
+Border& Border::operator=(Border other) {
+  Color::operator=(other);
+  std::swap(width_, other.width_);
+  std::swap(rounded_, other.rounded_);
+  return (*this);
+}
+
+void Border::set_color(Color const& other) { Color::operator=(other); }
+
+int Border::width() const { return width_; }
+
+void Border::set_width(int width) { width_ = width; }
+
+int Border::rounded() const { return rounded_; }
+
+void Border::set_rounded(int rounded) { rounded_ = rounded; }
+
+bool Border::operator==(Border const& other) const {
+  return Color::operator==(other) && (width_ == other.width_) &&
+         (rounded_ == other.rounded_);
+}
+
+bool Border::operator!=(Border const& other) const { return !(*this == other); }
+
+Background::Background(Background const& other)
+    : fill_color_(other.fill_color_),
+      fill_color_hover_(other.fill_color_hover_),
+      fill_color_pressed_(other.fill_color_pressed_),
+      border_(other.border_),
+      border_color_hover_(other.border_color_hover_),
+      border_color_pressed_(other.border_color_pressed_) {}
+
+Background::Background(Background&& other)
+    : fill_color_(std::move(other.fill_color_)),
+      fill_color_hover_(std::move(other.fill_color_hover_)),
+      fill_color_pressed_(std::move(other.fill_color_pressed_)),
+      border_(std::move(other.border_)),
+      border_color_hover_(std::move(other.border_color_hover_)),
+      border_color_pressed_(std::move(other.border_color_pressed_)) {}
+
+Background& Background::operator=(Background other) {
+  std::swap(fill_color_, other.fill_color_);
+  std::swap(fill_color_hover_, other.fill_color_hover_);
+  std::swap(fill_color_pressed_, other.fill_color_pressed_);
+  std::swap(border_, other.border_);
+  std::swap(border_color_hover_, other.border_color_hover_);
+  std::swap(border_color_pressed_, other.border_color_pressed_);
+  return (*this);
+}
+
+Color Background::fill_color() const { return fill_color_; }
+
+void Background::set_fill_color(Color const& color) { fill_color_ = color; }
+
+Color Background::fill_color_hover() const {
+  if (!fill_color_hover_) {
+    return fill_color_;
+  }
+  return fill_color_hover_.Unwrap();
+}
+
+void Background::set_fill_color_hover(Color const& color) {
+  fill_color_hover_ = color;
+}
+
+Color Background::fill_color_pressed() const {
+  if (!fill_color_pressed_) {
+    return fill_color_;
+  }
+  return fill_color_pressed_.Unwrap();
+}
+
+void Background::set_fill_color_pressed(Color const& color) {
+  fill_color_pressed_ = color;
+}
+
+Border const& Background::border() const { return border_; }
+
+Border& Background::border() { return border_; }
+
+void Background::set_border(Border const& border) { border_ = border; }
+
+Color Background::border_color_hover() const {
+  if (!border_color_hover_) {
+    return border_;
+  }
+  return border_color_hover_.Unwrap();
+}
+
+void Background::set_border_color_hover(Color const& color) {
+  border_color_hover_ = color;
+}
+
+Color Background::border_color_pressed() const {
+  if (!border_color_pressed_) {
+    return border_;
+  }
+  return border_color_pressed_.Unwrap();
+}
+
+void Background::set_border_color_pressed(Color const& color) {
+  border_color_pressed_ = color;
+}
+
 bool Background::operator==(Background const& other) const {
-  return (back == other.back) && (border == other.border);
+  return (fill_color_ == other.fill_color_) &&
+         (fill_color_hover_ == other.fill_color_hover_) &&
+         (fill_color_pressed_ == other.fill_color_pressed_) &&
+         (border_ == other.border_) &&
+         (border_color_hover_ == other.border_color_hover_) &&
+         (border_color_pressed_ == other.border_color_pressed_);
 }
 
 bool Background::operator!=(Background const& other) const {
@@ -133,15 +327,16 @@ Area& Area::CloneArea(Area const& other) {
  ************************************************************/
 
 void Area::InitRendering(int pos) {
+  const int w = bg_.border().width();
   // initialize fixed position/size
   for (auto& child : children_) {
     if (panel_horizontal) {
-      child->panel_y_ = pos + bg_.border.width + padding_y_;
-      child->height_ = height_ - (2 * (bg_.border.width + padding_y_));
+      child->panel_y_ = pos + w + padding_y_;
+      child->height_ = height_ - (2 * (w + padding_y_));
       child->InitRendering(child->panel_y_);
     } else {
-      child->panel_x_ = pos + bg_.border.width + padding_y_;
-      child->width_ = width_ - (2 * (bg_.border.width + padding_y_));
+      child->panel_x_ = pos + w + padding_y_;
+      child->width_ = width_ - (2 * (w + padding_y_));
       child->InitRendering(child->panel_x_);
     }
   }
@@ -195,7 +390,7 @@ void Area::SizeByLayout(int pos, int level) {
   }
 
   // update position of children
-  pos += padding_x_lr_ + bg_.border.width;
+  pos += padding_x_lr_ + bg_.border().width();
 
   for (auto& child : children_) {
     if (!child->on_screen_) {
@@ -262,7 +457,7 @@ int Area::ResizeByLayout(int maximum_size) {
 
   if (panel_horizontal) {
     // detect free size for kByLayout's Area
-    size = width_ - (2 * (padding_x_lr_ + bg_.border.width));
+    size = width_ - (2 * (padding_x_lr_ + bg_.border().width()));
 
     for (auto& child : children_) {
       if (child->on_screen_) {
@@ -309,7 +504,7 @@ int Area::ResizeByLayout(int maximum_size) {
     }
   } else {
     // detect free size for kByLayout's Area
-    size = height_ - (2 * (padding_x_lr_ + bg_.border.width));
+    size = height_ - (2 * (padding_x_lr_ + bg_.border().width()));
 
     for (auto& child : children_) {
       if (child->on_screen_) {
@@ -412,26 +607,27 @@ void Area::Draw() {
 }
 
 void Area::DrawBackground(cairo_t* c) {
-  if (bg_.back.alpha > 0.0) {
-    DrawRect(c, bg_.border.width, bg_.border.width,
-             width_ - (2.0 * bg_.border.width),
-             height_ - (2.0 * bg_.border.width),
-             bg_.border.rounded - bg_.border.width / 1.571);
-    cairo_set_source_rgba(c, bg_.back.color[0], bg_.back.color[1],
-                          bg_.back.color[2], bg_.back.alpha);
+  const int w = bg_.border().width();
+  auto const& fill_color = bg_.fill_color();
+
+  if (fill_color.alpha() > 0.0) {
+    DrawRect(c, w, w, width_ - (2.0 * w), height_ - (2.0 * w),
+             bg_.border().rounded() - w / 1.571);
+    cairo_set_source_rgba(c, fill_color[0], fill_color[1], fill_color[2],
+                          fill_color.alpha());
     cairo_fill(c);
   }
 
-  if (bg_.border.width > 0 && bg_.border.alpha > 0.0) {
-    cairo_set_line_width(c, bg_.border.width);
+  auto const& border_color = bg_.border();
+  if (w > 0 && border_color.alpha() > 0.0) {
+    cairo_set_line_width(c, w);
 
     // draw border inside (x, y, width, height)
-    DrawRect(c, bg_.border.width / 2.0, bg_.border.width / 2.0,
-             width_ - bg_.border.width, height_ - bg_.border.width,
-             bg_.border.rounded);
+    DrawRect(c, w / 2.0, w / 2.0, width_ - w, height_ - w,
+             bg_.border().rounded());
 
-    cairo_set_source_rgba(c, bg_.border.color[0], bg_.border.color[1],
-                          bg_.border.color[2], bg_.border.alpha);
+    cairo_set_source_rgba(c, border_color[0], border_color[1], border_color[2],
+                          border_color.alpha());
     cairo_stroke(c);
   }
 }

@@ -146,7 +146,7 @@ bool Launcher::Resize() {
     icon_size = width_;
   }
 
-  icon_size -= (2 * bg_.border.width) - (2 * padding_y_);
+  icon_size -= (2 * bg_.border().width()) - (2 * padding_y_);
 
   if (launcher_max_icon_size > 0 && icon_size > launcher_max_icon_size) {
     icon_size = launcher_max_icon_size;
@@ -210,7 +210,7 @@ bool Launcher::Resize() {
     width_ = 0;
 
     if (count != 0) {
-      int height = height_ - 2 * bg_.border.width - 2 * padding_y_;
+      int height = height_ - 2 * bg_.border().width() - 2 * padding_y_;
       // here icons_per_column always higher than 0
       icons_per_column =
           std::max(1, (height + padding_x_) / (icon_size + padding_x_));
@@ -218,35 +218,35 @@ bool Launcher::Resize() {
                icon_size;
       icons_per_row =
           count / icons_per_column + (count % icons_per_column != 0);
-      width_ = (2 * bg_.border.width) + (2 * padding_x_lr_) +
+      width_ = (2 * bg_.border().width()) + (2 * padding_x_lr_) +
                (icon_size * icons_per_row) + ((icons_per_row - 1) * padding_x_);
     }
   } else {
     height_ = 0;
 
     if (count != 0) {
-      int width = width_ - 2 * bg_.border.width - 2 * padding_y_;
+      int width = width_ - 2 * bg_.border().width() - 2 * padding_y_;
       // here icons_per_row always higher than 0
       icons_per_row =
           std::max(1, (width + padding_x_) / (icon_size + padding_x_));
       margin =
           width - (icons_per_row - 1) * (icon_size + padding_x_) - icon_size;
       icons_per_column = count / icons_per_row + (count % icons_per_row != 0);
-      height_ = (2 * bg_.border.width) + (2 * padding_x_lr_) +
+      height_ = (2 * bg_.border().width()) + (2 * padding_x_lr_) +
                 (icon_size * icons_per_column) +
                 ((icons_per_column - 1) * padding_x_);
     }
   }
 
   int posx, posy;
-  int start = bg_.border.width + padding_y_ + margin / 2;
+  int start = bg_.border().width() + padding_y_ + margin / 2;
 
   if (panel_horizontal) {
     posy = start;
-    posx = bg_.border.width + padding_x_lr_;
+    posx = bg_.border().width() + padding_x_lr_;
   } else {
     posx = start;
-    posy = bg_.border.width + padding_x_lr_;
+    posy = bg_.border().width() + padding_x_lr_;
   }
 
   int i = 1;

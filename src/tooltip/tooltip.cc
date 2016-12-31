@@ -73,10 +73,7 @@ void DefaultTooltip() {
   g_tooltip.font_desc = nullptr;
   g_tooltip.bg = Background{};
   g_tooltip.timeout.Clear();
-  g_tooltip.font_color.color[0] = 1;
-  g_tooltip.font_color.color[1] = 1;
-  g_tooltip.font_color.color[2] = 1;
-  g_tooltip.font_color.alpha = 1;
+  g_tooltip.font_color = Color{{1.0, 1.0, 1.0}, 1.0};
 }
 
 void CleanupTooltip(Timer& timer) {
@@ -172,8 +169,9 @@ void TooltipUpdateGeometry() {
 
   PangoRectangle r1, r2;
   pango_layout_get_pixel_extents(layout.get(), &r1, &r2);
-  width = 2 * g_tooltip.bg.border.width + 2 * g_tooltip.paddingx + r2.width;
-  height = 2 * g_tooltip.bg.border.width + 2 * g_tooltip.paddingy + r2.height;
+  const int w = g_tooltip.bg.border().width();
+  width = 2 * w + 2 * g_tooltip.paddingx + r2.width;
+  height = 2 * w + 2 * g_tooltip.paddingy + r2.height;
 
   Panel* panel = g_tooltip.panel;
 
@@ -260,35 +258,33 @@ void Tooltip::Update(Timer& timer) {
   auto cs = cairo_xlib_surface_create(server.dsp, window, server.visual, width,
                                       height);
   auto c = cairo_create(cs);
-  Color& bc = bg.back;
-  Border& b = bg.border;
+  Color bc{bg.fill_color()};
+  Border b{bg.border()};
+  const int w = b.width();
 
   if (server.real_transparency) {
     ClearPixmap(window, 0, 0, width, height);
-    DrawRect(c, b.width, b.width, width - 2 * b.width, height - 2 * b.width,
-             b.rounded - b.width / 1.571);
-    cairo_set_source_rgba(c, bc.color[0], bc.color[1], bc.color[2], bc.alpha);
+    DrawRect(c, w, w, width - 2 * w, height - w, b.rounded() - w / 1.571);
+    cairo_set_source_rgba(c, bc[0], bc[1], bc[2], bc.alpha());
   } else {
     cairo_rectangle(c, 0., 0, width, height);
-    cairo_set_source_rgb(c, bc.color[0], bc.color[1], bc.color[2]);
+    cairo_set_source_rgb(c, bc[0], bc[1], bc[2]);
   }
 
   cairo_fill(c);
-  cairo_set_line_width(c, b.width);
+  cairo_set_line_width(c, w);
 
   if (server.real_transparency) {
-    DrawRect(c, b.width / 2.0, b.width / 2.0, width - b.width, height - b.width,
-             b.rounded);
+    DrawRect(c, w / 2.0, w / 2.0, width - w, height - w, b.rounded());
   } else {
-    cairo_rectangle(c, b.width / 2.0, b.width / 2.0, width - b.width,
-                    height - b.width);
+    cairo_rectangle(c, w / 2.0, w / 2.0, width - w, height - w);
   }
 
-  cairo_set_source_rgba(c, b.color[0], b.color[1], b.color[2], b.alpha);
+  cairo_set_source_rgba(c, b[0], b[1], b[2], b.alpha());
   cairo_stroke(c);
 
-  Color& fc = font_color;
-  cairo_set_source_rgba(c, fc.color[0], fc.color[1], fc.color[2], fc.alpha);
+  cairo_set_source_rgba(c, font_color[0], font_color[1], font_color[2],
+                        font_color.alpha());
 
   util::GObjectPtr<PangoLayout> layout(pango_cairo_create_layout(c));
   pango_layout_set_font_description(layout.get(), font_desc);
@@ -301,8 +297,7 @@ void Tooltip::Update(Timer& timer) {
   pango_layout_set_ellipsize(layout.get(), PANGO_ELLIPSIZE_END);
   // I do not know why this is the right way, but with the below cairo_move_to
   // it seems to be centered (horiz. and vert.)
-  cairo_move_to(c, -r1.x / 2 + bg.border.width + paddingx,
-                -r1.y / 2 + bg.border.width + paddingy);
+  cairo_move_to(c, -r1.x / 2 + w + paddingx, -r1.y / 2 + w + paddingy);
   pango_cairo_show_layout(c, layout.get());
 
   cairo_destroy(c);

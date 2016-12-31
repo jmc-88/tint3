@@ -113,9 +113,9 @@ void Taskbarname::DrawForeground(cairo_t* c) {
 
   // TODO: the parent should return this value, without the children knowing
   // about its internals
-  Color* config_text = (taskbar->desktop == server.desktop)
-                           ? &taskbarname_active_font
-                           : &taskbarname_font;
+  Color const& config_text = (taskbar->desktop == server.desktop)
+                                 ? taskbarname_active_font
+                                 : taskbarname_font;
 
   // TODO: the parent should return this state, without the children knowing
   // about its internals
@@ -130,8 +130,8 @@ void Taskbarname::DrawForeground(cairo_t* c) {
   pango_layout_set_alignment(layout.get(), PANGO_ALIGN_CENTER);
   pango_layout_set_text(layout.get(), name_.c_str(), name_.length());
 
-  cairo_set_source_rgba(c, config_text->color[0], config_text->color[1],
-                        config_text->color[2], config_text->alpha);
+  cairo_set_source_rgba(c, config_text[0], config_text[1], config_text[2],
+                        config_text.alpha());
 
   pango_cairo_update_layout(c, layout.get());
   cairo_move_to(c, 0, panel_y_);
@@ -146,7 +146,7 @@ bool Taskbarname::Resize() {
                &name_width, panel_->height_, panel_->width_, name());
 
   if (panel_horizontal) {
-    int new_size = name_width + (2 * (padding_x_lr_ + bg_.border.width));
+    int new_size = name_width + (2 * (padding_x_lr_ + bg_.border().width()));
 
     if (new_size != width_) {
       width_ = new_size;
@@ -154,7 +154,7 @@ bool Taskbarname::Resize() {
       return true;
     }
   } else {
-    int new_size = name_height + (2 * (padding_x_lr_ + bg_.border.width));
+    int new_size = name_height + (2 * (padding_x_lr_ + bg_.border().width()));
 
     if (new_size != height_) {
       height_ = new_size;

@@ -396,7 +396,7 @@ void Task::DrawIcon(int text_width) {
       pos_x = (width_ - panel_->g_task.icon_size1) / 2;
     }
   } else {
-    pos_x = panel_->g_task.padding_x_lr_ + bg_.border.width;
+    pos_x = panel_->g_task.padding_x_lr_ + bg_.border().width();
   }
 
   // Render
@@ -441,9 +441,9 @@ void Task::DrawForeground(cairo_t* c) {
 
     pango_layout_get_pixel_size(layout.get(), &width, &height);
 
-    Color* config_text = &panel_->g_task.font[current_state];
-    cairo_set_source_rgba(c, config_text->color[0], config_text->color[1],
-                          config_text->color[2], config_text->alpha);
+    Color const& config_text = panel_->g_task.font[current_state];
+    cairo_set_source_rgba(c, config_text[0], config_text[1], config_text[2],
+                          config_text.alpha());
 
     pango_cairo_update_layout(c, layout.get());
     double text_posy = (panel_->g_task.height_ - height) / 2.0;

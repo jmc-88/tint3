@@ -291,6 +291,26 @@ bool Reader::LoadFromFile(std::string const& path) {
   return true;
 }
 
+namespace {
+
+Color ParseColor(std::string const& value, double default_alpha = 0.5) {
+  std::string value1, value2, value3;
+  config::ExtractValues(value, value1, value2, value3);
+
+  Color c;
+  c.SetColorFromHexString(value1);
+
+  if (!value2.empty()) {
+    c.set_alpha(std::stol(value2) / 100.0);
+  } else {
+    c.set_alpha(default_alpha);
+  }
+
+  return c;
+}
+
+}  // namespace
+
 void Reader::AddEntry(std::string const& key, std::string const& value) {
   std::string value1, value2, value3;
 
@@ -298,30 +318,22 @@ void Reader::AddEntry(std::string const& key, std::string const& value) {
   if (key == "rounded") {
     // 'rounded' is the first parameter => alloc a new background
     Background bg;
-    bg.border.rounded = std::stol(value);
+    bg.border().set_rounded(std::stol(value));
     backgrounds.push_back(bg);
   } else if (key == "border_width") {
-    backgrounds.back().border.width = std::stol(value);
+    backgrounds.back().border().set_width(std::stol(value));
   } else if (key == "background_color") {
-    auto& bg = backgrounds.back();
-    config::ExtractValues(value, value1, value2, value3);
-    GetColor(value1, bg.back.color);
-
-    if (!value2.empty()) {
-      bg.back.alpha = (std::stol(value2) / 100.0);
-    } else {
-      bg.back.alpha = 0.5;
-    }
+    backgrounds.back().set_fill_color(ParseColor(value));
+  } else if (key == "background_color_hover") {
+    backgrounds.back().set_fill_color_hover(ParseColor(value));
+  } else if (key == "background_color_pressed") {
+    backgrounds.back().set_fill_color_pressed(ParseColor(value));
   } else if (key == "border_color") {
-    auto& bg = backgrounds.back();
-    config::ExtractValues(value, value1, value2, value3);
-    GetColor(value1, bg.border.color);
-
-    if (!value2.empty()) {
-      bg.border.alpha = (std::stol(value2) / 100.0);
-    } else {
-      bg.border.alpha = 0.5;
-    }
+    backgrounds.back().border().set_color(ParseColor(value));
+  } else if (key == "border_color_hover") {
+    backgrounds.back().set_border_color_hover(ParseColor(value));
+  } else if (key == "border_color_pressed") {
+    backgrounds.back().set_border_color_pressed(ParseColor(value));
   }
 
   /* Panel */
@@ -464,14 +476,7 @@ void Reader::AddEntry(std::string const& key, std::string const& value) {
 #endif  // ENABLE_BATTERY
   } else if (key == "battery_font_color") {
 #ifdef ENABLE_BATTERY
-    config::ExtractValues(value, value1, value2, value3);
-    GetColor(value1, panel_config.battery_.font.color);
-
-    if (!value2.empty()) {
-      panel_config.battery_.font.alpha = (std::stol(value2) / 100.0);
-    } else {
-      panel_config.battery_.font.alpha = 0.5;
-    }
+    panel_config.battery_.font = ParseColor(value);
 #endif  // ENABLE_BATTERY
   } else if (key == "battery_padding") {
 #ifdef ENABLE_BATTERY
@@ -529,14 +534,7 @@ void Reader::AddEntry(std::string const& key, std::string const& value) {
   } else if (key == "time2_font") {
     time2_font_desc = pango_font_description_from_string(value.c_str());
   } else if (key == "clock_font_color") {
-    config::ExtractValues(value, value1, value2, value3);
-    GetColor(value1, panel_config.clock_.font_.color);
-
-    if (!value2.empty()) {
-      panel_config.clock_.font_.alpha = (std::stol(value2) / 100.0);
-    } else {
-      panel_config.clock_.font_.alpha = 0.5;
-    }
+    panel_config.clock_.font_ = ParseColor(value);
   } else if (key == "clock_padding") {
     config::ExtractValues(value, value1, value2, value3);
     panel_config.clock_.padding_x_lr_ = panel_config.clock_.padding_x_ =
@@ -620,23 +618,9 @@ void Reader::AddEntry(std::string const& key, std::string const& value) {
   } else if (key == "taskbar_name_font") {
     taskbarname_font_desc = pango_font_description_from_string(value.c_str());
   } else if (key == "taskbar_name_font_color") {
-    config::ExtractValues(value, value1, value2, value3);
-    GetColor(value1, taskbarname_font.color);
-
-    if (!value2.empty()) {
-      taskbarname_font.alpha = (std::stol(value2) / 100.0);
-    } else {
-      taskbarname_font.alpha = 0.5;
-    }
+    taskbarname_font = ParseColor(value);
   } else if (key == "taskbar_name_active_font_color") {
-    config::ExtractValues(value, value1, value2, value3);
-    GetColor(value1, taskbarname_active_font.color);
-
-    if (!value2.empty()) {
-      taskbarname_active_font.alpha = (std::stol(value2) / 100.0);
-    } else {
-      taskbarname_active_font.alpha = 0.5;
-    }
+    taskbarname_active_font = ParseColor(value);
   }
 
   /* Task */
@@ -676,15 +660,7 @@ void Reader::AddEntry(std::string const& key, std::string const& value) {
   } else if (util::string::RegexMatch("task.*_font_color", key)) {
     auto split = util::string::Split(key, '_');
     int status = GetTaskStatus(split[1]);
-    config::ExtractValues(value, value1, value2, value3);
-    float alpha = 1;
-
-    if (!value2.empty()) {
-      alpha = (std::stol(value2) / 100.0);
-    }
-
-    GetColor(value1, panel_config.g_task.font[status].color);
-    panel_config.g_task.font[status].alpha = alpha;
+    panel_config.g_task.font[status] = ParseColor(value, 1.0);
     panel_config.g_task.config_font_mask |= (1 << status);
   } else if (util::string::RegexMatch("task.*_icon_asb", key)) {
     auto split = util::string::Split(key, '_');
@@ -801,14 +777,7 @@ void Reader::AddEntry(std::string const& key, std::string const& value) {
   } else if (key == "tooltip_background_id") {
     g_tooltip.bg = GetBackgroundFromId(std::stol(value));
   } else if (key == "tooltip_font_color") {
-    config::ExtractValues(value, value1, value2, value3);
-    GetColor(value1, g_tooltip.font_color.color);
-
-    if (!value2.empty()) {
-      g_tooltip.font_color.alpha = (std::stol(value2) / 100.0);
-    } else {
-      g_tooltip.font_color.alpha = 0.1;
-    }
+    g_tooltip.font_color = ParseColor(value, 0.1);
   } else if (key == "tooltip_font") {
     g_tooltip.font_desc = pango_font_description_from_string(value.c_str());
   }

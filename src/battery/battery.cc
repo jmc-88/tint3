@@ -341,8 +341,7 @@ void Battery::DrawForeground(cairo_t* c) {
   pango_layout_set_text(layout.get(), battery_percentage_.c_str(),
                         battery_percentage_.length());
 
-  cairo_set_source_rgba(c, font.color[0], font.color[1], font.color[2],
-                        font.alpha);
+  cairo_set_source_rgba(c, font[0], font[1], font[2], font.alpha());
 
   pango_cairo_update_layout(c, layout.get());
   cairo_move_to(c, 0, bat1_posy);
@@ -387,7 +386,7 @@ bool Battery::Resize() {
 
   if (panel_horizontal) {
     int new_size = std::max(bat_percentage_width, bat_time_width) +
-                   (2 * padding_x_lr_) + (2 * bg_.border.width);
+                   (2 * padding_x_lr_) + (2 * bg_.border().width());
 
     if (new_size > width_ || new_size < (width_ - 2)) {
       // we try to limit the number of resize
@@ -398,7 +397,7 @@ bool Battery::Resize() {
     }
   } else {
     int new_size = bat_percentage_height + bat_time_height +
-                   (2 * (padding_x_lr_ + bg_.border.width));
+                   (2 * (padding_x_lr_ + bg_.border().width()));
 
     if (new_size > height_ || new_size < (height_ - 2)) {
       height_ = new_size;

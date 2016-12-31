@@ -76,9 +76,6 @@ bool SignalAction(int signal_number, void signal_handler(int), int flags = 0);
 // fork and execute a shell script
 void TintShellExec(std::string const& command);
 
-// color conversion
-bool GetColor(const std::string& hex, double* rgb);
-
 // adjust Alpha/Saturation/Brightness on an ARGB icon
 // alpha from 0 to 100, satur from 0 to 1, bright from 0 to 1.
 void AdjustAsb(DATA32* data, unsigned int w, unsigned int h, int alpha,

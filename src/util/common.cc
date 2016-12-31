@@ -37,49 +37,6 @@
 #include "util/common.hh"
 #include "util/log.hh"
 
-namespace {
-
-unsigned int HexCharToInt(char c) {
-  c = std::tolower(c);
-
-  if (c >= '0' && c <= '9') {
-    return c - '0';
-  }
-
-  if (c >= 'a' && c <= 'f') {
-    return c - 'a' + 10;
-  }
-
-  return 0;
-}
-
-bool HexToRgb(std::string const& hex, unsigned int* r, unsigned int* g,
-              unsigned int* b) {
-  if (hex.empty() || hex[0] != '#') {
-    return false;
-  }
-
-  if (hex.length() == 3 + 1) {
-    (*r) = HexCharToInt(hex[1]);
-    (*g) = HexCharToInt(hex[2]);
-    (*b) = HexCharToInt(hex[3]);
-  } else if (hex.length() == 6 + 1) {
-    (*r) = HexCharToInt(hex[1]) * 16 + HexCharToInt(hex[2]);
-    (*g) = HexCharToInt(hex[3]) * 16 + HexCharToInt(hex[4]);
-    (*b) = HexCharToInt(hex[5]) * 16 + HexCharToInt(hex[6]);
-  } else if (hex.length() == 12 + 1) {
-    (*r) = HexCharToInt(hex[1]) * 16 + HexCharToInt(hex[2]);
-    (*g) = HexCharToInt(hex[5]) * 16 + HexCharToInt(hex[6]);
-    (*b) = HexCharToInt(hex[9]) * 16 + HexCharToInt(hex[10]);
-  } else {
-    return false;
-  }
-
-  return true;
-}
-
-}  // namespace
-
 namespace util {
 
 void GObjectUnrefDeleter::operator()(gpointer data) const {
@@ -176,19 +133,6 @@ void TintShellExec(std::string const& command) {
       _exit(1);
     }
   }
-}
-
-bool GetColor(std::string const& hex, double* rgb) {
-  unsigned int r, g, b;
-
-  if (!HexToRgb(hex, &r, &g, &b)) {
-    return false;
-  }
-
-  rgb[0] = (r / 255.0);
-  rgb[1] = (g / 255.0);
-  rgb[2] = (b / 255.0);
-  return true;
 }
 
 void AdjustAsb(DATA32* data, unsigned int w, unsigned int h, int alpha,

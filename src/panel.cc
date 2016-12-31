@@ -370,10 +370,10 @@ void Panel::InitSizeAndPosition() {
       width_ = server.monitor[monitor_].width - margin_x_;
     }
 
-    if (bg_.border.rounded > height_ / 2) {
+    if (bg_.border().rounded() > height_ / 2) {
       util::log::Error() << "panel_background_id rounded is too big: please "
                             "fix your tint3rc.\n";
-      bg_.border.rounded = height_ / 2;
+      bg_.border().set_rounded(height_ / 2);
     }
   } else {
     int old_panel_height = height_;
@@ -394,10 +394,10 @@ void Panel::InitSizeAndPosition() {
       height_ = server.monitor[monitor_].height - margin_y_;
     }
 
-    if (bg_.border.rounded > width_ / 2) {
+    if (bg_.border().rounded() > width_ / 2) {
       util::log::Error() << "panel_background_id rounded is too big: please "
                             "fix your tint3rc.\n";
-      bg_.border.rounded = width_ / 2;
+      bg_.border().set_rounded(width_ / 2);
     }
   }
 

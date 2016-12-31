@@ -253,3 +253,54 @@ TEST_CASE("ConfigParserEmptyAssignment", "Doesn't choke on empty assignments") {
   CleanupClock(timer);    // TODO: decouple from config loading
   CleanupPanel();         // TODO: decouple from config loading
 }
+
+static constexpr char kHoverPressed[] =
+    u8R"EOF(
+# Background 1
+rounded = 0
+background_color = #808080 0
+border_color = #808080 0
+
+# Background 2
+rounded = 1
+border_width = 2
+background_color = #000000 0
+background_color_hover = #666666 0
+background_color_pressed = #ffffff 0
+border_color = #000000 0
+border_color_hover = #666666 0
+border_color_pressed = #ffffff 0
+)EOF";
+
+TEST_CASE("ConfigParserHoverPressed", "Doesn't choke on hover/pressed states") {
+  DefaultPanel();  // TODO: decouple from config loading
+
+  test::ConfigReader reader;
+  config::Parser config_entry_parser{&reader};
+  parser::Parser p{config::kLexer, &config_entry_parser};
+
+  REQUIRE(p.Parse(kHoverPressed));
+
+  REQUIRE(backgrounds.size() == 3);  // default background + 2 custom
+
+  // Background 1: Hover not given, verify it corresponds to normal state
+  REQUIRE(backgrounds[1].fill_color_hover() == backgrounds[1].fill_color());
+  REQUIRE(backgrounds[1].border_color_hover() == backgrounds[1].border());
+  // Background 1: Pressed not given, verify it corresponds to normal state
+  REQUIRE(backgrounds[1].fill_color_pressed() == backgrounds[1].fill_color());
+  REQUIRE(backgrounds[1].border_color_pressed() == backgrounds[1].border());
+
+  // Background 2: Hover was given, verify it was parsed
+  Color expected_hover_color{{0.4, 0.4, 0.4}, 0.0};
+  REQUIRE(backgrounds[2].fill_color_hover() == expected_hover_color);
+  REQUIRE(backgrounds[2].border_color_hover() == expected_hover_color);
+  // Background 2: Pressed was given, verify it was parsed
+  Color expected_pressed_color{{1.0, 1.0, 1.0}, 0.0};
+  REQUIRE(backgrounds[2].fill_color_pressed() == expected_pressed_color);
+  REQUIRE(backgrounds[2].border_color_pressed() == expected_pressed_color);
+  // Background 2: rounded and border_width parsed
+  REQUIRE(backgrounds[2].border().rounded() == 1);
+  REQUIRE(backgrounds[2].border().width() == 2);
+
+  CleanupPanel();  // TODO: decouple from config loading
+}
