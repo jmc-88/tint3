@@ -183,7 +183,7 @@ class Area {
 
   void FreeArea();
 
-  bool IsClickInside(int x, int y) const;
+  bool IsPointInside(int x, int y) const;
 
 #ifdef _TINT3_DEBUG
 

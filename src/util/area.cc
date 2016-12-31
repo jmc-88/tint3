@@ -728,7 +728,7 @@ void ClearPixmap(Pixmap p, int x, int y, int w, int h) {
   XRenderFreePicture(server.dsp, pict);
 }
 
-bool Area::IsClickInside(int x, int y) const {
+bool Area::IsPointInside(int x, int y) const {
   bool inside_x = (x >= panel_x_ && x <= panel_x_ + width_);
   bool inside_y = (y >= panel_y_ && y <= panel_y_ + height_);
   return on_screen_ && inside_x && inside_y;

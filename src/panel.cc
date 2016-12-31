@@ -694,7 +694,7 @@ Panel* GetPanel(Window win) {
 
 Taskbar* Panel::ClickTaskbar(int x, int y) {
   for (int i = 0; i < nb_desktop_; i++) {
-    if (taskbar_[i].IsClickInside(x, y)) {
+    if (taskbar_[i].IsPointInside(x, y)) {
       return &taskbar_[i];
     }
   }
@@ -713,7 +713,7 @@ Task* Panel::ClickTask(int x, int y) {
     }
 
     for (auto it = begin; it != tskbar->children_.end(); ++it) {
-      if ((*it)->IsClickInside(x, y)) {
+      if ((*it)->IsPointInside(x, y)) {
         return reinterpret_cast<Task*>(*it);
       }
     }
@@ -723,7 +723,7 @@ Task* Panel::ClickTask(int x, int y) {
 }
 
 bool Panel::ClickLauncher(int x, int y) {
-  return launcher_.IsClickInside(x, y);
+  return launcher_.IsPointInside(x, y);
 }
 
 LauncherIcon* Panel::ClickLauncherIcon(int x, int y) {
@@ -759,7 +759,7 @@ bool Panel::ClickPadding(int x, int y) {
   return false;
 }
 
-bool Panel::ClickClock(int x, int y) { return clock_.IsClickInside(x, y); }
+bool Panel::ClickClock(int x, int y) { return clock_.IsPointInside(x, y); }
 
 Area* Panel::ClickArea(int x, int y) {
   Area* new_result = this;
@@ -769,7 +769,7 @@ Area* Panel::ClickArea(int x, int y) {
     result = new_result;
 
     for (auto& child : result->children_) {
-      if (child->IsClickInside(x, y)) {
+      if (child->IsPointInside(x, y)) {
         new_result = child;
         break;
       }
