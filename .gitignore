@@ -1,2 +1,5 @@
+# Ignore the lock file created by Bundler
+Gemfile.lock
+
 # Ignore the generated Jekyll site folder
 /_site
