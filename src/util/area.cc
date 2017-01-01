@@ -695,6 +695,29 @@ bool Area::Resize() {
 void Area::OnChangeLayout() { /* defaults to a no-op */
 }
 
+bool Area::IsPointInside(int x, int y) const {
+  bool inside_x = (x >= panel_x_ && x <= panel_x_ + width_);
+  bool inside_y = (y >= panel_y_ && y <= panel_y_ + height_);
+  return on_screen_ && inside_x && inside_y;
+}
+
+Area* Area::InnermostAreaUnderPoint(int x, int y) {
+  if (!IsPointInside(x, y)) {
+    return nullptr;
+  }
+
+  // Try looking for the innermost child that contains the given point.
+  for (auto& child : children_) {
+    Area* result = child->InnermostAreaUnderPoint(x, y);
+    if (result != nullptr) {
+      return result;
+    }
+  }
+
+  // If no child has it, it has to be contained in this Area object itself.
+  return this;
+}
+
 #ifdef _TINT3_DEBUG
 
 std::string Area::GetFriendlyName() const { return "Area"; }
@@ -743,27 +766,4 @@ void ClearPixmap(Pixmap p, int x, int y, int w, int h) {
   XRenderColor col = {.red = 0, .green = 0, .blue = 0, .alpha = 0};
   XRenderFillRectangle(server.dsp, PictOpSrc, pict, &col, x, y, w, h);
   XRenderFreePicture(server.dsp, pict);
-}
-
-bool Area::IsPointInside(int x, int y) const {
-  bool inside_x = (x >= panel_x_ && x <= panel_x_ + width_);
-  bool inside_y = (y >= panel_y_ && y <= panel_y_ + height_);
-  return on_screen_ && inside_x && inside_y;
-}
-
-Area* Area::InnermostAreaUnderPoint(int x, int y) {
-  if (!IsPointInside(x, y)) {
-    return nullptr;
-  }
-
-  // Try looking for the innermost child that contains the given point.
-  for (auto& child : children_) {
-    Area* result = child->InnermostAreaUnderPoint(x, y);
-    if (result != nullptr) {
-      return result;
-    }
-  }
-
-  // If no child has it, it has to be contained in this Area object itself.
-  return this;
 }
