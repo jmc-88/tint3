@@ -707,15 +707,15 @@ void EventPropertyNotify(XEvent* e, Timer& timer) {
         XWindowAttributes wa;
         XGetWindowAttributes(server.dsp, win, &wa);
 
-        if (wa.map_state == IsViewable && !util::window::IsSkipTaskbar(win)) {
-          if ((tsk = AddTask(win, timer))) {
-            panel_refresh = true;
-          } else {
-            return;
-          }
-        } else {
+        if (wa.map_state != IsViewable || util::window::IsSkipTaskbar(win)) {
           return;
         }
+
+        if (!(tsk = AddTask(win, timer))) {
+          return;
+        }
+
+        panel_refresh = true;
       }
     }
 
@@ -1154,18 +1154,42 @@ start:
   pending_children = false;
   SignalAction(SIGCHLD, [](int) -> void { pending_children = true; });
 
-  event_loop.RegisterHandler(ButtonPress, [&timer](XEvent& e) -> void {
+  // Pointer to the Area that was last activated by a mouse effect.
+  Area* previous_mouse_over_area = nullptr;
+
+  event_loop.RegisterHandler(ButtonPress, [&](XEvent& e) -> void {
     TooltipHide(timer);
     EventButtonPress(&e);
-  });
-  event_loop.RegisterHandler(ButtonRelease,
-                             [](XEvent& e) -> void { EventButtonRelease(&e); });
 
-  event_loop.RegisterHandler(MotionNotify, [&timer](XEvent& e) -> void {
+    Panel* panel = GetPanel(e.xmotion.window);
+    if (!panel) {
+      return;
+    }
+
+    previous_mouse_over_area =
+        panel->InnermostAreaUnderPoint(e.xmotion.x, e.xmotion.y)
+            ->MouseOver(previous_mouse_over_area, /*button_pressed=*/true);
+  });
+
+  event_loop.RegisterHandler(ButtonRelease, [&](XEvent& e) -> void {
+    EventButtonRelease(&e);
+
+    Panel* panel = GetPanel(e.xmotion.window);
+    if (!panel) {
+      return;
+    }
+
+    previous_mouse_over_area =
+        panel->InnermostAreaUnderPoint(e.xmotion.x, e.xmotion.y)
+            ->MouseOver(previous_mouse_over_area, /*button_pressed=*/false);
+  });
+
+  event_loop.RegisterHandler(MotionNotify, [&](XEvent& e) -> void {
     static constexpr unsigned int button_mask =
         Button1Mask | Button2Mask | Button3Mask | Button4Mask | Button5Mask;
+    const bool button_pressed = (e.xmotion.state & button_mask) != 0;
 
-    if (e.xmotion.state & button_mask) {
+    if (button_pressed) {
       EventButtonMotionNotify(&e);
     }
 
@@ -1178,10 +1202,19 @@ start:
     } else {
       TooltipTriggerHide(timer);
     }
+
+    previous_mouse_over_area =
+        area->MouseOver(previous_mouse_over_area, button_pressed);
   });
 
-  event_loop.RegisterHandler(
-      LeaveNotify, [&timer](XEvent& e) -> void { TooltipTriggerHide(timer); });
+  event_loop.RegisterHandler(LeaveNotify, [&](XEvent& e) -> void {
+    TooltipTriggerHide(timer);
+
+    if (previous_mouse_over_area != nullptr) {
+      previous_mouse_over_area->MouseLeave();
+      previous_mouse_over_area = nullptr;
+    }
+  });
 
   event_loop.RegisterHandler(Expose,
                              [](XEvent& e) -> void { EventExpose(&e); });

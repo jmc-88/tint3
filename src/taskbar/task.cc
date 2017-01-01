@@ -599,6 +599,7 @@ void Task::SetState(int state) {
       tsk1->current_state = state;
       tsk1->bg_ = panel1[0].g_task.background[state];
       tsk1->pix_ = tsk1->state_pix[state];
+      tsk1->set_mouse_state(MouseState::kMouseNormal);
 
       if (tsk1->state_pix[state] == 0) {
         tsk1->need_redraw_ = true;

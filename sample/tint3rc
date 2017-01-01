@@ -13,8 +13,22 @@ border_color = #000000 0
 # ID 2
 rounded = 0
 border_width = 0
+background_color = #000000 0
+background_color_hover = #7f7f7f 40
+background_color_pressed = #7f7f7f 70
+border_color = #000000 0
+
+# ID 3
+rounded = 0
+border_width = 0
 background_color = #7f7f7f 80
-border_color = #ffffff 0
+border_color = #000000 0
+
+# ID 4
+rounded = 0
+border_width = 0
+background_color = #3f3f3f 90
+border_color = #000000 0
 # }}} backgrounds
 
 # {{{ panel
@@ -43,10 +57,10 @@ task_text = 0
 task_centered = 1
 task_maximum_size = 48 30
 task_padding = 9 8 0
-task_background_id = 0
-task_active_background_id = 2
-task_urgent_background_id = 0
-task_iconified_background_id = 0
+task_background_id = 2
+task_active_background_id = 3
+task_urgent_background_id = 2
+task_iconified_background_id = 2
 # }}} tasks
 
 # {{{ task icons
@@ -79,7 +93,7 @@ tooltip = 1
 tooltip_padding = 2 2
 tooltip_show_timeout = 0.0
 tooltip_hide_timeout = 0.0
-tooltip_background_id = 2
+tooltip_background_id = 4
 tooltip_font = Droid Sans 10
 tooltip_font_color = #dcdcdc 100
 # }}} tooltips

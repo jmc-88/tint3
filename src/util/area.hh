@@ -107,6 +107,9 @@ class Background {
 // kByContent objects : clock, battery, launcher, systray
 enum class SizeMode { kByLayout, kByContent };
 
+// Allowed mouse states.
+enum class MouseState { kMouseNormal, kMouseOver, kMousePressed };
+
 class Panel;
 class Area {
  public:
@@ -191,6 +194,17 @@ class Area {
   // found.
   Area* InnermostAreaUnderPoint(int x, int y);
 
+  // Applies mouse hover or pressed states, according to the given boolean
+  // parameter. Functionally a no-op if the loaded configuration doesn't
+  // override the hover/pressed states.
+  // Returns a pointer to this Area object, for easier chaining.
+  Area* MouseOver(Area* previous_area, bool button_pressed);
+
+  // Resets the normal state after the mouse pointer has left the area.
+  void MouseLeave();
+
+  void set_mouse_state(MouseState new_state);
+
 #ifdef _TINT3_DEBUG
 
   virtual std::string GetFriendlyName() const;
@@ -200,6 +214,9 @@ class Area {
   void PrintTreeLevel(unsigned int level) const;
 
 #endif  // _TINT3_DEBUG
+
+ private:
+  MouseState mouse_state_;
 };
 
 // draw rounded rectangle

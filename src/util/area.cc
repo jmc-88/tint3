@@ -266,7 +266,8 @@ Area::Area()
       padding_y_(0),
       parent_(nullptr),
       panel_(nullptr),
-      on_changed_(false) {}
+      on_changed_(false),
+      mouse_state_(MouseState::kMouseNormal) {}
 
 Area::~Area() {}
 
@@ -455,7 +456,7 @@ void Area::Refresh() {
   }
 
   // draw current Area
-  if (pix_ == 0) {
+  if (pix_ == None) {
     util::log::Debug() << "Empty area at panel_x_ = " << panel_x_
                        << ", width = " << width_ << '\n';
   }
@@ -597,12 +598,30 @@ void Area::Show() {
 }
 
 void Area::Draw() {
+  // if (on_changed_) {
+  //   for (auto& state_pix : pix_by_state_) {
+  //     if (pix_ == state_pix) {
+  //       pix_ = None;
+  //     }
+  //     if (state_pix) {
+  //       XFreePixmap(server.dsp, state_pix);
+  //       state_pix = None;
+  //     }
+  //   }
+  // }
+
   if (pix_) {
     XFreePixmap(server.dsp, pix_);
+    // Pixmap& state_pix = pix_by_state_[static_cast<unsigned
+    // int>(mouse_state_)];
+    // if (state_pix != pix_) {
+    //   XFreePixmap(server.dsp, state_pix);
+    // }
   }
 
   pix_ =
       XCreatePixmap(server.dsp, server.root_win, width_, height_, server.depth);
+  // pix_by_state_[static_cast<unsigned int>(mouse_state_)] = pix_;
 
   // add layer of root pixmap (or clear pixmap if real_transparency==true)
   if (server.real_transparency) {
@@ -625,7 +644,15 @@ void Area::Draw() {
 
 void Area::DrawBackground(cairo_t* c) {
   const int w = bg_.border().width();
-  auto const& fill_color = bg_.fill_color();
+
+  Color fill_color;
+  if (mouse_state_ == MouseState::kMouseNormal) {
+    fill_color = bg_.fill_color();
+  } else if (mouse_state_ == MouseState::kMouseOver) {
+    fill_color = bg_.fill_color_hover();
+  } else {
+    fill_color = bg_.fill_color_pressed();
+  }
 
   if (fill_color.alpha() > 0.0) {
     DrawRect(c, w, w, width_ - (2.0 * w), height_ - (2.0 * w),
@@ -635,8 +662,16 @@ void Area::DrawBackground(cairo_t* c) {
     cairo_fill(c);
   }
 
-  auto const& border_color = bg_.border();
-  if (w > 0 && border_color.alpha() > 0.0) {
+  Color border_color;
+  if (mouse_state_ == MouseState::kMouseNormal) {
+    border_color = bg_.border();
+  } else if (mouse_state_ == MouseState::kMouseOver) {
+    border_color = bg_.border_color_hover();
+  } else {
+    border_color = bg_.border_color_pressed();
+  }
+
+  if (w > 0) {
     cairo_set_line_width(c, w);
 
     // draw border inside (x, y, width, height)
@@ -673,9 +708,16 @@ void Area::FreeArea() {
 
   children_.clear();
 
+  // for (auto& pix : pix_by_state_) {
+  //   if (pix) {
+  //     XFreePixmap(server.dsp, pix);
+  //     pix = None;
+  //   }
+  // }
+
   if (pix_) {
     XFreePixmap(server.dsp, pix_);
-    pix_ = 0;
+    pix_ = None;
   }
 }
 
@@ -716,6 +758,26 @@ Area* Area::InnermostAreaUnderPoint(int x, int y) {
 
   // If no child has it, it has to be contained in this Area object itself.
   return this;
+}
+
+Area* Area::MouseOver(Area* previous_area, bool button_pressed) {
+  if (previous_area != nullptr) {
+    previous_area->MouseLeave();
+  }
+
+  set_mouse_state(button_pressed ? (MouseState::kMousePressed)
+                                 : (MouseState::kMouseOver));
+  return this;
+}
+
+void Area::MouseLeave() { set_mouse_state(MouseState::kMouseNormal); }
+
+void Area::set_mouse_state(MouseState new_state) {
+  // if (new_state != mouse_state_) {
+  mouse_state_ = new_state;
+  need_redraw_ = true;
+  panel_refresh = true;
+  // }
 }
 
 #ifdef _TINT3_DEBUG
