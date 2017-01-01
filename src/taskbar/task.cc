@@ -69,7 +69,7 @@ Global_task::Global_task() {
   }
 }
 
-Task::Task(Timer& timer) : timer_(timer) {}
+Task::Task(Timer& timer) : timer_(timer) { set_has_mouse_effects(true); }
 
 std::string Task::GetTooltipText() {
   return tooltip_enabled_ ? title_ : std::string();

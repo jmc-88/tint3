@@ -52,7 +52,7 @@ class Global_task : public Area {
 // TODO: make this inherit from a common base class that exposes state_pixmap
 class Task : public Area {
  public:
-  Task(Timer& timer);
+  explicit Task(Timer& timer);
 
   // TODO: group task with list of windows here
   Window win;

@@ -267,6 +267,7 @@ Area::Area()
       parent_(nullptr),
       panel_(nullptr),
       on_changed_(false),
+      has_mouse_effects_(false),
       mouse_state_(MouseState::kMouseNormal) {}
 
 Area::~Area() {}
@@ -598,30 +599,12 @@ void Area::Show() {
 }
 
 void Area::Draw() {
-  // if (on_changed_) {
-  //   for (auto& state_pix : pix_by_state_) {
-  //     if (pix_ == state_pix) {
-  //       pix_ = None;
-  //     }
-  //     if (state_pix) {
-  //       XFreePixmap(server.dsp, state_pix);
-  //       state_pix = None;
-  //     }
-  //   }
-  // }
-
   if (pix_) {
     XFreePixmap(server.dsp, pix_);
-    // Pixmap& state_pix = pix_by_state_[static_cast<unsigned
-    // int>(mouse_state_)];
-    // if (state_pix != pix_) {
-    //   XFreePixmap(server.dsp, state_pix);
-    // }
   }
 
   pix_ =
       XCreatePixmap(server.dsp, server.root_win, width_, height_, server.depth);
-  // pix_by_state_[static_cast<unsigned int>(mouse_state_)] = pix_;
 
   // add layer of root pixmap (or clear pixmap if real_transparency==true)
   if (server.real_transparency) {
@@ -708,13 +691,6 @@ void Area::FreeArea() {
 
   children_.clear();
 
-  // for (auto& pix : pix_by_state_) {
-  //   if (pix) {
-  //     XFreePixmap(server.dsp, pix);
-  //     pix = None;
-  //   }
-  // }
-
   if (pix_) {
     XFreePixmap(server.dsp, pix_);
     pix_ = None;
@@ -761,23 +737,29 @@ Area* Area::InnermostAreaUnderPoint(int x, int y) {
 }
 
 Area* Area::MouseOver(Area* previous_area, bool button_pressed) {
-  if (previous_area != nullptr) {
+  if (!has_mouse_effects_) {
+    return previous_area;
+  }
+  if (previous_area != nullptr && previous_area != this) {
     previous_area->MouseLeave();
   }
-
-  set_mouse_state(button_pressed ? (MouseState::kMousePressed)
-                                 : (MouseState::kMouseOver));
+  set_mouse_state(button_pressed ? MouseState::kMousePressed
+                                 : MouseState::kMouseOver);
   return this;
 }
 
 void Area::MouseLeave() { set_mouse_state(MouseState::kMouseNormal); }
 
+void Area::set_has_mouse_effects(bool has_mouse_effects) {
+  has_mouse_effects_ = has_mouse_effects;
+}
+
 void Area::set_mouse_state(MouseState new_state) {
-  // if (new_state != mouse_state_) {
+  if (new_state != mouse_state_) {
+    panel_refresh = true;
+  }
   mouse_state_ = new_state;
   need_redraw_ = true;
-  panel_refresh = true;
-  // }
 }
 
 #ifdef _TINT3_DEBUG

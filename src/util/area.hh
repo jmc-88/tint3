@@ -203,6 +203,7 @@ class Area {
   // Resets the normal state after the mouse pointer has left the area.
   void MouseLeave();
 
+  void set_has_mouse_effects(bool has_mouse_effects);
   void set_mouse_state(MouseState new_state);
 
 #ifdef _TINT3_DEBUG
@@ -216,6 +217,7 @@ class Area {
 #endif  // _TINT3_DEBUG
 
  private:
+  bool has_mouse_effects_;
   MouseState mouse_state_;
 };
 
