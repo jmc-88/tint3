@@ -3,8 +3,8 @@
 
 #include <string>
 
-#include "server.hh"
 #include "parser/parser.hh"
+#include "server.hh"
 
 namespace test {
 
@@ -31,7 +31,7 @@ void ExtractValues(const std::string& value, std::string& v1, std::string& v2,
 class Parser;
 class Reader {
  public:
-  Reader(Server* server, bool snapshot_mode);
+  Reader(Server* server);
 
   bool LoadFromFile(std::string const& path);
   bool LoadFromDefaults();
@@ -42,7 +42,6 @@ class Reader {
 
   Server* server_;
   bool new_config_file_;
-  bool snapshot_mode_;
 
   void AddEntry(std::string const& key, std::string const& value);
   int GetMonitor(std::string const& monitor_name) const;

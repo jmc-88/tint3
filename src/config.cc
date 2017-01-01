@@ -225,8 +225,7 @@ void ExtractValues(std::string const& value, std::string& v1, std::string& v2,
   }
 }
 
-Reader::Reader(Server* server, bool snapshot_mode)
-    : server_(server), new_config_file_(false), snapshot_mode_(snapshot_mode) {}
+Reader::Reader(Server* server) : server_(server), new_config_file_(false) {}
 
 bool Reader::LoadFromDefaults() {
   // follow XDG specification
@@ -385,8 +384,7 @@ void Reader::AddEntry(std::string const& key, std::string const& value) {
       }
 
       if (item == 'S') {
-        // systray disabled in snapshot mode
-        systray_enabled = !snapshot_mode_;
+        systray_enabled = true;
       }
 
       if (item == 'C') {

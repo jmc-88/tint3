@@ -77,10 +77,8 @@ Atom dnd_atom;
 int dnd_sent_request;
 std::string dnd_launcher_exec;
 
-void Init(int argc, char* argv[], std::string* config_path,
-          std::string* snapshot_path) {
+void Init(int argc, char* argv[], std::string* config_path) {
   config_path->clear();
-  snapshot_path->clear();
 
   // FIXME: remove this global data shit
   // set global data
@@ -111,14 +109,6 @@ void Init(int argc, char* argv[], std::string* config_path,
 
       if (i < argc) {
         config_path->assign(argv[i]);
-      }
-    }
-
-    if (!strcmp(argv[i], "-s")) {
-      i++;
-
-      if (i < argc) {
-        snapshot_path->assign(argv[i]);
       }
     }
   }
@@ -167,7 +157,7 @@ static void ErrorTrapPop(SnDisplay* display, Display* xdisplay) {
 }
 #endif  // HAVE_SN
 
-void InitX11(bool snapshot_mode) {
+void InitX11() {
   server.dsp = XOpenDisplay(nullptr);
 
   if (!server.dsp) {
@@ -179,7 +169,7 @@ void InitX11(bool snapshot_mode) {
   server.screen = DefaultScreen(server.dsp);
   server.root_win = RootWindow(server.dsp, server.screen);
   server.desktop = server.GetCurrentDesktop();
-  server.InitVisual(snapshot_mode);
+  server.InitVisual();
   XSetErrorHandler(ServerCatchError);
 
 #ifdef HAVE_SN
@@ -242,32 +232,6 @@ void Cleanup(Timer& timer) {
   imlib_context_disconnect_display();
 
   server.Cleanup();
-}
-
-void GetSnapshot(const char* path) {
-  Panel& panel = panel1[0];
-
-  if (panel.width_ > server.monitor[0].width) {
-    panel.width_ = server.monitor[0].width;
-  }
-
-  panel.temp_pmap = XCreatePixmap(server.dsp, server.root_win, panel.width_,
-                                  panel.height_, server.depth);
-  panel.Render();
-
-  imlib_context_set_drawable(panel.temp_pmap);
-  util::imlib2::Image img{imlib_create_image_from_drawable(
-      0, 0, 0, panel.width_, panel.height_, 0)};
-
-  imlib_context_set_image(img);
-
-  if (!panel_horizontal) {
-    // rotate 90° vertical panel
-    imlib_image_flip_horizontal();
-    imlib_image_flip_diagonal();
-  }
-
-  imlib_save_image(path);
 }
 
 void WindowAction(Task* tsk, MouseAction action) {
@@ -1090,15 +1054,12 @@ void DragAndDropDrop(XClientMessageEvent* e) {
 int main(int argc, char* argv[]) {
 start:
   std::string config_path;
-  std::string snapshot_path;
-  Init(argc, argv, &config_path, &snapshot_path);
-
-  bool snapshot_mode = (!snapshot_path.empty());
-  InitX11(snapshot_mode);
+  Init(argc, argv, &config_path);
+  InitX11();
 
   Timer timer;
 
-  config::Reader config_reader{&server, snapshot_mode};
+  config::Reader config_reader{&server};
   bool config_read = false;
 
   if (!config_path.empty()) {
@@ -1113,7 +1074,7 @@ start:
     std::exit(1);
   }
 
-  InitPanel(timer, snapshot_mode);
+  InitPanel(timer);
 
 #ifdef _TINT3_DEBUG
 
@@ -1123,12 +1084,6 @@ start:
   }
 
 #endif  // _TINT3_DEBUG
-
-  if (snapshot_mode) {
-    GetSnapshot(snapshot_path.c_str());
-    Cleanup(timer);
-    std::exit(0);
-  }
 
   int damage_event, damage_error;
   XDamageQueryExtension(server.dsp, &damage_event, &damage_error);

@@ -218,7 +218,7 @@ void CleanupPanel() {
   backgrounds.clear();
 }
 
-void InitPanel(Timer& timer, bool snapshot_mode) {
+void InitPanel(Timer& timer) {
   if (panel_config.monitor_ > server.nb_monitor - 1) {
     // server.nb_monitor minimum value is 1 (see get_monitors())
     util::log::Error() << "warning: monitor not found, "
@@ -337,11 +337,7 @@ void InitPanel(Timer& timer, bool snapshot_mode) {
     server.InitGC(p->main_win_);
     p->SetProperties();
     p->SetBackground();
-
-    if (!snapshot_mode) {
-      // if we are not in 'snapshot' mode then map new panel
-      XMapWindow(server.dsp, p->main_win_);
-    }
+    XMapWindow(server.dsp, p->main_win_);
 
     if (panel_autohide) {
       timer.SetTimeout(std::chrono::milliseconds(panel_autohide_hide_timeout),

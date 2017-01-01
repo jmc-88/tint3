@@ -324,7 +324,7 @@ void Server::InitGC(Window win) {
   }
 }
 
-void Server::InitVisual(bool snapshot_mode) {
+void Server::InitVisual() {
   // inspired by freedesktops fdclock ;)
   XVisualInfo templ;
   templ.screen = screen;
@@ -364,7 +364,7 @@ void Server::InitVisual(bool snapshot_mode) {
     colormap32 = XCreateColormap(dsp, root_win, xvi_visual, AllocNone);
   }
 
-  if (xvi_visual && composite_manager != None && !snapshot_mode) {
+  if (xvi_visual && composite_manager != None) {
     XSetWindowAttributes attrs;
     attrs.event_mask = StructureNotifyMask;
     XChangeWindowAttributes(dsp, composite_manager, CWEventMask, &attrs);
@@ -375,7 +375,7 @@ void Server::InitVisual(bool snapshot_mode) {
     colormap = XCreateColormap(dsp, root_win, xvi_visual, AllocNone);
     visual = xvi_visual;
   } else {
-    // no composite manager or snapshot mode => fake transparency
+    // no composite manager -> fake transparency
     real_transparency = false;
     depth = DefaultDepth(dsp, screen);
     std::cout << "Real transparency: off, depth: " << depth << '\n';
