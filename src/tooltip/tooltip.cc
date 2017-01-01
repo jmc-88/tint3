@@ -145,7 +145,7 @@ bool TooltipShow(Timer& timer) {
     my += height / 2;
   }
 
-  Area* area = g_tooltip.panel->ClickArea(mx, my);
+  Area* area = g_tooltip.panel->InnermostAreaUnderPoint(mx, my);
 
   if (!g_tooltip.mapped_) {
     g_tooltip.BindTo(area);

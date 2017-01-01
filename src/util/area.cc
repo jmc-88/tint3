@@ -251,6 +251,23 @@ bool Background::operator!=(Background const& other) const {
   return !(*this == other);
 }
 
+Area::Area()
+    : panel_x_(0),
+      panel_y_(0),
+      width_(0),
+      height_(0),
+      pix_(None),
+      on_screen_(false),
+      size_mode_(SizeMode::kByLayout),
+      need_resize_(false),
+      need_redraw_(false),
+      padding_x_lr_(0),
+      padding_x_(0),
+      padding_y_(0),
+      parent_(nullptr),
+      panel_(nullptr),
+      on_changed_(false) {}
+
 Area::~Area() {}
 
 Area& Area::CloneArea(Area const& other) {
@@ -732,4 +749,21 @@ bool Area::IsPointInside(int x, int y) const {
   bool inside_x = (x >= panel_x_ && x <= panel_x_ + width_);
   bool inside_y = (y >= panel_y_ && y <= panel_y_ + height_);
   return on_screen_ && inside_x && inside_y;
+}
+
+Area* Area::InnermostAreaUnderPoint(int x, int y) {
+  if (!IsPointInside(x, y)) {
+    return nullptr;
+  }
+
+  // Try looking for the innermost child that contains the given point.
+  for (auto& child : children_) {
+    Area* result = child->InnermostAreaUnderPoint(x, y);
+    if (result != nullptr) {
+      return result;
+    }
+  }
+
+  // If no child has it, it has to be contained in this Area object itself.
+  return this;
 }

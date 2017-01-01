@@ -761,24 +761,6 @@ bool Panel::ClickPadding(int x, int y) {
 
 bool Panel::ClickClock(int x, int y) { return clock_.IsPointInside(x, y); }
 
-Area* Panel::ClickArea(int x, int y) {
-  Area* new_result = this;
-  Area* result = nullptr;
-
-  do {
-    result = new_result;
-
-    for (auto& child : result->children_) {
-      if (child->IsPointInside(x, y)) {
-        new_result = child;
-        break;
-      }
-    }
-  } while (new_result != result);
-
-  return result;
-}
-
 bool Panel::HandlesClick(XButtonEvent* e) {
   Task* task = ClickTask(e->x, e->y);
 

@@ -1170,7 +1170,7 @@ start:
     }
 
     Panel* panel = GetPanel(e.xmotion.window);
-    Area* area = panel->ClickArea(e.xmotion.x, e.xmotion.y);
+    Area* area = panel->InnermostAreaUnderPoint(e.xmotion.x, e.xmotion.y);
     std::string tooltip = area->GetTooltipText();
 
     if (!tooltip.empty()) {

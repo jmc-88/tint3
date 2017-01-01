@@ -110,6 +110,7 @@ enum class SizeMode { kByLayout, kByContent };
 class Panel;
 class Area {
  public:
+  Area();
   virtual ~Area() = 0;
 
   Area& CloneArea(Area const& other);
@@ -184,6 +185,11 @@ class Area {
   void FreeArea();
 
   bool IsPointInside(int x, int y) const;
+
+  // Look up for the innermost area that contains the given (x; y) point.
+  // Returns a pointer to the matching Area object, or nullptr if none was
+  // found.
+  Area* InnermostAreaUnderPoint(int x, int y);
 
 #ifdef _TINT3_DEBUG
 
