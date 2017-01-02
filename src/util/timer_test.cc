@@ -42,6 +42,32 @@ TEST_CASE("Interval", "Test the Interval class") {
     Interval interval{123, fake_clock.Now(), _100ms, no_op_callback};
     REQUIRE(interval.GetRepeatInterval() == _100ms);
   }
+
+  SECTION("correctly assigns to an interval") {
+    Interval first_interval{1, fake_clock.Now(), std::chrono::milliseconds(0),
+                            no_op_callback};
+    Interval second_interval{2, fake_clock.Now(), std::chrono::milliseconds(50),
+                             no_op_callback};
+    REQUIRE(first_interval.GetRepeatInterval() !=
+            second_interval.GetRepeatInterval());
+    first_interval = second_interval;
+    REQUIRE(first_interval.GetRepeatInterval() ==
+            std::chrono::milliseconds(50));
+    REQUIRE(second_interval.GetRepeatInterval() ==
+            std::chrono::milliseconds(50));
+  }
+}
+
+TEST_CASE("CompareIds", "Sanity of nullable ids comparisons") {
+  CompareIds compare_fn;
+  // Left-hand side is nulled-out: right-hand side always comes first.
+  REQUIRE(!compare_fn(Interval::Id{}, Interval::Id{0}));
+  // Right-hand side is nulled-out: left-hand side always comes first.
+  REQUIRE(compare_fn(Interval::Id{0}, Interval::Id{}));
+  // Smaller left-hand side comes first.
+  REQUIRE(compare_fn(Interval::Id{0}, Interval::Id{1}));
+  // Smaller right-hand side comes first.
+  REQUIRE(!compare_fn(Interval::Id{1}, Interval::Id{0}));
 }
 
 class ChronoTimerTestUtils {
@@ -84,6 +110,13 @@ TEST_CASE("Timer", "Test the Timer class") {
 
     REQUIRE(timer.ClearInterval(interval));
     REQUIRE(intervals.empty());
+  }
+
+  SECTION("fails clearing a non-existing interval") {
+    Interval::Id nulled_interval;
+    REQUIRE(!timer.ClearInterval(nulled_interval));
+    Interval::Id no_such_interval{static_cast<uint64_t>(-1)};
+    REQUIRE(!timer.ClearInterval(no_such_interval));
   }
 
   SECTION("correctly processes an interval (single)") {
