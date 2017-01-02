@@ -56,7 +56,7 @@ class Task : public Area {
 
   // TODO: group task with list of windows here
   Window win;
-  int desktop;
+  unsigned int desktop;
   int current_state;
   Imlib_Image icon[kTaskStateCount];
   Pixmap state_pix[kTaskStateCount];

@@ -100,7 +100,7 @@ void ToLowerCase(std::string* str) {
 }  // namespace string
 }  // namespace util
 
-int const kAllDesktops = 0xFFFFFFFF;
+unsigned int const kAllDesktops = static_cast<unsigned int>(-1);
 
 bool SignalAction(int signal_number, void signal_handler(int), int flags) {
   struct sigaction sa;

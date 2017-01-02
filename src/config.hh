@@ -44,7 +44,7 @@ class Reader {
   bool new_config_file_;
 
   void AddEntry(std::string const& key, std::string const& value);
-  int GetMonitor(std::string const& monitor_name) const;
+  unsigned int GetMonitor(std::string const& monitor_name) const;
 };
 
 class Parser : public parser::ParseCallback {

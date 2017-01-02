@@ -62,8 +62,8 @@ void XSettingsNotifyCallback(const char* name, XSettingsAction action,
 
       icon_theme_name = setting->data.v_string;
 
-      for (int i = 0; i < num_panels; ++i) {
-        Launcher& launcher = panels[i].launcher_;
+      for (Panel& p : panels) {
+        Launcher& launcher = p.launcher_;
         launcher.CleanupTheme();
         launcher.LoadThemes();
         launcher.LoadIcons();

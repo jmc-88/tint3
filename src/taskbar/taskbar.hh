@@ -19,7 +19,7 @@ extern bool taskbar_enabled;
 // tint3 uses one taskbar per desktop.
 class Taskbar : public TaskbarBase {
  public:
-  int desktop;
+  unsigned int desktop;
   int text_width_;
   Taskbarname bar_name;
 

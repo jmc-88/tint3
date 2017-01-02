@@ -76,6 +76,8 @@ extern util::imlib2::Image default_icon;
 // tint3 use one panel per monitor and one taskbar per desktop.
 class Panel : public Area {
  public:
+  static constexpr unsigned int kAllMonitors = static_cast<unsigned int>(-1);
+
   // --------------------------------------------------
   // panel
   Window main_win_;
@@ -86,7 +88,7 @@ class Panel : public Area {
   int margin_x_, margin_y_;
   int percent_x, percent_y;
   // location of the panel (monitor number)
-  int monitor_;
+  unsigned int monitor_;
 
   // --------------------------------------------------
   // task and taskbar parameter per panel
@@ -99,7 +101,7 @@ class Panel : public Area {
   // taskbar[i] is used to loop over taskbar,
   // while panel->area.list is used to loop over all panel's objects
   Taskbar* taskbar_;
-  int nb_desktop_;
+  unsigned int nb_desktop_;
 
   // --------------------------------------------------
   // clock
@@ -142,16 +144,22 @@ class Panel : public Area {
   // show/hide taskbar according to current desktop
   void UpdateTaskbarVisibility();
 
+  // TODO: this should not exist. The only reason it's here is InitPanel() is
+  // not a member of this class.
+  void set_panel_index(unsigned int i);
+
 #ifdef _TINT3_DEBUG
 
   std::string GetFriendlyName() const override;
 
 #endif  // _TINT3_DEBUG
+
+ private:
+  unsigned int panel_index_;
 };
 
 extern Panel panel_config;
-extern Panel* panels;
-extern int num_panels;
+extern std::vector<Panel> panels;
 
 // default global data
 void DefaultPanel();

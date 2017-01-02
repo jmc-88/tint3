@@ -74,8 +74,7 @@ int max_tick_urgent;
 // panel's initial config
 Panel panel_config;
 // panels (one panel per monitor)
-Panel* panels;
-int num_panels;
+std::vector<Panel> panels;
 
 std::vector<Background> backgrounds;
 
@@ -153,8 +152,7 @@ void UpdateStrut(Panel* p) {
 }  // namespace
 
 void DefaultPanel() {
-  panels = nullptr;
-  num_panels = 0;
+  panels.clear();
   default_icon.Free();
   task_dragged = false;
   panel_horizontal = true;
@@ -177,7 +175,7 @@ void DefaultPanel() {
 }
 
 void CleanupPanel() {
-  if (!panels) {
+  if (panels.empty()) {
     return;
   }
 
@@ -189,27 +187,20 @@ void CleanupPanel() {
     pango_font_description_free(taskbarname_font_desc);
   }
 
-  for (int i = 0; i < num_panels; i++) {
-    Panel& p = panels[i];
-
+  for (Panel& p : panels) {
     p.FreeArea();
-
     if (p.temp_pmap) {
       XFreePixmap(server.dsp, p.temp_pmap);
     }
-
     if (p.hidden_pixmap_) {
       XFreePixmap(server.dsp, p.hidden_pixmap_);
     }
-
     if (p.main_win_) {
       XDestroyWindow(server.dsp, p.main_win_);
     }
   }
 
-  if (panels) {
-    delete[] panels;
-  }
+  panels.clear();
 
   if (panel_config.g_task.font_desc) {
     pango_font_description_free(panel_config.g_task.font_desc);
@@ -219,7 +210,8 @@ void CleanupPanel() {
 }
 
 void InitPanel(Timer& timer) {
-  if (panel_config.monitor_ > server.num_monitors - 1) {
+  if (panel_config.monitor_ != Panel::kAllMonitors &&
+      panel_config.monitor_ > server.num_monitors - 1) {
     // server.num_monitors minimum value is 1 (see get_monitors())
     util::log::Error() << "warning: monitor not found, "
                        << "defaulting to all monitors.\n";
@@ -236,52 +228,50 @@ void InitPanel(Timer& timer) {
   InitTaskbar();
 
   // number of panels (one monitor or 'all' monitors)
+  unsigned int num_panels = server.num_monitors;
   if (panel_config.monitor_ >= 0) {
     num_panels = 1;
-  } else {
-    num_panels = server.num_monitors;
   }
 
-  panels = new Panel[num_panels];
-
-  for (int i = 0; i < num_panels; i++) {
-    panels[i] = panel_config;
-  }
+  panels.resize(num_panels);
+  panels.shrink_to_fit();
+  std::fill(panels.begin(), panels.end(), panel_config);
 
   util::log::Debug() << "tint3: num_monitors " << server.num_monitors
-                     << ", num_monitors used " << num_panels
+                     << ", num_monitors used " << panels.size()
                      << ", num_desktops " << server.num_desktops << '\n';
 
-  for (int i = 0; i < num_panels; i++) {
-    auto p = &panels[i];
+  for (unsigned int i = 0; i < num_panels; ++i) {
+    Panel& p = panels[i];
 
-    if (panel_config.monitor_ < 0) {
-      p->monitor_ = i;
+    if (panel_config.monitor_ == Panel::kAllMonitors) {
+      p.monitor_ = i;
     }
 
-    p->parent_ = p;
-    p->panel_ = p;
-    p->on_screen_ = true;
-    p->need_resize_ = true;
-    p->size_mode_ = SizeMode::kByLayout;
-    p->InitSizeAndPosition();
+    p.set_panel_index(i);
+    p.parent_ = &p;
+    p.panel_ = &p;
+    p.on_screen_ = true;
+    p.need_resize_ = true;
+    p.size_mode_ = SizeMode::kByLayout;
+    p.InitSizeAndPosition();
 
     // add children according to panel_items
     util::log::Debug() << "Setting panel items: " << panel_items_order << '\n';
 
     for (char item : panel_items_order) {
       if (item == 'L') {
-        Launcher::InitPanel(p);
+        Launcher::InitPanel(&p);
       }
 
       if (item == 'T') {
-        Taskbar::InitPanel(p);
+        Taskbar::InitPanel(&p);
       }
 
 #ifdef ENABLE_BATTERY
 
       if (item == 'B') {
-        Battery::InitPanel(p);
+        Battery::InitPanel(&p);
       }
 
 #endif
@@ -289,16 +279,16 @@ void InitPanel(Timer& timer) {
       if (item == 'S' && i == 0) {
         // TODO : check systray is only on 1 panel
         // at the moment only on panels[0] allowed
-        systray.SetParentPanel(p);
+        systray.SetParentPanel(&p);
         systray.set_should_refresh(true);
       }
 
       if (item == 'C') {
-        Clock::InitPanel(p);
+        Clock::InitPanel(&p);
       }
     }
 
-    p->SetItemsOrder();
+    p.SetItemsOrder();
 
     {
       // catch some events
@@ -310,15 +300,15 @@ void InitPanel(Timer& timer) {
 
       unsigned long mask =
           CWEventMask | CWColormap | CWBackPixel | CWBorderPixel;
-      p->main_win_ = util::x11::CreateWindow(
-          server.root_win, p->root_x_, p->root_y_, p->width_, p->height_, 0,
+      p.main_win_ = util::x11::CreateWindow(
+          server.root_win, p.root_x_, p.root_y_, p.width_, p.height_, 0,
           server.depth, InputOutput, server.visual, mask, &attr);
     }
 
     long event_mask =
         ExposureMask | ButtonPressMask | ButtonReleaseMask | ButtonMotionMask;
 
-    if (p->g_task.tooltip_enabled ||
+    if (p.g_task.tooltip_enabled ||
         (launcher_enabled && launcher_tooltip_enabled)) {
       event_mask |= PointerMotionMask | LeaveWindowMask;
     }
@@ -331,20 +321,20 @@ void InitPanel(Timer& timer) {
       XSetWindowAttributes attr;
       std::memset(&attr, 0, sizeof(attr));
       attr.event_mask = event_mask;
-      XChangeWindowAttributes(server.dsp, p->main_win_, CWEventMask, &attr);
+      XChangeWindowAttributes(server.dsp, p.main_win_, CWEventMask, &attr);
     }
 
-    server.InitGC(p->main_win_);
-    p->SetProperties();
-    p->SetBackground();
-    XMapWindow(server.dsp, p->main_win_);
+    server.InitGC(p.main_win_);
+    p.SetProperties();
+    p.SetBackground();
+    XMapWindow(server.dsp, p.main_win_);
 
     if (panel_autohide) {
       timer.SetTimeout(std::chrono::milliseconds(panel_autohide_hide_timeout),
-                       [p]() -> bool { return AutohideHide(p); });
+                       [&p]() -> bool { return AutohideHide(&p); });
     }
 
-    p->UpdateTaskbarVisibility();
+    p.UpdateTaskbarVisibility();
   }
 
   TaskRefreshTasklist(timer);
@@ -442,7 +432,7 @@ bool Panel::Resize() {
     int width = taskbar_[server.desktop].width_;
     int height = taskbar_[server.desktop].height_;
 
-    for (int i = 0; i < nb_desktop_; ++i) {
+    for (unsigned int i = 0; i < nb_desktop_; ++i) {
       taskbar_[i].width_ = width;
       taskbar_[i].height_ = height;
       taskbar_[i].need_resize_ = true;
@@ -467,7 +457,7 @@ void Panel::SetItemsOrder() {
     }
 
     if (item == 'T') {
-      for (int j = 0; j < nb_desktop_; j++) {
+      for (unsigned int j = 0; j < nb_desktop_; j++) {
         children_.push_back(&taskbar_[j]);
       }
     }
@@ -480,10 +470,7 @@ void Panel::SetItemsOrder() {
 
 #endif
 
-    // FIXME: with the move of this method to the Panel class,
-    // this comparison got pretty shitty (this == panels...)
-
-    if (item == 'S' && this == panels) {
+    if (item == 'S' && panel_index_ == 0) {
       // TODO : check systray is only on 1 panel
       // at the moment only on panels[0] allowed
       children_.push_back(&systray);
@@ -639,7 +626,7 @@ void Panel::SetBackground() {
   }
 
   // reset task/taskbar 'state_pix'
-  for (int i = 0; i < nb_desktop_; i++) {
+  for (unsigned int i = 0; i < nb_desktop_; i++) {
     auto& tskbar = taskbar_[i];
 
     for (int k = 0; k < kTaskbarCount; ++k) {
@@ -663,7 +650,7 @@ void Panel::SetBackground() {
 }
 
 void Panel::UpdateTaskbarVisibility() {
-  for (int j = 0; j < nb_desktop_; j++) {
+  for (unsigned int j = 0; j < nb_desktop_; j++) {
     Taskbar& tskbar = taskbar_[j];
 
     if (panel_mode != PanelMode::kMultiDesktop &&
@@ -679,22 +666,20 @@ void Panel::UpdateTaskbarVisibility() {
 }
 
 Panel* GetPanel(Window win) {
-  for (int i = 0; i < num_panels; ++i) {
-    if (panels[i].main_win_ == win) {
-      return &panels[i];
+  for (Panel& p : panels) {
+    if (p.main_win_ == win) {
+      return &p;
     }
   }
-
   return nullptr;
 }
 
 Taskbar* Panel::ClickTaskbar(int x, int y) {
-  for (int i = 0; i < nb_desktop_; i++) {
+  for (unsigned int i = 0; i < nb_desktop_; i++) {
     if (taskbar_[i].IsPointInside(x, y)) {
       return &taskbar_[i];
     }
   }
-
   return nullptr;
 }
 
@@ -790,6 +775,8 @@ bool Panel::HandlesClick(XButtonEvent* e) {
 
   return false;
 }
+
+void Panel::set_panel_index(unsigned int i) { panel_index_ = i; }
 
 #ifdef _TINT3_DEBUG
 

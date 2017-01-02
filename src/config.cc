@@ -840,17 +840,17 @@ void Reader::AddEntry(std::string const& key, std::string const& value) {
   }
 }
 
-int Reader::GetMonitor(std::string const& monitor_name) const {
+unsigned int Reader::GetMonitor(std::string const& monitor_name) const {
   if (monitor_name != "all") {
     std::size_t end;
-    int ret_int = std::stol(monitor_name, &end);
+    unsigned int ret_int = std::stol(monitor_name, &end);
 
     if (monitor_name[end] != '\0') {
       return (ret_int - 1);
     }
 
     // monitor specified by name, not by index
-    for (int i = 0; i < server_->num_monitors; ++i) {
+    for (unsigned int i = 0; i < server_->num_monitors; ++i) {
       for (auto& name : server_->monitor[i].names) {
         if (name == monitor_name) {
           return i;
@@ -860,7 +860,7 @@ int Reader::GetMonitor(std::string const& monitor_name) const {
   }
 
   // monitor == "all" or monitor not found or xrandr can't identify monitors
-  return -1;
+  return Panel::kAllMonitors;
 }
 
 }  // namespace config

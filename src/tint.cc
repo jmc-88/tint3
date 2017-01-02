@@ -239,7 +239,7 @@ void WindowAction(Task* tsk, MouseAction action) {
     return;
   }
 
-  int desk = 0;
+  unsigned int desk = 0;
 
   switch (action) {
     case MouseAction::kClose:
@@ -260,7 +260,6 @@ void WindowAction(Task* tsk, MouseAction action) {
       } else {
         util::window::SetActive(tsk->win);
       }
-
       break;
 
     case MouseAction::kShade:
@@ -290,7 +289,6 @@ void WindowAction(Task* tsk, MouseAction action) {
       if (desk == server.desktop) {
         util::window::SetActive(tsk->win);
       }
-
       break;
 
     case MouseAction::kDesktopRight:
@@ -304,7 +302,6 @@ void WindowAction(Task* tsk, MouseAction action) {
       if (desk == server.desktop) {
         util::window::SetActive(tsk->win);
       }
-
       break;
 
     case MouseAction::kNextTask: {
@@ -538,17 +535,17 @@ void EventPropertyNotify(XEvent* e, Timer& timer) {
       auto desktop_names = ServerGetDesktopNames();
       auto it = desktop_names.begin();
 
-      for (int i = 0; i < num_panels; ++i) {
-        for (int j = 0; j < panels[i].nb_desktop_; ++j) {
+      for (Panel& panel : panels) {
+        for (unsigned int i = 0; i < panel.nb_desktop_; ++i) {
           std::string name;
 
           if (it != desktop_names.end()) {
             name = (*it++);
           } else {
-            name = util::string::Representation(j + 1);
+            name = util::string::Representation(i + 1);
           }
 
-          Taskbar& tskbar = panels[i].taskbar_[j];
+          Taskbar& tskbar = panel.taskbar_[i];
 
           if (tskbar.bar_name.name() != name) {
             tskbar.bar_name.set_name(name);
@@ -574,11 +571,11 @@ void EventPropertyNotify(XEvent* e, Timer& timer) {
       CleanupTaskbar();
       InitTaskbar();
 
-      for (int i = 0; i < num_panels; i++) {
-        Taskbar::InitPanel(&panels[i]);
-        panels[i].SetItemsOrder();
-        panels[i].UpdateTaskbarVisibility();
-        panels[i].need_resize_ = true;
+      for (Panel& panel : panels) {
+        Taskbar::InitPanel(&panel);
+        panel.SetItemsOrder();
+        panel.UpdateTaskbarVisibility();
+        panel.need_resize_ = true;
       }
 
       TaskRefreshTasklist(timer);
@@ -591,14 +588,13 @@ void EventPropertyNotify(XEvent* e, Timer& timer) {
         return;
       }
 
-      int old_desktop = server.desktop;
+      unsigned int old_desktop = server.desktop;
       server.desktop = server.GetCurrentDesktop();
 
       util::log::Debug() << "Current desktop changed from " << old_desktop
                          << " to " << server.desktop << '\n';
 
-      for (int i = 0; i < num_panels; i++) {
-        Panel& panel = panels[i];
+      for (Panel& panel : panels) {
         panel.taskbar_[old_desktop].SetState(kTaskbarNormal);
         panel.taskbar_[server.desktop].SetState(kTaskbarActive);
         // check ALLDESKTOP task => resize taskbar
@@ -651,10 +647,9 @@ void EventPropertyNotify(XEvent* e, Timer& timer) {
     } else if (at == server.atoms_["_XROOTPMAP_ID"] ||
                at == server.atoms_["_XROOTMAP_ID"]) {
       // change Wallpaper
-      for (int i = 0; i < num_panels; i++) {
-        panels[i].SetBackground();
+      for (Panel& panel : panels) {
+        panel.SetBackground();
       }
-
       panel_refresh = true;
     }
   } else {
@@ -725,7 +720,7 @@ void EventPropertyNotify(XEvent* e, Timer& timer) {
     }
     // Window desktop changed
     else if (at == server.atoms_["_NET_WM_DESKTOP"]) {
-      int desktop = util::window::GetDesktop(win);
+      unsigned int desktop = util::window::GetDesktop(win);
 
       util::log::Debug() << "Window desktop changed from " << tsk->desktop
                          << " to " << desktop << '\n';
@@ -783,7 +778,7 @@ void EventConfigureNotify(Window win, Timer& timer) {
   }
 
   // 'win' move in another monitor
-  if (num_panels == 1) {
+  if (panels.size() == 1) {
     return;
   }
 
@@ -1078,9 +1073,10 @@ start:
 
 #ifdef _TINT3_DEBUG
 
-  for (int i = 0; i < num_panels; ++i) {
-    util::log::Debug() << "Panel " << i << ":\n";
-    panels[i].PrintTree();
+  unsigned int panel_index = 0;
+  for (Panel& panel : panels) {
+    util::log::Debug() << "Panel " << (++panel_index) << ":\n";
+    panel.PrintTree();
   }
 
 #endif  // _TINT3_DEBUG

@@ -120,10 +120,8 @@ void CleanupTaskbar() {
     TaskbarRemoveTask(win_to_task_map.begin()->first);
   }
 
-  for (int i = 0; i < num_panels; ++i) {
-    Panel& panel = panels[i];
-
-    for (int j = 0; j < panel.nb_desktop_; ++j) {
+  for (Panel& panel : panels) {
+    for (unsigned int j = 0; j < panel.nb_desktop_; ++j) {
       Taskbar* tskbar = &panel.taskbar_[j];
 
       for (int k = 0; k < kTaskbarCount; ++k) {
@@ -304,7 +302,7 @@ void Taskbar::InitPanel(Panel* panel) {
   panel->nb_desktop_ = server.num_desktops;
   panel->taskbar_ = new Taskbar[server.num_desktops];
 
-  for (int j = 0; j < panel->nb_desktop_; j++) {
+  for (unsigned int j = 0; j < panel->nb_desktop_; j++) {
     Taskbar* tskbar = &panel->taskbar_[j];
 
     // TODO: nuke this from planet Earth ASAP - horrible hack to mimick the

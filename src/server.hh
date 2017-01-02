@@ -33,12 +33,12 @@ class Server {
   Window composite_manager;
   bool real_transparency;
   // current desktop
-  int desktop;
-  int screen;
+  unsigned int desktop;
+  unsigned int screen;
   int depth;
-  int num_desktops;
+  unsigned int num_desktops;
   // number of monitor (without monitor included into another one)
-  int num_monitors;
+  unsigned int num_monitors;
   std::vector<Monitor> monitor;
   bool got_root_win;
   Visual* visual;

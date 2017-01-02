@@ -93,8 +93,8 @@ bool UpdateClockSeconds() {
   time(&time_clock);
 
   if (!time1_format.empty()) {
-    for (int i = 0; i < num_panels; i++) {
-      panels[i].clock_.need_resize_ = true;
+    for (Panel& p : panels) {
+      p.clock_.need_resize_ = true;
     }
   }
 
@@ -110,8 +110,8 @@ bool UpdateClockMinutes() {
 
   if (time_clock % 60 == 0 || time_clock - old_time > 60) {
     if (!time1_format.empty()) {
-      for (int i = 0; i < num_panels; i++) {
-        panels[i].clock_.need_resize_ = true;
+      for (Panel& p : panels) {
+        p.clock_.need_resize_ = true;
       }
     }
     panel_refresh = true;

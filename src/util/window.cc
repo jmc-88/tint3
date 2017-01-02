@@ -103,8 +103,8 @@ int IsHidden(Window win) {
     }
   }
 
-  for (int i = 0; i < num_panels; ++i) {
-    if (panels[i].main_win_ == win) {
+  for (Panel& p : panels) {
+    if (p.main_win_ == win) {
       return 1;
     }
   }
@@ -124,18 +124,17 @@ bool IsInsideMonitor(int x, int y, Monitor const& monitor) {
 }
 
 int FindMonitorIndex(int x, int y) {
-  for (int i = 0; i < server.num_monitors; i++) {
+  for (unsigned int i = 0; i < server.num_monitors; i++) {
     if (IsInsideMonitor(x, y, server.monitor[i])) {
       return i;
     }
   }
-
   return -1;
 }
 
 }  // namespace
 
-int GetMonitor(Window win) {
+unsigned int GetMonitor(Window win) {
   int x, y;
   Window src;
   XTranslateCoordinates(server.dsp, win, server.root_win, 0, 0, &x, &y, &src);

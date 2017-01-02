@@ -21,7 +21,7 @@ void MaximizeRestore(Window win);
 void ToggleShade(Window win);
 int GetDesktop(Window win);
 void SetDesktop(Window win, int desktop);
-int GetMonitor(Window win);
+unsigned int GetMonitor(Window win);
 Window GetActive();
 
 }  // namespace window

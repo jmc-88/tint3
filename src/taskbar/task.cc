@@ -44,14 +44,14 @@ namespace {
 
 const char kUntitled[] = "Untitled";
 
-int GetMonitor(Window win) {
-  int monitor = 0;
+unsigned int GetMonitor(Window win) {
+  unsigned int monitor = 0;
 
-  if (num_panels > 1) {
+  if (panels.size() > 1) {
     monitor = util::window::GetMonitor(win);
   }
 
-  if (monitor >= num_panels) {
+  if (monitor >= panels.size()) {
     monitor = 0;
   }
 
@@ -113,7 +113,7 @@ Task* AddTask(Window win, Timer& timer) {
   TaskPtrArray task_group;
   Task* new_tsk2 = nullptr;
 
-  for (int j = 0; j < panels[monitor].nb_desktop_; j++) {
+  for (unsigned int j = 0; j < panels[monitor].nb_desktop_; j++) {
     if (new_tsk.desktop != kAllDesktops && new_tsk.desktop != j) {
       continue;
     }
