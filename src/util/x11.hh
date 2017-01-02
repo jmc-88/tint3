@@ -8,9 +8,10 @@
 #include <initializer_list>
 #include <map>
 #include <memory>
+#include <string>
 
-#include "util/timer.hh"
 #include "util/pipe.hh"
+#include "util/timer.hh"
 
 extern int signal_pending;
 extern bool pending_children;
@@ -66,6 +67,8 @@ class EventLoop {
 
   void ReapChildPIDs() const;
 };
+
+bool GetWMName(Display* display, Window window, std::string* output);
 
 pid_t GetWindowPID(Window window);
 int SetWindowPID(Window window);

@@ -24,9 +24,9 @@
 #include <X11/Xutil.h>
 #include <X11/extensions/Xcomposite.h>
 #include <X11/extensions/Xrender.h>
-#include <glib.h>
 
 #include <algorithm>
+#include <cctype>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -358,26 +358,24 @@ int WindowErrorHandler(Display* d, XErrorEvent* e) {
   return 0;
 }
 
-bool CompareTrayWindows(gconstpointer a, gconstpointer b) {
-  const TrayWindow* traywin_a = (TrayWindow*)a;
-  const TrayWindow* traywin_b = (TrayWindow*)b;
-  XTextProperty name_a, name_b;
-
-  if (XGetWMName(server.dsp, traywin_a->tray_id, &name_a) == 0) {
+bool CompareTrayWindows(TrayWindow const* traywin_a,
+                        TrayWindow const* traywin_b) {
+  std::string name_a;
+  if (!util::x11::GetWMName(server.dsp, traywin_a->tray_id, &name_a)) {
     return true;
   }
+  std::transform(name_a.begin(), name_a.end(), name_a.begin(),
+                 [](char c) { return std::tolower(c); });
 
-  if (XGetWMName(server.dsp, traywin_b->tray_id, &name_b) == 0) {
-    XFree(name_a.value);
-    return false;
+  std::string name_b;
+  if (!util::x11::GetWMName(server.dsp, traywin_a->tray_id, &name_b)) {
+    return true;
   }
+  std::transform(name_a.begin(), name_a.end(), name_a.begin(),
+                 [](char c) { return std::tolower(c); });
 
-  gint retval =
-      g_ascii_strncasecmp((char*)name_a.value, (char*)name_b.value, -1) *
-      systray.sort;
-  XFree(name_a.value);
-  XFree(name_b.value);
-  return (retval <= 0);
+  return (systray.sort == /*descending=*/-1) ? (name_a > name_b)
+                                             : (name_a < name_b);
 }
 
 bool Systraybar::AddIcon(Window id) {

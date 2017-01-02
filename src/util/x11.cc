@@ -1,7 +1,9 @@
-#include "util/x11.hh"
+#include <X11/Xutil.h>
+
 #include "panel.hh"
 #include "server.hh"
 #include "util/log.hh"
+#include "util/x11.hh"
 
 #include <cstring>
 
@@ -222,6 +224,17 @@ void EventLoop::ReapChildPIDs() const {
     }
 #endif  // HAVE_SN
   }
+}
+
+bool GetWMName(Display* display, Window window, std::string* output) {
+  XTextProperty wm_name_prop;
+  if (!XGetWMName(display, window, &wm_name_prop)) {
+    return false;
+  }
+
+  output->assign(reinterpret_cast<const char*>(wm_name_prop.value));
+  XFree(wm_name_prop.value);
+  return true;
 }
 
 pid_t GetWindowPID(Window window) {
