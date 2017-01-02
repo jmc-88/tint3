@@ -49,6 +49,8 @@ std::vector<std::string> Split(std::string const& str, char sep);
 bool StartsWith(std::string const& str, std::string const& other);
 bool RegexMatch(std::string const& pattern, std::string const& string);
 
+void ToLowerCase(std::string* str);
+
 }  // namespace string
 }  // namespace util
 

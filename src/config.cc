@@ -163,8 +163,7 @@ bool Parser::Assignment(parser::TokenList* tokens) {
   tokens->SkipOver(kWhitespace);
 
   std::string key{tokens->Current().match};
-  std::transform(key.begin(), key.end(), key.begin(),
-                 [](char c) { return std::tolower(c); });
+  util::string::ToLowerCase(&key);
   if (!tokens->Accept(kIdentifier)) {
     return false;
   }

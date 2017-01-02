@@ -26,7 +26,6 @@
 #include <X11/extensions/Xrender.h>
 
 #include <algorithm>
-#include <cctype>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -364,16 +363,14 @@ bool CompareTrayWindows(TrayWindow const* traywin_a,
   if (!util::x11::GetWMName(server.dsp, traywin_a->tray_id, &name_a)) {
     return true;
   }
-  std::transform(name_a.begin(), name_a.end(), name_a.begin(),
-                 [](char c) { return std::tolower(c); });
 
   std::string name_b;
   if (!util::x11::GetWMName(server.dsp, traywin_a->tray_id, &name_b)) {
     return true;
   }
-  std::transform(name_a.begin(), name_a.end(), name_a.begin(),
-                 [](char c) { return std::tolower(c); });
 
+  util::string::ToLowerCase(&name_a);
+  util::string::ToLowerCase(&name_b);
   return (systray.sort == /*descending=*/-1) ? (name_a > name_b)
                                              : (name_a < name_b);
 }
