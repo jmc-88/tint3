@@ -113,7 +113,7 @@ Task* AddTask(Window win, Timer& timer) {
   TaskPtrArray task_group;
   Task* new_tsk2 = nullptr;
 
-  for (unsigned int j = 0; j < panels[monitor].nb_desktop_; j++) {
+  for (unsigned int j = 0; j < panels[monitor].num_desktops_; j++) {
     if (new_tsk.desktop != kAllDesktops && new_tsk.desktop != j) {
       continue;
     }

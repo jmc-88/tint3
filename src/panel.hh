@@ -101,7 +101,7 @@ class Panel : public Area {
   // taskbar[i] is used to loop over taskbar,
   // while panel->area.list is used to loop over all panel's objects
   Taskbar* taskbar_;
-  unsigned int nb_desktop_;
+  unsigned int num_desktops_;
 
   // --------------------------------------------------
   // clock

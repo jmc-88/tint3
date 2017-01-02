@@ -432,7 +432,7 @@ bool Panel::Resize() {
     int width = taskbar_[server.desktop].width_;
     int height = taskbar_[server.desktop].height_;
 
-    for (unsigned int i = 0; i < nb_desktop_; ++i) {
+    for (unsigned int i = 0; i < num_desktops_; ++i) {
       taskbar_[i].width_ = width;
       taskbar_[i].height_ = height;
       taskbar_[i].need_resize_ = true;
@@ -457,7 +457,7 @@ void Panel::SetItemsOrder() {
     }
 
     if (item == 'T') {
-      for (unsigned int j = 0; j < nb_desktop_; j++) {
+      for (unsigned int j = 0; j < num_desktops_; j++) {
         children_.push_back(&taskbar_[j]);
       }
     }
@@ -626,7 +626,7 @@ void Panel::SetBackground() {
   }
 
   // reset task/taskbar 'state_pix'
-  for (unsigned int i = 0; i < nb_desktop_; i++) {
+  for (unsigned int i = 0; i < num_desktops_; i++) {
     auto& tskbar = taskbar_[i];
 
     for (int k = 0; k < kTaskbarCount; ++k) {
@@ -650,7 +650,7 @@ void Panel::SetBackground() {
 }
 
 void Panel::UpdateTaskbarVisibility() {
-  for (unsigned int j = 0; j < nb_desktop_; j++) {
+  for (unsigned int j = 0; j < num_desktops_; j++) {
     Taskbar& tskbar = taskbar_[j];
 
     if (panel_mode != PanelMode::kMultiDesktop &&
@@ -675,7 +675,7 @@ Panel* GetPanel(Window win) {
 }
 
 Taskbar* Panel::ClickTaskbar(int x, int y) {
-  for (unsigned int i = 0; i < nb_desktop_; i++) {
+  for (unsigned int i = 0; i < num_desktops_; i++) {
     if (taskbar_[i].IsPointInside(x, y)) {
       return &taskbar_[i];
     }

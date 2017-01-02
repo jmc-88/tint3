@@ -536,7 +536,7 @@ void EventPropertyNotify(XEvent* e, Timer& timer) {
       auto it = desktop_names.begin();
 
       for (Panel& panel : panels) {
-        for (unsigned int i = 0; i < panel.nb_desktop_; ++i) {
+        for (unsigned int i = 0; i < panel.num_desktops_; ++i) {
           std::string name;
 
           if (it != desktop_names.end()) {

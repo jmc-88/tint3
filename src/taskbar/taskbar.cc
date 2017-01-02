@@ -121,7 +121,7 @@ void CleanupTaskbar() {
   }
 
   for (Panel& panel : panels) {
-    for (unsigned int j = 0; j < panel.nb_desktop_; ++j) {
+    for (unsigned int j = 0; j < panel.num_desktops_; ++j) {
       Taskbar* tskbar = &panel.taskbar_[j];
 
       for (int k = 0; k < kTaskbarCount; ++k) {
@@ -299,10 +299,10 @@ void Taskbar::InitPanel(Panel* panel) {
         (panel->g_task.height_ - panel->g_task.icon_size1) / 2;
   }
 
-  panel->nb_desktop_ = server.num_desktops;
+  panel->num_desktops_ = server.num_desktops;
   panel->taskbar_ = new Taskbar[server.num_desktops];
 
-  for (unsigned int j = 0; j < panel->nb_desktop_; j++) {
+  for (unsigned int j = 0; j < panel->num_desktops_; j++) {
     Taskbar* tskbar = &panel->taskbar_[j];
 
     // TODO: nuke this from planet Earth ASAP - horrible hack to mimick the

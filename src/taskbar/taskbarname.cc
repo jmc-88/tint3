@@ -55,7 +55,7 @@ void Taskbarname::InitPanel(Panel* panel) {
   auto desktop_names = ServerGetDesktopNames();
   auto it = desktop_names.begin();
 
-  for (unsigned int j = 0; j < panel->nb_desktop_; ++j) {
+  for (unsigned int j = 0; j < panel->num_desktops_; ++j) {
     Taskbar& tskbar = panel->taskbar_[j];
     tskbar.bar_name = panel->g_taskbar.bar_name_;
     tskbar.bar_name.parent_ = &tskbar;
@@ -80,7 +80,7 @@ void Taskbarname::InitPanel(Panel* panel) {
 
 void Taskbarname::Cleanup() {
   for (Panel& panel : panels) {
-    for (unsigned int j = 0; j < panel.nb_desktop_; j++) {
+    for (unsigned int j = 0; j < panel.num_desktops_; j++) {
       Taskbar& tskbar = panel.taskbar_[j];
 
       tskbar.bar_name.FreeArea();
