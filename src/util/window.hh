@@ -1,7 +1,6 @@
 #ifndef TINT3_UTIL_WINDOW_HH
 #define TINT3_UTIL_WINDOW_HH
 
-#include <glib.h>
 #include <pango/pangocairo.h>
 
 #include <string>
@@ -29,9 +28,9 @@ Window GetActive();
 
 void SetDesktop(int desktop);
 
-int GetIconCount(gulong* data, int num);
-gulong* GetBestIcon(gulong* data, int icon_count, int num, int* iw, int* ih,
-                    int best_icon_size);
+int GetIconCount(unsigned long* data, int num);
+unsigned long* GetBestIcon(unsigned long* data, int icon_count, int num,
+                           int* iw, int* ih, int best_icon_size);
 
 std::vector<std::string> ServerGetDesktopNames();
 

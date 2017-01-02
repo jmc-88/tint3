@@ -282,14 +282,15 @@ void GetIcon(Task* tsk) {
 
   Imlib_Image img = nullptr;
   int i = 0;
-  auto data = ServerGetProperty<gulong>(tsk->win, server.atoms_["_NET_WM_ICON"],
-                                        XA_CARDINAL, &i);
+  auto data = ServerGetProperty<unsigned long>(
+      tsk->win, server.atoms_["_NET_WM_ICON"], XA_CARDINAL, &i);
 
   if (data != nullptr) {
     // get ARGB icon
     int w, h;
-    gulong* tmp_data = GetBestIcon(data.get(), GetIconCount(data.get(), i), i,
-                                   &w, &h, panel->g_task.icon_size1);
+    unsigned long* tmp_data =
+        GetBestIcon(data.get(), GetIconCount(data.get(), i), i, &w, &h,
+                    panel->g_task.icon_size1);
 #ifdef __x86_64__
     DATA32 icon_data[w * h];
     int length = w * h;

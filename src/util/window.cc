@@ -202,7 +202,7 @@ void SetDesktop(int desktop) {
               0, 0);
 }
 
-int GetIconCount(gulong* data, int num) {
+int GetIconCount(unsigned long* data, int num) {
   int count = 0;
   int pos = 0;
 
@@ -221,11 +221,11 @@ int GetIconCount(gulong* data, int num) {
   return count;
 }
 
-gulong* GetBestIcon(gulong* data, int icon_count, int num, int* iw, int* ih,
-                    int best_icon_size) {
+unsigned long* GetBestIcon(unsigned long* data, int icon_count, int num,
+                           int* iw, int* ih, int best_icon_size) {
   int width[icon_count];
   int height[icon_count];
-  gulong* icon_data[icon_count];
+  unsigned long* icon_data[icon_count];
 
   /* List up icons */
   int pos = 0;
