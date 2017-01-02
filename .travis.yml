@@ -14,7 +14,7 @@ before_install:
   - sudo apt-get update -qq
 
 install:
-  # g++ 4.8
+  # g++ 4.9
   - if [ "$CXX" == "g++" ]; then sudo apt-get install -qq g++-4.9; fi
   - if [ "$CXX" == "g++" ]; then export CXX="g++-4.9"; fi
 
@@ -28,10 +28,13 @@ install:
   # Required libraries
   - sudo apt-get --assume-yes install libcairo2-dev libpango1.0-dev libglib2.0-dev libimlib2-dev libxinerama-dev libx11-dev libxdamage-dev libxcomposite-dev libxrender-dev libxrandr-dev librsvg2-dev libstartup-notification0-dev
 
+  # For Coveralls integration
+  - sudo apt-get --assume-yes install lcov curl
+
 before_script:
   - mkdir "${TRAVIS_BUILD_DIR}/build"
   - cd "${TRAVIS_BUILD_DIR}/build"
-  - cmake "${TRAVIS_BUILD_DIR}" -DCMAKE_BUILD_TYPE=Release
+  - cmake "${TRAVIS_BUILD_DIR}" -DCMAKE_BUILD_TYPE=Debug -DCOVERALLS=ON -DCOVERALLS_UPLOAD=ON
 
 script:
   # Verify tint3 builds and passes tests

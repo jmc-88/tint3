@@ -65,6 +65,15 @@ set(DATADIR share CACHE PATH "Directory for shared data")
 set(SYSCONFDIR /etc CACHE PATH "Directory for configuration files")
 set(DOCDIR share/doc/tint3 CACHE PATH "Directory for documentation files")
 
+option(COVERALLS "Turn on coveralls support" OFF)
+option(COVERALLS_UPLOAD "Upload the generated coveralls json" OFF)
+
+if (COVERALLS)
+  set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}
+                        "${CMAKE_SOURCE_DIR}/cmake/coveralls-cmake/cmake/")
+	include(Coveralls)
+endif()
+
 # {{{ version.hh
 #
 # This section inspired by:
@@ -188,6 +197,16 @@ add_executable(tint3 src/tint.cc)
 target_link_libraries(tint3 tint3_common_lib ${TINT3_LINK_LIBRARIES})
 
 # }}} build rules
+
+# {{{ coverage rules
+
+if(COVERALLS)
+  set(COVERAGE_SRCS ${TINT3_SOURCES} src/tint.cc)
+  coveralls_turn_on_coverage()
+  coveralls_setup("${COVERAGE_SRCS}" ${COVERALLS_UPLOAD})
+endif()
+
+# }}} coverage rules
 
 # {{{ test rules
 
