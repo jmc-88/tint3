@@ -14,16 +14,25 @@ TEST_CASE("Get", "Reading from the environment is sane") {
 }
 
 TEST_CASE("Set", "Writing to the environment works") {
+  // Fails on invalid key.
+  REQUIRE(!environment::Set("", "__BOGUS_VALUE__"));
+
   REQUIRE(getenv("__BOGUS_NAME__") == nullptr);
   REQUIRE(environment::Set("__BOGUS_NAME__", "__BOGUS_VALUE__"));
   REQUIRE(std::strcmp(getenv("__BOGUS_NAME__"), "__BOGUS_VALUE__") == 0);
 }
 
 TEST_CASE("Unset", "Deleting from the environment works") {
+  // Fails on invalid key.
+  REQUIRE(!environment::Unset(""));
+
   setenv("__BOGUS_NAME__", "__BOGUS_VALUE__", 1);
   REQUIRE(std::strcmp(getenv("__BOGUS_NAME__"), "__BOGUS_VALUE__") == 0);
   REQUIRE(environment::Unset("__BOGUS_NAME__"));
   REQUIRE(getenv("__BOGUS_NAME__") == nullptr);
+
+  // No-op when removing an already deleted key name.
+  REQUIRE(environment::Unset("__BOGUS_NAME__"));
 }
 
 TEST_CASE("ScopedEnvironmentOverride",
