@@ -238,6 +238,9 @@ target_link_libraries(util_bimap_test tint3_common_lib ${TINT3_LINK_LIBRARIES})
 test_target(util_common_test src/util/common_test.cc)
 target_link_libraries(util_common_test tint3_common_lib ${TINT3_LINK_LIBRARIES})
 
+test_target(util_fs_test src/util/fs_test.cc)
+target_link_libraries(util_fs_test tint3_common_lib ${TINT3_LINK_LIBRARIES})
+
 test_target(util_imlib2_test src/util/imlib2_test.cc)
 target_link_libraries(util_imlib2_test tint3_common_lib ${TINT3_LINK_LIBRARIES})
 

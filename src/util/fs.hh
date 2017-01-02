@@ -57,6 +57,8 @@ class Path {
   Path& operator/=(std::string const& component);
   operator std::string() const;
 
+  bool operator==(std::string const& str) const;
+
  private:
   std::string path_;
 };
@@ -70,7 +72,6 @@ bool DirectoryExists(std::string const& path);
 bool FileExists(std::string const& path);
 bool FileExists(std::initializer_list<std::string> parts);
 Path HomeDirectory();
-bool IsAbsolutePath(std::string const& path);
 bool ReadFile(std::string const& path,
               std::function<bool(std::string const&)> const& fn);
 bool ReadFileByLine(std::string const& path,

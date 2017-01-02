@@ -109,14 +109,21 @@ Path Path::operator/(std::string const& component) {
 }
 
 Path& Path::operator/=(std::string const& component) {
-  if (!path_.empty() && path_ != "/") {
-    path_.append("/");
+  if (!path_.empty() && path_.back() != '/') {
+    path_.push_back('/');
   }
-  path_.append(StripLeadingSlash(component));
+  std::string stripped_component{StripTrailingSlash(component)};
+  if (path_.empty()) {
+    path_.append(stripped_component);
+  } else {
+    path_.append(StripLeadingSlash(stripped_component));
+  }
   return (*this);
 }
 
 Path::operator std::string() const { return path_; }
+
+bool Path::operator==(std::string const& str) const { return path_ == str; }
 
 std::ostream& operator<<(std::ostream& os, Path const& path) {
   return os << path.path_;
@@ -211,18 +218,6 @@ Path HomeDirectory() {
   // if we got here both getenv() and getpwuid() failed, so let's just return
   // an empty string to indicate failure
   return std::string();
-}
-
-bool IsAbsolutePath(std::string const& path) {
-  char* real_path = realpath(path.c_str(), nullptr);
-
-  if (real_path == nullptr) {
-    return false;
-  }
-
-  bool is_absolute = (std::strcmp(path.c_str(), real_path) == 0);
-  std::free(real_path);
-  return is_absolute;
 }
 
 bool ReadFile(std::string const& path,
