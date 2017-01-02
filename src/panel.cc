@@ -578,7 +578,7 @@ void Panel::SetProperties() {
 }
 
 void Panel::SetBackground() {
-  if (pix_) {
+  if (pix_ != None) {
     XFreePixmap(server.dsp, pix_);
   }
 
@@ -647,8 +647,8 @@ void Panel::SetBackground() {
       tskbar.bar_name.reset_state_pixmap(k);
     }
 
-    tskbar.pix_ = 0;
-    tskbar.bar_name.pix_ = 0;
+    tskbar.pix_ = None;
+    tskbar.bar_name.pix_ = None;
 
     auto begin = tskbar.children_.begin();
 

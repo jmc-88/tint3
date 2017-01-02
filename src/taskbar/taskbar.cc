@@ -77,11 +77,11 @@ Taskbar& Taskbar::SetState(size_t state) {
   }
 
   if (on_screen_ == true) {
-    if (state_pixmap(state) == 0) {
+    if (state_pixmap(state) == None) {
       need_redraw_ = true;
     }
 
-    if (taskbarname_enabled && bar_name.state_pixmap(state) == 0) {
+    if (taskbarname_enabled && bar_name.state_pixmap(state) == None) {
       bar_name.need_redraw_ = true;
     }
 
@@ -430,7 +430,7 @@ void Taskbar::OnChangeLayout() {
     reset_state_pixmap(k);
   }
 
-  pix_ = 0;
+  pix_ = None;
   need_redraw_ = true;
 }
 

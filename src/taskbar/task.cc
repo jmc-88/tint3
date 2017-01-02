@@ -98,7 +98,7 @@ Task* AddTask(Window win, Timer& timer) {
   // even with task_on_all_desktop and with task_on_all_panel
   for (int k = 0; k < kTaskStateCount; ++k) {
     new_tsk.icon[k] = 0;
-    new_tsk.state_pix[k] = 0;
+    new_tsk.state_pix[k] = None;
   }
 
   new_tsk.UpdateTitle();
@@ -180,7 +180,7 @@ void RemoveTask(Task* tsk) {
       imlib_free_image();
       tsk->icon[k] = 0;
 
-      if (tsk->state_pix[k]) {
+      if (tsk->state_pix[k] != None) {
         XFreePixmap(server.dsp, tsk->state_pix[k]);
       }
     }
@@ -601,7 +601,7 @@ void Task::SetState(int state) {
       tsk1->pix_ = tsk1->state_pix[state];
       tsk1->set_mouse_state(MouseState::kMouseNormal);
 
-      if (tsk1->state_pix[state] == 0) {
+      if (tsk1->state_pix[state] == None) {
         tsk1->need_redraw_ = true;
       }
 
@@ -618,14 +618,13 @@ void Task::SetState(int state) {
 
 void SetTaskRedraw(Task* tsk) {
   for (int k = 0; k < kTaskStateCount; ++k) {
-    if (tsk->state_pix[k]) {
+    if (tsk->state_pix[k] != None) {
       XFreePixmap(server.dsp, tsk->state_pix[k]);
     }
-
-    tsk->state_pix[k] = 0;
+    tsk->state_pix[k] = None;
   }
 
-  tsk->pix_ = 0;
+  tsk->pix_ = None;
   tsk->need_redraw_ = true;
 }
 

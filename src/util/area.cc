@@ -599,7 +599,7 @@ void Area::Show() {
 }
 
 void Area::Draw() {
-  if (pix_) {
+  if (pix_ != None) {
     XFreePixmap(server.dsp, pix_);
   }
 
@@ -691,7 +691,7 @@ void Area::FreeArea() {
 
   children_.clear();
 
-  if (pix_) {
+  if (pix_ != None) {
     XFreePixmap(server.dsp, pix_);
     pix_ = None;
   }
