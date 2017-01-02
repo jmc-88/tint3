@@ -9,6 +9,7 @@ namespace imlib2 {
 class Image {
  public:
   Image(Imlib_Image image = nullptr);
+  Image(Image const& other);
   Image(Image&& other);
   ~Image();
 
