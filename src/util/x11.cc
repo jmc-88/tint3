@@ -49,8 +49,8 @@ bool EventLoop::RunLoop() {
     if (panel_refresh) {
       panel_refresh = false;
 
-      for (int i = 0; i < nb_panel; i++) {
-        Panel& panel = panel1[i];
+      for (int i = 0; i < num_panels; i++) {
+        Panel& panel = panels[i];
 
         if (panel.is_hidden_) {
           XCopyArea(server_->dsp, panel.hidden_pixmap_, panel.main_win_,

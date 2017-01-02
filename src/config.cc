@@ -850,7 +850,7 @@ int Reader::GetMonitor(std::string const& monitor_name) const {
     }
 
     // monitor specified by name, not by index
-    for (int i = 0; i < server_->nb_monitor; ++i) {
+    for (int i = 0; i < server_->num_monitors; ++i) {
       for (auto& name : server_->monitor[i].names) {
         if (name == monitor_name) {
           return i;

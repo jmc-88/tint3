@@ -86,21 +86,21 @@ bool UpdateBatteries() {
     return true;
   }
 
-  for (int i = 0; i < nb_panel; i++) {
+  for (int i = 0; i < num_panels; i++) {
     if (battery_state.percentage >= percentage_hide) {
-      if (panel1[i].battery_.on_screen_) {
-        panel1[i].battery_.Hide();
+      if (panels[i].battery_.on_screen_) {
+        panels[i].battery_.Hide();
         panel_refresh = true;
       }
     } else {
-      if (!panel1[i].battery_.on_screen_) {
-        panel1[i].battery_.Show();
+      if (!panels[i].battery_.on_screen_) {
+        panels[i].battery_.Show();
         panel_refresh = true;
       }
     }
 
-    if (panel1[i].battery_.on_screen_) {
-      panel1[i].battery_.need_resize_ = true;
+    if (panels[i].battery_.on_screen_) {
+      panels[i].battery_.need_resize_ = true;
       panel_refresh = true;
     }
   }

@@ -103,8 +103,8 @@ int IsHidden(Window win) {
     }
   }
 
-  for (int i = 0; i < nb_panel; ++i) {
-    if (panel1[i].main_win_ == win) {
+  for (int i = 0; i < num_panels; ++i) {
+    if (panels[i].main_win_ == win) {
       return 1;
     }
   }
@@ -124,7 +124,7 @@ bool IsInsideMonitor(int x, int y, Monitor const& monitor) {
 }
 
 int FindMonitorIndex(int x, int y) {
-  for (int i = 0; i < server.nb_monitor; i++) {
+  for (int i = 0; i < server.num_monitors; i++) {
     if (IsInsideMonitor(x, y, server.monitor[i])) {
       return i;
     }

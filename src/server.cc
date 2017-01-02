@@ -268,8 +268,8 @@ void GetMonitors() {
       server.monitor[j].names.clear();
     }
 
-    server.nb_monitor = i;
-    server.monitor.resize(server.nb_monitor);
+    server.num_monitors = i;
+    server.monitor.resize(server.num_monitors);
     std::sort(server.monitor.begin(), server.monitor.end(), MonitorIncludes);
 
     if (res) {
@@ -277,9 +277,9 @@ void GetMonitors() {
     }
   }
 
-  if (!server.nb_monitor) {
-    server.nb_monitor = 1;
-    server.monitor.resize(server.nb_monitor);
+  if (!server.num_monitors) {
+    server.num_monitors = 1;
+    server.monitor.resize(server.num_monitors);
     server.monitor[0].x = server.monitor[0].y = 0;
     server.monitor[0].width = DisplayWidth(server.dsp, server.screen);
     server.monitor[0].height = DisplayHeight(server.dsp, server.screen);
@@ -291,17 +291,17 @@ void GetDesktops() {
   // detect number of desktops
   // wait 15s to leave some time for window manager startup
   for (int i = 0; i < 15; i++) {
-    server.nb_desktop = server.GetNumberOfDesktops();
+    server.num_desktops = server.GetNumberOfDesktops();
 
-    if (server.nb_desktop > 0) {
+    if (server.num_desktops > 0) {
       break;
     }
 
     sleep(1);
   }
 
-  if (server.nb_desktop == 0) {
-    server.nb_desktop = 1;
+  if (server.num_desktops == 0) {
+    server.num_desktops = 1;
     util::log::Error() << "WM doesn't respect NETWM specs. "
                        << "tint3 will default to 1 desktop.\n";
   }

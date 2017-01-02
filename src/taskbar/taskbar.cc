@@ -55,7 +55,7 @@ bool FindWindow(Window const needle, Window const* const haystack,
 // win_to_task_map holds for every Window an array of tasks.
 // Usually the array contains only one element. However for omnipresent windows
 // (windows which are visible in every taskbar) the array contains to every
-// Task* on each panel a pointer (i.e. GPtrArray.len == server.nb_desktop)
+// Task* on each panel a pointer (i.e. GPtrArray.len == server.num_desktops)
 
 WindowToTaskMap win_to_task_map;
 
@@ -64,11 +64,11 @@ Task* task_drag;
 bool taskbar_enabled;
 
 Taskbar& Taskbar::SetState(size_t state) {
-  bg_ = panel1[0].g_taskbar.background[state];
+  bg_ = panels[0].g_taskbar.background[state];
   pix_ = state_pixmap(state);
 
   if (taskbarname_enabled) {
-    bar_name.bg_ = panel1[0].g_taskbar.background_name[state];
+    bar_name.bg_ = panels[0].g_taskbar.background_name[state];
     bar_name.pix_ = bar_name.state_pixmap(state);
   }
 
@@ -85,8 +85,8 @@ Taskbar& Taskbar::SetState(size_t state) {
       bar_name.need_redraw_ = true;
     }
 
-    auto& normal_bg = panel1[0].g_taskbar.background[kTaskbarNormal];
-    auto& active_bg = panel1[0].g_taskbar.background[kTaskbarActive];
+    auto& normal_bg = panels[0].g_taskbar.background[kTaskbarNormal];
+    auto& active_bg = panels[0].g_taskbar.background[kTaskbarActive];
 
     if (panel_mode == PanelMode::kMultiDesktop && normal_bg != active_bg) {
       auto it = children_.begin();
@@ -120,8 +120,8 @@ void CleanupTaskbar() {
     TaskbarRemoveTask(win_to_task_map.begin()->first);
   }
 
-  for (int i = 0; i < nb_panel; ++i) {
-    Panel& panel = panel1[i];
+  for (int i = 0; i < num_panels; ++i) {
+    Panel& panel = panels[i];
 
     for (int j = 0; j < panel.nb_desktop_; ++j) {
       Taskbar* tskbar = &panel.taskbar_[j];
@@ -301,8 +301,8 @@ void Taskbar::InitPanel(Panel* panel) {
         (panel->g_task.height_ - panel->g_task.icon_size1) / 2;
   }
 
-  panel->nb_desktop_ = server.nb_desktop;
-  panel->taskbar_ = new Taskbar[server.nb_desktop];
+  panel->nb_desktop_ = server.num_desktops;
+  panel->taskbar_ = new Taskbar[server.num_desktops];
 
   for (int j = 0; j < panel->nb_desktop_; j++) {
     Taskbar* tskbar = &panel->taskbar_[j];

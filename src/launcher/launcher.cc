@@ -108,8 +108,8 @@ void CleanupLauncher() {
     XSettingsClientDestroy(xsettings_client);
   }
 
-  for (int i = 0; i < nb_panel; i++) {
-    panel1[i].launcher_.CleanupTheme();
+  for (int i = 0; i < num_panels; i++) {
+    panels[i].launcher_.CleanupTheme();
   }
 
   panel_config.launcher_.list_apps_.clear();

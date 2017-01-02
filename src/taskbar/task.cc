@@ -47,11 +47,11 @@ const char kUntitled[] = "Untitled";
 int GetMonitor(Window win) {
   int monitor = 0;
 
-  if (nb_panel > 1) {
+  if (num_panels > 1) {
     monitor = util::window::GetMonitor(win);
   }
 
-  if (monitor >= nb_panel) {
+  if (monitor >= num_panels) {
     monitor = 0;
   }
 
@@ -90,7 +90,7 @@ Task* AddTask(Window win, Timer& timer) {
   Task new_tsk{timer};
   new_tsk.win = win;
   new_tsk.desktop = util::window::GetDesktop(win);
-  new_tsk.panel_ = &panel1[monitor];
+  new_tsk.panel_ = &panels[monitor];
   new_tsk.current_state =
       util::window::IsIconified(win) ? kTaskIconified : kTaskNormal;
 
@@ -113,17 +113,17 @@ Task* AddTask(Window win, Timer& timer) {
   TaskPtrArray task_group;
   Task* new_tsk2 = nullptr;
 
-  for (int j = 0; j < panel1[monitor].nb_desktop_; j++) {
+  for (int j = 0; j < panels[monitor].nb_desktop_; j++) {
     if (new_tsk.desktop != kAllDesktops && new_tsk.desktop != j) {
       continue;
     }
 
-    Taskbar& tskbar = panel1[monitor].taskbar_[j];
+    Taskbar& tskbar = panels[monitor].taskbar_[j];
     new_tsk2 = new Task{timer};
 
     // TODO: nuke this from planet Earth ASAP - horrible hack to mimick the
     // original memcpy() call
-    new_tsk2->CloneArea(panel1[monitor].g_task);
+    new_tsk2->CloneArea(panels[monitor].g_task);
 
     new_tsk2->parent_ = &tskbar;
     new_tsk2->win = new_tsk.win;
@@ -138,7 +138,7 @@ Task* AddTask(Window win, Timer& timer) {
     }
 
     new_tsk2->SetTitle(new_tsk.GetTitle());
-    new_tsk2->SetTooltipEnabled(panel1[monitor].g_task.tooltip_enabled);
+    new_tsk2->SetTooltipEnabled(panels[monitor].g_task.tooltip_enabled);
 
     for (int k = 0; k < kTaskStateCount; ++k) {
       new_tsk2->icon[k] = new_tsk.icon[k];
@@ -597,7 +597,7 @@ void Task::SetState(int state) {
   if (current_state != state) {
     for (auto& tsk1 : TaskGetTasks(win)) {
       tsk1->current_state = state;
-      tsk1->bg_ = panel1[0].g_task.background[state];
+      tsk1->bg_ = panels[0].g_task.background[state];
       tsk1->pix_ = tsk1->state_pix[state];
       tsk1->set_mouse_state(MouseState::kMouseNormal);
 

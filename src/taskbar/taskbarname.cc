@@ -79,8 +79,8 @@ void Taskbarname::InitPanel(Panel* panel) {
 }
 
 void Taskbarname::Cleanup() {
-  for (int i = 0; i < nb_panel; i++) {
-    Panel& panel = panel1[i];
+  for (int i = 0; i < num_panels; i++) {
+    Panel& panel = panels[i];
 
     for (int j = 0; j < panel.nb_desktop_; j++) {
       Taskbar& tskbar = panel.taskbar_[j];

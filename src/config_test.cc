@@ -52,7 +52,7 @@ namespace test {
 class MockServer : public Server {
  public:
   void SetMonitors(std::initializer_list<std::string> const& monitor_list) {
-    nb_monitor = monitor_list.size();
+    num_monitors = monitor_list.size();
 
     monitor.clear();
     for (auto const& name : monitor_list) {

@@ -95,7 +95,7 @@ class Panel : public Area {
 
   // --------------------------------------------------
   // taskbar point to the first taskbar in panel.area.list.
-  // number of tasbar == nb_desktop. taskbar[i] is for desktop(i).
+  // number of tasbar == num_desktops. taskbar[i] is for desktop(i).
   // taskbar[i] is used to loop over taskbar,
   // while panel->area.list is used to loop over all panel's objects
   Taskbar* taskbar_;
@@ -150,8 +150,8 @@ class Panel : public Area {
 };
 
 extern Panel panel_config;
-extern Panel* panel1;
-extern int nb_panel;
+extern Panel* panels;
+extern int num_panels;
 
 // default global data
 void DefaultPanel();

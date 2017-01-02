@@ -74,8 +74,8 @@ int max_tick_urgent;
 // panel's initial config
 Panel panel_config;
 // panels (one panel per monitor)
-Panel* panel1;
-int nb_panel;
+Panel* panels;
+int num_panels;
 
 std::vector<Background> backgrounds;
 
@@ -153,8 +153,8 @@ void UpdateStrut(Panel* p) {
 }  // namespace
 
 void DefaultPanel() {
-  panel1 = nullptr;
-  nb_panel = 0;
+  panels = nullptr;
+  num_panels = 0;
   default_icon.Free();
   task_dragged = false;
   panel_horizontal = true;
@@ -177,7 +177,7 @@ void DefaultPanel() {
 }
 
 void CleanupPanel() {
-  if (!panel1) {
+  if (!panels) {
     return;
   }
 
@@ -189,8 +189,8 @@ void CleanupPanel() {
     pango_font_description_free(taskbarname_font_desc);
   }
 
-  for (int i = 0; i < nb_panel; i++) {
-    Panel& p = panel1[i];
+  for (int i = 0; i < num_panels; i++) {
+    Panel& p = panels[i];
 
     p.FreeArea();
 
@@ -207,8 +207,8 @@ void CleanupPanel() {
     }
   }
 
-  if (panel1) {
-    delete[] panel1;
+  if (panels) {
+    delete[] panels;
   }
 
   if (panel_config.g_task.font_desc) {
@@ -219,8 +219,8 @@ void CleanupPanel() {
 }
 
 void InitPanel(Timer& timer) {
-  if (panel_config.monitor_ > server.nb_monitor - 1) {
-    // server.nb_monitor minimum value is 1 (see get_monitors())
+  if (panel_config.monitor_ > server.num_monitors - 1) {
+    // server.num_monitors minimum value is 1 (see get_monitors())
     util::log::Error() << "warning: monitor not found, "
                        << "defaulting to all monitors.\n";
     panel_config.monitor_ = 0;
@@ -237,23 +237,23 @@ void InitPanel(Timer& timer) {
 
   // number of panels (one monitor or 'all' monitors)
   if (panel_config.monitor_ >= 0) {
-    nb_panel = 1;
+    num_panels = 1;
   } else {
-    nb_panel = server.nb_monitor;
+    num_panels = server.num_monitors;
   }
 
-  panel1 = new Panel[nb_panel];
+  panels = new Panel[num_panels];
 
-  for (int i = 0; i < nb_panel; i++) {
-    panel1[i] = panel_config;
+  for (int i = 0; i < num_panels; i++) {
+    panels[i] = panel_config;
   }
 
-  util::log::Debug() << "tint3: nb monitor " << server.nb_monitor
-                     << ", nb monitor used " << nb_panel << ", nb desktop "
-                     << server.nb_desktop << '\n';
+  util::log::Debug() << "tint3: num_monitors " << server.num_monitors
+                     << ", num_monitors used " << num_panels
+                     << ", num_desktops " << server.num_desktops << '\n';
 
-  for (int i = 0; i < nb_panel; i++) {
-    auto p = &panel1[i];
+  for (int i = 0; i < num_panels; i++) {
+    auto p = &panels[i];
 
     if (panel_config.monitor_ < 0) {
       p->monitor_ = i;
@@ -288,7 +288,7 @@ void InitPanel(Timer& timer) {
 
       if (item == 'S' && i == 0) {
         // TODO : check systray is only on 1 panel
-        // at the moment only on panel1[0] allowed
+        // at the moment only on panels[0] allowed
         systray.SetParentPanel(p);
         systray.set_should_refresh(true);
       }
@@ -481,11 +481,11 @@ void Panel::SetItemsOrder() {
 #endif
 
     // FIXME: with the move of this method to the Panel class,
-    // this comparison got pretty shitty (this == panel1...)
+    // this comparison got pretty shitty (this == panels...)
 
-    if (item == 'S' && this == panel1) {
+    if (item == 'S' && this == panels) {
       // TODO : check systray is only on 1 panel
-      // at the moment only on panel1[0] allowed
+      // at the moment only on panels[0] allowed
       children_.push_back(&systray);
     }
 
@@ -679,9 +679,9 @@ void Panel::UpdateTaskbarVisibility() {
 }
 
 Panel* GetPanel(Window win) {
-  for (int i = 0; i < nb_panel; ++i) {
-    if (panel1[i].main_win_ == win) {
-      return &panel1[i];
+  for (int i = 0; i < num_panels; ++i) {
+    if (panels[i].main_win_ == win) {
+      return &panels[i];
     }
   }
 

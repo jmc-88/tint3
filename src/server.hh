@@ -36,9 +36,9 @@ class Server {
   int desktop;
   int screen;
   int depth;
-  int nb_desktop;
+  int num_desktops;
   // number of monitor (without monitor included into another one)
-  int nb_monitor;
+  int num_monitors;
   std::vector<Monitor> monitor;
   bool got_root_win;
   Visual* visual;
