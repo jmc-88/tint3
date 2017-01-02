@@ -41,5 +41,9 @@ script:
   - cd "${TRAVIS_BUILD_DIR}/build"
   - make all test
 
+  # Upload coverage data to Coveralls
+  - cd "${TRAVIS_BUILD_DIR}/build"
+  - cmake --build . --target coveralls
+
   # Verify the installation script works, then clean up
   - sudo make install DESTDIR=/opt/tint3 && sudo rm -rf /opt/tint3
