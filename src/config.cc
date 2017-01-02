@@ -26,7 +26,6 @@
 #include <X11/Xutil.h>
 #include <cairo-xlib.h>
 #include <cairo.h>
-#include <glib/gstdio.h>
 #include <pango/pangocairo.h>
 #include <pango/pangoxft.h>
 #include <sys/stat.h>

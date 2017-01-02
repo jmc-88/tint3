@@ -19,7 +19,6 @@
 
 #include <cairo-xlib.h>
 #include <cairo.h>
-#include <glib/gi18n.h>
 #include <signal.h>
 #include <unistd.h>
 
