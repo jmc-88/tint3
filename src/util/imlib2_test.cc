@@ -1,6 +1,8 @@
 #define CATCH_CONFIG_MAIN
 #include "catch.hpp"
 
+#include <utility>
+
 #include "util/imlib2.hh"
 
 TEST_CASE("imlib2::Image::Image", "Construction/destruction") {
@@ -20,7 +22,7 @@ TEST_CASE("imlib2::Image::Image", "Construction/destruction") {
   auto new_imlib2_image = []() -> util::imlib2::Image {
     return imlib_create_image(100, 100);
   };
-  util::imlib2::Image moved_image{new_imlib2_image()};
+  util::imlib2::Image moved_image{std::move(new_imlib2_image())};
   REQUIRE(moved_image != nullptr);
 }
 
