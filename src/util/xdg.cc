@@ -26,29 +26,9 @@ namespace util {
 namespace xdg {
 namespace basedir {
 
-util::fs::Path DataHome() {
-  static auto default_ = GetDefaultDirectory("/.local/share");
-  return default_(environment::Get("XDG_DATA_HOME"));
-}
-
 util::fs::Path ConfigHome() {
   static auto default_ = GetDefaultDirectory("/.config");
   return default_(environment::Get("XDG_CONFIG_HOME"));
-}
-
-util::fs::Path CacheHome() {
-  static auto default_ = GetDefaultDirectory("/.cache");
-  return default_(environment::Get("XDG_CACHE_HOME"));
-}
-
-util::fs::Path RuntimeDir() {
-  // FIXME: the value of $XDG_CACHE_HOME is what glib defaults to if
-  // $XDG_RUNTIME_DIR is empty, but the specification also mandates that the
-  // runtime directory be tied to the user's session lifetime (i.e., created
-  // at user login time, and fully removed at user logout time), so there
-  // might be a better choice for this default value
-  static auto default_ = DefaultValue(CacheHome());
-  return default_(environment::Get("XDG_RUNTIME_DIR"));
 }
 
 std::vector<std::string> DataDirs() {

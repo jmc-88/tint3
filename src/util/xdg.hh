@@ -10,10 +10,7 @@ namespace util {
 namespace xdg {
 namespace basedir {
 
-util::fs::Path DataHome();
 util::fs::Path ConfigHome();
-util::fs::Path CacheHome();
-util::fs::Path RuntimeDir();
 std::vector<std::string> DataDirs();
 std::vector<std::string> ConfigDirs();
 
