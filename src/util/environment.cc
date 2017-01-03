@@ -1,3 +1,4 @@
+#include <cstdlib>
 #include <cstring>
 
 #include "util/environment.hh"
@@ -7,13 +8,10 @@ namespace environment {
 
 std::string Get(std::string const& key) {
   char* value = getenv(key.c_str());
-  std::string result;
-
   if (value != nullptr) {
-    result.assign(value);
+    return value;
   }
-
-  return result;
+  return std::string{};
 }
 
 bool Set(std::string const& key, std::string const& value) {
@@ -21,7 +19,6 @@ bool Set(std::string const& key, std::string const& value) {
     util::log::Error() << "setenv(): " << std::strerror(errno) << '\n';
     return false;
   }
-
   return true;
 }
 
@@ -30,7 +27,6 @@ bool Unset(std::string const& key) {
     util::log::Error() << "unsetenv(): " << std::strerror(errno) << '\n';
     return false;
   }
-
   return true;
 }
 
