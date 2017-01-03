@@ -1,13 +1,16 @@
 #define CATCH_CONFIG_MAIN
 #include "catch.hpp"
 
+#include <sys/types.h>
+#include <unistd.h>
+
+#include <functional>
 #include <sstream>
 #include <string>
 #include <utility>
 
 #include "util/environment.hh"
 #include "util/fs.hh"
-#include "util/log.hh"
 
 TEST_CASE("Path", "Represents a filesystem path string") {
   SECTION("move constructor") {
@@ -84,4 +87,73 @@ TEST_CASE("HomeDirectory", "Returns the user's home path") {
   // When $HOME is empty or missing, getpwuid() should give us the same info.
   environment::ScopedOverride unset_home{"HOME", ""};
   REQUIRE(util::fs::HomeDirectory() == home_from_environment);
+}
+
+class ReadFileCallback {
+ public:
+  ReadFileCallback() : invoked_(false) {}
+  ReadFileCallback(ReadFileCallback const&) = delete;
+
+  bool invoked() { return invoked_; }
+
+  bool operator()(std::string const& /*contents*/) {
+    invoked_ = true;
+    return true;
+  }
+
+ private:
+  bool invoked_;
+};
+
+TEST_CASE("ReadFile", "Reads the entire contents of a file into memory") {
+  // Bad path case.
+  ReadFileCallback read_file_callback_bad;
+  REQUIRE(!util::fs::ReadFile("/none", std::ref(read_file_callback_bad)));
+  REQUIRE(!read_file_callback_bad.invoked());
+
+  // Good path case.
+  ReadFileCallback read_file_callback_good;
+  REQUIRE(util::fs::ReadFile("/proc/self/status",
+                             std::ref(read_file_callback_good)));
+  REQUIRE(read_file_callback_good.invoked());
+}
+
+class ReadFileByLineCallback : public ReadFileCallback {
+ public:
+  ReadFileByLineCallback() : found_(false) {
+    // Construct the expected "Pid" line. Does not include the newline
+    // terminator, as std::getline() removes it.
+    std::ostringstream oss;
+    oss << "Pid:\t" << getpid();
+    expected_line_ = oss.str();
+  }
+
+  ReadFileByLineCallback(ReadFileCallback const&) = delete;
+
+  bool found() { return found_; }
+
+  bool operator()(std::string const& line) {
+    if (line == expected_line_) {
+      found_ = true;
+    }
+    return ReadFileCallback::operator()(line);
+  }
+
+ private:
+  bool found_;
+  std::string expected_line_;
+};
+
+TEST_CASE("ReadFileByLine", "Reads the contents of a file line by line") {
+  // Bad path case.
+  ReadFileCallback read_file_callback_bad;
+  REQUIRE(!util::fs::ReadFileByLine("/none", std::ref(read_file_callback_bad)));
+  REQUIRE(!read_file_callback_bad.invoked());
+
+  // Good path case.
+  ReadFileByLineCallback read_file_callback_good;
+  REQUIRE(util::fs::ReadFileByLine("/proc/self/status",
+                                   std::ref(read_file_callback_good)));
+  REQUIRE(read_file_callback_good.invoked());
+  REQUIRE(read_file_callback_good.found());
 }

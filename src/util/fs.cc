@@ -222,11 +222,18 @@ Path HomeDirectory() {
 
 bool ReadFile(std::string const& path,
               std::function<bool(std::string const&)> const& fn) {
-  static std::streamsize kMaxBytesToRead = (1 << 20);
+  static constexpr std::streamsize kDefaultBufferSize = (1 << 15);  // 32 KiB
+  static constexpr std::streamsize kMaxBytesToRead = (1 << 20);     // 1 MiB
+  static constexpr auto get_buffer_size =
+      [](std::streamsize num_bytes_to_read) -> std::streamsize {
+    if (num_bytes_to_read == -1) {
+      return kDefaultBufferSize;
+    } else {
+      return std::min(num_bytes_to_read, kMaxBytesToRead);
+    }
+  };
 
-  std::ifstream is(path);
-  std::string contents;
-
+  std::ifstream is{path};
   if (!is.good()) {
     return false;
   }
@@ -235,18 +242,29 @@ bool ReadFile(std::string const& path,
   std::streamsize num_bytes_to_read = is.tellg();
   is.seekg(0, is.beg);
 
-  while (!is.eof() && num_bytes_to_read != 0) {
-    std::streamsize buf_size = std::min(num_bytes_to_read, kMaxBytesToRead);
+  // Keep going as long as there's nothing more to read.
+  // tellg() returns -1 for streams, so also account for that.
+  std::string contents;
+  while (!is.eof() && (num_bytes_to_read == -1 || num_bytes_to_read != 0)) {
+    std::streamsize buf_size = get_buffer_size(num_bytes_to_read);
     char buf[buf_size + 1];
-
-    if (is.read(buf, buf_size).bad()) {
-      return false;
+    if (!is.read(buf, buf_size)) {
+      break;
     }
 
     std::streamsize num_bytes_read = is.gcount();
-    num_bytes_to_read -= num_bytes_read;
     buf[num_bytes_read] = '\0';
     contents.append(buf);
+
+    if (num_bytes_to_read != -1) {
+      num_bytes_to_read -= num_bytes_read;
+    }
+  }
+
+  // Unless this is a stream, failure to read indicates we failed our job.
+  // Commit sudoku.
+  if (!is.good() && num_bytes_to_read != -1) {
+    return false;
   }
 
   return fn(contents);
@@ -255,7 +273,6 @@ bool ReadFile(std::string const& path,
 bool ReadFileByLine(std::string const& path,
                     std::function<bool(std::string const&)> const& fn) {
   std::ifstream is(path);
-
   if (!is.good()) {
     return false;
   }
