@@ -256,6 +256,9 @@ target_link_libraries(util_environment_test tint3_common_lib ${TINT3_LINK_LIBRAR
 test_target(util_timer_test src/util/timer_test.cc src/util/timer_test_utils.cc)
 target_link_libraries(util_timer_test tint3_common_lib ${TINT3_LINK_LIBRARIES})
 
+test_target(util_xdg_test src/util/xdg_test.cc)
+target_link_libraries(util_xdg_test tint3_common_lib ${TINT3_LINK_LIBRARIES})
+
 # }}} test rules
 
 # {{{ install rules

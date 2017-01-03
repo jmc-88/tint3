@@ -5,18 +5,20 @@
 #include "util/common.hh"
 #include "util/environment.hh"
 #include "util/fs.hh"
+#include "util/log.hh"
 #include "util/xdg.hh"
 
 namespace {
 
-std::function<std::string(std::string)> DefaultValue(std::string value) {
+using StringTransformFn = std::function<std::string(std::string)>;
+
+StringTransformFn DefaultValue(std::string value) {
   return [value](std::string other) -> std::string {
     return (!other.empty()) ? other : value;
   };
 }
 
-std::function<std::string(std::string)> GetDefaultDirectory(
-    char const* relative_path) {
+StringTransformFn GetDefaultDirectory(char const* relative_path) {
   return DefaultValue(util::fs::HomeDirectory() / relative_path);
 }
 
