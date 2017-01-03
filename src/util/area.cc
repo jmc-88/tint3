@@ -78,7 +78,7 @@ bool HexToRgb(std::string const& hex, unsigned int* r, unsigned int* g,
 
 Color::Color() : color_(), alpha_() {}
 
-Color::Color(std::array<double, 3> const& color, double alpha)
+Color::Color(Color::Array const& color, double alpha)
     : color_(color), alpha_(alpha) {}
 
 Color::Color(Color const& other) : color_(other.color_), alpha_(other.alpha_) {}

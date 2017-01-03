@@ -291,11 +291,11 @@ TEST_CASE("ConfigParserHoverPressed", "Doesn't choke on hover/pressed states") {
   REQUIRE(backgrounds[1].border_color_pressed() == backgrounds[1].border());
 
   // Background 2: Hover was given, verify it was parsed
-  Color expected_hover_color{{0.4, 0.4, 0.4}, 0.0};
+  Color expected_hover_color{Color::Array{{0.4, 0.4, 0.4}}, 0.0};
   REQUIRE(backgrounds[2].fill_color_hover() == expected_hover_color);
   REQUIRE(backgrounds[2].border_color_hover() == expected_hover_color);
   // Background 2: Pressed was given, verify it was parsed
-  Color expected_pressed_color{{1.0, 1.0, 1.0}, 0.0};
+  Color expected_pressed_color{Color::Array{{1.0, 1.0, 1.0}}, 0.0};
   REQUIRE(backgrounds[2].fill_color_pressed() == expected_pressed_color);
   REQUIRE(backgrounds[2].border_color_pressed() == expected_pressed_color);
   // Background 2: rounded and border_width parsed

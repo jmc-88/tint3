@@ -229,7 +229,7 @@ void InitPanel(Timer& timer) {
 
   // number of panels (one monitor or 'all' monitors)
   unsigned int num_panels = server.num_monitors;
-  if (panel_config.monitor_ >= 0) {
+  if (panel_config.monitor_ != Panel::kAllMonitors) {
     num_panels = 1;
   }
 

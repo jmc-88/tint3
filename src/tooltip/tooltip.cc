@@ -73,7 +73,7 @@ void DefaultTooltip() {
   g_tooltip.font_desc = nullptr;
   g_tooltip.bg = Background{};
   g_tooltip.timeout.Clear();
-  g_tooltip.font_color = Color{{1.0, 1.0, 1.0}, 1.0};
+  g_tooltip.font_color = Color{Color::Array{{1.0, 1.0, 1.0}}, 1.0};
 }
 
 void CleanupTooltip(Timer& timer) {

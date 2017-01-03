@@ -224,7 +224,7 @@ bool ReadFile(std::string const& path,
               std::function<bool(std::string const&)> const& fn) {
   static constexpr std::streamsize kDefaultBufferSize = (1 << 15);  // 32 KiB
   static constexpr std::streamsize kMaxBytesToRead = (1 << 20);     // 1 MiB
-  static constexpr auto get_buffer_size =
+  static auto get_buffer_size =
       [](std::streamsize num_bytes_to_read) -> std::streamsize {
     if (num_bytes_to_read == -1) {
       return kDefaultBufferSize;

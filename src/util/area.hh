@@ -16,6 +16,8 @@ class Color {
  public:
   friend std::ostream& operator<<(std::ostream& os, Color const& color);
 
+  using Array = std::array<double, 3>;
+
   Color();
   Color(std::array<double, 3> const& color, double alpha);
   Color(Color const& other);
@@ -32,7 +34,7 @@ class Color {
   bool operator!=(Color const& other) const;
 
  private:
-  std::array<double, 3> color_;
+  Array color_;
   double alpha_;
 };
 
