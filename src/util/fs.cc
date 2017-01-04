@@ -222,49 +222,23 @@ Path HomeDirectory() {
 
 bool ReadFile(std::string const& path,
               std::function<bool(std::string const&)> const& fn) {
-  static constexpr std::streamsize kDefaultBufferSize = (1 << 15);  // 32 KiB
-  static constexpr std::streamsize kMaxBytesToRead = (1 << 20);     // 1 MiB
-  static auto get_buffer_size =
-      [](std::streamsize num_bytes_to_read) -> std::streamsize {
-    if (num_bytes_to_read == -1) {
-      return kDefaultBufferSize;
-    } else {
-      return std::min(num_bytes_to_read, kMaxBytesToRead);
-    }
-  };
+  static constexpr std::streamsize kBufferSize = (1 << 10);  // 1 KiB
 
   std::ifstream is{path};
   if (!is.good()) {
     return false;
   }
 
-  is.seekg(0, is.end);
-  std::streamsize num_bytes_to_read = is.tellg();
-  is.seekg(0, is.beg);
-
-  // Keep going as long as there's nothing more to read.
-  // tellg() returns -1 for streams, so also account for that.
   std::string contents;
-  while (!is.eof() && (num_bytes_to_read == -1 || num_bytes_to_read != 0)) {
-    std::streamsize buf_size = get_buffer_size(num_bytes_to_read);
-    char buf[buf_size + 1];
-    if (!is.read(buf, buf_size)) {
-      break;
+  while (!is.eof()) {
+    char buffer[kBufferSize + 1];
+    is.read(buffer, kBufferSize);
+    if (is.fail() && !is.eof()) {
+      return false;
     }
 
-    std::streamsize num_bytes_read = is.gcount();
-    buf[num_bytes_read] = '\0';
-    contents.append(buf);
-
-    if (num_bytes_to_read != -1) {
-      num_bytes_to_read -= num_bytes_read;
-    }
-  }
-
-  // Unless this is a stream, failure to read indicates we failed our job.
-  // Commit sudoku.
-  if (!is.good() && num_bytes_to_read != -1) {
-    return false;
+    buffer[is.gcount()] = '\0';
+    contents.append(buffer);
   }
 
   return fn(contents);
@@ -280,6 +254,9 @@ bool ReadFileByLine(std::string const& path,
   while (!is.eof()) {
     std::string line;
     std::getline(is, line);
+    if (is.fail() && !is.eof()) {
+      return false;
+    }
     if (!fn(line)) {
       return false;
     }
