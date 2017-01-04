@@ -310,6 +310,7 @@ void UpdateBattery() {
   }
 #else
   battery_ptr->Update();
+  battery_state.state = battery_ptr->charge_state();
   battery_state.percentage = battery_ptr->charge_percentage();
   seconds = battery_ptr->seconds_to_charge();
 #endif
