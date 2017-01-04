@@ -5,7 +5,7 @@
 namespace linux_sysfs {
 
 std::vector<std::string> GetBatteryDirectories() {
-  static std::string const kPowerSupply{"/sys/class/power_supply"};
+  static constexpr const char kPowerSupply[] = "/sys/class/power_supply";
 
   std::vector<std::string> directories;
 
@@ -54,9 +54,9 @@ Battery::Battery(const std::string& base_path)
 bool Battery::Found() const { return found_; }
 
 bool Battery::Update() {
-  static std::string const kStatusCharging{"Charging\n"};
-  static std::string const kStatusDischarging{"Discharging\n"};
-  static std::string const kStatusFull{"Full\n"};
+  static constexpr const char kStatusCharging[] = "Charging\n";
+  static constexpr const char kStatusDischarging[] = "Discharging\n";
+  static constexpr const char kStatusFull[] = "Full\n";
 
   if (!found_) {
     return false;
@@ -65,11 +65,11 @@ bool Battery::Update() {
   charge_state_ = ChargeState::kUnknown;
 
   util::fs::ReadFile(path_status_, [&](std::string const& contents) {
-    if (kStatusCharging == contents) {
+    if (contents == kStatusCharging) {
       charge_state_ = ChargeState::kCharging;
-    } else if (kStatusDischarging == contents) {
+    } else if (contents == kStatusDischarging) {
       charge_state_ = ChargeState::kDischarging;
-    } else if (kStatusFull == contents) {
+    } else if (contents == kStatusFull) {
       charge_state_ = ChargeState::kFull;
     }
     return true;

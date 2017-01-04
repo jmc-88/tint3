@@ -1,5 +1,6 @@
 #ifndef TINT3_BATTERY_BATTERY_INTERFACE_HH
 #define TINT3_BATTERY_BATTERY_INTERFACE_HH
+
 enum class ChargeState { kUnknown, kCharging, kDischarging, kFull };
 
 struct BatteryTimestamp {
