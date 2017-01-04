@@ -123,6 +123,7 @@ void Init(int argc, char* argv[], std::string* config_path) {
   SignalAction(SIGINT, signal_handler);
   SignalAction(SIGTERM, signal_handler);
   SignalAction(SIGUSR1, signal_handler);
+  SignalAction(SIGUSR2, signal_handler);
   SignalAction(SIGCHLD, SIG_DFL, SA_NOCLDWAIT);
 
   // BSD does not support pselect(), therefore we have to use select and hope
@@ -1342,7 +1343,18 @@ start:
   if (event_loop.RunLoop()) {
     systray.Clear(timer);
     Cleanup(timer);
-    goto start;  // brrr
+
+    // Reinitialize tint3.
+    if (signal_pending == SIGUSR1) {
+      goto start;  // brrr
+    }
+    // Try to replace the process with a new instance of itself.
+    else if (signal_pending == SIGUSR2) {
+      if (execvp(argv[0], argv) == -1) {
+        util::log::Error() << "execv() failed: terminating tint3\n";
+        return 1;
+      }
+    }
   }
 
   // Make sure we reparent all the tray icon windows to the server root window

@@ -167,18 +167,20 @@ bool EventLoop::RunLoop() {
     timer_.ProcessExpiredIntervals();
 
     if (signal_pending) {
-      // FIXME: why is this even needed here?
-      // Cleanup();
+      // Handle incoming signals:
+      //
+      //  * SIGUSR1 is used in case of user-sent signal, composite manager
+      // stop/start or XRandR event, and causes tint3 to reload.
+      //
+      //  * SIGUSR2 is sent from the user to trigger a complete restart of tint3
+      // (replacing this process's contents with a new instance of self, useful
+      // in cases where the binary itself has change, for instance because of a
+      // package upgrade).
+      //
+      //  * anything else results in an unsuccessful process termination.
 
-      if (signal_pending != SIGUSR1) {
-        return false;
-      }
-
-      // We're asked to restart tint3.
-      // SIGUSR1 is used in case of user-sent signal, composite manager
-      // stop/start or XRandR
-      FD_CLR(x11_file_descriptor_, &fdset);
-      return true;
+      FD_ZERO(&fdset);
+      return (signal_pending == SIGUSR1 || signal_pending == SIGUSR2);
     }
   }
 
