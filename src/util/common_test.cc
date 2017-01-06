@@ -88,3 +88,21 @@ TEST_CASE("RegexMatch",
     REQUIRE(!util::string::RegexMatch("test[0-9]?", "test01"));
   }
 }
+
+TEST_CASE("AdjustAsb",
+          "Adjustments are in agreement with http://colorizer.org/") {
+  // A 2x2 bitmap.
+  DATA32 image_data[] = {0x00000000, 0xffffffff, 0xa0b0c0d0, 0x0a0b0c0d};
+
+  // Increase brightness by 10%.
+  AdjustAsb(image_data, 2, 2, 100, 0.0, +0.1);
+
+  // Transparent pixel, shouldn't change.
+  REQUIRE(image_data[0] == 0x00000000);
+  // White pixel, shouldn't change.
+  REQUIRE(image_data[1] == 0xffffffff);
+  // Bright pixel, should be made brighter.
+  REQUIRE(image_data[2] == 0xa0c6d8ea);
+  // Dark pixel, should be made brighter.
+  REQUIRE(image_data[3] == 0x0a212427);
+}

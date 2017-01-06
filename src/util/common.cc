@@ -28,10 +28,13 @@
 
 #include <algorithm>
 #include <cctype>
+#include <cmath>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <functional>
 #include <regex>
+#include <tuple>
 
 #include "server.hh"
 #include "util/common.hh"
@@ -140,149 +143,122 @@ void TintShellExec(std::string const& command) {
   }
 }
 
-void AdjustAsb(DATA32* data, unsigned int w, unsigned int h, int alpha,
-               float satur, float bright) {
-  for (unsigned int y = 0; y < h; ++y) {
-    unsigned int id = y * w;
+namespace {
 
-    for (unsigned int x = 0; x < w; ++x, ++id) {
-      unsigned int argb = data[id];
-      unsigned int a = (argb >> 24) & 0xff;
+template <typename T>
+constexpr T clamp(T value, T min, T max) {
+  return (value < min) ? min : ((max < value) ? max : value);
+}
 
-      // transparent => nothing to do.
-      if (a == 0) {
-        continue;
+// Returns an ARGB value given the individual A, R, G, B components.
+constexpr DATA32 pack_argb(unsigned char a, unsigned char r, unsigned char g,
+                           unsigned char b) {
+  return (a << 24 | r << 16 | g << 8 | b);
+}
+
+// Returns the individual A, R, G, B components from an ARGB value.
+constexpr std::tuple<char, char, char, char> unpack_argb(DATA32 argb) {
+  return std::make_tuple((argb >> 24) & 0xFF, (argb >> 16) & 0xFF,
+                         (argb >> 8) & 0xFF, argb & 0xFF);
+}
+
+std::tuple<double, double, double> RgbToHsv(double R, double G, double B) {
+  double M = std::max({R, G, B});
+  double m = std::min({R, G, B});
+  double C = (M - m);
+
+  double H_ = 0.0;
+  if (C != 0.0) {
+    if (R == M) {
+      H_ = (G - B) / C;
+      if (H_ < 0.0) {
+        H_ += 6.0;
       }
-
-      unsigned int r = (argb >> 16) & 0xff;
-      unsigned int g = (argb >> 8) & 0xff;
-      unsigned int b = (argb)&0xff;
-
-      // convert RGB to HSB
-      auto cmax = (r > g) ? r : g;
-
-      if (b > cmax) {
-        cmax = b;
-      }
-
-      auto cmin = (r < g) ? r : g;
-
-      if (b < cmin) {
-        cmin = b;
-      }
-
-      auto hue = 0.0f;
-      auto saturation = 0.0f;
-      auto brightness = (cmax / 255.0f);
-
-      if (cmax != 0) {
-        saturation =
-            (static_cast<float>(cmax - cmin) / static_cast<float>(cmax));
-      }
-
-      if (saturation != 0) {
-        auto redc =
-            (static_cast<float>(cmax - r) / static_cast<float>(cmax - cmin));
-        auto greenc =
-            (static_cast<float>(cmax - g) / static_cast<float>(cmax - cmin));
-        auto bluec =
-            (static_cast<float>(cmax - b) / static_cast<float>(cmax - cmin));
-
-        if (r == cmax) {
-          hue = bluec - greenc;
-        } else if (g == cmax) {
-          hue = 2.0f + redc - bluec;
-        } else {
-          hue = 4.0f + greenc - redc;
-        }
-
-        hue = hue / 6.0f;
-
-        if (hue < 0) {
-          hue = hue + 1.0f;
-        }
-      }
-
-      // adjust
-      saturation += satur;
-
-      if (saturation < 0.0) {
-        saturation = 0.0;
-      }
-
-      if (saturation > 1.0) {
-        saturation = 1.0;
-      }
-
-      brightness += bright;
-
-      if (brightness < 0.0) {
-        brightness = 0.0;
-      }
-
-      if (brightness > 1.0) {
-        brightness = 1.0;
-      }
-
-      if (alpha != 100) {
-        a = (a * alpha) / 100;
-      }
-
-      // convert HSB to RGB
-      if (saturation == 0) {
-        r = g = b = (int)(brightness * 255.0f + 0.5f);
-      } else {
-        float h2 = (hue - (int)hue) * 6.0f;
-        float f = h2 - (int)(h2);
-        float p = brightness * (1.0f - saturation);
-        float q = brightness * (1.0f - saturation * f);
-        float t = brightness * (1.0f - (saturation * (1.0f - f)));
-
-        switch ((int)h2) {
-          case 0:
-            r = (int)(brightness * 255.0f + 0.5f);
-            g = (int)(t * 255.0f + 0.5f);
-            b = (int)(p * 255.0f + 0.5f);
-            break;
-
-          case 1:
-            r = (int)(q * 255.0f + 0.5f);
-            g = (int)(brightness * 255.0f + 0.5f);
-            b = (int)(p * 255.0f + 0.5f);
-            break;
-
-          case 2:
-            r = (int)(p * 255.0f + 0.5f);
-            g = (int)(brightness * 255.0f + 0.5f);
-            b = (int)(t * 255.0f + 0.5f);
-            break;
-
-          case 3:
-            r = (int)(p * 255.0f + 0.5f);
-            g = (int)(q * 255.0f + 0.5f);
-            b = (int)(brightness * 255.0f + 0.5f);
-            break;
-
-          case 4:
-            r = (int)(t * 255.0f + 0.5f);
-            g = (int)(p * 255.0f + 0.5f);
-            b = (int)(brightness * 255.0f + 0.5f);
-            break;
-
-          case 5:
-            r = (int)(brightness * 255.0f + 0.5f);
-            g = (int)(p * 255.0f + 0.5f);
-            b = (int)(q * 255.0f + 0.5f);
-            break;
-        }
-      }
-
-      argb = a;
-      argb = (argb << 8) + r;
-      argb = (argb << 8) + g;
-      argb = (argb << 8) + b;
-      data[id] = argb;
+    } else if (G == M) {
+      H_ = ((B - R) / C) + 2.0;
+    } else {  // B == M
+      H_ = ((R - G) / C) + 4.0;
     }
+  }
+
+  double S_ = 0.0;
+  if (M != 0.0) {
+    S_ = (C / M);
+  }
+
+  // Value returned as the maximum of the R, G, B components in accordance with:
+  //  https://en.wikipedia.org/wiki/HSL_and_HSV.
+  return std::make_tuple(H_ / 6.0, S_, M);
+}
+
+std::tuple<double, double, double> HsvToRgb(double H, double S, double V) {
+  double C = (V * S);
+  double H_ = (H * 6.0);
+  double X = C * (1.0 - std::fabs(std::fmod(H_, 2.0) - 1.0));
+  double R_, G_, B_;
+
+  if (H_ <= 1.0) {
+    R_ = C;
+    G_ = X;
+    B_ = 0.0;
+  } else if (H_ <= 2.0) {
+    R_ = X;
+    G_ = C;
+    B_ = 0.0;
+  } else if (H_ <= 3.0) {
+    R_ = 0.0;
+    G_ = C;
+    B_ = X;
+  } else if (H_ <= 4.0) {
+    R_ = 0.0;
+    G_ = X;
+    B_ = C;
+  } else if (H_ <= 5.0) {
+    R_ = X;
+    G_ = 0.0;
+    B_ = C;
+  } else if (H_ <= 6.0) {
+    R_ = C;
+    G_ = 0.0;
+    B_ = X;
+  } else {
+    R_ = 0.0;
+    G_ = 0.0;
+    B_ = 0.0;
+  }
+
+  double m = (V - C);
+  return std::make_tuple(R_ + m, G_ + m, B_ + m);
+}
+
+}  // namespace
+
+void AdjustAsb(DATA32* data, unsigned int w, unsigned int h, int alpha,
+               float saturation_adjustment, float brightness_adjustment) {
+  for (unsigned int i = 0; i < w * h; ++i, ++data) {
+    unsigned char ca, cr, cg, cb;
+    std::tie(ca, cr, cg, cb) = unpack_argb(*data);
+
+    // transparent => nothing to do.
+    if (ca == 0) {
+      continue;
+    }
+
+    double h, s, v;
+    std::tie(h, s, v) = RgbToHsv(cr / 255.0, cg / 255.0, cb / 255.0);
+
+    // adjust
+    ca = (ca * alpha) / 100.0;
+    s = clamp(s + saturation_adjustment, 0.0, 1.0);
+    v = clamp(v + brightness_adjustment, 0.0, 1.0);
+
+    // update the pixel data
+    double r, g, b;
+    std::tie(r, g, b) = HsvToRgb(h, s, v);
+    cr = std::nearbyint(r * 255.0);
+    cg = std::nearbyint(g * 255.0);
+    cb = std::nearbyint(b * 255.0);
+    (*data) = pack_argb(ca, cr, cg, cb);
   }
 }
 
