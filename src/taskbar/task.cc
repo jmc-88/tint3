@@ -98,6 +98,8 @@ Task* AddTask(Window win, Timer& timer) {
   // even with task_on_all_desktop and with task_on_all_panel
   for (int k = 0; k < kTaskStateCount; ++k) {
     new_tsk.icon[k] = 0;
+    new_tsk.icon_hover[k] = 0;
+    new_tsk.icon_pressed[k] = 0;
     new_tsk.state_pix[k] = None;
   }
 
@@ -142,7 +144,9 @@ Task* AddTask(Window win, Timer& timer) {
 
     for (int k = 0; k < kTaskStateCount; ++k) {
       new_tsk2->icon[k] = new_tsk.icon[k];
-      new_tsk2->state_pix[k] = 0;
+      new_tsk2->icon_hover[k] = new_tsk.icon_hover[k];
+      new_tsk2->icon_pressed[k] = new_tsk.icon_pressed[k];
+      new_tsk2->state_pix[k] = None;
     }
 
     new_tsk2->icon_width = new_tsk.icon_width;
@@ -179,10 +183,19 @@ void RemoveTask(Task* tsk) {
       imlib_context_set_image(tsk->icon[k]);
       imlib_free_image();
       tsk->icon[k] = 0;
-
-      if (tsk->state_pix[k] != None) {
-        XFreePixmap(server.dsp, tsk->state_pix[k]);
-      }
+    }
+    if (tsk->icon_hover[k]) {
+      imlib_context_set_image(tsk->icon_hover[k]);
+      imlib_free_image();
+      tsk->icon_hover[k] = 0;
+    }
+    if (tsk->icon_pressed[k]) {
+      imlib_context_set_image(tsk->icon_pressed[k]);
+      imlib_free_image();
+      tsk->icon_pressed[k] = 0;
+    }
+    if (tsk->state_pix[k] != None) {
+      XFreePixmap(server.dsp, tsk->state_pix[k]);
     }
   }
 
@@ -278,6 +291,16 @@ void GetIcon(Task* tsk) {
       imlib_free_image();
       tsk->icon[k] = 0;
     }
+    if (tsk->icon_hover[k]) {
+      imlib_context_set_image(tsk->icon_hover[k]);
+      imlib_free_image();
+      tsk->icon_hover[k] = 0;
+    }
+    if (tsk->icon_pressed[k]) {
+      imlib_context_set_image(tsk->icon_pressed[k]);
+      imlib_free_image();
+      tsk->icon_pressed[k] = 0;
+    }
   }
 
   Imlib_Image img = nullptr;
@@ -352,10 +375,8 @@ void GetIcon(Task* tsk) {
   tsk->icon_height = imlib_image_get_height();
 
   for (int k = 0; k < kTaskStateCount; ++k) {
-    imlib_context_set_image(orig_image);
-    tsk->icon[k] = imlib_clone_image();
-    imlib_context_set_image(tsk->icon[k]);
-
+    auto adjusted_icon = util::imlib2::Image::CloneExisting(orig_image);
+    imlib_context_set_image(adjusted_icon);
     if (panel->g_task.alpha[k] != 100 || panel->g_task.saturation[k] != 0 ||
         panel->g_task.brightness[k] != 0) {
       DATA32* data32 = imlib_image_get_data();
@@ -365,6 +386,23 @@ void GetIcon(Task* tsk) {
                 (float)panel->g_task.brightness[k] / 100);
       imlib_image_put_back_data(data32);
     }
+    tsk->icon[k] = adjusted_icon;
+
+    auto adjusted_hover_icon = util::imlib2::Image::CloneExisting(orig_image);
+    imlib_context_set_image(adjusted_hover_icon);
+    DATA32* hover_data = imlib_image_get_data();
+    AdjustAsb(hover_data, tsk->icon_width, tsk->icon_height,
+              panel->g_task.alpha[k], 0.0f, +0.1f);
+    imlib_image_put_back_data(hover_data);
+    tsk->icon_hover[k] = adjusted_hover_icon;
+
+    auto adjusted_pressed_icon = util::imlib2::Image::CloneExisting(orig_image);
+    imlib_context_set_image(adjusted_pressed_icon);
+    DATA32* pressed_data = imlib_image_get_data();
+    AdjustAsb(pressed_data, tsk->icon_width, tsk->icon_height,
+              panel->g_task.alpha[k], 0.0f, -0.1f);
+    imlib_image_put_back_data(pressed_data);
+    tsk->icon_pressed[k] = adjusted_hover_icon;
   }
 
   imlib_context_set_image(orig_image);
@@ -401,7 +439,13 @@ void Task::DrawIcon(int text_width) {
   }
 
   // Render
-  imlib_context_set_image(icon[current_state]);
+  if (mouse_state() == MouseState::kMouseOver) {
+    imlib_context_set_image(icon_hover[current_state]);
+  } else if (mouse_state() == MouseState::kMousePressed) {
+    imlib_context_set_image(icon_pressed[current_state]);
+  } else {
+    imlib_context_set_image(icon[current_state]);
+  }
 
   if (server.real_transparency) {
     RenderImage(pix_, pos_x, panel_->g_task.icon_posy, imlib_image_get_width(),

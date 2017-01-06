@@ -205,6 +205,7 @@ class Area {
   void MouseLeave();
 
   void set_has_mouse_effects(bool has_mouse_effects);
+  MouseState mouse_state() const;
   void set_mouse_state(MouseState new_state);
 
 #ifdef _TINT3_DEBUG

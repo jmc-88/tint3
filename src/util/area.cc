@@ -754,6 +754,8 @@ void Area::set_has_mouse_effects(bool has_mouse_effects) {
   has_mouse_effects_ = has_mouse_effects;
 }
 
+MouseState Area::mouse_state() const { return mouse_state_; }
+
 void Area::set_mouse_state(MouseState new_state) {
   if (new_state != mouse_state_) {
     panel_refresh = true;

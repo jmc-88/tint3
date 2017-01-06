@@ -19,6 +19,8 @@ class Image {
 
   void Free();
 
+  static Image CloneExisting(Imlib_Image other_image);
+
  private:
   Imlib_Image image_;
 };

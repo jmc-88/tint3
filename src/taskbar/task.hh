@@ -58,7 +58,9 @@ class Task : public Area {
   Window win;
   unsigned int desktop;
   int current_state;
-  Imlib_Image icon[kTaskStateCount];
+  util::imlib2::Image icon[kTaskStateCount];
+  util::imlib2::Image icon_hover[kTaskStateCount];
+  util::imlib2::Image icon_pressed[kTaskStateCount];
   Pixmap state_pix[kTaskStateCount];
   unsigned int icon_width;
   unsigned int icon_height;

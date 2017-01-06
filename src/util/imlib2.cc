@@ -6,14 +6,28 @@
 namespace util {
 namespace imlib2 {
 
+namespace {
+
+class ScopedCurrentImageRestorer {
+ public:
+  ScopedCurrentImageRestorer() : image_(imlib_context_get_image()) {}
+  ~ScopedCurrentImageRestorer() { imlib_context_set_image(image_); }
+
+ private:
+  Imlib_Image image_;
+};
+
+Imlib_Image CloneImlib2Image(Imlib_Image other_image) {
+  ScopedCurrentImageRestorer restorer;
+  imlib_context_set_image(other_image);
+  return imlib_clone_image();
+}
+
+}  // namespace
+
 Image::Image(Imlib_Image image) : image_(image) {}
 
-Image::Image(Image const& other) : image_(nullptr) {
-  Imlib_Image current_image = imlib_context_get_image();
-  imlib_context_set_image(other.image_);
-  image_ = imlib_clone_image();
-  imlib_context_set_image(current_image);
-}
+Image::Image(Image const& other) : image_(CloneImlib2Image(other.image_)) {}
 
 Image::Image(Image&& other) : image_(std::move(other.image_)) {}
 
@@ -34,12 +48,15 @@ Image::operator Imlib_Image() const { return image_; }
 
 void Image::Free() {
   if (image_ != nullptr) {
-    Imlib_Image current_image = imlib_context_get_image();
+    ScopedCurrentImageRestorer restorer;
     imlib_context_set_image(image_);
     imlib_free_image();
     image_ = nullptr;
-    imlib_context_set_image(current_image);
   }
+}
+
+Image Image::CloneExisting(Imlib_Image other_image) {
+  return Image{CloneImlib2Image(other_image)};
 }
 
 }  // namespace imlib2
