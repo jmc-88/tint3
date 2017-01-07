@@ -11,8 +11,10 @@
 
 class LauncherIcon : public Area {
  public:
-  util::imlib2::Image icon_scaled_;
   util::imlib2::Image icon_original_;
+  util::imlib2::Image icon_scaled_;
+  util::imlib2::Image icon_hover_;
+  util::imlib2::Image icon_pressed_;
   std::string cmd_;
   std::string icon_name_;
   std::string icon_path_;
@@ -21,6 +23,8 @@ class LauncherIcon : public Area {
   int is_app_desktop_;
   int x_;
   int y_;
+
+  LauncherIcon();
 
   void DrawForeground(cairo_t*) override;
   std::string GetTooltipText() override;

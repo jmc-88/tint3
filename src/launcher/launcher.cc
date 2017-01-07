@@ -167,6 +167,8 @@ bool Launcher::Resize() {
         // Draw a blank icon
         launcher_icon->icon_original_.Free();
         launcher_icon->icon_scaled_.Free();
+        launcher_icon->icon_hover_.Free();
+        launcher_icon->icon_pressed_.Free();
         new_icon_path = GetIconPath(kIconFallback, launcher_icon->icon_size_);
 
         if (!new_icon_path.empty()) {
@@ -179,6 +181,10 @@ bool Launcher::Resize() {
 
         launcher_icon->icon_scaled_ =
             ScaleIcon(launcher_icon->icon_original_, icon_size);
+        launcher_icon->icon_hover_ = launcher_icon->icon_scaled_;
+        launcher_icon->icon_hover_.AdjustASB(100, 0.0, +0.1);
+        launcher_icon->icon_pressed_ = launcher_icon->icon_scaled_;
+        launcher_icon->icon_pressed_.AdjustASB(100, 0.0, -0.1);
         continue;
       }
 
@@ -187,6 +193,10 @@ bool Launcher::Resize() {
         // If it's the same file just rescale
         launcher_icon->icon_scaled_ =
             ScaleIcon(launcher_icon->icon_original_, icon_size);
+        launcher_icon->icon_hover_ = launcher_icon->icon_scaled_;
+        launcher_icon->icon_hover_.AdjustASB(100, 0.0, +0.1);
+        launcher_icon->icon_pressed_ = launcher_icon->icon_scaled_;
+        launcher_icon->icon_pressed_.AdjustASB(100, 0.0, -0.1);
 
         util::log::Error() << __FILE__ << ':' << __LINE__ << ": Using icon "
                            << launcher_icon->icon_path_ << '\n';
@@ -195,6 +205,10 @@ bool Launcher::Resize() {
         launcher_icon->icon_original_ = imlib_load_image(new_icon_path.c_str());
         launcher_icon->icon_scaled_ =
             ScaleIcon(launcher_icon->icon_original_, launcher_icon->icon_size_);
+        launcher_icon->icon_hover_ = launcher_icon->icon_scaled_;
+        launcher_icon->icon_hover_.AdjustASB(100, 0.0, +0.1);
+        launcher_icon->icon_pressed_ = launcher_icon->icon_scaled_;
+        launcher_icon->icon_pressed_.AdjustASB(100, 0.0, -0.1);
         launcher_icon->icon_path_ = new_icon_path;
 
         util::log::Error() << __FILE__ << ':' << __LINE__ << ": Using icon "
@@ -276,6 +290,8 @@ bool Launcher::Resize() {
   return 1;
 }
 
+LauncherIcon::LauncherIcon() { set_has_mouse_effects(true); }
+
 // Here we override the default layout of the icons; normally Area layouts its
 // children
 // in a stack; we need to layout them in a kind of table
@@ -290,7 +306,13 @@ std::string LauncherIcon::GetTooltipText() {
 
 void LauncherIcon::DrawForeground(cairo_t* c) {
   // Render
-  imlib_context_set_image(icon_scaled_);
+  if (mouse_state() == MouseState::kMouseOver) {
+    imlib_context_set_image(icon_hover_);
+  } else if (mouse_state() == MouseState::kMousePressed) {
+    imlib_context_set_image(icon_pressed_);
+  } else {
+    imlib_context_set_image(icon_scaled_);
+  }
 
   if (server.real_transparency) {
     RenderImage(pix_, 0, 0, imlib_image_get_width(), imlib_image_get_height());
