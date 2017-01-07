@@ -157,7 +157,7 @@ constexpr DATA32 pack_argb(unsigned char a, unsigned char r, unsigned char g,
 }
 
 // Returns the individual A, R, G, B components from an ARGB value.
-constexpr std::tuple<char, char, char, char> unpack_argb(DATA32 argb) {
+std::tuple<char, char, char, char> unpack_argb(DATA32 argb) {
   return std::make_tuple((argb >> 24) & 0xFF, (argb >> 16) & 0xFF,
                          (argb >> 8) & 0xFF, argb & 0xFF);
 }
