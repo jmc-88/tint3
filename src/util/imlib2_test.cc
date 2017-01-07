@@ -22,6 +22,8 @@ TEST_CASE("imlib2::Image::Image", "Construction/destruction") {
   // AddressSanitizer should make sure imlib_empty_image gets freed by the
   // destructor and we're not leaking memory.
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wpessimizing-move"
   // Lambda that returns a temporary util::imlib2::Image object, to test the
   // move constructor also works.
   auto new_imlib2_image = []() -> util::imlib2::Image {
@@ -29,6 +31,7 @@ TEST_CASE("imlib2::Image::Image", "Construction/destruction") {
   };
   util::imlib2::Image moved_image{std::move(new_imlib2_image())};
   REQUIRE(moved_image != nullptr);
+#pragma clang diagnostic pop
 }
 
 TEST_CASE("imlib2::Image::operator=", "Assignment") {

@@ -14,9 +14,12 @@
 
 TEST_CASE("Path", "Represents a filesystem path string") {
   SECTION("move constructor") {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wpessimizing-move"
     auto new_path = []() -> util::fs::Path { return "/move"; };
     util::fs::Path moved_path{std::move(new_path())};
     REQUIRE(moved_path == "/move");
+#pragma clang diagnostic pop
   }
 
   SECTION("assignment") {
