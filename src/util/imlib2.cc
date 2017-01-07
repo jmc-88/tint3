@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <utility>
 
+#include "util/common.hh"
 #include "util/imlib2.hh"
 
 namespace util {
@@ -45,6 +46,18 @@ Image& Image::operator=(Imlib_Image image) {
 }
 
 Image::operator Imlib_Image() const { return image_; }
+
+void Image::AdjustASB(int alpha, float saturation_adjustment,
+                      float brightness_adjustment) {
+  if (image_ != nullptr) {
+    ScopedCurrentImageRestorer restorer;
+    imlib_context_set_image(image_);
+    DATA32* data = imlib_image_get_data();
+    ::AdjustASB(data, imlib_image_get_width(), imlib_image_get_height(), alpha,
+                saturation_adjustment, brightness_adjustment);
+    imlib_image_put_back_data(data);
+  }
+}
 
 void Image::Free() {
   if (image_ != nullptr) {

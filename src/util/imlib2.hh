@@ -17,6 +17,8 @@ class Image {
   Image& operator=(Imlib_Image image);
   operator Imlib_Image() const;
 
+  void AdjustASB(int alpha, float saturation_adjustment,
+                 float brightness_adjustment);
   void Free();
 
   static Image CloneExisting(Imlib_Image other_image);

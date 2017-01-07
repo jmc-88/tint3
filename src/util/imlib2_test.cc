@@ -58,6 +58,21 @@ TEST_CASE("imlib2::Image::operator=", "Assignment") {
   REQUIRE(image1 != image2);
 }
 
+TEST_CASE("imlib2::Image::AdjustASB", "Adjustment in place works") {
+  // Prepare a 1x1 image to adjust.
+  util::imlib2::Image image{imlib_create_image(1, 1)};
+  imlib_context_set_image(image);
+  imlib_image_set_has_alpha(1);
+  DATA32* original_data = imlib_image_get_data();
+  original_data[0] = 0xffc86464;  // rgba(200, 100, 100, 1.0)
+  imlib_image_put_back_data(original_data);
+
+  image.AdjustASB(50, 0.0, +0.1);
+  DATA32* adjusted_data = imlib_image_get_data();
+  REQUIRE(adjusted_data[0] == 0x7fe27171);  // rgba(226, 113, 113, 0.5)
+  REQUIRE(adjusted_data == original_data);  // data was not reallocated
+}
+
 TEST_CASE("imlib2::Image::CloneExisting",
           "Returns an Image object holding a clone of the given Imlib_Image") {
   static constexpr unsigned int const width = 10;
