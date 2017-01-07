@@ -80,7 +80,7 @@ void TintShellExec(std::string const& command);
 
 // adjust Alpha/Saturation/Brightness on an ARGB icon
 // alpha from 0 to 100, satur from 0 to 1, bright from 0 to 1.
-void AdjustAsb(DATA32* data, unsigned int w, unsigned int h, int alpha,
+void AdjustASB(DATA32* data, unsigned int w, unsigned int h, int alpha,
                float satur, float bright);
 void CreateHeuristicMask(DATA32* data, int w, int h);
 

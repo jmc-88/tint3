@@ -317,7 +317,7 @@ util::imlib2::Image ScaleIcon(Imlib_Image original, int icon_size) {
     imlib_context_set_image(icon_scaled);
     imlib_image_set_has_alpha(1);
     DATA32* data = imlib_image_get_data();
-    AdjustAsb(data, icon_size, icon_size, launcher_alpha,
+    AdjustASB(data, icon_size, icon_size, launcher_alpha,
               (float)launcher_saturation / 100,
               (float)launcher_brightness / 100);
     imlib_image_put_back_data(data);

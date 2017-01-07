@@ -233,7 +233,7 @@ std::tuple<double, double, double> HsvToRgb(double H, double S, double V) {
 
 }  // namespace
 
-void AdjustAsb(DATA32* data, unsigned int w, unsigned int h, int alpha,
+void AdjustASB(DATA32* data, unsigned int w, unsigned int h, int alpha,
                float saturation_adjustment, float brightness_adjustment) {
   for (unsigned int i = 0; i < w * h; ++i, ++data) {
     unsigned char ca, cr, cg, cb;

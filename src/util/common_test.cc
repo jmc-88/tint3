@@ -89,13 +89,13 @@ TEST_CASE("RegexMatch",
   }
 }
 
-TEST_CASE("AdjustAsb",
+TEST_CASE("AdjustASB",
           "Adjustments are in agreement with http://colorizer.org/") {
   // A 2x2 bitmap.
   DATA32 image_data[] = {0x00000000, 0xffffffff, 0xa0b0c0d0, 0x0a0b0c0d};
 
   // Increase brightness by 10%.
-  AdjustAsb(image_data, 2, 2, 100, 0.0, +0.1);
+  AdjustASB(image_data, 2, 2, 100, 0.0, +0.1);
 
   // Transparent pixel, shouldn't change.
   REQUIRE(image_data[0] == 0x00000000);

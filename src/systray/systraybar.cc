@@ -671,7 +671,7 @@ void SystrayRenderIconNow(TrayWindow* traywin, Timer& timer) {
 
   if (systray.alpha != 100 || systray.brightness != 0 ||
       systray.saturation != 0) {
-    AdjustAsb(data, traywin->width, traywin->height, systray.alpha,
+    AdjustASB(data, traywin->width, traywin->height, systray.alpha,
               (float)systray.saturation / 100, (float)systray.brightness / 100);
   }
 

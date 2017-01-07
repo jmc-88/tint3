@@ -380,7 +380,7 @@ void GetIcon(Task* tsk) {
     if (panel->g_task.alpha[k] != 100 || panel->g_task.saturation[k] != 0 ||
         panel->g_task.brightness[k] != 0) {
       DATA32* data32 = imlib_image_get_data();
-      AdjustAsb(data32, tsk->icon_width, tsk->icon_height,
+      AdjustASB(data32, tsk->icon_width, tsk->icon_height,
                 panel->g_task.alpha[k],
                 (float)panel->g_task.saturation[k] / 100,
                 (float)panel->g_task.brightness[k] / 100);
@@ -391,7 +391,7 @@ void GetIcon(Task* tsk) {
     auto adjusted_hover_icon = util::imlib2::Image::CloneExisting(orig_image);
     imlib_context_set_image(adjusted_hover_icon);
     DATA32* hover_data = imlib_image_get_data();
-    AdjustAsb(hover_data, tsk->icon_width, tsk->icon_height,
+    AdjustASB(hover_data, tsk->icon_width, tsk->icon_height,
               panel->g_task.alpha[k], 0.0f, +0.1f);
     imlib_image_put_back_data(hover_data);
     tsk->icon_hover[k] = adjusted_hover_icon;
@@ -399,7 +399,7 @@ void GetIcon(Task* tsk) {
     auto adjusted_pressed_icon = util::imlib2::Image::CloneExisting(orig_image);
     imlib_context_set_image(adjusted_pressed_icon);
     DATA32* pressed_data = imlib_image_get_data();
-    AdjustAsb(pressed_data, tsk->icon_width, tsk->icon_height,
+    AdjustASB(pressed_data, tsk->icon_width, tsk->icon_height,
               panel->g_task.alpha[k], 0.0f, -0.1f);
     imlib_image_put_back_data(pressed_data);
     tsk->icon_pressed[k] = adjusted_hover_icon;
