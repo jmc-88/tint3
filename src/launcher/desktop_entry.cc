@@ -12,9 +12,13 @@
 namespace launcher {
 namespace desktop_entry {
 
+// Whitespace matcher has all the characters accepted by isspace(), except for
+// the newline character:
+//  http://www.cplusplus.com/reference/cctype/isspace/
+
 const parser::Lexer kLexer{
     std::make_pair('\n', kNewLine),
-    std::make_pair("\\s+", kWhitespace),
+    std::make_pair("[ \t\v\f\r]+", kWhitespace),
     std::make_pair('#', kPoundSign),
     std::make_pair('[', kLeftBracket),
     std::make_pair(']', kRightBracket),

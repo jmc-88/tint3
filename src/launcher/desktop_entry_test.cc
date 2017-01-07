@@ -315,3 +315,32 @@ TEST_CASE("BestLocalizedEntry", "Picks the best value for the current locale") {
             "Non-localized");
   }
 }
+
+// Trailing whitespace on the "Comment" line.
+// Not a heredoc string as editors would likely remove the trailing whitespace
+// on save.
+static constexpr char kTrailingWhitespace[] =
+    "[Desktop Entry]\n"
+    "Name=Firefox\n"
+    "Type=Application\n"
+    "Exec=firefox\n"
+    "Comment=Browse the World Wide Web \n"
+    "GenericName=Web Browser\n";
+
+TEST_CASE("TrailingWhitespace",
+          "Trailing whitespace is consumed without swallowing a newline") {
+  launcher::desktop_entry::Parser desktop_entry_parser;
+  parser::Parser p{launcher::desktop_entry::kLexer, &desktop_entry_parser};
+
+  REQUIRE(p.Parse(kTrailingWhitespace));
+
+  launcher::desktop_entry::DesktopEntry groups{
+      desktop_entry_parser.GetDesktopEntry()};
+  REQUIRE(launcher::desktop_entry::Validate(&groups));
+
+  // Check both entries are present, and the newline separating them wasn't
+  // swallowed by an overly eager lexer.
+  REQUIRE(groups[0].GetEntry<std::string>("GenericName") == "Web Browser");
+  REQUIRE(groups[0].GetEntry<std::string>("Comment") ==
+          "Browse the World Wide Web ");
+}
