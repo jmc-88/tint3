@@ -439,24 +439,21 @@ IconTheme* LoadTheme(std::string const& name) {
     return nullptr;
   }
 
-  std::string file_name(util::fs::HomeDirectory() / ".icons" / name /
-                        "index.theme");
+  std::vector<std::string> candidates = {
+      util::fs::HomeDirectory() / ".local" / "share" / "icons" / name /
+          "index.theme",
+      util::fs::HomeDirectory() / ".icons" / name / "index.theme",
+      util::fs::Path("/usr/share/icons") / name / "index.theme",
+      util::fs::Path("/usr/share/pixmaps") / name / "index.theme"};
 
-  if (!util::fs::FileExists(file_name)) {
-    file_name = util::fs::Path("/usr/share/icons") / name / "index.theme";
-
-    if (!util::fs::FileExists(file_name)) {
-      file_name = util::fs::Path("/usr/share/pixmaps") / name / "index.theme";
-
-      if (!util::fs::FileExists(file_name)) {
-        file_name.clear();
-      }
-    }
-  }
-
-  if (file_name.empty()) {
+  auto it = std::find_if(
+      candidates.begin(), candidates.end(),
+      [](util::fs::Path const& item) { return util::fs::FileExists(item); });
+  if (it == candidates.end()) {
     return nullptr;
   }
+
+  std::string file_name = (*it);
 
   auto theme = new IconTheme();
   theme->name = name;
