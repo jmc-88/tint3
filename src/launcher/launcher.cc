@@ -468,7 +468,7 @@ IconTheme* LoadTheme(std::string const& name) {
     util::string::Trim(line);
 
     if (line.empty()) {
-      return false;
+      return true;
     }
 
     std::string key, value;
