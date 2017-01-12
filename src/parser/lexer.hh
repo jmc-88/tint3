@@ -1,8 +1,8 @@
 #ifndef TINT3_PARSER_LEXER_HH
 #define TINT3_PARSER_LEXER_HH
 
-#include <initializer_list>
 #include <functional>
+#include <initializer_list>
 #include <string>
 #include <utility>
 #include <vector>
@@ -38,17 +38,18 @@ class TokenMatcher {
 };
 
 class Token {
-public:
+ public:
   Symbol const symbol;
   unsigned int const begin;
   unsigned int const end;
   std::string const match;
 
-  Token(Symbol symbol, unsigned int begin, unsigned int end, std::string const& match);
+  Token(Symbol symbol, unsigned int begin, unsigned int end,
+        std::string const& match);
 };
 
 class Lexer {
-public:
+ public:
   using Result = std::vector<Token>;
   using MatchPair = std::pair<TokenMatcher, Symbol>;
 
@@ -60,7 +61,7 @@ public:
 
   bool ProcessContents(std::string const& buffer, Result* result) const;
 
-private:
+ private:
   // This could be an std::map for brevity, but we want to preserve the
   // given matcher ordering.
   std::vector<MatchPair> matcher_to_symbol_;
