@@ -737,11 +737,11 @@ Area* Area::InnermostAreaUnderPoint(int x, int y) {
 }
 
 Area* Area::MouseOver(Area* previous_area, bool button_pressed) {
-  if (!has_mouse_effects_) {
-    return previous_area;
-  }
   if (previous_area != nullptr && previous_area != this) {
     previous_area->MouseLeave();
+  }
+  if (!has_mouse_effects_) {
+    return nullptr;
   }
   set_mouse_state(button_pressed ? MouseState::kMousePressed
                                  : MouseState::kMouseOver);
