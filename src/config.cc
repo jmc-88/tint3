@@ -112,14 +112,33 @@ Background& GetBackgroundFromId(size_t id) {
 }  // namespace
 
 namespace config {
+namespace {
+
+bool IdentifierMatcher(std::string const& buffer, unsigned int* position,
+                       std::string* output) {
+  unsigned int begin = (*position);
+  if (!isalpha(buffer[*position])) {
+    return false;
+  }
+  unsigned int end = (begin + 1);
+  while (end != buffer.length() &&
+         (isalnum(buffer[end]) || buffer[end] == '_')) {
+    ++end;
+  }
+  (*position) = end;
+  output->assign(buffer, begin, end - begin);
+  return true;
+}
+
+}  // namespace
 
 const parser::Lexer kLexer{
     std::make_pair('\n', kNewLine),
-    std::make_pair("\\s+", kWhitespace),
+    std::make_pair(parser::matcher::Whitespace, kWhitespace),
     std::make_pair('#', kPoundSign),
     std::make_pair('=', kEqualsSign),
-    std::make_pair("[A-Za-z][A-Za-z0-9_]*", kIdentifier),
-    std::make_pair(".", kAny),
+    std::make_pair(IdentifierMatcher, kIdentifier),
+    std::make_pair(parser::matcher::Any, kAny),
 };
 
 Parser::Parser(Reader* reader) : reader_(reader) {}

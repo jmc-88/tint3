@@ -4,6 +4,30 @@
 #include <utility>
 
 namespace parser {
+namespace matcher {
+
+bool Whitespace(std::string const& buffer, unsigned int* position,
+                std::string* output) {
+  unsigned int begin = (*position);
+  unsigned int end = begin;
+  while (end < buffer.length() && isspace(buffer[end]) && buffer[end] != '\n') {
+    ++end;
+  }
+  (*position) = end;
+  output->assign(buffer, begin, end - begin);
+  return !output->empty();
+}
+
+bool Any(std::string const& buffer, unsigned int* position,
+         std::string* output) {
+  if (*position >= buffer.length()) {
+    return false;
+  }
+  output->assign(buffer, (*position)++, 1);
+  return true;
+}
+
+}  // namespace
 
 TokenMatcher::TokenMatcher(TokenMatcher const& other)
     : matcher_(other.matcher_) {}

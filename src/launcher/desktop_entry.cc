@@ -11,20 +11,35 @@
 
 namespace launcher {
 namespace desktop_entry {
+namespace {
 
-// Whitespace matcher has all the characters accepted by isspace(), except for
-// the newline character:
-//  http://www.cplusplus.com/reference/cctype/isspace/
+bool IdentifierMatcher(std::string const& buffer, unsigned int* position,
+                       std::string* output) {
+  unsigned int begin = (*position);
+  if (!isalpha(buffer[*position])) {
+    return false;
+  }
+  unsigned int end = (begin + 1);
+  while (end != buffer.length() &&
+         (isalnum(buffer[end]) || buffer[end] == '-')) {
+    ++end;
+  }
+  (*position) = end;
+  output->assign(buffer, begin, end - begin);
+  return true;
+}
+
+}  // namespace
 
 const parser::Lexer kLexer{
     std::make_pair('\n', kNewLine),
-    std::make_pair("[ \t\v\f\r]+", kWhitespace),
+    std::make_pair(parser::matcher::Whitespace, kWhitespace),
     std::make_pair('#', kPoundSign),
     std::make_pair('[', kLeftBracket),
     std::make_pair(']', kRightBracket),
     std::make_pair('=', kEqualsSign),
-    std::make_pair("[A-Za-z][A-Za-z0-9-]*", kIdentifier),
-    std::make_pair(".", kAny),
+    std::make_pair(IdentifierMatcher, kIdentifier),
+    std::make_pair(parser::matcher::Any, kAny),
 };
 
 const std::string Group::kInvalidName{""};

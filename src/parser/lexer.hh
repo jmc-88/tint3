@@ -8,6 +8,19 @@
 #include <vector>
 
 namespace parser {
+namespace matcher {
+
+// Whitespace matcher accepts all the characters accepted by isspace(), except
+// for the newline character (which is usually to be accepted as a separate
+// token, and not swallowed by this matcher).
+bool Whitespace(std::string const& buffer, unsigned int* position,
+                std::string* output);
+
+// Any matcher accepts any single character.
+bool Any(std::string const& buffer, unsigned int* position,
+         std::string* output);
+
+}  // namespace matcher
 
 using Symbol = unsigned int;
 

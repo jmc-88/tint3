@@ -3,6 +3,66 @@
 
 #include "parser/lexer.hh"
 
+TEST_CASE("matchers::Whitespace", "Whitespace matcher is sane") {
+  SECTION("All spaces") {
+    std::string all_spaces{"   "};
+    unsigned int position = 0;
+    std::string output;
+    REQUIRE(parser::matcher::Whitespace(all_spaces, &position, &output));
+    REQUIRE(position == all_spaces.length());
+    REQUIRE(output == all_spaces);
+  }
+
+  SECTION("Mixed spaces") {
+    std::string mixed_spaces{" \t \r"};
+    unsigned int position = 0;
+    std::string output;
+    REQUIRE(parser::matcher::Whitespace(mixed_spaces, &position, &output));
+    REQUIRE(position == mixed_spaces.length());
+    REQUIRE(output == mixed_spaces);
+  }
+
+  SECTION("Leading spaces") {
+    std::string test_string{"   test"};
+    unsigned int position = 0;
+    std::string output;
+    REQUIRE(parser::matcher::Whitespace(test_string, &position, &output));
+    REQUIRE(position == 3);
+    REQUIRE(output == "   ");
+  }
+
+  SECTION("Trailing spaces") {
+    std::string test_string{"test   "};
+    unsigned int position = 0;
+    std::string output;
+    // Since we're starting from position=0, there's no whitespace that matches
+    // at that position, so we expect to fail here.
+    REQUIRE(!parser::matcher::Whitespace(test_string, &position, &output));
+    REQUIRE(position == 0);
+    REQUIRE(output.empty());
+  }
+}
+
+TEST_CASE("matchers::Any", "Whitespace matcher is sane") {
+  SECTION("Inside a string") {
+    std::string test_string{"test"};
+    unsigned int position = 0;
+    std::string output;
+    REQUIRE(parser::matcher::Any(test_string, &position, &output));
+    REQUIRE(position == 1);
+    REQUIRE(output == "t");
+  }
+
+  SECTION("At the end of a string") {
+    std::string test_string{"test"};
+    unsigned int position = test_string.length();
+    std::string output;
+    REQUIRE(!parser::matcher::Any(test_string, &position, &output));
+    REQUIRE(position == test_string.length());
+    REQUIRE(output.empty());
+  }
+}
+
 TEST_CASE("Lexer", "Tokens are returned as expected") {
   enum TestFileTokens {
     kNewLine = (parser::kEOF + 1),
