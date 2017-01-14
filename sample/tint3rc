@@ -79,6 +79,18 @@ systray_icon_size = 22
 systray_icon_asb = 100 0 0
 # }}} system tray
 
+# {{{ battery
+battery = 1
+battery_hide = 99
+battery_low_status = 25
+battery_low_cmd = notify-send --app-name=tint3 --expire-time=-1 --icon=dialog-warning "Battery level is <b>critically low</b>. Please connect your charger as soon as possible."
+battery_padding = 10 6
+battery_background_id = 0
+bat1_font = Droid Sans Bold 10
+bat2_font = Droid Sans 10
+battery_font_color = #dcdcdc 100
+# }}} battery
+
 # {{{ clock
 time1_format = %H:%M
 time1_font = Droid Sans Bold 10
