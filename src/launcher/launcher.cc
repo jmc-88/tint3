@@ -182,9 +182,19 @@ bool Launcher::Resize() {
         launcher_icon->icon_scaled_ =
             ScaleIcon(launcher_icon->icon_original_, icon_size);
         launcher_icon->icon_hover_ = launcher_icon->icon_scaled_;
-        launcher_icon->icon_hover_.AdjustASB(100, 0.0, +0.1);
+        if (panel_config.mouse_effects) {
+          launcher_icon->icon_hover_.AdjustASB(
+              panel_config.mouse_hover_alpha,
+              panel_config.mouse_hover_saturation / 100.0f,
+              panel_config.mouse_hover_brightness / 100.0f);
+        }
         launcher_icon->icon_pressed_ = launcher_icon->icon_scaled_;
-        launcher_icon->icon_pressed_.AdjustASB(100, 0.0, -0.1);
+        if (panel_config.mouse_effects) {
+          launcher_icon->icon_pressed_.AdjustASB(
+              panel_config.mouse_pressed_alpha,
+              panel_config.mouse_pressed_saturation / 100.0f,
+              panel_config.mouse_pressed_brightness / 100.0f);
+        }
         continue;
       }
 
@@ -306,10 +316,14 @@ std::string LauncherIcon::GetTooltipText() {
 
 void LauncherIcon::DrawForeground(cairo_t* c) {
   // Render
-  if (mouse_state() == MouseState::kMouseOver) {
-    imlib_context_set_image(icon_hover_);
-  } else if (mouse_state() == MouseState::kMousePressed) {
-    imlib_context_set_image(icon_pressed_);
+  if (panel_config.mouse_effects) {
+    if (mouse_state() == MouseState::kMouseOver) {
+      imlib_context_set_image(icon_hover_);
+    } else if (mouse_state() == MouseState::kMousePressed) {
+      imlib_context_set_image(icon_pressed_);
+    } else {
+      imlib_context_set_image(icon_scaled_);
+    }
   } else {
     imlib_context_set_image(icon_scaled_);
   }
@@ -403,7 +417,8 @@ void LauncherAction(LauncherIcon* launcher_icon, XEvent* evt) {
 #endif  // HAVE_SN
 }
 
-// Splits line at first '=' and returns 1 if successful, and parts are not empty
+// Splits line at first '=' and returns 1 if successful, and parts are not
+// empty
 // key and value point to the parts
 // http://standards.freedesktop.org/icon-theme-spec/
 bool ParseThemeLine(std::string const& line, std::string& key,
@@ -530,7 +545,8 @@ IconTheme* LoadTheme(std::string const& name) {
           // value is like 2
           current_dir->threshold = std::stoi(value);
         } else if (key == "Type") {
-          // value is Fixed, Scalable or Threshold : default to scalable for
+          // value is Fixed, Scalable or Threshold : default to scalable
+          // for
           // unknown Type.
           if (value == "Fixed") {
             current_dir->type = ICON_DIR_TYPE_FIXED;
@@ -828,9 +844,11 @@ std::string Launcher::GetIconPath(std::string const& icon_name, int size) {
   // Stage 1: best size match
   // Contrary to the freedesktop spec, we are not choosing the closest icon in
   // size, but the next larger icon
-  // otherwise the quality is usually crap (for size 22, if you can choose 16 or
+  // otherwise the quality is usually crap (for size 22, if you can choose 16
+  // or
   // 32, you're better with 32)
-  // We do fallback to the closest size if we cannot find a larger or equal icon
+  // We do fallback to the closest size if we cannot find a larger or equal
+  // icon
 
   // These 3 variables are used for keeping the closest size match
   int minimal_size = INT_MAX;
