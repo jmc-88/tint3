@@ -121,6 +121,15 @@ class Panel : public Area {
   Pixmap hidden_pixmap_;
   Interval::Id autohide_timeout_;
 
+  // mouse effects
+  bool mouse_effects;
+  int mouse_hover_alpha;
+  int mouse_hover_saturation;
+  int mouse_hover_brightness;
+  int mouse_pressed_alpha;
+  int mouse_pressed_saturation;
+  int mouse_pressed_brightness;
+
   Taskbar* ClickTaskbar(int x, int y);
   Task* ClickTask(int x, int y);
   bool ClickLauncher(int x, int y);

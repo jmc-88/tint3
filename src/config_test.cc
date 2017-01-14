@@ -304,3 +304,36 @@ TEST_CASE("ConfigParserHoverPressed", "Doesn't choke on hover/pressed states") {
 
   CleanupPanel();  // TODO: decouple from config loading
 }
+
+static constexpr char kMouseEffects[] =
+    u8R"EOF(
+mouse_effects = 1
+mouse_hover_icon_asb = 100 0 25
+mouse_pressed_icon_asb = 100 0 -25
+)EOF";
+
+TEST_CASE("ConfigParserMouseEffects", "Mouse effects are correctly read") {
+  test::ConfigReader reader;
+  config::Parser config_entry_parser{&reader};
+  parser::Parser p{config::kLexer, &config_entry_parser};
+
+  // Before: defaults
+  REQUIRE(!panel_config.mouse_effects);
+  REQUIRE(panel_config.mouse_hover_alpha == 100);
+  REQUIRE(panel_config.mouse_hover_saturation == 0);
+  REQUIRE(panel_config.mouse_hover_brightness == 10);
+  REQUIRE(panel_config.mouse_pressed_alpha == 100);
+  REQUIRE(panel_config.mouse_pressed_saturation == 0);
+  REQUIRE(panel_config.mouse_pressed_brightness == -10);
+
+  REQUIRE(p.Parse(kMouseEffects));
+
+  // After: config values
+  REQUIRE(panel_config.mouse_effects);
+  REQUIRE(panel_config.mouse_hover_alpha == 100);
+  REQUIRE(panel_config.mouse_hover_saturation == 0);
+  REQUIRE(panel_config.mouse_hover_brightness == 25);
+  REQUIRE(panel_config.mouse_pressed_alpha == 100);
+  REQUIRE(panel_config.mouse_pressed_saturation == 0);
+  REQUIRE(panel_config.mouse_pressed_brightness == -25);
+}

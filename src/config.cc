@@ -242,7 +242,15 @@ void ExtractValues(std::string const& value, std::string& v1, std::string& v2,
   }
 }
 
-Reader::Reader(Server* server) : server_(server), new_config_file_(false) {}
+Reader::Reader(Server* server) : server_(server), new_config_file_(false) {
+  panel_config.mouse_effects = false;
+  panel_config.mouse_hover_alpha = 100;
+  panel_config.mouse_hover_saturation = 0;
+  panel_config.mouse_hover_brightness = 10;
+  panel_config.mouse_pressed_alpha = 100;
+  panel_config.mouse_pressed_saturation = 0;
+  panel_config.mouse_pressed_brightness = -10;
+}
 
 bool Reader::LoadFromDefaults() {
   // follow XDG specification
@@ -806,6 +814,18 @@ void Reader::AddEntry(std::string const& key, std::string const& value) {
     GetAction(value, &mouse_scroll_up);
   } else if (key == "mouse_scroll_down") {
     GetAction(value, &mouse_scroll_down);
+  } else if (key == "mouse_effects") {
+    panel_config.mouse_effects = (0 != std::stol(value));
+  } else if (key == "mouse_hover_icon_asb") {
+    config::ExtractValues(value, value1, value2, value3);
+    panel_config.mouse_hover_alpha = std::stol(value1);
+    panel_config.mouse_hover_saturation = std::stol(value2);
+    panel_config.mouse_hover_brightness = std::stol(value3);
+  } else if (key == "mouse_pressed_icon_asb") {
+    config::ExtractValues(value, value1, value2, value3);
+    panel_config.mouse_pressed_alpha = std::stol(value1);
+    panel_config.mouse_pressed_saturation = std::stol(value2);
+    panel_config.mouse_pressed_brightness = std::stol(value3);
   }
 
   /* autohide options */
