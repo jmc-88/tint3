@@ -103,4 +103,7 @@ mouse_middle = none
 mouse_right = close
 mouse_scroll_up = toggle
 mouse_scroll_down = iconify
+mouse_effects = 1
+mouse_hover_icon_asb = 100 0 25
+mouse_pressed_icon_asb = 100 0 -25
 # }}} mouse
