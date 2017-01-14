@@ -11,12 +11,12 @@ for more information.
 
 ## packages
 
-Packages provided here are for tint3 **v0.1.0**.
+Packages provided here are for tint3 **v0.2.0**.
 
 <!-- Important! No spaces between anchors, or Markdown will render them in
      separate <p> tags, breaking the alignment -->
 <a class="package" target="source"
-   href="https://github.com/jmc-88/tint3/releases/tag/v0.1.0">
+   href="https://github.com/jmc-88/tint3/releases/tag/v0.2.0">
   <img src="data/archive.svg" alt="Source code">
   <span>source</span>
 </a>
@@ -25,11 +25,11 @@ Packages provided here are for tint3 **v0.1.0**.
   <img src="data/archlinux.svg" alt="Arch Linux">
   <span>aur+git</span>
 </a>
-<a class="package" href="https://github.com/jmc-88/tint3/releases/download/v0.1.0/tint3-0.1.0-amd64.deb">
+<a class="package" href="https://github.com/jmc-88/tint3/releases/download/v0.2.0/tint3-0.2.0-amd64.deb">
   <img src="data/debian.svg" alt="Debian">
   <span>amd64</span>
 </a>
-<a class="package" href="https://github.com/jmc-88/tint3/releases/download/v0.1.0/tint3-0.1.0-amd64.rpm">
+<a class="package" href="https://github.com/jmc-88/tint3/releases/download/v0.2.0/tint3-0.2.0-amd64.rpm">
   <img src="data/rpm.svg" alt="RedHat">
   <span>amd64</span>
 </a>
