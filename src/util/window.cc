@@ -137,7 +137,8 @@ int FindMonitorIndex(int x, int y) {
 unsigned int GetMonitor(Window win) {
   int x, y;
   Window src;
-  XTranslateCoordinates(server.dsp, win, server.root_win, 0, 0, &x, &y, &src);
+  XTranslateCoordinates(server.dsp, win, server.root_window(), 0, 0, &x, &y,
+                        &src);
 
   int i = FindMonitorIndex(x + 2, y + 2);
   return (i != -1) ? i : 0;
@@ -188,7 +189,7 @@ int IsSkipTaskbar(Window win) {
 }
 
 Window GetActive() {
-  return GetProperty32<Window>(server.root_win,
+  return GetProperty32<Window>(server.root_window(),
                                server.atoms_["_NET_ACTIVE_WINDOW"], XA_WINDOW);
 }
 
@@ -198,8 +199,8 @@ int IsActive(Window win) { return GetActive() == win; }
 }  // namespace window
 
 void SetDesktop(int desktop) {
-  SendEvent32(server.root_win, server.atoms_["_NET_CURRENT_DESKTOP"], desktop,
-              0, 0);
+  SendEvent32(server.root_window(), server.atoms_["_NET_CURRENT_DESKTOP"],
+              desktop, 0, 0);
 }
 
 int GetIconCount(unsigned long* data, int num) {
@@ -274,7 +275,7 @@ unsigned long* GetBestIcon(unsigned long* data, int icon_count, int num,
 
 std::vector<std::string> ServerGetDesktopNames() {
   int count = 0;
-  auto data_ptr = ServerGetProperty<char>(server.root_win,
+  auto data_ptr = ServerGetProperty<char>(server.root_window(),
                                           server.atoms_["_NET_DESKTOP_NAMES"],
                                           server.atoms_["UTF8_STRING"], &count);
 
@@ -299,7 +300,7 @@ std::vector<std::string> ServerGetDesktopNames() {
 
 void GetTextSize(PangoFontDescription* font, int* height_ink, int* height,
                  int panel_height, std::string const& text) {
-  auto pmap = XCreatePixmap(server.dsp, server.root_win, panel_height,
+  auto pmap = XCreatePixmap(server.dsp, server.root_window(), panel_height,
                             panel_height, server.depth);
 
   auto cs = cairo_xlib_surface_create(server.dsp, pmap, server.visual,
@@ -323,7 +324,7 @@ void GetTextSize(PangoFontDescription* font, int* height_ink, int* height,
 void GetTextSize2(PangoFontDescription* font, int* height_ink, int* height,
                   int* width, int panel_height, int panel_width,
                   std::string const& text) {
-  auto pmap = XCreatePixmap(server.dsp, server.root_win, panel_height,
+  auto pmap = XCreatePixmap(server.dsp, server.root_window(), panel_height,
                             panel_height, server.depth);
 
   auto cs = cairo_xlib_surface_create(server.dsp, pmap, server.visual,

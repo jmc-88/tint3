@@ -123,7 +123,7 @@ void Systraybar::DrawForeground(cairo_t* /* c */) {
     }
 
     render_background =
-        XCreatePixmap(server.dsp, server.root_win, systray.width_,
+        XCreatePixmap(server.dsp, server.root_window(), systray.width_,
                       systray.height_, server.depth);
     XCopyArea(server.dsp, systray.pix_, render_background, server.gc, 0, 0,
               systray.width_, systray.height_, 0, 0);
@@ -277,8 +277,8 @@ void Systraybar::StartNet(Timer& timer) {
   }
 
   // init systray protocol
-  net_sel_win =
-      util::x11::CreateSimpleWindow(server.root_win, -1, -1, 1, 1, 0, 0, 0);
+  net_sel_win = util::x11::CreateSimpleWindow(server.root_window(), -1, -1, 1,
+                                              1, 0, 0, 0);
 
   // v0.3 trayer specification. tint3 always horizontal.
   // Vertical panel will draw the systray horizontal.
@@ -314,7 +314,7 @@ void Systraybar::StartNet(Timer& timer) {
 
   XClientMessageEvent ev;
   ev.type = ClientMessage;
-  ev.window = server.root_win;
+  ev.window = server.root_window();
   ev.message_type = server.atoms_["MANAGER"];
   ev.format = 32;
   ev.data.l[0] = CurrentTime;
@@ -322,7 +322,7 @@ void Systraybar::StartNet(Timer& timer) {
   ev.data.l[2] = net_sel_win;
   ev.data.l[3] = 0;
   ev.data.l[4] = 0;
-  XSendEvent(server.dsp, server.root_win, False, StructureNotifyMask,
+  XSendEvent(server.dsp, server.root_window(), False, StructureNotifyMask,
              (XEvent*)&ev);
 }
 
@@ -512,7 +512,7 @@ void Systraybar::RemoveIconInternal(TrayWindow* traywin, Timer& timer) {
       XUnmapWindow(server.dsp, traywin->tray_id);
     }
 
-    XReparentWindow(server.dsp, traywin->tray_id, server.root_win, 0, 0);
+    XReparentWindow(server.dsp, traywin->tray_id, server.root_window(), 0, 0);
     XDestroyWindow(server.dsp, traywin->id);
     XSync(server.dsp, False);
   }
@@ -624,8 +624,8 @@ void SystrayRenderIconNow(TrayWindow* traywin, Timer& timer) {
   // to use this pixmap as
   // drawable. If someone knows why it does not work with the traywindow itself,
   // please tell me ;)
-  Pixmap tmp_pmap = XCreatePixmap(server.dsp, server.root_win, traywin->width,
-                                  traywin->height, 32);
+  Pixmap tmp_pmap = XCreatePixmap(server.dsp, server.root_window(),
+                                  traywin->width, traywin->height, 32);
   XRenderPictFormat* f = nullptr;
 
   if (traywin->depth == 24) {
@@ -718,7 +718,7 @@ void SystrayRenderIcon(TrayWindow* traywin, Timer& timer) {
     // offer the same depth as tint3 does, need to draw a background pixmap, but
     // this cannot be done with
     // XCopyArea... So we actually need XRenderComposite???
-    //          Pixmap pix = XCreatePixmap(server.dsp, server.root_win,
+    //          Pixmap pix = XCreatePixmap(server.dsp, server.root_window(),
     //          traywin->width, traywin->height, server.depth);
     //          XCopyArea(server.dsp, panel->temp_pmap, pix, server.gc,
     //          traywin->x, traywin->y, traywin->width, traywin->height, 0, 0);

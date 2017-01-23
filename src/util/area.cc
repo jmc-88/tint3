@@ -603,8 +603,8 @@ void Area::Draw() {
     XFreePixmap(server.dsp, pix_);
   }
 
-  pix_ =
-      XCreatePixmap(server.dsp, server.root_win, width_, height_, server.depth);
+  pix_ = XCreatePixmap(server.dsp, server.root_window(), width_, height_,
+                       server.depth);
 
   // add layer of root pixmap (or clear pixmap if real_transparency==true)
   if (server.real_transparency) {

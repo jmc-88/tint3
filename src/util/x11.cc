@@ -62,7 +62,7 @@ bool EventLoop::RunLoop() {
           }
 
           panel.temp_pmap =
-              XCreatePixmap(server_->dsp, server_->root_win, panel.width_,
+              XCreatePixmap(server_->dsp, server_->root_window(), panel.width_,
                             panel.height_, server_->depth);
           panel.Render();
           XCopyArea(server_->dsp, panel.temp_pmap, panel.main_win_, server_->gc,

@@ -94,7 +94,7 @@ void UpdateStrut(Panel* p) {
   unsigned int d1, screen_width, screen_height;
   Window d2;
   int d3;
-  XGetGeometry(server.dsp, server.root_win, &d2, &d3, &d3, &screen_width,
+  XGetGeometry(server.dsp, server.root_window(), &d2, &d3, &d3, &screen_width,
                &screen_height, &d1, &d1);
   Monitor monitor = server.monitor[p->monitor_];
   long struts[12] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
@@ -301,7 +301,7 @@ void InitPanel(Timer& timer) {
       unsigned long mask =
           CWEventMask | CWColormap | CWBackPixel | CWBorderPixel;
       p.main_win_ = util::x11::CreateWindow(
-          server.root_win, p.root_x_, p.root_y_, p.width_, p.height_, 0,
+          server.root_window(), p.root_x_, p.root_y_, p.width_, p.height_, 0,
           server.depth, InputOutput, server.visual, mask, &attr);
     }
 
@@ -569,8 +569,8 @@ void Panel::SetBackground() {
     XFreePixmap(server.dsp, pix_);
   }
 
-  pix_ =
-      XCreatePixmap(server.dsp, server.root_win, width_, height_, server.depth);
+  pix_ = XCreatePixmap(server.dsp, server.root_window(), width_, height_,
+                       server.depth);
 
   int xoff = 0, yoff = 0;
 
@@ -589,8 +589,8 @@ void Panel::SetBackground() {
     // copy background (server.root_pmap) in panel.pix
     Window dummy;
     int x, y;
-    XTranslateCoordinates(server.dsp, main_win_, server.root_win, 0, 0, &x, &y,
-                          &dummy);
+    XTranslateCoordinates(server.dsp, main_win_, server.root_window(), 0, 0, &x,
+                          &y, &dummy);
 
     if (panel_autohide && is_hidden_) {
       x -= xoff;
@@ -614,8 +614,8 @@ void Panel::SetBackground() {
       XFreePixmap(server.dsp, hidden_pixmap_);
     }
 
-    hidden_pixmap_ = XCreatePixmap(server.dsp, server.root_win, hidden_width_,
-                                   hidden_height_, server.depth);
+    hidden_pixmap_ = XCreatePixmap(server.dsp, server.root_window(),
+                                   hidden_width_, hidden_height_, server.depth);
     XCopyArea(server.dsp, pix_, hidden_pixmap_, server.gc, xoff, yoff,
               hidden_width_, hidden_height_, 0, 0);
   }

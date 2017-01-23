@@ -76,8 +76,8 @@ void DefaultLauncher() {
 void InitLauncher() {
   if (launcher_enabled) {
     // if XSETTINGS manager running, tint3 read the icon_theme_name.
-    xsettings_client = XSettingsClientNew(
-        server.dsp, server.screen, XSettingsNotifyCallback, nullptr, nullptr);
+    xsettings_client =
+        XSettingsClientNew(server, XSettingsNotifyCallback, nullptr, nullptr);
   }
 }
 

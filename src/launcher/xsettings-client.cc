@@ -39,7 +39,7 @@
 
 struct _XSettingsClient {
   Display* display;
-  int screen;
+  Window root_window;
   XSettingsNotifyFunc notify;
   XSettingsWatchFunc watch;
   void* cb_data;
@@ -448,7 +448,7 @@ static void CheckManagerWindow(XSettingsClient* client) {
   ReadSettings(client);
 }
 
-XSettingsClient* XSettingsClientNew(Display* display, int screen,
+XSettingsClient* XSettingsClientNew(Server const& server,
                                     XSettingsNotifyFunc notify,
                                     XSettingsWatchFunc watch, void* cb_data) {
   XSettingsClient* client = (XSettingsClient*)std::malloc(sizeof(*client));
@@ -457,8 +457,8 @@ XSettingsClient* XSettingsClientNew(Display* display, int screen,
     return nullptr;
   }
 
-  client->display = display;
-  client->screen = screen;
+  client->display = server.dsp;
+  client->root_window = server.root_window();
   client->notify = notify;
   client->watch = watch;
   client->cb_data = cb_data;
@@ -467,7 +467,7 @@ XSettingsClient* XSettingsClientNew(Display* display, int screen,
   client->settings = nullptr;
 
   if (client->watch) {
-    client->watch(RootWindow(display, screen), True, StructureNotifyMask,
+    client->watch(client->root_window, True, StructureNotifyMask,
                   client->cb_data);
   }
 
@@ -486,8 +486,7 @@ XSettingsClient* XSettingsClientNew(Display* display, int screen,
 
 void XSettingsClientDestroy(XSettingsClient* client) {
   if (client->watch) {
-    client->watch(RootWindow(client->display, client->screen), False, 0,
-                  client->cb_data);
+    client->watch(client->root_window, False, 0, client->cb_data);
   }
 
   if (client->manager_window && client->watch) {
@@ -517,7 +516,7 @@ Bool XSettingsClientProcessEvent(XSettingsClient* client, XEvent* xev) {
   * times when the manager changes from A->B. But manager changes
   * are going to be pretty rare.
   */
-  if (xev->xany.window == RootWindow(server.dsp, server.screen)) {
+  if (xev->xany.window == server.root_window()) {
     if (xev->xany.type == ClientMessage &&
         xev->xclient.message_type == server.atoms_["MANAGER"]) {
       CheckManagerWindow(client);

@@ -166,11 +166,7 @@ void InitX11() {
     std::exit(0);
   }
 
-  server.InitAtoms();
-  server.screen = DefaultScreen(server.dsp);
-  server.root_win = RootWindow(server.dsp, server.screen);
-  server.desktop = server.GetCurrentDesktop();
-  server.InitVisual();
+  server.InitX11();
   XSetErrorHandler(ServerCatchError);
 
 #ifdef HAVE_SN
@@ -183,7 +179,7 @@ void InitX11() {
   imlib_context_set_colormap(server.colormap);
 
   /* Catch events */
-  XSelectInput(server.dsp, server.root_win,
+  XSelectInput(server.dsp, server.root_window(),
                PropertyChangeMask | StructureNotifyMask);
 
   setlocale(LC_ALL, "");
@@ -324,7 +320,7 @@ void WindowAction(Task* tsk, MouseAction action) {
 void ForwardClick(XEvent* e) {
   // forward the click to the desktop window (thanks conky)
   XUngrabPointer(server.dsp, e->xbutton.time);
-  e->xbutton.window = server.root_win;
+  e->xbutton.window = server.root_window();
   // icewm doesn't open under the mouse.
   // and xfce doesn't open at all.
   e->xbutton.x = e->xbutton.x_root;
@@ -521,9 +517,9 @@ void EventPropertyNotify(XEvent* e, Timer& timer) {
     XSettingsClientProcessEvent(xsettings_client, e);
   }
 
-  if (win == server.root_win) {
+  if (win == server.root_window()) {
     if (!server.got_root_win) {
-      XSelectInput(server.dsp, server.root_win,
+      XSelectInput(server.dsp, server.root_window(),
                    PropertyChangeMask | StructureNotifyMask);
       server.got_root_win = true;
     }
@@ -743,7 +739,7 @@ void EventPropertyNotify(XEvent* e, Timer& timer) {
     }
 
     if (!server.got_root_win) {
-      server.root_win = RootWindow(server.dsp, server.screen);
+      server.UpdateRootWindow();
     }
   }
 }
@@ -761,7 +757,7 @@ void EventExpose(XEvent* e) {
 
 void EventConfigureNotify(Window win, Timer& timer) {
   // change in root window (xrandr)
-  if (win == server.root_win) {
+  if (win == server.root_window()) {
     signal_pending = SIGUSR1;
     return;
   }
@@ -974,7 +970,7 @@ void DragAndDropPosition(XClientMessageEvent* e) {
   int y = e->data.l[2] & 0xFFFF;
   int map_x, map_y;
   Window child;
-  XTranslateCoordinates(server.dsp, server.root_win, e->window, x, y, &map_x,
+  XTranslateCoordinates(server.dsp, server.root_window(), e->window, x, y, &map_x,
                         &map_y, &child);
 
   Panel* panel = GetPanel(e->window);

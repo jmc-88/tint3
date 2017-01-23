@@ -28,7 +28,6 @@ class Server {
   std::map<std::string, Atom> atoms_;
 
   Display* dsp;
-  Window root_win;
   Window composite_manager;
   bool real_transparency;
   // current desktop
@@ -59,6 +58,13 @@ class Server {
   void InitGC(Window win);
   void InitAtoms();
   void InitVisual();
+  void InitX11();
+
+  Window root_window() const;
+  void UpdateRootWindow();
+
+ private:
+  Window root_window_;
 };
 
 extern Server server;

@@ -160,7 +160,7 @@ void SendEvent32(Window win, Atom at, long data1, long data2, long data3) {
   event.xclient.data.l[3] = 0;
   event.xclient.data.l[4] = 0;
 
-  XSendEvent(server.dsp, server.root_win, False,
+  XSendEvent(server.dsp, server.root_window(), False,
              SubstructureRedirectMask | SubstructureNotifyMask, &event);
 }
 
@@ -170,7 +170,8 @@ void GetRootPixmap() {
                          server.atoms_["_XROOTMAP_ID"]};
 
   for (Atom const& atom : pixmap_atoms) {
-    auto res = ServerGetProperty<Pixmap>(server.root_win, atom, XA_PIXMAP, 0);
+    auto res =
+        ServerGetProperty<Pixmap>(server.root_window(), atom, XA_PIXMAP, 0);
 
     if (res != nullptr) {
       ret = (*res);
@@ -208,7 +209,7 @@ void GetMonitors() {
     util::x11::ClientData<XineramaScreenInfo> info(
         XineramaQueryScreens(server.dsp, &nbmonitor));
     XRRScreenResources* res =
-        XRRGetScreenResourcesCurrent(server.dsp, server.root_win);
+        XRRGetScreenResourcesCurrent(server.dsp, server.root_window());
 
     if (res != nullptr && res->ncrtc >= nbmonitor) {
       // use xrandr to identify monitors (does not work with proprietery nvidia
@@ -308,12 +309,12 @@ void GetDesktops() {
 }
 
 int Server::GetCurrentDesktop() {
-  return GetProperty32<int>(root_win, atoms_["_NET_CURRENT_DESKTOP"],
+  return GetProperty32<int>(root_window_, atoms_["_NET_CURRENT_DESKTOP"],
                             XA_CARDINAL);
 }
 
 int Server::GetNumberOfDesktops() {
-  return GetProperty32<int>(root_win, atoms_["_NET_NUMBER_OF_DESKTOPS"],
+  return GetProperty32<int>(root_window_, atoms_["_NET_NUMBER_OF_DESKTOPS"],
                             XA_CARDINAL);
 }
 
@@ -361,7 +362,7 @@ void Server::InitVisual() {
 
   if (xvi_visual) {
     visual32 = xvi_visual;
-    colormap32 = XCreateColormap(dsp, root_win, xvi_visual, AllocNone);
+    colormap32 = XCreateColormap(dsp, root_window_, xvi_visual, AllocNone);
   }
 
   if (xvi_visual && composite_manager != None) {
@@ -372,7 +373,7 @@ void Server::InitVisual() {
     real_transparency = true;
     depth = 32;
     std::cout << "Real transparency: on, depth: " << depth << '\n';
-    colormap = XCreateColormap(dsp, root_win, xvi_visual, AllocNone);
+    colormap = XCreateColormap(dsp, root_window_, xvi_visual, AllocNone);
     visual = xvi_visual;
   } else {
     // no composite manager -> fake transparency
@@ -383,3 +384,15 @@ void Server::InitVisual() {
     visual = DefaultVisual(dsp, screen);
   }
 }
+
+void Server::InitX11() {
+  InitAtoms();
+  screen = DefaultScreen(dsp);
+  UpdateRootWindow();
+  desktop = GetCurrentDesktop();
+  InitVisual();
+}
+
+Window Server::root_window() const { return root_window_; }
+
+void Server::UpdateRootWindow() { root_window_ = RootWindow(dsp, screen); }

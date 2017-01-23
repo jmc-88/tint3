@@ -27,6 +27,8 @@
 #include <X11/Xlib.h>
 #include "xsettings-common.hh"
 
+#include "server.hh"
+
 #ifdef __cplusplus
 extern "C" {
 #endif  // __cplusplus
@@ -44,7 +46,7 @@ typedef void (*XSettingsNotifyFunc)(const char* name, XSettingsAction action,
 typedef void (*XSettingsWatchFunc)(Window window, Bool is_start, long mask,
                                    void* cb_data);
 
-XSettingsClient* XSettingsClientNew(Display* display, int screen,
+XSettingsClient* XSettingsClientNew(Server const& server,
                                     XSettingsNotifyFunc notify,
                                     XSettingsWatchFunc watch, void* cb_data);
 void XSettingsClientDestroy(XSettingsClient* client);

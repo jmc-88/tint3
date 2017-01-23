@@ -309,7 +309,7 @@ void RenderImage(Drawable d, int x, int y, int w, int h) {
   // is doing internally)
   // But first we need to render the image onto itself with PictOpIn to adjust
   // the colors to the alpha channel
-  Pixmap pmap_tmp = XCreatePixmap(server.dsp, server.root_win, w, h, 32);
+  Pixmap pmap_tmp = XCreatePixmap(server.dsp, server.root_window(), w, h, 32);
   imlib_context_set_drawable(pmap_tmp);
   imlib_context_set_blend(0);
   imlib_render_image_on_drawable(0, 0);

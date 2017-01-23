@@ -108,9 +108,9 @@ void InitTooltip() {
     XDestroyWindow(server.dsp, g_tooltip.window);
   }
 
-  g_tooltip.window =
-      util::x11::CreateWindow(server.root_win, 0, 0, 100, 20, 0, server.depth,
-                              InputOutput, server.visual, mask, &attr);
+  g_tooltip.window = util::x11::CreateWindow(server.root_window(), 0, 0, 100,
+                                             20, 0, server.depth, InputOutput,
+                                             server.visual, mask, &attr);
 }
 
 void TooltipTriggerShow(Area* area, Panel* p, XEvent* e, Timer& timer) {
@@ -136,8 +136,8 @@ void TooltipTriggerShow(Area* area, Panel* p, XEvent* e, Timer& timer) {
 bool TooltipShow(Timer& timer) {
   int mx, my;
   Window w;
-  XTranslateCoordinates(server.dsp, server.root_win, g_tooltip.panel->main_win_,
-                        x, y, &mx, &my, &w);
+  XTranslateCoordinates(server.dsp, server.root_window(),
+                        g_tooltip.panel->main_win_, x, y, &mx, &my, &w);
 
   if (!panel_horizontal) {
     // we adjusted y in tooltip_trigger_show, revert or we won't find the
