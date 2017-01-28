@@ -27,6 +27,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <iostream>
+#include <memory>
 
 #include "config.hh"
 #include "server.hh"
@@ -203,44 +204,64 @@ bool MonitorIncludes(Monitor const& m1, Monitor const& m2) {
 }
 
 void GetMonitors() {
-  int nbmonitor = 0;
+  using CrtcInfoPtr = std::unique_ptr<XRRCrtcInfo, decltype(&XRRFreeCrtcInfo)>;
+  using OutputInfoPtr =
+      std::unique_ptr<XRROutputInfo, decltype(&XRRFreeOutputInfo)>;
+  using ScreenResourcesPtr =
+      std::unique_ptr<XRRScreenResources, decltype(&XRRFreeScreenResources)>;
+
+  int num_monitors = 0;
 
   if (XineramaIsActive(server.dsp)) {
     util::x11::ClientData<XineramaScreenInfo> info(
-        XineramaQueryScreens(server.dsp, &nbmonitor));
-    XRRScreenResources* res =
-        XRRGetScreenResourcesCurrent(server.dsp, server.root_window());
+        XineramaQueryScreens(server.dsp, &num_monitors));
+    ScreenResourcesPtr res{
+        XRRGetScreenResourcesCurrent(server.dsp, server.root_window()),
+        XRRFreeScreenResources};
 
-    if (res != nullptr && res->ncrtc >= nbmonitor) {
+    if (res != nullptr && res->ncrtc >= num_monitors) {
       // use xrandr to identify monitors (does not work with proprietery nvidia
       // drivers)
       util::log::Debug() << "XRandR: found CRTCs: " << res->ncrtc << '\n';
-      server.monitor.resize(res->ncrtc);
+      server.monitor.clear();
 
       for (int i = 0; i < res->ncrtc; ++i) {
-        XRRCrtcInfo* crtc_info = XRRGetCrtcInfo(server.dsp, res, res->crtcs[i]);
-        server.monitor[i].x = crtc_info->x;
-        server.monitor[i].y = crtc_info->y;
-        server.monitor[i].width = crtc_info->width;
-        server.monitor[i].height = crtc_info->height;
+        CrtcInfoPtr crtc_info{
+            XRRGetCrtcInfo(server.dsp, res.get(), res->crtcs[i]),
+            XRRFreeCrtcInfo};
 
-        for (int j = 0; j < crtc_info->noutput; ++j) {
-          XRROutputInfo* output_info =
-              XRRGetOutputInfo(server.dsp, res, crtc_info->outputs[j]);
-          util::log::Debug() << "XRandR: linking output " << output_info->name
-                             << " with CRTC " << i << '\n';
-          server.monitor[i].names.push_back(output_info->name);
-          XRRFreeOutputInfo(output_info);
+        // Skip disabled outputs, which XRandR indicates with a width and height
+        // of zero. For reference:
+        //  https://cgit.freedesktop.org/xorg/proto/randrproto/tree/randrproto.txt?id=57d3ab1aa7daea9b351dd8bf41ad94522c786d79#n975
+        if (crtc_info->width == 0 || crtc_info->height == 0) {
+          util::log::Debug() << "XRandR: skipping disabled output " << i
+                             << '\n';
+          continue;
         }
 
-        XRRFreeCrtcInfo(crtc_info);
+        Monitor current_monitor;
+        current_monitor.x = crtc_info->x;
+        current_monitor.y = crtc_info->y;
+        current_monitor.width = crtc_info->width;
+        current_monitor.height = crtc_info->height;
+
+        for (int j = 0; j < crtc_info->noutput; ++j) {
+          OutputInfoPtr output_info{
+              XRRGetOutputInfo(server.dsp, res.get(), crtc_info->outputs[j]),
+              XRRFreeOutputInfo};
+          util::log::Debug() << "XRandR: linking output " << output_info->name
+                             << " with CRTC " << i << '\n';
+          current_monitor.names.push_back(output_info->name);
+        }
+
+        server.monitor.push_back(current_monitor);
       }
 
-      nbmonitor = res->ncrtc;
-    } else if (info != nullptr && nbmonitor > 0) {
-      server.monitor.resize(nbmonitor);
+      num_monitors = server.monitor.size();
+    } else if (info != nullptr && num_monitors > 0) {
+      server.monitor.resize(num_monitors);
 
-      for (int i = 0; i < nbmonitor; ++i) {
+      for (int i = 0; i < num_monitors; ++i) {
         server.monitor[i].x = info.get()[i].x_org;
         server.monitor[i].y = info.get()[i].y_org;
         server.monitor[i].width = info.get()[i].width;
@@ -255,7 +276,7 @@ void GetMonitors() {
     int i;
 
     // remove monitor included into another one
-    for (i = 0; i < nbmonitor; ++i) {
+    for (i = 0; i < num_monitors; ++i) {
       for (int j = 0; j < i; ++j) {
         if (!MonitorIncludes(server.monitor[i], server.monitor[j])) {
           goto next;
@@ -264,18 +285,9 @@ void GetMonitors() {
     }
 
   next:
-
-    for (int j = i; j < nbmonitor; ++j) {
-      server.monitor[j].names.clear();
-    }
-
     server.num_monitors = i;
     server.monitor.resize(server.num_monitors);
     std::sort(server.monitor.begin(), server.monitor.end(), MonitorIncludes);
-
-    if (res) {
-      XRRFreeScreenResources(res);
-    }
   }
 
   if (!server.num_monitors) {
