@@ -51,3 +51,11 @@ after_success:
   # Upload coverage data to Coveralls
   - cd "${TRAVIS_BUILD_DIR}/build"
   - cmake --build . --target coveralls
+
+notifications:
+  irc:
+    channels:
+      - "chat.freenode.net#tint3"
+    on_success: change
+    on_failure: always
+    use_notice: true
