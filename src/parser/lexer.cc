@@ -27,7 +27,7 @@ bool Any(std::string const& buffer, unsigned int* position,
   return true;
 }
 
-}  // namespace
+}  // namespace matcher
 
 TokenMatcher::TokenMatcher(TokenMatcher const& other)
     : matcher_(other.matcher_) {}
