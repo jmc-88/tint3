@@ -116,7 +116,6 @@ class Panel : public Area {
   Launcher launcher_;
 
   // autohide
-  bool hidden_;
   int hidden_width_, hidden_height_;
   Pixmap hidden_pixmap_;
   Interval::Id autohide_timeout_;
@@ -168,6 +167,7 @@ class Panel : public Area {
 #endif  // _TINT3_DEBUG
 
  private:
+  bool hidden_;
   unsigned int panel_index_;
 };
 
