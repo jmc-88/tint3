@@ -103,7 +103,7 @@ void UpdateStrut(Panel* p) {
     int height = p->height_ + p->margin_y_;
 
     if (panel_strut_policy == PanelStrutPolicy::kMinimum ||
-        (panel_strut_policy == PanelStrutPolicy::kFollowSize && p->hidden_)) {
+        (panel_strut_policy == PanelStrutPolicy::kFollowSize && p->hidden())) {
       height = p->hidden_height_;
     }
 
@@ -122,7 +122,7 @@ void UpdateStrut(Panel* p) {
     int width = p->width_ + p->margin_x_;
 
     if (panel_strut_policy == PanelStrutPolicy::kMinimum ||
-        (panel_strut_policy == PanelStrutPolicy::kFollowSize && p->hidden_)) {
+        (panel_strut_policy == PanelStrutPolicy::kFollowSize && p->hidden())) {
       width = p->hidden_width_;
     }
 
@@ -329,7 +329,7 @@ void InitPanel(Timer& timer) {
 
     if (panel_autohide) {
       timer.SetTimeout(std::chrono::milliseconds(panel_autohide_hide_timeout),
-                       [&p]() -> bool { return AutohideHide(&p); });
+                       [&p]() -> bool { return p.AutohideHide(); });
     }
 
     p.UpdateTaskbarVisibility();
@@ -784,30 +784,28 @@ std::string Panel::GetFriendlyName() const { return "Panel"; }
 
 #endif  // _TINT3_DEBUG
 
-bool AutohideShow(Panel* panel) {
-  panel->hidden_ = false;
+bool Panel::AutohideShow() {
+  hidden_ = false;
 
   if (panel_strut_policy == PanelStrutPolicy::kFollowSize) {
-    UpdateStrut(panel);
+    UpdateStrut(this);
   }
 
-  XMapSubwindows(server.dsp, panel->main_win_);  // systray windows
+  XMapSubwindows(server.dsp, main_win_);  // systray windows
 
   if (panel_horizontal) {
     if (panel_vertical_position == PanelVerticalPosition::kTop) {
-      XResizeWindow(server.dsp, panel->main_win_, panel->width_,
-                    panel->height_);
+      XResizeWindow(server.dsp, main_win_, width_, height_);
     } else {
-      XMoveResizeWindow(server.dsp, panel->main_win_, panel->root_x_,
-                        panel->root_y_, panel->width_, panel->height_);
+      XMoveResizeWindow(server.dsp, main_win_, root_x_, root_y_, width_,
+                        height_);
     }
   } else {
     if (panel_horizontal_position == PanelHorizontalPosition::kLeft) {
-      XResizeWindow(server.dsp, panel->main_win_, panel->width_,
-                    panel->height_);
+      XResizeWindow(server.dsp, main_win_, width_, height_);
     } else {
-      XMoveResizeWindow(server.dsp, panel->main_win_, panel->root_x_,
-                        panel->root_y_, panel->width_, panel->height_);
+      XMoveResizeWindow(server.dsp, main_win_, root_x_, root_y_, width_,
+                        height_);
     }
   }
 
@@ -817,34 +815,29 @@ bool AutohideShow(Panel* panel) {
   return false;
 }
 
-bool AutohideHide(Panel* panel) {
-  panel->hidden_ = true;
+bool Panel::AutohideHide() {
+  hidden_ = true;
 
   if (panel_strut_policy == PanelStrutPolicy::kFollowSize) {
-    UpdateStrut(panel);
+    UpdateStrut(this);
   }
 
-  XUnmapSubwindows(server.dsp, panel->main_win_);  // systray windows
-  int diff = (panel_horizontal ? panel->height_ : panel->width_) -
-             panel_autohide_height;
+  XUnmapSubwindows(server.dsp, main_win_);  // systray windows
+  int diff = (panel_horizontal ? height_ : width_) - panel_autohide_height;
 
   if (panel_horizontal) {
     if (panel_vertical_position == PanelVerticalPosition::kTop) {
-      XResizeWindow(server.dsp, panel->main_win_, panel->hidden_width_,
-                    panel->hidden_height_);
+      XResizeWindow(server.dsp, main_win_, hidden_width_, hidden_height_);
     } else {
-      XMoveResizeWindow(server.dsp, panel->main_win_, panel->root_x_,
-                        panel->root_y_ + diff, panel->hidden_width_,
-                        panel->hidden_height_);
+      XMoveResizeWindow(server.dsp, main_win_, root_x_, root_y_ + diff,
+                        hidden_width_, hidden_height_);
     }
   } else {
     if (panel_horizontal_position == PanelHorizontalPosition::kLeft) {
-      XResizeWindow(server.dsp, panel->main_win_, panel->hidden_width_,
-                    panel->hidden_height_);
+      XResizeWindow(server.dsp, main_win_, hidden_width_, hidden_height_);
     } else {
-      XMoveResizeWindow(server.dsp, panel->main_win_, panel->root_x_ + diff,
-                        panel->root_y_, panel->hidden_width_,
-                        panel->hidden_height_);
+      XMoveResizeWindow(server.dsp, main_win_, root_x_ + diff, root_y_,
+                        hidden_width_, hidden_height_);
     }
   }
 
@@ -859,7 +852,7 @@ void AutohideTriggerShow(Panel* p, Timer& timer) {
 
   p->autohide_timeout_ =
       timer.SetTimeout(std::chrono::milliseconds(panel_autohide_show_timeout),
-                       [p]() -> bool { return AutohideShow(p); });
+                       [p]() -> bool { return p->AutohideShow(); });
 }
 
 void AutohideTriggerHide(Panel* p, Timer& timer) {
@@ -880,5 +873,5 @@ void AutohideTriggerHide(Panel* p, Timer& timer) {
 
   p->autohide_timeout_ =
       timer.SetTimeout(std::chrono::milliseconds(panel_autohide_hide_timeout),
-                       [p]() -> bool { return AutohideHide(p); });
+                       [p]() -> bool { return p->AutohideHide(); });
 }

@@ -137,7 +137,7 @@ bool EventLoop::RunLoop() {
             if (e.type == ClientMessage &&
                 e.xclient.message_type == XdndPosition) {
               hidden_dnd = true;
-              AutohideShow(panel);
+              panel->AutohideShow();
             } else {
               // discard further processing of this event because
               // the panel is not visible yet
@@ -146,7 +146,7 @@ bool EventLoop::RunLoop() {
           } else if (hidden_dnd && e.type == ClientMessage &&
                      e.xclient.message_type == XdndLeave) {
             hidden_dnd = false;
-            AutohideHide(panel);
+            panel->AutohideHide();
           }
         }
 

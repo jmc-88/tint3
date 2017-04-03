@@ -154,6 +154,8 @@ class Panel : public Area {
   void UpdateTaskbarVisibility();
 
   bool hidden() const;
+  bool AutohideShow();
+  bool AutohideHide();
 
   // TODO: this should not exist. The only reason it's here is InitPanel() is
   // not a member of this class.
@@ -185,8 +187,6 @@ void InitPanel(Timer& timer);
 // detect wich panel
 Panel* GetPanel(Window win);
 
-bool AutohideShow(Panel* panel);
-bool AutohideHide(Panel* panel);
 void AutohideTriggerShow(Panel* p, Timer& timer);
 void AutohideTriggerHide(Panel* p, Timer& timer);
 
