@@ -486,7 +486,7 @@ bool Systraybar::AddIcon(Window id) {
     XMapWindow(server.dsp, traywin->tray_id);
   }
 
-  if (!traywin->hide && !panel_->is_hidden_) {
+  if (!traywin->hide && !panel_->hidden()) {
     XMapRaised(server.dsp, traywin->id);
   }
 

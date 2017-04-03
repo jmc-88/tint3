@@ -103,8 +103,7 @@ void UpdateStrut(Panel* p) {
     int height = p->height_ + p->margin_y_;
 
     if (panel_strut_policy == PanelStrutPolicy::kMinimum ||
-        (panel_strut_policy == PanelStrutPolicy::kFollowSize &&
-         p->is_hidden_)) {
+        (panel_strut_policy == PanelStrutPolicy::kFollowSize && p->hidden_)) {
       height = p->hidden_height_;
     }
 
@@ -123,8 +122,7 @@ void UpdateStrut(Panel* p) {
     int width = p->width_ + p->margin_x_;
 
     if (panel_strut_policy == PanelStrutPolicy::kMinimum ||
-        (panel_strut_policy == PanelStrutPolicy::kFollowSize &&
-         p->is_hidden_)) {
+        (panel_strut_policy == PanelStrutPolicy::kFollowSize && p->hidden_)) {
       width = p->hidden_width_;
     }
 
@@ -592,7 +590,7 @@ void Panel::SetBackground() {
     XTranslateCoordinates(server.dsp, main_win_, server.root_window(), 0, 0, &x,
                           &y, &dummy);
 
-    if (panel_autohide && is_hidden_) {
+    if (panel_autohide && hidden_) {
       x -= xoff;
       y -= yoff;
     }
@@ -776,6 +774,8 @@ bool Panel::HandlesClick(XButtonEvent* e) {
   return false;
 }
 
+bool Panel::hidden() const { return hidden_; }
+
 void Panel::set_panel_index(unsigned int i) { panel_index_ = i; }
 
 #ifdef _TINT3_DEBUG
@@ -785,7 +785,7 @@ std::string Panel::GetFriendlyName() const { return "Panel"; }
 #endif  // _TINT3_DEBUG
 
 bool AutohideShow(Panel* panel) {
-  panel->is_hidden_ = false;
+  panel->hidden_ = false;
 
   if (panel_strut_policy == PanelStrutPolicy::kFollowSize) {
     UpdateStrut(panel);
@@ -818,7 +818,7 @@ bool AutohideShow(Panel* panel) {
 }
 
 bool AutohideHide(Panel* panel) {
-  panel->is_hidden_ = true;
+  panel->hidden_ = true;
 
   if (panel_strut_policy == PanelStrutPolicy::kFollowSize) {
     UpdateStrut(panel);

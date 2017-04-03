@@ -50,7 +50,7 @@ bool EventLoop::RunLoop() {
       panel_refresh = false;
 
       for (Panel& panel : panels) {
-        if (panel.is_hidden_) {
+        if (panel.hidden()) {
           XCopyArea(server_->dsp, panel.hidden_pixmap_, panel.main_win_,
                     server_->gc, 0, 0, panel.hidden_width_,
                     panel.hidden_height_, 0, 0);
@@ -74,7 +74,7 @@ bool EventLoop::RunLoop() {
 
       Panel* panel = systray.panel_;
 
-      if (systray.should_refresh() && panel != nullptr && !panel->is_hidden_) {
+      if (systray.should_refresh() && panel != nullptr && !panel->hidden()) {
         systray.set_should_refresh(false);
         // tint3 doesn't draw systray icons. it just redraw background.
         XSetWindowBackgroundPixmap(server_->dsp, panel->main_win_,
@@ -133,7 +133,7 @@ bool EventLoop::RunLoop() {
           auto XdndPosition = server_->atoms_.at("XdndPosition");
           auto XdndLeave = server_->atoms_.at("XdndLeave");
 
-          if (panel->is_hidden_) {
+          if (panel->hidden()) {
             if (e.type == ClientMessage &&
                 e.xclient.message_type == XdndPosition) {
               hidden_dnd = true;

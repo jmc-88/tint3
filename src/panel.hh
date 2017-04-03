@@ -116,7 +116,7 @@ class Panel : public Area {
   Launcher launcher_;
 
   // autohide
-  bool is_hidden_;
+  bool hidden_;
   int hidden_width_, hidden_height_;
   Pixmap hidden_pixmap_;
   Interval::Id autohide_timeout_;
@@ -152,6 +152,8 @@ class Panel : public Area {
 
   // show/hide taskbar according to current desktop
   void UpdateTaskbarVisibility();
+
+  bool hidden() const;
 
   // TODO: this should not exist. The only reason it's here is InitPanel() is
   // not a member of this class.
