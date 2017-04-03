@@ -116,7 +116,7 @@ class Panel : public Area {
   Launcher launcher_;
 
   // autohide
-  int is_hidden_;
+  bool is_hidden_;
   int hidden_width_, hidden_height_;
   Pixmap hidden_pixmap_;
   Interval::Id autohide_timeout_;

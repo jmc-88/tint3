@@ -785,7 +785,7 @@ std::string Panel::GetFriendlyName() const { return "Panel"; }
 #endif  // _TINT3_DEBUG
 
 bool AutohideShow(Panel* panel) {
-  panel->is_hidden_ = 0;
+  panel->is_hidden_ = false;
 
   if (panel_strut_policy == PanelStrutPolicy::kFollowSize) {
     UpdateStrut(panel);
@@ -818,7 +818,7 @@ bool AutohideShow(Panel* panel) {
 }
 
 bool AutohideHide(Panel* panel) {
-  panel->is_hidden_ = 1;
+  panel->is_hidden_ = true;
 
   if (panel_strut_policy == PanelStrutPolicy::kFollowSize) {
     UpdateStrut(panel);
