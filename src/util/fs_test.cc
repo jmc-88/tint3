@@ -80,8 +80,8 @@ TEST_CASE("DirectoryExists", "Checks for the existence of a directory") {
 
 TEST_CASE("FileExists", "Checks for the existence of a file") {
   // Obviously existing path.
-  REQUIRE(util::fs::FileExists("/proc/self/cmdline"));
-  REQUIRE(util::fs::FileExists({"/proc", "self", "cmdline"}));
+  REQUIRE(util::fs::FileExists("src/util/testdata/fs_test.txt"));
+  REQUIRE(util::fs::FileExists({"src", "util", "testdata", "fs_test.txt"}));
   // Obviously non-existing path.
   REQUIRE(!util::fs::FileExists("/dev/troll"));
 }
