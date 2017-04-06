@@ -214,6 +214,22 @@ include(TestTarget)
 enable_testing()
 include_directories(test)
 
+# List of testdata files to copy
+set(TESTDATA_SRCS
+    src/util/testdata/fs_test.txt)
+
+# Generated list of output paths in the build directory
+string(REGEX REPLACE "([^;]+)" "${CMAKE_BINARY_DIR}/\\1" TESTDATA_OUTS "${TESTDATA_SRCS}")
+
+foreach(item IN LISTS TESTDATA_SRCS)
+  add_custom_command(
+    OUTPUT "${CMAKE_BINARY_DIR}/${item}"
+    COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_SOURCE_DIR}/${item}" "${CMAKE_BINARY_DIR}/${item}"
+    DEPENDS "${CMAKE_SOURCE_DIR}/${item}")
+endforeach()
+
+add_custom_target(testdata ALL DEPENDS ${TESTDATA_OUTS})
+
 test_target(config_test src/config_test.cc src/util/timer_test_utils.cc)
 target_link_libraries(config_test tint3_common_lib ${TINT3_LINK_LIBRARIES})
 
@@ -239,6 +255,7 @@ test_target(util_common_test src/util/common_test.cc)
 target_link_libraries(util_common_test tint3_common_lib ${TINT3_LINK_LIBRARIES})
 
 test_target(util_fs_test src/util/fs_test.cc)
+add_dependencies(util_fs_test testdata)
 target_link_libraries(util_fs_test tint3_common_lib ${TINT3_LINK_LIBRARIES})
 
 test_target(util_imlib2_test src/util/imlib2_test.cc)

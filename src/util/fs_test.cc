@@ -120,22 +120,16 @@ TEST_CASE("ReadFile", "Reads the entire contents of a file into memory") {
 
   // Good path case.
   ReadFileCallback read_file_callback_good;
-  REQUIRE(util::fs::ReadFile("/proc/self/status",
+  REQUIRE(util::fs::ReadFile("src/util/testdata/fs_test.txt",
                              std::ref(read_file_callback_good)));
   REQUIRE(read_file_callback_good.invoked());
 }
 
 class ReadFileByLineCallback : public ReadFileCallback {
  public:
-  ReadFileByLineCallback() : found_(false) {
-    // Construct the expected "Pid" line. Does not include the newline
-    // terminator, as std::getline() removes it.
-    std::ostringstream oss;
-    oss << "Pid:\t" << getpid();
-    expected_line_ = oss.str();
+  void set_expected_line(std::string const& expected_line) {
+    expected_line_ = expected_line;
   }
-
-  ReadFileByLineCallback(ReadFileCallback const&) = delete;
 
   bool found() { return found_; }
 
@@ -159,7 +153,8 @@ TEST_CASE("ReadFileByLine", "Reads the contents of a file line by line") {
 
   // Good path case.
   ReadFileByLineCallback read_file_callback_good;
-  REQUIRE(util::fs::ReadFileByLine("/proc/self/status",
+  read_file_callback_good.set_expected_line("Pid:	24440");
+  REQUIRE(util::fs::ReadFileByLine("src/util/testdata/fs_test.txt",
                                    std::ref(read_file_callback_good)));
   REQUIRE(read_file_callback_good.invoked());
   REQUIRE(read_file_callback_good.found());
