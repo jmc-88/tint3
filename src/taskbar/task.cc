@@ -179,21 +179,9 @@ void RemoveTask(Task* tsk) {
   tsk->SetTitle("");
 
   for (int k = 0; k < kTaskStateCount; ++k) {
-    if (tsk->icon[k]) {
-      imlib_context_set_image(tsk->icon[k]);
-      imlib_free_image();
-      tsk->icon[k] = 0;
-    }
-    if (tsk->icon_hover[k]) {
-      imlib_context_set_image(tsk->icon_hover[k]);
-      imlib_free_image();
-      tsk->icon_hover[k] = 0;
-    }
-    if (tsk->icon_pressed[k]) {
-      imlib_context_set_image(tsk->icon_pressed[k]);
-      imlib_free_image();
-      tsk->icon_pressed[k] = 0;
-    }
+    tsk->icon[k] = 0;
+    tsk->icon_hover[k] = 0;
+    tsk->icon_pressed[k] = 0;
     if (tsk->state_pix[k] != None) {
       XFreePixmap(server.dsp, tsk->state_pix[k]);
     }
