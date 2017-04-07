@@ -26,12 +26,8 @@ TEST_CASE("ClockGetTimeForTimezone",
   time_t tm_8am_elapsed = (60 * 60 * 8);
   struct tm tm_8am = (*std::gmtime(&tm_8am_elapsed));
 
-  auto same_time = [](struct tm const& lhs, struct tm const& rhs) -> bool {
-    return lhs.tm_sec == rhs.tm_sec && lhs.tm_min == rhs.tm_min &&
-           lhs.tm_hour == rhs.tm_hour && lhs.tm_mday == rhs.tm_mday &&
-           lhs.tm_mon == rhs.tm_mon && lhs.tm_year == rhs.tm_year &&
-           lhs.tm_wday == rhs.tm_wday && lhs.tm_yday == rhs.tm_yday &&
-           lhs.tm_isdst == rhs.tm_isdst;
+  auto same_time = [](struct tm lhs, struct tm rhs) -> bool {
+    return std::difftime(std::mktime(&lhs), std::mktime(&rhs)) == 0;
   };
 
   SECTION("Empty timezone") {
@@ -42,7 +38,8 @@ TEST_CASE("ClockGetTimeForTimezone",
 
   SECTION("Timezone override works and doesn't change the environment") {
     environment::ScopedOverride tz{"TZ", "UTC"};
-    struct tm tm2 = ClockGetTimeForTimezone("US/Pacific", tm_8am_elapsed);
+    struct tm tm2 =
+        ClockGetTimeForTimezone("America/Los_Angeles", tm_8am_elapsed);
     REQUIRE(same_time(tm_12am, tm2));
     REQUIRE(environment::Get("TZ") == "UTC");
   }
