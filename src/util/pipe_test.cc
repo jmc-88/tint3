@@ -30,11 +30,11 @@ class PipeTestFixture {
       FAIL("ftruncate(" << pipe_shm_fd_ << "): " << strerror(errno));
     }
 
-    pipe_mmap_addr_ = mmap(buffer_, kBufferSize, PROT_READ | PROT_WRITE,
+    pipe_mmap_addr_ = mmap(nullptr, kBufferSize, PROT_READ | PROT_WRITE,
                            MAP_SHARED, pipe_shm_fd_, 0);
     if (pipe_mmap_addr_ == MAP_FAILED) {
       shm_unlink(kPipeName);
-      FAIL("mmap(" << static_cast<void*>(buffer_) << "): " << strerror(errno));
+      FAIL("mmap(): " << strerror(errno));
     }
 
     std::memset(pipe_mmap_addr_, 0, kBufferSize);
@@ -75,7 +75,6 @@ class PipeTestFixture {
  protected:
   int pipe_shm_fd_;
   void* pipe_mmap_addr_;
-  char buffer_[kBufferSize];
 };
 
 namespace test {
