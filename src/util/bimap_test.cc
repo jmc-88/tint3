@@ -1,4 +1,3 @@
-#define CATCH_CONFIG_MAIN
 #include "catch.hpp"
 
 #include <string>
@@ -39,8 +38,7 @@ TEST_CASE("erase", "Removal works as expected") {
 TEST_CASE("const_iterator", "Iterating works from both sides") {
   util::bimap<int, std::string> bimap;
   std::vector<std::pair<int, std::string>> expected{
-    {1, "test"},
-    {2, "toast"},
+      {1, "test"}, {2, "toast"},
   };
 
   for (auto& p : expected) {
