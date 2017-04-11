@@ -97,9 +97,19 @@ configure_file(
   ${CMAKE_SOURCE_DIR}/src/version.hh.in
   ${CMAKE_BINARY_DIR}/generated/version.hh)
 
-include(CheckCXXSymbolExists)
-check_cxx_symbol_exists("std::nearbyint" "cmath" TINT3_HAVE_STD_NEARBYINT)
-check_cxx_symbol_exists("std::round" "cmath" TINT3_HAVE_STD_ROUND)
+include(CheckCXXSourceRuns)
+check_cxx_source_runs(
+  "#include <cmath>
+  int main() {
+    std::nearbyint(0.5);
+  }"
+  TINT3_HAVE_STD_NEARBYINT)
+check_cxx_source_runs(
+  "#include <cmath>
+  int main() {
+    std::round(0.5);
+  }"
+  TINT3_HAVE_STD_ROUND)
 
 configure_file(
   ${CMAKE_SOURCE_DIR}/src/cxx_features.hh.in
