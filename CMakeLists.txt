@@ -98,6 +98,7 @@ configure_file(
   ${CMAKE_BINARY_DIR}/generated/version.hh)
 
 include(CheckCXXSourceRuns)
+set(CMAKE_REQUIRED_DEFINITIONS ${CMAKE_CXX11_STANDARD_COMPILE_OPTION})
 check_cxx_source_runs(
   "#include <cmath>
   int main() {
