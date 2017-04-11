@@ -74,7 +74,7 @@ if (COVERALLS)
 	include(Coveralls)
 endif()
 
-# {{{ version.hh
+# {{{ version.hh and cxx_features.hh
 #
 # This section inspired by:
 #       http://xit0.org/2013/04/cmake-use-git-branch-and-commit-details-in-project/
@@ -97,9 +97,17 @@ configure_file(
   ${CMAKE_SOURCE_DIR}/src/version.hh.in
   ${CMAKE_BINARY_DIR}/generated/version.hh)
 
+include(CheckSymbolExists)
+check_symbol_exists(std::nearbyint "cmath" TINT3_HAVE_STD_NEARBYINT)
+check_symbol_exists(std::round "cmath" TINT3_HAVE_STD_ROUND)
+
+configure_file(
+  ${CMAKE_SOURCE_DIR}/src/cxx_features.hh.in
+  ${CMAKE_BINARY_DIR}/generated/cxx_features.hh)
+
 include_directories(${CMAKE_BINARY_DIR}/generated)
 
-# }}} version.hh
+# }}} version.hh and cxx_features.hh
 
 # {{{ common rules
 

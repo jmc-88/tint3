@@ -1,0 +1,22 @@
+#ifndef TINT3_CXX_FEATURES_HH
+#define TINT3_CXX_FEATURES_HH
+
+#cmakedefine TINT3_HAVE_STD_NEARBYINT
+#cmakedefine TINT3_HAVE_STD_ROUND
+
+#include <cmath>
+
+#ifndef TINT3_HAVE_STD_NEARBYINT
+namespace std {
+  template<typename T>
+  T nearbyint(T x) {
+#ifdef TINT3_HAVE_STD_ROUND
+    return round(x);
+#else  // TINT3_HAVE_STD_ROUND
+    return ::round(x);
+#endif  // TINT3_HAVE_STD_ROUND
+  }
+};
+#endif  // TINT3_HAVE_STD_NEARBYINT
+
+#endif  // TINT3_CXX_FEATURES_HH

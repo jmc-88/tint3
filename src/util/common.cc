@@ -36,6 +36,7 @@
 #include <regex>
 #include <tuple>
 
+#include "cxx_features.hh"
 #include "server.hh"
 #include "util/common.hh"
 #include "util/log.hh"
