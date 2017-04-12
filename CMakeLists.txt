@@ -74,7 +74,7 @@ if (COVERALLS)
 	include(Coveralls)
 endif()
 
-# {{{ version.hh and cxx_features.hh
+# {{{ configuration files
 #
 # This section inspired by:
 #       http://xit0.org/2013/04/cmake-use-git-branch-and-commit-details-in-project/
@@ -116,9 +116,16 @@ configure_file(
   ${CMAKE_SOURCE_DIR}/src/cxx_features.hh.in
   ${CMAKE_BINARY_DIR}/generated/cxx_features.hh)
 
+include(CheckSymbolExists)
+check_symbol_exists(shm_open "sys/mman.h" TINT3_HAVE_SHM_OPEN)
+
+configure_file(
+  ${CMAKE_SOURCE_DIR}/src/unix_features.hh.in
+  ${CMAKE_BINARY_DIR}/generated/unix_features.hh)
+
 include_directories(${CMAKE_BINARY_DIR}/generated)
 
-# }}} version.hh and cxx_features.hh
+# }}} configuration files
 
 # {{{ common rules
 

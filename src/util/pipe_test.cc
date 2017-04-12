@@ -1,79 +1,122 @@
 #include "catch.hpp"
 
 #include <cstring>
+#include <string>
 
 #include <fcntl.h>
+#include <stdlib.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
 
+#include "unix_features.hh"
 #include "util/log.hh"
 #include "util/pipe.hh"
 
 constexpr unsigned int kBufferSize = 1024;
 constexpr char kPipeName[] = "/tint3_pipe_test_shm";
+constexpr char kTempTemplate[] = "/tmp/tint3_pipe_test.XXXXXX";
 
-class PipeTestFixture {
+class SharedMemory {
  public:
-  PipeTestFixture() : pipe_shm_fd_(-1), pipe_mmap_addr_(MAP_FAILED) {
-    shm_unlink(kPipeName);
-    pipe_shm_fd_ =
-        shm_open(kPipeName, O_RDWR | O_CREAT | O_EXCL, S_IWUSR | S_IRUSR);
-    if (pipe_shm_fd_ == -1) {
-      FAIL("shm_open(" << kPipeName << "): " << strerror(errno));
+  SharedMemory(const char* shm_name, unsigned int shm_size)
+    : shm_name_(shm_name), shm_size_(shm_size), shm_fd_(-1), mem_(nullptr) {
+#ifdef TINT3_HAVE_SHM_OPEN
+    shm_unlink(shm_name_.c_str());
+    shm_fd_ = shm_open(shm_name_.c_str(),
+                       O_RDWR | O_CREAT | O_EXCL,
+                       S_IWUSR | S_IRUSR);
+    if (shm_fd_ == -1) {
+      FAIL("shm_open(" << shm_name_ << "): " << strerror(errno));
+    }
+#else  // TINT3_HAVE_SHM_OPEN
+    char temp_name[sizeof(kTempTemplate) + 1] = {'\0'};
+    std::strcpy(temp_name, kTempTemplate);
+    shm_fd_ = mkstemp(temp_name);
+    if (shm_fd_ == -1) {
+      FAIL("mkstemp(): " << strerror(errno));
+    }
+    shm_name_.assign(temp_name);
+#endif  // TINT3_HAVE_SHM_OPEN
+
+    if (ftruncate(shm_fd_, shm_size) == -1) {
+      close(shm_fd_);
+#ifdef TINT3_HAVE_SHM_OPEN
+      shm_unlink(shm_name_.c_str());
+#endif  // TINT3_HAVE_SHM_OPEN
+      FAIL("ftruncate(" << shm_fd_ << "): " << strerror(errno));
     }
 
-    if (ftruncate(pipe_shm_fd_, kBufferSize) == -1) {
-      shm_unlink(kPipeName);
-      FAIL("ftruncate(" << pipe_shm_fd_ << "): " << strerror(errno));
-    }
-
-    pipe_mmap_addr_ = mmap(nullptr, kBufferSize, PROT_READ | PROT_WRITE,
-                           MAP_SHARED, pipe_shm_fd_, 0);
-    if (pipe_mmap_addr_ == MAP_FAILED) {
-      shm_unlink(kPipeName);
+    mem_ = mmap(nullptr, shm_size_, PROT_READ | PROT_WRITE,
+                MAP_SHARED, shm_fd_, 0);
+    if (mem_ == MAP_FAILED) {
+      close(shm_fd_);
+#ifdef TINT3_HAVE_SHM_OPEN
+      shm_unlink(shm_name_.c_str());
+#endif  // TINT3_HAVE_SHM_OPEN
       FAIL("mmap(): " << strerror(errno));
     }
 
-    std::memset(pipe_mmap_addr_, 0, kBufferSize);
+    std::memset(mem_, 0, shm_size_);
   }
 
-  ~PipeTestFixture() {
-    if (pipe_mmap_addr_ != MAP_FAILED) {
-      if (munmap(pipe_mmap_addr_, kBufferSize) != 0) {
-        WARN("munmap(" << static_cast<void*>(pipe_mmap_addr_)
-                       << "): " << strerror(errno));
+  ~SharedMemory() {
+    if (mem_ != MAP_FAILED) {
+      if (munmap(mem_, shm_size_) != 0) {
+        WARN("munmap(" << mem_ << "): " << strerror(errno));
       }
     }
 
-    if (pipe_shm_fd_ != -1) {
-      if (close(pipe_shm_fd_) != 0) {
-        WARN("close(" << pipe_shm_fd_ << "): " << strerror(errno));
+    if (shm_fd_ != -1) {
+      if (close(shm_fd_) != 0) {
+        WARN("close(" << shm_fd_ << "): " << strerror(errno));
       }
 
-      if (shm_unlink(kPipeName) != 0) {
-        WARN("shm_unlink(" << kPipeName << "): " << strerror(errno));
+#ifdef TINT3_HAVE_SHM_OPEN
+      if (shm_unlink(shm_name_.c_str()) != 0) {
+        WARN("shm_unlink(" << shm_name_ << "): " << strerror(errno));
       }
+#else  // TINT3_HAVE_SHM_OPEN
+      if (unlink(shm_name_.c_str()) != 0) {
+        WARN("unlink(" << shm_name_ << "): " << strerror(errno));
+      }
+#endif  // TINT3_HAVE_SHM_OPEN
     }
   }
 
-  int GetFileDescriptor() const { return pipe_shm_fd_; }
+  int fd() const {
+    return shm_fd_;
+  }
 
-  void* GetMMapAddress() const { return pipe_mmap_addr_; }
+  void* addr() const {
+    return mem_;
+  }
+
+ private:
+  std::string shm_name_;
+  unsigned int shm_size_;
+  int shm_fd_;
+  void* mem_;
+};
+
+class PipeTestFixture {
+ public:
+  PipeTestFixture() : shm_(kPipeName, kBufferSize) {}
+
+  int GetFileDescriptor() const { return shm_.fd(); }
 
   unsigned int CountNonZeroBytes() const {
-    const char* mmap_addr = static_cast<char*>(GetMMapAddress());
+    const char* ptr = static_cast<char*>(shm_.addr());
     unsigned int written_bytes = 0;
-    for (; *mmap_addr != '\0'; ++mmap_addr) {
+    for (; *ptr != '\0'; ++ptr) {
       ++written_bytes;
     }
     return written_bytes;
   }
 
  protected:
-  int pipe_shm_fd_;
-  void* pipe_mmap_addr_;
+  const SharedMemory shm_;
 };
 
 namespace test {
