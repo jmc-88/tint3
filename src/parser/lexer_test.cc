@@ -2,6 +2,49 @@
 
 #include "parser/lexer.hh"
 
+TEST_CASE("matchers::NewLine", "NewLine matcher is sane") {
+  SECTION("<CR><LF>") {
+    std::string cr_lf{"\r\n"};
+    unsigned int position = 0;
+    std::string output;
+    REQUIRE(parser::matcher::NewLine(cr_lf, &position, &output));
+    REQUIRE(position == cr_lf.length());
+    REQUIRE(output == cr_lf);
+  }
+
+  SECTION("<CR>") {
+    std::string cr{"\r"};
+    unsigned int position = 0;
+    std::string output;
+    REQUIRE(parser::matcher::NewLine(cr, &position, &output));
+    REQUIRE(position == cr.length());
+    REQUIRE(output == cr);
+  }
+
+  SECTION("<LF>") {
+    std::string lf{"\n"};
+    unsigned int position = 0;
+    std::string output;
+    REQUIRE(parser::matcher::NewLine(lf, &position, &output));
+    REQUIRE(position == lf.length());
+    REQUIRE(output == lf);
+  }
+
+  SECTION("<LF><CR><LF>") {
+    std::string mixed{"\n\r\n"};
+    unsigned int position = 0;
+    std::string output;
+    // First pass: consume only '\n'
+    REQUIRE(parser::matcher::NewLine(mixed, &position, &output));
+    REQUIRE(position == 1);
+    REQUIRE(output == "\n");
+    // Second pass: consume '\r\n'
+    REQUIRE(parser::matcher::NewLine(mixed, &position, &output));
+    REQUIRE(position == mixed.length());
+    REQUIRE(output == "\r\n");
+  }
+}
+
 TEST_CASE("matchers::Whitespace", "Whitespace matcher is sane") {
   SECTION("All spaces") {
     std::string all_spaces{"   "};

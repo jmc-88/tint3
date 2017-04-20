@@ -32,7 +32,7 @@ bool IdentifierMatcher(std::string const& buffer, unsigned int* position,
 }  // namespace
 
 const parser::Lexer kLexer{
-    std::make_pair('\n', kNewLine),
+    std::make_pair(parser::matcher::NewLine, kNewLine),
     std::make_pair(parser::matcher::Whitespace, kWhitespace),
     std::make_pair('#', kPoundSign),
     std::make_pair('[', kLeftBracket),

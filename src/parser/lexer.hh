@@ -10,6 +10,11 @@
 namespace parser {
 namespace matcher {
 
+// NewLine matcher accepts DOS-style (<CR><LF>), Macintosh-style (<CR>) or
+// Unix-style (<LF>) newline sequences.
+bool NewLine(std::string const& buffer, unsigned int* position,
+             std::string* output);
+
 // Whitespace matcher accepts all the characters accepted by isspace(), except
 // for the newline character (which is usually to be accepted as a separate
 // token, and not swallowed by this matcher).

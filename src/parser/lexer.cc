@@ -6,6 +6,21 @@
 namespace parser {
 namespace matcher {
 
+bool NewLine(std::string const& buffer, unsigned int* position,
+             std::string* output) {
+  unsigned int begin = (*position);
+  unsigned int end = begin;
+  if (end < buffer.length() && buffer[end] == '\r') {
+    ++end;
+  }
+  if (end < buffer.length() && buffer[end] == '\n') {
+    ++end;
+  }
+  (*position) = end;
+  output->assign(buffer, begin, end - begin);
+  return !output->empty();
+}
+
 bool Whitespace(std::string const& buffer, unsigned int* position,
                 std::string* output) {
   unsigned int begin = (*position);
