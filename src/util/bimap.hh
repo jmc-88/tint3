@@ -15,34 +15,26 @@ namespace util {
 // Naming of this class and its methods is STL-like:
 //  https://google.github.io/styleguide/cppguide.html#Exceptions_to_Naming_Rules
 
-template<
-  typename A,
-  typename B,
-  typename CompareA = std::less<A>,
-  typename CompareB = std::less<B>
->
+template <typename A, typename B, typename CompareA = std::less<A>,
+          typename CompareB = std::less<B> >
 class bimap {
  private:
   using bimap_node = std::pair<A, B>;
 
   class bimap_node_left_accessor {
    public:
-    A const& operator()(bimap_node const* n) {
-      return n->first;
-    }
+    A const& operator()(bimap_node const* n) { return n->first; }
   };
 
   class bimap_node_right_accessor {
    public:
-    B const& operator()(bimap_node const* n) {
-      return n->second;
-    }
+    B const& operator()(bimap_node const* n) { return n->second; }
   };
 
   using bimap_left_map = std::map<A, bimap_node*, CompareA>;
   using bimap_right_map = std::map<B, bimap_node*, CompareB>;
 
-  template<typename T1, typename T2, typename CompareT1>
+  template <typename T1, typename T2, typename CompareT1>
   class const_iterator {
    public:
     using return_pair = std::pair<const T1, const T2>;
@@ -52,30 +44,29 @@ class bimap {
 
     const_iterator() = delete;
 
-    const_iterator(t1_map const& map,
-                   t1_map_iterator const& it,
+    const_iterator(t1_map const& map, t1_map_iterator const& it,
                    node_other_accessor other_accessor)
-      : map_(map),
-        it_(it),
-        pair_(nullptr),
-        node_other_accessor_(other_accessor) {
+        : map_(map),
+          it_(it),
+          pair_(nullptr),
+          node_other_accessor_(other_accessor) {
       if (it_ != map_.end()) {
         pair_.reset(
-          new return_pair{it_->first, node_other_accessor_(it_->second)});
+            new return_pair{it_->first, node_other_accessor_(it_->second)});
       }
     }
 
     const_iterator(const_iterator const& other)
-      : map_(other.map_),
-        it_(other.it_),
-        pair_(other.pair_),
-        node_other_accessor_(other.node_other_accessor_) {}
+        : map_(other.map_),
+          it_(other.it_),
+          pair_(other.pair_),
+          node_other_accessor_(other.node_other_accessor_) {}
 
     const_iterator(const_iterator&& other)
-      : map_(std::move(other.map_)),
-        it_(std::move(other.it_)),
-        pair_(std::move(other.pair_)),
-        node_other_accessor_(std::move(other.node_other_accessor_)) {}
+        : map_(std::move(other.map_)),
+          it_(std::move(other.it_)),
+          pair_(std::move(other.pair_)),
+          node_other_accessor_(std::move(other.node_other_accessor_)) {}
 
     const_iterator& operator=(const_iterator other) {
       std::swap(map_, other.map_);
@@ -84,13 +75,9 @@ class bimap {
       std::swap(node_other_accessor_, other.node_other_accessor_);
     }
 
-    return_pair const& operator*() const {
-      return *(pair_.get());
-    }
+    return_pair const& operator*() const { return *(pair_.get()); }
 
-    return_pair const* operator->() const {
-      return pair_.get();
-    }
+    return_pair const* operator->() const { return pair_.get(); }
 
     bool operator==(const_iterator const& other) const {
       return it_ == other.it_;
@@ -103,7 +90,7 @@ class bimap {
     const_iterator& operator++() {
       if (++it_ != map_.end()) {
         pair_.reset(
-          new return_pair{it_->first, node_other_accessor_(it_->second)});
+            new return_pair{it_->first, node_other_accessor_(it_->second)});
       }
       return *this;
     }
@@ -121,13 +108,7 @@ class bimap {
     node_other_accessor node_other_accessor_;
   };
 
-
-  template<
-    typename T1,
-    typename T2,
-    typename CompareT1,
-    typename CompareT2
-  >
+  template <typename T1, typename T2, typename CompareT1, typename CompareT2>
   class side_handler {
    public:
     using node_other_accessor = std::function<T2 const&(bimap_node const*)>;
@@ -135,12 +116,11 @@ class bimap {
     using other_side_map = std::map<T2, bimap_node*, CompareT2>;
     using this_const_iterator = const_iterator<T1, T2, CompareT1>;
 
-    explicit side_handler(this_side_map& this_side,
-                          other_side_map& other_side,
+    explicit side_handler(this_side_map& this_side, other_side_map& other_side,
                           node_other_accessor other_accessor)
-      : this_side_(this_side),
-        other_side_(other_side),
-        node_other_accessor_(other_accessor) {}
+        : this_side_(this_side),
+          other_side_(other_side),
+          node_other_accessor_(other_accessor) {}
 
     bool has(T1 const& t) const {
       return this_side_.find(t) != this_side_.end();
@@ -162,22 +142,18 @@ class bimap {
       return true;
     }
 
-    this_const_iterator begin() const {
-      return cbegin();
-    }
+    this_const_iterator begin() const { return cbegin(); }
 
     this_const_iterator cbegin() const {
-      return this_const_iterator{
-        this_side_, this_side_.cbegin(), node_other_accessor_};
+      return this_const_iterator{this_side_, this_side_.cbegin(),
+                                 node_other_accessor_};
     }
 
-    this_const_iterator end() const {
-      return cend();
-    }
+    this_const_iterator end() const { return cend(); }
 
     this_const_iterator cend() const {
-      return this_const_iterator{
-        this_side_, this_side_.cend(), node_other_accessor_};
+      return this_const_iterator{this_side_, this_side_.cend(),
+                                 node_other_accessor_};
     }
 
    private:
@@ -191,8 +167,8 @@ class bimap {
 
  public:
   bimap()
-    : left(left_, right_, bimap_node_right_accessor()),
-      right(right_, left_, bimap_node_left_accessor()) {}
+      : left(left_, right_, bimap_node_right_accessor()),
+        right(right_, left_, bimap_node_left_accessor()) {}
 
   ~bimap() {
     // Delete all the bimap_node* stored in the left_ map.
