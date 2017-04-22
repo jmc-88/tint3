@@ -26,17 +26,12 @@ enum Tokens {
 extern const parser::Lexer kLexer;
 
 class Group {
-public:
+ public:
   using StringList = std::vector<std::string>;
   using LocaleString = std::map<std::string, std::string>;
 
-  using Value = util::variant::Value<
-    std::string,
-    StringList,
-    LocaleString,
-    bool,
-    float
-  >;
+  using Value =
+      util::variant::Value<std::string, StringList, LocaleString, bool, float>;
 
   static const std::string kInvalidName;
 
@@ -50,17 +45,17 @@ public:
 
   bool HasEntry(std::string const& key) const;
 
-  template<typename T>
+  template <typename T>
   bool IsEntry(std::string const& key) {
     return HasEntry(key) && entries_.at(key).Is<T>();
   }
 
-  template<typename T>
+  template <typename T>
   T& GetEntry(std::string const& key) {
     return entries_.at(key).Get<T>();
   }
 
-  template<typename T>
+  template <typename T>
   void AddEntry(std::string const& key, T const& value) {
     auto it = entries_.find(key);
     if (it != entries_.end()) {
@@ -69,7 +64,7 @@ public:
     entries_.emplace(key, value);
   }
 
-private:
+ private:
   std::string name_;
   std::map<std::string, Value> entries_;
 };
@@ -91,13 +86,13 @@ class Parser : public parser::ParseCallback {
   //     identifier ::= [A-Za-z][A-Za-z0-9-]*
   //          value ::= [^\n]+
 
-public:
+ public:
   Parser();
 
   bool operator()(parser::TokenList* tokens);
   DesktopEntry GetDesktopEntry() const;
 
-private:
+ private:
   Group current_group_;
   DesktopEntry groups_;
 
