@@ -34,6 +34,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
+#include <unordered_map>
 
 #include "config.hh"
 #include "launcher/launcher.hh"
@@ -435,7 +436,7 @@ void EventButtonRelease(XEvent* e) {
     return;
   }
 
-  static std::map<unsigned int, MouseAction> mouse_actions{
+  static std::unordered_map<unsigned int, MouseAction> mouse_actions{
       {2, mouse_middle},      {3, mouse_right},     {4, mouse_scroll_up},
       {5, mouse_scroll_down}, {6, mouse_tilt_left}, {7, mouse_tilt_right},
   };
@@ -970,8 +971,8 @@ void DragAndDropPosition(XClientMessageEvent* e) {
   int y = e->data.l[2] & 0xFFFF;
   int map_x, map_y;
   Window child;
-  XTranslateCoordinates(server.dsp, server.root_window(), e->window, x, y, &map_x,
-                        &map_y, &child);
+  XTranslateCoordinates(server.dsp, server.root_window(), e->window, x, y,
+                        &map_x, &map_y, &child);
 
   Panel* panel = GetPanel(e->window);
   Task* task = panel->ClickTask(map_x, map_y);

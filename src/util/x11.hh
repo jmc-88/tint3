@@ -6,9 +6,9 @@
 
 #include <functional>
 #include <initializer_list>
-#include <map>
 #include <memory>
 #include <string>
+#include <unordered_map>
 
 #include "util/pipe.hh"
 #include "util/timer.hh"
@@ -63,7 +63,7 @@ class EventLoop {
   util::SelfPipe self_pipe_;
   Timer& timer_;
   EventHandler default_handler_;
-  std::map<int, EventHandler> handler_map_;
+  std::unordered_map<int, EventHandler> handler_map_;
 
   void ReapChildPIDs() const;
 };

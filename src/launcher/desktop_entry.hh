@@ -1,8 +1,8 @@
 #ifndef TINT3_LAUNCHER_DESKTOP_ENTRY_HH
 #define TINT3_LAUNCHER_DESKTOP_ENTRY_HH
 
-#include <map>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #include "util/variant.hh"
@@ -28,7 +28,7 @@ extern const parser::Lexer kLexer;
 class Group {
  public:
   using StringList = std::vector<std::string>;
-  using LocaleString = std::map<std::string, std::string>;
+  using LocaleString = std::unordered_map<std::string, std::string>;
 
   using Value =
       util::variant::Value<std::string, StringList, LocaleString, bool, float>;
@@ -66,7 +66,7 @@ class Group {
 
  private:
   std::string name_;
-  std::map<std::string, Value> entries_;
+  std::unordered_map<std::string, Value> entries_;
 };
 
 // A Desktop Entry is a list of groups and their key/value entries.

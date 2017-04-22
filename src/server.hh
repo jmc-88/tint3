@@ -5,8 +5,8 @@
 #include <X11/Xlib.h>
 #include <X11/extensions/Xinerama.h>
 
-#include <map>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #ifdef HAVE_SN
@@ -25,7 +25,7 @@ struct Monitor {
 
 class Server {
  public:
-  std::map<std::string, Atom> atoms_;
+  std::unordered_map<std::string, Atom> atoms_;
 
   Display* dsp;
   Window composite_manager;
@@ -48,7 +48,7 @@ class Server {
   Colormap colormap32;
 #ifdef HAVE_SN
   SnDisplay* sn_dsp;
-  std::map<pid_t, SnLauncherContext*> pids;
+  std::unordered_map<pid_t, SnLauncherContext*> pids;
   Atom atom;
 #endif  // HAVE_SN
 
