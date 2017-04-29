@@ -292,28 +292,23 @@ void GetIcon(Task* tsk) {
   }
 
   Imlib_Image img = nullptr;
-  int i = 0;
+  int length = 0;
   auto data = ServerGetProperty<unsigned long>(
-      tsk->win, server.atoms_["_NET_WM_ICON"], XA_CARDINAL, &i);
+      tsk->win, server.atoms_["_NET_WM_ICON"], XA_CARDINAL, &length);
 
-  if (data != nullptr) {
+  if (data != nullptr && length > 0) {
     // get ARGB icon
     int w, h;
     unsigned long* tmp_data =
-        GetBestIcon(data.get(), GetIconCount(data.get(), i), i, &w, &h,
-                    panel->g_task.icon_size1);
-#ifdef __x86_64__
-    DATA32 icon_data[w * h];
-    int length = w * h;
-
-    for (int i = 0; i < length; ++i) {
-      icon_data[i] = tmp_data[i];
+        GetBestIcon(data.get(), GetIconCount(data.get(), length), length, &w,
+                    &h, panel->g_task.icon_size1);
+    if (tmp_data) {
+      DATA32 icon_data[w * h] = {0};
+      for (int i = 0; i < w * h; ++i) {
+        icon_data[i] = tmp_data[i];
+      }
+      img = imlib_create_image_using_copied_data(w, h, icon_data);
     }
-
-    img = imlib_create_image_using_copied_data(w, h, icon_data);
-#else
-    img = imlib_create_image_using_data(w, h, (DATA32*)tmp_data);
-#endif
   } else {
     // get Pixmap icon
     util::x11::ClientData<XWMHints> hints(XGetWMHints(server.dsp, tsk->win));
