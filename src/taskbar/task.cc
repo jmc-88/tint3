@@ -29,6 +29,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <vector>
 
 #include "panel.hh"
 #include "server.hh"
@@ -303,11 +304,8 @@ void GetIcon(Task* tsk) {
         GetBestIcon(data.get(), GetIconCount(data.get(), length), length, &w,
                     &h, panel->g_task.icon_size1);
     if (tmp_data) {
-      DATA32 icon_data[w * h] = {0};
-      for (int i = 0; i < w * h; ++i) {
-        icon_data[i] = tmp_data[i];
-      }
-      img = imlib_create_image_using_copied_data(w, h, icon_data);
+      std::vector<DATA32> icon_data{&tmp_data[0], &tmp_data[w * h]};
+      img = imlib_create_image_using_copied_data(w, h, icon_data.data());
     }
   } else {
     // get Pixmap icon
