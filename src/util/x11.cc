@@ -16,8 +16,8 @@
 #include <sys/select.h>
 #include <unistd.h>
 
-int signal_pending;
-bool pending_children;
+int signal_pending = 0;
+bool pending_children = false;
 
 namespace util {
 namespace x11 {
@@ -169,8 +169,8 @@ bool EventLoop::RunLoop() {
     if (signal_pending) {
       // Handle incoming signals:
       //
-      //  * SIGUSR1 is used in case of user-sent signal, composite manager
-      // stop/start or XRandR event, and causes tint3 to reload.
+      //  * SIGUSR1 is used in case of user-sent signal, or some X11 events, and
+      //  causes tint3 to reload.
       //
       //  * SIGUSR2 is sent from the user to trigger a complete restart of tint3
       // (replacing this process's contents with a new instance of self, useful

@@ -48,9 +48,9 @@ static constexpr char const* const kAtomList[] = {
     "_NET_DESKTOP_VIEWPORT", "_NET_NUMBER_OF_DESKTOPS",
     "_NET_SUPPORTING_WM_CHECK", "_NET_SYSTEM_TRAY_MESSAGE_DATA",
     "_NET_SYSTEM_TRAY_OPCODE", "_NET_SYSTEM_TRAY_ORIENTATION",
-    "_NET_SYSTEM_TRAY_VISUAL", "_NET_WM_CM_S0", "_NET_WM_DESKTOP",
-    "_NET_WM_ICON", "_NET_WM_ICON_GEOMETRY", "_NET_WM_NAME", "_NET_WM_PID",
-    "_NET_WM_STATE", "_NET_WM_STATE_ABOVE", "_NET_WM_STATE_BELOW",
+    "_NET_SYSTEM_TRAY_VISUAL", "_NET_WM_DESKTOP", "_NET_WM_ICON",
+    "_NET_WM_ICON_GEOMETRY", "_NET_WM_NAME", "_NET_WM_PID", "_NET_WM_STATE",
+    "_NET_WM_STATE_ABOVE", "_NET_WM_STATE_BELOW",
     "_NET_WM_STATE_DEMANDS_ATTENTION", "_NET_WM_STATE_HIDDEN",
     "_NET_WM_STATE_MAXIMIZED_HORZ", "_NET_WM_STATE_MAXIMIZED_VERT",
     "_NET_WM_STATE_MODAL", "_NET_WM_STATE_SHADED", "_NET_WM_STATE_SKIP_PAGER",
@@ -103,6 +103,14 @@ void Server::InitAtoms() {
 
   std::string name;
   Atom atom;
+
+  name.assign(util::string::Builder() << "_NET_WM_CM_S" << DefaultScreen(dsp));
+  atom = XInternAtom(dsp, name.c_str(), False);
+  atoms_.insert(std::make_pair("_NET_WM_CM_SCREEN", atom));
+
+  if (atom == None) {
+    util::log::Error() << "tint3: XInternAtom(\"" << name << "\") failed\n";
+  }
 
   name.assign(util::string::Builder() << "_XSETTINGS_S" << DefaultScreen(dsp));
   atom = XInternAtom(dsp, name.c_str(), False);
@@ -362,7 +370,7 @@ void Server::InitVisual() {
   }
 
   // check composite manager
-  composite_manager = XGetSelectionOwner(dsp, atoms_["_NET_WM_CM_S0"]);
+  composite_manager = XGetSelectionOwner(dsp, atoms_["_NET_WM_CM_SCREEN"]);
 
   if (colormap) {
     XFreeColormap(dsp, colormap);

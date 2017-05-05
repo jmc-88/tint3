@@ -24,6 +24,7 @@
 #include <X11/Xlocale.h>
 #include <X11/Xutil.h>
 #include <X11/extensions/Xdamage.h>
+#include <X11/extensions/Xfixes.h>
 #include <sys/stat.h>
 #include <unistd.h>
 
@@ -1080,7 +1081,15 @@ start:
 #endif  // _TINT3_DEBUG
 
   int damage_event, damage_error;
-  XDamageQueryExtension(server.dsp, &damage_event, &damage_error);
+  if (!XDamageQueryExtension(server.dsp, &damage_event, &damage_error)) {
+    util::log::Error() << "Couldn't initialize XDAMAGE.\n";
+  }
+
+  int xfixes_event, xfixes_error;
+  if (!XFixesQueryExtension(server.dsp, &xfixes_event, &xfixes_error)) {
+    util::log::Error() << "Couldn't initialize XFIXES.\n";
+  }
+
   XSync(server.dsp, False);
 
   // XDND initialization
@@ -1105,6 +1114,28 @@ start:
 
   // Pointer to the Area that was last activated by a mouse effect.
   Area* previous_mouse_over_area = nullptr;
+
+  for (auto& panel : panels) {
+    XFixesSelectSelectionInput(server.dsp, panel.main_win_,
+                               server.atoms_["_NET_WM_CM_SCREEN"],
+                               XFixesSetSelectionOwnerNotifyMask |
+                                   XFixesSelectionWindowDestroyNotifyMask |
+                                   XFixesSelectionClientCloseNotifyMask);
+  }
+
+  event_loop.RegisterHandler(
+      xfixes_event + XFixesSelectionNotify, [&](XEvent& e) -> void {
+        XFixesSelectionNotifyEvent* ev =
+            reinterpret_cast<XFixesSelectionNotifyEvent*>(&e);
+
+        Panel* panel = GetPanel(ev->window);
+        if (!panel) {
+          return;
+        }
+
+        // Compositing was enabled or disabled, reinitialize the panel
+        signal_pending = SIGUSR1;
+      });
 
   event_loop.RegisterHandler(ButtonPress, [&](XEvent& e) -> void {
     TooltipHide(timer);
@@ -1192,12 +1223,6 @@ start:
   event_loop.RegisterHandler(
       {UnmapNotify, DestroyNotify},
       [&](XEvent& e) -> void {
-        if (e.xany.window == server.composite_manager) {
-          // Stop real_transparency
-          signal_pending = SIGUSR1;
-          return;
-        }
-
         if (e.xany.window == g_tooltip.window || !systray_enabled) {
           return;
         }
@@ -1211,12 +1236,6 @@ start:
       });
 
   event_loop.RegisterHandler(ClientMessage, [&](XEvent& e) -> void {
-    auto& ev = e.xclient;
-
-    if (ev.data.l[1] == (long int)server.atoms_["_NET_WM_CM_S0"]) {
-      signal_pending = SIGUSR1;
-    }
-
     if (systray_enabled &&
         e.xclient.message_type == server.atoms_["_NET_SYSTEM_TRAY_OPCODE"] &&
         e.xclient.format == 32 && e.xclient.window == net_sel_win) {

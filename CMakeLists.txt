@@ -26,7 +26,7 @@ endif()
 
 include(FindPkgConfig)
 include(CheckLibraryExists)
-pkg_check_modules(X11 REQUIRED x11 xcomposite xdamage xinerama xrender xrandr>=1.3)
+pkg_check_modules(X11 REQUIRED x11 xcomposite xdamage xfixes xinerama xrender xrandr>=1.3)
 pkg_check_modules(PANGOCAIRO REQUIRED pangocairo)
 pkg_check_modules(PANGO REQUIRED pango)
 pkg_check_modules(CAIRO REQUIRED cairo)
