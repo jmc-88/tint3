@@ -54,7 +54,6 @@ class EventLoop {
   EventLoop& RegisterHandler(int event, EventHandler handler);
   EventLoop& RegisterHandler(std::initializer_list<int> event_list,
                              EventHandler handler);
-  EventLoop& RegisterDefaultHandler(EventHandler handler);
 
  private:
   bool alive_;
@@ -62,7 +61,6 @@ class EventLoop {
   int x11_file_descriptor_;
   util::SelfPipe self_pipe_;
   Timer& timer_;
-  EventHandler default_handler_;
   std::unordered_map<int, EventHandler> handler_map_;
 
   void ReapChildPIDs() const;

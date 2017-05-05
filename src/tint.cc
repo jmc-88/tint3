@@ -1080,8 +1080,8 @@ start:
 
 #endif  // _TINT3_DEBUG
 
-  int damage_event, damage_error;
-  if (!XDamageQueryExtension(server.dsp, &damage_event, &damage_error)) {
+  int xdamage_event, xdamage_error;
+  if (!XDamageQueryExtension(server.dsp, &xdamage_event, &xdamage_error)) {
     util::log::Error() << "Couldn't initialize XDAMAGE.\n";
   }
 
@@ -1339,22 +1339,17 @@ start:
     }
   });
 
-  event_loop.RegisterDefaultHandler([&](XEvent& e) -> void {
-    if (e.type == XDamageNotify + damage_event) {
-      // union needed to avoid strict-aliasing warnings by gcc
-      union {
-        XEvent e;
-        XDamageNotifyEvent de;
-      } event_union = {.e = e};
+  event_loop.RegisterHandler(
+      xdamage_event + XDamageNotify, [&](XEvent& e) -> void {
+        XDamageNotifyEvent* ev = reinterpret_cast<XDamageNotifyEvent*>(&e);
 
-      for (auto& traywin : systray.list_icons) {
-        if (traywin->id == event_union.de.drawable) {
-          SystrayRenderIcon(traywin, timer);
-          return;
+        for (auto& traywin : systray.list_icons) {
+          if (traywin->id == ev->drawable) {
+            SystrayRenderIcon(traywin, timer);
+            return;
+          }
         }
-      }
-    }
-  });
+      });
 
   if (event_loop.RunLoop()) {
     systray.Clear(timer);

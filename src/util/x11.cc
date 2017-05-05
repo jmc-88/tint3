@@ -156,10 +156,6 @@ bool EventLoop::RunLoop() {
           if (it->second != nullptr) {
             it->second(e);
           }
-        } else {
-          if (default_handler_ != nullptr) {
-            default_handler_(e);
-          }
         }
       }
     }
@@ -201,11 +197,6 @@ EventLoop& EventLoop::RegisterHandler(std::initializer_list<int> event_list,
     RegisterHandler(event, handler);
   }
 
-  return (*this);
-}
-
-EventLoop& EventLoop::RegisterDefaultHandler(EventLoop::EventHandler handler) {
-  default_handler_ = std::move(handler);
   return (*this);
 }
 
