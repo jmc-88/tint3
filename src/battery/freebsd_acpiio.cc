@@ -1,9 +1,10 @@
+#include <algorithm>
+#include <cstdint>  // acpiio.h expects uintN_t types to be defined
+
 #include <dev/acpica/acpiio.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
 #include <unistd.h>
-
-#include <algorithm>
 
 #include "battery/freebsd_acpiio.hh"
 #include "util/log.hh"
