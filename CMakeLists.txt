@@ -208,8 +208,16 @@ set(TINT3_SOURCES
 if(ENABLE_BATTERY)
     set(TINT3_SOURCES
         ${TINT3_SOURCES}
-        src/battery/battery.cc
-        src/battery/linux_sysfs.cc)
+        src/battery/battery.cc)
+
+    if(CMAKE_SYSTEM_NAME MATCHES "Linux")
+      set(TINT3_SOURCES ${TINT3_SOURCES} src/battery/linux_sysfs.cc)
+    endif()
+
+    if(CMAKE_SYSTEM_NAME MATCHES "FreeBSD")
+      set(TINT3_SOURCES ${TINT3_SOURCES} src/battery/freebsd_acpiio.cc)
+    endif()
+
     add_definitions(-DENABLE_BATTERY)
 endif()
 

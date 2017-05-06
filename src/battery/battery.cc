@@ -22,16 +22,11 @@
 #include <cairo.h>
 
 #if defined(__OpenBSD__) || defined(__NetBSD__)
-#include <err.h>
 #include <dev/apm/apmbios.h>
 #include <dev/apm/apmio.h>
+#include <err.h>
 #include <sys/ioctl.h>
 #include <unistd.h>
-#endif
-
-#if defined(__FreeBSD__)
-#include <sys/sysctl.h>
-#include <sys/types.h>
 #endif
 
 #include <algorithm>
@@ -43,7 +38,6 @@
 
 #include "battery/battery.hh"
 #include "battery/battery_interface.hh"
-#include "battery/linux_sysfs.hh"
 #include "panel.hh"
 #include "server.hh"
 #include "util/common.hh"
@@ -51,6 +45,14 @@
 #include "util/log.hh"
 #include "util/timer.hh"
 #include "util/window.hh"
+
+#if defined(__linux__)
+#include "battery/linux_sysfs.hh"
+#endif  // defined(__linux__)
+
+#if defined(__FreeBSD__)
+#include "battery/freebsd_acpiio.hh"
+#endif  // defined(__FreeBSD__)
 
 PangoFontDescription* bat1_font_desc;
 PangoFontDescription* bat2_font_desc;
@@ -153,16 +155,12 @@ void CleanupBattery(Timer& timer) {
   }
 
 #if defined(__OpenBSD__) || defined(__NetBSD__)
-
   if ((apm_fd != -1) && (close(apm_fd) == -1)) {
     warn("cannot close /dev/apm");
   }
-
 #endif
 
-#if defined(__linux__)
   battery_ptr.reset();
-#endif
 }
 
 void InitBattery(Timer& timer) {
@@ -180,8 +178,14 @@ void InitBattery(Timer& timer) {
     battery_enabled = 0;
     return;
   }
+#elif defined(__FreeBSD__)
+  battery_ptr.reset(new freebsd_acpiio::Battery());
 
-#elif !defined(__FreeBSD__)
+  if (!battery_ptr->Found()) {
+    util::log::Error() << "Can't initialize battery status.\n";
+    return;
+  }
+#elif defined(__linux__)
   // check battery
   auto battery_dirs = linux_sysfs::GetBatteryDirectories();
 
@@ -221,13 +225,8 @@ void Battery::InitPanel(Panel* panel) {
 }
 
 void UpdateBattery() {
-#if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
+#if defined(__NetBSD__) || defined(__OpenBSD__)
   int64_t energy_now = 0, energy_full = 0;
-#endif
-
-#if defined(__FreeBSD__)
-  int sysctl_out = 0;
-  size_t len = 0;
 #endif
 
   unsigned int seconds = 0;
@@ -262,49 +261,6 @@ void UpdateBattery() {
   seconds = info.minutes_left * 60;
 
   battery_state.percentage = info.battery_life;
-
-#elif defined(__FreeBSD__)
-  len = sizeof(sysctl_out);
-
-  if (sysctlbyname("hw.acpi.battery.state", &sysctl_out, &len, nullptr, 0) !=
-      0) {
-    util::log::Error() << "power update: no such sysctl";
-  }
-
-  // attemp to map the battery state to linux
-  battery_state.state = ChargeState::kUnknown;
-
-  switch (sysctl_out) {
-    case 1:
-      battery_state.state = ChargeState::kDischarging;
-      break;
-
-    case 2:
-      battery_state.state = ChargeState::kCharging;
-      break;
-
-    default:
-      battery_state.state = ChargeState::kFull;
-      break;
-  }
-
-  // no mapping for freebsd
-  energy_full = 0;
-  energy_now = 0;
-
-  seconds = 0;
-
-  if (sysctlbyname("hw.acpi.battery.time", &sysctl_out, &len, nullptr, 0) ==
-      0) {
-    seconds = sysctl_out * 60;
-  }
-
-  battery_state.percentage = -1;
-
-  if (sysctlbyname("hw.acpi.battery.life", &sysctl_out, &len, nullptr, 0) ==
-      0) {
-    battery_state.percentage = sysctl_out;
-  }
 #else
   battery_ptr->Update();
   battery_state.state = battery_ptr->charge_state();
