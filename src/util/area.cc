@@ -56,9 +56,9 @@ bool HexToRgb(std::string const& hex, unsigned int* r, unsigned int* g,
   }
 
   if (hex.length() == 3 + 1) {
-    (*r) = HexCharToInt(hex[1]);
-    (*g) = HexCharToInt(hex[2]);
-    (*b) = HexCharToInt(hex[3]);
+    (*r) = HexCharToInt(hex[1]) * 16 + HexCharToInt(hex[1]);
+    (*g) = HexCharToInt(hex[2]) * 16 + HexCharToInt(hex[2]);
+    (*b) = HexCharToInt(hex[3]) * 16 + HexCharToInt(hex[3]);
   } else if (hex.length() == 6 + 1) {
     (*r) = HexCharToInt(hex[1]) * 16 + HexCharToInt(hex[2]);
     (*g) = HexCharToInt(hex[3]) * 16 + HexCharToInt(hex[4]);

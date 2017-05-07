@@ -10,6 +10,13 @@ TEST_CASE("Color", "SetColorFromHexString") {
     REQUIRE(!c.SetColorFromHexString("ff007f"));
   }
 
+  SECTION("Three-digit values are parsed correctly") {
+    REQUIRE(c.SetColorFromHexString("#fff"));
+    REQUIRE(c[0] == 1.0);
+    REQUIRE(c[1] == 1.0);
+    REQUIRE(c[2] == 1.0);
+  }
+
   SECTION("Black is black") {
     REQUIRE(c.SetColorFromHexString("#000000"));
     REQUIRE(c[0] == 0.0);
