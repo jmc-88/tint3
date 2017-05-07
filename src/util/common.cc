@@ -112,10 +112,6 @@ bool SignalAction(int signal_number, void signal_handler(int), int flags) {
   sa.sa_handler = signal_handler;
   sa.sa_flags = flags;
 
-  util::log::Debug() << "sigaction(signal = " << signal_number
-                     << ", handler = " << reinterpret_cast<void*>(sa.sa_handler)
-                     << ", flags = " << sa.sa_flags << ")\n";
-
   if (sigaction(signal_number, &sa, nullptr) != 0) {
     util::log::Error() << "sigaction: " << std::strerror(errno) << '\n';
     return false;
