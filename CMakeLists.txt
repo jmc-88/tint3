@@ -196,6 +196,7 @@ set(TINT3_SOURCES
     src/util/area.cc
     src/util/common.cc
     src/util/environment.cc
+    src/util/geometry.cc
     src/util/fs.cc
     src/util/imlib2.cc
     src/util/log.cc
@@ -290,6 +291,9 @@ target_link_libraries(util_bimap_test tint3_common_lib testmain ${TINT3_LINK_LIB
 
 test_target(util_common_test src/util/common_test.cc)
 target_link_libraries(util_common_test tint3_common_lib testmain ${TINT3_LINK_LIBRARIES})
+
+test_target(util_geometry_test src/util/geometry_test.cc)
+target_link_libraries(util_geometry_test tint3_common_lib testmain ${TINT3_LINK_LIBRARIES})
 
 test_target(util_fs_test src/util/fs_test.cc)
 add_dependencies(util_fs_test testdata)
