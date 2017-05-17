@@ -165,10 +165,16 @@ void Clock::DrawForeground(cairo_t* c) {
   pango_layout_set_text(layout.get(), time1_.c_str(), time1_.size());
 
   cairo_set_source_rgba(c, font_[0], font_[1], font_[2], font_.alpha());
-
   pango_cairo_update_layout(c, layout.get());
   cairo_move_to(c, 0, time1_posy_);
   pango_cairo_show_layout(c, layout.get());
+
+  if (panel_->g_task.font_shadow) {
+    cairo_set_source_rgba(c, font_[0], font_[1], font_[2], 0.5 * font_.alpha());
+    pango_cairo_update_layout(c, layout.get());
+    cairo_move_to(c, 0, time1_posy_ + 1);
+    pango_cairo_show_layout(c, layout.get());
+  }
 
   if (!time2_format.empty()) {
     pango_layout_set_font_description(layout.get(), time2_font_desc);
@@ -176,9 +182,18 @@ void Clock::DrawForeground(cairo_t* c) {
     pango_layout_set_text(layout.get(), time2_.c_str(), time2_.size());
     pango_layout_set_width(layout.get(), width_ * PANGO_SCALE);
 
+    cairo_set_source_rgba(c, font_[0], font_[1], font_[2], font_.alpha());
     pango_cairo_update_layout(c, layout.get());
     cairo_move_to(c, 0, time2_posy_);
     pango_cairo_show_layout(c, layout.get());
+
+    if (panel_->g_task.font_shadow) {
+      cairo_set_source_rgba(c, font_[0], font_[1], font_[2],
+                            0.5 * font_.alpha());
+      pango_cairo_update_layout(c, layout.get());
+      cairo_move_to(c, 0, time2_posy_ + 1);
+      pango_cairo_show_layout(c, layout.get());
+    }
   }
 }
 
