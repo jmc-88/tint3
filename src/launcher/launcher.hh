@@ -74,6 +74,8 @@ class Launcher : public Area {
   std::vector<LauncherIcon*> list_icons_;
   std::vector<IconTheme*> list_themes_;
 
+  int GetIconSize() const;
+
   void CleanupTheme();
 
   // Populates the list_themes list

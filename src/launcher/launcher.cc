@@ -135,21 +135,21 @@ void Launcher::CleanupTheme() {
   list_themes_.clear();
 }
 
-bool Launcher::Resize() {
-  int icons_per_column = 1, icons_per_row = 1, margin = 0;
-  int icon_size;
-
-  if (panel_horizontal) {
-    icon_size = height_;
-  } else {
-    icon_size = width_;
-  }
+int Launcher::GetIconSize() const {
+  int icon_size = panel_horizontal ? height_ : width_;
 
   icon_size -= (2 * bg_.border().width()) + (2 * padding_y_);
 
   if (launcher_max_icon_size > 0 && icon_size > launcher_max_icon_size) {
     icon_size = launcher_max_icon_size;
   }
+
+  return icon_size;
+}
+
+bool Launcher::Resize() {
+  int icons_per_column = 1, icons_per_row = 1, margin = 0;
+  int icon_size = GetIconSize();
 
   // Resize icons if necessary
   for (auto& launcher_icon : list_icons_) {

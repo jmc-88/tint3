@@ -274,6 +274,9 @@ target_link_libraries(config_test tint3_common_lib testmain ${TINT3_LINK_LIBRARI
 test_target(clock_time_utils_test src/clock/time_utils_test.cc)
 target_link_libraries(clock_time_utils_test tint3_common_lib testmain ${TINT3_LINK_LIBRARIES})
 
+test_target(launcher_test src/launcher/launcher_test.cc)
+target_link_libraries(launcher_test tint3_common_lib testmain ${TINT3_LINK_LIBRARIES})
+
 test_target(launcher_desktop_entry_test src/launcher/desktop_entry_test.cc)
 target_link_libraries(launcher_desktop_entry_test tint3_common_lib testmain ${TINT3_LINK_LIBRARIES})
 
