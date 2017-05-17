@@ -19,6 +19,9 @@ class ScopedCurrentImageRestorer {
 };
 
 Imlib_Image CloneImlib2Image(Imlib_Image other_image) {
+  if (!other_image) {
+    return nullptr;
+  }
   ScopedCurrentImageRestorer restorer;
   imlib_context_set_image(other_image);
   return imlib_clone_image();
