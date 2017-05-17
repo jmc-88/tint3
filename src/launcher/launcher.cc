@@ -145,7 +145,7 @@ bool Launcher::Resize() {
     icon_size = width_;
   }
 
-  icon_size -= (2 * bg_.border().width()) - (2 * padding_y_);
+  icon_size -= (2 * bg_.border().width()) + (2 * padding_y_);
 
   if (launcher_max_icon_size > 0 && icon_size > launcher_max_icon_size) {
     icon_size = launcher_max_icon_size;
