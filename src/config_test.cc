@@ -8,6 +8,7 @@
 #include "panel.hh"  // TODO: decouple from config loading
 #include "server.hh"
 #include "tooltip/tooltip.hh"  // TODO: decouple from config loading
+#include "util/fs.hh"
 #include "util/timer_test_utils.hh"
 
 using namespace config;
@@ -335,4 +336,33 @@ TEST_CASE("ConfigParserMouseEffects", "Mouse effects are correctly read") {
   REQUIRE(panel_config.mouse_pressed_alpha == 100);
   REQUIRE(panel_config.mouse_pressed_saturation == 0);
   REQUIRE(panel_config.mouse_pressed_brightness == -25);
+}
+
+static constexpr char kLauncherItemExpansion[] =
+    u8R"EOF(
+launcher_item_app = ~/tilde_expansion
+launcher_item_app = $HOME/var_expansion
+launcher_item_app = ${HOME}/braced_var_expansion
+launcher_item_app = $IDKFA/failed_expansion
+)EOF";
+
+TEST_CASE("ConfigParserLauncherItemExpansion", "Expands shell-like items") {
+  DefaultPanel();  // TODO: decouple from config loading
+
+  test::ConfigReader reader;
+  config::Parser config_entry_parser{&reader};
+  parser::Parser p{config::kLexer, &config_entry_parser};
+
+  REQUIRE(p.Parse(kLauncherItemExpansion));
+
+  REQUIRE(panel_config.launcher_.list_apps_.size() == 4);
+  REQUIRE(util::fs::HomeDirectory() / "tilde_expansion" ==
+          panel_config.launcher_.list_apps_[0]);
+  REQUIRE(util::fs::HomeDirectory() / "var_expansion" ==
+          panel_config.launcher_.list_apps_[1]);
+  REQUIRE(util::fs::HomeDirectory() / "braced_var_expansion" ==
+          panel_config.launcher_.list_apps_[2]);
+  REQUIRE("$IDKFA/failed_expansion" == panel_config.launcher_.list_apps_[3]);
+
+  CleanupPanel();  // TODO: decouple from config loading
 }

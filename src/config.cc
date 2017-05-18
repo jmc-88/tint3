@@ -31,6 +31,7 @@
 #include <sys/stat.h>
 #include <sys/time.h>
 #include <unistd.h>
+#include <wordexp.h>
 
 #include <algorithm>
 #include <cctype>
@@ -240,6 +241,21 @@ void ExtractValues(std::string const& value, std::string& v1, std::string& v2,
     v3.assign(value, second_space + 1, std::string::npos);
     util::string::Trim(v3);
   }
+}
+
+std::string ExpandWords(std::string const& line) {
+  util::string::Builder sb;
+  wordexp_t we;
+  if (wordexp(line.c_str(), &we, WRDE_NOCMD | WRDE_UNDEF) == 0) {
+    for (char** ptr = we.we_wordv; *ptr != nullptr; ++ptr) {
+      if (ptr != we.we_wordv) {
+        sb << ' ';
+      }
+      sb << (*ptr);
+    }
+    wordfree(&we);
+  }
+  return sb;
 }
 
 Reader::Reader(Server* server) : server_(server), new_config_file_(false) {
@@ -765,7 +781,14 @@ void Reader::AddEntry(std::string const& key, std::string const& value) {
   } else if (key == "launcher_icon_size") {
     launcher_max_icon_size = std::stol(value);
   } else if (key == "launcher_item_app") {
-    panel_config.launcher_.list_apps_.push_back(value);
+    std::string expanded = ExpandWords(value);
+    if (expanded.empty()) {
+      util::log::Error() << "expansion failed for \"" << value
+                         << "\", adding verbatim\n";
+      panel_config.launcher_.list_apps_.push_back(value);
+    } else {
+      panel_config.launcher_.list_apps_.push_back(expanded);
+    }
   } else if (key == "launcher_icon_theme") {
     // if XSETTINGS manager running, tint3 use it.
     if (icon_theme_name.empty()) {
