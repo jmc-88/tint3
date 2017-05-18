@@ -129,10 +129,12 @@ std::ostream& operator<<(std::ostream& os, Color const& color) {
 Border::Border() : width_(0), rounded_(0) {}
 
 Border::Border(Border const& other)
-    : width_(other.width_), rounded_(other.rounded_) {}
+    : Color(other), width_(other.width_), rounded_(other.rounded_) {}
 
 Border::Border(Border&& other)
-    : width_(std::move(other.width_)), rounded_(std::move(other.rounded_)) {}
+    : Color(other),
+      width_(std::move(other.width_)),
+      rounded_(std::move(other.rounded_)) {}
 
 Border& Border::operator=(Border other) {
   Color::operator=(other);

@@ -46,6 +46,26 @@ TEST_CASE("Color", "SetColorFromHexString") {
   }
 }
 
+TEST_CASE("Border", "Copying") {
+  Border b1;
+  b1.set_color(Color{{0.25, 0.50, 1.00}, 0.75});
+
+  Border b2{b1};
+  REQUIRE(b2 == b1);
+
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wpessimizing-move"
+#endif  // __clang__
+  Border b3{std::move(b1)};
+  // b1 was moved at this point, check against b2 which was guaranteed to be
+  // equal to b1 by the above check
+  REQUIRE(b3 == b2);
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif  // __clang__
+}
+
 // Area is an abstract class because it has a pure virtual destructor.
 // Subclass it here so that we can instantiate it for testing.
 class ConcreteArea : public Area {
