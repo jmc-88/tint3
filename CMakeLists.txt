@@ -195,6 +195,7 @@ set(TINT3_SOURCES
     src/tooltip/tooltip.cc
     src/util/area.cc
     src/util/common.cc
+    src/util/color.cc
     src/util/environment.cc
     src/util/geometry.cc
     src/util/fs.cc
@@ -291,6 +292,9 @@ target_link_libraries(util_area_test tint3_common_lib testmain ${TINT3_LINK_LIBR
 
 test_target(util_bimap_test src/util/bimap_test.cc)
 target_link_libraries(util_bimap_test tint3_common_lib testmain ${TINT3_LINK_LIBRARIES})
+
+test_target(util_color_test src/util/color_test.cc)
+target_link_libraries(util_color_test tint3_common_lib testmain ${TINT3_LINK_LIBRARIES})
 
 test_target(util_common_test src/util/common_test.cc)
 target_link_libraries(util_common_test tint3_common_lib testmain ${TINT3_LINK_LIBRARIES})
