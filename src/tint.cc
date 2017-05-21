@@ -1316,7 +1316,7 @@ start:
           }
         }
 
-        cmd << "\"&";
+        cmd << "\")&";
         util::log::Debug() << "DnD " << __FILE__ << ':' << __LINE__
                            << ": Running command: \"" << std::string(cmd)
                            << "\"\n";
