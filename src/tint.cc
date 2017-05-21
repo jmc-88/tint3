@@ -38,6 +38,7 @@
 #include <unordered_map>
 
 #include "config.hh"
+#include "dnd/dnd.hh"
 #include "launcher/launcher.hh"
 #include "launcher/xsettings-client.hh"
 #include "panel.hh"
@@ -810,57 +811,6 @@ char const* GetAtomName(Display* disp, Atom a) {
   return XGetAtomName(disp, a);
 }
 
-struct Property {
- public:
-  Property(void* data, int format, unsigned long nitems, Atom type)
-      : data(data), format(format), nitems(nitems), type(type) {}
-  ~Property() { XFree(const_cast<void*>(data)); }
-
-  Property(Property&&) = default;
-  Property(Property const&) = delete;
-  Property& operator=(Property) = delete;
-
-  const void* data;
-  const int format;
-  const unsigned long nitems;
-  const Atom type;
-};
-
-// This fetches all the data from a property
-Property ReadProperty(Display* disp, Window w, Atom property) {
-  Atom actual_type;
-  int actual_format;
-  unsigned long nitems;
-  unsigned long bytes_after;
-  unsigned char* ret = nullptr;
-
-  int read_bytes = 1024;
-
-  // Keep trying to read the property until there are no
-  // bytes unread.
-  do {
-    if (ret != nullptr) {
-      XFree(ret);
-    }
-
-    XGetWindowProperty(disp, w, property, 0, read_bytes, False, AnyPropertyType,
-                       &actual_type, &actual_format, &nitems, &bytes_after,
-                       &ret);
-    read_bytes *= 2;
-  } while (bytes_after != 0);
-
-  util::log::Debug() << "DnD " << __FILE__ << ':' << __LINE__ << ": Property:\n"
-                     << "DnD " << __FILE__ << ':' << __LINE__
-                     << ": Actual type: " << GetAtomName(disp, actual_type)
-                     << '\n'
-                     << "DnD " << __FILE__ << ':' << __LINE__
-                     << ": Actual format: " << actual_format << '\n'
-                     << "DnD " << __FILE__ << ':' << __LINE__
-                     << ": Number of items: " << nitems << '\n';
-
-  return Property{ret, actual_format, nitems, actual_type};
-}
-
 // This function takes a list of targets which can be converted to (atom_list,
 // nitems)
 // and a list of acceptable targets with prioritees (datatypes). It returns the
@@ -907,7 +857,7 @@ Atom PickTargetFromAtoms(Display* disp, Atom t1, Atom t2, Atom t3) {
 }
 
 // Finds the best target given a local copy of a property.
-Atom PickTargetFromTargets(Display* disp, Property const& p) {
+Atom PickTargetFromTargets(Display* disp, dnd::Property const& p) {
   // The list of targets is a list of atoms, so it should have type XA_ATOM
   // but it may have the type TARGETS instead.
 
@@ -952,8 +902,8 @@ void DragAndDropEnter(XClientMessageEvent* e) {
   if (more_than_3) {
     // Fetch the list of possible conversions
     // Notice the similarity to TARGETS with paste.
-    Property p = ReadProperty(server.dsp, dnd_source_window,
-                              server.atoms_["XdndTypeList"]);
+    auto p = dnd::ReadProperty(server.dsp, dnd_source_window,
+                               server.atoms_["XdndTypeList"]);
     dnd_atom = PickTargetFromTargets(server.dsp, p);
   } else {
     // Use the available list
@@ -1268,8 +1218,8 @@ start:
         << GetAtomName(server.dsp, e.xselection.property) << '\n';
 
     if (e.xselection.property != None && !dnd_launcher_exec.empty()) {
-      Property prop =
-          ReadProperty(server.dsp, dnd_target_window, dnd_selection);
+      auto prop =
+          dnd::ReadProperty(server.dsp, dnd_target_window, dnd_selection);
 
       // If we're being given a list of targets (possible conversions)
       if (target == server.atoms_["TARGETS"] && !dnd_sent_request) {
@@ -1286,41 +1236,7 @@ start:
                             dnd_target_window, CurrentTime);
         }
       } else if (target == dnd_atom) {
-        // Dump the binary data
-        util::log::Debug() << "DnD " << __FILE__ << ':' << __LINE__
-                           << ": Data begins:\n";
-        util::log::Debug() << "--------\n";
-
-        for (unsigned int i = 0; i < prop.nitems * prop.format / 8; i++) {
-          util::log::Debug() << ((char*)prop.data)[i];
-        }
-
-        util::log::Debug() << "--------\n";
-
-        util::string::Builder cmd;
-        cmd << '(' << dnd_launcher_exec << " \"";
-
-        for (unsigned int i = 0; i < prop.nitems * prop.format / 8; i++) {
-          char c = ((char*)prop.data)[i];
-
-          if (c == '\n') {
-            if (i < prop.nitems * prop.format / 8 - 1) {
-              cmd << "\" \"";
-            }
-          } else {
-            if (c == '`' || c == '$' || c == '\\') {
-              cmd << '\\';
-            }
-
-            cmd << c;
-          }
-        }
-
-        cmd << "\")&";
-        util::log::Debug() << "DnD " << __FILE__ << ':' << __LINE__
-                           << ": Running command: \"" << std::string(cmd)
-                           << "\"\n";
-        TintShellExec(cmd);
+        TintShellExec(dnd::BuildCommand(dnd_launcher_exec, prop));
 
         // Reply OK.
         XClientMessageEvent m;
