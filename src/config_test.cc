@@ -8,7 +8,9 @@
 #include "panel.hh"  // TODO: decouple from config loading
 #include "server.hh"
 #include "tooltip/tooltip.hh"  // TODO: decouple from config loading
+#include "util/color.hh"
 #include "util/fs.hh"
+#include "util/gradient.hh"
 #include "util/timer_test_utils.hh"
 
 using namespace config;
@@ -363,6 +365,60 @@ TEST_CASE("ConfigParserLauncherItemExpansion", "Expands shell-like items") {
   REQUIRE(util::fs::HomeDirectory() / "braced_var_expansion" ==
           panel_config.launcher_.list_apps_[2]);
   REQUIRE("$IDKFA/failed_expansion" == panel_config.launcher_.list_apps_[3]);
+
+  CleanupPanel();  // TODO: decouple from config loading
+}
+
+static constexpr char kGradients[] =
+    u8R"EOF(
+rounded = 0
+background_color = #000 100
+gradient_id = 0
+gradient_id_hover = 1
+gradient_id_pressed = 2
+
+gradient = vertical
+start_color = #fff 0
+end_color = #fff 100
+
+gradient = horizontal
+start_color = #fff 0
+color_stop = 50 #000 50
+# Invalid stop percentage: ignored
+color_stop = 100 #000 0
+end_color = #fff 100
+)EOF";
+
+TEST_CASE("ConfigParserGradients", "Accepts gradients") {
+  DefaultPanel();  // TODO: decouple from config loading
+
+  test::ConfigReader reader;
+  config::Parser config_entry_parser{&reader};
+  parser::Parser p{config::kLexer, &config_entry_parser};
+
+  REQUIRE(p.Parse(kGradients));
+
+  // Check that the background was parsed and is linked to the gradients
+  REQUIRE(backgrounds.size() == 2);
+  REQUIRE(backgrounds[1].gradient_id() == 0);
+  REQUIRE(backgrounds[1].gradient_id_hover() == 1);
+  REQUIRE(backgrounds[1].gradient_id_pressed() == 2);
+
+  // Check that the gradients were parsed as expected
+  REQUIRE(gradients.size() == 3);
+  REQUIRE(gradients[0] == util::Gradient{});
+
+  util::Gradient first{util::GradientKind::kVertical};
+  first.set_start_color({{{1.0, 1.0, 1.0}}, 0.0});
+  first.set_end_color({{{1.0, 1.0, 1.0}}, 1.0});
+  REQUIRE(gradients[1] == first);
+
+  util::Gradient second{util::GradientKind::kHorizontal};
+  second.set_start_color({{{1.0, 1.0, 1.0}}, 0.0});
+  second.set_end_color({{{1.0, 1.0, 1.0}}, 1.0});
+  // only one color stop added: the second is expected to be rejected
+  second.AddColorStop(50, {{{0.0, 0.0, 0.0}}, 0.5});
+  REQUIRE(gradients[2] == second);
 
   CleanupPanel();  // TODO: decouple from config loading
 }

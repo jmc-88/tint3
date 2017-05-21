@@ -32,6 +32,7 @@
 #include "server.hh"
 #include "util/area.hh"
 #include "util/common.hh"
+#include "util/geometry.hh"
 #include "util/log.hh"
 
 Area::Area()
@@ -409,8 +410,6 @@ void Area::Draw() {
 }
 
 void Area::DrawBackground(cairo_t* c) {
-  const int w = bg_.border().width();
-
   Color fill_color;
   if (mouse_state_ == MouseState::kMouseNormal) {
     fill_color = bg_.fill_color();
@@ -420,12 +419,29 @@ void Area::DrawBackground(cairo_t* c) {
     fill_color = bg_.fill_color_pressed();
   }
 
+  const int w = bg_.border().width();
+  util::Rect extents{0, 0, width_, height_};
+  extents.ShrinkBy(w);
+
   if (fill_color.alpha() > 0.0) {
-    DrawRect(c, w, w, width_ - (2.0 * w), height_ - (2.0 * w),
+    DrawRect(c, extents.top_left().first, extents.top_left().second,
+             extents.bottom_right().first, extents.bottom_right().second,
              bg_.border().rounded() - w / 1.571);
     cairo_set_source_rgba(c, fill_color[0], fill_color[1], fill_color[2],
                           fill_color.alpha());
     cairo_fill(c);
+  }
+
+  int gradient_id = -1;
+  if (mouse_state_ == MouseState::kMouseNormal) {
+    gradient_id = bg_.gradient_id();
+  } else if (mouse_state_ == MouseState::kMouseOver) {
+    gradient_id = bg_.gradient_id_hover();
+  } else {
+    gradient_id = bg_.gradient_id_pressed();
+  }
+  if (gradient_id >= 0 && gradient_id < gradients.size()) {
+    gradients[gradient_id].Draw(c, extents);
   }
 
   Color border_color;

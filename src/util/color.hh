@@ -58,11 +58,10 @@ struct Border : public Color {
 
 class Background {
  public:
-  Background() = default;
-  Background(Background const& other);
-  Background(Background&& other);
-
-  Background& operator=(Background other);
+  Background();
+  Background(Background const&) = default;
+  Background(Background&&) = default;
+  Background& operator=(Background const&) = default;
 
   Color fill_color() const;
   void set_fill_color(Color const& color);
@@ -83,6 +82,15 @@ class Background {
   Color border_color_pressed() const;
   void set_border_color_pressed(Color const& border);
 
+  int gradient_id() const;
+  void set_gradient_id(int id);
+
+  int gradient_id_hover() const;
+  void set_gradient_id_hover(int id);
+
+  int gradient_id_pressed() const;
+  void set_gradient_id_pressed(int id);
+
   bool operator==(Background const& other) const;
   bool operator!=(Background const& other) const;
 
@@ -93,6 +101,9 @@ class Background {
   Border border_;
   util::Nullable<Color> border_color_hover_;
   util::Nullable<Color> border_color_pressed_;
+  int gradient_id_;
+  int gradient_id_hover_;
+  int gradient_id_pressed_;
 };
 
 std::ostream& operator<<(std::ostream& os, Color const& color);

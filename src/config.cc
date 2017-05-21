@@ -374,6 +374,44 @@ void Reader::AddEntry(std::string const& key, std::string const& value) {
     backgrounds.back().set_border_color_hover(ParseColor(value));
   } else if (key == "border_color_pressed") {
     backgrounds.back().set_border_color_pressed(ParseColor(value));
+  } else if (key == "gradient_id") {
+    backgrounds.back().set_gradient_id(std::stol(value));
+  } else if (key == "gradient_id_hover") {
+    backgrounds.back().set_gradient_id_hover(std::stol(value));
+  } else if (key == "gradient_id_pressed") {
+    backgrounds.back().set_gradient_id_pressed(std::stol(value));
+  }
+
+  /* Gradients */
+  else if (key == "gradient") {
+    if (value == "vertical") {
+      gradients.push_back(util::Gradient{util::GradientKind::kVertical});
+    } else if (value == "horizontal") {
+      gradients.push_back(util::Gradient{util::GradientKind::kHorizontal});
+    } else if (value == "radial") {
+      gradients.push_back(util::Gradient{util::GradientKind::kRadial});
+    } else {
+      util::log::Error() << "unknown gradient kind \"" << value
+                         << "\", ignoring\n";
+    }
+  } else if (key == "start_color") {
+    gradients.back().set_start_color(ParseColor(value));
+  } else if (key == "end_color") {
+    gradients.back().set_end_color(ParseColor(value));
+  } else if (key == "color_stop") {
+    std::string::size_type first_space = value.find_first_of(' ');
+    if (first_space == std::string::npos) {
+      util::log::Error() << "malformed color stop \"" << value
+                         << "\", ignoring\n";
+      return;
+    }
+    std::string percentage{value, 0, first_space};
+    std::string color_spec{value, first_space + 1};
+    if (!gradients.back().AddColorStop(std::stol(percentage),
+                                       ParseColor(color_spec))) {
+      util::log::Error() << "malformed color stop \"" << value
+                         << "\", ignoring\n";
+    }
   }
 
   /* Panel */

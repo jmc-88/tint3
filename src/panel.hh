@@ -15,6 +15,7 @@
 #include "taskbar/taskbar.hh"
 #include "util/area.hh"
 #include "util/common.hh"
+#include "util/gradient.hh"
 #include "util/imlib2.hh"
 #include "util/timer.hh"
 
@@ -70,6 +71,7 @@ extern PanelStrutPolicy panel_strut_policy;
 extern int max_tick_urgent;
 
 extern std::vector<Background> backgrounds;
+extern std::vector<util::Gradient> gradients;
 
 extern util::imlib2::Image default_icon;
 

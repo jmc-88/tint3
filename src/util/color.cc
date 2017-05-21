@@ -120,31 +120,8 @@ bool Border::operator==(Border const& other) const {
 
 bool Border::operator!=(Border const& other) const { return !(*this == other); }
 
-Background::Background(Background const& other)
-    : fill_color_(other.fill_color_),
-      fill_color_hover_(other.fill_color_hover_),
-      fill_color_pressed_(other.fill_color_pressed_),
-      border_(other.border_),
-      border_color_hover_(other.border_color_hover_),
-      border_color_pressed_(other.border_color_pressed_) {}
-
-Background::Background(Background&& other)
-    : fill_color_(std::move(other.fill_color_)),
-      fill_color_hover_(std::move(other.fill_color_hover_)),
-      fill_color_pressed_(std::move(other.fill_color_pressed_)),
-      border_(std::move(other.border_)),
-      border_color_hover_(std::move(other.border_color_hover_)),
-      border_color_pressed_(std::move(other.border_color_pressed_)) {}
-
-Background& Background::operator=(Background other) {
-  std::swap(fill_color_, other.fill_color_);
-  std::swap(fill_color_hover_, other.fill_color_hover_);
-  std::swap(fill_color_pressed_, other.fill_color_pressed_);
-  std::swap(border_, other.border_);
-  std::swap(border_color_hover_, other.border_color_hover_);
-  std::swap(border_color_pressed_, other.border_color_pressed_);
-  return (*this);
-}
+Background::Background()
+    : gradient_id_(-1), gradient_id_hover_(-1), gradient_id_pressed_(-1) {}
 
 Color Background::fill_color() const { return fill_color_; }
 
@@ -200,13 +177,28 @@ void Background::set_border_color_pressed(Color const& color) {
   border_color_pressed_ = color;
 }
 
+int Background::gradient_id() const { return gradient_id_; }
+
+void Background::set_gradient_id(int id) { gradient_id_ = id; }
+
+int Background::gradient_id_hover() const { return gradient_id_hover_; }
+
+void Background::set_gradient_id_hover(int id) { gradient_id_hover_ = id; }
+
+int Background::gradient_id_pressed() const { return gradient_id_pressed_; }
+
+void Background::set_gradient_id_pressed(int id) { gradient_id_pressed_ = id; }
+
 bool Background::operator==(Background const& other) const {
   return (fill_color_ == other.fill_color_) &&
          (fill_color_hover_ == other.fill_color_hover_) &&
          (fill_color_pressed_ == other.fill_color_pressed_) &&
          (border_ == other.border_) &&
          (border_color_hover_ == other.border_color_hover_) &&
-         (border_color_pressed_ == other.border_color_pressed_);
+         (border_color_pressed_ == other.border_color_pressed_) &&
+         (gradient_id_ == other.gradient_id_) &&
+         (gradient_id_hover_ == other.gradient_id_hover_) &&
+         (gradient_id_pressed_ == other.gradient_id_pressed_);
 }
 
 bool Background::operator!=(Background const& other) const {

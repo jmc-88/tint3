@@ -31,8 +31,8 @@ class Area {
   int panel_x_;
   int panel_y_;
   // width and height including border
-  int width_;
-  int height_;
+  unsigned int width_;
+  unsigned int height_;
   Pixmap pix_;
   Background bg_;
 
