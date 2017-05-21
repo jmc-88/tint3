@@ -13,8 +13,13 @@ class FakeStringProperty : public dnd::Property {
 };
 
 TEST_CASE("BuildCommand", "Command construction is (somewhat) sane") {
-  constexpr char data[] = "one\ntwo\nthree";
-  FakeStringProperty prop{data, sizeof(data) / sizeof(char)};
-  REQUIRE(dnd::BuildCommand("test_command", prop) ==
+  constexpr char plain[] = "one\ntwo\nthree";
+  FakeStringProperty plain_prop{plain, sizeof(plain) / sizeof(char)};
+  REQUIRE(dnd::BuildCommand("test_command", plain_prop) ==
           "test_command \"one\" \"two\" \"three\"");
+
+  constexpr char escape[] = "one`\ntwo$\nthree\\";
+  FakeStringProperty escape_prop{escape, sizeof(escape) / sizeof(char)};
+  REQUIRE(dnd::BuildCommand("test_command", escape_prop) ==
+          "test_command \"one\\`\" \"two\\$\" \"three\\\\\"");
 }
