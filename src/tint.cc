@@ -1120,7 +1120,7 @@ start:
       // If we're being given a list of targets (possible conversions)
       if (target == server.atoms_["TARGETS"] && !dnd_sent_request) {
         dnd_sent_request = 1;
-        dnd_atom = PickTargetFromTargets(server.dsp, prop);
+        dnd_atom = dnd::PickTargetFromTargets(server.dsp, prop);
 
         if (dnd_atom == None) {
           util::log::Debug() << "No matching datatypes.\n";

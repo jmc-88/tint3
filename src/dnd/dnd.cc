@@ -117,7 +117,7 @@ Atom PickTargetFromAtoms(Display* disp, Atom t1, Atom t2, Atom t3) {
 }
 
 // Finds the best target given a local copy of a property.
-Atom PickTargetFromTargets(Display* disp, dnd::Property const& p) {
+Atom PickTargetFromTargets(Display* disp, Property const& p) {
   if ((p.type != XA_ATOM && p.type != server.atoms_["TARGETS"]) ||
       p.format != 32) {
     // This would be really broken. Targets have to be an atom list
