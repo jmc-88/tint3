@@ -42,7 +42,7 @@ std::string BuildCommand(std::string const& dnd_launcher_exec,
   unsigned int total = prop.nitems * prop.format / 8;
 
   util::string::Builder cmd;
-  cmd << '(' << dnd_launcher_exec << " \"";
+  cmd << dnd_launcher_exec << " \"";
   for (unsigned int i = 0; i < total; i++) {
     char c = data[i];
 
@@ -58,7 +58,7 @@ std::string BuildCommand(std::string const& dnd_launcher_exec,
       cmd << c;
     }
   }
-  cmd << "\")&";
+  cmd << '"';
   return cmd;
 }
 
