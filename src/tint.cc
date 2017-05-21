@@ -811,9 +811,19 @@ char const* GetAtomName(Display* disp, Atom a) {
 }
 
 struct Property {
-  unsigned char* data;
-  int format, nitems;
-  Atom type;
+ public:
+  Property(void* data, int format, unsigned long nitems, Atom type)
+      : data(data), format(format), nitems(nitems), type(type) {}
+  ~Property() { XFree(const_cast<void*>(data)); }
+
+  Property(Property&&) = default;
+  Property(Property const&) = delete;
+  Property& operator=(Property) = delete;
+
+  const void* data;
+  const int format;
+  const unsigned long nitems;
+  const Atom type;
 };
 
 // This fetches all the data from a property
@@ -848,13 +858,7 @@ Property ReadProperty(Display* disp, Window w, Atom property) {
                      << "DnD " << __FILE__ << ':' << __LINE__
                      << ": Number of items: " << nitems << '\n';
 
-  Property p;
-  p.data = ret;
-  p.format = actual_format;
-  p.nitems = nitems;
-  p.type = actual_type;
-
-  return p;
+  return Property{ret, actual_format, nitems, actual_type};
 }
 
 // This function takes a list of targets which can be converted to (atom_list,
@@ -903,7 +907,7 @@ Atom PickTargetFromAtoms(Display* disp, Atom t1, Atom t2, Atom t3) {
 }
 
 // Finds the best target given a local copy of a property.
-Atom PickTargetFromTargets(Display* disp, Property p) {
+Atom PickTargetFromTargets(Display* disp, Property const& p) {
   // The list of targets is a list of atoms, so it should have type XA_ATOM
   // but it may have the type TARGETS instead.
 
@@ -951,7 +955,6 @@ void DragAndDropEnter(XClientMessageEvent* e) {
     Property p = ReadProperty(server.dsp, dnd_source_window,
                               server.atoms_["XdndTypeList"]);
     dnd_atom = PickTargetFromTargets(server.dsp, p);
-    XFree(p.data);
   } else {
     // Use the available list
     dnd_atom = PickTargetFromAtoms(server.dsp, e->data.l[2], e->data.l[3],
@@ -1288,7 +1291,7 @@ start:
                            << ": Data begins:\n";
         util::log::Debug() << "--------\n";
 
-        for (int i = 0; i < prop.nitems * prop.format / 8; i++) {
+        for (unsigned int i = 0; i < prop.nitems * prop.format / 8; i++) {
           util::log::Debug() << ((char*)prop.data)[i];
         }
 
@@ -1297,7 +1300,7 @@ start:
         util::string::Builder cmd;
         cmd << '(' << dnd_launcher_exec << " \"";
 
-        for (int i = 0; i < prop.nitems * prop.format / 8; i++) {
+        for (unsigned int i = 0; i < prop.nitems * prop.format / 8; i++) {
           char c = ((char*)prop.data)[i];
 
           if (c == '\n') {
@@ -1334,8 +1337,6 @@ start:
                    (XEvent*)&m);
         XSync(server.dsp, False);
       }
-
-      XFree(prop.data);
     }
   });
 
