@@ -803,117 +803,24 @@ void EventConfigureNotify(Window win, Timer& timer) {
   }
 }
 
-char const* GetAtomName(Display* disp, Atom a) {
-  if (a == None) {
-    return "None";
-  }
-
-  return XGetAtomName(disp, a);
-}
-
-// This function takes a list of targets which can be converted to (atom_list,
-// nitems)
-// and a list of acceptable targets with prioritees (datatypes). It returns the
-// highest
-// entry in datatypes which is also in atom_list: ie it finds the best match.
-Atom PickTargetFromList(Display* disp, Atom* atom_list, int nitems) {
-  Atom to_be_requested = None;
-
-  for (int i = 0; i < nitems; ++i) {
-    char const* atom_name = GetAtomName(disp, atom_list[i]);
-
-    util::log::Debug() << "DnD " << __FILE__ << ':' << __LINE__ << ": Type "
-                       << i << " = " << atom_name << '\n';
-
-    // See if this data type is allowed and of higher priority (closer to zero)
-    // than the present one.
-    if (strcmp(atom_name, "STRING") == 0) {
-      to_be_requested = atom_list[i];
-    }
-  }
-
-  return to_be_requested;
-}
-
-// Finds the best target given up to three atoms provided (any can be None).
-// Useful for part of the Xdnd protocol.
-Atom PickTargetFromAtoms(Display* disp, Atom t1, Atom t2, Atom t3) {
-  Atom atoms[3];
-  int n = 0;
-
-  if (t1 != None) {
-    atoms[n++] = t1;
-  }
-
-  if (t2 != None) {
-    atoms[n++] = t2;
-  }
-
-  if (t3 != None) {
-    atoms[n++] = t3;
-  }
-
-  return PickTargetFromList(disp, atoms, n);
-}
-
-// Finds the best target given a local copy of a property.
-Atom PickTargetFromTargets(Display* disp, dnd::Property const& p) {
-  // The list of targets is a list of atoms, so it should have type XA_ATOM
-  // but it may have the type TARGETS instead.
-
-  if ((p.type != XA_ATOM && p.type != server.atoms_["TARGETS"]) ||
-      p.format != 32) {
-    // This would be really broken. Targets have to be an atom list
-    // and applications should support this. Nevertheless, some
-    // seem broken (MATLAB 7, for instance), so ask for STRING
-    // next instead as the lowest common denominator
-    return XA_STRING;
-  } else {
-    Atom* atom_list = (Atom*)p.data;
-
-    return PickTargetFromList(disp, atom_list, p.nitems);
-  }
-}
-
 void DragAndDropEnter(XClientMessageEvent* e) {
   dnd_atom = None;
   int more_than_3 = e->data.l[1] & 1;
   dnd_source_window = e->data.l[0];
   dnd_version = (e->data.l[1] >> 24);
 
-  util::log::Debug() << "DnD " << __FILE__ << ':' << __LINE__ << ": DnDEnter\n"
-                     << "DnD " << __FILE__ << ':' << __LINE__
-                     << ": DnDEnter. Supports > 3 types = "
-                     << (more_than_3 ? "yes" : "no") << '\n'
-                     << "DnD " << __FILE__ << ':' << __LINE__
-                     << ": Protocol version = " << dnd_version << '\n'
-                     << "DnD " << __FILE__ << ':' << __LINE__
-                     << ": Type 1 = " << GetAtomName(server.dsp, e->data.l[2])
-                     << '\n'
-                     << "DnD " << __FILE__ << ':' << __LINE__
-                     << ": Type 2 = " << GetAtomName(server.dsp, e->data.l[3])
-                     << '\n'
-                     << "DnD " << __FILE__ << ':' << __LINE__
-                     << ": Type 3 = " << GetAtomName(server.dsp, e->data.l[4])
-                     << '\n';
-
   // Query which conversions are available and pick the best
-
   if (more_than_3) {
     // Fetch the list of possible conversions
     // Notice the similarity to TARGETS with paste.
     auto p = dnd::ReadProperty(server.dsp, dnd_source_window,
                                server.atoms_["XdndTypeList"]);
-    dnd_atom = PickTargetFromTargets(server.dsp, p);
+    dnd_atom = dnd::PickTargetFromTargets(server.dsp, p);
   } else {
     // Use the available list
-    dnd_atom = PickTargetFromAtoms(server.dsp, e->data.l[2], e->data.l[3],
-                                   e->data.l[4]);
+    dnd_atom = dnd::PickTargetFromAtoms(server.dsp, e->data.l[2], e->data.l[3],
+                                        e->data.l[4]);
   }
-
-  util::log::Debug() << "DnD " << __FILE__ << ':' << __LINE__
-                     << ": Requested type = "
-                     << GetAtomName(server.dsp, dnd_atom) << '\n';
 }
 
 void DragAndDropPosition(XClientMessageEvent* e) {
@@ -1205,18 +1112,6 @@ start:
   event_loop.RegisterHandler(SelectionNotify, [&](XEvent& e) -> void {
     Atom target = e.xselection.target;
 
-    util::log::Debug()
-        << "DnD " << __FILE__ << ':' << __LINE__
-        << ": A selection notify has arrived!\n"
-        << "DnD " << __FILE__ << ':' << __LINE__
-        << ": Requestor = " << e.xselectionrequest.requestor << '\n'
-        << "DnD " << __FILE__ << ':' << __LINE__ << ": Selection atom = "
-        << GetAtomName(server.dsp, e.xselection.selection) << '\n'
-        << "DnD " << __FILE__ << ':' << __LINE__
-        << ": Target atom    = " << GetAtomName(server.dsp, target) << '\n'
-        << "DnD " << __FILE__ << ':' << __LINE__ << ": Property atom  = "
-        << GetAtomName(server.dsp, e.xselection.property) << '\n';
-
     if (e.xselection.property != None && !dnd_launcher_exec.empty()) {
       auto prop =
           dnd::ReadProperty(server.dsp, dnd_target_window, dnd_selection);
@@ -1230,8 +1125,6 @@ start:
           util::log::Debug() << "No matching datatypes.\n";
         } else {
           // Request the data type we are able to select
-          util::log::Debug() << "Now requesting type "
-                             << GetAtomName(server.dsp, dnd_atom) << '\n';
           XConvertSelection(server.dsp, dnd_selection, dnd_atom, dnd_selection,
                             dnd_target_window, CurrentTime);
         }

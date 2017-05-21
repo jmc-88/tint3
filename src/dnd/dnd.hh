@@ -38,6 +38,10 @@ AutoProperty ReadProperty(Display* disp, Window w, Atom property);
 std::string BuildCommand(std::string const& dnd_launcher_exec,
                          Property const& prop);
 
+Atom PickTargetFromList(Display* disp, Atom const* atom_list, int nitems);
+Atom PickTargetFromAtoms(Display* disp, Atom t1, Atom t2, Atom t3);
+Atom PickTargetFromTargets(Display* disp, Property const& p);
+
 }  // namespace dnd
 
 #endif  // TINT3_DND_DND_HH
