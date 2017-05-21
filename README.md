@@ -12,12 +12,14 @@ Pretty stable. I use it daily and I haven't seen issues in a while, but if you h
 
 ## Is it packaged for my Linux distribution?
 
- * There's a user-contributed package for Arch Linux in AUR,
- [tint3-cpp-git](https://aur.archlinux.org/packages/tint3-cpp-git).
- * You can easily obtain a `.deb` or `.rpm` package through
- [CPack](https://cmake.org/Wiki/CMake:Packaging_With_CPack). Check the build
- instructions at [README.source.md](README.source.md) for more info.
- * Other distributions: please build and install it manually.
+  * AMD64 `.deb` and `.rpm` packages are available at
+  [jmc-88.github.io/tint3](https://jmc-88.github.io/tint3/).
+  * There's a user-contributed package for Arch Linux in AUR,
+  [tint3-cpp-git](https://aur.archlinux.org/packages/tint3-cpp-git).
+  * You can easily rebuild your own `.deb` or `.rpm` package through
+  [CPack](https://cmake.org/Wiki/CMake:Packaging_With_CPack). Check the build
+  instructions at [README.source.md](README.source.md) for more info.
+  * Other distributions: please build and install it manually.
 
 ## How do I build it?
 
