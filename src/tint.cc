@@ -804,8 +804,9 @@ void EventConfigureNotify(Window win, Timer& timer) {
 }
 
 void DragAndDropEnter(XClientMessageEvent* e) {
+  bool more_than_3 = e->data.l[1] & 1;
+
   dnd_atom = None;
-  int more_than_3 = e->data.l[1] & 1;
   dnd_source_window = e->data.l[0];
   dnd_version = (e->data.l[1] >> 24);
 
