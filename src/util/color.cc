@@ -3,6 +3,7 @@
 #include <string>
 #include <utility>
 
+#include "util/area.hh"
 #include "util/color.hh"
 
 namespace {
@@ -123,6 +124,16 @@ bool Border::operator!=(Border const& other) const { return !(*this == other); }
 Background::Background()
     : gradient_id_(-1), gradient_id_hover_(-1), gradient_id_pressed_(-1) {}
 
+Color Background::fill_color_for(MouseState mouse_state) const {
+  if (mouse_state == MouseState::kMouseNormal) {
+    return fill_color();
+  }
+  if (mouse_state == MouseState::kMouseOver) {
+    return fill_color_hover();
+  }
+  return fill_color_pressed();
+}
+
 Color Background::fill_color() const { return fill_color_; }
 
 void Background::set_fill_color(Color const& color) { fill_color_ = color; }
@@ -147,6 +158,16 @@ Color Background::fill_color_pressed() const {
 
 void Background::set_fill_color_pressed(Color const& color) {
   fill_color_pressed_ = color;
+}
+
+Color Background::border_color_for(MouseState mouse_state) const {
+  if (mouse_state == MouseState::kMouseNormal) {
+    return border();
+  }
+  if (mouse_state == MouseState::kMouseOver) {
+    return border_color_hover();
+  }
+  return border_color_pressed();
 }
 
 Border const& Background::border() const { return border_; }
@@ -175,6 +196,16 @@ Color Background::border_color_pressed() const {
 
 void Background::set_border_color_pressed(Color const& color) {
   border_color_pressed_ = color;
+}
+
+int Background::gradient_id_for(MouseState mouse_state) const {
+  if (mouse_state == MouseState::kMouseNormal) {
+    return gradient_id();
+  }
+  if (mouse_state == MouseState::kMouseOver) {
+    return gradient_id_hover();
+  }
+  return gradient_id_pressed();
 }
 
 int Background::gradient_id() const { return gradient_id_; }

@@ -6,6 +6,9 @@
 
 #include "util/nullable.hh"
 
+// forward declaration from area.hh
+enum class MouseState;
+
 class Color {
  public:
   friend std::ostream& operator<<(std::ostream& os, Color const& color);
@@ -63,31 +66,28 @@ class Background {
   Background(Background&&) = default;
   Background& operator=(Background const&) = default;
 
+  Color fill_color_for(MouseState mouse_state) const;
   Color fill_color() const;
   void set_fill_color(Color const& color);
-
   Color fill_color_hover() const;
   void set_fill_color_hover(Color const& color);
-
   Color fill_color_pressed() const;
   void set_fill_color_pressed(Color const& color);
 
+  Color border_color_for(MouseState mouse_state) const;
   Border const& border() const;
   Border& border();
   void set_border(Border const& border);
-
   Color border_color_hover() const;
   void set_border_color_hover(Color const& border);
-
   Color border_color_pressed() const;
   void set_border_color_pressed(Color const& border);
 
+  int gradient_id_for(MouseState mouse_state) const;
   int gradient_id() const;
   void set_gradient_id(int id);
-
   int gradient_id_hover() const;
   void set_gradient_id_hover(int id);
-
   int gradient_id_pressed() const;
   void set_gradient_id_pressed(int id);
 

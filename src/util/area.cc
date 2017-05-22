@@ -410,19 +410,11 @@ void Area::Draw() {
 }
 
 void Area::DrawBackground(cairo_t* c) {
-  Color fill_color;
-  if (mouse_state_ == MouseState::kMouseNormal) {
-    fill_color = bg_.fill_color();
-  } else if (mouse_state_ == MouseState::kMouseOver) {
-    fill_color = bg_.fill_color_hover();
-  } else {
-    fill_color = bg_.fill_color_pressed();
-  }
-
   const int w = bg_.border().width();
   util::Rect extents{0, 0, width_, height_};
   extents.ShrinkBy(w);
 
+  Color fill_color = bg_.fill_color_for(mouse_state_);
   if (fill_color.alpha() > 0.0) {
     DrawRect(c, extents.top_left().first, extents.top_left().second,
              extents.bottom_right().first, extents.bottom_right().second,
@@ -432,25 +424,9 @@ void Area::DrawBackground(cairo_t* c) {
     cairo_fill(c);
   }
 
-  int gradient_id = -1;
-  if (mouse_state_ == MouseState::kMouseNormal) {
-    gradient_id = bg_.gradient_id();
-  } else if (mouse_state_ == MouseState::kMouseOver) {
-    gradient_id = bg_.gradient_id_hover();
-  } else {
-    gradient_id = bg_.gradient_id_pressed();
-  }
+  int gradient_id = bg_.gradient_id_for(mouse_state_);
   if (gradient_id >= 0 && gradient_id < gradients.size()) {
     gradients[gradient_id].Draw(c, extents);
-  }
-
-  Color border_color;
-  if (mouse_state_ == MouseState::kMouseNormal) {
-    border_color = bg_.border();
-  } else if (mouse_state_ == MouseState::kMouseOver) {
-    border_color = bg_.border_color_hover();
-  } else {
-    border_color = bg_.border_color_pressed();
   }
 
   if (w > 0) {
@@ -460,6 +436,7 @@ void Area::DrawBackground(cairo_t* c) {
     DrawRect(c, w / 2.0, w / 2.0, width_ - w, height_ - w,
              bg_.border().rounded());
 
+    Color border_color = bg_.border_color_for(mouse_state_);
     cairo_set_source_rgba(c, border_color[0], border_color[1], border_color[2],
                           border_color.alpha());
     cairo_stroke(c);
