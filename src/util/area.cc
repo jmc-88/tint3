@@ -292,7 +292,7 @@ int Area::ResizeByLayout(int maximum_size) {
     // resize kByLayout objects
     for (auto& child : children_) {
       if (child->on_screen_ && child->size_mode_ == SizeMode::kByLayout) {
-        int old_width = child->width_;
+        unsigned int old_width = child->width_;
         child->width_ = width;
 
         if (modulo != 0) {
@@ -339,7 +339,7 @@ int Area::ResizeByLayout(int maximum_size) {
     // resize kByLayout objects
     for (auto& child : children_) {
       if (child->on_screen_ && child->size_mode_ == SizeMode::kByLayout) {
-        int old_height = child->height_;
+        unsigned int old_height = child->height_;
         child->height_ = height;
 
         if (modulo != 0) {
@@ -425,7 +425,7 @@ void Area::DrawBackground(cairo_t* c) {
   }
 
   int gradient_id = bg_.gradient_id_for(mouse_state_);
-  if (gradient_id >= 0 && gradient_id < gradients.size()) {
+  if (gradient_id >= 0 && gradient_id < static_cast<int>(gradients.size())) {
     gradients[gradient_id].Draw(c, extents);
   }
 
@@ -490,8 +490,8 @@ void Area::OnChangeLayout() { /* defaults to a no-op */
 }
 
 bool Area::IsPointInside(int x, int y) const {
-  bool inside_x = (x >= panel_x_ && x <= panel_x_ + width_);
-  bool inside_y = (y >= panel_y_ && y <= panel_y_ + height_);
+  bool inside_x = (x >= panel_x_ && x <= panel_x_ + static_cast<int>(width_));
+  bool inside_y = (y >= panel_y_ && y <= panel_y_ + static_cast<int>(height_));
   return on_screen_ && inside_x && inside_y;
 }
 

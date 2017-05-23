@@ -118,8 +118,10 @@ int IsHidden(Window win) {
 namespace {
 
 bool IsInsideMonitor(int x, int y, Monitor const& monitor) {
-  bool inside_x = (x >= monitor.x && x <= monitor.x + monitor.width);
-  bool inside_y = (y >= monitor.y && y <= monitor.y + monitor.height);
+  bool inside_x =
+      (x >= monitor.x && x <= monitor.x + static_cast<int>(monitor.width));
+  bool inside_y =
+      (y >= monitor.y && y <= monitor.y + static_cast<int>(monitor.height));
   return (inside_x && inside_y);
 }
 

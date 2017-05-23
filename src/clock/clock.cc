@@ -219,7 +219,8 @@ bool Clock::Resize() {
     int new_size = std::max(time_width, date_width) + (2 * padding_x_lr_) +
                    (2 * bg_.border().width());
 
-    if (new_size > width_ || new_size < (width_ - 6)) {
+    if (new_size > static_cast<int>(width_) ||
+        new_size < static_cast<int>(width_) - 6) {
       // we try to limit the number of resize
       width_ = new_size + 1;
       time1_posy_ = (height_ - time_height) / 2;
@@ -235,7 +236,7 @@ bool Clock::Resize() {
     int new_size = time_height + date_height +
                    (2 * (padding_x_lr_ + bg_.border().width()));
 
-    if (new_size != height_) {
+    if (new_size != static_cast<int>(height_)) {
       // we try to limit the number of resize
       height_ = new_size;
       time1_posy_ = (height_ - time_height) / 2;

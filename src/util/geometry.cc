@@ -11,7 +11,8 @@ void Rect::ExpandBy(unsigned int p) {
 }
 
 bool Rect::ShrinkBy(unsigned int p) {
-  if (br_.first - tl_.first < 2 * p || br_.second - tl_.second < 2 * p) {
+  if (br_.first - tl_.first < static_cast<int>(2 * p) ||
+      br_.second - tl_.second < static_cast<int>(2 * p)) {
     return false;
   }
 

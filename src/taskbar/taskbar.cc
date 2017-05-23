@@ -263,7 +263,7 @@ void Taskbar::InitPanel(Panel* panel) {
   }
 
   for (int j = 0; j < kTaskStateCount; ++j) {
-    auto half_height = (panel->g_task.height_ / 2);
+    int half_height = static_cast<int>(panel->g_task.height_ / 2);
 
     if (panel->g_task.background[j].border().rounded() > half_height) {
       std::string separator =

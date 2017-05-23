@@ -18,8 +18,8 @@
 struct Monitor {
   int x;
   int y;
-  int width;
-  int height;
+  unsigned int width;
+  unsigned int height;
   std::vector<std::string> names;
 };
 

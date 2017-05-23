@@ -227,13 +227,14 @@ void TooltipAdjustGeometry() {
   }
 
   if (x + width > server.monitor[panel->monitor_].x +
-                      server.monitor[panel->monitor_].width) {
+                      static_cast<int>(server.monitor[panel->monitor_].width)) {
     x = server.monitor[panel->monitor_].x +
         server.monitor[panel->monitor_].width - width;
   }
 
-  if (y + height > server.monitor[panel->monitor_].y +
-                       server.monitor[panel->monitor_].height) {
+  if (y + height >
+      server.monitor[panel->monitor_].y +
+          static_cast<int>(server.monitor[panel->monitor_].height)) {
     y = server.monitor[panel->monitor_].y +
         server.monitor[panel->monitor_].height - height;
   }

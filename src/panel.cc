@@ -359,7 +359,7 @@ void Panel::InitSizeAndPosition() {
       width_ = server.monitor[monitor_].width - margin_x_;
     }
 
-    if (bg_.border().rounded() > height_ / 2) {
+    if (bg_.border().rounded() > static_cast<int>(height_ / 2)) {
       util::log::Error() << "panel_background_id rounded is too big: please "
                             "fix your tint3rc.\n";
       bg_.border().set_rounded(height_ / 2);
@@ -383,7 +383,7 @@ void Panel::InitSizeAndPosition() {
       height_ = server.monitor[monitor_].height - margin_y_;
     }
 
-    if (bg_.border().rounded() > width_ / 2) {
+    if (bg_.border().rounded() > static_cast<int>(width_ / 2)) {
       util::log::Error() << "panel_background_id rounded is too big: please "
                             "fix your tint3rc.\n";
       bg_.border().set_rounded(width_ / 2);
@@ -731,15 +731,14 @@ LauncherIcon* Panel::ClickLauncherIcon(int x, int y) {
 
 bool Panel::ClickPadding(int x, int y) {
   if (panel_horizontal) {
-    if (x < padding_x_lr_ || x > width_ - padding_x_lr_) {
+    if (x < padding_x_lr_ || x > static_cast<int>(width_) - padding_x_lr_) {
       return true;
     }
   } else {
-    if (y < padding_x_lr_ || y > height_ - padding_x_lr_) {
+    if (y < padding_x_lr_ || y > static_cast<int>(height_) - padding_x_lr_) {
       return true;
     }
   }
-
   return false;
 }
 
