@@ -30,7 +30,7 @@ function(add_pandoc_man_page target_name)
           --standalone --from=markdown --to=man
           --output="${CMAKE_BINARY_DIR}/${ADD_PANDOC_MAN_PAGE_OUTPUT}"
           "${ADD_PANDOC_MAN_PAGE_INPUT}"
-      DEPENDS ${OUTPUT_DIRECTORY}
+      DEPENDS "${target_name}_output_directory"
       WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
     add_custom_target(
       ${target_name} ALL
