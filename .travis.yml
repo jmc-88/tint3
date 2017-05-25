@@ -34,6 +34,9 @@ install:
   # For Coveralls integration
   - sudo apt-get --assume-yes install lcov curl
 
+  # For documentation build
+  - sudo apt-get --assume-yes install pandoc
+
 before_script:
   - mkdir "${TRAVIS_BUILD_DIR}/build"
   - cd "${TRAVIS_BUILD_DIR}/build"

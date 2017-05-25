@@ -230,6 +230,17 @@ add_library(tint3_common_lib STATIC ${TINT3_SOURCES})
 
 # }}} common rules
 
+# {{{ doc rules
+
+include(Pandoc)
+add_pandoc_man_page(
+  tint3_1
+  INPUT doc/tint3.1.md
+  OUTPUT doc/tint3.1
+  DESTINATION "${MANDIR}/man1")
+
+# }}} doc rules
+
 # {{{ build rules
 
 add_executable(tint3 src/tint.cc)
@@ -340,7 +351,6 @@ target_link_libraries(util_xdg_test tint3_common_lib testmain ${TINT3_LINK_LIBRA
 install(TARGETS tint3 DESTINATION bin)
 install(FILES sample/tint3rc DESTINATION ${SYSCONFDIR}/xdg/tint3)
 install(FILES AUTHORS.md README.md DESTINATION ${DOCDIR})
-install(FILES doc/tint3.1 DESTINATION ${MANDIR}/man1)
 
 install(FILES data/tint3.desktop DESTINATION ${DATADIR}/applications/tint3)
 install(FILES data/default_icon.png DESTINATION ${DATADIR}/tint3)

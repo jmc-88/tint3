@@ -30,6 +30,7 @@ have that installed.
   - libXdamage
   - startup-notification (optional)
   - libc++ (optional, recommended)
+  - pandoc (optional, recommended, needed for building documentation)
 
 ## Debian/Ubuntu systems
 
@@ -39,7 +40,8 @@ You can install all needed compile-time dependencies with the following command:
 $ sudo apt-get install libcairo2-dev libpango1.0-dev libglib2.0-dev \
                        libimlib2-dev libxinerama-dev libx11-dev libxdamage-dev \
                        libxcomposite-dev libxrender-dev libxrandr-dev \
-                       librsvg2-dev libstartup-notification0-dev libc++-dev
+                       librsvg2-dev libstartup-notification0-dev libc++-dev \
+                       pandoc
 ```
 
 You can now build a Debian package as follows:
