@@ -31,6 +31,7 @@ function(add_pandoc_man_page target_name)
           --output="${CMAKE_BINARY_DIR}/${ADD_PANDOC_MAN_PAGE_OUTPUT}"
           "${ADD_PANDOC_MAN_PAGE_INPUT}"
       DEPENDS "${target_name}_output_directory"
+              "${ADD_PANDOC_MAN_PAGE_INPUT}"
       WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
     add_custom_target(
       ${target_name} ALL
