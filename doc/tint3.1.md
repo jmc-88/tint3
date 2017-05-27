@@ -24,8 +24,11 @@ system tray, transparency and gradients.
 -c *config-file*
 
 :   Specify which configuration file to use instead of the default.
-    If this flag is not provided and `$XDG_CONFIG_HOME/tint3/tint3rc` is missing,
-    tint3 will copy its default configuration file to that path.
+
+    If this flag is not provided and *$XDG_CONFIG_HOME/tint3/tint3rc* is
+    missing, tint3 will copy its default configuration file to that path.
+
+    See **tint3rc(5)** for a description of the configuration file format.
 
 # FILES
 
@@ -68,9 +71,9 @@ system tray, transparency and gradients.
 # AUTHORS
 
 tint3 written by Daniele Cocca <https://github.com/jmc-88> and based on tint2,
-originally written by Thierry Lorthiois <lorthiois@bbsoft.fr>, in turn based on
-ttm, originally written by Pål Staurland <staura@gmail.com>.
+originally written by Thierry Lorthiois &lt;lorthiois@bbsoft.fr>, in turn based
+on ttm, originally written by Pål Staurland &lt;staura@gmail.com>.
 
 # SEE ALSO
 
-**tint2(1)**
+**tint2(1)**, **tint3rc(5)**

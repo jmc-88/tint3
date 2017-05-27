@@ -238,6 +238,11 @@ add_pandoc_man_page(
   INPUT doc/tint3.1.md
   OUTPUT doc/tint3.1
   DESTINATION "${MANDIR}/man1")
+add_pandoc_man_page(
+  tint3rc_5
+  INPUT doc/tint3rc.5.md
+  OUTPUT doc/tint3rc.5
+  DESTINATION "${MANDIR}/man5")
 
 # }}} doc rules
 
