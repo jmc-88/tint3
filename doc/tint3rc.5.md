@@ -610,34 +610,22 @@ tooltip_font = &lt;string>
 mouse_middle = &lt;mouse_action>
 
 :   Determines how to handle a click of the middle mouse button or the mouse
-    wheel.
-
-    - *none* does nothing (default).
-    - *close* closes the focused window.
-    - *toggle* toggles the active state on the focused window.
-    - *iconify* iconifies the focused window.
-    - *shade* toggles the shaded state on the focused window.
-    - *toggle_iconify* toggles the iconified state of the focused window.
-    - *maximize_restore* maximizes or restores the focused window.
-    - *desktop_left* moves the window to the desktop to the left.
-    - *desktop_right* moves the window to the desktop to the right.
-    - *next_task* activates the next window.
-    - *prev_task* activates the previous window.
+    wheel. See **FORMAT OF VALUES** for a description of the accepted values.
 
 mouse_right = &lt;mouse_action>
 
 :   Determines how to handle a click of the right mouse button.
-    See *mouse_middle* for a description of the accepted mouse actions.
+    See **FORMAT OF VALUES** for a description of the accepted values.
 
 mouse_scroll_up = &lt;mouse_action>
 
 :   Determines how to handle a mouse wheel up event.
-    See *mouse_middle* for a description of the accepted mouse actions.
+    See **FORMAT OF VALUES** for a description of the accepted values.
 
 mouse_scroll_down = &lt;mouse_action>
 
 :   Determines how to handle a mouse wheel down event.
-    See *mouse_middle* for a description of the accepted mouse actions.
+    See **FORMAT OF VALUES** for a description of the accepted values.
 
 mouse_effects = &lt;boolean>
 
@@ -671,6 +659,43 @@ autohide_height = &lt;integer>
 
 :   Height, in pixel, of the panel in its hidden state.
     This entry has a lower bound of **1**.
+
+# FORMAT OF VALUES
+
+## &lt;boolean>
+
+Numerical value. **0** means **false**, **1** means **true**.
+
+## &lt;color>
+
+RGBA color value. It's specified as a CSS-like hex color string, followed by
+an integer representing the opacity. As an example:
+
+    background_color = #ff0000 25
+
+creates a red background with 25% opacity.
+A short hex value is also accepted. As an example:
+
+    background_color = #f00 25
+
+is identical to the previous example.
+
+## &lt;mouse_action>
+
+String indicating the action to perform for the given mouse event.
+It can be one of the following:
+
+- *none* does nothing (default).
+- *close* closes the focused window.
+- *toggle* toggles the active state on the focused window.
+- *iconify* iconifies the focused window.
+- *shade* toggles the shaded state on the focused window.
+- *toggle_iconify* toggles the iconified state of the focused window.
+- *maximize_restore* maximizes or restores the focused window.
+- *desktop_left* moves the window to the desktop to the left.
+- *desktop_right* moves the window to the desktop to the right.
+- *next_task* activates the next window.
+- *prev_task* activates the previous window.
 
 # SEE ALSO
 
