@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=FindDesktopEntry
+Comment=The most beautiful desktop entry out there!
+Exec=/bin/true
+Icon=tint3
+Terminal=false
+Type=Application
+Categories=Office;

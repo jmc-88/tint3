@@ -271,6 +271,7 @@ include_directories(test)
 
 # List of testdata files to copy
 set(TESTDATA_SRCS
+    src/launcher/testdata/applications/launcher_test.desktop
     src/util/testdata/fs_test.txt)
 
 # Generated list of output paths in the build directory
@@ -298,6 +299,7 @@ test_target(dnd_dnd_test src/dnd/dnd_test.cc)
 target_link_libraries(dnd_dnd_test tint3_common_lib testmain ${TINT3_LINK_LIBRARIES})
 
 test_target(launcher_test src/launcher/launcher_test.cc)
+add_dependencies(launcher_test testdata)
 target_link_libraries(launcher_test tint3_common_lib testmain ${TINT3_LINK_LIBRARIES})
 
 test_target(launcher_desktop_entry_test src/launcher/desktop_entry_test.cc)

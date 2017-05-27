@@ -11,8 +11,9 @@ namespace xdg {
 namespace basedir {
 
 util::fs::Path ConfigHome();
-std::vector<std::string> DataDirs();
+util::fs::Path DataHome();
 std::vector<std::string> ConfigDirs();
+std::vector<std::string> DataDirs();
 
 }  // namespace basedir
 }  // namespace xdg

@@ -113,4 +113,9 @@ void CleanupLauncher();
 
 void LauncherAction(LauncherIcon* launcher_icon, XEvent* evt);
 
+// Looks up for the given desktop entry in well known paths.
+// The desktop entry can be a relative or absolute path to a file, or it can
+// be simply the file name that will be resolved against standard XDG dirs.
+bool FindDesktopEntry(std::string const& name, std::string* output_path);
+
 #endif  // TINT3_LAUNCHER_LAUNCHER_HH

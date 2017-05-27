@@ -42,6 +42,7 @@
 #include "taskbar.hh"
 #include "util/fs.hh"
 #include "util/log.hh"
+#include "util/xdg.hh"
 
 bool launcher_enabled = false;
 int launcher_max_icon_size;
@@ -664,11 +665,53 @@ bool ParseDesktopFile(std::string const& contents,
 
 }  // namespace
 
+bool FindDesktopEntry(std::string const& name, std::string* output_path) {
+  // First, check if the given parameter is already a valid path
+  if (util::fs::FileExists(name)) {
+    output_path->assign(name);
+    return true;
+  }
+
+  // Second, try and find the given .desktop entry name in a standard location
+  std::vector<std::string> candidates = {
+      util::xdg::basedir::DataHome() / "applications" / name,
+      util::fs::HomeDirectory() / ".local" / "share" / "applications" / name,
+      util::fs::Path("/usr/local/share/applications") / name,
+      util::fs::Path("/usr/share/applications") / name,
+      util::fs::Path("/opt/share/applications") / name,
+  };
+
+  auto it = std::find_if(
+      candidates.begin(), candidates.end(),
+      [](util::fs::Path const& item) { return util::fs::FileExists(item); });
+  if (it != candidates.end()) {
+    output_path->assign(*it);
+    return true;
+  }
+
+  for (auto const& dir : util::xdg::basedir::DataDirs()) {
+    std::string resolved_path = util::fs::Path{dir} / "applications" / name;
+    if (util::fs::FileExists(resolved_path)) {
+      output_path->assign(resolved_path);
+      return true;
+    }
+  }
+
+  // Give up and fail
+  return false;
+}
+
 // Populates the list_icons list
 void Launcher::LoadIcons() {
   // Load apps (.desktop style launcher items)
   for (auto const& path : list_apps_) {
-    util::fs::ReadFile(path, [&](std::string const& contents) {
+    std::string resolved_path;
+    if (!FindDesktopEntry(path, &resolved_path)) {
+      util::log::Error() << "File \"" << path << "\" not found, skipping\n";
+      continue;
+    }
+
+    util::fs::ReadFile(resolved_path, [&](std::string const& contents) {
       launcher::desktop_entry::DesktopEntry entry;
       if (!ParseDesktopFile(contents, &entry)) {
         util::log::Error() << "Failed parsing \"" << path << "\", skipping.\n";

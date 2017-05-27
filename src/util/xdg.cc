@@ -33,6 +33,11 @@ util::fs::Path ConfigHome() {
   return default_(environment::Get("XDG_CONFIG_HOME"));
 }
 
+util::fs::Path DataHome() {
+  static auto default_ = GetDefaultDirectory("/.local/share");
+  return default_(environment::Get("XDG_DATA_HOME"));
+}
+
 std::vector<std::string> DataDirs() {
   static auto default_ = DefaultValue("/usr/local/share:/usr/share");
   return util::string::Split(default_(environment::Get("XDG_DATA_DIRS")), ':');
