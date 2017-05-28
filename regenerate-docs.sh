@@ -16,8 +16,10 @@ regen() {
   fi
 
   printf "%s" "${_source}" | \
-    pandoc --standalone --toc --from markdown --to html5 --css /css/man.css \
-    > "${1%.md}.html"
+    pandoc --standalone --toc \
+           --from markdown --to html5 \
+           --css /tint3/css/man.css \
+           > "${1%.md}.html"
   if [ ${?} -ne 0 ]; then
     die "regen: \"pandoc\" failed"
   fi
