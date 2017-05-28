@@ -14,3 +14,7 @@
 # Don't include built packages
 *.deb
 *.rpm
+
+# Don't include gh-pages build artifacts
+/Gemfile.lock
+/_site
