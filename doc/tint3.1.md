@@ -47,10 +47,20 @@ system tray, transparency and gradients.
 :   The value of this variable influences the lookup of the per-user
     configuration file. Typically defaults to *~/.config*.
 
+*XDG_DATA_HOME*
+
+:   The value of this variable influences the lookup of `.desktop` files for
+    launcher items. Typically defaults to *~/.local/share*.
+
 *XDG_CONFIG_DIRS*
 
 :   The value of this variable influences the lookup of the system-wide
-    configuration file. Typically defaults to */etc/xdg*.
+    configuration file. Typically defaults to */usr/local/etc/xdg:/etc/xdg*.
+
+*XDG_DATA_DIRS*
+
+:   The value of this variable influences the lookup of `.desktop` files for
+    launcher items. Typically defaults to */usr/local/share:/usr/share*.
 
 # SIGNALS
 
