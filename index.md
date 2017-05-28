@@ -34,6 +34,11 @@ Packages provided here are for tint3 **v0.3.0**.
   <span>amd64</span>
 </a>
 
+## configuration
+
+*   [tint3(1)](doc/tint3.1.html)
+*   [tint3rc(5)](doc/tint3rc.5.html)
+
 ## screenshots
 
 <a href="#screenshot"><img src="data/screenshot.png" class="thumbnail"></a>

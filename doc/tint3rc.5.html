@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="pandoc">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>TINT3RC(5) v0.3.0 | tint3 user manual</title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <!--[if lt IE 9]>
+    <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+  <link rel="stylesheet" href="/css/man.css">
+</head>
+<body>
+<header>
+<h1 class="title">TINT3RC(5) v0.3.0 | tint3 user manual</h1>
+</header>
+<nav id="TOC">
+<ul>
+<li><a href="#name">NAME</a></li>
+<li><a href="#description">DESCRIPTION</a></li>
+<li><a href="#configuration-entries">CONFIGURATION ENTRIES</a><ul>
+<li><a href="#general">GENERAL</a></li>
+<li><a href="#backgrounds">BACKGROUNDS</a></li>
+<li><a href="#gradients">GRADIENTS</a></li>
+<li><a href="#panel">PANEL</a></li>
+<li><a href="#battery">BATTERY</a></li>
+<li><a href="#clock">CLOCK</a></li>
+<li><a href="#taskbar">TASKBAR</a></li>
+<li><a href="#tasks">TASKS</a></li>
+<li><a href="#system-tray">SYSTEM TRAY</a></li>
+<li><a href="#launchers">LAUNCHERS</a></li>
+<li><a href="#tooltips">TOOLTIPS</a></li>
+<li><a href="#mouse-actions">MOUSE ACTIONS</a></li>
+<li><a href="#autohide">AUTOHIDE</a></li>
+</ul></li>
+<li><a href="#format-of-values">FORMAT OF VALUES</a><ul>
+<li><a href="#boolean">&lt;boolean&gt;</a></li>
+<li><a href="#color">&lt;color&gt;</a></li>
+<li><a href="#mouse_action">&lt;mouse_action&gt;</a></li>
+</ul></li>
+<li><a href="#see-also">SEE ALSO</a></li>
+</ul>
+</nav>
+<h1 id="name">NAME</h1>
+<p><strong>tint3rc</strong> - Configuration file for the tint3 panel</p>
+<h1 id="description">DESCRIPTION</h1>
+<p>A tint3 configuration file describes the look and the behaviour of the tint3 panel.</p>
+<h1 id="configuration-entries">CONFIGURATION ENTRIES</h1>
+<p>A tint3 configuration file consists of a series of key/value pairs, one pair on each line. Keys can contain alphanumeric characters and underscores (&quot;<strong>_</strong>&quot;), but cannot start with an underscore. Values can contain any character and are terminated by a newline. Keys and values are separated by a single equals sign (&quot;<strong>=</strong>&quot;), optionally surrounded by whitespace.</p>
+<p>As the configuration file is unstructured, some entries take the special meaning of a section marker. These are explicitly noted below.</p>
+<h2 id="general">GENERAL</h2>
+<dl>
+<dt>font_shadow = &lt;boolean&gt;</dt>
+<dd><p>Determines whether font shadows are enabled.</p>
+</dd>
+<dt>strut_policy = <em>none</em> | <em>minimum</em> | <em>follow_size</em></dt>
+<dd><p>Instructs the window manager on how to handle maximized windows.</p>
+<ul>
+<li><em>none</em> means maximized windows will use the full screen area.</li>
+<li><em>minimum</em> means maximized windows will expand to the full screen area, minus the hidden panel size.</li>
+<li><em>follow_size</em> means maximized windows will be expand to the full screen area, minux the current panel size.</li>
+</ul>
+</dd>
+</dl>
+<h2 id="backgrounds">BACKGROUNDS</h2>
+<dl>
+<dt>rounded = &lt;integer&gt;</dt>
+<dd><p>Determines the rounding, in pixels, of this background.</p>
+<p>This entry is a <em>section marker</em> that determines the beginning of a new background. Backgrounds are given an incremental id number that can be used to refer to them, starting with 1 (background 0 is preallocated and defaults to be fully transparent).</p>
+</dd>
+<dt>border_width = &lt;integer&gt;</dt>
+<dd><p>Width, in pixels, of this border.</p>
+</dd>
+<dt>background_color = &lt;color&gt;</dt>
+<dd><p>Color of this background in the normal state.</p>
+</dd>
+<dt>background_color_hover = &lt;color&gt;</dt>
+<dd><p>Color of this background in the mouse hover state.</p>
+</dd>
+<dt>background_color_pressed = &lt;color&gt;</dt>
+<dd><p>Color of this background in the mouse pressed state.</p>
+</dd>
+<dt>border_color = &lt;color&gt;</dt>
+<dd><p>Color of this background's border in the normal state.</p>
+</dd>
+<dt>border_color_hover = &lt;color&gt;</dt>
+<dd><p>Color of this background's border in the mouse hover state.</p>
+</dd>
+<dt>border_color_pressed = &lt;color&gt;</dt>
+<dd><p>Color of this background's border in the mouse pressed state.</p>
+</dd>
+<dt>gradient_id = &lt;integer&gt;</dt>
+<dd><p>Id of this background's gradient in the normal state.</p>
+</dd>
+<dt>gradient_id_hover = &lt;integer&gt;</dt>
+<dd><p>Id of this background's gradient in the mouse hover state.</p>
+</dd>
+<dt>gradient_id_pressed = &lt;integer&gt;</dt>
+<dd><p>Id of this background's gradient in the mouse pressed state.</p>
+</dd>
+</dl>
+<h2 id="gradients">GRADIENTS</h2>
+<dl>
+<dt>gradient = <em>vertical</em> | <em>horizontal</em> | <em>radial</em></dt>
+<dd><p>Determines the type of gradient to use. It can be <em>vertical</em> (top to bottom), <em>horizontal</em> (left to right), or <em>radial</em> (centre to outer edges).</p>
+<p>This entry is a <em>section marker</em> that determines the beginning of a new gradient. Gradients are given an incremental id number that can be used to refer to them, starting with 1 (background 0 is preallocated and defaults to be fully transparent).</p>
+</dd>
+<dt>start_color = &lt;color&gt;</dt>
+<dd><p>Starting color of this gradient.</p>
+</dd>
+<dt>end_color = &lt;color&gt;</dt>
+<dd><p>Ending color of this gradient.</p>
+</dd>
+<dt>color_stop = &lt;integer&gt; &lt;color&gt;</dt>
+<dd><p>Additional color stop for this gradient. The first integer of this value indicates the percentage where to add the color stop, and it must be in the open range (0; 100); i.e., negative values or values above 100 are not allowed, as well as <strong>0</strong> and <strong>100</strong>, to avoid conflicting with <em>start_color</em> and <em>end_color</em>.</p>
+</dd>
+</dl>
+<h2 id="panel">PANEL</h2>
+<dl>
+<dt>panel_monitor = &lt;integer&gt; | &lt;string&gt; | &quot;all&quot;</dt>
+<dd><p>Indicates the monitor on which the panel should be displayed. This value can be given as a positive integer representing the index of the monitor (starting from 1), or as a string representing the monitor name, or as the special string value of <em>all</em> which makes tint3 display the panel on all available monitors.</p>
+<p>This option requires XRANDR. If the extension is not enabled at compile time or unavailable at run time, or if the given monitor name or index can't be found, tint3 will default to displaying the panel on all available monitors.</p>
+</dd>
+<dt>panel_size = &lt;integer&gt;[%] &lt;integer&gt;[%]</dt>
+<dd><p>Size of the panel.</p>
+<p>The first integer indicates the width of the panel. This value is considered to be given in pixels, unless it is followed by <em>%</em>, in which case it's considered a percentage of the current screen width.</p>
+<p>The second integer indicates the height of the panel. This value is considered to be given in pixels, unless it is followed by <em>%</em>, in which case it's considered a percentage of the current screen height.</p>
+</dd>
+<dt>panel_items = <em>LTBSC</em></dt>
+<dd><p>Chooses the items to show in the panel, and their ordering. This value is a string where each character represents an item to display.</p>
+<ul>
+<li><strong>L</strong> indicates the launcher.</li>
+<li><strong>T</strong> indicates the taskbar.</li>
+<li><strong>B</strong> indicates the battery.</li>
+<li><strong>S</strong> indicates the system tray.</li>
+<li><strong>C</strong> indicates the clock.</li>
+</ul>
+</dd>
+<dt>panel_margin = &lt;integer&gt; [&lt;integer&gt;]</dt>
+<dd><p>Margin, in pixels, of the panel. The first integer represents the margin on the <strong>X</strong> axis. The second, if given, represents the margin on the <strong>Y</strong> axis.</p>
+</dd>
+<dt>panel_padding = &lt;integer&gt; [&lt;integer&gt; [&lt;integer&gt;]]</dt>
+<dd><p>Padding, in pixels, of the panel.</p>
+<p>The first integer represents the internal padding on the <strong>X</strong> axis (and the spacing between children areas, if a third integer is not given).</p>
+<p>The second integer represents the internal padding on the <strong>Y</strong> axis.</p>
+<p>The third integer represents the spacing on the <strong>X</strong> axis between children areas, overriding the value given by the first integer.</p>
+</dd>
+<dt>panel_position = &lt;alignment&gt; &lt;alignment&gt; [&lt;position&gt;]</dt>
+<dd><p>Position and alignment of the panel.</p>
+<p>The first value indicates the vertical alignment of the panel and can be either <em>top</em>, <em>bottom</em> or <em>center</em>. Defaults to <em>center</em>.</p>
+<p>The second value indicates the horizontal alignment of the panel and can be either <em>left</em>, <em>right</em> or <em>center</em>. Defaults to <em>center</em>.</p>
+<p>The third value indicates the position of the panel and can be either <em>horizontal</em> or <em>vertical</em>. Defaults to <em>horizontal</em>.</p>
+</dd>
+<dt>panel_background_id = &lt;integer&gt;</dt>
+<dd><p>Id of the background used by the panel.</p>
+</dd>
+<dt>wm_menu = &lt;boolean&gt;</dt>
+<dd><p>Determines whether unhandled clicks should be forwarded to the window manager.</p>
+</dd>
+<dt>panel_dock = &lt;boolean&gt;</dt>
+<dd><p>Determines whether the panel window should be placed in the window manager's dock.</p>
+</dd>
+<dt>urgent_nb_of_blink = &lt;integer&gt;</dt>
+<dd><p>Maximum number of blinks allowed for windows with the <em>urgent</em> hint.</p>
+</dd>
+<dt>panel_layer = <em>normal</em> | <em>top</em> | <em>bottom</em></dt>
+<dd><p>Chooses whether the panel should behave like a <em>normal</em> window, or placed always on <em>top</em> of other windows, or always at the <em>bottom</em>.</p>
+</dd>
+</dl>
+<h2 id="battery">BATTERY</h2>
+<dl>
+<dt>battery = &lt;boolean&gt;</dt>
+<dd><p>Determines whether the battery indicator is enabled. This is a legacy entry, superseded by <em>panel_items</em>. If that option is present, this one is ignored.</p>
+</dd>
+<dt>battery_low_status = &lt;integer&gt;</dt>
+<dd><p>Battery percentage to consider &quot;low&quot;.</p>
+</dd>
+<dt>battery_low_cmd = &lt;command&gt;</dt>
+<dd><p>Command to run when the battery reaches the &quot;low&quot; level.</p>
+</dd>
+<dt>bat1_font = &lt;string&gt;</dt>
+<dd><p>Pango font descriptor to use for the first line of the battery indicator.</p>
+</dd>
+<dt>bat2_font = &lt;string&gt;</dt>
+<dd><p>Pango font descriptor to use for the second line of the battery indicator.</p>
+</dd>
+<dt>battery_font_color = &lt;color&gt;</dt>
+<dd><p>Color to use for the battery font.</p>
+</dd>
+<dt>battery_padding = &lt;integer&gt; [&lt;integer&gt; [&lt;integer&gt;]]</dt>
+<dd><p>Padding, in pixels, of the battery.</p>
+<p>The first integer represents the internal padding on the <strong>X</strong> axis (and the spacing between children areas, if a third integer is not given).</p>
+<p>The second integer represents the internal padding on the <strong>Y</strong> axis.</p>
+<p>The third integer represents the spacing on the <strong>X</strong> axis between children areas, overriding the value given by the first integer.</p>
+</dd>
+<dt>battery_background_id = &lt;integer&gt;</dt>
+<dd><p>Id of the background used by the battery.</p>
+</dd>
+<dt>battery_hide = &lt;integer&gt;</dt>
+<dd><p>Battery fullness percentage after which to hide the indicator. Defaults to <strong>101%</strong> if not given, meaning the indicator will always be shown.</p>
+</dd>
+</dl>
+<h2 id="clock">CLOCK</h2>
+<dl>
+<dt>time1_format = &lt;string&gt;</dt>
+<dd><p>Format string to use for the first line of the clock applet. See <strong>strftime(3)</strong> for accepted conversion specifications.</p>
+<p>This entry is a <em>section marker</em> that determines the presence of a clock applet in legacy configurations. It is ignored for this purpose if <em>panel_items</em> is present.</p>
+</dd>
+<dt>time2_format = &lt;string&gt;</dt>
+<dd><p>Format string to use for the second line of the clock applet. See <strong>strftime(3)</strong> for accepted conversion specifications.</p>
+</dd>
+<dt>time1_font = &lt;string&gt;</dt>
+<dd><p>Pango font descriptor to use for the first line of the clock applet.</p>
+</dd>
+<dt>time1_timezone = &lt;string&gt;</dt>
+<dd><p>Name of the timezone to use for the first line of the clock applet.</p>
+</dd>
+<dt>time2_timezone = &lt;string&gt;</dt>
+<dd><p>Name of the timezone to use for the second line of the clock applet.</p>
+</dd>
+<dt>time2_font = &lt;string&gt;</dt>
+<dd><p>Pango font descriptor to use for the second line of the clock applet.</p>
+</dd>
+<dt>clock_font_color = &lt;color&gt;</dt>
+<dd><p>Color to use for the clock font.</p>
+</dd>
+<dt>clock_padding = &lt;integer&gt; [&lt;integer&gt; [&lt;integer&gt;]]</dt>
+<dd><p>Padding, in pixels, of the clock applet.</p>
+<p>The first integer represents the internal padding on the <strong>X</strong> axis (and the spacing between children areas, if a third integer is not given).</p>
+<p>The second integer represents the internal padding on the <strong>Y</strong> axis.</p>
+<p>The third integer represents the spacing on the <strong>X</strong> axis between children areas, overriding the value given by the first integer.</p>
+</dd>
+<dt>clock_background_id = &lt;integer&gt;</dt>
+<dd><p>Id of the background used by the clock applet.</p>
+</dd>
+<dt>clock_tooltip = &lt;string&gt;</dt>
+<dd><p>Format string to use for the clock applet tooltip. See <strong>strftime(3)</strong> for accepted conversion specifications.</p>
+</dd>
+<dt>clock_tooltip_timezone = &lt;string&gt;</dt>
+<dd><p>Name of the timezone to use for the second line of the clock tooltip.</p>
+</dd>
+<dt>clock_lclick_command = &lt;string&gt;</dt>
+<dd><p>Command to execute when the clock applet is left clicked.</p>
+</dd>
+<dt>clock_rclick_command = &lt;string&gt;</dt>
+<dd><p>Command to execute when the clock applet is right clicked.</p>
+</dd>
+</dl>
+<h2 id="taskbar">TASKBAR</h2>
+<dl>
+<dt>taskbar_mode = <em>single_desktop</em> | <em>multi_desktop</em></dt>
+<dd><p>Determines whether the taskbar should be shown on a single desktop or on all desktops.</p>
+</dd>
+<dt>taskbar_padding = &lt;integer&gt; [&lt;integer&gt; [&lt;integer&gt;]]</dt>
+<dd><p>Padding, in pixels, of the taskbar.</p>
+<p>The first integer represents the internal padding on the <strong>X</strong> axis (and the spacing between children areas, if a third integer is not given).</p>
+<p>The second integer represents the internal padding on the <strong>Y</strong> axis.</p>
+<p>The third integer represents the spacing on the <strong>X</strong> axis between children areas, overriding the value given by the first integer.</p>
+</dd>
+<dt>taskbar_background_id = &lt;integer;</dt>
+<dd><p>Id of the background used by the taskbar.</p>
+</dd>
+<dt>taskbar_active_background_id = &lt;integer&gt;</dt>
+<dd><p>Id of the background used by the active taskbar.</p>
+</dd>
+<dt>taskbar_name = &lt;boolean&gt;</dt>
+<dd><p>Determines whether the taskbar name should be displayed.</p>
+</dd>
+<dt>taskbar_name_padding = &lt;integer&gt; [&lt;integer&gt; [&lt;integer&gt;]]</dt>
+<dd><p>Padding, in pixels, of the taskbar name.</p>
+<p>The first integer represents the internal padding on the <strong>X</strong> axis (and the spacing between children areas, if a third integer is not given).</p>
+<p>The second integer represents the internal padding on the <strong>Y</strong> axis.</p>
+<p>The third integer represents the spacing on the <strong>X</strong> axis between children areas, overriding the value given by the first integer.</p>
+</dd>
+<dt>taskbar_name_background_id = &lt;integer&gt;</dt>
+<dd><p>Id of the background used by the taskbar name.</p>
+</dd>
+<dt>taskbar_name_active_background_id = &lt;integer&gt;</dt>
+<dd><p>Id of the background used by the active taskbar name. Defaults to <em>taskbar_name_background_id</em>.</p>
+</dd>
+<dt>taskbar_name_font = &lt;string&gt;</dt>
+<dd><p>Pango font descriptor to use for the taskbar name.</p>
+</dd>
+<dt>taskbar_name_font_color = &lt;color&gt;</dt>
+<dd><p>Color to use for the taskbar name font.</p>
+</dd>
+<dt>taskbar_name_active_font_color = &lt;color&gt;</dt>
+<dd><p>Color to use for the active taskbar name font.</p>
+</dd>
+</dl>
+<h2 id="tasks">TASKS</h2>
+<dl>
+<dt>task_text = &lt;boolean&gt;</dt>
+<dd><p>Determines whether the task name should be displayed.</p>
+</dd>
+<dt>task_icon = &lt;boolean&gt;</dt>
+<dd><p>Determines whether the task icon should be displayed.</p>
+</dd>
+<dt>task_centered = &lt;boolean&gt;</dt>
+<dd><p>Determines whether the task icon and/or text should be centered.</p>
+</dd>
+<dt>task_width = &lt;integer&gt;</dt>
+<dd><p>Sets the maximum task area width to the given integer and the maximum task area height to its default of <strong>30</strong>. Legacy entry, superseded by <em>task_maximum_size</em>.</p>
+</dd>
+<dt>task_maximum_size = &lt;integer&gt; [&lt;integer&gt;]</dt>
+<dd><p>Sets the maximum task area width to the first given integer and the maximum task area height to the second given integer (or its default of <strong>30</strong>, if missing).</p>
+</dd>
+<dt>task_padding = &lt;integer&gt; [&lt;integer&gt; [&lt;integer&gt;]]</dt>
+<dd><p>Padding, in pixels, of the task area.</p>
+<p>The first integer represents the internal padding on the <strong>X</strong> axis (and the spacing between children areas, if a third integer is not given).</p>
+<p>The second integer represents the internal padding on the <strong>Y</strong> axis.</p>
+<p>The third integer represents the spacing on the <strong>X</strong> axis between children areas, overriding the value given by the first integer.</p>
+</dd>
+<dt>task_font_color = &lt;color&gt;</dt>
+<dd><p>Color to use for the task font.</p>
+</dd>
+<dt>task_active_font_color = &lt;color&gt;</dt>
+<dd><p>Color to use for the active task font.</p>
+</dd>
+<dt>task_iconified_font_color = &lt;color&gt;</dt>
+<dd><p>Color to use for the iconified task font.</p>
+</dd>
+<dt>task_urgent_font_color = &lt;color&gt;</dt>
+<dd><p>Color to use for the urgent task font.</p>
+</dd>
+<dt>task_icon_asb = &lt;integer&gt; &lt;integer&gt; &lt;integer&gt;</dt>
+<dd><p>Relative alpha, saturation and brightness adjustments for the task icon, expressed as percentages.</p>
+</dd>
+<dt>task_active_icon_asb = &lt;integer&gt; &lt;integer&gt; &lt;integer&gt;</dt>
+<dd><p>Relative alpha, saturation and brightness adjustments for the active task icon, expressed as percentages.</p>
+</dd>
+<dt>task_iconified_icon_asb = &lt;integer&gt; &lt;integer&gt; &lt;integer&gt;</dt>
+<dd><p>Relative alpha, saturation and brightness adjustments for the iconified task icon, expressed as percentages.</p>
+</dd>
+<dt>task_urgent_icon_asb = &lt;integer&gt; &lt;integer&gt; &lt;integer&gt;</dt>
+<dd><p>Relative alpha, saturation and brightness adjustments for the urgent task icon, expressed as percentages.</p>
+</dd>
+<dt>task_background_id = &lt;integer;</dt>
+<dd><p>Id of the background used by the task area.</p>
+</dd>
+<dt>task_active_background_id = &lt;integer;</dt>
+<dd><p>Id of the background used by the active task area.</p>
+</dd>
+<dt>task_iconified_background_id = &lt;integer;</dt>
+<dd><p>Id of the background used by the iconified task area.</p>
+</dd>
+<dt>task_urgent_background_id = &lt;integer;</dt>
+<dd><p>Id of the background used by the urgent task area.</p>
+</dd>
+<dt>tooltip = &lt;boolean&gt;</dt>
+<dd><p>Determines whether the task tooltip is enabled. Legacy entry, superseded by <em>task_tooltip</em>.</p>
+</dd>
+<dt>task_tooltip = &lt;boolean&gt;</dt>
+<dd><p>Determines whether the task tooltip is enabled.</p>
+</dd>
+</dl>
+<h2 id="system-tray">SYSTEM TRAY</h2>
+<dl>
+<dt>systray = &lt;boolean&gt;</dt>
+<dd><p>Determines whether the systray is enabled. This is a legacy entry, superseded by <em>panel_items</em>. If that option is present, this one is ignored.</p>
+</dd>
+<dt>systray_padding = &lt;integer&gt; [&lt;integer&gt; [&lt;integer&gt;]]</dt>
+<dd><p>Padding, in pixels, of the system tray area.</p>
+<p>The first integer represents the internal padding on the <strong>X</strong> axis (and the spacing between children areas, if a third integer is not given).</p>
+<p>The second integer represents the internal padding on the <strong>Y</strong> axis.</p>
+<p>The third integer represents the spacing on the <strong>X</strong> axis between children areas, overriding the value given by the first integer.</p>
+<p>This entry is a <em>section marker</em> that determines the presence of a system tray area in legacy configurations. It is ignored for this purpose if <em>panel_items</em> is present.</p>
+</dd>
+<dt>systray_background_id = &lt;integer&gt;</dt>
+<dd><p>Id of the background used by the system tray area.</p>
+</dd>
+<dt>systray_sort = <em>descending</em> | <em>ascending</em> | <em>left2right</em> | <em>right2left</em></dt>
+<dd><p>Determines how the system tray icons should be sorted.</p>
+<ul>
+<li><em>descending</em> inserts new icons according to the window name, in reverse lexicographical order.</li>
+<li><em>ascending</em> inserts new icons according to the window name, in lexicographical order.</li>
+<li><em>left2right</em> appends new icons to the end of the icon list.</li>
+<li><em>right2left</em> prepends new icons to the start of the icon list.</li>
+</ul>
+</dd>
+<dt>systray_icon_size = &lt;integer&gt;</dt>
+<dd><p>Size, in pixels, of system tray icons.</p>
+</dd>
+<dt>systray_icon_asb = &lt;integer&gt; &lt;integer&gt; &lt;integer&gt;</dt>
+<dd><p>Relative alpha, saturation and brightness adjustments for the system tray icons, expressed as percentages.</p>
+</dd>
+</dl>
+<h2 id="launchers">LAUNCHERS</h2>
+<dl>
+<dt>launcher_padding = &lt;integer&gt; [&lt;integer&gt; [&lt;integer&gt;]]</dt>
+<dd><p>Padding, in pixels, of the launchers area.</p>
+<p>The first integer represents the internal padding on the <strong>X</strong> axis (and the spacing between children areas, if a third integer is not given).</p>
+<p>The second integer represents the internal padding on the <strong>Y</strong> axis.</p>
+<p>The third integer represents the spacing on the <strong>X</strong> axis between children areas, overriding the value given by the first integer.</p>
+</dd>
+<dt>launcher_background_id = &lt;integer&gt;</dt>
+<dd><p>Id of the background used by the launchers area.</p>
+</dd>
+<dt>launcher_icon_size = &lt;integer&gt;</dt>
+<dd><p>Size, in pixels, of the launcher icons.</p>
+</dd>
+<dt>launcher_item_app = &lt;string&gt;</dt>
+<dd><p>Path to a <em>.desktop</em> file to add to the launcher area. This must be conforming to the Desktop Entry Specification from freedesktop.org.</p>
+<p>The path given here supports shell-like expansion. As an example, home-relative paths for the current user can be be specified in any of the following formats:</p>
+<ul>
+<li>~/something.desktop</li>
+<li>~<em>user</em>/something.desktop</li>
+<li>$HOME/something.desktop</li>
+</ul>
+</dd>
+<dt>launcher_icon_theme &lt;string&gt;</dt>
+<dd><p>Name of the icon theme to use when looking up for icons used by the <em>.desktop</em> files to be loaded. If an XSETTINGS manager is running, tint3 will ignore this setting and load the icon name from there.</p>
+</dd>
+<dt>launcher_icon_asb = &lt;integer&gt; &lt;integer&gt; &lt;integer&gt;</dt>
+<dd><p>Relative alpha, saturation and brightness adjustments for the launcher icons, expressed as percentages.</p>
+</dd>
+<dt>launcher_tooltip = &lt;boolean&gt;</dt>
+<dd><p>Determines whether the launcher tooltip is enabled.</p>
+</dd>
+</dl>
+<h2 id="tooltips">TOOLTIPS</h2>
+<dl>
+<dt>tooltip_show_timeout = &lt;float&gt;</dt>
+<dd><p>Time, in seconds, after which tooltips are shown.</p>
+</dd>
+<dt>tooltip_hide_timeout = &lt;float&gt;</dt>
+<dd><p>Time, in seconds, after which tooltips are hidden.</p>
+</dd>
+<dt>tooltip_padding = &lt;integer&gt; [&lt;integer&gt;]</dt>
+<dd><p>Padding, in pixels, of the tooltip area.</p>
+<p>The first integer represents the internal padding on the <strong>X</strong> axis.</p>
+<p>The second integer represents the internal padding on the <strong>Y</strong> axis.</p>
+</dd>
+<dt>tooltip_background_id = &lt;integer&gt;</dt>
+<dd><p>Id of the background used by the tooltip area.</p>
+</dd>
+<dt>tooltip_font_color = &lt;color&gt;</dt>
+<dd><p>Color to use for the tooltip font.</p>
+</dd>
+<dt>tooltip_font = &lt;string&gt;</dt>
+<dd><p>Pango font descriptor to use for tooltips.</p>
+</dd>
+</dl>
+<h2 id="mouse-actions">MOUSE ACTIONS</h2>
+<dl>
+<dt>mouse_middle = &lt;mouse_action&gt;</dt>
+<dd><p>Determines how to handle a click of the middle mouse button or the mouse wheel. See <strong>FORMAT OF VALUES</strong> for a description of the accepted values.</p>
+</dd>
+<dt>mouse_right = &lt;mouse_action&gt;</dt>
+<dd><p>Determines how to handle a click of the right mouse button. See <strong>FORMAT OF VALUES</strong> for a description of the accepted values.</p>
+</dd>
+<dt>mouse_scroll_up = &lt;mouse_action&gt;</dt>
+<dd><p>Determines how to handle a mouse wheel up event. See <strong>FORMAT OF VALUES</strong> for a description of the accepted values.</p>
+</dd>
+<dt>mouse_scroll_down = &lt;mouse_action&gt;</dt>
+<dd><p>Determines how to handle a mouse wheel down event. See <strong>FORMAT OF VALUES</strong> for a description of the accepted values.</p>
+</dd>
+<dt>mouse_effects = &lt;boolean&gt;</dt>
+<dd><p>Determines whether icon effects on mouse events are enabled.</p>
+</dd>
+<dt>mouse_hover_icon_asb = &lt;integer&gt; &lt;integer&gt; &lt;integer&gt;</dt>
+<dd><p>Relative alpha, saturation and brightness adjustments for launcher and taskbar icons on a mouse hover event, expressed as percentages.</p>
+</dd>
+<dt>mouse_pressed_icon_asb = &lt;integer&gt; &lt;integer&gt; &lt;integer&gt;</dt>
+<dd><p>Relative alpha, saturation and brightness adjustments for launcher and taskbar icons on a mouse down event, expressed as percentages.</p>
+</dd>
+</dl>
+<h2 id="autohide">AUTOHIDE</h2>
+<dl>
+<dt>autohide = &lt;boolean&gt;</dt>
+<dd><p>Determines whether panel autohide is enabled.</p>
+</dd>
+<dt>autohide_show_timeout = &lt;float&gt;</dt>
+<dd><p>Time, in seconds, after which the panel is shown.</p>
+</dd>
+<dt>autohide_hide_timeout = &lt;float&gt;</dt>
+<dd><p>Time, in seconds, after which the panel is hidden.</p>
+</dd>
+<dt>autohide_height = &lt;integer&gt;</dt>
+<dd><p>Height, in pixel, of the panel in its hidden state. This entry has a lower bound of <strong>1</strong>.</p>
+</dd>
+</dl>
+<h1 id="format-of-values">FORMAT OF VALUES</h1>
+<h2 id="boolean">&lt;boolean&gt;</h2>
+<p>Numerical value. <strong>0</strong> means <strong>false</strong>, <strong>1</strong> means <strong>true</strong>.</p>
+<h2 id="color">&lt;color&gt;</h2>
+<p>RGBA color value. It's specified as a CSS-like hex color string, followed by an integer representing the opacity. As an example:</p>
+<pre><code>background_color = #ff0000 25</code></pre>
+<p>creates a red background with 25% opacity. A short hex value is also accepted. As an example:</p>
+<pre><code>background_color = #f00 25</code></pre>
+<p>is identical to the previous example.</p>
+<h2 id="mouse_action">&lt;mouse_action&gt;</h2>
+<p>String indicating the action to perform for the given mouse event. It can be one of the following:</p>
+<ul>
+<li><em>none</em> does nothing (default).</li>
+<li><em>close</em> closes the focused window.</li>
+<li><em>toggle</em> toggles the active state on the focused window.</li>
+<li><em>iconify</em> iconifies the focused window.</li>
+<li><em>shade</em> toggles the shaded state on the focused window.</li>
+<li><em>toggle_iconify</em> toggles the iconified state of the focused window.</li>
+<li><em>maximize_restore</em> maximizes or restores the focused window.</li>
+<li><em>desktop_left</em> moves the window to the desktop to the left.</li>
+<li><em>desktop_right</em> moves the window to the desktop to the right.</li>
+<li><em>next_task</em> activates the next window.</li>
+<li><em>prev_task</em> activates the previous window.</li>
+</ul>
+<h1 id="see-also">SEE ALSO</h1>
+<p><strong>tint3(1)</strong>, <strong>strftime(3)</strong></p>
+</body>
+</html>

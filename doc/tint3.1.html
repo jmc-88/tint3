@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="pandoc">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>TINT3(1) v0.3.0 | tint3 user manual</title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <!--[if lt IE 9]>
+    <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+  <link rel="stylesheet" href="/css/man.css">
+</head>
+<body>
+<header>
+<h1 class="title">TINT3(1) v0.3.0 | tint3 user manual</h1>
+</header>
+<nav id="TOC">
+<ul>
+<li><a href="#name">NAME</a></li>
+<li><a href="#synopsis">SYNOPSIS</a></li>
+<li><a href="#description">DESCRIPTION</a></li>
+<li><a href="#options">OPTIONS</a></li>
+<li><a href="#files">FILES</a></li>
+<li><a href="#environment">ENVIRONMENT</a></li>
+<li><a href="#signals">SIGNALS</a></li>
+<li><a href="#authors">AUTHORS</a></li>
+<li><a href="#see-also">SEE ALSO</a></li>
+</ul>
+</nav>
+<h1 id="name">NAME</h1>
+<p><strong>tint3</strong> - lightweight panel/taskbar</p>
+<h1 id="synopsis">SYNOPSIS</h1>
+<p><strong>tint3</strong> [<strong>-c</strong> config-file]</p>
+<h1 id="description">DESCRIPTION</h1>
+<p>This manual page documents briefly the <code>tint3</code> command. See the README at <a href="https://github.com/jmc-88/tint3">https://github.com/jmc-88/tint3</a> for the most up-to-date information.</p>
+<p>tint3 is a simple panel/taskbar derived from tint2. Initially written for Openbox, it should work fine with any modern window manager. It provides support for launchers, taskbars, battery indicator, clock, system tray, transparency and gradients.</p>
+<h1 id="options">OPTIONS</h1>
+<dl>
+<dt>-c <em>config-file</em></dt>
+<dd><p>Specify which configuration file to use instead of the default.</p>
+<p>If this flag is not provided and <em>$XDG_CONFIG_HOME/tint3/tint3rc</em> is missing, tint3 will copy its default configuration file to that path.</p>
+<p>See <strong>tint3rc(5)</strong> for a description of the configuration file format.</p>
+</dd>
+</dl>
+<h1 id="files">FILES</h1>
+<dl>
+<dt><em>$XDG_CONFIG_HOME/tint3/tint3rc</em></dt>
+<dd><p>Per-user configuration file.</p>
+</dd>
+<dt><em>$XDG_CONFIG_DIRS/tint3/tint3rc</em></dt>
+<dd><p>System-wide configuration file. Only loaded if no per-user one is found.</p>
+</dd>
+</dl>
+<h1 id="environment">ENVIRONMENT</h1>
+<dl>
+<dt><em>XDG_CONFIG_HOME</em></dt>
+<dd><p>The value of this variable influences the lookup of the per-user configuration file. Typically defaults to <em>~/.config</em>.</p>
+</dd>
+<dt><em>XDG_DATA_HOME</em></dt>
+<dd><p>The value of this variable influences the lookup of <code>.desktop</code> files for launcher items. Typically defaults to <em>~/.local/share</em>.</p>
+</dd>
+<dt><em>XDG_CONFIG_DIRS</em></dt>
+<dd><p>The value of this variable influences the lookup of the system-wide configuration file. Typically defaults to <em>/usr/local/etc/xdg:/etc/xdg</em>.</p>
+</dd>
+<dt><em>XDG_DATA_DIRS</em></dt>
+<dd><p>The value of this variable influences the lookup of <code>.desktop</code> files for launcher items. Typically defaults to <em>/usr/local/share:/usr/share</em>.</p>
+</dd>
+</dl>
+<h1 id="signals">SIGNALS</h1>
+<dl>
+<dt><em>SIGHUP</em>, <em>SIGTERM</em>, <em>SIGINT</em></dt>
+<dd><p>Gracefully terminates tint3.</p>
+</dd>
+<dt><em>SIGUSR1</em></dt>
+<dd><p>Causes tint3 to restart and reload the configuration file in use.</p>
+</dd>
+<dt><em>SIGUSR2</em></dt>
+<dd><p>Causes tint3 to <strong>execvp(3)</strong> and replace its current process image with the one pointed at by <code>argv[0]</code>. Allows for a seamless upgrade of tint3 through binary package upgrades.</p>
+</dd>
+</dl>
+<h1 id="authors">AUTHORS</h1>
+<p>tint3 written by Daniele Cocca <a href="https://github.com/jmc-88">https://github.com/jmc-88</a> and based on tint2, originally written by Thierry Lorthiois &lt;lorthiois@bbsoft.fr&gt;, in turn based on ttm, originally written by Pål Staurland &lt;staura@gmail.com&gt;.</p>
+<h1 id="see-also">SEE ALSO</h1>
+<p><strong>tint2(1)</strong>, <strong>tint3rc(5)</strong></p>
+</body>
+</html>

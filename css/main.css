@@ -39,6 +39,7 @@ a:visited { color: #205caa; }
   zoom: 1;
 }
 
+ul { padding: inherit; }
 
 /* Layout Styles */
 /* ----------------------------------------------------------*/
