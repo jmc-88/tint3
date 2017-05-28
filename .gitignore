@@ -3,3 +3,10 @@ Gemfile.lock
 
 # Ignore the generated Jekyll site folder
 /_site
+
+# Ignore build artifacts from master
+*.deb
+*.rpm
+/build
+/package-build
+/_CPack_Packages
