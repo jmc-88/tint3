@@ -158,22 +158,20 @@ bool TooltipShow(Timer& timer) {
   return false;
 }
 
-void TooltipUpdateGeometry() {
-  cairo_surface_t* cs = cairo_xlib_surface_create(server.dsp, g_tooltip.window,
+void Tooltip::UpdateGeometry() {
+  cairo_surface_t* cs = cairo_xlib_surface_create(server.dsp, window,
                                                   server.visual, width, height);
   cairo_t* c = cairo_create(cs);
   util::GObjectPtr<PangoLayout> layout(pango_cairo_create_layout(c));
 
-  pango_layout_set_font_description(layout.get(), g_tooltip.font_desc);
-  pango_layout_set_text(layout.get(), g_tooltip.tooltip_text.c_str(), -1);
+  pango_layout_set_font_description(layout.get(), font_desc);
+  pango_layout_set_text(layout.get(), tooltip_text.c_str(), -1);
 
   PangoRectangle r1, r2;
   pango_layout_get_pixel_extents(layout.get(), &r1, &r2);
-  const int w = g_tooltip.bg.border().width();
-  width = 2 * w + 2 * g_tooltip.paddingx + r2.width;
-  height = 2 * w + 2 * g_tooltip.paddingy + r2.height;
-
-  Panel* panel = g_tooltip.panel;
+  const int w = bg.border().width();
+  width = 2 * w + 2 * paddingx + r2.width;
+  height = 2 * w + 2 * paddingy + r2.height;
 
   if (panel_horizontal &&
       panel_vertical_position == PanelVerticalPosition::kBottom) {
@@ -191,12 +189,11 @@ void TooltipUpdateGeometry() {
   cairo_surface_destroy(cs);
 }
 
-void TooltipAdjustGeometry() {
+void Tooltip::AdjustGeometry() {
   // adjust coordinates and size to not go offscreen
   // it seems quite impossible that the height needs to be adjusted, but we do
   // it anyway.
 
-  Panel* panel = g_tooltip.panel;
   int screen_width =
       server.monitor[panel->monitor_].x + server.monitor[panel->monitor_].width;
   int screen_height = server.monitor[panel->monitor_].y +
@@ -251,8 +248,8 @@ void Tooltip::Update(Timer& timer) {
     return;
   }
 
-  TooltipUpdateGeometry();
-  TooltipAdjustGeometry();
+  UpdateGeometry();
+  AdjustGeometry();
   XMoveResizeWindow(server.dsp, window, x, y, width, height);
 
   // Stuff for drawing the tooltip

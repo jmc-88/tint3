@@ -25,7 +25,9 @@ class Tooltip {
   void BindTo(Area* area);
   bool IsBoundTo(Area* area) const;
 
+  void AdjustGeometry();
   void Update(Timer& timer);
+  void UpdateGeometry();
 
  private:
   Area* area_;
