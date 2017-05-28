@@ -130,8 +130,8 @@ bool EventLoop::RunLoop() {
             AutohideTriggerHide(panel, timer_);
           }
 
-          auto XdndPosition = server_->atoms_.at("XdndPosition");
-          auto XdndLeave = server_->atoms_.at("XdndLeave");
+          auto XdndPosition = server_->atom("XdndPosition");
+          auto XdndLeave = server_->atom("XdndLeave");
 
           if (panel->hidden()) {
             if (e.type == ClientMessage &&
@@ -234,7 +234,7 @@ pid_t GetWindowPID(Window window) {
   int actual_format;
   unsigned long nitems;
   unsigned long bytes_after;
-  int ret = XGetWindowProperty(server.dsp, window, server.atoms_["_NET_WM_PID"],
+  int ret = XGetWindowProperty(server.dsp, window, server.atom("_NET_WM_PID"),
                                0, 1024, False, AnyPropertyType, &actual_type,
                                &actual_format, &nitems, &bytes_after, &prop);
 
@@ -247,7 +247,7 @@ pid_t GetWindowPID(Window window) {
 
 int SetWindowPID(Window window) {
   pid_t pid = getpid();
-  return XChangeProperty(server.dsp, window, server.atoms_["_NET_WM_PID"],
+  return XChangeProperty(server.dsp, window, server.atom("_NET_WM_PID"),
                          XA_CARDINAL, 32, PropModeReplace,
                          reinterpret_cast<unsigned char*>(&pid), 1);
 }

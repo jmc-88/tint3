@@ -223,16 +223,16 @@ bool Task::UpdateTitle() {
   }
 
   auto name =
-      ServerGetProperty<char>(win, server.atoms_["_NET_WM_VISIBLE_NAME"],
-                              server.atoms_["UTF8_STRING"], 0);
+      ServerGetProperty<char>(win, server.atom("_NET_WM_VISIBLE_NAME"),
+                              server.atom("UTF8_STRING"), 0);
 
   if (name == nullptr || *name == '\0') {
-    name = ServerGetProperty<char>(win, server.atoms_["_NET_WM_NAME"],
-                                   server.atoms_["UTF8_STRING"], 0);
+    name = ServerGetProperty<char>(win, server.atom("_NET_WM_NAME"),
+                                   server.atom("UTF8_STRING"), 0);
   }
 
   if (name == nullptr || *name == '\0') {
-    name = ServerGetProperty<char>(win, server.atoms_["WM_NAME"], XA_STRING, 0);
+    name = ServerGetProperty<char>(win, server.atom("WM_NAME"), XA_STRING, 0);
   }
 
   // add space before title
@@ -295,7 +295,7 @@ void GetIcon(Task* tsk) {
   Imlib_Image img = nullptr;
   int length = 0;
   auto data = ServerGetProperty<unsigned long>(
-      tsk->win, server.atoms_["_NET_WM_ICON"], XA_CARDINAL, &length);
+      tsk->win, server.atom("_NET_WM_ICON"), XA_CARDINAL, &length);
 
   if (data != nullptr && length > 0) {
     // get ARGB icon
@@ -501,7 +501,7 @@ void Task::OnChangeLayout() {
   long value[] = {panel_->panel_x_ + panel_x_, panel_->panel_y_ + panel_y_,
                   width_, height_};
 
-  XChangeProperty(server.dsp, win, server.atoms_["_NET_WM_ICON_GEOMETRY"],
+  XChangeProperty(server.dsp, win, server.atom("_NET_WM_ICON_GEOMETRY"),
                   XA_CARDINAL, 32, PropModeReplace, (unsigned char*)value, 4);
 
   // reset Pixmap when position/size changed

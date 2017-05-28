@@ -175,8 +175,8 @@ void SendEvent32(Window win, Atom at, long data1, long data2, long data3) {
 
 void GetRootPixmap() {
   Pixmap ret = None;
-  Atom pixmap_atoms[] = {server.atoms_["_XROOTPMAP_ID"],
-                         server.atoms_["_XROOTMAP_ID"]};
+  Atom pixmap_atoms[] = {server.atom("_XROOTPMAP_ID"),
+                         server.atom("_XROOTMAP_ID")};
 
   for (Atom const& atom : pixmap_atoms) {
     auto res =
@@ -416,3 +416,5 @@ void Server::InitX11() {
 Window Server::root_window() const { return root_window_; }
 
 void Server::UpdateRootWindow() { root_window_ = RootWindow(dsp, screen); }
+
+Atom Server::atom(std::string const& name) const { return atoms_.at(name); }

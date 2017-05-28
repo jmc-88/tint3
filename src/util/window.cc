@@ -41,40 +41,40 @@ namespace util {
 namespace window {
 
 void SetActive(Window win) {
-  SendEvent32(win, server.atoms_["_NET_ACTIVE_WINDOW"], 2, CurrentTime, 0);
+  SendEvent32(win, server.atom("_NET_ACTIVE_WINDOW"), 2, CurrentTime, 0);
 }
 
 int GetDesktop(Window win) {
-  return GetProperty32<int>(win, server.atoms_["_NET_WM_DESKTOP"], XA_CARDINAL);
+  return GetProperty32<int>(win, server.atom("_NET_WM_DESKTOP"), XA_CARDINAL);
 }
 
 void SetDesktop(Window win, int desktop) {
-  SendEvent32(win, server.atoms_["_NET_WM_DESKTOP"], desktop, 2, 0);
+  SendEvent32(win, server.atom("_NET_WM_DESKTOP"), desktop, 2, 0);
 }
 
 void SetClose(Window win) {
-  SendEvent32(win, server.atoms_["_NET_CLOSE_WINDOW"], 0, 2, 0);
+  SendEvent32(win, server.atom("_NET_CLOSE_WINDOW"), 0, 2, 0);
 }
 
 void ToggleShade(Window win) {
-  SendEvent32(win, server.atoms_["_NET_WM_STATE"], 2,
-              server.atoms_["_NET_WM_STATE_SHADED"], 0);
+  SendEvent32(win, server.atom("_NET_WM_STATE"), 2,
+              server.atom("_NET_WM_STATE_SHADED"), 0);
 }
 
 void MaximizeRestore(Window win) {
-  SendEvent32(win, server.atoms_["_NET_WM_STATE"], 2,
-              server.atoms_["_NET_WM_STATE_MAXIMIZED_VERT"], 0);
-  SendEvent32(win, server.atoms_["_NET_WM_STATE"], 2,
-              server.atoms_["_NET_WM_STATE_MAXIMIZED_HORZ"], 0);
+  SendEvent32(win, server.atom("_NET_WM_STATE"), 2,
+              server.atom("_NET_WM_STATE_MAXIMIZED_VERT"), 0);
+  SendEvent32(win, server.atom("_NET_WM_STATE"), 2,
+              server.atom("_NET_WM_STATE_MAXIMIZED_HORZ"), 0);
 }
 
 int IsHidden(Window win) {
   int state_count = 0;
-  auto at = ServerGetProperty<Atom>(win, server.atoms_["_NET_WM_STATE"],
-                                    XA_ATOM, &state_count);
+  auto at = ServerGetProperty<Atom>(win, server.atom("_NET_WM_STATE"), XA_ATOM,
+                                    &state_count);
 
   for (int i = 0; i < state_count; ++i) {
-    if (at.get()[i] == server.atoms_["_NET_WM_STATE_SKIP_TASKBAR"]) {
+    if (at.get()[i] == server.atom("_NET_WM_STATE_SKIP_TASKBAR")) {
       return 1;
     }
 
@@ -90,15 +90,15 @@ int IsHidden(Window win) {
   }
 
   int type_count = 0;
-  at = ServerGetProperty<Atom>(win, server.atoms_["_NET_WM_WINDOW_TYPE"],
-                               XA_ATOM, &type_count);
+  at = ServerGetProperty<Atom>(win, server.atom("_NET_WM_WINDOW_TYPE"), XA_ATOM,
+                               &type_count);
 
   for (int i = 0; i < type_count; ++i) {
-    if (at.get()[i] == server.atoms_["_NET_WM_WINDOW_TYPE_DOCK"] ||
-        at.get()[i] == server.atoms_["_NET_WM_WINDOW_TYPE_DESKTOP"] ||
-        at.get()[i] == server.atoms_["_NET_WM_WINDOW_TYPE_TOOLBAR"] ||
-        at.get()[i] == server.atoms_["_NET_WM_WINDOW_TYPE_MENU"] ||
-        at.get()[i] == server.atoms_["_NET_WM_WINDOW_TYPE_SPLASH"]) {
+    if (at.get()[i] == server.atom("_NET_WM_WINDOW_TYPE_DOCK") ||
+        at.get()[i] == server.atom("_NET_WM_WINDOW_TYPE_DESKTOP") ||
+        at.get()[i] == server.atom("_NET_WM_WINDOW_TYPE_TOOLBAR") ||
+        at.get()[i] == server.atom("_NET_WM_WINDOW_TYPE_MENU") ||
+        at.get()[i] == server.atom("_NET_WM_WINDOW_TYPE_SPLASH")) {
       return 1;
     }
   }
@@ -150,11 +150,11 @@ int IsIconified(Window win) {
   // EWMH specification : minimization of windows use _NET_WM_STATE_HIDDEN.
   // WM_STATE is not accurate for shaded window and in multi_desktop mode.
   int count = 0;
-  auto at = ServerGetProperty<Atom>(win, server.atoms_["_NET_WM_STATE"],
-                                    XA_ATOM, &count);
+  auto at = ServerGetProperty<Atom>(win, server.atom("_NET_WM_STATE"), XA_ATOM,
+                                    &count);
 
   for (int i = 0; i < count; i++) {
-    if (at.get()[i] == server.atoms_["_NET_WM_STATE_HIDDEN"]) {
+    if (at.get()[i] == server.atom("_NET_WM_STATE_HIDDEN")) {
       return 1;
     }
   }
@@ -164,11 +164,11 @@ int IsIconified(Window win) {
 
 int IsUrgent(Window win) {
   int count = 0;
-  auto at = ServerGetProperty<Atom>(win, server.atoms_["_NET_WM_STATE"],
-                                    XA_ATOM, &count);
+  auto at = ServerGetProperty<Atom>(win, server.atom("_NET_WM_STATE"), XA_ATOM,
+                                    &count);
 
   for (int i = 0; i < count; i++) {
-    if (at.get()[i] == server.atoms_["_NET_WM_STATE_DEMANDS_ATTENTION"]) {
+    if (at.get()[i] == server.atom("_NET_WM_STATE_DEMANDS_ATTENTION")) {
       return 1;
     }
   }
@@ -178,11 +178,11 @@ int IsUrgent(Window win) {
 
 int IsSkipTaskbar(Window win) {
   int count = 0;
-  auto at = ServerGetProperty<Atom>(win, server.atoms_["_NET_WM_STATE"],
-                                    XA_ATOM, &count);
+  auto at = ServerGetProperty<Atom>(win, server.atom("_NET_WM_STATE"), XA_ATOM,
+                                    &count);
 
   for (int i = 0; i < count; ++i) {
-    if (at.get()[i] == server.atoms_["_NET_WM_STATE_SKIP_TASKBAR"]) {
+    if (at.get()[i] == server.atom("_NET_WM_STATE_SKIP_TASKBAR")) {
       return 1;
     }
   }
@@ -192,7 +192,7 @@ int IsSkipTaskbar(Window win) {
 
 Window GetActive() {
   return GetProperty32<Window>(server.root_window(),
-                               server.atoms_["_NET_ACTIVE_WINDOW"], XA_WINDOW);
+                               server.atom("_NET_ACTIVE_WINDOW"), XA_WINDOW);
 }
 
 int IsActive(Window win) { return GetActive() == win; }
@@ -201,7 +201,7 @@ int IsActive(Window win) { return GetActive() == win; }
 }  // namespace window
 
 void SetDesktop(int desktop) {
-  SendEvent32(server.root_window(), server.atoms_["_NET_CURRENT_DESKTOP"],
+  SendEvent32(server.root_window(), server.atom("_NET_CURRENT_DESKTOP"),
               desktop, 0, 0);
 }
 
@@ -278,8 +278,8 @@ unsigned long* GetBestIcon(unsigned long* data, int icon_count, int num,
 std::vector<std::string> ServerGetDesktopNames() {
   int count = 0;
   auto data_ptr = ServerGetProperty<char>(server.root_window(),
-                                          server.atoms_["_NET_DESKTOP_NAMES"],
-                                          server.atoms_["UTF8_STRING"], &count);
+                                          server.atom("_NET_DESKTOP_NAMES"),
+                                          server.atom("UTF8_STRING"), &count);
 
   std::vector<std::string> names;
 

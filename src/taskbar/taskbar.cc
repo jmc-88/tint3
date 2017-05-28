@@ -352,7 +352,7 @@ void TaskRefreshTasklist(Timer& timer) {
 
   int num_results = 0;
   auto windows = ServerGetProperty<Window>(server.root_window(),
-                                           server.atoms_["_NET_CLIENT_LIST"],
+                                           server.atom("_NET_CLIENT_LIST"),
                                            XA_WINDOW, &num_results);
 
   if (windows == nullptr) {

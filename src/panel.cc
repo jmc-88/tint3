@@ -85,9 +85,9 @@ namespace {
 
 void UpdateStrut(Panel* p) {
   if (panel_strut_policy == PanelStrutPolicy::kNone) {
-    XDeleteProperty(server.dsp, p->main_win_, server.atoms_["_NET_WM_STRUT"]);
+    XDeleteProperty(server.dsp, p->main_win_, server.atom("_NET_WM_STRUT"));
     XDeleteProperty(server.dsp, p->main_win_,
-                    server.atoms_["_NET_WM_STRUT_PARTIAL"]);
+                    server.atom("_NET_WM_STRUT_PARTIAL"));
     return;
   }
 
@@ -141,10 +141,10 @@ void UpdateStrut(Panel* p) {
   }
 
   // Old specification : fluxbox need _NET_WM_STRUT.
-  XChangeProperty(server.dsp, p->main_win_, server.atoms_["_NET_WM_STRUT"],
+  XChangeProperty(server.dsp, p->main_win_, server.atom("_NET_WM_STRUT"),
                   XA_CARDINAL, 32, PropModeReplace, (unsigned char*)&struts, 4);
   XChangeProperty(server.dsp, p->main_win_,
-                  server.atoms_["_NET_WM_STRUT_PARTIAL"], XA_CARDINAL, 32,
+                  server.atom("_NET_WM_STRUT_PARTIAL"), XA_CARDINAL, 32,
                   PropModeReplace, (unsigned char*)&struts, 12);
 }
 
@@ -494,32 +494,31 @@ void Panel::SetProperties() {
   gchar* name = g_locale_to_utf8("tint3", -1, nullptr, &len, nullptr);
 
   if (name != nullptr) {
-    XChangeProperty(server.dsp, main_win_, server.atoms_["_NET_WM_NAME"],
-                    server.atoms_["UTF8_STRING"], 8, PropModeReplace,
+    XChangeProperty(server.dsp, main_win_, server.atom("_NET_WM_NAME"),
+                    server.atom("UTF8_STRING"), 8, PropModeReplace,
                     (unsigned char*)name, (int)len);
     g_free(name);
   }
 
   // Dock
-  long val = server.atoms_["_NET_WM_WINDOW_TYPE_DOCK"];
-  XChangeProperty(server.dsp, main_win_, server.atoms_["_NET_WM_WINDOW_TYPE"],
+  long val = server.atom("_NET_WM_WINDOW_TYPE_DOCK");
+  XChangeProperty(server.dsp, main_win_, server.atom("_NET_WM_WINDOW_TYPE"),
                   XA_ATOM, 32, PropModeReplace, (unsigned char*)&val, 1);
 
   // Sticky and below other window
   val = kAllDesktops;
-  XChangeProperty(server.dsp, main_win_, server.atoms_["_NET_WM_DESKTOP"],
+  XChangeProperty(server.dsp, main_win_, server.atom("_NET_WM_DESKTOP"),
                   XA_CARDINAL, 32, PropModeReplace, (unsigned char*)&val, 1);
   Atom state[4];
-  state[0] = server.atoms_["_NET_WM_STATE_SKIP_PAGER"];
-  state[1] = server.atoms_["_NET_WM_STATE_SKIP_TASKBAR"];
-  state[2] = server.atoms_["_NET_WM_STATE_STICKY"];
+  state[0] = server.atom("_NET_WM_STATE_SKIP_PAGER");
+  state[1] = server.atom("_NET_WM_STATE_SKIP_TASKBAR");
+  state[2] = server.atom("_NET_WM_STATE_STICKY");
   state[3] = panel_layer == PanelLayer::kBottom
-                 ? server.atoms_["_NET_WM_STATE_BELOW"]
-                 : server.atoms_["_NET_WM_STATE_ABOVE"];
+                 ? server.atom("_NET_WM_STATE_BELOW")
+                 : server.atom("_NET_WM_STATE_ABOVE");
   int nb_atoms = panel_layer == PanelLayer::kNormal ? 3 : 4;
-  XChangeProperty(server.dsp, main_win_, server.atoms_["_NET_WM_STATE"],
-                  XA_ATOM, 32, PropModeReplace, (unsigned char*)state,
-                  nb_atoms);
+  XChangeProperty(server.dsp, main_win_, server.atom("_NET_WM_STATE"), XA_ATOM,
+                  32, PropModeReplace, (unsigned char*)state, nb_atoms);
 
   // Unfocusable
   XWMHints wmhints;
@@ -537,14 +536,14 @@ void Panel::SetProperties() {
 
   // Undecorated
   long prop[5] = {2, 0, 0, 0, 0};
-  XChangeProperty(server.dsp, main_win_, server.atoms_["_MOTIF_WM_HINTS"],
-                  server.atoms_["_MOTIF_WM_HINTS"], 32, PropModeReplace,
+  XChangeProperty(server.dsp, main_win_, server.atom("_MOTIF_WM_HINTS"),
+                  server.atom("_MOTIF_WM_HINTS"), 32, PropModeReplace,
                   (unsigned char*)prop, 5);
 
   // XdndAware - Register for Xdnd events
   Atom version = 4;
-  XChangeProperty(server.dsp, main_win_, server.atoms_["XdndAware"], XA_ATOM,
-                  32, PropModeReplace, (unsigned char*)&version, 1);
+  XChangeProperty(server.dsp, main_win_, server.atom("XdndAware"), XA_ATOM, 32,
+                  PropModeReplace, (unsigned char*)&version, 1);
 
   UpdateStrut(this);
 

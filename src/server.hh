@@ -25,8 +25,6 @@ struct Monitor {
 
 class Server {
  public:
-  std::unordered_map<std::string, Atom> atoms_;
-
   Display* dsp;
   Window composite_manager;
   bool real_transparency;
@@ -49,7 +47,6 @@ class Server {
 #ifdef HAVE_SN
   SnDisplay* sn_dsp;
   std::unordered_map<pid_t, SnLauncherContext*> pids;
-  Atom atom;
 #endif  // HAVE_SN
 
   void Cleanup();
@@ -63,8 +60,11 @@ class Server {
   Window root_window() const;
   void UpdateRootWindow();
 
+  Atom atom(std::string const& name) const;
+
  private:
   Window root_window_;
+  std::unordered_map<std::string, Atom> atoms_;
 };
 
 extern Server server;
