@@ -15,6 +15,9 @@ class Rect {
   // The created rectangle strecthes from (x; y) to (x + w; y + h).
   Rect(int x, int y, unsigned int w, unsigned int h);
 
+  // Tells if the other rectangle is contained in this one.
+  bool Contains(Rect const& other);
+
   // Expands the rectangle in all directions by the given amount of pixels.
   void ExpandBy(unsigned int p);
 
