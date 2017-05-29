@@ -138,9 +138,8 @@ void Taskbarname::DrawForeground(cairo_t* c) {
 bool Taskbarname::Resize() {
   need_redraw_ = true;
 
-  int name_height, name_width, name_height_ink;
-  GetTextSize2(taskbarname_font_desc, &name_height_ink, &name_height,
-               &name_width, panel_->height_, panel_->width_, name());
+  int name_width, name_height;
+  GetTextSize(taskbarname_font_desc, name(), &name_width, &name_height);
 
   if (panel_horizontal) {
     int new_size = name_width + (2 * (padding_x_lr_ + bg_.border().width()));

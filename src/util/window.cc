@@ -300,50 +300,25 @@ std::vector<std::string> ServerGetDesktopNames() {
   return names;
 }
 
-void GetTextSize(PangoFontDescription* font, int* height_ink, int* height,
-                 int panel_height, std::string const& text) {
-  auto pmap = XCreatePixmap(server.dsp, server.root_window(), panel_height,
-                            panel_height, server.depth);
+void GetTextSize(PangoFontDescription* font, std::string const& text,
+                 int* width, int* height) {
+  cairo_surface_t* cs = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, 1, 1);
+  cairo_t* c = cairo_create(cs);
 
-  auto cs = cairo_xlib_surface_create(server.dsp, pmap, server.visual,
-                                      panel_height, panel_height);
-  auto c = cairo_create(cs);
-
-  util::GObjectPtr<PangoLayout> layout(pango_cairo_create_layout(c));
+  util::GObjectPtr<PangoLayout> layout{pango_cairo_create_layout(c)};
+  pango_layout_set_ellipsize(layout.get(), PANGO_ELLIPSIZE_NONE);
   pango_layout_set_font_description(layout.get(), font);
-  pango_layout_set_text(layout.get(), text.c_str(), text.length());
+  pango_layout_set_text(layout.get(), text.c_str(), -1);
 
-  PangoRectangle rect_ink, rect;
-  pango_layout_get_pixel_extents(layout.get(), &rect_ink, &rect);
-  (*height_ink) = rect_ink.height;
-  (*height) = rect.height;
+  PangoRectangle r1, r2;
+  pango_layout_get_pixel_extents(layout.get(), &r1, &r2);
+  if (width) {
+    (*width) = r2.width;
+  }
+  if (height) {
+    (*height) = r2.height;
+  }
 
   cairo_destroy(c);
   cairo_surface_destroy(cs);
-  XFreePixmap(server.dsp, pmap);
-}
-
-void GetTextSize2(PangoFontDescription* font, int* height_ink, int* height,
-                  int* width, int panel_height, int panel_width,
-                  std::string const& text) {
-  auto pmap = XCreatePixmap(server.dsp, server.root_window(), panel_height,
-                            panel_height, server.depth);
-
-  auto cs = cairo_xlib_surface_create(server.dsp, pmap, server.visual,
-                                      panel_height, panel_width);
-  auto c = cairo_create(cs);
-
-  util::GObjectPtr<PangoLayout> layout(pango_cairo_create_layout(c));
-  pango_layout_set_font_description(layout.get(), font);
-  pango_layout_set_text(layout.get(), text.c_str(), text.length());
-
-  PangoRectangle rect_ink, rect;
-  pango_layout_get_pixel_extents(layout.get(), &rect_ink, &rect);
-  (*height_ink) = rect_ink.height;
-  (*height) = rect.height;
-  (*width) = rect.width;
-
-  cairo_destroy(c);
-  cairo_surface_destroy(cs);
-  XFreePixmap(server.dsp, pmap);
 }

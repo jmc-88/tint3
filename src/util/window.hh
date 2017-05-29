@@ -34,10 +34,7 @@ unsigned long* GetBestIcon(unsigned long* data, int icon_count, int num,
 
 std::vector<std::string> ServerGetDesktopNames();
 
-void GetTextSize(PangoFontDescription* font, int* height_ink, int* height,
-                 int panel_height, std::string const& text);
-void GetTextSize2(PangoFontDescription* font, int* height_ink, int* height,
-                  int* width, int panel_height, int panel_width,
-                  std::string const& text);
+void GetTextSize(PangoFontDescription* font, std::string const& text,
+                 int* width, int* height);
 
 #endif  // TINT3_UTIL_WINDOW_HH

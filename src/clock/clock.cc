@@ -200,19 +200,17 @@ void Clock::DrawForeground(cairo_t* c) {
 bool Clock::Resize() {
   need_redraw_ = true;
 
-  int time_height_ink = 0, time_height = 0, time_width = 0;
-  int date_height_ink = 0, date_height = 0, date_width = 0;
+  int time_width = 0, time_height = 0;
+  int date_width = 0, date_height = 0;
 
   time1_ = FormatTime(time1_format,
                       ClockGetTimeForTimezone(time1_timezone, time_clock));
-  GetTextSize2(time1_font_desc, &time_height_ink, &time_height, &time_width,
-               panel_->height_, panel_->width_, time1_);
+  GetTextSize(time1_font_desc, time1_, &time_width, &time_height);
 
   if (!time2_format.empty()) {
     time2_ = FormatTime(time2_format,
                         ClockGetTimeForTimezone(time2_timezone, time_clock));
-    GetTextSize2(time2_font_desc, &date_height_ink, &date_height, &date_width,
-                 panel_->height_, panel_->width_, time2_);
+    GetTextSize(time2_font_desc, time2_, &date_width, &date_height);
   }
 
   if (panel_horizontal) {

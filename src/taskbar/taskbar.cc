@@ -278,9 +278,8 @@ void Taskbar::InitPanel(Panel* panel) {
   }
 
   // compute vertical position : text and icon
-  int height_ink, height;
-  GetTextSize(panel->g_task.font_desc, &height_ink, &height, panel->height_,
-              "TAjpg");
+  int height;
+  GetTextSize(panel->g_task.font_desc, "TAjpg", nullptr, &height);
 
   if (!panel->g_task.maximum_width && panel_horizontal) {
     panel->g_task.maximum_width = server.monitor[panel->monitor_].width;
