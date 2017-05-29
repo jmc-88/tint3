@@ -20,7 +20,7 @@ bool TokenList::Accept(Symbol symbol) {
 }
 
 bool TokenList::Next() {
-  if (current_ < tokens_.size()) {
+  if (current_ != tokens_.size() - 1) {
     ++current_;
     return true;
   }

@@ -149,6 +149,8 @@ bool Parser::operator()(parser::TokenList* tokens) {
 }
 
 bool Parser::ConfigEntryParser(parser::TokenList* tokens) {
+  tokens->SkipOver(kWhitespace);
+
   // end of file, stop parsing
   if (tokens->Accept(parser::kEOF)) {
     return true;
@@ -196,7 +198,8 @@ bool Parser::Assignment(parser::TokenList* tokens) {
   tokens->SkipOver(kWhitespace);
 
   std::vector<parser::Token> skipped;
-  if (!tokens->SkipUntil(kNewLine, &skipped)) {
+  if (!tokens->SkipUntil(kNewLine, &skipped) &&
+      tokens->Current().symbol != parser::kEOF) {
     return false;
   }
 

@@ -422,3 +422,21 @@ TEST_CASE("ConfigParserGradients", "Accepts gradients") {
 
   CleanupPanel();  // TODO: decouple from config loading
 }
+
+static constexpr char kNoNewlineAtEOF[] =
+    u8R"EOF(mouse_scroll_down = iconify)EOF";
+
+TEST_CASE("ConfigParserNoNewlineAtEOF") {
+  DefaultPanel();  // TODO: decouple from config loading
+
+  test::ConfigReader reader;
+  config::Parser config_entry_parser{&reader};
+  parser::Parser p{config::kLexer, &config_entry_parser};
+
+  REQUIRE(p.Parse(kNoNewlineAtEOF));
+
+  // Check that the mouse action was parsed correctly
+  REQUIRE(mouse_scroll_down == MouseAction::kIconify);
+
+  CleanupPanel();  // TODO: decouple from config loading
+}
