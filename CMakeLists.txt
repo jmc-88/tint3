@@ -289,67 +289,107 @@ add_custom_target(testdata ALL DEPENDS ${TESTDATA_OUTS})
 # Main entry point for tests
 add_library(testmain STATIC test/main.cc)
 
-test_target(config_test src/config_test.cc src/util/timer_test_utils.cc)
-target_link_libraries(config_test tint3_common_lib testmain ${TINT3_LINK_LIBRARIES})
+test_target(
+  config_test
+  SOURCES src/config_test.cc src/util/timer_test_utils.cc
+  LINK_LIBRARIES tint3_common_lib testmain ${TINT3_LINK_LIBRARIES})
 
-test_target(clock_time_utils_test src/clock/time_utils_test.cc)
-target_link_libraries(clock_time_utils_test tint3_common_lib testmain ${TINT3_LINK_LIBRARIES})
+test_target(
+  clock_time_utils_test
+  SOURCES src/clock/time_utils_test.cc
+  LINK_LIBRARIES tint3_common_lib testmain ${TINT3_LINK_LIBRARIES})
 
-test_target(dnd_dnd_test src/dnd/dnd_test.cc)
-target_link_libraries(dnd_dnd_test tint3_common_lib testmain ${TINT3_LINK_LIBRARIES})
+test_target(
+  dnd_dnd_test
+  SOURCES src/dnd/dnd_test.cc
+  LINK_LIBRARIES tint3_common_lib testmain ${TINT3_LINK_LIBRARIES})
 
-test_target(launcher_test src/launcher/launcher_test.cc)
-add_dependencies(launcher_test testdata)
-target_link_libraries(launcher_test tint3_common_lib testmain ${TINT3_LINK_LIBRARIES})
+test_target(
+  launcher_test
+  SOURCES src/launcher/launcher_test.cc
+  DEPENDS testdata
+  LINK_LIBRARIES tint3_common_lib testmain ${TINT3_LINK_LIBRARIES})
 
-test_target(launcher_desktop_entry_test src/launcher/desktop_entry_test.cc)
-target_link_libraries(launcher_desktop_entry_test tint3_common_lib testmain ${TINT3_LINK_LIBRARIES})
+test_target(
+  launcher_desktop_entry_test
+  SOURCES src/launcher/desktop_entry_test.cc
+  LINK_LIBRARIES tint3_common_lib testmain ${TINT3_LINK_LIBRARIES})
 
-test_target(parser_lexer_test src/parser/lexer_test.cc)
-target_link_libraries(parser_lexer_test tint3_common_lib testmain ${TINT3_LINK_LIBRARIES})
+test_target(
+  parser_lexer_test
+  SOURCES src/parser/lexer_test.cc
+  LINK_LIBRARIES tint3_common_lib testmain ${TINT3_LINK_LIBRARIES})
 
-test_target(parser_parser_test src/parser/parser_test.cc)
-target_link_libraries(parser_parser_test tint3_common_lib testmain ${TINT3_LINK_LIBRARIES})
+test_target(
+  parser_parser_test
+  SOURCES src/parser/parser_test.cc
+  LINK_LIBRARIES tint3_common_lib testmain ${TINT3_LINK_LIBRARIES})
 
-test_target(util_area_test src/util/area_test.cc)
-target_link_libraries(util_area_test tint3_common_lib testmain ${TINT3_LINK_LIBRARIES})
+test_target(
+  util_area_test
+  SOURCES src/util/area_test.cc
+  LINK_LIBRARIES tint3_common_lib testmain ${TINT3_LINK_LIBRARIES})
 
-test_target(util_bimap_test src/util/bimap_test.cc)
-target_link_libraries(util_bimap_test tint3_common_lib testmain ${TINT3_LINK_LIBRARIES})
+test_target(
+  util_bimap_test
+  SOURCES src/util/bimap_test.cc
+  LINK_LIBRARIES tint3_common_lib testmain ${TINT3_LINK_LIBRARIES})
 
-test_target(util_color_test src/util/color_test.cc)
-target_link_libraries(util_color_test tint3_common_lib testmain ${TINT3_LINK_LIBRARIES})
+test_target(
+  util_color_test
+  SOURCES src/util/color_test.cc
+  LINK_LIBRARIES tint3_common_lib testmain ${TINT3_LINK_LIBRARIES})
 
-test_target(util_common_test src/util/common_test.cc)
-target_link_libraries(util_common_test tint3_common_lib testmain ${TINT3_LINK_LIBRARIES})
+test_target(
+  util_common_test
+  SOURCES src/util/common_test.cc
+  LINK_LIBRARIES tint3_common_lib testmain ${TINT3_LINK_LIBRARIES})
 
-test_target(util_geometry_test src/util/geometry_test.cc)
-target_link_libraries(util_geometry_test tint3_common_lib testmain ${TINT3_LINK_LIBRARIES})
+test_target(
+  util_geometry_test
+  SOURCES src/util/geometry_test.cc
+  LINK_LIBRARIES tint3_common_lib testmain ${TINT3_LINK_LIBRARIES})
 
-test_target(util_gradient_test src/util/gradient_test.cc)
-target_link_libraries(util_gradient_test tint3_common_lib testmain ${TINT3_LINK_LIBRARIES})
+test_target(
+  util_gradient_test
+  SOURCES src/util/gradient_test.cc
+  LINK_LIBRARIES tint3_common_lib testmain ${TINT3_LINK_LIBRARIES})
 
-test_target(util_fs_test src/util/fs_test.cc)
-add_dependencies(util_fs_test testdata)
-target_link_libraries(util_fs_test tint3_common_lib testmain ${TINT3_LINK_LIBRARIES})
+test_target(
+  util_fs_test
+  SOURCES src/util/fs_test.cc
+  DEPENDS testdata
+  LINK_LIBRARIES tint3_common_lib testmain ${TINT3_LINK_LIBRARIES})
 
-test_target(util_imlib2_test src/util/imlib2_test.cc)
-target_link_libraries(util_imlib2_test tint3_common_lib testmain ${TINT3_LINK_LIBRARIES})
+test_target(
+  util_imlib2_test
+  SOURCES src/util/imlib2_test.cc
+  LINK_LIBRARIES tint3_common_lib testmain ${TINT3_LINK_LIBRARIES})
 
-test_target(util_variant_test src/util/variant_test.cc)
-target_link_libraries(util_variant_test tint3_common_lib testmain ${TINT3_LINK_LIBRARIES})
+test_target(
+  util_variant_test
+  SOURCES src/util/variant_test.cc
+  LINK_LIBRARIES tint3_common_lib testmain ${TINT3_LINK_LIBRARIES})
 
-test_target(util_pipe_test src/util/pipe_test.cc)
-target_link_libraries(util_pipe_test tint3_common_lib testmain ${TINT3_LINK_LIBRARIES})
+test_target(
+  util_pipe_test
+  SOURCES src/util/pipe_test.cc
+  LINK_LIBRARIES tint3_common_lib testmain ${TINT3_LINK_LIBRARIES})
 
-test_target(util_environment_test src/util/environment_test.cc)
-target_link_libraries(util_environment_test tint3_common_lib testmain ${TINT3_LINK_LIBRARIES})
+test_target(
+  util_environment_test
+  SOURCES src/util/environment_test.cc
+  LINK_LIBRARIES tint3_common_lib testmain ${TINT3_LINK_LIBRARIES})
 
-test_target(util_timer_test src/util/timer_test.cc src/util/timer_test_utils.cc)
-target_link_libraries(util_timer_test tint3_common_lib testmain ${TINT3_LINK_LIBRARIES})
+test_target(
+  util_timer_test
+  SOURCES src/util/timer_test.cc src/util/timer_test_utils.cc
+  LINK_LIBRARIES tint3_common_lib testmain ${TINT3_LINK_LIBRARIES})
 
-test_target(util_xdg_test src/util/xdg_test.cc)
-target_link_libraries(util_xdg_test tint3_common_lib testmain ${TINT3_LINK_LIBRARIES})
+test_target(
+  util_xdg_test
+  SOURCES src/util/xdg_test.cc
+  LINK_LIBRARIES tint3_common_lib testmain ${TINT3_LINK_LIBRARIES})
 
 # }}} test rules
 
