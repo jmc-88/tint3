@@ -173,14 +173,12 @@ void SendEvent32(Window win, Atom at, long data1, long data2, long data3) {
              SubstructureRedirectMask | SubstructureNotifyMask, &event);
 }
 
-void GetRootPixmap() {
+void Server::GetRootPixmap() {
   Pixmap ret = None;
-  Atom pixmap_atoms[] = {server.atom("_XROOTPMAP_ID"),
-                         server.atom("_XROOTMAP_ID")};
+  Atom pixmap_atoms[] = {atom("_XROOTPMAP_ID"), atom("_XROOTMAP_ID")};
 
   for (Atom const& atom : pixmap_atoms) {
-    auto res =
-        ServerGetProperty<Pixmap>(server.root_window(), atom, XA_PIXMAP, 0);
+    auto res = GetProperty<Pixmap>(root_window(), atom, XA_PIXMAP, 0);
 
     if (res != nullptr) {
       ret = (*res);
@@ -188,9 +186,8 @@ void GetRootPixmap() {
     }
   }
 
-  server.root_pmap = ret;
-
-  if (server.root_pmap == None) {
+  root_pmap = ret;
+  if (root_pmap == None) {
     util::log::Error() << "tint3: pixmap background detection failed\n";
     return;
   }
@@ -201,8 +198,8 @@ void GetRootPixmap() {
   gcv.fill_style = FillTiled;
   uint mask = GCTileStipXOrigin | GCTileStipYOrigin | GCFillStyle | GCTile;
 
-  gcv.tile = server.root_pmap;
-  XChangeGC(server.dsp, server.gc, mask, &gcv);
+  gcv.tile = root_pmap;
+  XChangeGC(dsp, gc, mask, &gcv);
 }
 
 bool MonitorIncludes(Monitor const& m1, Monitor const& m2) {
