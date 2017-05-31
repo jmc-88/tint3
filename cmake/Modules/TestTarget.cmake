@@ -4,11 +4,18 @@ option(TINT3_ENABLE_ASAN_FOR_TESTS
        ON)
 
 function(test_target target_name)
+  set(options USE_XVFB_RUN)
   set(multiValueArgs SOURCES DEPENDS LINK_LIBRARIES)
-  cmake_parse_arguments(TEST_TARGET "" "" "${multiValueArgs}" ${ARGN})
+  cmake_parse_arguments(TEST_TARGET "${options}" "" "${multiValueArgs}" ${ARGN})
 
   add_executable(${target_name} ${TEST_TARGET_SOURCES})
-  add_test(NAME ${target_name} COMMAND ${target_name})
+  if(TEST_TARGET_USE_XVFB_RUN)
+    add_test(
+      NAME ${target_name}
+      COMMAND xvfb-run -a -s "-screen 0 1024x768x24" "${CMAKE_BINARY_DIR}/${target_name}")
+  else()
+    add_test(NAME ${target_name} COMMAND ${target_name})
+  endif()
 
   if(TEST_TARGET_LINK_LIBRARIES)
     target_link_libraries(${target_name} ${TEST_TARGET_LINK_LIBRARIES})

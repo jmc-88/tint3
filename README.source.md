@@ -28,6 +28,7 @@ have that installed.
   - libXrender
   - libXcomposite
   - libXdamage
+  - xvfb (needed for running some tests)
   - startup-notification (optional)
   - libc++ (optional, recommended)
   - pandoc (optional, recommended, needed for building documentation)
