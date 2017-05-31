@@ -133,10 +133,12 @@ void Server::InitAtoms() {
 void Server::Cleanup() {
   if (colormap) {
     XFreeColormap(dsp, colormap);
+    colormap = None;
   }
 
   if (colormap32) {
     XFreeColormap(dsp, colormap32);
+    colormap32 = None;
   }
 
   monitor.clear();
