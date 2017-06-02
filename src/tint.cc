@@ -913,6 +913,7 @@ start:
   InitX11();
 
   Timer timer;
+  auto cleanup = util::MakeScopedDeleter([&] { Cleanup(timer); });
 
   config::Reader config_reader{&server};
   bool config_read = false;
@@ -925,7 +926,6 @@ start:
 
   if (!config_read) {
     util::log::Error() << "usage: tint3 [-c] <config_file>\n";
-    Cleanup(timer);
     std::exit(1);
   }
 
@@ -965,7 +965,6 @@ start:
   util::x11::EventLoop event_loop(&server, timer);
 
   if (!event_loop.IsAlive()) {
-    Cleanup(timer);
     std::exit(1);
   }
 
@@ -1163,9 +1162,6 @@ start:
       });
 
   if (event_loop.RunLoop()) {
-    systray.Clear(timer);
-    Cleanup(timer);
-
     // Reinitialize tint3.
     if (signal_pending == SIGUSR1) {
       goto start;  // brrr
@@ -1179,9 +1175,5 @@ start:
     }
   }
 
-  // Make sure we reparent all the tray icon windows to the server root window
-  // before we exit the program and destroy our own tray window.
-  // FIXME: this wouldn't need manual deletion if there was no global state.
-  Cleanup(timer);
   return 0;
 }

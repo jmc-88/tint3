@@ -24,6 +24,25 @@ class GObjectUnrefDeleter {
 template <typename T>
 using GObjectPtr = std::unique_ptr<T, GObjectUnrefDeleter>;
 
+// ScopedDeleter is a class that receives a callable and invokes it when it
+// goes out of scope.
+template <typename T>
+class ScopedDeleter {
+ public:
+  ScopedDeleter(T deleter) : deleter_(deleter) {}
+  ~ScopedDeleter() { deleter_(); }
+
+ private:
+  T deleter_;
+};
+
+// MakeScopedDeleter is a helper method to create a ScopedDeleter of the right
+// type from the argument it's passed.
+template <typename T>
+ScopedDeleter<T> MakeScopedDeleter(T deleter) {
+  return deleter;
+}
+
 namespace string {
 
 class Builder {

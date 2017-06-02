@@ -105,3 +105,12 @@ TEST_CASE("AdjustASB",
   // Dark pixel, should be made brighter.
   REQUIRE(image_data[3] == 0x0a212427);
 }
+
+TEST_CASE("ScopedDeleter") {
+  bool was_invoked = false;
+  {
+    auto _ = util::MakeScopedDeleter([&] { was_invoked = true; });
+    REQUIRE(!was_invoked);
+  }
+  REQUIRE(was_invoked);
+}
