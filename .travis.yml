@@ -32,7 +32,7 @@ install:
   - sudo apt-get --assume-yes install libcairo2-dev libpango1.0-dev libglib2.0-dev libimlib2-dev libxinerama-dev libx11-dev libxdamage-dev libxcomposite-dev libxrender-dev libxrandr-dev librsvg2-dev libstartup-notification0-dev
 
   # For running some tests
-  - sudo apt-get --assume-yes install xvfb
+  - sudo apt-get --assume-yes install xvfb xauth
 
   # For Coveralls integration
   - sudo apt-get --assume-yes install lcov curl
