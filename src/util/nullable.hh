@@ -6,20 +6,16 @@
 
 namespace util {
 
-template<typename T>
+template <typename T>
 class Nullable {
  public:
   Nullable() : has_value_(false) {}
   Nullable(T const& value) : has_value_(true), value_(value) {}
   Nullable(T&& value) : has_value_(true), value_(std::move(value)) {}
 
-  operator bool() const {
-    return has_value_;
-  }
+  operator bool() const { return has_value_; }
 
-  operator T const&() const {
-    return Unwrap();
-  }
+  operator T const&() const { return Unwrap(); }
 
   Nullable& operator=(Nullable other) {
     std::swap(has_value_, other.has_value_);
@@ -27,9 +23,7 @@ class Nullable {
     return *this;
   }
 
-  T const& Unwrap() const {
-    return value_;
-  }
+  T const& Unwrap() const { return value_; }
 
   void Clear() {
     has_value_ = false;
