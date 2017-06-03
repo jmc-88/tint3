@@ -12,7 +12,7 @@ function(test_target target_name)
   if(TEST_TARGET_USE_XVFB_RUN)
     add_test(
       NAME ${target_name}
-      COMMAND xvfb-run -a -s "-screen 0 1024x768x24" "${CMAKE_BINARY_DIR}/${target_name}")
+      COMMAND xvfb-run -a -s "-screen 0 1024x768x24 +extension RANDR +extension XINERAMA" "${CMAKE_BINARY_DIR}/${target_name}")
   else()
     add_test(NAME ${target_name} COMMAND ${target_name})
   endif()
