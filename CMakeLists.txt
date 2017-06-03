@@ -326,6 +326,12 @@ test_target(
   LINK_LIBRARIES tint3_common_lib testmain ${TINT3_LINK_LIBRARIES})
 
 test_target(
+  tooltip_tooltip_test
+  SOURCES src/tooltip/tooltip_test.cc src/util/timer_test_utils.cc
+  LINK_LIBRARIES tint3_common_lib testmain ${TINT3_LINK_LIBRARIES}
+  USE_XVFB_RUN)
+
+test_target(
   util_area_test
   SOURCES src/util/area_test.cc
   LINK_LIBRARIES tint3_common_lib testmain ${TINT3_LINK_LIBRARIES})

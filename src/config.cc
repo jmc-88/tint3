@@ -269,6 +269,8 @@ Reader::Reader(Server* server) : server_(server), new_config_file_(false) {
   panel_config.mouse_pressed_alpha = 100;
   panel_config.mouse_pressed_saturation = 0;
   panel_config.mouse_pressed_brightness = -10;
+
+  tooltip_config = TooltipConfig::Default();
 }
 
 bool Reader::LoadFromDefaults() {
@@ -847,26 +849,27 @@ void Reader::AddEntry(std::string const& key, std::string const& value) {
   /* Tooltip */
   else if (key == "tooltip_show_timeout") {
     int timeout_msec = 1000 * std::stof(value);
-    g_tooltip.show_timeout_msec = timeout_msec;
+    tooltip_config.show_timeout_msec = timeout_msec;
   } else if (key == "tooltip_hide_timeout") {
     int timeout_msec = 1000 * std::stof(value);
-    g_tooltip.hide_timeout_msec = timeout_msec;
+    tooltip_config.hide_timeout_msec = timeout_msec;
   } else if (key == "tooltip_padding") {
     config::ExtractValues(value, value1, value2, value3);
 
     if (!value1.empty()) {
-      g_tooltip.paddingx = std::stol(value1);
+      tooltip_config.paddingx = std::stol(value1);
     }
 
     if (!value2.empty()) {
-      g_tooltip.paddingy = std::stol(value2);
+      tooltip_config.paddingy = std::stol(value2);
     }
   } else if (key == "tooltip_background_id") {
-    g_tooltip.bg = GetBackgroundFromId(std::stol(value));
+    tooltip_config.bg = GetBackgroundFromId(std::stol(value));
   } else if (key == "tooltip_font_color") {
-    g_tooltip.font_color = ParseColor(value, 0.1);
+    tooltip_config.font_color = ParseColor(value, 0.1);
   } else if (key == "tooltip_font") {
-    g_tooltip.font_desc = pango_font_description_from_string(value.c_str());
+    tooltip_config.font_desc =
+        pango_font_description_from_string(value.c_str());
   }
 
   /* Mouse actions */

@@ -221,7 +221,6 @@ void InitPanel(Timer& timer) {
     panel_config.monitor_ = 0;
   }
 
-  InitTooltip();
   InitSystray(timer);
   InitLauncher();
   InitClock(timer);

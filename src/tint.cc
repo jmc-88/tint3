@@ -92,7 +92,6 @@ void Init(int argc, char* argv[], std::string* config_path) {
   DefaultClock();
   DefaultLauncher();
   DefaultTaskbar();
-  DefaultTooltip();
   DefaultPanel();
 
   // read options
@@ -221,7 +220,6 @@ void InitX11() {
 
 void Cleanup(Timer& timer) {
   CleanupSystray(timer);
-  CleanupTooltip(timer);
   CleanupClock(timer);
   CleanupLauncher();
 #ifdef ENABLE_BATTERY
@@ -511,7 +509,7 @@ void EventButtonRelease(XEvent* e) {
   }
 }
 
-void EventPropertyNotify(XEvent* e, Timer& timer) {
+void EventPropertyNotify(XEvent* e, Timer& timer, Tooltip* tooltip) {
   Task* tsk;
   Window win = e->xproperty.window;
   Atom at = e->xproperty.atom;
@@ -682,11 +680,10 @@ void EventPropertyNotify(XEvent* e, Timer& timer) {
     if (at == server.atom("_NET_WM_VISIBLE_NAME") ||
         at == server.atom("_NET_WM_NAME") || at == server.atom("WM_NAME")) {
       if (tsk->UpdateTitle()) {
-        if (g_tooltip.IsBoundTo(tsk)) {
-          g_tooltip.BindTo(tsk);
-          g_tooltip.Update(timer);
+        std::string title = tsk->GetTooltipText();
+        if (tooltip->IsBoundTo(tsk) && !title.empty()) {
+          tooltip->Update(tsk, nullptr, title);
         }
-
         panel_refresh = true;
       }
     }
@@ -953,6 +950,9 @@ start:
 
   XSync(server.dsp, False);
 
+  // Tooltip
+  Tooltip tooltip{&server, &timer};
+
   // XDND initialization
   dnd_source_window = 0;
   dnd_target_window = 0;
@@ -998,7 +998,7 @@ start:
       });
 
   event_loop.RegisterHandler(ButtonPress, [&](XEvent& e) -> void {
-    TooltipHide(timer);
+    tooltip.Hide();
     EventButtonPress(&e);
 
     Panel* panel = GetPanel(e.xmotion.window);
@@ -1028,19 +1028,21 @@ start:
     static constexpr unsigned int button_mask =
         Button1Mask | Button2Mask | Button3Mask | Button4Mask | Button5Mask;
     const bool button_pressed = (e.xmotion.state & button_mask) != 0;
-
     if (button_pressed) {
       EventButtonMotionNotify(&e);
     }
 
     Panel* panel = GetPanel(e.xmotion.window);
     Area* area = panel->InnermostAreaUnderPoint(e.xmotion.x, e.xmotion.y);
-    std::string tooltip = area->GetTooltipText();
-
-    if (!tooltip.empty()) {
-      TooltipTriggerShow(area, panel, &e, timer);
+    std::string text = area->GetTooltipText();
+    if (text.empty()) {
+      tooltip.Hide();
     } else {
-      TooltipTriggerHide(timer);
+      if (tooltip.IsBound()) {
+        tooltip.Update(area, &e, text);
+      } else {
+        tooltip.Show(area, &e, text);
+      }
     }
 
     previous_mouse_over_area =
@@ -1048,7 +1050,7 @@ start:
   });
 
   event_loop.RegisterHandler(LeaveNotify, [&](XEvent& e) -> void {
-    TooltipTriggerHide(timer);
+    tooltip.Hide();
 
     if (previous_mouse_over_area != nullptr) {
       previous_mouse_over_area->MouseLeave();
@@ -1059,8 +1061,8 @@ start:
   event_loop.RegisterHandler(Expose,
                              [](XEvent& e) -> void { EventExpose(&e); });
 
-  event_loop.RegisterHandler(PropertyNotify, [&timer](XEvent& e) -> void {
-    EventPropertyNotify(&e, timer);
+  event_loop.RegisterHandler(PropertyNotify, [&](XEvent& e) -> void {
+    EventPropertyNotify(&e, timer, &tooltip);
   });
 
   event_loop.RegisterHandler(ConfigureNotify, [&timer](XEvent& e) -> void {
@@ -1083,7 +1085,7 @@ start:
   event_loop.RegisterHandler(
       {UnmapNotify, DestroyNotify},
       [&](XEvent& e) -> void {
-        if (e.xany.window == g_tooltip.window || !systray_enabled) {
+        if (e.xany.window == tooltip.window() || !systray_enabled) {
           return;
         }
 

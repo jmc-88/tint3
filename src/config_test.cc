@@ -231,9 +231,8 @@ clock_padding = 10 6
 )EOF";
 
 TEST_CASE("ConfigParserEmptyAssignment", "Doesn't choke on empty assignments") {
-  DefaultPanel();    // TODO: decouple from config loading
-  DefaultClock();    // TODO: decouple from config loading
-  DefaultTooltip();  // TODO: decouple from config loading
+  DefaultPanel();  // TODO: decouple from config loading
+  DefaultClock();  // TODO: decouple from config loading
 
   test::ConfigReader reader;
   config::Parser config_entry_parser{&reader};
@@ -251,9 +250,8 @@ TEST_CASE("ConfigParserEmptyAssignment", "Doesn't choke on empty assignments") {
   REQUIRE(panel_config.clock_.padding_y_ == 6);
 
   FakeClock timer{0};
-  CleanupTooltip(timer);  // TODO: decouple from config loading
-  CleanupClock(timer);    // TODO: decouple from config loading
-  CleanupPanel();         // TODO: decouple from config loading
+  CleanupClock(timer);  // TODO: decouple from config loading
+  CleanupPanel();       // TODO: decouple from config loading
 }
 
 static constexpr char kHoverPressed[] =

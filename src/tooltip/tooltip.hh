@@ -1,50 +1,76 @@
 #ifndef TINT3_TOOLTIP_TOOLTIP_HH
 #define TINT3_TOOLTIP_TOOLTIP_HH
 
+#include <cairo/cairo.h>
+#include <pango/pangocairo.h>
+
 #include <string>
 
-#include "panel.hh"
-#include "task.hh"
+#include "server.hh"
+#include "util/area.hh"
+#include "util/color.hh"
 #include "util/timer.hh"
+
+class TooltipConfig {
+ public:
+  TooltipConfig() = default;
+  ~TooltipConfig();
+
+  Background bg;
+  Color font_color;
+  PangoFontDescription* font_desc;
+  int paddingx;
+  int paddingy;
+  unsigned int show_timeout_msec;
+  unsigned int hide_timeout_msec;
+
+  static TooltipConfig Default();
+};
+
+extern TooltipConfig tooltip_config;
 
 class Tooltip {
  public:
-  std::string tooltip_text;
-  Panel* panel;
-  Window window;
-  int show_timeout_msec;
-  int hide_timeout_msec;
-  bool mapped_;
-  int paddingx;
-  int paddingy;
-  PangoFontDescription* font_desc;
-  Color font_color;
-  Background bg;
-  Interval::Id timeout;
+  Tooltip(Server* server, Timer* timer);
+  Tooltip() = delete;
+  Tooltip(Tooltip const&) = delete;
+  Tooltip(Tooltip&&) = delete;
+  ~Tooltip();
 
-  void BindTo(Area* area);
-  bool IsBoundTo(Area* area) const;
+  // Getter: returns the Window associated with this Tooltip.
+  Window window() const;
 
-  void AdjustGeometry();
-  void Update(Timer& timer);
-  void UpdateGeometry();
+  // IsBound tells whether the tooltip is bound to any Area.
+  bool IsBound() const;
+
+  // IsBoundTo tells whether the tooltip is bound to the given Area.
+  bool IsBoundTo(Area const* area) const;
+
+  // Show triggers the show tooltip timeout, which maps the tooltip window on
+  // the screen and calls out to Update().
+  void Show(Area const* area, XEvent const* e, std::string text);
+
+  // Update binds the tooltip to given Area, resizes and redraws the tooltip
+  // window with the given text.
+  void Update(Area const* area, XEvent const* e, std::string const& text);
+
+  // Hide triggers the hide tooltip timeout, which unbinds the tooltip from the
+  // Area and unmaps the tooltip window from the screen.
+  void Hide();
 
  private:
-  Area* area_;
+  Server* server_;
+  Timer* timer_;
+  Area const* area_;
+  PangoFontDescription* font_desc_;
+  Window window_;
+  Interval::Id timeout_;
+
+  void GetExtents(std::string const& text, int* x, int* y, int* width,
+                  int* height);
+  void DrawBackground(cairo_t* c, int width, int height);
+  void DrawBorder(cairo_t* c, int width, int height);
+  void DrawText(cairo_t* c, int width, int height, std::string const& text);
 };
-
-extern Tooltip g_tooltip;
-
-// default global data
-void DefaultTooltip();
-
-// freed memory
-void CleanupTooltip(Timer& timer);
-
-void InitTooltip();
-void TooltipTriggerHide(Timer& timer);
-void TooltipTriggerShow(Area* area, Panel* p, XEvent* e, Timer& timer);
-bool TooltipHide(Timer& timer);
-bool TooltipShow(Timer& timer);
 
 #endif  // TINT3_TOOLTIP_TOOLTIP_HH
