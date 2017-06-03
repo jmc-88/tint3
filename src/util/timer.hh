@@ -82,7 +82,7 @@ class Timer {
   Interval::Id SetTimeout(Duration timeout_interval,
                           Interval::Callback callback);
 
-  // Registers a new single-shot callback.
+  // Registers a new periodic callback.
   // Will be called at (or after) now + repeat_interval, and the next callback
   // time point will be adjusted accordingly for the next invocation.
   //
