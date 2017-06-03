@@ -25,7 +25,7 @@ class Battery : public Area {
   void DrawForeground(cairo_t*) override;
   bool Resize() override;
 
-  static void InitPanel(Panel* panel);
+  static void InitPanel(Panel* panel, Timer* timer);
 
 #ifdef _TINT3_DEBUG
 
@@ -59,6 +59,6 @@ void CleanupBattery(Timer& timer);
 // initialize clock : y position, ...
 void UpdateBattery();
 
-void InitBattery(Timer& timer);
+void InitBattery();
 
 #endif  // TINT3_BATTERY_BATTERY_HH

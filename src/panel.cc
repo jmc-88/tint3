@@ -226,7 +226,7 @@ void InitPanel(Timer& timer) {
   InitLauncher();
   InitClock(timer);
 #ifdef ENABLE_BATTERY
-  InitBattery(timer);
+  InitBattery();
 #endif
   InitTaskbar();
 
@@ -274,7 +274,7 @@ void InitPanel(Timer& timer) {
 #ifdef ENABLE_BATTERY
 
       if (item == 'B') {
-        Battery::InitPanel(&p);
+        Battery::InitPanel(&p, &timer);
       }
 
 #endif

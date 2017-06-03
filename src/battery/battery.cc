@@ -77,17 +77,16 @@ int apm_fd;
 namespace {
 
 bool UpdateBatteries() {
-  int old_percentage = battery_state.percentage;
-  int16_t old_hours = battery_state.time.hours;
-  int8_t old_minutes = battery_state.time.minutes;
+  auto old_percentage = battery_state.percentage;
+  auto old_hours = battery_state.time.hours;
+  auto old_minutes = battery_state.time.minutes;
+  bool same_info = false;
 
   UpdateBattery();
 
-  if (old_percentage == battery_state.percentage &&
-      old_hours == battery_state.time.hours &&
-      old_minutes == battery_state.time.minutes) {
-    return true;
-  }
+  same_info = (old_percentage == battery_state.percentage &&
+               old_hours == battery_state.time.hours &&
+               old_minutes == battery_state.time.minutes);
 
   for (Panel& panel : panels) {
     if (battery_state.percentage >= percentage_hide) {
@@ -102,7 +101,7 @@ bool UpdateBatteries() {
       }
     }
 
-    if (panel.battery_.on_screen_) {
+    if (panel.battery_.on_screen_ && !same_info) {
       panel.battery_.need_resize_ = true;
       panel_refresh = true;
     }
@@ -163,7 +162,7 @@ void CleanupBattery(Timer& timer) {
   battery_ptr.reset();
 }
 
-void InitBattery(Timer& timer) {
+void InitBattery() {
   if (!battery_enabled) {
     return;
   }
@@ -203,15 +202,9 @@ void InitBattery(Timer& timer) {
     return;
   }
 #endif
-
-  if (battery_enabled && !battery_timeout) {
-    battery_timeout =
-        timer.SetInterval(std::chrono::seconds(10), UpdateBatteries);
-    UpdateBatteries();
-  }
 }
 
-void Battery::InitPanel(Panel* panel) {
+void Battery::InitPanel(Panel* panel, Timer* timer) {
   if (!battery_enabled) {
     return;
   }
@@ -222,6 +215,12 @@ void Battery::InitPanel(Panel* panel) {
   battery.size_mode_ = SizeMode::kByContent;
   battery.on_screen_ = true;
   battery.need_resize_ = true;
+
+  if (!battery_timeout) {
+    battery_timeout =
+        timer->SetInterval(std::chrono::seconds(10), UpdateBatteries);
+    UpdateBatteries();
+  }
 }
 
 void UpdateBattery() {
