@@ -8,8 +8,8 @@
 #include <functional>
 #include <memory>
 
-#include "util/nullable.hh"
 #include "util/bimap.hh"
+#include "util/nullable.hh"
 
 using TimePoint = std::chrono::steady_clock::time_point;
 using Duration = std::chrono::nanoseconds;
@@ -58,8 +58,8 @@ class CompareIntervals {
 
 std::unique_ptr<struct timeval> ToTimeval(Duration duration);
 
-using IntervalSet = util::bimap<
-  Interval::Id, Interval, CompareIds, CompareIntervals>;
+using IntervalSet =
+    util::bimap<Interval::Id, Interval, CompareIds, CompareIntervals>;
 
 class ChronoTimerTestUtils;
 class Timer {
