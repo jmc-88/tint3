@@ -21,7 +21,7 @@ TooltipConfig TooltipConfig::Default() {
   cfg.paddingy = 0;
   cfg.font_desc = nullptr;
   cfg.bg = Background{};
-  cfg.font_color = Color{{1.0, 1.0, 1.0}, 1.0};
+  cfg.font_color = Color{{{1.0, 1.0, 1.0}}, 1.0};
   return cfg;
 }
 
