@@ -1,4 +1,9 @@
-# tint3 panel [![Build Status](https://travis-ci.org/jmc-88/tint3.svg?branch=master)](https://travis-ci.org/jmc-88/tint3) [![Coverage Status](https://coveralls.io/repos/github/jmc-88/tint3/badge.svg?branch=master)](https://coveralls.io/github/jmc-88/tint3?branch=master)
+[![build Status](https://travis-ci.org/jmc-88/tint3.svg?branch=master)](https://travis-ci.org/jmc-88/tint3)
+[![coverage status](https://coveralls.io/repos/github/jmc-88/tint3/badge.svg?branch=master)](https://coveralls.io/github/jmc-88/tint3?branch=master)
+[![GitHub release](https://img.shields.io/github/release/jmc-88/tint3.svg)](https://github.com/jmc-88/tint3/releases)
+[![license](https://img.shields.io/github/license/jmc-88/tint3.svg)](https://github.com/jmc-88/tint3/blob/master/LICENSE)
+
+# tint3 panel
 
 This project aims to continue the development of tint2, port it to C++, make it safer against crashes, and have it use XCB instead of Xlib.
 
