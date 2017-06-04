@@ -65,3 +65,13 @@ TEST_CASE("Border", "Copying") {
 #pragma clang diagnostic pop
 #endif  // __clang__
 }
+
+TEST_CASE("Border::set_mask") {
+  // Defaults to BORDER_ALL
+  Border b;
+  REQUIRE(b.mask() == BORDER_ALL);
+
+  // Filters out bits not in the BORDER_ALL mask
+  b.set_mask(static_cast<unsigned int>(-1));
+  REQUIRE(b.mask() == BORDER_ALL);
+}

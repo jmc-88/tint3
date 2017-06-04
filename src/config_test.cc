@@ -438,3 +438,29 @@ TEST_CASE("ConfigParserNoNewlineAtEOF") {
 
   CleanupPanel();  // TODO: decouple from config loading
 }
+
+static constexpr char kBorderSides[] =
+    u8R"EOF(
+# ID 1: no border_sides given, defaults to BORDER_ALL
+rounded = 0
+
+# ID 2: border_sides given, takes the given BorderSides mask (= BORDER_BOTTOM)
+rounded = 0
+border_sides = B
+)EOF";
+
+TEST_CASE("ConfigParserBorderSides") {
+  DefaultPanel();  // TODO: decouple from config loading
+
+  test::ConfigReader reader;
+  config::Parser config_entry_parser{&reader};
+  parser::Parser p{config::kLexer, &config_entry_parser};
+
+  REQUIRE(p.Parse(kBorderSides));
+
+  REQUIRE(backgrounds.size() == 3);  // default background + 2 custom
+  REQUIRE(backgrounds[1].border().mask() == BORDER_ALL);
+  REQUIRE(backgrounds[2].border().mask() == BORDER_BOTTOM);
+
+  CleanupPanel();  // TODO: decouple from config loading
+}

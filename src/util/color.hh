@@ -35,6 +35,14 @@ class Color {
   double alpha_;
 };
 
+enum BorderMask {
+  BORDER_TOP = (1 << 0),
+  BORDER_RIGHT = (1 << 1),
+  BORDER_BOTTOM = (1 << 2),
+  BORDER_LEFT = (1 << 3),
+  BORDER_ALL = (1 << 4) - 1,
+};
+
 struct Border : public Color {
  public:
   Border();
@@ -51,12 +59,16 @@ struct Border : public Color {
   int rounded() const;
   void set_rounded(int rounded);
 
+  unsigned int mask() const;
+  void set_mask(unsigned int mask);
+
   bool operator==(Border const& other) const;
   bool operator!=(Border const& other) const;
 
  private:
   int width_;
   int rounded_;
+  unsigned int mask_;
 };
 
 class Background {

@@ -134,6 +134,10 @@ class Area {
 // draw rounded rectangle
 void DrawRect(cairo_t* c, double x, double y, double w, double h, double r);
 
+// Draw rounded rectangle, only for borders matching the provided bit mask.
+void DrawRectOnSides(cairo_t* c, double x, double y, double w, double h,
+                     double r, unsigned int border_mask);
+
 // clear pixmap with transparent color
 void ClearPixmap(Pixmap p, int x, int y, int w, int h);
 

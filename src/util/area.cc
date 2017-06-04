@@ -433,8 +433,8 @@ void Area::DrawBackground(cairo_t* c) {
     cairo_set_line_width(c, w);
 
     // draw border inside (x, y, width, height)
-    DrawRect(c, w / 2.0, w / 2.0, width_ - w, height_ - w,
-             bg_.border().rounded());
+    DrawRectOnSides(c, w / 2.0, w / 2.0, width_ - w, height_ - w,
+                    bg_.border().rounded(), bg_.border().mask());
 
     Color border_color = bg_.border_color_for(mouse_state_);
     cairo_set_source_rgba(c, border_color[0], border_color[1], border_color[2],
@@ -565,20 +565,72 @@ void Area::PrintTree() const { PrintTreeLevel(0); }
 #endif  // _TINT3_DEBUG
 
 void DrawRect(cairo_t* c, double x, double y, double w, double h, double r) {
-  if (r > 0.0) {
-    double c1 = 0.55228475 * r;
+  DrawRectOnSides(c, x, y, w, h, r, BORDER_ALL);
+}
 
-    cairo_move_to(c, x + r, y);
+void DrawRectOnSides(cairo_t* c, double x, double y, double w, double h,
+                     double r, unsigned int border_mask) {
+  double c1 = 0.55228475 * r;
+  cairo_move_to(c, x + r, y);
+
+  // Top line
+  if (border_mask & BORDER_TOP) {
     cairo_rel_line_to(c, w - 2 * r, 0);
-    cairo_rel_curve_to(c, c1, 0.0, r, c1, r, r);
-    cairo_rel_line_to(c, 0, h - 2 * r);
-    cairo_rel_curve_to(c, 0.0, c1, c1 - r, r, -r, r);
-    cairo_rel_line_to(c, -w + 2 * r, 0);
-    cairo_rel_curve_to(c, -c1, 0, -r, -c1, -r, -r);
-    cairo_rel_line_to(c, 0, -h + 2 * r);
-    cairo_rel_curve_to(c, 0, -c1, r - c1, -r, r, -r);
   } else {
-    cairo_rectangle(c, x, y, w, h);
+    cairo_rel_move_to(c, w - 2 * r, y);
+  }
+  // Top right corner
+  if (r > 0) {
+    if ((border_mask & BORDER_TOP) && (border_mask & BORDER_RIGHT)) {
+      cairo_rel_curve_to(c, c1, 0.0, r, c1, r, r);
+    } else {
+      cairo_rel_move_to(c, r, r);
+    }
+  }
+
+  // Right line
+  if (border_mask & BORDER_RIGHT) {
+    cairo_rel_line_to(c, 0, h - 2 * r);
+  } else {
+    cairo_rel_move_to(c, 0, h - 2 * r);
+  }
+  // Bottom right corner
+  if (r > 0) {
+    if ((border_mask & BORDER_RIGHT) && (border_mask & BORDER_BOTTOM)) {
+      cairo_rel_curve_to(c, 0.0, c1, c1 - r, r, -r, r);
+    } else {
+      cairo_rel_move_to(c, -r, r);
+    }
+  }
+
+  // Bottom line
+  if (border_mask & BORDER_BOTTOM) {
+    cairo_rel_line_to(c, -w + 2 * r, 0);
+  } else {
+    cairo_rel_move_to(c, -w + 2 * r, 0);
+  }
+  // Bottom left corner
+  if (r > 0) {
+    if ((border_mask & BORDER_LEFT) && (border_mask & BORDER_BOTTOM)) {
+      cairo_rel_curve_to(c, -c1, 0, -r, -c1, -r, -r);
+    } else {
+      cairo_rel_move_to(c, -r, -r);
+    }
+  }
+
+  // Left line
+  if (border_mask & BORDER_LEFT) {
+    cairo_rel_line_to(c, 0, -h + 2 * r);
+  } else {
+    cairo_rel_move_to(c, 0, -h + 2 * r);
+  }
+  // Top left corner
+  if (r > 0) {
+    if ((border_mask & BORDER_LEFT) && (border_mask & BORDER_TOP)) {
+      cairo_rel_curve_to(c, 0, -c1, r - c1, -r, r, -r);
+    } else {
+      cairo_rel_move_to(c, r, -r);
+    }
   }
 }
 

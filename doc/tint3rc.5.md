@@ -60,6 +60,17 @@ background_color_pressed = &lt;color>
 
 :   Color of this background in the mouse pressed state.
 
+border_sides = *TRBL*
+
+:   Sides on which the border should be drawn. Can be any combination of:
+
+    - **T** (top)
+    - **R** (right)
+    - **B** (bottom)
+    - **L** (left)
+
+    If not given, defaults to all sides.
+
 border_color = &lt;color>
 
 :   Color of this background's border in the normal state.

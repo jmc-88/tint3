@@ -354,6 +354,27 @@ Color ParseColor(std::string const& value, double default_alpha = 0.5) {
   return c;
 }
 
+unsigned int ParseBorderSides(std::string const& value) {
+  unsigned int border_mask = 0;
+  for (char c : value) {
+    switch (c) {
+      case 'T':
+        border_mask |= BORDER_TOP;
+        break;
+      case 'R':
+        border_mask |= BORDER_RIGHT;
+        break;
+      case 'B':
+        border_mask |= BORDER_BOTTOM;
+        break;
+      case 'L':
+        border_mask |= BORDER_LEFT;
+        break;
+    }
+  }
+  return border_mask;
+}
+
 }  // namespace
 
 void Reader::AddEntry(std::string const& key, std::string const& value) {
@@ -373,6 +394,8 @@ void Reader::AddEntry(std::string const& key, std::string const& value) {
     backgrounds.back().set_fill_color_hover(ParseColor(value));
   } else if (key == "background_color_pressed") {
     backgrounds.back().set_fill_color_pressed(ParseColor(value));
+  } else if (key == "border_sides") {
+    backgrounds.back().border().set_mask(ParseBorderSides(value));
   } else if (key == "border_color") {
     backgrounds.back().border().set_color(ParseColor(value));
   } else if (key == "border_color_hover") {

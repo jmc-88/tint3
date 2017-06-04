@@ -87,20 +87,25 @@ bool Color::operator==(Color const& other) const {
 
 bool Color::operator!=(Color const& other) const { return !(*this == other); }
 
-Border::Border() : width_(0), rounded_(0) {}
+Border::Border() : width_(0), rounded_(0), mask_(BORDER_ALL) {}
 
 Border::Border(Border const& other)
-    : Color(other), width_(other.width_), rounded_(other.rounded_) {}
+    : Color(other),
+      width_(other.width_),
+      rounded_(other.rounded_),
+      mask_(other.mask_) {}
 
 Border::Border(Border&& other)
     : Color(other),
       width_(std::move(other.width_)),
-      rounded_(std::move(other.rounded_)) {}
+      rounded_(std::move(other.rounded_)),
+      mask_(std::move(other.mask_)) {}
 
 Border& Border::operator=(Border other) {
   Color::operator=(other);
   std::swap(width_, other.width_);
   std::swap(rounded_, other.rounded_);
+  std::swap(mask_, other.mask_);
   return (*this);
 }
 
@@ -114,9 +119,13 @@ int Border::rounded() const { return rounded_; }
 
 void Border::set_rounded(int rounded) { rounded_ = rounded; }
 
+unsigned int Border::mask() const { return mask_; }
+
+void Border::set_mask(unsigned int mask) { mask_ = (mask & BORDER_ALL); }
+
 bool Border::operator==(Border const& other) const {
   return Color::operator==(other) && (width_ == other.width_) &&
-         (rounded_ == other.rounded_);
+         (rounded_ == other.rounded_) && (mask_ == other.mask_);
 }
 
 bool Border::operator!=(Border const& other) const { return !(*this == other); }
