@@ -130,16 +130,18 @@ Area& Area::CloneArea(Area const& other) {
  ************************************************************/
 
 void Area::InitRendering(int pos) {
-  const int w = bg_.border().width();
+  Border const& b = bg_.border();
   // initialize fixed position/size
   for (auto& child : children_) {
     if (panel_horizontal) {
-      child->panel_y_ = pos + w + padding_y_;
-      child->height_ = height_ - (2 * (w + padding_y_));
+      child->panel_y_ = pos + b.width_for_side(BORDER_TOP) + padding_y_;
+      child->height_ = height_ - b.width_for_side(BORDER_TOP) -
+                       b.width_for_side(BORDER_BOTTOM) - (2 * padding_y_);
       child->InitRendering(child->panel_y_);
     } else {
-      child->panel_x_ = pos + w + padding_y_;
-      child->width_ = width_ - (2 * (w + padding_y_));
+      child->panel_x_ = pos + b.width_for_side(BORDER_LEFT) + padding_x_;
+      child->width_ = width_ - b.width_for_side(BORDER_LEFT) -
+                      b.width_for_side(BORDER_RIGHT) - (2 * padding_x_);
       child->InitRendering(child->panel_x_);
     }
   }
@@ -410,15 +412,14 @@ void Area::Draw() {
 }
 
 void Area::DrawBackground(cairo_t* c) {
-  const int w = bg_.border().width();
-  util::Rect extents{0, 0, width_, height_};
-  extents.ShrinkBy(w);
+  Border const& b = bg_.border();
+  util::Rect extents = b.GetInnerAreaRect(width_, height_);
 
   Color fill_color = bg_.fill_color_for(mouse_state_);
   if (fill_color.alpha() > 0.0) {
     DrawRect(c, extents.top_left().first, extents.top_left().second,
              extents.bottom_right().first, extents.bottom_right().second,
-             bg_.border().rounded() - w / 1.571);
+             bg_.border().rounded() - b.width() / 1.571);
     cairo_set_source_rgba(c, fill_color[0], fill_color[1], fill_color[2],
                           fill_color.alpha());
     cairo_fill(c);
@@ -429,12 +430,16 @@ void Area::DrawBackground(cairo_t* c) {
     gradients[gradient_id].Draw(c, extents);
   }
 
-  if (w > 0) {
-    cairo_set_line_width(c, w);
+  if (b.width() > 0) {
+    cairo_set_line_width(c, b.width());
 
-    // draw border inside (x, y, width, height)
-    DrawRectOnSides(c, w / 2.0, w / 2.0, width_ - w, height_ - w,
-                    bg_.border().rounded(), bg_.border().mask());
+    const int border_width =
+        (b.width_for_side(BORDER_LEFT) + b.width_for_side(BORDER_RIGHT)) / 2.0;
+    const int border_height =
+        (b.width_for_side(BORDER_TOP) + b.width_for_side(BORDER_BOTTOM)) / 2.0;
+    DrawRectOnSides(c, b.width_for_side(BORDER_LEFT) / 2.0,
+                    b.width_for_side(BORDER_TOP) / 2.0, width_ - border_width,
+                    height_ - border_height, b.rounded(), b.mask());
 
     Color border_color = bg_.border_color_for(mouse_state_);
     cairo_set_source_rgba(c, border_color[0], border_color[1], border_color[2],

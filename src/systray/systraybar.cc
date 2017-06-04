@@ -174,20 +174,26 @@ bool Systraybar::Resize() {
 }
 
 void Systraybar::OnChangeLayout() {
+  Border const& panel_border = panel_->bg_.border();
+  Border const& systray_border = systray.bg_.border();
+
   // here, systray.posx/posy are defined by rendering engine. so we can
   // calculate position of tray icon.
-  int posx, posy;
-  int start = panel_->bg_.border().width() + panel_->padding_y_ +
-              systray.bg_.border().width() + systray.padding_y_ + margin_ / 2;
-
+  int posx, posy, start;
   if (panel_horizontal) {
-    posy = start;
-    posx =
-        systray.panel_x_ + systray.bg_.border().width() + systray.padding_x_lr_;
+    posy = start =
+        (panel_border.width_for_side(BORDER_TOP) + panel_->padding_y_) +
+        (systray_border.width_for_side(BORDER_TOP) + systray.padding_y_) +
+        margin_ / 2;
+    posx = systray.panel_x_ + systray_border.width_for_side(BORDER_TOP) +
+           systray.padding_x_lr_;
   } else {
-    posx = start;
-    posy =
-        systray.panel_y_ + systray.bg_.border().width() + systray.padding_x_lr_;
+    posx = start =
+        (panel_border.width_for_side(BORDER_LEFT) + panel_->padding_y_) +
+        (systray_border.width_for_side(BORDER_LEFT) + systray.padding_y_) +
+        margin_ / 2;
+    posy = systray.panel_y_ + systray_border.width_for_side(BORDER_LEFT) +
+           systray.padding_x_lr_;
   }
 
   int i = 0;

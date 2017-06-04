@@ -185,14 +185,22 @@ void Tooltip::DrawBackground(cairo_t* c, int width, int height) {
 }
 
 void Tooltip::DrawBorder(cairo_t* c, int width, int height) {
-  Border b = tooltip_config.bg.border();
-  const int w = b.width();
-  cairo_set_line_width(c, w);
+  Border const& b = tooltip_config.bg.border();
+  cairo_set_line_width(c, b.width());
+
+  const int border_width =
+      (b.width_for_side(BORDER_LEFT) + b.width_for_side(BORDER_RIGHT)) / 2.0;
+  const int border_height =
+      (b.width_for_side(BORDER_TOP) + b.width_for_side(BORDER_BOTTOM)) / 2.0;
 
   if (server_->real_transparency) {
-    DrawRect(c, w / 2.0, w / 2.0, width - w, height - w, b.rounded());
+    DrawRectOnSides(c, b.width_for_side(BORDER_LEFT) / 2.0,
+                    b.width_for_side(BORDER_TOP) / 2.0, width - border_width,
+                    height - border_height, b.rounded(), b.mask());
   } else {
-    cairo_rectangle(c, w / 2.0, w / 2.0, width - w, height - w);
+    cairo_rectangle(c, b.width_for_side(BORDER_LEFT) / 2.0,
+                    b.width_for_side(BORDER_TOP) / 2.0, width - border_width,
+                    height - border_height);
   }
 
   cairo_set_source_rgba(c, b[0], b[1], b[2], b.alpha());

@@ -75,3 +75,36 @@ TEST_CASE("Border::set_mask") {
   b.set_mask(static_cast<unsigned int>(-1));
   REQUIRE(b.mask() == BORDER_ALL);
 }
+
+TEST_CASE("Border::width_for_side") {
+  // Defaults to BORDER_ALL
+  Border b;
+  b.set_width(2);
+  REQUIRE(b.width() == 2);
+  REQUIRE(b.width_for_side(BORDER_TOP) == 2);
+  REQUIRE(b.width_for_side(BORDER_RIGHT) == 2);
+  REQUIRE(b.width_for_side(BORDER_BOTTOM) == 2);
+  REQUIRE(b.width_for_side(BORDER_LEFT) == 2);
+
+  // Limit it to a single side
+  b.set_mask(BORDER_LEFT);
+  REQUIRE(b.width() == 2);
+  REQUIRE(b.width_for_side(BORDER_TOP) == 0);
+  REQUIRE(b.width_for_side(BORDER_RIGHT) == 0);
+  REQUIRE(b.width_for_side(BORDER_BOTTOM) == 0);
+  REQUIRE(b.width_for_side(BORDER_LEFT) == 2);
+}
+
+TEST_CASE("Border::GetInnerAreaRect") {
+  // Default: no border
+  Border b;
+  REQUIRE(b.GetInnerAreaRect(100, 100) == util::Rect({0, 0, 100, 100}));
+
+  // 2px border, on all sides
+  b.set_width(2);
+  REQUIRE(b.GetInnerAreaRect(100, 100) == util::Rect({2, 2, 96, 96}));
+
+  // 2px border, only on the top and left sides
+  b.set_mask(BORDER_TOP | BORDER_LEFT);
+  REQUIRE(b.GetInnerAreaRect(100, 100) == util::Rect({2, 2, 98, 98}));
+}

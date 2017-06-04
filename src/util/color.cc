@@ -109,9 +109,21 @@ Border& Border::operator=(Border other) {
   return (*this);
 }
 
+util::Rect Border::GetInnerAreaRect(unsigned int area_width,
+                                    unsigned int area_height) const {
+  return {
+      width_for_side(BORDER_LEFT), width_for_side(BORDER_TOP),
+      area_width - width_for_side(BORDER_LEFT) - width_for_side(BORDER_RIGHT),
+      area_height - width_for_side(BORDER_TOP) - width_for_side(BORDER_BOTTOM)};
+}
+
 void Border::set_color(Color const& other) { Color::operator=(other); }
 
 int Border::width() const { return width_; }
+
+int Border::width_for_side(unsigned int border_side) const {
+  return (mask_ & border_side) ? width_ : 0;
+}
 
 void Border::set_width(int width) { width_ = width; }
 

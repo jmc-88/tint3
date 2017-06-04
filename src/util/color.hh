@@ -4,6 +4,7 @@
 #include <array>
 #include <ostream>
 
+#include "util/geometry.hh"
 #include "util/nullable.hh"
 
 // forward declaration from area.hh
@@ -51,9 +52,17 @@ struct Border : public Color {
 
   Border& operator=(Border other);
 
+  // Returns the util::Rect corresponding to the inner area of a given Area
+  // size. This is the rect (0; 0)-(w; h) for the given width and height, but
+  // with the sides reduced by the border size according to which are enabled
+  // or disabled by the configuration.
+  util::Rect GetInnerAreaRect(unsigned int area_width,
+                              unsigned int area_height) const;
+
   void set_color(Color const& other);
 
   int width() const;
+  int width_for_side(unsigned int border_side) const;
   void set_width(int width);
 
   int rounded() const;

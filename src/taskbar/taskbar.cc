@@ -164,13 +164,16 @@ void Taskbar::InitPanel(Panel* panel) {
   panel->g_taskbar.need_resize_ = true;
   panel->g_taskbar.on_screen_ = true;
 
+  Border const& b = panel->bg_.border();
   if (panel_horizontal) {
-    panel->g_taskbar.panel_y_ = panel->bg_.border().width() + panel->padding_y_;
+    panel->g_taskbar.panel_y_ =
+        b.width_for_side(BORDER_TOP) + panel->padding_y_;
     panel->g_taskbar.height_ = panel->height_ - (2 * panel->g_taskbar.panel_y_);
     panel->g_taskbar.bar_name_.panel_y_ = panel->g_taskbar.panel_y_;
     panel->g_taskbar.bar_name_.height_ = panel->g_taskbar.height_;
   } else {
-    panel->g_taskbar.panel_x_ = panel->bg_.border().width() + panel->padding_y_;
+    panel->g_taskbar.panel_x_ =
+        b.width_for_side(BORDER_LEFT) + panel->padding_y_;
     panel->g_taskbar.width_ = panel->width_ - (2 * panel->g_taskbar.panel_x_);
     panel->g_taskbar.bar_name_.panel_x_ = panel->g_taskbar.panel_x_;
     panel->g_taskbar.bar_name_.width_ = panel->g_taskbar.width_;

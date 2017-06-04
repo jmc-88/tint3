@@ -137,14 +137,19 @@ void Launcher::CleanupTheme() {
 }
 
 int Launcher::GetIconSize() const {
+  Border const& b = bg_.border();
+  const int left_right_border =
+      b.width_for_side(BORDER_LEFT) + b.width_for_side(BORDER_RIGHT);
+  const int top_bottom_border =
+      b.width_for_side(BORDER_TOP) + b.width_for_side(BORDER_BOTTOM);
+
   int icon_size = panel_horizontal ? height_ : width_;
+  icon_size -= std::max(left_right_border, top_bottom_border);
+  icon_size -= (2 * padding_y_);
 
-  icon_size -= (2 * bg_.border().width()) + (2 * padding_y_);
-
-  if (launcher_max_icon_size > 0 && icon_size > launcher_max_icon_size) {
-    icon_size = launcher_max_icon_size;
+  if (launcher_max_icon_size > 0) {
+    icon_size = std::max(icon_size, launcher_max_icon_size);
   }
-
   return icon_size;
 }
 
@@ -228,13 +233,14 @@ bool Launcher::Resize() {
     }
   }
 
+  Border const& b = bg_.border();
   size_t count = list_icons_.size();
 
   if (panel_horizontal) {
     width_ = 0;
 
     if (count != 0) {
-      int height = height_ - 2 * bg_.border().width() - 2 * padding_y_;
+      int height = height_ - 2 * b.width() - 2 * padding_y_;
       // here icons_per_column always higher than 0
       icons_per_column =
           std::max(1, (height + padding_x_) / (icon_size + padding_x_));
@@ -242,35 +248,33 @@ bool Launcher::Resize() {
                icon_size;
       icons_per_row =
           count / icons_per_column + (count % icons_per_column != 0);
-      width_ = (2 * bg_.border().width()) + (2 * padding_x_lr_) +
+      width_ = (2 * b.width()) + (2 * padding_x_lr_) +
                (icon_size * icons_per_row) + ((icons_per_row - 1) * padding_x_);
     }
   } else {
     height_ = 0;
 
     if (count != 0) {
-      int width = width_ - 2 * bg_.border().width() - 2 * padding_y_;
+      int width = width_ - 2 * b.width() - 2 * padding_y_;
       // here icons_per_row always higher than 0
       icons_per_row =
           std::max(1, (width + padding_x_) / (icon_size + padding_x_));
       margin =
           width - (icons_per_row - 1) * (icon_size + padding_x_) - icon_size;
       icons_per_column = count / icons_per_row + (count % icons_per_row != 0);
-      height_ = (2 * bg_.border().width()) + (2 * padding_x_lr_) +
+      height_ = (2 * b.width()) + (2 * padding_x_lr_) +
                 (icon_size * icons_per_column) +
                 ((icons_per_column - 1) * padding_x_);
     }
   }
 
-  int posx, posy;
-  int start = bg_.border().width() + padding_y_ + margin / 2;
-
+  int posx, posy, start;
   if (panel_horizontal) {
-    posy = start;
-    posx = bg_.border().width() + padding_x_lr_;
+    posy = start = b.width_for_side(BORDER_TOP) + padding_y_ + margin / 2;
+    posx = b.width_for_side(BORDER_LEFT) + padding_x_lr_;
   } else {
-    posx = start;
-    posy = bg_.border().width() + padding_x_lr_;
+    posx = start = b.width_for_side(BORDER_LEFT) + padding_y_ + margin / 2;
+    posy = b.width_for_side(BORDER_TOP) + padding_x_lr_;
   }
 
   int i = 1;
