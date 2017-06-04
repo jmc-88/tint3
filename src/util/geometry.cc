@@ -5,6 +5,10 @@ namespace util {
 Rect::Rect(int x, int y, unsigned int w, unsigned int h)
     : tl_(std::make_pair(x, y)), br_(std::make_pair(x + w, y + h)) {}
 
+bool Rect::operator==(Rect const& other) const {
+  return tl_ == other.tl_ && br_ == other.br_;
+}
+
 bool Rect::Contains(Rect const& other) {
   bool top_left_smaller =
       tl_.first <= other.tl_.first && tl_.second <= other.tl_.second;

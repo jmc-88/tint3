@@ -12,6 +12,17 @@ TEST_CASE("Rect", "Come on, I can get at least this one right") {
     REQUIRE(r.bottom_right() == std::make_pair(150, 200));
   }
 
+  SECTION("operator==()") {
+    util::Rect a{0, 0, 20, 20};
+    REQUIRE(a == a);
+
+    util::Rect b{0, 0, 20, 20};
+    REQUIRE(a == b);
+
+    util::Rect c{10, 10, 30, 30};
+    REQUIRE_FALSE(a == c);
+  }
+
   SECTION("Contains") {
     util::Rect inside{100, 100, 20, 20};
     REQUIRE(r.Contains(inside));
