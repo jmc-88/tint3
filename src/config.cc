@@ -849,7 +849,7 @@ void Reader::AddEntry(std::string const& key, std::string const& value) {
   } else if (key == "launcher_item_app") {
     std::string expanded = ExpandWords(value);
     if (expanded.empty()) {
-      util::log::Error() << "expansion failed for \"" << value
+      util::log::Debug() << "expansion failed for \"" << value
                          << "\", adding verbatim\n";
       panel_config.launcher_.list_apps_.push_back(value);
     } else {
