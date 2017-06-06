@@ -123,6 +123,18 @@ Path& Path::operator/=(std::string const& component) {
 
 Path::operator std::string() const { return path_; }
 
+Path Path::DirectoryName() const {
+  auto last_slash = path_.find_last_of('/');
+  if (last_slash == std::string::npos) {
+    return "";
+  }
+  auto parent = path_.substr(0, last_slash);
+  if (parent.empty()) {
+    return "/";
+  }
+  return parent;
+}
+
 bool Path::operator==(std::string const& str) const { return path_ == str; }
 
 std::ostream& operator<<(std::ostream& os, Path const& path) {

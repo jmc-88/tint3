@@ -57,6 +57,13 @@ class Path {
   Path& operator/=(std::string const& component);
   operator std::string() const;
 
+  // Returns the logical path of the parent directory of the current path.
+  // This method doesn't differentiate a current path pointing to a file from
+  // one pointing to a directory.
+  // If the path is '/', it's returned as is.
+  // If the path doesn't contain any slash, an empty string is returned.
+  Path DirectoryName() const;
+
   bool operator==(std::string const& str) const;
 
  private:

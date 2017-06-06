@@ -62,6 +62,17 @@ TEST_CASE("Path", "Represents a filesystem path string") {
     oss << test_path;
     REQUIRE(test_path == oss.str());
   }
+
+  SECTION("get parent directory path") {
+    util::fs::Path relative{"test"};
+    REQUIRE(relative.DirectoryName() == "");
+
+    util::fs::Path is_root{"/"};
+    REQUIRE(is_root.DirectoryName() == "/");
+
+    util::fs::Path has_parent{"/path/to/somewhere"};
+    REQUIRE(has_parent.DirectoryName() == "/path/to");
+  }
 }
 
 TEST_CASE("BuildPath", "Joins the given pieces into a single path string") {
