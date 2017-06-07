@@ -302,7 +302,7 @@ bool Launcher::Resize() {
     ++i;
   }
 
-  return 1;
+  return true;
 }
 
 LauncherIcon::LauncherIcon() { set_has_mouse_effects(true); }
