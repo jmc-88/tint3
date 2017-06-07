@@ -84,12 +84,19 @@ void InitLauncher() {
 
 void Launcher::InitPanel(Panel* panel) {
   Launcher& launcher = panel->launcher_;
-
   launcher.parent_ = panel;
   launcher.panel_ = panel;
   launcher.size_mode_ = SizeMode::kByContent;
   launcher.need_resize_ = true;
   launcher.need_redraw_ = true;
+
+  // These will be overridden by Launcher::Resize() below, but need to have
+  // a default non-zero value in case the configuration doesn't specify any
+  // dimensions, or we might end up having a division by zero.
+  unsigned int short_side =
+      std::max(1U, panel_horizontal ? panel->height_ : panel->width_);
+  launcher.width_ = short_side;
+  launcher.height_ = short_side;
 
   // check consistency
   if (launcher.list_apps_.empty()) {

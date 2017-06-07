@@ -36,30 +36,66 @@ TEST_CASE("FindDesktopEntry") {
   }
 }
 
-TEST_CASE("Launcher::GetIconSize", "Icon size is computed sensibly") {
-  panel_horizontal = true;
+TEST_CASE("Launcher::GetIconSize") {
+  SECTION("borders") {
+    panel_horizontal = true;
 
-  Launcher l;
-  l.height_ = 50;
-  l.width_ = 50;
+    Launcher l;
+    l.height_ = 50;
+    l.width_ = 50;
 
-  // No padding, no border: 50px
-  l.padding_y_ = 0;
-  l.bg_.border().set_width(0);
-  REQUIRE(l.GetIconSize() == 50);
+    // No padding, no border: 50px
+    l.padding_y_ = 0;
+    l.bg_.border().set_width(0);
+    REQUIRE(l.GetIconSize() == 50);
 
-  // 5px padding, no border: 40px
-  l.padding_y_ = 5;
-  l.bg_.border().set_width(0);
-  REQUIRE(l.GetIconSize() == 40);
+    // 5px padding, no border: 40px
+    l.padding_y_ = 5;
+    l.bg_.border().set_width(0);
+    REQUIRE(l.GetIconSize() == 40);
 
-  // No padding, 5px border: 40px
-  l.padding_y_ = 0;
-  l.bg_.border().set_width(5);
-  REQUIRE(l.GetIconSize() == 40);
+    // No padding, 5px border: 40px
+    l.padding_y_ = 0;
+    l.bg_.border().set_width(5);
+    REQUIRE(l.GetIconSize() == 40);
 
-  // 2px padding, 2px border: 42px
-  l.padding_y_ = 2;
-  l.bg_.border().set_width(2);
-  REQUIRE(l.GetIconSize() == 42);
+    // 2px padding, 2px border: 42px
+    l.padding_y_ = 2;
+    l.bg_.border().set_width(2);
+    REQUIRE(l.GetIconSize() == 42);
+  }
+
+  SECTION("horizontal") {
+    // Horizontal panel, no launcher_icon_size given: the computed icon size
+    // should default to the panel height.
+    panel_horizontal = true;
+    launcher_max_icon_size = 0;
+
+    Panel p;
+    p.width_ = 200;
+    p.height_ = 50;
+    Launcher::InitPanel(&p);
+
+    Launcher const& l = p.launcher_;
+    REQUIRE(l.width_ == p.height_);
+    REQUIRE(l.height_ == p.height_);
+    REQUIRE(l.GetIconSize() == p.height_);
+  }
+
+  SECTION("vertical") {
+    // Vertical panel, no launcher_icon_size given: the computed icon size
+    // should default to the panel width.
+    panel_horizontal = false;
+    launcher_max_icon_size = 0;
+
+    Panel p;
+    p.width_ = 50;
+    p.height_ = 200;
+    Launcher::InitPanel(&p);
+
+    Launcher const& l = p.launcher_;
+    REQUIRE(l.width_ == p.width_);
+    REQUIRE(l.height_ == p.width_);
+    REQUIRE(l.GetIconSize() == p.width_);
+  }
 }
