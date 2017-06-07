@@ -344,6 +344,10 @@ void InitPanel(Timer& timer) {
 }
 
 void Panel::InitSizeAndPosition() {
+  // This should never be zero.
+  width_ = std::max(1U, width_);
+  height_ = std::max(1U, height_);
+
   // detect panel size
   if (panel_horizontal) {
     if (percent_x) {

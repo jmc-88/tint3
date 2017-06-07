@@ -318,6 +318,11 @@ test_target(
   LINK_LIBRARIES tint3_common_lib testmain ${TINT3_LINK_LIBRARIES})
 
 test_target(
+  panel_test
+  SOURCES src/panel_test.cc
+  LINK_LIBRARIES tint3_common_lib testmain ${TINT3_LINK_LIBRARIES})
+
+test_target(
   parser_lexer_test
   SOURCES src/parser/lexer_test.cc
   LINK_LIBRARIES tint3_common_lib testmain ${TINT3_LINK_LIBRARIES})
