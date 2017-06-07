@@ -131,6 +131,21 @@ bool IdentifierMatcher(std::string const& buffer, unsigned int* position,
   return true;
 }
 
+std::string ExpandWords(std::string const& line) {
+  util::string::Builder sb;
+  wordexp_t we;
+  if (wordexp(line.c_str(), &we, WRDE_NOCMD | WRDE_UNDEF) == 0) {
+    for (char** ptr = we.we_wordv; *ptr != nullptr; ++ptr) {
+      if (ptr != we.we_wordv) {
+        sb << ' ';
+      }
+      sb << (*ptr);
+    }
+    wordfree(&we);
+  }
+  return sb;
+}
+
 }  // namespace
 
 const parser::Lexer kLexer{
@@ -138,11 +153,13 @@ const parser::Lexer kLexer{
     std::make_pair(parser::matcher::Whitespace, kWhitespace),
     std::make_pair('#', kPoundSign),
     std::make_pair('=', kEqualsSign),
+    std::make_pair("@import", kImport),
     std::make_pair(IdentifierMatcher, kIdentifier),
     std::make_pair(parser::matcher::Any, kAny),
 };
 
-Parser::Parser(Reader* reader) : reader_(reader) {}
+Parser::Parser(Reader* reader, std::string const& path)
+    : reader_(reader), current_config_path_(path) {}
 
 bool Parser::operator()(parser::TokenList* tokens) {
   return ConfigEntryParser(tokens);
@@ -167,6 +184,11 @@ bool Parser::ConfigEntryParser(parser::TokenList* tokens) {
     return ConfigEntryParser(tokens);
   }
 
+  // import
+  if (tokens->Current().symbol == kImport) {
+    return Import(tokens);
+  }
+
   // assignment, or fail
   return Assignment(tokens);
 }
@@ -178,6 +200,56 @@ bool Parser::Comment(parser::TokenList* tokens) {
   }
   tokens->SkipUntil(kNewLine);
   return true;
+}
+
+bool Parser::Import(parser::TokenList* tokens) {
+  tokens->Accept(kImport);
+  tokens->SkipOver(kWhitespace);
+
+  std::vector<parser::Token> skipped;
+  if (!tokens->SkipUntil(kNewLine, &skipped) &&
+      tokens->Current().symbol != parser::kEOF) {
+    return false;
+  }
+
+  tokens->SkipOver(kNewLine);
+
+  std::string path{parser::TokenList::JoinSkipped(skipped)};
+  util::string::Trim(path);
+
+  if (path.empty()) {
+    return false;
+  }
+
+  // try to expand words
+  std::string expanded = ExpandWords(path);
+  if (!expanded.empty()) {
+    path = expanded;
+  }
+
+  if (util::fs::FileExists(path)) {
+    util::log::Debug() << "config: importing \"" << path << "\"\n";
+    if (!reader_->LoadFromFile(path)) {
+      util::log::Error() << "config: failed importing \"" << path
+                         << "\", ignoring\n";
+    }
+  } else if (!util::string::StartsWith(path, "/")) {
+    util::log::Debug()
+        << "config: import file \"" << path
+        << "\" doesn't exist, attempting an import from a relative path\n";
+    path = (current_config_path_.DirectoryName() / path);
+
+    util::log::Debug() << "config: importing \"" << path << "\"\n";
+    if (!reader_->LoadFromFile(path)) {
+      util::log::Error() << "config: failed importing \"" << path
+                         << "\", ignoring\n";
+    }
+  } else {
+    util::log::Debug() << "config: import file \"" << path
+                       << "\" doesn't exist, ignoring\n";
+  }
+
+  return ConfigEntryParser(tokens);
 }
 
 bool Parser::Assignment(parser::TokenList* tokens) {
@@ -246,21 +318,6 @@ void ExtractValues(std::string const& value, std::string& v1, std::string& v2,
   }
 }
 
-std::string ExpandWords(std::string const& line) {
-  util::string::Builder sb;
-  wordexp_t we;
-  if (wordexp(line.c_str(), &we, WRDE_NOCMD | WRDE_UNDEF) == 0) {
-    for (char** ptr = we.we_wordv; *ptr != nullptr; ++ptr) {
-      if (ptr != we.we_wordv) {
-        sb << ' ';
-      }
-      sb << (*ptr);
-    }
-    wordfree(&we);
-  }
-  return sb;
-}
-
 Reader::Reader(Server* server) : server_(server), new_config_file_(false) {
   panel_config.mouse_effects = false;
   panel_config.mouse_hover_alpha = 100;
@@ -317,7 +374,7 @@ bool Reader::LoadFromDefaults() {
 
 bool Reader::LoadFromFile(std::string const& path) {
   bool read = util::fs::ReadFile(path, [=](std::string const& contents) {
-    config::Parser config_entry_parser{this};
+    config::Parser config_entry_parser{this, path};
     parser::Parser p{config::kLexer, &config_entry_parser};
     return p.Parse(contents);
   });

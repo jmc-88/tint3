@@ -5,6 +5,7 @@
 
 #include "parser/parser.hh"
 #include "server.hh"
+#include "util/fs.hh"
 
 namespace test {
 
@@ -18,6 +19,7 @@ enum Tokens {
   kNewLine = (parser::kEOF + 1),
   kPoundSign,
   kEqualsSign,
+  kImport,
   kIdentifier,
   kWhitespace,
   kAny,
@@ -33,7 +35,7 @@ class Reader {
  public:
   Reader(Server* server);
 
-  bool LoadFromFile(std::string const& path);
+  virtual bool LoadFromFile(std::string const& path);
   bool LoadFromDefaults();
 
  private:
@@ -50,22 +52,26 @@ class Reader {
 class Parser : public parser::ParseCallback {
   //  config_entry  ::= '\n' config_entry
   //                    | comment '\n' config_entry
+  //                    | import
   //                    | assignment;
   //        comment ::= '#' value '\n';
   //     assignment ::= \s* identifier \s+ '=' \s+ value \s* '\n';
-  //     identifier ::= [A-Za-z][A-Za-z0-9-]*
-  //          value ::= [^\n]+
+  //         import ::= '@import "' value '"'";
+  //     identifier ::= [A-Za-z][A-Za-z0-9-]*;
+  //          value ::= [^\n]+;
 
  public:
-  explicit Parser(Reader* reader);
+  Parser(Reader* reader, std::string const& path);
 
   bool operator()(parser::TokenList* tokens);
 
  private:
   Reader* reader_;
+  util::fs::Path current_config_path_;
 
   bool ConfigEntryParser(parser::TokenList* tokens);
   bool Comment(parser::TokenList* tokens);
+  bool Import(parser::TokenList* tokens);
   bool Assignment(parser::TokenList* tokens);
   bool AddKeyValue(std::string key, std::string value);
 };

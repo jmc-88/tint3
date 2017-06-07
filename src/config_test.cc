@@ -1,6 +1,7 @@
 #include "catch.hpp"
 
 #include <initializer_list>
+#include <set>
 #include <string>
 
 #include "clock/clock.hh"  // TODO: decouple from config loading
@@ -10,6 +11,7 @@
 #include "tooltip/tooltip.hh"  // TODO: decouple from config loading
 #include "util/color.hh"
 #include "util/fs.hh"
+#include "util/fs_test_utils.hh"
 #include "util/gradient.hh"
 #include "util/timer_test_utils.hh"
 
@@ -71,12 +73,23 @@ class ConfigReader : public config::Reader {
 
   MockServer& server() { return server_; }
 
+  std::set<std::string> const& loaded_files() const { return loaded_files_; }
+
   int GetMonitor(std::string const& monitor_name) const {
     return config::Reader::GetMonitor(monitor_name);
   }
 
+  bool LoadFromFile(std::string const& path) {
+    // Doesn't actually load any files, but that's ok.
+    // This is only used for testing. Test cases below which need to parse some
+    // configuration will manually instantiate a new Parser.
+    loaded_files_.emplace(path);
+    return true;
+  }
+
  private:
   MockServer server_;
+  std::set<std::string> loaded_files_;
 };
 
 }  // namespace test
@@ -216,7 +229,7 @@ TEST_CASE("ConfigParser", "Correctly loads a valid configuration file") {
   DefaultPanel();  // TODO: decouple from config loading
 
   test::ConfigReader reader;
-  config::Parser config_entry_parser{&reader};
+  config::Parser config_entry_parser{&reader, ""};
   parser::Parser p{config::kLexer, &config_entry_parser};
 
   REQUIRE(p.Parse(kConfigFile));
@@ -235,7 +248,7 @@ TEST_CASE("ConfigParserEmptyAssignment", "Doesn't choke on empty assignments") {
   DefaultClock();  // TODO: decouple from config loading
 
   test::ConfigReader reader;
-  config::Parser config_entry_parser{&reader};
+  config::Parser config_entry_parser{&reader, ""};
   parser::Parser p{config::kLexer, &config_entry_parser};
 
   REQUIRE(p.Parse(kEmptyAssignment));
@@ -276,7 +289,7 @@ TEST_CASE("ConfigParserHoverPressed", "Doesn't choke on hover/pressed states") {
   DefaultPanel();  // TODO: decouple from config loading
 
   test::ConfigReader reader;
-  config::Parser config_entry_parser{&reader};
+  config::Parser config_entry_parser{&reader, ""};
   parser::Parser p{config::kLexer, &config_entry_parser};
 
   REQUIRE(p.Parse(kHoverPressed));
@@ -314,7 +327,7 @@ mouse_pressed_icon_asb = 100 0 -25
 
 TEST_CASE("ConfigParserMouseEffects", "Mouse effects are correctly read") {
   test::ConfigReader reader;
-  config::Parser config_entry_parser{&reader};
+  config::Parser config_entry_parser{&reader, ""};
   parser::Parser p{config::kLexer, &config_entry_parser};
 
   // Before: defaults
@@ -350,7 +363,7 @@ TEST_CASE("ConfigParserLauncherItemExpansion", "Expands shell-like items") {
   DefaultPanel();  // TODO: decouple from config loading
 
   test::ConfigReader reader;
-  config::Parser config_entry_parser{&reader};
+  config::Parser config_entry_parser{&reader, ""};
   parser::Parser p{config::kLexer, &config_entry_parser};
 
   REQUIRE(p.Parse(kLauncherItemExpansion));
@@ -391,7 +404,7 @@ TEST_CASE("ConfigParserGradients", "Accepts gradients") {
   DefaultPanel();  // TODO: decouple from config loading
 
   test::ConfigReader reader;
-  config::Parser config_entry_parser{&reader};
+  config::Parser config_entry_parser{&reader, ""};
   parser::Parser p{config::kLexer, &config_entry_parser};
 
   REQUIRE(p.Parse(kGradients));
@@ -428,7 +441,7 @@ TEST_CASE("ConfigParserNoNewlineAtEOF") {
   DefaultPanel();  // TODO: decouple from config loading
 
   test::ConfigReader reader;
-  config::Parser config_entry_parser{&reader};
+  config::Parser config_entry_parser{&reader, ""};
   parser::Parser p{config::kLexer, &config_entry_parser};
 
   REQUIRE(p.Parse(kNoNewlineAtEOF));
@@ -453,7 +466,7 @@ TEST_CASE("ConfigParserBorderSides") {
   DefaultPanel();  // TODO: decouple from config loading
 
   test::ConfigReader reader;
-  config::Parser config_entry_parser{&reader};
+  config::Parser config_entry_parser{&reader, ""};
   parser::Parser p{config::kLexer, &config_entry_parser};
 
   REQUIRE(p.Parse(kBorderSides));
@@ -461,6 +474,48 @@ TEST_CASE("ConfigParserBorderSides") {
   REQUIRE(backgrounds.size() == 3);  // default background + 2 custom
   REQUIRE(backgrounds[1].border().mask() == BORDER_ALL);
   REQUIRE(backgrounds[2].border().mask() == BORDER_BOTTOM);
+
+  CleanupPanel();  // TODO: decouple from config loading
+}
+
+static constexpr char kImportFiles[] =
+    u8R"EOF(
+@import /etc/tint3/absolute.tint3rc
+@import ~/in_my_home.tint3rc
+)EOF";
+
+static constexpr char kImportFilesRelativeNoNewLine[] =
+    u8R"EOF(@import relative.tint3rc)EOF";
+
+TEST_CASE("ConfigParserImportFiles") {
+  DefaultPanel();  // TODO: decouple from config loading
+
+  test::ConfigReader reader;
+  config::Parser config_entry_parser{&reader, "/config/path/fake.tint3rc"};
+  parser::Parser p{config::kLexer, &config_entry_parser};
+
+  SECTION("multiple imports") {
+    FakeFileSystemInterface fake_fs;
+    auto original_interface = util::fs::SetSystemInterface(&fake_fs);
+    REQUIRE(p.Parse(kImportFiles));
+    util::fs::SetSystemInterface(original_interface);
+
+    auto const& loaded_files = reader.loaded_files();
+    REQUIRE(loaded_files.size() == 2);
+    REQUIRE(loaded_files.find("/etc/tint3/absolute.tint3rc") !=
+            loaded_files.end());
+    REQUIRE(loaded_files.find(util::fs::HomeDirectory() /
+                              "in_my_home.tint3rc") != loaded_files.end());
+  }
+
+  SECTION("relative import, no newline") {
+    REQUIRE(p.Parse(kImportFilesRelativeNoNewLine));
+
+    auto const& loaded_files = reader.loaded_files();
+    REQUIRE(loaded_files.size() == 1);
+    REQUIRE(loaded_files.find("/config/path/relative.tint3rc") !=
+            loaded_files.end());
+  }
 
   CleanupPanel();  // TODO: decouple from config loading
 }

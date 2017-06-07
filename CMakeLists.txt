@@ -291,7 +291,9 @@ add_library(testmain STATIC test/main.cc)
 
 test_target(
   config_test
-  SOURCES src/config_test.cc src/util/timer_test_utils.cc
+  SOURCES src/config_test.cc
+          src/util/fs_test_utils.cc
+          src/util/timer_test_utils.cc
   LINK_LIBRARIES tint3_common_lib testmain ${TINT3_LINK_LIBRARIES})
 
 test_target(

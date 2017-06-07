@@ -10,12 +10,27 @@ A tint3 configuration file describes the look and the behaviour of the tint3 pan
 
 # CONFIGURATION ENTRIES
 
-A tint3 configuration file consists of a series of key/value pairs, one pair on each line.
+A tint3 configuration file consists of a series of directives and key/value
+pairs, one pair on each line.
 Keys can contain alphanumeric characters and underscores ("**\_**"), but cannot start with an underscore.
 Values can contain any character and are terminated by a newline.
 Keys and values are separated by a single equals sign ("**=**"), optionally surrounded by whitespace.
 
 As the configuration file is unstructured, some entries take the special meaning of a section marker. These are explicitly noted below.
+
+## DIRECTIVES
+
+@import *path*
+
+:   Imports the contents of another tint3 configuration file into the one
+    currently being evaluated.
+
+    If the file cannot be loaded, an error will be logged and the entry will be
+    skipped.
+
+    The given path name can be *relative* (to the logical path of the config
+    file currently being evaluated), *absolute*, and it supports shell-like
+    *expansion*.
 
 ## GENERAL
 
