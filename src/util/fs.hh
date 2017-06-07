@@ -13,6 +13,15 @@
 namespace util {
 namespace fs {
 
+class SystemInterface {
+ public:
+  virtual bool stat(std::string const& name, struct stat* buf);
+};
+
+// Replaces the current system interface with the new one, and returns a
+// pointer to the old one.
+SystemInterface* SetSystemInterface(SystemInterface* interface);
+
 class DirectoryContents {
  public:
   explicit DirectoryContents(std::string const& path);

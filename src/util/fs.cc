@@ -14,6 +14,23 @@
 namespace util {
 namespace fs {
 
+bool SystemInterface::stat(std::string const& path, struct stat* buf) {
+  return ::stat(path.c_str(), buf) == 0;
+}
+
+namespace {
+
+SystemInterface default_system_interface;
+SystemInterface* system_interface = &default_system_interface;
+
+}  // namespace
+
+SystemInterface* SetSystemInterface(SystemInterface* interface) {
+  SystemInterface* old_interface = system_interface;
+  system_interface = interface;
+  return old_interface;
+}
+
 DirectoryContents::DirectoryContents(const std::string& path)
     : dir_(opendir(path.c_str())) {}
 
@@ -192,21 +209,17 @@ bool CreateDirectory(std::string const& path, mode_t mode) {
 
 bool DirectoryExists(std::string const& path) {
   struct stat info;
-
-  if (stat(path.c_str(), &info) != 0) {
+  if (!system_interface->stat(path, &info)) {
     return false;
   }
-
   return S_ISDIR(info.st_mode);
 }
 
 bool FileExists(std::string const& path) {
   struct stat info;
-
-  if (stat(path.c_str(), &info) != 0) {
+  if (!system_interface->stat(path, &info)) {
     return false;
   }
-
   return S_ISREG(info.st_mode);
 }
 
