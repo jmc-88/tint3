@@ -363,7 +363,7 @@ test_target(
 
 test_target(
   util_fs_test
-  SOURCES src/util/fs_test.cc
+  SOURCES src/util/fs_test.cc src/util/fs_test_utils.cc
   DEPENDS testdata
   LINK_LIBRARIES tint3_common_lib testmain ${TINT3_LINK_LIBRARIES})
 

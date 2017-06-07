@@ -10,6 +10,7 @@
 
 #include "util/environment.hh"
 #include "util/fs.hh"
+#include "util/fs_test_utils.hh"
 
 TEST_CASE("Path", "Represents a filesystem path string") {
   SECTION("move constructor") {
@@ -170,30 +171,20 @@ TEST_CASE("ReadFileByLine", "Reads the contents of a file line by line") {
   REQUIRE(read_file_callback_good.found());
 }
 
-class MockFileSystemInterface : public util::fs::SystemInterface {
- public:
-  bool stat(std::string const& path, struct stat* buf) {
-    // We pretend that any path passed to this function is a regular file, and
-    // that it exists.
-    buf->st_mode = S_IFREG;
-    return true;
-  }
-};
-
 TEST_CASE("SetSystemInterface") {
   // First, the file should be reported as non existing, as expected.
   REQUIRE_FALSE(util::fs::FileExists("./bogus_path"));
 
-  // Then, we override the system interface with a mock one, and test that the
+  // Then, we override the system interface with a fake one, and test that the
   // same file is now reported as existing.
-  MockFileSystemInterface mock_fs;
-  auto original_interface = util::fs::SetSystemInterface(&mock_fs);
+  FakeFileSystemInterface fake_fs;
+  auto original_interface = util::fs::SetSystemInterface(&fake_fs);
   REQUIRE(util::fs::FileExists("./bogus_path"));
 
   // Finally, we set the system interface back to the original one, and verify
   // that the file is reported again as non existing, and that the system
-  // interface we just replaced was indeed the mock one.
-  auto mock_interface = util::fs::SetSystemInterface(original_interface);
+  // interface we just replaced was indeed the fake one.
+  auto fake_interface = util::fs::SetSystemInterface(original_interface);
   REQUIRE_FALSE(util::fs::FileExists("./bogus_path"));
-  REQUIRE(mock_interface == &mock_fs);
+  REQUIRE(fake_interface == &fake_fs);
 }
