@@ -31,6 +31,6 @@ function(test_target target_name)
     set_target_properties(${target_name} PROPERTIES
       LINK_FLAGS "-fsanitize=address -fno-omit-frame-pointer -fno-optimize-sibling-calls")
     set_tests_properties(${target_name} PROPERTIES
-      ENVIRONMENT "LSAN_OPTIONS=suppressions=${CMAKE_SOURCE_DIR}/test/suppressions/lsan.txt")
+      ENVIRONMENT "LSAN_OPTIONS=report_objects=1:suppressions=${CMAKE_SOURCE_DIR}/test/suppressions/lsan.txt")
   endif()
 endfunction(test_target)
