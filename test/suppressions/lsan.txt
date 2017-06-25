@@ -1,0 +1,4 @@
+# False positives from Fontconfig.
+# Previously reported for Chromium as well, and similarly filtered out.
+# See: http://crbug.com/39050
+leak:libfontconfig.so
