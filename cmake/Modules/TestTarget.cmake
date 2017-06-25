@@ -26,13 +26,11 @@ function(test_target target_name)
   endif()
 
   if(${TINT3_ENABLE_ASAN_FOR_TESTS})
-    if("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
-      # When using Clang, turn on AddressSanitizer by default for all
-      # the test targets.
-      set_target_properties(${target_name} PROPERTIES
-        LINK_FLAGS "-fsanitize=address -fno-omit-frame-pointer -fno-optimize-sibling-calls")
-      set_tests_properties(${target_name} PROPERTIES
-        ENVIRONMENT "LSAN_OPTIONS=suppressions=${CMAKE_SOURCE_DIR}/test/suppressions/lsan.txt")
-    endif()
+    # When using Clang, turn on AddressSanitizer by default for all
+    # the test targets.
+    set_target_properties(${target_name} PROPERTIES
+      LINK_FLAGS "-fsanitize=address -fno-omit-frame-pointer -fno-optimize-sibling-calls")
+    set_tests_properties(${target_name} PROPERTIES
+      ENVIRONMENT "LSAN_OPTIONS=suppressions=${CMAKE_SOURCE_DIR}/test/suppressions/lsan.txt")
   endif()
 endfunction(test_target)
