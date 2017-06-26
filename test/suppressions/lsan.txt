@@ -2,3 +2,9 @@
 # Previously reported for Chromium as well, and similarly filtered out.
 # See: http://crbug.com/39050
 leak:libfontconfig.so
+
+# Cairo shows up in the leak reports when using Xlib surfaces, even though the
+# code looks correct.
+leak:_cairo_xlib_source_create_for_pattern
+leak:cairo_xlib_surface_create
+leak:cairo_show_glyphs
