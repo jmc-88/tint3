@@ -14,6 +14,7 @@
 #include "taskbar/task.hh"
 #include "taskbar/taskbar.hh"
 #include "util/area.hh"
+#include "util/color.hh"
 #include "util/common.hh"
 #include "util/gradient.hh"
 #include "util/imlib2.hh"
