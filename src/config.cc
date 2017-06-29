@@ -952,6 +952,157 @@ void Reader::AddEntry(std::string const& key, std::string const& value) {
         pango_font_description_from_string(value.c_str());
   }
 
+  /* Executor */
+  else if (key == "execp") {
+    if (value != "new") {
+      util::log::Error() << "unexpected value \"" << value
+                         << "\", for execp, ignoring\n";
+      return;
+    }
+    executors.push_back(Executor{});
+  } else if (key == "execp_background_id") {
+    if (executors.empty()) {
+      util::log::Error() << key << " config entry without any previous execp "
+                                   "plugin initialized, ignoring\n";
+      return;
+    }
+    executors.back().set_background(GetBackgroundFromId(std::stol(value)));
+  } else if (key == "execp_cache_icon") {
+    if (executors.empty()) {
+      util::log::Error() << key << " config entry without any previous execp "
+                                   "plugin initialized, ignoring\n";
+      return;
+    }
+    executors.back().set_cache_icon(std::stol(value) != 0);
+  } else if (key == "execp_centered") {
+    if (executors.empty()) {
+      util::log::Error() << key << " config entry without any previous execp "
+                                   "plugin initialized, ignoring\n";
+      return;
+    }
+    executors.back().set_centered(std::stol(value) != 0);
+  } else if (key == "execp_command") {
+    if (executors.empty()) {
+      util::log::Error() << key << " config entry without any previous execp "
+                                   "plugin initialized, ignoring\n";
+      return;
+    }
+    executors.back().set_command(value);
+  } else if (key == "execp_continuous") {
+    if (executors.empty()) {
+      util::log::Error() << key << " config entry without any previous execp "
+                                   "plugin initialized, ignoring\n";
+      return;
+    }
+    executors.back().set_continuous(std::stol(value) != 0);
+  } else if (key == "execp_dwheel_command") {
+    if (executors.empty()) {
+      util::log::Error() << key << " config entry without any previous execp "
+                                   "plugin initialized, ignoring\n";
+      return;
+    }
+    executors.back().set_command_down_wheel(value);
+  } else if (key == "execp_font") {
+    if (executors.empty()) {
+      util::log::Error() << key << " config entry without any previous execp "
+                                   "plugin initialized, ignoring\n";
+      return;
+    }
+    executors.back().set_font(value);
+  } else if (key == "execp_font_color") {
+    if (executors.empty()) {
+      util::log::Error() << key << " config entry without any previous execp "
+                                   "plugin initialized, ignoring\n";
+      return;
+    }
+    executors.back().set_font_color(ParseColor(value));
+  } else if (key == "execp_has_icon") {
+    if (executors.empty()) {
+      util::log::Error() << key << " config entry without any previous execp "
+                                   "plugin initialized, ignoring\n";
+      return;
+    }
+    executors.back().set_has_icon(std::stol(value) != 0);
+  } else if (key == "execp_icon_h") {
+    if (executors.empty()) {
+      util::log::Error() << key << " config entry without any previous execp "
+                                   "plugin initialized, ignoring\n";
+      return;
+    }
+    int height = std::stol(value);
+    if (height < 0) {
+      util::log::Error() << "negative " << key << " given, ignoring\n";
+      return;
+    }
+    executors.back().set_icon_height(height);
+  } else if (key == "execp_icon_w") {
+    if (executors.empty()) {
+      util::log::Error() << key << " config entry without any previous execp "
+                                   "plugin initialized, ignoring\n";
+      return;
+    }
+    int width = std::stol(value);
+    if (width < 0) {
+      util::log::Error() << "negative " << key << " given, ignoring\n";
+      return;
+    }
+    executors.back().set_icon_width(width);
+  } else if (key == "execp_interval") {
+    if (executors.empty()) {
+      util::log::Error() << key << " config entry without any previous execp "
+                                   "plugin initialized, ignoring\n";
+      return;
+    }
+    int interval = std::stol(value);
+    if (interval < 0) {
+      util::log::Error() << "negative " << key << " given, ignoring\n";
+      return;
+    }
+    executors.back().set_interval(interval);
+  } else if (key == "execp_lclick_command") {
+    if (executors.empty()) {
+      util::log::Error() << key << " config entry without any previous execp "
+                                   "plugin initialized, ignoring\n";
+      return;
+    }
+    executors.back().set_command_left_click(value);
+  } else if (key == "execp_markup") {
+    if (executors.empty()) {
+      util::log::Error() << key << " config entry without any previous execp "
+                                   "plugin initialized, ignoring\n";
+      return;
+    }
+    executors.back().set_markup(std::stol(value) != 0);
+  } else if (key == "execp_mclick_command") {
+    if (executors.empty()) {
+      util::log::Error() << key << " config entry without any previous execp "
+                                   "plugin initialized, ignoring\n";
+      return;
+    }
+    executors.back().set_command_middle_click(value);
+  } else if (key == "execp_rclick_command") {
+    if (executors.empty()) {
+      util::log::Error() << key << " config entry without any previous execp "
+                                   "plugin initialized, ignoring\n";
+      return;
+    }
+    executors.back().set_command_right_click(value);
+  } else if (key == "execp_tooltip") {
+    if (executors.empty()) {
+      util::log::Error() << key << " config entry without any previous execp "
+                                   "plugin initialized, ignoring\n";
+      return;
+    }
+    executors.back().set_tooltip(value);
+  } else if (key == "execp_uwheel_command") {
+    if (executors.empty()) {
+      util::log::Error() << key << " config entry without any previous execp "
+                                   "plugin initialized, ignoring\n";
+      return;
+    }
+    executors.back().set_command_up_wheel(value);
+  }
+
   /* Mouse actions */
   else if (key == "mouse_middle") {
     GetAction(value, &mouse_middle);

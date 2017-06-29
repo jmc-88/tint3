@@ -77,6 +77,7 @@ Panel panel_config;
 std::vector<Panel> panels;
 
 std::vector<Background> backgrounds;
+std::vector<Executor> executors;
 std::vector<util::Gradient> gradients;
 
 util::imlib2::Image default_icon;
@@ -171,6 +172,9 @@ void DefaultPanel() {
   // append full transparency background
   backgrounds.clear();
   backgrounds.push_back(Background{});
+
+  // reset executors
+  executors.clear();
 
   // append full transparency gradient
   gradients.clear();

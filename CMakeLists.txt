@@ -182,6 +182,7 @@ set(TINT3_SOURCES
     src/clock/clock.cc
     src/clock/time_utils.cc
     src/dnd/dnd.cc
+    src/execp/execp.cc
     src/parser/lexer.cc
     src/parser/parser.cc
     src/systray/systraybar.cc
@@ -304,6 +305,11 @@ test_target(
 test_target(
   dnd_dnd_test
   SOURCES src/dnd/dnd_test.cc
+  LINK_LIBRARIES tint3_common_lib testmain ${TINT3_LINK_LIBRARIES})
+
+test_target(
+  execp_execp_test
+  SOURCES src/execp/execp_test.cc
   LINK_LIBRARIES tint3_common_lib testmain ${TINT3_LINK_LIBRARIES})
 
 test_target(

@@ -519,3 +519,91 @@ TEST_CASE("ConfigParserImportFiles") {
 
   CleanupPanel();  // TODO: decouple from config loading
 }
+
+static constexpr char kExecpNew[] =
+    u8R"EOF(
+# First execp
+execp = new
+execp_background_id = 0
+execp_centered = 1
+execp_command = /bin/true
+execp_continuous = 0
+execp_dwheel_command = /bin/true
+execp_interval = 0
+execp_lclick_command = /bin/true
+execp_mclick_command = /bin/true
+execp_rclick_command = /bin/true
+execp_tooltip = o hai
+execp_uwheel_command = /bin/true
+
+# Second execp
+execp = new
+execp_cache_icon = 0
+execp_command = /bin/false
+execp_continuous = 1
+execp_font = sans 10
+execp_font_color = #fff
+execp_has_icon = 0
+execp_interval = 0
+execp_markup = 0
+)EOF";
+
+static constexpr char kExecpNoNew[] =
+    u8R"EOF(
+# This section should be completely ignored as no "execp = new" was given
+execp_cache_icon = 0
+execp_command = /bin/true
+execp_centered = 1
+execp_continuous = 0
+execp_dwheel_command = /bin/true
+execp_font = sans 10
+execp_font_color = #fff
+execp_has_icon = 0
+execp_interval = 0
+execp_lclick_command = /bin/true
+execp_markup = 0
+execp_mclick_command = /bin/true
+execp_rclick_command = /bin/true
+execp_tooltip = o hai
+execp_uwheel_command = /bin/true
+)EOF";
+
+static constexpr char kExecpNegatives[] =
+    u8R"EOF(
+# These integer values must be non-negative, so negative values should be
+# ignored and stay at their default of 0
+execp = new
+execp_icon_h = -10
+execp_icon_w = -20
+execp_interval = -30
+)EOF";
+
+TEST_CASE("ConfigParserExecp") {
+  DefaultPanel();  // TODO: decouple from config loading
+
+  test::ConfigReader reader;
+  config::Parser config_entry_parser{&reader, ""};
+  parser::Parser p{config::kLexer, &config_entry_parser};
+
+  SECTION("new") {
+    REQUIRE(p.Parse(kExecpNew));
+    REQUIRE(executors.size() == 2);
+    REQUIRE(executors[0].command() == "/bin/true");
+    REQUIRE(executors[1].command() == "/bin/false");
+  }
+
+  SECTION("no new") {
+    REQUIRE(p.Parse(kExecpNoNew));
+    REQUIRE(executors.size() == 0);
+  }
+
+  SECTION("negative values") {
+    REQUIRE(p.Parse(kExecpNegatives));
+    REQUIRE(executors.size() == 1);
+    REQUIRE(executors.back().icon_height() == 0);
+    REQUIRE(executors.back().icon_width() == 0);
+    REQUIRE(executors.back().interval() == 0);
+  }
+
+  CleanupPanel();  // TODO: decouple from config loading
+}

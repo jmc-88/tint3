@@ -9,6 +9,7 @@
 #include <vector>
 
 #include "clock/clock.hh"
+#include "execp/execp.hh"
 #include "launcher/launcher.hh"
 #include "systray/systraybar.hh"
 #include "taskbar/task.hh"
@@ -72,6 +73,7 @@ extern PanelStrutPolicy panel_strut_policy;
 extern int max_tick_urgent;
 
 extern std::vector<Background> backgrounds;
+extern std::vector<Executor> executors;
 extern std::vector<util::Gradient> gradients;
 
 extern util::imlib2::Image default_icon;
