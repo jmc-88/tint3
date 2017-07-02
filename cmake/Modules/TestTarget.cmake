@@ -3,6 +3,12 @@ option(TINT3_ENABLE_ASAN_FOR_TESTS
        "Whether to use AddressSanitizer for test binaries"
        ON)
 
+set(LSAN_OPTIONS "report_objects=1:suppressions=${CMAKE_SOURCE_DIR}/test/suppressions/lsan.txt")
+set(ASAN_OPTIONS "allow_addr2line=1:fast_unwind_on_malloc=0")
+if(CMAKE_SYSTEM_NAME MATCHES "FreeBSD")
+  string(APPEND ASAN_OPTIONS ":malloc_context_size=2")
+endif()
+
 function(test_target target_name)
   set(options USE_XVFB_RUN)
   set(multiValueArgs SOURCES DEPENDS LINK_LIBRARIES)
@@ -31,6 +37,6 @@ function(test_target target_name)
     set_target_properties(${target_name} PROPERTIES
       LINK_FLAGS "-fsanitize=address -fno-omit-frame-pointer -fno-optimize-sibling-calls")
     set_tests_properties(${target_name} PROPERTIES
-      ENVIRONMENT "LSAN_OPTIONS=report_objects=1:suppressions=${CMAKE_SOURCE_DIR}/test/suppressions/lsan.txt;ASAN_OPTIONS=allow_addr2line=1:fast_unwind_on_malloc=0:malloc_context_size=2")
+      ENVIRONMENT "LSAN_OPTIONS=${LSAN_OPTIONS};ASAN_OPTIONS=${ASAN_OPTIONS}")
   endif()
 endfunction(test_target)
