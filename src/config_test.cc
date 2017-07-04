@@ -550,9 +550,15 @@ execp_interval = 0
 execp_markup = 0
 )EOF";
 
+static constexpr char kExecpBogusNew[] =
+    u8R"EOF(
+execp = lol
+)EOF";
+
 static constexpr char kExecpNoNew[] =
     u8R"EOF(
 # This section should be completely ignored as no "execp = new" was given
+execp_background_id = 0
 execp_cache_icon = 0
 execp_command = /bin/true
 execp_centered = 1
@@ -594,6 +600,11 @@ TEST_CASE("ConfigParserExecp") {
     REQUIRE(executors.size() == 2);
     REQUIRE(executors[0].command() == "/bin/true");
     REQUIRE(executors[1].command() == "/bin/false");
+  }
+
+  SECTION("bogus new") {
+    REQUIRE(p.Parse(kExecpBogusNew));
+    REQUIRE(executors.size() == 0);
   }
 
   SECTION("no new") {
