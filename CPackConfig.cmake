@@ -1,6 +1,13 @@
 # CPack configuration file for tint3.
 # Based on compton's CPackConfig.cmake (https://github.com/chjj/compton).
 
+# Workaround for: https://gitlab.kitware.com/cmake/cmake/issues/16517
+if(${CMAKE_VERSION} VERSION_LESS "3.8.0")
+  set(CPACK_COMPONENTS_ALL "tint3")
+  set(CPACK_DEB_COMPONENT_INSTALL ON)
+  set(CPACK_COMPONENTS_GROUPING ALL_COMPONENTS_IN_ONE)
+endif()
+
 # Environment
 if(NOT CPACK_SYSTEM_NAME)
 	set(CPACK_SYSTEM_NAME "${CMAKE_SYSTEM_PROCESSOR}")

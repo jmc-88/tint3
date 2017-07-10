@@ -1,6 +1,11 @@
 cmake_minimum_required(VERSION 3.1 FATAL_ERROR)
 project(tint3)
 
+# Workaround for: https://gitlab.kitware.com/cmake/cmake/issues/16517
+if(${CMAKE_VERSION} VERSION_LESS "3.8.0")
+  set(CMAKE_INSTALL_DEFAULT_COMPONENT_NAME "tint3")
+endif()
+
 # Additional CMake modules
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
