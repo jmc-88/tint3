@@ -44,6 +44,13 @@ set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE "${CPACK_SYSTEM_NAME}")
 set(CPACK_DEBIAN_PACKAGE_SECTION "x11")
 set(CPACK_DEBIAN_PACKAGE_DEPENDS "libc6, libcairo2, libpango1.0-0, libglib2.0-0, libimlib2, libxinerama1, libx11-6, libxdamage1, libxcomposite1, libxrender1, libxrandr2, librsvg2-2, libstartup-notification0, libc++1")
 set(CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA "debian/conffiles")
+set(CPACK_DEBIAN_PACKAGE_DESCRIPTION "${CPACK_PACKAGE_DESCRIPTION_SUMMARY}
+ tint3 is a simple panel/taskbar for X11. It provides features such as a
+ taskbar, a battery applet, a clock applet, a system tray, drag and drop
+ support, application launchers, and more.
+ .
+ The project was born as a C++ rewrite of tint2, and aims to be
+ backwards-compatible with it.")
 
 # RPM package config
 set(CPACK_RPM_PACKAGE_ARCHITECTURE "${CPACK_SYSTEM_NAME}")
