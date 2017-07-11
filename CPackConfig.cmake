@@ -43,6 +43,7 @@ set(CPACK_DEBIAN_PACKAGE_MAINTAINER "${CPACK_PACKAGE_VENDOR} (${CPACK_PACKAGE_CO
 set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE "${CPACK_SYSTEM_NAME}")
 set(CPACK_DEBIAN_PACKAGE_SECTION "x11")
 set(CPACK_DEBIAN_PACKAGE_DEPENDS "libc6, libcairo2, libpango1.0-0, libglib2.0-0, libimlib2, libxinerama1, libx11-6, libxdamage1, libxcomposite1, libxrender1, libxrandr2, librsvg2-2, libstartup-notification0, libc++1")
+set(CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA "debian/conffiles")
 
 # RPM package config
 set(CPACK_RPM_PACKAGE_ARCHITECTURE "${CPACK_SYSTEM_NAME}")
