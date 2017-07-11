@@ -1,27 +1,11 @@
 #ifndef TINT3_EXECP_EXECP_HH
 #define TINT3_EXECP_EXECP_HH
 
-#include <pango/pango.h>
-
 #include <memory>
 #include <string>
 
 #include "util/color.hh"
-
-class PangoFontDescriptionPtr {
- public:
-  PangoFontDescriptionPtr();
-  PangoFontDescriptionPtr(PangoFontDescriptionPtr const& other);
-  PangoFontDescriptionPtr(PangoFontDescriptionPtr&& other);
-  ~PangoFontDescriptionPtr();
-
-  PangoFontDescriptionPtr& operator=(PangoFontDescriptionPtr other);
-  PangoFontDescriptionPtr& operator=(PangoFontDescription* ptr);
-  PangoFontDescription* operator()() const;
-
- private:
-  PangoFontDescription* font_description_;
-};
+#include "util/pango.hh"
 
 class Executor {
  public:
@@ -65,7 +49,7 @@ class Executor {
   std::string command_up_wheel_;
   std::string command_down_wheel_;
   bool continuous_;
-  PangoFontDescriptionPtr font_description_;
+  util::pango::FontDescriptionPtr font_description_;
   Color font_color_;
   bool has_icon_;
   unsigned int icon_height_;

@@ -210,6 +210,7 @@ set(TINT3_SOURCES
     src/util/fs.cc
     src/util/imlib2.cc
     src/util/log.cc
+    src/util/pango.cc
     src/util/pipe.cc
     src/util/timer.cc
     src/util/window.cc
@@ -393,6 +394,11 @@ test_target(
 test_target(
   util_variant_test
   SOURCES src/util/variant_test.cc
+  LINK_LIBRARIES tint3_common_lib testmain ${TINT3_LINK_LIBRARIES})
+
+test_target(
+  util_pango_test
+  SOURCES src/util/pango_test.cc
   LINK_LIBRARIES tint3_common_lib testmain ${TINT3_LINK_LIBRARIES})
 
 test_target(

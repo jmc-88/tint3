@@ -1,45 +1,5 @@
 #include "execp/execp.hh"
 
-#include <algorithm>
-
-PangoFontDescriptionPtr::PangoFontDescriptionPtr()
-    : font_description_(pango_font_description_from_string("sans 10")) {}
-
-PangoFontDescriptionPtr::PangoFontDescriptionPtr(
-    PangoFontDescriptionPtr const& other)
-    : font_description_(pango_font_description_copy(other.font_description_)) {}
-
-PangoFontDescriptionPtr::PangoFontDescriptionPtr(
-    PangoFontDescriptionPtr&& other)
-    : font_description_(std::move(other.font_description_)) {
-  other.font_description_ = nullptr;
-}
-
-PangoFontDescriptionPtr::~PangoFontDescriptionPtr() {
-  if (font_description_) {
-    pango_font_description_free(font_description_);
-  }
-}
-
-PangoFontDescriptionPtr& PangoFontDescriptionPtr::operator=(
-    PangoFontDescriptionPtr other) {
-  std::swap(font_description_, other.font_description_);
-  return (*this);
-}
-
-PangoFontDescriptionPtr& PangoFontDescriptionPtr::operator=(
-    PangoFontDescription* ptr) {
-  if (font_description_) {
-    pango_font_description_free(font_description_);
-  }
-  font_description_ = ptr;
-  return (*this);
-}
-
-PangoFontDescription* PangoFontDescriptionPtr::operator()() const {
-  return font_description_;
-}
-
 void Executor::set_background(Background const& background) {
   background_ = background;
 }
