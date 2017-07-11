@@ -30,7 +30,7 @@ set(CPACK_PACKAGE_VERSION "${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSIO
 set(CPACK_PACKAGE_DESCRIPTION "Lightweight X11 panel, taskbar and system tray. A backwards-compatible fork and C++ rewrite of tint2.")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Lightweight X11 panel")
 set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}-${CPACK_SYSTEM_NAME}")
-set(CPACK_PACKAGE_CONTACT "https://github.com/jmc-88/tint3/issues")
+set(CPACK_PACKAGE_CONTACT "daniele.cocca@gmail.com")
 
 # Package config
 set(CPACK_GENERATOR "DEB" "RPM")
@@ -39,7 +39,7 @@ set(CPACK_RESOURCE_FILE_README "README.md")
 set(CPACK_STRIP_FILES 1)
 
 # DEB package config
-set(CPACK_DEBIAN_PACKAGE_MAINTAINER "${CPACK_PACKAGE_VENDOR} (${CPACK_PACKAGE_CONTACT})")
+set(CPACK_DEBIAN_PACKAGE_MAINTAINER "${CPACK_PACKAGE_VENDOR} <${CPACK_PACKAGE_CONTACT}>")
 set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE "${CPACK_SYSTEM_NAME}")
 set(CPACK_DEBIAN_PACKAGE_SECTION "x11")
 set(CPACK_DEBIAN_PACKAGE_DEPENDS "libc6, libcairo2, libpango1.0-0, libglib2.0-0, libimlib2, libxinerama1, libx11-6, libxdamage1, libxcomposite1, libxrender1, libxrandr2, librsvg2-2, libstartup-notification0, libc++1")
