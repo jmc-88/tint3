@@ -33,7 +33,7 @@ set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}-${CP
 set(CPACK_PACKAGE_CONTACT "daniele.cocca@gmail.com")
 
 # Package config
-set(CPACK_GENERATOR "DEB" "RPM")
+set(CPACK_GENERATOR "DEB;RPM")
 set(CPACK_RESOURCE_FILE_LICENSE "LICENSE")
 set(CPACK_RESOURCE_FILE_README "README.md")
 set(CPACK_STRIP_FILES 1)
@@ -58,4 +58,4 @@ set(CPACK_RPM_PACKAGE_LICENSE "GPL2")
 set(CPACK_RPM_PACKAGE_REQUIRES "/bin/sh,libcairo.so.0,libpangocairo-1.0.so.0,,libpango-1.0.so.0,libgobject-2.0.so.0,libglib-2.0.so.0,libImlib2.so.1,libXinerama.so.1,libX11.so.6,libXdamage.so.1,libXcomposite.so.1,libXrender.so.1,libXrandr.so.2,librsvg-2.so.2,libstartup-notification-1.so.0,libc++.so.1")
 
 # Source package config
-set(CPACK_SOURCE_GENERATOR "DEB RPM")
+set(CPACK_SOURCE_GENERATOR "DEB;RPM")
