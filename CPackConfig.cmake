@@ -18,6 +18,7 @@ endif()
 
 # Build and install information
 set(CPACK_INSTALL_CMAKE_PROJECTS "package-build;tint3;ALL;/")
+set(CPACK_PROJECT_CONFIG_FILE "cmake/package.cmake")
 set(CPACK_CMAKE_GENERATOR "Unix Makefiles")
 
 # Basic information
@@ -29,7 +30,6 @@ set(CPACK_PACKAGE_VERSION_PATCH "0")
 set(CPACK_PACKAGE_VERSION "${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}")
 set(CPACK_PACKAGE_DESCRIPTION "Lightweight X11 panel, taskbar and system tray. A backwards-compatible fork and C++ rewrite of tint2.")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Lightweight X11 panel")
-set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}-${CPACK_SYSTEM_NAME}")
 set(CPACK_PACKAGE_CONTACT "daniele.cocca@gmail.com")
 
 # Package config
@@ -54,6 +54,7 @@ set(CPACK_DEBIAN_PACKAGE_DESCRIPTION "${CPACK_PACKAGE_DESCRIPTION_SUMMARY}
 
 # RPM package config
 set(CPACK_RPM_PACKAGE_ARCHITECTURE "${CPACK_SYSTEM_NAME}")
+set(CPACK_RPM_PACKAGE_RELEASE "1")
 set(CPACK_RPM_PACKAGE_LICENSE "GPL2")
 set(CPACK_RPM_PACKAGE_REQUIRES "/bin/sh,libcairo.so.0,libpangocairo-1.0.so.0,,libpango-1.0.so.0,libgobject-2.0.so.0,libglib-2.0.so.0,libImlib2.so.1,libXinerama.so.1,libX11.so.6,libXdamage.so.1,libXcomposite.so.1,libXrender.so.1,libXrandr.so.2,librsvg-2.so.2,libstartup-notification-1.so.0,libc++.so.1")
 
