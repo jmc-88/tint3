@@ -12,8 +12,6 @@
 #include <string>
 #include <vector>
 
-#include "util/area.hh"
-
 namespace util {
 
 class GObjectUnrefDeleter {
