@@ -530,20 +530,13 @@ void EventPropertyNotify(XEvent* e, Timer& timer, Tooltip* tooltip) {
         return;
       }
 
-      auto desktop_names = ServerGetDesktopNames();
+      auto desktop_names = server.GetDesktopNames();
       auto it = desktop_names.begin();
 
       for (Panel& panel : panels) {
         for (unsigned int i = 0; i < panel.num_desktops_; ++i) {
-          std::string name;
-
-          if (it != desktop_names.end()) {
-            name = (*it++);
-          } else {
-            name = util::string::Representation(i + 1);
-          }
-
           Taskbar& tskbar = panel.taskbar_[i];
+          std::string name = (*it++);
 
           if (tskbar.bar_name.name() != name) {
             tskbar.bar_name.set_name(name);

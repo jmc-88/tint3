@@ -51,25 +51,19 @@ void Taskbarname::InitPanel(Panel* panel) {
     return;
   }
 
-  auto desktop_names = ServerGetDesktopNames();
+  auto desktop_names = server.GetDesktopNames();
   auto it = desktop_names.begin();
 
   for (unsigned int j = 0; j < panel->num_desktops_; ++j) {
     Taskbar& tskbar = panel->taskbar_[j];
     tskbar.bar_name = panel->g_taskbar.bar_name_;
     tskbar.bar_name.parent_ = &tskbar;
+    tskbar.bar_name.set_name(*it++);
 
     if (j == server.desktop) {
       tskbar.bar_name.bg_ = panel->g_taskbar.background_name[kTaskbarActive];
     } else {
       tskbar.bar_name.bg_ = panel->g_taskbar.background_name[kTaskbarNormal];
-    }
-
-    // use desktop number if name is missing
-    if (it != desktop_names.end()) {
-      tskbar.bar_name.set_name(*it++);
-    } else {
-      tskbar.bar_name.set_name(util::string::Representation(j + 1));
     }
 
     // append the name at the beginning of taskbar

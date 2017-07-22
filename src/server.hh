@@ -50,6 +50,7 @@ class Server {
 
   void Cleanup();
   int GetCurrentDesktop();
+  std::vector<std::string> GetDesktopNames() const;
   void UpdateNumberOfDesktops();
   int GetNumberOfDesktops();
   void GetRootPixmap();

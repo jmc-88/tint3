@@ -275,31 +275,6 @@ unsigned long* GetBestIcon(unsigned long* data, int icon_count, int num,
   return icon_data[icon_num];
 }
 
-std::vector<std::string> ServerGetDesktopNames() {
-  int count = 0;
-  auto data_ptr = ServerGetProperty<char>(server.root_window(),
-                                          server.atom("_NET_DESKTOP_NAMES"),
-                                          server.atom("UTF8_STRING"), &count);
-
-  std::vector<std::string> names;
-
-  // data_ptr contains strings separated by NUL characters, so we can just add
-  // one and add its length to a counter, then repeat until the data has been
-  // fully consumed
-  if (data_ptr != nullptr) {
-    names.push_back(data_ptr.get());
-
-    int j = (names.back().length() + 1);
-
-    while (j < count - 1) {
-      names.push_back(data_ptr.get() + j);
-      j += (names.back().length() + 1);
-    }
-  }
-
-  return names;
-}
-
 void GetTextSize(PangoFontDescription* font, std::string const& text,
                  int* width, int* height) {
   cairo_surface_t* cs = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, 1, 1);

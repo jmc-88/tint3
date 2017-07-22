@@ -32,8 +32,6 @@ int GetIconCount(unsigned long* data, int num);
 unsigned long* GetBestIcon(unsigned long* data, int icon_count, int num,
                            int* iw, int* ih, int best_icon_size);
 
-std::vector<std::string> ServerGetDesktopNames();
-
 void GetTextSize(PangoFontDescription* font, std::string const& text,
                  int* width, int* height);
 

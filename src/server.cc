@@ -347,6 +347,34 @@ int Server::GetNumberOfDesktops() {
                             XA_CARDINAL);
 }
 
+std::vector<std::string> Server::GetDesktopNames() const {
+  int count = 0;
+  auto data_ptr = ServerGetProperty<char>(
+      root_window(), atom("_NET_DESKTOP_NAMES"), atom("UTF8_STRING"), &count);
+
+  std::vector<std::string> names;
+
+  // data_ptr contains strings separated by NUL characters, so we can just add
+  // one and add its length to a counter, then repeat until the data has been
+  // fully consumed
+  if (data_ptr != nullptr) {
+    names.push_back(data_ptr.get());
+    int j = (names.back().length() + 1);
+
+    while (j < count - 1) {
+      names.push_back(data_ptr.get() + j);
+      j += (names.back().length() + 1);
+    }
+  }
+
+  // fill in missing desktop names with desktop numbers
+  for (unsigned int j = names.size(); j < num_desktops(); ++j) {
+    names.push_back(util::string::Representation(j + 1));
+  }
+
+  return names;
+}
+
 void Server::InitGC(Window win) {
   if (!gc) {
     XGCValues gcv;
