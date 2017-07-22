@@ -307,7 +307,7 @@ void GetMonitors() {
   }
 }
 
-void GetDesktops() {
+void InitDesktops() {
   // detect number of desktops
   // wait 15s to leave some time for window manager startup
   for (int i = 0; i < 15; i++) {

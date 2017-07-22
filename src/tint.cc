@@ -215,7 +215,7 @@ void InitX11() {
 
   // get monitor and desktop config
   GetMonitors();
-  GetDesktops();
+  InitDesktops();
 }
 
 void Cleanup(Timer& timer) {

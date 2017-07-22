@@ -111,7 +111,7 @@ int ServerCatchError(Display* d, XErrorEvent* ev);
 
 // detect monitors and desktops
 void GetMonitors();
-void GetDesktops();
+void InitDesktops();
 
 template <typename T>
 util::x11::ClientData<T> ServerGetProperty(Window win, Atom at, Atom type,
