@@ -245,7 +245,7 @@ void InitPanel(Timer& timer) {
 
   util::log::Debug() << "tint3: num_monitors " << server.num_monitors
                      << ", num_monitors used " << panels.size()
-                     << ", num_desktops " << server.num_desktops << '\n';
+                     << ", num_desktops " << server.num_desktops() << '\n';
 
   for (unsigned int i = 0; i < num_panels; ++i) {
     Panel& p = panels[i];

@@ -301,8 +301,8 @@ void Taskbar::InitPanel(Panel* panel) {
         (panel->g_task.height_ - panel->g_task.icon_size1) / 2;
   }
 
-  panel->num_desktops_ = server.num_desktops;
-  panel->taskbar_ = new Taskbar[server.num_desktops];
+  panel->num_desktops_ = server.num_desktops();
+  panel->taskbar_ = new Taskbar[panel->num_desktops_];
 
   for (unsigned int j = 0; j < panel->num_desktops_; j++) {
     Taskbar* tskbar = &panel->taskbar_[j];

@@ -32,7 +32,6 @@ class Server {
   unsigned int desktop;
   unsigned int screen;
   int depth;
-  unsigned int num_desktops;
   // number of monitor (without monitor included into another one)
   unsigned int num_monitors;
   std::vector<Monitor> monitor;
@@ -56,8 +55,11 @@ class Server {
   void GetRootPixmap();
   void InitGC(Window win);
   void InitAtoms();
+  void InitDesktops();
   void InitVisual();
   void InitX11();
+
+  unsigned int num_desktops() const;
 
   Window root_window() const;
   void UpdateRootWindow();
@@ -102,6 +104,7 @@ class Server {
  private:
   Window root_window_;
   std::unordered_map<std::string, Atom> atoms_;
+  unsigned int num_desktops_;
 };
 
 extern Server server;
@@ -112,7 +115,6 @@ int ServerCatchError(Display* d, XErrorEvent* ev);
 
 // detect monitors and desktops
 void GetMonitors();
-void InitDesktops();
 
 template <typename T>
 util::x11::ClientData<T> ServerGetProperty(Window win, Atom at, Atom type,

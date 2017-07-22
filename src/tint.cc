@@ -215,7 +215,7 @@ void InitX11() {
 
   // get monitor and desktop config
   GetMonitors();
-  InitDesktops();
+  server.InitDesktops();
 }
 
 void Cleanup(Timer& timer) {
@@ -290,7 +290,7 @@ void WindowAction(Task* tsk, MouseAction action) {
       break;
 
     case MouseAction::kDesktopRight:
-      if (tsk->desktop == server.num_desktops) {
+      if (tsk->desktop == server.num_desktops()) {
         break;
       }
 
@@ -592,7 +592,7 @@ void EventPropertyNotify(XEvent* e, Timer& timer, Tooltip* tooltip) {
         panel.taskbar_[server.desktop].SetState(kTaskbarActive);
         // check ALLDESKTOP task => resize taskbar
 
-        if (server.num_desktops > old_desktop) {
+        if (server.num_desktops() > old_desktop) {
           Taskbar& tskbar = panel.taskbar_[old_desktop];
           auto it = tskbar.children_.begin();
 

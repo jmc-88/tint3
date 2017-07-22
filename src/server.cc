@@ -307,21 +307,21 @@ void GetMonitors() {
   }
 }
 
-void InitDesktops() {
+void Server::InitDesktops() {
   // detect number of desktops
   // wait 15s to leave some time for window manager startup
   for (int i = 0; i < 15; i++) {
-    server.num_desktops = server.GetNumberOfDesktops();
+    num_desktops_ = GetNumberOfDesktops();
 
-    if (server.num_desktops > 0) {
+    if (num_desktops_ > 0) {
       break;
     }
 
     sleep(1);
   }
 
-  if (server.num_desktops == 0) {
-    server.num_desktops = 1;
+  if (num_desktops_ == 0) {
+    num_desktops_ = 1;
     util::log::Error() << "WM doesn't respect NETWM specs. "
                        << "tint3 will default to 1 desktop.\n";
   }
@@ -332,11 +332,13 @@ int Server::GetCurrentDesktop() {
                             XA_CARDINAL);
 }
 
-void Server::UpdateNumberOfDesktops() {
-  num_desktops = GetNumberOfDesktops();
+unsigned int Server::num_desktops() const { return num_desktops_; }
 
-  if (desktop >= num_desktops) {
-    desktop = num_desktops - 1;
+void Server::UpdateNumberOfDesktops() {
+  num_desktops_ = GetNumberOfDesktops();
+
+  if (desktop >= num_desktops_) {
+    desktop = num_desktops_ - 1;
   }
 }
 
