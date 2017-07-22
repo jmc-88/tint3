@@ -332,6 +332,14 @@ int Server::GetCurrentDesktop() {
                             XA_CARDINAL);
 }
 
+void Server::UpdateNumberOfDesktops() {
+  num_desktops = GetNumberOfDesktops();
+
+  if (desktop >= num_desktops) {
+    desktop = num_desktops - 1;
+  }
+}
+
 int Server::GetNumberOfDesktops() {
   return GetProperty32<int>(root_window_, atoms_["_NET_NUMBER_OF_DESKTOPS"],
                             XA_CARDINAL);

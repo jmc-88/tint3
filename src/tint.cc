@@ -560,12 +560,7 @@ void EventPropertyNotify(XEvent* e, Timer& timer, Tooltip* tooltip) {
         return;
       }
 
-      server.num_desktops = server.GetNumberOfDesktops();
-
-      if (server.desktop >= server.num_desktops) {
-        server.desktop = server.num_desktops - 1;
-      }
-
+      server.UpdateNumberOfDesktops();
       CleanupTaskbar();
       InitTaskbar();
 

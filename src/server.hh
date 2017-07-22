@@ -51,6 +51,7 @@ class Server {
 
   void Cleanup();
   int GetCurrentDesktop();
+  void UpdateNumberOfDesktops();
   int GetNumberOfDesktops();
   void GetRootPixmap();
   void InitGC(Window win);
