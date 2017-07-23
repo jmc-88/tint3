@@ -439,8 +439,8 @@ bool Panel::Resize() {
 
   if (panel_mode != PanelMode::kMultiDesktop && taskbar_enabled) {
     // propagate width/height on hidden taskbar
-    int width = taskbar_[server.desktop].width_;
-    int height = taskbar_[server.desktop].height_;
+    int width = taskbar_[server.desktop()].width_;
+    int height = taskbar_[server.desktop()].height_;
 
     for (unsigned int i = 0; i < num_desktops_; ++i) {
       taskbar_[i].width_ = width;
@@ -663,7 +663,7 @@ void Panel::UpdateTaskbarVisibility() {
     Taskbar& tskbar = taskbar_[j];
 
     if (panel_mode != PanelMode::kMultiDesktop &&
-        tskbar.desktop != server.desktop) {
+        tskbar.desktop != server.desktop()) {
       // SINGLE_DESKTOP and not current desktop
       tskbar.on_screen_ = false;
     } else {

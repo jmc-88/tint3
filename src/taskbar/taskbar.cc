@@ -313,7 +313,7 @@ void Taskbar::InitPanel(Panel* panel) {
 
     tskbar->desktop = j;
 
-    if (j == server.desktop) {
+    if (j == server.desktop()) {
       tskbar->bg_ = panel->g_taskbar.background[kTaskbarActive];
     } else {
       tskbar->bg_ = panel->g_taskbar.background[kTaskbarNormal];
@@ -382,7 +382,8 @@ void TaskRefreshTasklist(Timer& timer) {
 }
 
 void Taskbar::DrawForeground(cairo_t* /* c */) {
-  size_t state = (desktop == server.desktop ? kTaskbarActive : kTaskbarNormal);
+  size_t state =
+      (desktop == server.desktop() ? kTaskbarActive : kTaskbarNormal);
   set_state_pixmap(state, pix_);
 }
 

@@ -327,9 +327,11 @@ void Server::InitDesktops() {
   }
 }
 
+unsigned int Server::desktop() const { return desktop_; }
+
 void Server::UpdateCurrentDesktop() {
-  desktop = GetProperty32<int>(root_window_, atoms_["_NET_CURRENT_DESKTOP"],
-                               XA_CARDINAL);
+  desktop_ = GetProperty32<int>(root_window_, atoms_["_NET_CURRENT_DESKTOP"],
+                                XA_CARDINAL);
 }
 
 unsigned int Server::num_desktops() const { return num_desktops_; }
@@ -337,8 +339,8 @@ unsigned int Server::num_desktops() const { return num_desktops_; }
 void Server::UpdateNumberOfDesktops() {
   num_desktops_ = GetNumberOfDesktops();
 
-  if (desktop >= num_desktops_) {
-    desktop = num_desktops_ - 1;
+  if (desktop_ >= num_desktops_) {
+    desktop_ = num_desktops_ - 1;
   }
 }
 

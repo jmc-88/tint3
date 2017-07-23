@@ -284,7 +284,7 @@ void WindowAction(Task* tsk, MouseAction action) {
       desk = (tsk->desktop - 1);
       util::window::SetDesktop(tsk->win, desk);
 
-      if (desk == server.desktop) {
+      if (desk == server.desktop()) {
         util::window::SetActive(tsk->win);
       }
       break;
@@ -297,7 +297,7 @@ void WindowAction(Task* tsk, MouseAction action) {
       desk = (tsk->desktop + 1);
       util::window::SetDesktop(tsk->win, desk);
 
-      if (desk == server.desktop) {
+      if (desk == server.desktop()) {
         util::window::SetActive(tsk->win);
       }
       break;
@@ -493,7 +493,7 @@ void EventButtonRelease(XEvent* e) {
 
   // switch desktop
   if (panel_mode == PanelMode::kMultiDesktop) {
-    if (tskbar->desktop != server.desktop && action != MouseAction::kClose &&
+    if (tskbar->desktop != server.desktop() && action != MouseAction::kClose &&
         action != MouseAction::kDesktopLeft &&
         action != MouseAction::kDesktopRight) {
       SetDesktop(tskbar->desktop);
@@ -574,14 +574,14 @@ void EventPropertyNotify(XEvent* e, Timer& timer, Tooltip* tooltip) {
         return;
       }
 
-      unsigned int old_desktop = server.desktop;
+      unsigned int old_desktop = server.desktop();
       server.UpdateCurrentDesktop();
       util::log::Debug() << "Current desktop changed from " << old_desktop
-                         << " to " << server.desktop << '\n';
+                         << " to " << server.desktop() << '\n';
 
       for (Panel& panel : panels) {
         panel.taskbar_[old_desktop].SetState(kTaskbarNormal);
-        panel.taskbar_[server.desktop].SetState(kTaskbarActive);
+        panel.taskbar_[server.desktop()].SetState(kTaskbarActive);
         // check ALLDESKTOP task => resize taskbar
 
         if (server.num_desktops() > old_desktop) {
@@ -603,7 +603,7 @@ void EventPropertyNotify(XEvent* e, Timer& timer, Tooltip* tooltip) {
           }
         }
 
-        Taskbar& tskbar = panel.taskbar_[server.desktop];
+        Taskbar& tskbar = panel.taskbar_[server.desktop()];
         auto it = tskbar.children_.begin();
 
         if (taskbarname_enabled) {
@@ -824,7 +824,7 @@ void DragAndDropPosition(XClientMessageEvent* e) {
   Task* task = panel->ClickTask(map_x, map_y);
 
   if (task) {
-    if (task->desktop != server.desktop) {
+    if (task->desktop != server.desktop()) {
       SetDesktop(task->desktop);
     }
 

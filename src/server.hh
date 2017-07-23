@@ -28,8 +28,6 @@ class Server {
   Display* dsp;
   Window composite_manager;
   bool real_transparency;
-  // current desktop
-  unsigned int desktop;
   unsigned int screen;
   int depth;
   // number of monitor (without monitor included into another one)
@@ -60,6 +58,7 @@ class Server {
   void InitVisual();
   void InitX11();
 
+  unsigned int desktop() const;
   unsigned int num_desktops() const;
 
   Window root_window() const;
@@ -105,6 +104,7 @@ class Server {
  private:
   Window root_window_;
   std::unordered_map<std::string, Atom> atoms_;
+  unsigned int desktop_;
   unsigned int num_desktops_;
 };
 

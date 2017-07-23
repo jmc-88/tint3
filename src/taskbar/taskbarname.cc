@@ -60,7 +60,7 @@ void Taskbarname::InitPanel(Panel* panel) {
     tskbar.bar_name.parent_ = &tskbar;
     tskbar.bar_name.set_name(*it++);
 
-    if (j == server.desktop) {
+    if (j == server.desktop()) {
       tskbar.bar_name.bg_ = panel->g_taskbar.background_name[kTaskbarActive];
     } else {
       tskbar.bar_name.bg_ = panel->g_taskbar.background_name[kTaskbarNormal];
@@ -104,14 +104,14 @@ void Taskbarname::DrawForeground(cairo_t* c) {
 
   // TODO: the parent should return this value, without the children knowing
   // about its internals
-  Color const& config_text = (taskbar->desktop == server.desktop)
+  Color const& config_text = (taskbar->desktop == server.desktop())
                                  ? taskbarname_active_font
                                  : taskbarname_font;
 
   // TODO: the parent should return this state, without the children knowing
   // about its internals
   int state =
-      (taskbar->desktop == server.desktop) ? kTaskbarActive : kTaskbarNormal;
+      (taskbar->desktop == server.desktop()) ? kTaskbarActive : kTaskbarNormal;
   set_state_pixmap(state, pix_);
 
   // draw content

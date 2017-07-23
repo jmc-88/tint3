@@ -135,7 +135,7 @@ Task* AddTask(Window win, Timer& timer) {
     // to update the current state later in set_task_state...
     new_tsk2->current_state = -1;
 
-    if (new_tsk2->desktop == kAllDesktops && server.desktop != j) {
+    if (new_tsk2->desktop == kAllDesktops && server.desktop() != j) {
       // hide ALLDESKTOP task on non-current desktop
       new_tsk2->on_screen_ = false;
     }
@@ -222,9 +222,8 @@ bool Task::UpdateTitle() {
     return false;
   }
 
-  auto name =
-      ServerGetProperty<char>(win, server.atom("_NET_WM_VISIBLE_NAME"),
-                              server.atom("UTF8_STRING"), 0);
+  auto name = ServerGetProperty<char>(win, server.atom("_NET_WM_VISIBLE_NAME"),
+                                      server.atom("UTF8_STRING"), 0);
 
   if (name == nullptr || *name == '\0') {
     name = ServerGetProperty<char>(win, server.atom("_NET_WM_NAME"),
