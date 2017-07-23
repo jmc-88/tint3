@@ -575,8 +575,7 @@ void EventPropertyNotify(XEvent* e, Timer& timer, Tooltip* tooltip) {
       }
 
       unsigned int old_desktop = server.desktop;
-      server.desktop = server.GetCurrentDesktop();
-
+      server.UpdateCurrentDesktop();
       util::log::Debug() << "Current desktop changed from " << old_desktop
                          << " to " << server.desktop << '\n';
 

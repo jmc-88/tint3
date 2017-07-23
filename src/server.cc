@@ -327,9 +327,9 @@ void Server::InitDesktops() {
   }
 }
 
-int Server::GetCurrentDesktop() {
-  return GetProperty32<int>(root_window_, atoms_["_NET_CURRENT_DESKTOP"],
-                            XA_CARDINAL);
+void Server::UpdateCurrentDesktop() {
+  desktop = GetProperty32<int>(root_window_, atoms_["_NET_CURRENT_DESKTOP"],
+                               XA_CARDINAL);
 }
 
 unsigned int Server::num_desktops() const { return num_desktops_; }
@@ -446,7 +446,7 @@ void Server::InitX11() {
   InitAtoms();
   screen = DefaultScreen(dsp);
   UpdateRootWindow();
-  desktop = GetCurrentDesktop();
+  UpdateCurrentDesktop();
   InitVisual();
 }
 

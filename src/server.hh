@@ -49,7 +49,7 @@ class Server {
 #endif  // HAVE_SN
 
   void Cleanup();
-  int GetCurrentDesktop();
+  void UpdateCurrentDesktop();
   std::vector<std::string> GetDesktopNames() const;
   void UpdateNumberOfDesktops();
   int GetNumberOfDesktops();
