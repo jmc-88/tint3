@@ -1,6 +1,7 @@
 # Don't include the build directories in the repository
 /build
 /build-*
+/bazel-*
 /package-build
 /scan-build
 /_CPack_Packages
