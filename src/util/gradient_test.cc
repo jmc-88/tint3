@@ -11,9 +11,7 @@ namespace test {
 
 class GradientHelper {
  public:
-  static util::GradientKind GetKind(util::Gradient const& g) {
-    return g.kind_;
-  }
+  static util::GradientKind GetKind(util::Gradient const& g) { return g.kind_; }
 
   static Color const& GetStartColor(util::Gradient const& g) {
     return g.start_color_;
@@ -23,7 +21,8 @@ class GradientHelper {
     return g.end_color_;
   }
 
-  static std::map<unsigned short, Color> GetColorStops(util::Gradient const& g) {
+  static std::map<unsigned short, Color> GetColorStops(
+      util::Gradient const& g) {
     return g.color_stops_;
   }
 };
@@ -35,12 +34,14 @@ Color const kSemitrasparentWhite{{{1, 1, 1}}, 0.5};
 
 TEST_CASE("Constructor", "Construction works as expected") {
   util::Gradient default_gradient;
-  REQUIRE(test::GradientHelper::GetKind(default_gradient) == util::GradientKind::kVertical);
+  REQUIRE(test::GradientHelper::GetKind(default_gradient) ==
+          util::GradientKind::kVertical);
   REQUIRE(test::GradientHelper::GetStartColor(default_gradient) == Color{});
   REQUIRE(test::GradientHelper::GetEndColor(default_gradient) == Color{});
 
   util::Gradient horizontal_gradient{util::GradientKind::kHorizontal};
-  REQUIRE(test::GradientHelper::GetKind(horizontal_gradient) == util::GradientKind::kHorizontal);
+  REQUIRE(test::GradientHelper::GetKind(horizontal_gradient) ==
+          util::GradientKind::kHorizontal);
   REQUIRE(test::GradientHelper::GetStartColor(horizontal_gradient) == Color{});
   REQUIRE(test::GradientHelper::GetEndColor(horizontal_gradient) == Color{});
 }
@@ -80,9 +81,9 @@ TEST_CASE("AddColorStop", "Adding color stops works as expected") {
   // Set up expectations on the order of stops that we want the iterator to
   // traverse when used.
   std::vector<std::pair<unsigned short, Color>> const expected_stops{
-    std::make_pair(25, test::kSemitrasparentWhite),
-    std::make_pair(50, test::kTransparentBlack),
-    std::make_pair(75, test::kSemitrasparentWhite),
+      std::make_pair(25, test::kSemitrasparentWhite),
+      std::make_pair(50, test::kTransparentBlack),
+      std::make_pair(75, test::kSemitrasparentWhite),
   };
   auto it = expected_stops.cbegin();
 

@@ -21,16 +21,15 @@ constexpr char kTempTemplate[] = "/tmp/tint3_pipe_test.XXXXXX";
 class SharedMemory {
  public:
   SharedMemory(const char* shm_name, unsigned int shm_size)
-    : shm_name_(shm_name), shm_size_(shm_size), shm_fd_(-1), mem_(nullptr) {
+      : shm_name_(shm_name), shm_size_(shm_size), shm_fd_(-1), mem_(nullptr) {
 #ifdef TINT3_HAVE_SHM_OPEN
     shm_unlink(shm_name_.c_str());
-    shm_fd_ = shm_open(shm_name_.c_str(),
-                       O_RDWR | O_CREAT | O_EXCL,
+    shm_fd_ = shm_open(shm_name_.c_str(), O_RDWR | O_CREAT | O_EXCL,
                        S_IWUSR | S_IRUSR);
     if (shm_fd_ == -1) {
       FAIL("shm_open(" << shm_name_ << "): " << strerror(errno));
     }
-#else  // TINT3_HAVE_SHM_OPEN
+#else   // TINT3_HAVE_SHM_OPEN
     char temp_name[sizeof(kTempTemplate) + 1] = {'\0'};
     std::strcpy(temp_name, kTempTemplate);
     shm_fd_ = mkstemp(temp_name);
@@ -48,8 +47,8 @@ class SharedMemory {
       FAIL("ftruncate(" << shm_fd_ << "): " << strerror(errno));
     }
 
-    mem_ = mmap(nullptr, shm_size_, PROT_READ | PROT_WRITE,
-                MAP_SHARED, shm_fd_, 0);
+    mem_ = mmap(nullptr, shm_size_, PROT_READ | PROT_WRITE, MAP_SHARED, shm_fd_,
+                0);
     if (mem_ == MAP_FAILED) {
       close(shm_fd_);
 #ifdef TINT3_HAVE_SHM_OPEN
@@ -77,7 +76,7 @@ class SharedMemory {
       if (shm_unlink(shm_name_.c_str()) != 0) {
         WARN("shm_unlink(" << shm_name_ << "): " << strerror(errno));
       }
-#else  // TINT3_HAVE_SHM_OPEN
+#else   // TINT3_HAVE_SHM_OPEN
       if (unlink(shm_name_.c_str()) != 0) {
         WARN("unlink(" << shm_name_ << "): " << strerror(errno));
       }
@@ -85,13 +84,9 @@ class SharedMemory {
     }
   }
 
-  int fd() const {
-    return shm_fd_;
-  }
+  int fd() const { return shm_fd_; }
 
-  void* addr() const {
-    return mem_;
-  }
+  void* addr() const { return mem_; }
 
  private:
   std::string shm_name_;

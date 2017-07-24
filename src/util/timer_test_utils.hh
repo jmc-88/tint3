@@ -20,5 +20,4 @@ class FakeClock : public Timer {
   TimePoint current_time_;
 };
 
-
 #endif  // TINT3_UTIL_TIMER_TEST_UTILS_HH

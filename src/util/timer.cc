@@ -34,7 +34,8 @@ std::atomic<uint64_t> interval_id_counter;
 
 Interval::Interval() {}
 
-Interval::Interval(Interval::Id interval_id, TimePoint time_point, Duration repeat_interval, Callback callback)
+Interval::Interval(Interval::Id interval_id, TimePoint time_point,
+                   Duration repeat_interval, Callback callback)
     : id_(interval_id),
       time_point_(time_point),
       repeat_interval_(repeat_interval),
@@ -127,9 +128,8 @@ Interval::Id Timer::SetTimeout(Duration timeout_interval,
 Interval::Id Timer::SetInterval(Duration repeat_interval,
                                 Interval::Callback callback) {
   Interval::Id id{++interval_id_counter};
-  intervals_.insert(
-      id, Interval{id, Now() + repeat_interval, repeat_interval,
-                   std::move(callback)});
+  intervals_.insert(id, Interval{id, Now() + repeat_interval, repeat_interval,
+                                 std::move(callback)});
   return id;
 }
 

@@ -9,7 +9,7 @@
 namespace parser {
 
 class TokenList {
-public:
+ public:
   explicit TokenList(Lexer::Result tokens);
 
   Token const& Current() const;
@@ -20,23 +20,23 @@ public:
 
   static std::string JoinSkipped(std::vector<Token> const& tokens);
 
-private:
+ private:
   Lexer::Result tokens_;
   unsigned int current_;
 };
 
 class ParseCallback {
-public:
+ public:
   virtual bool operator()(TokenList* tokens) = 0;
 };
 
 class Parser {
-public:
+ public:
   Parser(Lexer lexer, ParseCallback* entry_fn);
 
   bool Parse(std::string const& buffer) const;
 
-private:
+ private:
   Lexer lexer_;
   ParseCallback* parser_entry_fn_;
 };

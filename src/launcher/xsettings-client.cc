@@ -404,9 +404,9 @@ static void ReadSettings(XSettingsClient* client) {
   unsigned char* data = nullptr;
   int result =
       XGetWindowProperty(client->display, client->manager_window,
-                         server.atom("_XSETTINGS_SETTINGS"), 0, LONG_MAX,
-                         False, server.atom("_XSETTINGS_SETTINGS"), &type,
-                         &format, &n_items, &bytes_after, &data);
+                         server.atom("_XSETTINGS_SETTINGS"), 0, LONG_MAX, False,
+                         server.atom("_XSETTINGS_SETTINGS"), &type, &format,
+                         &n_items, &bytes_after, &data);
 
   if (result == Success && type == server.atom("_XSETTINGS_SETTINGS")) {
     if (format != 8) {

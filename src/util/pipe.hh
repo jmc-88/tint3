@@ -10,7 +10,7 @@ class MockSelfPipe;
 namespace util {
 
 class Pipe {
-public:
+ public:
   Pipe();
   ~Pipe();
 
@@ -18,7 +18,7 @@ public:
   int ReadEnd() const;
   int WriteEnd() const;
 
-private:
+ private:
   friend class test::MockSelfPipe;
 
   bool alive_;
@@ -26,14 +26,14 @@ private:
 };
 
 class SelfPipe : public Pipe {
-public:
+ public:
   SelfPipe();
 
   bool IsAlive() const;
   void WriteOneByte();
   void ReadPendingBytes();
 
-private:
+ private:
   friend class test::MockSelfPipe;
 
   bool alive_;
