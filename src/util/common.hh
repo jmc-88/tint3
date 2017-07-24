@@ -12,6 +12,9 @@
 #include <string>
 #include <vector>
 
+// forward declaration
+class Server;
+
 namespace util {
 
 class GObjectUnrefDeleter {
@@ -101,6 +104,6 @@ void AdjustASB(DATA32* data, unsigned int w, unsigned int h, int alpha,
                float saturation_adjustment, float brightness_adjustment);
 void CreateHeuristicMask(DATA32* data, int w, int h);
 
-void RenderImage(Drawable d, int x, int y, int w, int h);
+void RenderImage(Server* server, Drawable d, int x, int y, int w, int h);
 
 #endif  // TINT3_UTIL_COMMON_HH

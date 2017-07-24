@@ -436,8 +436,8 @@ void Task::DrawIcon(int text_width) {
   }
 
   if (server.real_transparency) {
-    RenderImage(pix_, pos_x, panel_->g_task.icon_posy, imlib_image_get_width(),
-                imlib_image_get_height());
+    RenderImage(&server, pix_, pos_x, panel_->g_task.icon_posy,
+                imlib_image_get_width(), imlib_image_get_height());
   } else {
     imlib_context_set_drawable(pix_);
     imlib_render_image_on_drawable(pos_x, panel_->g_task.icon_posy);
