@@ -44,8 +44,8 @@ class Global_taskbar : public TaskbarBase {
   Global_taskbar();
 
   Taskbarname bar_name_;
-  Background background[kTaskbarCount];
-  Background background_name[kTaskbarCount];
+  std::vector<Background> background;
+  std::vector<Background> background_name;
 };
 
 // default global data
