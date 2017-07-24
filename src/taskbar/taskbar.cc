@@ -441,9 +441,5 @@ std::string Taskbar::GetFriendlyName() const { return "Taskbar"; }
 
 #endif  // _TINT3_DEBUG
 
-Global_taskbar::Global_taskbar() {
-  for (int i = 0; i < kTaskbarCount; ++i) {
-    background[i] = Background{};
-    background_name[i] = Background{};
-  }
-}
+Global_taskbar::Global_taskbar()
+    : background(kTaskbarCount), background_name(kTaskbarCount) {}
