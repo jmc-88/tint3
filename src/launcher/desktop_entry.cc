@@ -266,7 +266,7 @@ bool Parser::AddKeyValue(std::string key, std::string value,
 }
 
 bool ParseBooleanValue(std::string value_string, bool* value_boolean) {
-  util::string::Trim(value_string);
+  util::string::Trim(&value_string);
 
   // Also accept "0" and "1" for backwards compatibility:
   //  https://specifications.freedesktop.org/desktop-entry-spec/latest/apc.html
@@ -285,7 +285,7 @@ bool ParseBooleanValue(std::string value_string, bool* value_boolean) {
 }
 
 bool ParseNumericValue(std::string value_string, float* value_numeric) {
-  std::istringstream ss{util::string::Trim(value_string)};
+  std::istringstream ss{util::string::Trim(&value_string)};
 
   if (!(ss >> *value_numeric)) {
     // Couldn't parse the floating point number.

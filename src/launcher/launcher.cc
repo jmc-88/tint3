@@ -493,7 +493,7 @@ IconTheme* LoadTheme(std::string const& name) {
 
   bool read = util::fs::ReadFileByLine(file_name, [&](std::string const& data) {
     std::string line(data);
-    util::string::Trim(line);
+    util::string::Trim(&line);
 
     if (line.empty()) {
       return true;

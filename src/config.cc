@@ -215,7 +215,7 @@ bool Parser::Import(parser::TokenList* tokens) {
   tokens->SkipOver(kNewLine);
 
   std::string path{parser::TokenList::JoinSkipped(skipped)};
-  util::string::Trim(path);
+  util::string::Trim(&path);
 
   if (path.empty()) {
     return false;
@@ -276,7 +276,7 @@ bool Parser::Assignment(parser::TokenList* tokens) {
   }
 
   std::string value{parser::TokenList::JoinSkipped(skipped)};
-  util::string::Trim(value);
+  util::string::Trim(&value);
 
   if (!AddKeyValue(key, value)) {
     return false;
@@ -303,18 +303,18 @@ void ExtractValues(std::string const& value, std::string& v1, std::string& v2,
   size_t second_space = std::string::npos;
 
   v1.assign(value, 0, first_space);
-  util::string::Trim(v1);
+  util::string::Trim(&v1);
 
   if (first_space != std::string::npos) {
     second_space = value.find_first_of(' ', first_space + 1);
 
     v2.assign(value, first_space + 1, second_space - first_space);
-    util::string::Trim(v2);
+    util::string::Trim(&v2);
   }
 
   if (second_space != std::string::npos) {
     v3.assign(value, second_space + 1, std::string::npos);
-    util::string::Trim(v3);
+    util::string::Trim(&v3);
   }
 }
 

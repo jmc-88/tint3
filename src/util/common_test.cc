@@ -9,17 +9,17 @@ TEST_CASE("StringTrim", "Removing trailing spaces from strings should work") {
 
   SECTION("Removes spaces from the left end") {
     s = "      text";
-    REQUIRE(util::string::Trim(s) == "text");
+    REQUIRE(util::string::Trim(&s) == "text");
   }
 
   SECTION("Removes spaces from the right end") {
     s = "text      ";
-    REQUIRE(util::string::Trim(s) == "text");
+    REQUIRE(util::string::Trim(&s) == "text");
   }
 
   SECTION("Removes spaces from both ends") {
     s = "   text   ";
-    REQUIRE(util::string::Trim(s) == "text");
+    REQUIRE(util::string::Trim(&s) == "text");
   }
 }
 

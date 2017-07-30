@@ -49,21 +49,19 @@ void GObjectUnrefDeleter::operator()(gpointer data) const {
 
 namespace string {
 
-std::string& Trim(std::string& str) {
+std::string& Trim(std::string* str) {
   static char const* space_chars = " \f\n\r\t\v";
 
-  auto first = str.find_first_not_of(space_chars);
-
+  auto first = str->find_first_not_of(space_chars);
   if (first == std::string::npos) {
-    str.clear();
-    return str;
+    str->clear();
+    return (*str);
   }
 
-  auto last = str.find_last_not_of(space_chars);
-
-  str.erase(0, first);
-  str.erase(last - first + 1, std::string::npos);
-  return str;
+  auto last = str->find_last_not_of(space_chars);
+  str->erase(0, first);
+  str->erase(last - first + 1, std::string::npos);
+  return (*str);
 }
 
 std::vector<std::string> Split(std::string const& str, char sep) {
