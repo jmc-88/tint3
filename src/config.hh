@@ -27,8 +27,8 @@ enum Tokens {
 
 extern const parser::Lexer kLexer;
 
-void ExtractValues(const std::string& value, std::string& v1, std::string& v2,
-                   std::string& v3);
+void ExtractValues(const std::string& value, std::string* v1, std::string* v2,
+                   std::string* v3);
 
 class Parser;
 class Reader {

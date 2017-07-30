@@ -293,28 +293,28 @@ bool Parser::AddKeyValue(std::string key, std::string value) {
   return true;
 }
 
-void ExtractValues(std::string const& value, std::string& v1, std::string& v2,
-                   std::string& v3) {
-  v1.clear();
-  v2.clear();
-  v3.clear();
+void ExtractValues(std::string const& value, std::string* v1, std::string* v2,
+                   std::string* v3) {
+  v1->clear();
+  v2->clear();
+  v3->clear();
 
   size_t first_space = value.find_first_of(' ');
   size_t second_space = std::string::npos;
 
-  v1.assign(value, 0, first_space);
-  util::string::Trim(&v1);
+  v1->assign(value, 0, first_space);
+  util::string::Trim(v1);
 
   if (first_space != std::string::npos) {
     second_space = value.find_first_of(' ', first_space + 1);
 
-    v2.assign(value, first_space + 1, second_space - first_space);
-    util::string::Trim(&v2);
+    v2->assign(value, first_space + 1, second_space - first_space);
+    util::string::Trim(v2);
   }
 
   if (second_space != std::string::npos) {
-    v3.assign(value, second_space + 1, std::string::npos);
-    util::string::Trim(&v3);
+    v3->assign(value, second_space + 1, std::string::npos);
+    util::string::Trim(v3);
   }
 }
 
@@ -397,7 +397,7 @@ namespace {
 
 Color ParseColor(std::string const& value, double default_alpha = 0.5) {
   std::string value1, value2, value3;
-  config::ExtractValues(value, value1, value2, value3);
+  config::ExtractValues(value, &value1, &value2, &value3);
 
   Color c;
   c.SetColorFromHexString(value1);
@@ -555,7 +555,7 @@ bool Reader::AddEntry_Panel(std::string const& key, std::string const& value) {
   }
   if (key == "panel_size") {
     std::string value1, value2, value3;
-    config::ExtractValues(value, value1, value2, value3);
+    config::ExtractValues(value, &value1, &value2, &value3);
 
     size_t b = value1.find_first_of('%');
 
@@ -610,7 +610,7 @@ bool Reader::AddEntry_Panel(std::string const& key, std::string const& value) {
   }
   if (key == "panel_margin") {
     std::string value1, value2, value3;
-    config::ExtractValues(value, value1, value2, value3);
+    config::ExtractValues(value, &value1, &value2, &value3);
     panel_config.margin_x_ = std::stol(value1);
 
     if (!value2.empty()) {
@@ -620,7 +620,7 @@ bool Reader::AddEntry_Panel(std::string const& key, std::string const& value) {
   }
   if (key == "panel_padding") {
     std::string value1, value2, value3;
-    config::ExtractValues(value, value1, value2, value3);
+    config::ExtractValues(value, &value1, &value2, &value3);
     panel_config.padding_x_lr_ = panel_config.padding_x_ = std::stol(value1);
 
     if (!value2.empty()) {
@@ -633,7 +633,7 @@ bool Reader::AddEntry_Panel(std::string const& key, std::string const& value) {
   }
   if (key == "panel_position") {
     std::string value1, value2, value3;
-    config::ExtractValues(value, value1, value2, value3);
+    config::ExtractValues(value, &value1, &value2, &value3);
 
     if (value1 == "top") {
       panel_vertical_position = PanelVerticalPosition::kTop;
@@ -728,7 +728,7 @@ bool Reader::AddEntry_Battery(std::string const& key,
   if (key == "battery_padding") {
 #ifdef ENABLE_BATTERY
     std::string value1, value2, value3;
-    config::ExtractValues(value, value1, value2, value3);
+    config::ExtractValues(value, &value1, &value2, &value3);
     panel_config.battery_.padding_x_lr_ = panel_config.battery_.padding_x_ =
         std::stol(value1);
 
@@ -805,7 +805,7 @@ bool Reader::AddEntry_Clock(std::string const& key, std::string const& value) {
   }
   if (key == "clock_padding") {
     std::string value1, value2, value3;
-    config::ExtractValues(value, value1, value2, value3);
+    config::ExtractValues(value, &value1, &value2, &value3);
     panel_config.clock_.padding_x_lr_ = panel_config.clock_.padding_x_ =
         std::stol(value1);
 
@@ -861,7 +861,7 @@ bool Reader::AddEntry_Taskbar(std::string const& key,
   }
   if (key == "taskbar_padding") {
     std::string value1, value2, value3;
-    config::ExtractValues(value, value1, value2, value3);
+    config::ExtractValues(value, &value1, &value2, &value3);
     panel_config.g_taskbar.padding_x_lr_ = panel_config.g_taskbar.padding_x_ =
         std::stol(value1);
 
@@ -894,7 +894,7 @@ bool Reader::AddEntry_Taskbar(std::string const& key,
   }
   if (key == "taskbar_name_padding") {
     std::string value1, value2, value3;
-    config::ExtractValues(value, value1, value2, value3);
+    config::ExtractValues(value, &value1, &value2, &value3);
     panel_config.g_taskbar.bar_name_.padding_x_lr_ =
         panel_config.g_taskbar.bar_name_.padding_x_ = std::stol(value1);
     return true;
@@ -952,7 +952,7 @@ bool Reader::AddEntry_Task(std::string const& key, std::string const& value) {
   }
   if (key == "task_maximum_size") {
     std::string value1, value2, value3;
-    config::ExtractValues(value, value1, value2, value3);
+    config::ExtractValues(value, &value1, &value2, &value3);
     panel_config.g_task.maximum_width = std::stol(value1);
     panel_config.g_task.maximum_height = 30;
 
@@ -963,7 +963,7 @@ bool Reader::AddEntry_Task(std::string const& key, std::string const& value) {
   }
   if (key == "task_padding") {
     std::string value1, value2, value3;
-    config::ExtractValues(value, value1, value2, value3);
+    config::ExtractValues(value, &value1, &value2, &value3);
     panel_config.g_task.padding_x_lr_ = panel_config.g_task.padding_x_ =
         std::stol(value1);
 
@@ -991,7 +991,7 @@ bool Reader::AddEntry_Task(std::string const& key, std::string const& value) {
     auto split = util::string::Split(key, '_');
     int status = GetTaskStatus(split[1]);
     std::string value1, value2, value3;
-    config::ExtractValues(value, value1, value2, value3);
+    config::ExtractValues(value, &value1, &value2, &value3);
     panel_config.g_task.alpha[status] = std::stol(value1);
     panel_config.g_task.saturation[status] = std::stol(value2);
     panel_config.g_task.brightness[status] = std::stol(value3);
@@ -1028,7 +1028,7 @@ bool Reader::AddEntry_Systray(std::string const& key,
     }
 
     std::string value1, value2, value3;
-    config::ExtractValues(value, value1, value2, value3);
+    config::ExtractValues(value, &value1, &value2, &value3);
     systray.padding_x_lr_ = systray.padding_x_ = std::stol(value1);
 
     if (!value2.empty()) {
@@ -1061,7 +1061,7 @@ bool Reader::AddEntry_Systray(std::string const& key,
   }
   if (key == "systray_icon_asb") {
     std::string value1, value2, value3;
-    config::ExtractValues(value, value1, value2, value3);
+    config::ExtractValues(value, &value1, &value2, &value3);
     systray.alpha = std::stol(value1);
     systray.saturation = std::stol(value2);
     systray.brightness = std::stol(value3);
@@ -1075,7 +1075,7 @@ bool Reader::AddEntry_Launcher(std::string const& key,
                                std::string const& value) {
   if (key == "launcher_padding") {
     std::string value1, value2, value3;
-    config::ExtractValues(value, value1, value2, value3);
+    config::ExtractValues(value, &value1, &value2, &value3);
     panel_config.launcher_.padding_x_lr_ = panel_config.launcher_.padding_x_ =
         std::stol(value1);
 
@@ -1115,7 +1115,7 @@ bool Reader::AddEntry_Launcher(std::string const& key,
   }
   if (key == "launcher_icon_asb") {
     std::string value1, value2, value3;
-    config::ExtractValues(value, value1, value2, value3);
+    config::ExtractValues(value, &value1, &value2, &value3);
     launcher_alpha = std::stol(value1);
     launcher_saturation = std::stol(value2);
     launcher_brightness = std::stol(value3);
@@ -1143,7 +1143,7 @@ bool Reader::AddEntry_Tooltip(std::string const& key,
   }
   if (key == "tooltip_padding") {
     std::string value1, value2, value3;
-    config::ExtractValues(value, value1, value2, value3);
+    config::ExtractValues(value, &value1, &value2, &value3);
 
     if (!value1.empty()) {
       tooltip_config.paddingx = std::stol(value1);
@@ -1385,7 +1385,7 @@ bool Reader::AddEntry_Mouse(std::string const& key, std::string const& value) {
   }
   if (key == "mouse_hover_icon_asb") {
     std::string value1, value2, value3;
-    config::ExtractValues(value, value1, value2, value3);
+    config::ExtractValues(value, &value1, &value2, &value3);
     panel_config.mouse_hover_alpha = std::stol(value1);
     panel_config.mouse_hover_saturation = std::stol(value2);
     panel_config.mouse_hover_brightness = std::stol(value3);
@@ -1393,7 +1393,7 @@ bool Reader::AddEntry_Mouse(std::string const& key, std::string const& value) {
   }
   if (key == "mouse_pressed_icon_asb") {
     std::string value1, value2, value3;
-    config::ExtractValues(value, value1, value2, value3);
+    config::ExtractValues(value, &value1, &value2, &value3);
     panel_config.mouse_pressed_alpha = std::stol(value1);
     panel_config.mouse_pressed_saturation = std::stol(value2);
     panel_config.mouse_pressed_brightness = std::stol(value3);
