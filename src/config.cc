@@ -435,40 +435,79 @@ unsigned int ParseBorderSides(std::string const& value) {
 }  // namespace
 
 void Reader::AddEntry(std::string const& key, std::string const& value) {
-  std::string value1, value2, value3;
+  if (AddEntry_BackgroundBorder(key, value) || AddEntry_Gradient(key, value) ||
+      AddEntry_Panel(key, value) || AddEntry_Battery(key, value) ||
+      AddEntry_Clock(key, value) || AddEntry_Taskbar(key, value) ||
+      AddEntry_Task(key, value) || AddEntry_Systray(key, value) ||
+      AddEntry_Launcher(key, value) || AddEntry_Tooltip(key, value) ||
+      AddEntry_Executor(key, value) || AddEntry_Mouse(key, value) ||
+      AddEntry_Autohide(key, value) || AddEntry_Legacy(key, value)) {
+    return;
+  }
 
-  /* Background and border */
+  std::cerr << "tint3: invalid option \"" << key
+            << "\", please upgrade tint3 or correct your configuration file.\n";
+}
+
+bool Reader::AddEntry_BackgroundBorder(std::string const& key,
+                                       std::string const& value) {
   if (key == "rounded") {
     // 'rounded' is the first parameter => alloc a new background
     Background bg;
     bg.border().set_rounded(std::stol(value));
     backgrounds.push_back(bg);
-  } else if (key == "border_width") {
-    backgrounds.back().border().set_width(std::stol(value));
-  } else if (key == "background_color") {
-    backgrounds.back().set_fill_color(ParseColor(value));
-  } else if (key == "background_color_hover") {
-    backgrounds.back().set_fill_color_hover(ParseColor(value));
-  } else if (key == "background_color_pressed") {
-    backgrounds.back().set_fill_color_pressed(ParseColor(value));
-  } else if (key == "border_sides") {
-    backgrounds.back().border().set_mask(ParseBorderSides(value));
-  } else if (key == "border_color") {
-    backgrounds.back().border().set_color(ParseColor(value));
-  } else if (key == "border_color_hover") {
-    backgrounds.back().set_border_color_hover(ParseColor(value));
-  } else if (key == "border_color_pressed") {
-    backgrounds.back().set_border_color_pressed(ParseColor(value));
-  } else if (key == "gradient_id") {
-    backgrounds.back().set_gradient_id(std::stol(value));
-  } else if (key == "gradient_id_hover") {
-    backgrounds.back().set_gradient_id_hover(std::stol(value));
-  } else if (key == "gradient_id_pressed") {
-    backgrounds.back().set_gradient_id_pressed(std::stol(value));
+    return true;
   }
+  if (key == "border_width") {
+    backgrounds.back().border().set_width(std::stol(value));
+    return true;
+  }
+  if (key == "background_color") {
+    backgrounds.back().set_fill_color(ParseColor(value));
+    return true;
+  }
+  if (key == "background_color_hover") {
+    backgrounds.back().set_fill_color_hover(ParseColor(value));
+    return true;
+  }
+  if (key == "background_color_pressed") {
+    backgrounds.back().set_fill_color_pressed(ParseColor(value));
+    return true;
+  }
+  if (key == "border_sides") {
+    backgrounds.back().border().set_mask(ParseBorderSides(value));
+    return true;
+  }
+  if (key == "border_color") {
+    backgrounds.back().border().set_color(ParseColor(value));
+    return true;
+  }
+  if (key == "border_color_hover") {
+    backgrounds.back().set_border_color_hover(ParseColor(value));
+    return true;
+  }
+  if (key == "border_color_pressed") {
+    backgrounds.back().set_border_color_pressed(ParseColor(value));
+    return true;
+  }
+  if (key == "gradient_id") {
+    backgrounds.back().set_gradient_id(std::stol(value));
+    return true;
+  }
+  if (key == "gradient_id_hover") {
+    backgrounds.back().set_gradient_id_hover(std::stol(value));
+    return true;
+  }
+  if (key == "gradient_id_pressed") {
+    backgrounds.back().set_gradient_id_pressed(std::stol(value));
+    return true;
+  }
+  return false;
+}
 
-  /* Gradients */
-  else if (key == "gradient") {
+bool Reader::AddEntry_Gradient(std::string const& key,
+                               std::string const& value) {
+  if (key == "gradient") {
     if (value == "vertical") {
       gradients.push_back(util::Gradient{util::GradientKind::kVertical});
     } else if (value == "horizontal") {
@@ -479,16 +518,22 @@ void Reader::AddEntry(std::string const& key, std::string const& value) {
       util::log::Error() << "unknown gradient kind \"" << value
                          << "\", ignoring\n";
     }
-  } else if (key == "start_color") {
+    return true;
+  }
+  if (key == "start_color") {
     gradients.back().set_start_color(ParseColor(value));
-  } else if (key == "end_color") {
+    return true;
+  }
+  if (key == "end_color") {
     gradients.back().set_end_color(ParseColor(value));
-  } else if (key == "color_stop") {
+    return true;
+  }
+  if (key == "color_stop") {
     std::string::size_type first_space = value.find_first_of(' ');
     if (first_space == std::string::npos) {
       util::log::Error() << "malformed color stop \"" << value
                          << "\", ignoring\n";
-      return;
+      return true;
     }
     std::string percentage{value, 0, first_space};
     std::string color_spec{value, first_space + 1};
@@ -497,12 +542,19 @@ void Reader::AddEntry(std::string const& key, std::string const& value) {
       util::log::Error() << "malformed color stop \"" << value
                          << "\", ignoring\n";
     }
+    return true;
   }
 
-  /* Panel */
-  else if (key == "panel_monitor") {
+  return false;
+}
+
+bool Reader::AddEntry_Panel(std::string const& key, std::string const& value) {
+  if (key == "panel_monitor") {
     panel_config.monitor_ = GetMonitor(value);
-  } else if (key == "panel_size") {
+    return true;
+  }
+  if (key == "panel_size") {
+    std::string value1, value2, value3;
     config::ExtractValues(value, value1, value2, value3);
 
     size_t b = value1.find_first_of('%');
@@ -526,7 +578,10 @@ void Reader::AddEntry(std::string const& key, std::string const& value) {
 
       panel_config.height_ = std::stol(value2.substr(0, b));
     }
-  } else if (key == "panel_items") {
+
+    return true;
+  }
+  if (key == "panel_items") {
     new_config_file_ = true;
     panel_items_order.assign(value);
 
@@ -534,11 +589,9 @@ void Reader::AddEntry(std::string const& key, std::string const& value) {
       if (item == 'L') {
         launcher_enabled = true;
       }
-
       if (item == 'T') {
         taskbar_enabled = true;
       }
-
       if (item == 'B') {
 #ifdef ENABLE_BATTERY
         battery_enabled = true;
@@ -546,34 +599,40 @@ void Reader::AddEntry(std::string const& key, std::string const& value) {
         util::log::Error() << "tint3 is built without battery support\n";
 #endif  // ENABLE_BATTERY
       }
-
       if (item == 'S') {
         systray_enabled = true;
       }
-
       if (item == 'C') {
         clock_enabled = true;
       }
     }
-  } else if (key == "panel_margin") {
+    return true;
+  }
+  if (key == "panel_margin") {
+    std::string value1, value2, value3;
     config::ExtractValues(value, value1, value2, value3);
     panel_config.margin_x_ = std::stol(value1);
 
     if (!value2.empty()) {
       panel_config.margin_y_ = std::stol(value2);
     }
-  } else if (key == "panel_padding") {
+    return true;
+  }
+  if (key == "panel_padding") {
+    std::string value1, value2, value3;
     config::ExtractValues(value, value1, value2, value3);
     panel_config.padding_x_lr_ = panel_config.padding_x_ = std::stol(value1);
 
     if (!value2.empty()) {
       panel_config.padding_y_ = std::stol(value2);
     }
-
     if (!value3.empty()) {
       panel_config.padding_x_ = std::stol(value3);
     }
-  } else if (key == "panel_position") {
+    return true;
+  }
+  if (key == "panel_position") {
+    std::string value1, value2, value3;
     config::ExtractValues(value, value1, value2, value3);
 
     if (value1 == "top") {
@@ -593,17 +652,29 @@ void Reader::AddEntry(std::string const& key, std::string const& value) {
     }
 
     panel_horizontal = (value3 != "vertical");
-  } else if (key == "font_shadow") {
+    return true;
+  }
+  if (key == "font_shadow") {
     panel_config.g_task.font_shadow = std::stol(value);
-  } else if (key == "panel_background_id") {
+    return true;
+  }
+  if (key == "panel_background_id") {
     panel_config.bg_ = GetBackgroundFromId(std::stol(value));
-  } else if (key == "wm_menu") {
+    return true;
+  }
+  if (key == "wm_menu") {
     wm_menu = std::stol(value);
-  } else if (key == "panel_dock") {
+    return true;
+  }
+  if (key == "panel_dock") {
     panel_dock = std::stol(value);
-  } else if (key == "urgent_nb_of_blink") {
+    return true;
+  }
+  if (key == "urgent_nb_of_blink") {
     max_tick_urgent = std::stol(value);
-  } else if (key == "panel_layer") {
+    return true;
+  }
+  if (key == "panel_layer") {
     if (value == "bottom") {
       panel_layer = PanelLayer::kBottom;
     } else if (value == "top") {
@@ -611,37 +682,52 @@ void Reader::AddEntry(std::string const& key, std::string const& value) {
     } else {
       panel_layer = PanelLayer::kNormal;
     }
+    return true;
   }
 
-  /* Battery */
-  else if (key == "battery_low_status") {
+  return false;
+}
+
+bool Reader::AddEntry_Battery(std::string const& key,
+                              std::string const& value) {
+  if (key == "battery_low_status") {
 #ifdef ENABLE_BATTERY
     battery_low_status = std::stol(value);
-
     if (battery_low_status < 0 || battery_low_status > 100) {
       battery_low_status = 0;
     }
 #endif  // ENABLE_BATTERY
-  } else if (key == "battery_low_cmd") {
+    return true;
+  }
+  if (key == "battery_low_cmd") {
 #ifdef ENABLE_BATTERY
     if (!value.empty()) {
       battery_low_cmd = value;
     }
 #endif  // ENABLE_BATTERY
-  } else if (key == "bat1_font") {
+    return true;
+  }
+  if (key == "bat1_font") {
 #ifdef ENABLE_BATTERY
     bat1_font_desc = pango_font_description_from_string(value.c_str());
 #endif  // ENABLE_BATTERY
-  } else if (key == "bat2_font") {
+    return true;
+  }
+  if (key == "bat2_font") {
 #ifdef ENABLE_BATTERY
     bat2_font_desc = pango_font_description_from_string(value.c_str());
 #endif  // ENABLE_BATTERY
-  } else if (key == "battery_font_color") {
+    return true;
+  }
+  if (key == "battery_font_color") {
 #ifdef ENABLE_BATTERY
     panel_config.battery_.font = ParseColor(value);
 #endif  // ENABLE_BATTERY
-  } else if (key == "battery_padding") {
+    return true;
+  }
+  if (key == "battery_padding") {
 #ifdef ENABLE_BATTERY
+    std::string value1, value2, value3;
     config::ExtractValues(value, value1, value2, value3);
     panel_config.battery_.padding_x_lr_ = panel_config.battery_.padding_x_ =
         std::stol(value1);
@@ -649,16 +735,19 @@ void Reader::AddEntry(std::string const& key, std::string const& value) {
     if (!value2.empty()) {
       panel_config.battery_.padding_y_ = std::stol(value2);
     }
-
     if (!value3.empty()) {
       panel_config.battery_.padding_x_ = std::stol(value3);
     }
 #endif  // ENABLE_BATTERY
-  } else if (key == "battery_background_id") {
+    return true;
+  }
+  if (key == "battery_background_id") {
 #ifdef ENABLE_BATTERY
     panel_config.battery_.bg_ = GetBackgroundFromId(std::stol(value));
 #endif  // ENABLE_BATTERY
-  } else if (key == "battery_hide") {
+    return true;
+  }
+  if (key == "battery_hide") {
 #ifdef ENABLE_BATTERY
     percentage_hide = std::stol(value);
 
@@ -666,38 +755,56 @@ void Reader::AddEntry(std::string const& key, std::string const& value) {
       percentage_hide = 101;
     }
 #endif  // ENABLE_BATTERY
+    return true;
   }
 
-  /* Clock */
-  else if (key == "time1_format") {
+  return false;
+}
+
+bool Reader::AddEntry_Clock(std::string const& key, std::string const& value) {
+  if (key == "time1_format") {
     if (!new_config_file_) {
       clock_enabled = true;
       panel_items_order.push_back('C');
     }
-
     if (!value.empty()) {
       time1_format = value;
       clock_enabled = true;
     }
-  } else if (key == "time2_format") {
+    return true;
+  }
+  if (key == "time2_format") {
     if (!value.empty()) {
       time2_format = value;
     }
-  } else if (key == "time1_font") {
+    return true;
+  }
+  if (key == "time1_font") {
     time1_font_desc = pango_font_description_from_string(value.c_str());
-  } else if (key == "time1_timezone") {
+    return true;
+  }
+  if (key == "time1_timezone") {
     if (!value.empty()) {
       time1_timezone = value;
     }
-  } else if (key == "time2_timezone") {
+    return true;
+  }
+  if (key == "time2_timezone") {
     if (!value.empty()) {
       time2_timezone = value;
     }
-  } else if (key == "time2_font") {
+    return true;
+  }
+  if (key == "time2_font") {
     time2_font_desc = pango_font_description_from_string(value.c_str());
-  } else if (key == "clock_font_color") {
+    return true;
+  }
+  if (key == "clock_font_color") {
     panel_config.clock_.font_ = ParseColor(value);
-  } else if (key == "clock_padding") {
+    return true;
+  }
+  if (key == "clock_padding") {
+    std::string value1, value2, value3;
     config::ExtractValues(value, value1, value2, value3);
     panel_config.clock_.padding_x_lr_ = panel_config.clock_.padding_x_ =
         std::stol(value1);
@@ -705,38 +812,55 @@ void Reader::AddEntry(std::string const& key, std::string const& value) {
     if (!value2.empty()) {
       panel_config.clock_.padding_y_ = std::stol(value2);
     }
-
     if (!value3.empty()) {
       panel_config.clock_.padding_x_ = std::stol(value3);
     }
-  } else if (key == "clock_background_id") {
+    return true;
+  }
+  if (key == "clock_background_id") {
     panel_config.clock_.bg_ = GetBackgroundFromId(std::stol(value));
-  } else if (key == "clock_tooltip") {
+    return true;
+  }
+  if (key == "clock_tooltip") {
     if (!value.empty()) {
       time_tooltip_format = value;
     }
-  } else if (key == "clock_tooltip_timezone") {
+    return true;
+  }
+  if (key == "clock_tooltip_timezone") {
     if (!value.empty()) {
       time_tooltip_timezone = value;
     }
-  } else if (key == "clock_lclick_command") {
+    return true;
+  }
+  if (key == "clock_lclick_command") {
     if (!value.empty()) {
       clock_lclick_command = value;
     }
-  } else if (key == "clock_rclick_command") {
+    return true;
+  }
+  if (key == "clock_rclick_command") {
     if (!value.empty()) {
       clock_rclick_command = value;
     }
+    return true;
   }
 
-  /* Taskbar */
-  else if (key == "taskbar_mode") {
+  return false;
+}
+
+bool Reader::AddEntry_Taskbar(std::string const& key,
+                              std::string const& value) {
+  if (key == "taskbar_mode") {
     if (value == "multi_desktop") {
       panel_mode = PanelMode::kMultiDesktop;
     } else {
       panel_mode = PanelMode::kSingleDesktop;
     }
-  } else if (key == "taskbar_padding") {
+    return true;
+  }
+  if (key == "taskbar_padding") {
+    std::string value1, value2, value3;
     config::ExtractValues(value, value1, value2, value3);
     panel_config.g_taskbar.padding_x_lr_ = panel_config.g_taskbar.padding_x_ =
         std::stol(value1);
@@ -744,11 +868,12 @@ void Reader::AddEntry(std::string const& key, std::string const& value) {
     if (!value2.empty()) {
       panel_config.g_taskbar.padding_y_ = std::stol(value2);
     }
-
     if (!value3.empty()) {
       panel_config.g_taskbar.padding_x_ = std::stol(value3);
     }
-  } else if (key == "taskbar_background_id") {
+    return true;
+  }
+  if (key == "taskbar_background_id") {
     panel_config.g_taskbar.background[kTaskbarNormal] =
         GetBackgroundFromId(std::stol(value));
 
@@ -756,16 +881,25 @@ void Reader::AddEntry(std::string const& key, std::string const& value) {
       panel_config.g_taskbar.background[kTaskbarActive] =
           panel_config.g_taskbar.background[kTaskbarNormal];
     }
-  } else if (key == "taskbar_active_background_id") {
+    return true;
+  }
+  if (key == "taskbar_active_background_id") {
     panel_config.g_taskbar.background[kTaskbarActive] =
         GetBackgroundFromId(std::stol(value));
-  } else if (key == "taskbar_name") {
+    return true;
+  }
+  if (key == "taskbar_name") {
     taskbarname_enabled = (0 != std::stol(value));
-  } else if (key == "taskbar_name_padding") {
+    return true;
+  }
+  if (key == "taskbar_name_padding") {
+    std::string value1, value2, value3;
     config::ExtractValues(value, value1, value2, value3);
     panel_config.g_taskbar.bar_name_.padding_x_lr_ =
         panel_config.g_taskbar.bar_name_.padding_x_ = std::stol(value1);
-  } else if (key == "taskbar_name_background_id") {
+    return true;
+  }
+  if (key == "taskbar_name_background_id") {
     panel_config.g_taskbar.background_name[kTaskbarNormal] =
         GetBackgroundFromId(std::stol(value));
 
@@ -774,29 +908,50 @@ void Reader::AddEntry(std::string const& key, std::string const& value) {
       panel_config.g_taskbar.background_name[kTaskbarActive] =
           panel_config.g_taskbar.background_name[kTaskbarNormal];
     }
-  } else if (key == "taskbar_name_active_background_id") {
+    return true;
+  }
+  if (key == "taskbar_name_active_background_id") {
     panel_config.g_taskbar.background_name[kTaskbarActive] =
         GetBackgroundFromId(std::stol(value));
-  } else if (key == "taskbar_name_font") {
+    return true;
+  }
+  if (key == "taskbar_name_font") {
     taskbarname_font_desc = pango_font_description_from_string(value.c_str());
-  } else if (key == "taskbar_name_font_color") {
+    return true;
+  }
+  if (key == "taskbar_name_font_color") {
     taskbarname_font = ParseColor(value);
-  } else if (key == "taskbar_name_active_font_color") {
+    return true;
+  }
+  if (key == "taskbar_name_active_font_color") {
     taskbarname_active_font = ParseColor(value);
+    return true;
   }
 
-  /* Task */
-  else if (key == "task_text") {
+  return false;
+}
+
+bool Reader::AddEntry_Task(std::string const& key, std::string const& value) {
+  if (key == "task_text") {
     panel_config.g_task.text = std::stol(value);
-  } else if (key == "task_icon") {
+    return true;
+  }
+  if (key == "task_icon") {
     panel_config.g_task.icon = std::stol(value);
-  } else if (key == "task_centered") {
+    return true;
+  }
+  if (key == "task_centered") {
     panel_config.g_task.centered = std::stol(value);
-  } else if (key == "task_width") {
+    return true;
+  }
+  if (key == "task_width") {
     // old parameter : just for backward compatibility
     panel_config.g_task.maximum_width = std::stol(value);
     panel_config.g_task.maximum_height = 30;
-  } else if (key == "task_maximum_size") {
+    return true;
+  }
+  if (key == "task_maximum_size") {
+    std::string value1, value2, value3;
     config::ExtractValues(value, value1, value2, value3);
     panel_config.g_task.maximum_width = std::stol(value1);
     panel_config.g_task.maximum_height = 30;
@@ -804,7 +959,10 @@ void Reader::AddEntry(std::string const& key, std::string const& value) {
     if (!value2.empty()) {
       panel_config.g_task.maximum_height = std::stol(value2);
     }
-  } else if (key == "task_padding") {
+    return true;
+  }
+  if (key == "task_padding") {
+    std::string value1, value2, value3;
     config::ExtractValues(value, value1, value2, value3);
     panel_config.g_task.padding_x_lr_ = panel_config.g_task.padding_x_ =
         std::stol(value1);
@@ -812,27 +970,35 @@ void Reader::AddEntry(std::string const& key, std::string const& value) {
     if (!value2.empty()) {
       panel_config.g_task.padding_y_ = std::stol(value2);
     }
-
     if (!value3.empty()) {
       panel_config.g_task.padding_x_ = std::stol(value3);
     }
-  } else if (key == "task_font") {
+    return true;
+  }
+  if (key == "task_font") {
     panel_config.g_task.font_desc =
         pango_font_description_from_string(value.c_str());
-  } else if (util::string::RegexMatch("task.*_font_color", key)) {
+    return true;
+  }
+  if (util::string::RegexMatch("task.*_font_color", key)) {
     auto split = util::string::Split(key, '_');
     int status = GetTaskStatus(split[1]);
     panel_config.g_task.font[status] = ParseColor(value, 1.0);
     panel_config.g_task.config_font_mask |= (1 << status);
-  } else if (util::string::RegexMatch("task.*_icon_asb", key)) {
+    return true;
+  }
+  if (util::string::RegexMatch("task.*_icon_asb", key)) {
     auto split = util::string::Split(key, '_');
     int status = GetTaskStatus(split[1]);
+    std::string value1, value2, value3;
     config::ExtractValues(value, value1, value2, value3);
     panel_config.g_task.alpha[status] = std::stol(value1);
     panel_config.g_task.saturation[status] = std::stol(value2);
     panel_config.g_task.brightness[status] = std::stol(value3);
     panel_config.g_task.config_asb_mask |= (1 << status);
-  } else if (util::string::RegexMatch("task.*_background_id", key)) {
+    return true;
+  }
+  if (util::string::RegexMatch("task.*_background_id", key)) {
     auto split = util::string::Split(key, '_');
     int status = GetTaskStatus(split[1]);
     panel_config.g_task.background[status] =
@@ -842,32 +1008,42 @@ void Reader::AddEntry(std::string const& key, std::string const& value) {
     if (status == kTaskNormal) {
       panel_config.g_task.bg_ = panel_config.g_task.background[kTaskNormal];
     }
+    return true;
   }
   // "tooltip" is deprecated but here for backwards compatibility
-  else if (key == "task_tooltip" || key == "tooltip") {
+  if (key == "task_tooltip" || key == "tooltip") {
     panel_config.g_task.tooltip_enabled = std::stol(value);
+    return true;
   }
 
-  /* Systray */
-  else if (key == "systray_padding") {
+  return false;
+}
+
+bool Reader::AddEntry_Systray(std::string const& key,
+                              std::string const& value) {
+  if (key == "systray_padding") {
     if (!new_config_file_ && !systray_enabled) {
       systray_enabled = true;
       panel_items_order.push_back('S');
     }
 
+    std::string value1, value2, value3;
     config::ExtractValues(value, value1, value2, value3);
     systray.padding_x_lr_ = systray.padding_x_ = std::stol(value1);
 
     if (!value2.empty()) {
       systray.padding_y_ = std::stol(value2);
     }
-
     if (!value3.empty()) {
       systray.padding_x_ = std::stol(value3);
     }
-  } else if (key == "systray_background_id") {
+    return true;
+  }
+  if (key == "systray_background_id") {
     systray.bg_ = GetBackgroundFromId(std::stol(value));
-  } else if (key == "systray_sort") {
+    return true;
+  }
+  if (key == "systray_sort") {
     if (value == "descending") {
       systray.sort = -1;
     } else if (value == "ascending") {
@@ -877,17 +1053,28 @@ void Reader::AddEntry(std::string const& key, std::string const& value) {
     } else if (value == "right2left") {
       systray.sort = 3;
     }
-  } else if (key == "systray_icon_size") {
+    return true;
+  }
+  if (key == "systray_icon_size") {
     systray_max_icon_size = std::stol(value);
-  } else if (key == "systray_icon_asb") {
+    return true;
+  }
+  if (key == "systray_icon_asb") {
+    std::string value1, value2, value3;
     config::ExtractValues(value, value1, value2, value3);
     systray.alpha = std::stol(value1);
     systray.saturation = std::stol(value2);
     systray.brightness = std::stol(value3);
+    return true;
   }
 
-  /* Launcher */
-  else if (key == "launcher_padding") {
+  return false;
+}
+
+bool Reader::AddEntry_Launcher(std::string const& key,
+                               std::string const& value) {
+  if (key == "launcher_padding") {
+    std::string value1, value2, value3;
     config::ExtractValues(value, value1, value2, value3);
     panel_config.launcher_.padding_x_lr_ = panel_config.launcher_.padding_x_ =
         std::stol(value1);
@@ -895,15 +1082,20 @@ void Reader::AddEntry(std::string const& key, std::string const& value) {
     if (!value2.empty()) {
       panel_config.launcher_.padding_y_ = std::stol(value2);
     }
-
     if (!value3.empty()) {
       panel_config.launcher_.padding_x_ = std::stol(value3);
     }
-  } else if (key == "launcher_background_id") {
+    return true;
+  }
+  if (key == "launcher_background_id") {
     panel_config.launcher_.bg_ = GetBackgroundFromId(std::stol(value));
-  } else if (key == "launcher_icon_size") {
+    return true;
+  }
+  if (key == "launcher_icon_size") {
     launcher_max_icon_size = std::stol(value);
-  } else if (key == "launcher_item_app") {
+    return true;
+  }
+  if (key == "launcher_item_app") {
     std::string expanded = ExpandWords(value);
     if (expanded.empty()) {
       util::log::Debug() << "expansion failed for \"" << value
@@ -912,228 +1104,320 @@ void Reader::AddEntry(std::string const& key, std::string const& value) {
     } else {
       panel_config.launcher_.list_apps_.push_back(expanded);
     }
-  } else if (key == "launcher_icon_theme") {
+    return true;
+  }
+  if (key == "launcher_icon_theme") {
     // if XSETTINGS manager running, tint3 use it.
     if (icon_theme_name.empty()) {
       icon_theme_name = value;
     }
-  } else if (key == "launcher_icon_asb") {
+    return true;
+  }
+  if (key == "launcher_icon_asb") {
+    std::string value1, value2, value3;
     config::ExtractValues(value, value1, value2, value3);
     launcher_alpha = std::stol(value1);
     launcher_saturation = std::stol(value2);
     launcher_brightness = std::stol(value3);
-  } else if (key == "launcher_tooltip") {
+    return true;
+  }
+  if (key == "launcher_tooltip") {
     launcher_tooltip_enabled = std::stol(value);
+    return true;
   }
 
-  /* Tooltip */
-  else if (key == "tooltip_show_timeout") {
+  return false;
+}
+
+bool Reader::AddEntry_Tooltip(std::string const& key,
+                              std::string const& value) {
+  if (key == "tooltip_show_timeout") {
     int timeout_msec = 1000 * std::stof(value);
     tooltip_config.show_timeout_msec = timeout_msec;
-  } else if (key == "tooltip_hide_timeout") {
+    return true;
+  }
+  if (key == "tooltip_hide_timeout") {
     int timeout_msec = 1000 * std::stof(value);
     tooltip_config.hide_timeout_msec = timeout_msec;
-  } else if (key == "tooltip_padding") {
+    return true;
+  }
+  if (key == "tooltip_padding") {
+    std::string value1, value2, value3;
     config::ExtractValues(value, value1, value2, value3);
 
     if (!value1.empty()) {
       tooltip_config.paddingx = std::stol(value1);
     }
-
     if (!value2.empty()) {
       tooltip_config.paddingy = std::stol(value2);
     }
-  } else if (key == "tooltip_background_id") {
+    return true;
+  }
+  if (key == "tooltip_background_id") {
     tooltip_config.bg = GetBackgroundFromId(std::stol(value));
-  } else if (key == "tooltip_font_color") {
+    return true;
+  }
+  if (key == "tooltip_font_color") {
     tooltip_config.font_color = ParseColor(value, 0.1);
-  } else if (key == "tooltip_font") {
+    return true;
+  }
+  if (key == "tooltip_font") {
     tooltip_config.font_desc =
         pango_font_description_from_string(value.c_str());
+    return true;
   }
 
-  /* Executor */
-  else if (key == "execp") {
+  return false;
+}
+
+bool Reader::AddEntry_Executor(std::string const& key,
+                               std::string const& value) {
+  if (key == "execp") {
     if (value != "new") {
       util::log::Error() << "unexpected value \"" << value
                          << "\", for execp, ignoring\n";
-      return;
+      return true;
     }
     executors.push_back(Executor{});
-  } else if (key == "execp_background_id") {
+    return true;
+  }
+  if (key == "execp_background_id") {
     if (executors.empty()) {
       util::log::Error() << key << " config entry without any previous execp "
                                    "plugin initialized, ignoring\n";
-      return;
+      return true;
     }
     executors.back().set_background(GetBackgroundFromId(std::stol(value)));
-  } else if (key == "execp_cache_icon") {
+    return true;
+  }
+  if (key == "execp_cache_icon") {
     if (executors.empty()) {
       util::log::Error() << key << " config entry without any previous execp "
                                    "plugin initialized, ignoring\n";
-      return;
+      return true;
     }
     executors.back().set_cache_icon(std::stol(value) != 0);
-  } else if (key == "execp_centered") {
+    return true;
+  }
+  if (key == "execp_centered") {
     if (executors.empty()) {
       util::log::Error() << key << " config entry without any previous execp "
                                    "plugin initialized, ignoring\n";
-      return;
+      return true;
     }
     executors.back().set_centered(std::stol(value) != 0);
-  } else if (key == "execp_command") {
+    return true;
+  }
+  if (key == "execp_command") {
     if (executors.empty()) {
       util::log::Error() << key << " config entry without any previous execp "
                                    "plugin initialized, ignoring\n";
-      return;
+      return true;
     }
     executors.back().set_command(value);
-  } else if (key == "execp_continuous") {
+    return true;
+  }
+  if (key == "execp_continuous") {
     if (executors.empty()) {
       util::log::Error() << key << " config entry without any previous execp "
                                    "plugin initialized, ignoring\n";
-      return;
+      return true;
     }
     executors.back().set_continuous(std::stol(value) != 0);
-  } else if (key == "execp_dwheel_command") {
+    return true;
+  }
+  if (key == "execp_dwheel_command") {
     if (executors.empty()) {
       util::log::Error() << key << " config entry without any previous execp "
                                    "plugin initialized, ignoring\n";
-      return;
+      return true;
     }
     executors.back().set_command_down_wheel(value);
-  } else if (key == "execp_font") {
+    return true;
+  }
+  if (key == "execp_font") {
     if (executors.empty()) {
       util::log::Error() << key << " config entry without any previous execp "
                                    "plugin initialized, ignoring\n";
-      return;
+      return true;
     }
     executors.back().set_font(value);
-  } else if (key == "execp_font_color") {
+    return true;
+  }
+  if (key == "execp_font_color") {
     if (executors.empty()) {
       util::log::Error() << key << " config entry without any previous execp "
                                    "plugin initialized, ignoring\n";
-      return;
+      return true;
     }
     executors.back().set_font_color(ParseColor(value));
-  } else if (key == "execp_has_icon") {
+    return true;
+  }
+  if (key == "execp_has_icon") {
     if (executors.empty()) {
       util::log::Error() << key << " config entry without any previous execp "
                                    "plugin initialized, ignoring\n";
-      return;
+      return true;
     }
     executors.back().set_has_icon(std::stol(value) != 0);
-  } else if (key == "execp_icon_h") {
+    return true;
+  }
+  if (key == "execp_icon_h") {
     if (executors.empty()) {
       util::log::Error() << key << " config entry without any previous execp "
                                    "plugin initialized, ignoring\n";
-      return;
+      return true;
     }
     int height = std::stol(value);
     if (height < 0) {
       util::log::Error() << "negative " << key << " given, ignoring\n";
-      return;
+    } else {
+      executors.back().set_icon_height(height);
     }
-    executors.back().set_icon_height(height);
-  } else if (key == "execp_icon_w") {
+    return true;
+  }
+  if (key == "execp_icon_w") {
     if (executors.empty()) {
       util::log::Error() << key << " config entry without any previous execp "
                                    "plugin initialized, ignoring\n";
-      return;
+      return true;
     }
     int width = std::stol(value);
     if (width < 0) {
       util::log::Error() << "negative " << key << " given, ignoring\n";
-      return;
+    } else {
+      executors.back().set_icon_width(width);
     }
-    executors.back().set_icon_width(width);
-  } else if (key == "execp_interval") {
+    return true;
+  }
+  if (key == "execp_interval") {
     if (executors.empty()) {
       util::log::Error() << key << " config entry without any previous execp "
                                    "plugin initialized, ignoring\n";
-      return;
+      return true;
     }
     int interval = std::stol(value);
     if (interval < 0) {
       util::log::Error() << "negative " << key << " given, ignoring\n";
-      return;
+    } else {
+      executors.back().set_interval(interval);
     }
-    executors.back().set_interval(interval);
-  } else if (key == "execp_lclick_command") {
+    return true;
+  }
+  if (key == "execp_lclick_command") {
     if (executors.empty()) {
       util::log::Error() << key << " config entry without any previous execp "
                                    "plugin initialized, ignoring\n";
-      return;
+      return true;
     }
     executors.back().set_command_left_click(value);
-  } else if (key == "execp_markup") {
+    return true;
+  }
+  if (key == "execp_markup") {
     if (executors.empty()) {
       util::log::Error() << key << " config entry without any previous execp "
                                    "plugin initialized, ignoring\n";
-      return;
+      return true;
     }
     executors.back().set_markup(std::stol(value) != 0);
-  } else if (key == "execp_mclick_command") {
+    return true;
+  }
+  if (key == "execp_mclick_command") {
     if (executors.empty()) {
       util::log::Error() << key << " config entry without any previous execp "
                                    "plugin initialized, ignoring\n";
-      return;
+      return true;
     }
     executors.back().set_command_middle_click(value);
-  } else if (key == "execp_rclick_command") {
+    return true;
+  }
+  if (key == "execp_rclick_command") {
     if (executors.empty()) {
       util::log::Error() << key << " config entry without any previous execp "
                                    "plugin initialized, ignoring\n";
-      return;
+      return true;
     }
     executors.back().set_command_right_click(value);
-  } else if (key == "execp_tooltip") {
+    return true;
+  }
+  if (key == "execp_tooltip") {
     if (executors.empty()) {
       util::log::Error() << key << " config entry without any previous execp "
                                    "plugin initialized, ignoring\n";
-      return;
+      return true;
     }
     executors.back().set_tooltip(value);
-  } else if (key == "execp_uwheel_command") {
+    return true;
+  }
+  if (key == "execp_uwheel_command") {
     if (executors.empty()) {
       util::log::Error() << key << " config entry without any previous execp "
                                    "plugin initialized, ignoring\n";
-      return;
+      return true;
     }
     executors.back().set_command_up_wheel(value);
+    return true;
   }
 
-  /* Mouse actions */
-  else if (key == "mouse_middle") {
+  return false;
+}
+
+bool Reader::AddEntry_Mouse(std::string const& key, std::string const& value) {
+  if (key == "mouse_middle") {
     GetAction(value, &mouse_middle);
-  } else if (key == "mouse_right") {
+    return true;
+  }
+  if (key == "mouse_right") {
     GetAction(value, &mouse_right);
-  } else if (key == "mouse_scroll_up") {
+    return true;
+  }
+  if (key == "mouse_scroll_up") {
     GetAction(value, &mouse_scroll_up);
-  } else if (key == "mouse_scroll_down") {
+    return true;
+  }
+  if (key == "mouse_scroll_down") {
     GetAction(value, &mouse_scroll_down);
-  } else if (key == "mouse_effects") {
+    return true;
+  }
+  if (key == "mouse_effects") {
     panel_config.mouse_effects = (0 != std::stol(value));
-  } else if (key == "mouse_hover_icon_asb") {
+    return true;
+  }
+  if (key == "mouse_hover_icon_asb") {
+    std::string value1, value2, value3;
     config::ExtractValues(value, value1, value2, value3);
     panel_config.mouse_hover_alpha = std::stol(value1);
     panel_config.mouse_hover_saturation = std::stol(value2);
     panel_config.mouse_hover_brightness = std::stol(value3);
-  } else if (key == "mouse_pressed_icon_asb") {
+    return true;
+  }
+  if (key == "mouse_pressed_icon_asb") {
+    std::string value1, value2, value3;
     config::ExtractValues(value, value1, value2, value3);
     panel_config.mouse_pressed_alpha = std::stol(value1);
     panel_config.mouse_pressed_saturation = std::stol(value2);
     panel_config.mouse_pressed_brightness = std::stol(value3);
+    return true;
   }
 
-  /* autohide options */
-  else if (key == "autohide") {
+  return false;
+}
+
+bool Reader::AddEntry_Autohide(std::string const& key,
+                               std::string const& value) {
+  if (key == "autohide") {
     panel_autohide = (0 != std::stol(value));
-  } else if (key == "autohide_show_timeout") {
+    return true;
+  }
+  if (key == "autohide_show_timeout") {
     panel_autohide_show_timeout = 1000 * std::stof(value);
-  } else if (key == "autohide_hide_timeout") {
+    return true;
+  }
+  if (key == "autohide_hide_timeout") {
     panel_autohide_hide_timeout = 1000 * std::stof(value);
-  } else if (key == "strut_policy") {
+    return true;
+  }
+  if (key == "strut_policy") {
     if (value == "follow_size") {
       panel_strut_policy = PanelStrutPolicy::kFollowSize;
     } else if (value == "none") {
@@ -1141,39 +1425,39 @@ void Reader::AddEntry(std::string const& key, std::string const& value) {
     } else {
       panel_strut_policy = PanelStrutPolicy::kMinimum;
     }
-  } else if (key == "autohide_height") {
-    panel_autohide_height = std::stol(value);
-
-    if (panel_autohide_height == 0) {
-      // autohide need height > 0
-      panel_autohide_height = 1;
-    }
+    return true;
+  }
+  if (key == "autohide_height") {
+    panel_autohide_height = std::max(1L, std::stol(value));
+    return true;
   }
 
-  // old config option
-  else if (key == "systray") {
+  return false;
+}
+
+bool Reader::AddEntry_Legacy(std::string const& key, std::string const& value) {
+  if (key == "systray") {
     if (!new_config_file_) {
       systray_enabled = (0 != std::stol(value));
-
       if (systray_enabled) {
         panel_items_order.push_back('S');
       }
+      return true;
     }
-  } else if (key == "battery") {
+  }
+  if (key == "battery") {
 #ifdef ENABLE_BATTERY
     if (!new_config_file_) {
       battery_enabled = (0 != std::stol(value));
-
       if (battery_enabled) {
         panel_items_order.push_back('B');
       }
     }
+    return true;
 #endif  // ENABLE_BATTERY
-  } else {
-    std::cerr
-        << "tint3: invalid option \"" << key
-        << "\", please upgrade tint3 or correct your configuration file.\n";
   }
+
+  return false;
 }
 
 unsigned int Reader::GetMonitor(std::string const& monitor_name) const {

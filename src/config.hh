@@ -46,6 +46,21 @@ class Reader {
   bool new_config_file_;
 
   void AddEntry(std::string const& key, std::string const& value);
+  bool AddEntry_BackgroundBorder(std::string const& key,
+                                 std::string const& value);
+  bool AddEntry_Gradient(std::string const& key, std::string const& value);
+  bool AddEntry_Panel(std::string const& key, std::string const& value);
+  bool AddEntry_Battery(std::string const& key, std::string const& value);
+  bool AddEntry_Clock(std::string const& key, std::string const& value);
+  bool AddEntry_Taskbar(std::string const& key, std::string const& value);
+  bool AddEntry_Task(std::string const& key, std::string const& value);
+  bool AddEntry_Systray(std::string const& key, std::string const& value);
+  bool AddEntry_Launcher(std::string const& key, std::string const& value);
+  bool AddEntry_Tooltip(std::string const& key, std::string const& value);
+  bool AddEntry_Executor(std::string const& key, std::string const& value);
+  bool AddEntry_Mouse(std::string const& key, std::string const& value);
+  bool AddEntry_Autohide(std::string const& key, std::string const& value);
+  bool AddEntry_Legacy(std::string const& key, std::string const& value);
   unsigned int GetMonitor(std::string const& monitor_name) const;
 };
 
