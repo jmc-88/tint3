@@ -21,6 +21,7 @@
 
 #include <cairo-xlib.h>
 #include <cairo.h>
+#include <pango/pangocairo.h>
 
 #include <algorithm>
 #include <cstdio>
@@ -46,8 +47,8 @@ std::string time_tooltip_timezone;
 std::string clock_lclick_command;
 std::string clock_rclick_command;
 time_t time_clock;
-PangoFontDescription* time1_font_desc;
-PangoFontDescription* time2_font_desc;
+util::pango::FontDescriptionPtr time1_font_desc;
+util::pango::FontDescriptionPtr time2_font_desc;
 bool clock_enabled;
 static Interval::Id clock_timeout;
 
@@ -67,14 +68,6 @@ void DefaultClock() {
 }
 
 void CleanupClock(Timer& timer) {
-  if (time1_font_desc) {
-    pango_font_description_free(time1_font_desc);
-  }
-
-  if (time2_font_desc) {
-    pango_font_description_free(time2_font_desc);
-  }
-
   if (clock_timeout) {
     timer.ClearInterval(clock_timeout);
   }
@@ -159,7 +152,7 @@ void Clock::DrawForeground(cairo_t* c) {
   util::GObjectPtr<PangoLayout> layout(pango_cairo_create_layout(c));
 
   // draw layout
-  pango_layout_set_font_description(layout.get(), time1_font_desc);
+  pango_layout_set_font_description(layout.get(), time1_font_desc());
   pango_layout_set_width(layout.get(), width_ * PANGO_SCALE);
   pango_layout_set_alignment(layout.get(), PANGO_ALIGN_CENTER);
   pango_layout_set_text(layout.get(), time1_.c_str(), time1_.size());
@@ -177,7 +170,7 @@ void Clock::DrawForeground(cairo_t* c) {
   }
 
   if (!time2_format.empty()) {
-    pango_layout_set_font_description(layout.get(), time2_font_desc);
+    pango_layout_set_font_description(layout.get(), time2_font_desc());
     pango_layout_set_indent(layout.get(), 0);
     pango_layout_set_text(layout.get(), time2_.c_str(), time2_.size());
     pango_layout_set_width(layout.get(), width_ * PANGO_SCALE);

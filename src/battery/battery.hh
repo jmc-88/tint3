@@ -2,7 +2,6 @@
 #define TINT3_BATTERY_BATTERY_HH
 
 #include <fcntl.h>
-#include <pango/pangocairo.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 
@@ -10,6 +9,7 @@
 
 #include "util/area.hh"
 #include "util/common.hh"
+#include "util/pango.hh"
 #include "util/timer.hh"
 
 // forward declarations
@@ -38,8 +38,8 @@ class Battery : public Area {
   std::string battery_time_;
 };
 
-extern PangoFontDescription* bat1_font_desc;
-extern PangoFontDescription* bat2_font_desc;
+extern util::pango::FontDescriptionPtr bat1_font_desc;
+extern util::pango::FontDescriptionPtr bat2_font_desc;
 extern bool battery_enabled;
 extern int percentage_hide;
 

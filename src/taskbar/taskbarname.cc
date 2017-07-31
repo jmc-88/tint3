@@ -23,6 +23,7 @@
 #include <X11/Xatom.h>
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
+#include <pango/pangocairo.h>
 
 #include <algorithm>
 #include <cstdio>
@@ -37,7 +38,7 @@
 #include "util/window.hh"
 
 bool taskbarname_enabled;
-PangoFontDescription* taskbarname_font_desc;
+util::pango::FontDescriptionPtr taskbarname_font_desc;
 Color taskbarname_font;
 Color taskbarname_active_font;
 
@@ -116,7 +117,7 @@ void Taskbarname::DrawForeground(cairo_t* c) {
 
   // draw content
   util::GObjectPtr<PangoLayout> layout(pango_cairo_create_layout(c));
-  pango_layout_set_font_description(layout.get(), taskbarname_font_desc);
+  pango_layout_set_font_description(layout.get(), taskbarname_font_desc());
   pango_layout_set_width(layout.get(), width_ * PANGO_SCALE);
   pango_layout_set_alignment(layout.get(), PANGO_ALIGN_CENTER);
   pango_layout_set_text(layout.get(), name_.c_str(), name_.length());

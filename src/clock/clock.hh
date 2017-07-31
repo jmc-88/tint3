@@ -1,12 +1,11 @@
 #ifndef TINT3_CLOCK_CLOCK_HH
 #define TINT3_CLOCK_CLOCK_HH
 
-#include <pango/pangocairo.h>
-
 #include <string>
 
 #include "util/area.hh"
 #include "util/common.hh"
+#include "util/pango.hh"
 #include "util/timer.hh"
 
 class Clock : public Area {
@@ -40,8 +39,8 @@ extern std::string time_tooltip_format;
 extern std::string time_tooltip_timezone;
 extern std::string clock_lclick_command;
 extern std::string clock_rclick_command;
-extern PangoFontDescription* time1_font_desc;
-extern PangoFontDescription* time2_font_desc;
+extern util::pango::FontDescriptionPtr time1_font_desc;
+extern util::pango::FontDescriptionPtr time2_font_desc;
 extern bool clock_enabled;
 
 // default global data

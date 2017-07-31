@@ -1,10 +1,10 @@
 #ifndef TINT3_UTIL_WINDOW_HH
 #define TINT3_UTIL_WINDOW_HH
 
-#include <pango/pangocairo.h>
-
 #include <string>
 #include <vector>
+
+#include "util/pango.hh"
 
 namespace util {
 namespace window {
@@ -32,7 +32,7 @@ int GetIconCount(unsigned long* data, int num);
 unsigned long* GetBestIcon(unsigned long* data, int icon_count, int num,
                            int* iw, int* ih, int best_icon_size);
 
-void GetTextSize(PangoFontDescription* font, std::string const& text,
-                 int* width, int* height);
+void GetTextSize(util::pango::FontDescriptionPtr const& font,
+                 std::string const& text, int* width, int* height);
 
 #endif  // TINT3_UTIL_WINDOW_HH

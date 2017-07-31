@@ -3,12 +3,12 @@
 
 #include <Imlib2.h>
 #include <X11/Xlib.h>
-#include <pango/pangocairo.h>
 
 #include <list>
 
 #include "util/area.hh"
 #include "util/common.hh"
+#include "util/pango.hh"
 #include "util/timer.hh"
 
 enum TaskState {
@@ -43,7 +43,7 @@ class Global_task : public Area {
   double text_posx, text_height;
 
   int font_shadow;
-  PangoFontDescription* font_desc;
+  util::pango::FontDescriptionPtr font_desc;
   Color font[kTaskStateCount];
   int config_font_mask;
   int tooltip_enabled;

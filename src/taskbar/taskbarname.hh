@@ -4,9 +4,10 @@
 #include "taskbar/taskbarbase.hh"
 #include "util/area.hh"
 #include "util/common.hh"
+#include "util/pango.hh"
 
 extern bool taskbarname_enabled;
-extern PangoFontDescription* taskbarname_font_desc;
+extern util::pango::FontDescriptionPtr taskbarname_font_desc;
 extern Color taskbarname_font;
 extern Color taskbarname_active_font;
 

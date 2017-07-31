@@ -2,23 +2,22 @@
 #define TINT3_TOOLTIP_TOOLTIP_HH
 
 #include <cairo/cairo.h>
-#include <pango/pangocairo.h>
 
 #include <string>
 
 #include "server.hh"
 #include "util/area.hh"
 #include "util/color.hh"
+#include "util/pango.hh"
 #include "util/timer.hh"
 
 class TooltipConfig {
  public:
   TooltipConfig() = default;
-  ~TooltipConfig();
 
   Background bg;
   Color font_color;
-  PangoFontDescription* font_desc;
+  util::pango::FontDescriptionPtr font_desc;
   int paddingx;
   int paddingy;
   unsigned int show_timeout_msec;
@@ -62,7 +61,7 @@ class Tooltip {
   Server* server_;
   Timer* timer_;
   Area const* area_;
-  PangoFontDescription* font_desc_;
+  util::pango::FontDescriptionPtr font_desc_;
   Window window_;
   Interval::Id timeout_;
 

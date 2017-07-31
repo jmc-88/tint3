@@ -20,6 +20,7 @@
 
 #include <cairo-xlib.h>
 #include <cairo.h>
+#include <pango/pangocairo.h>
 
 #if defined(__OpenBSD__) || defined(__NetBSD__)
 #include <dev/apm/apmbios.h>
@@ -54,8 +55,8 @@
 #include "battery/freebsd_acpiio.hh"
 #endif  // defined(__FreeBSD__)
 
-PangoFontDescription* bat1_font_desc;
-PangoFontDescription* bat2_font_desc;
+util::pango::FontDescriptionPtr bat1_font_desc;
+util::pango::FontDescriptionPtr bat2_font_desc;
 std::unique_ptr<BatteryInterface> battery_ptr;
 BatteryState battery_state;
 bool battery_enabled;
@@ -135,14 +136,6 @@ void DefaultBattery() {
 }
 
 void CleanupBattery(Timer& timer) {
-  if (bat1_font_desc) {
-    pango_font_description_free(bat1_font_desc);
-  }
-
-  if (bat2_font_desc) {
-    pango_font_description_free(bat2_font_desc);
-  }
-
   battery_low_cmd.clear();
   path_energy_now.clear();
   path_energy_full.clear();
@@ -288,7 +281,7 @@ void Battery::DrawForeground(cairo_t* c) {
   util::GObjectPtr<PangoLayout> layout(pango_cairo_create_layout(c));
 
   // draw layout
-  pango_layout_set_font_description(layout.get(), bat1_font_desc);
+  pango_layout_set_font_description(layout.get(), bat1_font_desc());
   pango_layout_set_width(layout.get(), width_ * PANGO_SCALE);
   pango_layout_set_alignment(layout.get(), PANGO_ALIGN_CENTER);
   pango_layout_set_text(layout.get(), battery_percentage_.c_str(),
@@ -300,7 +293,7 @@ void Battery::DrawForeground(cairo_t* c) {
   cairo_move_to(c, 0, bat1_posy);
   pango_cairo_show_layout(c, layout.get());
 
-  pango_layout_set_font_description(layout.get(), bat2_font_desc);
+  pango_layout_set_font_description(layout.get(), bat2_font_desc());
   pango_layout_set_indent(layout.get(), 0);
   pango_layout_set_text(layout.get(), battery_time_.c_str(),
                         battery_time_.length());

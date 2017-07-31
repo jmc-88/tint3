@@ -23,7 +23,6 @@
 #include <X11/Xutil.h>
 #include <cairo-xlib.h>
 #include <cairo.h>
-#include <pango/pangocairo.h>
 
 #include <algorithm>
 #include <cstdlib>
@@ -188,12 +187,6 @@ void CleanupPanel() {
 
   CleanupTaskbar();
 
-  // taskbarname_font_desc freed here because cleanup_taskbarname() called on
-  // _NET_NUMBER_OF_DESKTOPS
-  if (taskbarname_font_desc) {
-    pango_font_description_free(taskbarname_font_desc);
-  }
-
   for (Panel& p : panels) {
     p.FreeArea();
     if (p.temp_pmap) {
@@ -208,11 +201,6 @@ void CleanupPanel() {
   }
 
   panels.clear();
-
-  if (panel_config.g_task.font_desc) {
-    pango_font_description_free(panel_config.g_task.font_desc);
-  }
-
   backgrounds.clear();
 }
 

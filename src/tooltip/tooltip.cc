@@ -1,3 +1,5 @@
+#include <pango/pangocairo.h>
+
 #include "tooltip/tooltip.hh"
 
 #include "panel.hh"
@@ -6,12 +8,6 @@
 #include "util/window.hh"
 
 TooltipConfig tooltip_config;
-
-TooltipConfig::~TooltipConfig() {
-  if (font_desc) {
-    pango_font_description_free(font_desc);
-  }
-}
 
 TooltipConfig TooltipConfig::Default() {
   TooltipConfig cfg;
@@ -29,13 +25,8 @@ Tooltip::Tooltip(Server* server, Timer* timer)
     : server_(server),
       timer_(timer),
       area_(nullptr),
-      font_desc_(nullptr),
+      font_desc_(tooltip_config.font_desc),
       window_(None) {
-  font_desc_ = tooltip_config.font_desc;
-  if (!font_desc_) {
-    font_desc_ = pango_font_description_from_string("sans 10");
-  }
-
   XSetWindowAttributes attr;
   attr.override_redirect = True;
   attr.event_mask = StructureNotifyMask;
@@ -214,7 +205,7 @@ void Tooltip::DrawText(cairo_t* c, int width, int height,
       tooltip_config.font_color[2], tooltip_config.font_color.alpha());
 
   util::GObjectPtr<PangoLayout> layout(pango_cairo_create_layout(c));
-  pango_layout_set_font_description(layout.get(), font_desc_);
+  pango_layout_set_font_description(layout.get(), font_desc_());
   pango_layout_set_text(layout.get(), text.c_str(), -1);
 
   PangoRectangle r1, r2;

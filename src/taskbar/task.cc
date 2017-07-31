@@ -23,6 +23,7 @@
 #include <X11/Xatom.h>
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
+#include <pango/pangocairo.h>
 #include <unistd.h>
 
 #include <algorithm>
@@ -453,7 +454,7 @@ void Task::DrawForeground(cairo_t* c) {
   if (panel_->g_task.text) {
     /* Layout */
     util::GObjectPtr<PangoLayout> layout(pango_cairo_create_layout(c));
-    pango_layout_set_font_description(layout.get(), panel_->g_task.font_desc);
+    pango_layout_set_font_description(layout.get(), panel_->g_task.font_desc());
     pango_layout_set_text(layout.get(), title_.c_str(), -1);
 
     /* Drawing width and Cut text */

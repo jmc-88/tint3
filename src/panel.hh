@@ -2,7 +2,6 @@
 #define TINT3_PANEL_HH
 
 #include <X11/Xlib.h>
-#include <pango/pangocairo.h>
 #include <sys/time.h>
 
 #include <string>
