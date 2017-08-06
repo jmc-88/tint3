@@ -312,7 +312,10 @@ bool Launcher::Resize() {
   return true;
 }
 
-LauncherIcon::LauncherIcon() { set_has_mouse_effects(true); }
+LauncherIcon::LauncherIcon()
+    : Area(), icon_size_(), is_app_desktop_(), x_(), y_() {
+  set_has_mouse_effects(true);
+}
 
 // Here we override the default layout of the icons; normally Area layouts its
 // children
