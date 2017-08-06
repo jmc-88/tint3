@@ -83,6 +83,8 @@ Area& Area::CloneArea(Area const& other) {
   return (*this);
 }
 
+void Area::set_background(Background const& background) { bg_ = background; }
+
 /************************************************************
  * !!! This design is experimental and not yet fully implemented !!!!!!!!!!!!!
  *

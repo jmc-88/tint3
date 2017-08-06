@@ -34,7 +34,9 @@ class Area {
   unsigned int width_;
   unsigned int height_;
   Pixmap pix_;
+
   Background bg_;
+  void set_background(Background const& background);
 
   // list of children Area objects
   std::vector<Area*> children_;

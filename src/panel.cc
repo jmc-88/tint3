@@ -447,6 +447,7 @@ void Panel::Render() {
 }
 
 void Panel::SetItemsOrder() {
+  auto executor = executors.begin();
   children_.clear();
 
   for (char item : panel_items_order) {
@@ -476,6 +477,18 @@ void Panel::SetItemsOrder() {
 
     if (item == 'C') {
       children_.push_back(&clock_);
+    }
+
+    if (item == 'E') {
+      if (executor != executors.end()) {
+        executor->InitPanel(this);
+        children_.push_back(&*executor);
+        util::log::Debug() << "new executor: " << executor->command() << '\n';
+        executor++;
+      } else {
+        util::log::Error()
+            << "panel_items: requested an executor, but none are left.\n";
+      }
     }
   }
 

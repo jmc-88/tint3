@@ -4,12 +4,21 @@
 #include <memory>
 #include <string>
 
+#include "util/area.hh"
 #include "util/color.hh"
 #include "util/pango.hh"
 
-class Executor {
+class Panel;
+class Executor : public Area {
  public:
-  void set_background(Background const& background);
+  Executor();
+
+  void InitPanel(Panel* panel);
+
+  std::string GetTooltipText();
+  void DrawForeground(cairo_t* c);
+  bool Resize();
+
   void set_cache_icon(bool cache_icon);
   void set_centered(bool centered);
 
