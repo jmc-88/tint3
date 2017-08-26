@@ -11,11 +11,11 @@ namespace window {
 
 void SetActive(Window win);
 void SetClose(Window win);
-int IsIconified(Window win);
-int IsUrgent(Window win);
-int IsHidden(Window win);
-int IsActive(Window win);
-int IsSkipTaskbar(Window win);
+bool IsIconified(Window win);
+bool IsUrgent(Window win);
+bool IsHidden(Window win);
+bool IsActive(Window win);
+bool IsSkipTaskbar(Window win);
 void MaximizeRestore(Window win);
 void ToggleShade(Window win);
 int GetDesktop(Window win);

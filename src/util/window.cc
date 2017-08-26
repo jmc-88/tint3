@@ -69,14 +69,14 @@ void MaximizeRestore(Window win) {
               server.atom("_NET_WM_STATE_MAXIMIZED_HORZ"), 0);
 }
 
-int IsHidden(Window win) {
+bool IsHidden(Window win) {
   int state_count = 0;
   auto at = ServerGetProperty<Atom>(win, server.atom("_NET_WM_STATE"), XA_ATOM,
                                     &state_count);
 
   for (int i = 0; i < state_count; ++i) {
     if (at.get()[i] == server.atom("_NET_WM_STATE_SKIP_TASKBAR")) {
-      return 1;
+      return true;
     }
 
     // do not add transient_for windows if the transient window is already in
@@ -85,7 +85,7 @@ int IsHidden(Window win) {
 
     while (XGetTransientForHint(server.dsp, window, &window)) {
       if (!TaskGetTasks(window).empty()) {
-        return 1;
+        return true;
       }
     }
   }
@@ -100,7 +100,7 @@ int IsHidden(Window win) {
         at.get()[i] == server.atom("_NET_WM_WINDOW_TYPE_TOOLBAR") ||
         at.get()[i] == server.atom("_NET_WM_WINDOW_TYPE_MENU") ||
         at.get()[i] == server.atom("_NET_WM_WINDOW_TYPE_SPLASH")) {
-      return 1;
+      return true;
     }
   }
 
@@ -113,7 +113,7 @@ int IsHidden(Window win) {
   // specification
   // Windows with neither _NET_WM_WINDOW_TYPE nor WM_TRANSIENT_FOR set
   // MUST be taken as top-level window.
-  return 0;
+  return false;
 }
 
 namespace {
@@ -147,7 +147,7 @@ unsigned int GetMonitor(Window win) {
   return (i != -1) ? i : 0;
 }
 
-int IsIconified(Window win) {
+bool IsIconified(Window win) {
   // EWMH specification : minimization of windows use _NET_WM_STATE_HIDDEN.
   // WM_STATE is not accurate for shaded window and in multi_desktop mode.
   int count = 0;
@@ -156,39 +156,39 @@ int IsIconified(Window win) {
 
   for (int i = 0; i < count; i++) {
     if (at.get()[i] == server.atom("_NET_WM_STATE_HIDDEN")) {
-      return 1;
+      return true;
     }
   }
 
-  return 0;
+  return false;
 }
 
-int IsUrgent(Window win) {
+bool IsUrgent(Window win) {
   int count = 0;
   auto at = ServerGetProperty<Atom>(win, server.atom("_NET_WM_STATE"), XA_ATOM,
                                     &count);
 
   for (int i = 0; i < count; i++) {
     if (at.get()[i] == server.atom("_NET_WM_STATE_DEMANDS_ATTENTION")) {
-      return 1;
+      return true;
     }
   }
 
-  return 0;
+  return false;
 }
 
-int IsSkipTaskbar(Window win) {
+bool IsSkipTaskbar(Window win) {
   int count = 0;
   auto at = ServerGetProperty<Atom>(win, server.atom("_NET_WM_STATE"), XA_ATOM,
                                     &count);
 
   for (int i = 0; i < count; ++i) {
     if (at.get()[i] == server.atom("_NET_WM_STATE_SKIP_TASKBAR")) {
-      return 1;
+      return true;
     }
   }
 
-  return 0;
+  return false;
 }
 
 Window GetActive() {
@@ -196,7 +196,7 @@ Window GetActive() {
                                server.atom("_NET_ACTIVE_WINDOW"), XA_WINDOW);
 }
 
-int IsActive(Window win) { return GetActive() == win; }
+bool IsActive(Window win) { return GetActive() == win; }
 
 }  // namespace util
 }  // namespace window
