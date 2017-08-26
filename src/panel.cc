@@ -773,7 +773,7 @@ bool Panel::HandlesClick(XButtonEvent* e) {
 
   if (tskbar != nullptr && e->button == 1 &&
       panel_mode == PanelMode::kMultiDesktop) {
-    return 1;
+    return true;
   }
 
   if (ClickClock(e->x, e->y)) {
