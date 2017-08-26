@@ -198,8 +198,8 @@ Window GetActive() {
 
 bool IsActive(Window win) { return GetActive() == win; }
 
-}  // namespace util
 }  // namespace window
+}  // namespace util
 
 void SetDesktop(int desktop) {
   SendEvent32(server.root_window(), server.atom("_NET_CURRENT_DESKTOP"),
