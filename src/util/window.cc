@@ -277,14 +277,19 @@ unsigned long* GetBestIcon(unsigned long* data, int icon_count, int num,
 }
 
 void GetTextSize(util::pango::FontDescriptionPtr const& font,
-                 std::string const& text, int* width, int* height) {
+                 std::string const& text, MarkupTag markup_tag,
+                 int* width, int* height) {
   cairo_surface_t* cs = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, 1, 1);
   cairo_t* c = cairo_create(cs);
 
   util::GObjectPtr<PangoLayout> layout{pango_cairo_create_layout(c)};
   pango_layout_set_ellipsize(layout.get(), PANGO_ELLIPSIZE_NONE);
   pango_layout_set_font_description(layout.get(), font());
-  pango_layout_set_text(layout.get(), text.c_str(), -1);
+  if (markup_tag == MarkupTag::kNoMarkup) {
+    pango_layout_set_text(layout.get(), text.c_str(), -1);
+  } else {
+    pango_layout_set_markup(layout.get(), text.c_str(), -1);
+  }
 
   PangoRectangle r1, r2;
   pango_layout_get_pixel_extents(layout.get(), &r1, &r2);

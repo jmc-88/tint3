@@ -322,11 +322,12 @@ bool Battery::Resize() {
   }
 
   int bat_percentage_width, bat_percentage_height;
-  GetTextSize(bat1_font_desc, battery_percentage_, &bat_percentage_width,
-              &bat_percentage_height);
+  GetTextSize(bat1_font_desc, battery_percentage_, MarkupTag::kNoMarkup,
+              &bat_percentage_width, &bat_percentage_height);
 
   int bat_time_width, bat_time_height;
-  GetTextSize(bat2_font_desc, battery_time_, &bat_time_width, &bat_time_height);
+  GetTextSize(bat2_font_desc, battery_time_, MarkupTag::kNoMarkup,
+              &bat_time_width, &bat_time_height);
 
   if (panel_horizontal) {
     int new_size = std::max(bat_percentage_width, bat_time_width) +

@@ -26,9 +26,22 @@ void Executor::InitPanel(Panel* panel) {
   on_screen_ = true;
 }
 
+namespace {
+
+inline MarkupTag markup_tag(bool has_markup) {
+  if (has_markup) {
+    return MarkupTag::kHasMarkup;
+  } else {
+    return MarkupTag::kNoMarkup;
+  }
+}
+
+}  // namespace
+
 bool Executor::Resize() {
   int text_width, text_height;
-  GetTextSize(font_description_, command_, &text_width, &text_height);
+  GetTextSize(font_description_, command_, markup_tag(markup_),
+              &text_width, &text_height);
 
   width_ = text_width;
   height_ = text_height;

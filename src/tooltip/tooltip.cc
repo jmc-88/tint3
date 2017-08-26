@@ -99,7 +99,8 @@ void Tooltip::Update(Area const* area, XEvent const* e,
 void Tooltip::GetExtents(std::string const& text, int* x, int* y, int* width,
                          int* height) {
   int text_width, text_height;
-  GetTextSize(font_desc_, text, &text_width, &text_height);
+  GetTextSize(font_desc_, text, MarkupTag::kNoMarkup,
+              &text_width, &text_height);
 
   // Find the base dimensions and positions
   Border b = tooltip_config.bg.border();

@@ -198,12 +198,14 @@ bool Clock::Resize() {
 
   time1_ = FormatTime(time1_format,
                       ClockGetTimeForTimezone(time1_timezone, time_clock));
-  GetTextSize(time1_font_desc, time1_, &time_width, &time_height);
+  GetTextSize(time1_font_desc, time1_, MarkupTag::kNoMarkup,
+              &time_width, &time_height);
 
   if (!time2_format.empty()) {
     time2_ = FormatTime(time2_format,
                         ClockGetTimeForTimezone(time2_timezone, time_clock));
-    GetTextSize(time2_font_desc, time2_, &date_width, &date_height);
+    GetTextSize(time2_font_desc, time2_, MarkupTag::kNoMarkup,
+                &date_width, &date_height);
   }
 
   if (panel_horizontal) {

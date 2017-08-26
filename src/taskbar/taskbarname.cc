@@ -134,7 +134,8 @@ bool Taskbarname::Resize() {
   need_redraw_ = true;
 
   int name_width, name_height;
-  GetTextSize(taskbarname_font_desc, name(), &name_width, &name_height);
+  GetTextSize(taskbarname_font_desc, name(), MarkupTag::kNoMarkup,
+              &name_width, &name_height);
 
   if (panel_horizontal) {
     int new_size = name_width + (2 * (padding_x_lr_ + bg_.border().width()));

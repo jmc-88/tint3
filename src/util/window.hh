@@ -32,7 +32,13 @@ int GetIconCount(unsigned long* data, int num);
 unsigned long* GetBestIcon(unsigned long* data, int icon_count, int num,
                            int* iw, int* ih, int best_icon_size);
 
+enum class MarkupTag {
+  kNoMarkup,
+  kHasMarkup,
+};
+
 void GetTextSize(util::pango::FontDescriptionPtr const& font,
-                 std::string const& text, int* width, int* height);
+                 std::string const& text, MarkupTag markup_tag,
+                 int* width, int* height);
 
 #endif  // TINT3_UTIL_WINDOW_HH
