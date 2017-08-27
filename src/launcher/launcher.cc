@@ -404,6 +404,7 @@ void LauncherAction(LauncherIcon* launcher_icon, XEvent* evt) {
   pid_t pid = fork();
 
   if (pid < 0) {
+    sn_launcher_context_unref(ctx);
     util::log::Error() << "Could not fork\n";
   } else if (pid == 0) {
 #if HAVE_SN
@@ -426,7 +427,6 @@ void LauncherAction(LauncherIcon* launcher_icon, XEvent* evt) {
   else {
     server.pids[pid] = ctx;
   }
-
 #endif  // HAVE_SN
 }
 
