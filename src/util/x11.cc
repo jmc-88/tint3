@@ -205,13 +205,9 @@ void EventLoop::ReapChildPIDs() const {
   while ((pid = waitpid(-1, nullptr, WNOHANG)) > 0) {
 #ifdef HAVE_SN
     auto it = server.pids.find(pid);
-
     if (it != server.pids.end()) {
-      sn_launcher_context_complete(it->second);
-      sn_launcher_context_unref(it->second);
+      it->second.Complete();
       server.pids.erase(it);
-    } else {
-      util::log::Error() << "Unknown child " << pid << " terminated!\n";
     }
 #endif  // HAVE_SN
   }

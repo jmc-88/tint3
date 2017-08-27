@@ -190,6 +190,7 @@ set(TINT3_SOURCES
     src/execp/execp.cc
     src/parser/lexer.cc
     src/parser/parser.cc
+    src/startup_notification.cc
     src/systray/systraybar.cc
     src/systray/tray_window.cc
     src/launcher/desktop_entry.cc
@@ -343,6 +344,12 @@ test_target(
   parser_parser_test
   SOURCES src/parser/parser_test.cc
   LINK_LIBRARIES tint3_common_lib testmain ${TINT3_LINK_LIBRARIES})
+
+test_target(
+  startup_notification_test
+  SOURCES src/startup_notification_test.cc
+  LINK_LIBRARIES tint3_common_lib testmain ${TINT3_LINK_LIBRARIES}
+  USE_XVFB_RUN)
 
 test_target(
   tooltip_tooltip_test

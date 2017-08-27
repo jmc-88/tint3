@@ -39,6 +39,7 @@
 #include "launcher/desktop_entry.hh"
 #include "panel.hh"
 #include "server.hh"
+#include "startup_notification.hh"
 #include "taskbar.hh"
 #include "util/fs.hh"
 #include "util/log.hh"
@@ -384,48 +385,38 @@ util::imlib2::Image ScaleIcon(Imlib_Image original, int icon_size) {
 }
 
 void LauncherAction(LauncherIcon* launcher_icon, XEvent* evt) {
-#if HAVE_SN
   if (evt->type != ButtonPress && evt->type != ButtonRelease) {
     util::log::Error() << "Unexpected X event: " << evt->type << '\n';
     return;
   }
 
-  Time time;
-  time = evt->xbutton.time;
-
-  auto ctx = sn_launcher_context_new(server.sn_dsp, server.screen);
-  sn_launcher_context_set_name(ctx, launcher_icon->icon_tooltip_.c_str());
-  sn_launcher_context_set_description(ctx, "Application launched from tint3");
-  sn_launcher_context_set_binary_name(ctx, launcher_icon->cmd_.c_str());
-  sn_launcher_context_initiate(ctx, "tint3", launcher_icon->cmd_.c_str(), time);
-#endif /* HAVE_SN */
+  StartupNotification sn{server.sn_dsp, server.screen};
+  sn.set_description("Application launched from tint3");
+  sn.set_name(launcher_icon->icon_tooltip_);
+  sn.Initiate(launcher_icon->cmd_, evt->xbutton.time);
 
   // TODO: make this use tint_exec...
   pid_t pid = fork();
 
   if (pid < 0) {
-    sn_launcher_context_unref(ctx);
     util::log::Error() << "Could not fork\n";
-  } else if (pid == 0) {
-#if HAVE_SN
-    sn_launcher_context_setup_child_process(ctx);
-#endif  // HAVE_SN
-    // Allow children to exist after parent destruction
-    setsid();
-    // Run the command
+    return;
+  }
+
+  if (pid == 0) {
+    sn.IncrementRef();
+    sn.SetupChildProcess();
+
+    setsid();  // allows child to exist after parent destruction
     execl("/bin/sh", "/bin/sh", "-c", launcher_icon->cmd_.c_str(), nullptr);
 
-    util::log::Error() << "Failed to execlp " << launcher_icon->cmd_ << '\n';
-#if HAVE_SN
-    // TODO: how can this not leak? On a successful execl, this line is
-    // never executed.
-    sn_launcher_context_unref(ctx);
-#endif  // HAVE_SN
+    util::log::Error() << "Failed to execl(\"" << launcher_icon->cmd_
+                       << "\")\n";
     _exit(1);
   }
 #if HAVE_SN
   else {
-    server.pids[pid] = ctx;
+    server.pids[pid] = sn;
   }
 #endif  // HAVE_SN
 }

@@ -11,6 +11,7 @@
 
 #ifdef HAVE_SN
 #include <libsn/sn.h>
+#include "startup_notification.hh"
 #endif
 
 #include "util/x11.hh"
@@ -43,7 +44,7 @@ class Server {
   Colormap colormap32;
 #ifdef HAVE_SN
   SnDisplay* sn_dsp;
-  std::unordered_map<pid_t, SnLauncherContext*> pids;
+  std::unordered_map<pid_t, StartupNotification> pids;
 #endif  // HAVE_SN
 
   void Cleanup();
