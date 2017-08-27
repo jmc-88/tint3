@@ -385,21 +385,18 @@ util::imlib2::Image ScaleIcon(Imlib_Image original, int icon_size) {
 
 void LauncherAction(LauncherIcon* launcher_icon, XEvent* evt) {
 #if HAVE_SN
+  if (evt->type != ButtonPress && evt->type != ButtonRelease) {
+    util::log::Error() << "Unexpected X event: " << evt->type << '\n';
+    return;
+  }
+
+  Time time;
+  time = evt->xbutton.time;
+
   auto ctx = sn_launcher_context_new(server.sn_dsp, server.screen);
   sn_launcher_context_set_name(ctx, launcher_icon->icon_tooltip_.c_str());
   sn_launcher_context_set_description(ctx, "Application launched from tint3");
   sn_launcher_context_set_binary_name(ctx, launcher_icon->cmd_.c_str());
-
-  // Get a timestamp from the X event
-  Time time;
-
-  if (evt->type == ButtonPress || evt->type == ButtonRelease) {
-    time = evt->xbutton.time;
-  } else {
-    util::log::Error() << "Unknown X event: " << evt->type << '\n';
-    return;
-  }
-
   sn_launcher_context_initiate(ctx, "tint3", launcher_icon->cmd_.c_str(), time);
 #endif /* HAVE_SN */
 
