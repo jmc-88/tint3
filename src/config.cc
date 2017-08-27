@@ -1223,7 +1223,7 @@ bool Reader::AddEntry_Executor(std::string const& key,
                                    "plugin initialized, ignoring\n";
       return true;
     }
-    executors.back().set_continuous(std::stol(value) != 0);
+    executors.back().set_continuous(std::stol(value));
     return true;
   }
   if (key == "execp_dwheel_command") {

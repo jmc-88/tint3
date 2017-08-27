@@ -103,7 +103,11 @@ void Executor::set_command_down_wheel(std::string const& command) {
   command_down_wheel_ = command;
 }
 
-void Executor::set_continuous(bool continuous) { continuous_ = continuous; }
+bool Executor::continuous() const { return continuous_ != 0; }
+
+void Executor::set_continuous(unsigned int continuous) {
+  continuous_ = continuous;
+}
 
 void Executor::set_font(std::string const& font) {
   font_description_ = pango_font_description_from_string(font.c_str());

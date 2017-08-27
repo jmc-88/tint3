@@ -598,8 +598,12 @@ TEST_CASE("ConfigParserExecp") {
   SECTION("new") {
     REQUIRE(p.Parse(kExecpNew));
     REQUIRE(executors.size() == 2);
+    // first, single-shot executor
     REQUIRE(executors[0].command() == "/bin/true");
+    REQUIRE_FALSE(executors[0].continuous());
+    // second, continuous executor
     REQUIRE(executors[1].command() == "/bin/false");
+    REQUIRE(executors[1].continuous());
   }
 
   SECTION("bogus new") {

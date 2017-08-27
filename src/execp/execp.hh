@@ -30,7 +30,9 @@ class Executor : public Area {
   void set_command_up_wheel(std::string const& command);
   void set_command_down_wheel(std::string const& command);
 
-  void set_continuous(bool continuous);
+  bool continuous() const;
+  void set_continuous(unsigned int continuous);
+
   void set_font(std::string const& font);
   void set_font_color(Color const& color);
   void set_has_icon(bool has_icon);
