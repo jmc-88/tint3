@@ -114,3 +114,15 @@ TEST_CASE("ScopedDeleter") {
   }
   REQUIRE(was_invoked);
 }
+
+TEST_CASE("TintShellExec") {
+  SECTION("empty command") {
+    // doesn't make sense, should be refused
+    REQUIRE(TintShellExec("") < 0);
+  }
+
+  SECTION("bogus command") {
+    // won't really do anything, but is a valid input, should fork() and exec*()
+    REQUIRE(TintShellExec("there is no such command") > 0);
+  }
+}

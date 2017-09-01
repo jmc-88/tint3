@@ -6,6 +6,7 @@
 #include <Imlib2.h>
 #include <glib-object.h>
 #include <signal.h>
+#include <unistd.h>
 
 #include <memory>
 #include <sstream>
@@ -96,7 +97,7 @@ extern unsigned int const kAllDesktops;
 bool SignalAction(int signal_number, void signal_handler(int), int flags = 0);
 
 // fork and execute a shell script
-void TintShellExec(std::string const& command);
+pid_t TintShellExec(std::string const& command);
 
 // adjust Alpha/Saturation/Brightness on an ARGB icon
 // alpha from 0 to 100, satur from 0 to 1, bright from 0 to 1.
