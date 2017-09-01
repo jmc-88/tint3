@@ -395,28 +395,14 @@ void LauncherAction(LauncherIcon* launcher_icon, XEvent* evt) {
   sn.set_name(launcher_icon->icon_tooltip_);
   sn.Initiate(launcher_icon->cmd_, evt->xbutton.time);
 
-  // TODO: make this use tint_exec...
-  pid_t pid = fork();
-
-  if (pid < 0) {
-    util::log::Error() << "Could not fork\n";
-    return;
-  }
-
-  if (pid == 0) {
+  pid_t child_pid = TintShellExec(launcher_icon->cmd_, [&sn] {
     sn.IncrementRef();
     sn.SetupChildProcess();
+  });
 
-    setsid();  // allows child to exist after parent destruction
-    execl("/bin/sh", "/bin/sh", "-c", launcher_icon->cmd_.c_str(), nullptr);
-
-    util::log::Error() << "Failed to execl(\"" << launcher_icon->cmd_
-                       << "\")\n";
-    _exit(1);
-  }
 #if HAVE_SN
-  else {
-    server.pids[pid] = sn;
+  if (child_pid > 0) {
+    server.pids[child_pid] = sn;
   }
 #endif  // HAVE_SN
 }

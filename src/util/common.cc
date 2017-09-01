@@ -30,7 +30,6 @@
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
-#include <cstring>
 #include <functional>
 #include <regex>
 #include <tuple>
@@ -38,7 +37,6 @@
 #include "cxx_features.hh"
 #include "server.hh"
 #include "util/common.hh"
-#include "util/log.hh"
 
 namespace util {
 
@@ -118,36 +116,8 @@ bool SignalAction(int signal_number, void signal_handler(int), int flags) {
 }
 
 pid_t TintShellExec(std::string const& command) {
-  if (command.empty()) {
-    util::log::Error() << "Refusing to launch empty command\n";
-    return -1;
-  }
-
-  pid_t child_pid = fork();
-  if (child_pid < 0) {
-    util::log::Error() << "fork: " << std::strerror(errno) << '\n';
-    return -1;
-  }
-  if (child_pid == 0) {
-    // change for the fork the signal mask
-    //          sigset_t sigset;
-    //          sigprocmask(SIG_SETMASK, &sigset, 0);
-    //          sigprocmask(SIG_UNBLOCK, &sigset, 0);
-
-    // Allow child to exist after parent destruction
-    setsid();
-
-    // "/bin/sh" should be guaranteed to be a POSIX-compliant shell
-    // accepting the "-c" flag:
-    //   http://pubs.opengroup.org/onlinepubs/9699919799/utilities/sh.html
-    execlp("/bin/sh", "sh", "-c", command.c_str(), nullptr);
-
-    // In case execlp() fails and the process image is not replaced
-    util::log::Error() << "execlp(\"" << command << "\"): "
-                       << std::strerror(errno) << '\n';
-    _exit(1);
-  }
-  return child_pid;
+  // Delegate to the template version of this function with a no-op callback
+  return TintShellExec(command, []{});
 }
 
 namespace {
