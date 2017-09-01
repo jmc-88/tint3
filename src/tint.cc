@@ -1118,7 +1118,7 @@ start:
                             dnd_target_window, CurrentTime);
         }
       } else if (target == dnd_atom) {
-        TintShellExec(dnd::BuildCommand(dnd_launcher_exec, prop));
+        util::ShellExec(dnd::BuildCommand(dnd_launcher_exec, prop));
 
         // Reply OK.
         XClientMessageEvent m;

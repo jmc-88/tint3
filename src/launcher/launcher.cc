@@ -395,7 +395,7 @@ void LauncherAction(LauncherIcon* launcher_icon, XEvent* evt) {
   sn.set_name(launcher_icon->icon_tooltip_);
   sn.Initiate(launcher_icon->cmd_, evt->xbutton.time);
 
-  pid_t child_pid = TintShellExec(launcher_icon->cmd_, [&sn] {
+  pid_t child_pid = util::ShellExec(launcher_icon->cmd_, [&sn] {
     sn.IncrementRef();
     sn.SetupChildProcess();
   });

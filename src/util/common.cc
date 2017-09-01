@@ -44,6 +44,11 @@ void GObjectUnrefDeleter::operator()(gpointer data) const {
   g_object_unref(data);
 }
 
+pid_t ShellExec(std::string const& command) {
+  // Delegate to the template version of this function with a no-op callback
+  return ShellExec(command, []{});
+}
+
 namespace string {
 
 std::string& Trim(std::string* str) {
@@ -113,11 +118,6 @@ bool SignalAction(int signal_number, void signal_handler(int), int flags) {
   }
 
   return true;
-}
-
-pid_t TintShellExec(std::string const& command) {
-  // Delegate to the template version of this function with a no-op callback
-  return TintShellExec(command, []{});
 }
 
 namespace {

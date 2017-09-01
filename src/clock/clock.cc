@@ -254,8 +254,8 @@ std::string Clock::GetFriendlyName() const { return "Clock"; }
 
 void ClockAction(int button) {
   if (button == 1) {
-    TintShellExec(clock_lclick_command);
+    util::ShellExec(clock_lclick_command);
   } else if (button == 2) {
-    TintShellExec(clock_rclick_command);
+    util::ShellExec(clock_rclick_command);
   }
 }
