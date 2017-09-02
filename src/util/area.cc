@@ -496,6 +496,14 @@ bool Area::Resize() {
 void Area::OnChangeLayout() { /* defaults to a no-op */
 }
 
+bool Area::OnClick(XEvent* event) {
+  if (event->type != ButtonPress && event->type != ButtonRelease) {
+    util::log::Error() << "Unexpected X event: " << event->type << '\n';
+    return false;
+  }
+  return true;
+}
+
 bool Area::IsPointInside(int x, int y) const {
   bool inside_x = (x >= panel_x_ && x <= panel_x_ + static_cast<int>(width_));
   bool inside_y = (y >= panel_y_ && y <= panel_y_ + static_cast<int>(height_));

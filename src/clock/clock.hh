@@ -18,6 +18,8 @@ class Clock : public Area {
   std::string GetTooltipText() override;
   bool Resize() override;
 
+  bool OnClick(XEvent* event) override;
+
   static void InitPanel(Panel* panel);
 
 #ifdef _TINT3_DEBUG
@@ -51,7 +53,5 @@ void CleanupClock(Timer& timer);
 
 // initialize clock : y position, precision, ...
 void InitClock(Timer& timer);
-
-void ClockAction(int button);
 
 #endif  // TINT3_CLOCK_CLOCK_HH

@@ -107,10 +107,6 @@ class Panel : public Area {
   Taskbar* taskbar_;
   unsigned int num_desktops_;
 
-  // --------------------------------------------------
-  // clock
-  Clock clock_;
-
 // --------------------------------------------------
 // battery
 #ifdef ENABLE_BATTERY
@@ -132,6 +128,8 @@ class Panel : public Area {
   int mouse_pressed_alpha;
   int mouse_pressed_saturation;
   int mouse_pressed_brightness;
+
+  Clock* clock();
 
   Taskbar* ClickTaskbar(int x, int y);
   Task* ClickTask(int x, int y);
@@ -173,6 +171,8 @@ class Panel : public Area {
  private:
   bool hidden_;
   unsigned int panel_index_;
+
+  Clock clock_;
 };
 
 extern Panel panel_config;

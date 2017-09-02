@@ -73,6 +73,9 @@ class Area {
   bool on_changed_;
   virtual void OnChangeLayout();
 
+  // action to take when the user clicks this Area
+  virtual bool OnClick(XEvent* event);
+
   virtual std::string GetTooltipText();
 
   virtual bool RemoveChild(Area* child);

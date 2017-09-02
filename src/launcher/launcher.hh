@@ -29,6 +29,7 @@ class LauncherIcon : public Area {
   void DrawForeground(cairo_t*) override;
   std::string GetTooltipText() override;
   void OnChangeLayout() override;
+  bool OnClick(XEvent* event) override;
 
 #ifdef _TINT3_DEBUG
 
@@ -110,8 +111,6 @@ void DefaultLauncher();
 // initialize launcher : y position, precision, ...
 void InitLauncher();
 void CleanupLauncher();
-
-void LauncherAction(LauncherIcon* launcher_icon, XEvent* evt);
 
 // Looks up for the given desktop entry in well known paths.
 // The desktop entry can be a relative or absolute path to a file, or it can

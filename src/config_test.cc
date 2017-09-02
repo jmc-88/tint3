@@ -258,9 +258,9 @@ TEST_CASE("ConfigParserEmptyAssignment", "Doesn't choke on empty assignments") {
   // consume the following "clock_padding" line.
   REQUIRE(time_tooltip_format.empty());
   // Ensure the clock padding was parsed too.
-  REQUIRE(panel_config.clock_.padding_x_lr_ == 10);
-  REQUIRE(panel_config.clock_.padding_x_ == 10);
-  REQUIRE(panel_config.clock_.padding_y_ == 6);
+  REQUIRE(panel_config.clock()->padding_x_lr_ == 10);
+  REQUIRE(panel_config.clock()->padding_x_ == 10);
+  REQUIRE(panel_config.clock()->padding_y_ == 6);
 
   FakeClock timer{0};
   CleanupClock(timer);  // TODO: decouple from config loading

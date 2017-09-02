@@ -433,19 +433,8 @@ void EventButtonRelease(XEvent* e) {
     return;
   }
 
-  static std::unordered_map<unsigned int, MouseAction> mouse_actions{
-      {2, mouse_middle},      {3, mouse_right},     {4, mouse_scroll_up},
-      {5, mouse_scroll_down}, {6, mouse_tilt_left}, {7, mouse_tilt_right},
-  };
-
-  MouseAction action = MouseAction::kToggleIconify;
-  auto it = mouse_actions.find(e->xbutton.button);
-  if (it != mouse_actions.end()) {
-    action = it->second;
-  }
-
   if (panel->ClickClock(e->xbutton.x, e->xbutton.y)) {
-    ClockAction(e->xbutton.button);
+    panel->clock()->OnClick(e);
     if (panel_layer == PanelLayer::kBottom) {
       XLowerWindow(server.dsp, panel->main_win_);
     }
@@ -456,7 +445,7 @@ void EventButtonRelease(XEvent* e) {
   if (panel->ClickLauncher(e->xbutton.x, e->xbutton.y)) {
     LauncherIcon* icon = panel->ClickLauncherIcon(e->xbutton.x, e->xbutton.y);
     if (icon) {
-      LauncherAction(icon, e);
+      icon->OnClick(e);
     }
     task_drag = nullptr;
     return;
@@ -476,6 +465,17 @@ void EventButtonRelease(XEvent* e) {
     task_drag = nullptr;
     task_dragged = false;
     return;
+  }
+
+  static std::unordered_map<unsigned int, MouseAction> mouse_actions{
+      {2, mouse_middle},      {3, mouse_right},     {4, mouse_scroll_up},
+      {5, mouse_scroll_down}, {6, mouse_tilt_left}, {7, mouse_tilt_right},
+  };
+
+  MouseAction action = MouseAction::kToggleIconify;
+  auto it = mouse_actions.find(e->xbutton.button);
+  if (it != mouse_actions.end()) {
+    action = it->second;
   }
 
   // switch desktop

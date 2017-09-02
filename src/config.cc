@@ -800,25 +800,25 @@ bool Reader::AddEntry_Clock(std::string const& key, std::string const& value) {
     return true;
   }
   if (key == "clock_font_color") {
-    panel_config.clock_.font_ = ParseColor(value);
+    panel_config.clock()->font_ = ParseColor(value);
     return true;
   }
   if (key == "clock_padding") {
     std::string value1, value2, value3;
     config::ExtractValues(value, &value1, &value2, &value3);
-    panel_config.clock_.padding_x_lr_ = panel_config.clock_.padding_x_ =
+    panel_config.clock()->padding_x_lr_ = panel_config.clock()->padding_x_ =
         std::stol(value1);
 
     if (!value2.empty()) {
-      panel_config.clock_.padding_y_ = std::stol(value2);
+      panel_config.clock()->padding_y_ = std::stol(value2);
     }
     if (!value3.empty()) {
-      panel_config.clock_.padding_x_ = std::stol(value3);
+      panel_config.clock()->padding_x_ = std::stol(value3);
     }
     return true;
   }
   if (key == "clock_background_id") {
-    panel_config.clock_.bg_ = GetBackgroundFromId(std::stol(value));
+    panel_config.clock()->bg_ = GetBackgroundFromId(std::stol(value));
     return true;
   }
   if (key == "clock_tooltip") {

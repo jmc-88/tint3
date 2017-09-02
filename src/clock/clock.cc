@@ -87,7 +87,7 @@ bool UpdateClockSeconds() {
 
   if (!time1_format.empty()) {
     for (Panel& p : panels) {
-      p.clock_.need_resize_ = true;
+      p.clock()->need_resize_ = true;
     }
   }
 
@@ -104,7 +104,7 @@ bool UpdateClockMinutes() {
   if (time_clock % 60 == 0 || time_clock - old_time > 60) {
     if (!time1_format.empty()) {
       for (Panel& p : panels) {
-        p.clock_.need_resize_ = true;
+        p.clock()->need_resize_ = true;
       }
     }
     panel_refresh = true;
@@ -134,18 +134,18 @@ void InitClock(Timer& timer) {
 }
 
 void Clock::InitPanel(Panel* panel) {
-  Clock& clock = panel->clock_;
-  clock.parent_ = panel;
-  clock.panel_ = panel;
-  clock.size_mode_ = SizeMode::kByContent;
+  Clock* clock = panel->clock();
+  clock->parent_ = panel;
+  clock->panel_ = panel;
+  clock->size_mode_ = SizeMode::kByContent;
 
   // check consistency
   if (time1_format.empty()) {
     return;
   }
 
-  clock.need_resize_ = true;
-  clock.on_screen_ = true;
+  clock->need_resize_ = true;
+  clock->on_screen_ = true;
 }
 
 void Clock::DrawForeground(cairo_t* c) {
@@ -198,14 +198,14 @@ bool Clock::Resize() {
 
   time1_ = FormatTime(time1_format,
                       ClockGetTimeForTimezone(time1_timezone, time_clock));
-  GetTextSize(time1_font_desc, time1_, MarkupTag::kNoMarkup,
-              &time_width, &time_height);
+  GetTextSize(time1_font_desc, time1_, MarkupTag::kNoMarkup, &time_width,
+              &time_height);
 
   if (!time2_format.empty()) {
     time2_ = FormatTime(time2_format,
                         ClockGetTimeForTimezone(time2_timezone, time_clock));
-    GetTextSize(time2_font_desc, time2_, MarkupTag::kNoMarkup,
-                &date_width, &date_height);
+    GetTextSize(time2_font_desc, time2_, MarkupTag::kNoMarkup, &date_width,
+                &date_height);
   }
 
   if (panel_horizontal) {
@@ -246,16 +246,23 @@ bool Clock::Resize() {
   return false;
 }
 
+bool Clock::OnClick(XEvent* event) {
+  if (!Area::OnClick(event)) {
+    return false;
+  }
+
+  int button = event->xbutton.button;
+  pid_t child_pid = -1;
+  if (button == 1) {
+    child_pid = util::ShellExec(clock_lclick_command);
+  } else if (button == 2) {
+    child_pid = util::ShellExec(clock_rclick_command);
+  }
+  return (child_pid > 0);
+}
+
 #ifdef _TINT3_DEBUG
 
 std::string Clock::GetFriendlyName() const { return "Clock"; }
 
 #endif  // _TINT3_DEBUG
-
-void ClockAction(int button) {
-  if (button == 1) {
-    util::ShellExec(clock_lclick_command);
-  } else if (button == 2) {
-    util::ShellExec(clock_rclick_command);
-  }
-}

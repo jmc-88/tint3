@@ -353,6 +353,30 @@ void LauncherIcon::DrawForeground(cairo_t* c) {
   }
 }
 
+bool LauncherIcon::OnClick(XEvent* event) {
+  if (!Area::OnClick(event)) {
+    return false;
+  }
+
+  StartupNotification sn{server.sn_dsp, server.screen};
+  sn.set_description("Application launched from tint3");
+  sn.set_name(icon_tooltip_);
+  sn.Initiate(cmd_, event->xbutton.time);
+
+  pid_t child_pid = util::ShellExec(cmd_, [&sn] {
+    sn.IncrementRef();
+    sn.SetupChildProcess();
+  });
+
+#if HAVE_SN
+  if (child_pid > 0) {
+    server.pids[child_pid] = sn;
+  }
+#endif  // HAVE_SN
+
+  return (child_pid > 0);
+}
+
 #ifdef _TINT3_DEBUG
 
 std::string LauncherIcon::GetFriendlyName() const { return "LauncherIcon"; }
@@ -382,29 +406,6 @@ util::imlib2::Image ScaleIcon(Imlib_Image original, int icon_size) {
   }
 
   return icon_scaled;
-}
-
-void LauncherAction(LauncherIcon* launcher_icon, XEvent* evt) {
-  if (evt->type != ButtonPress && evt->type != ButtonRelease) {
-    util::log::Error() << "Unexpected X event: " << evt->type << '\n';
-    return;
-  }
-
-  StartupNotification sn{server.sn_dsp, server.screen};
-  sn.set_description("Application launched from tint3");
-  sn.set_name(launcher_icon->icon_tooltip_);
-  sn.Initiate(launcher_icon->cmd_, evt->xbutton.time);
-
-  pid_t child_pid = util::ShellExec(launcher_icon->cmd_, [&sn] {
-    sn.IncrementRef();
-    sn.SetupChildProcess();
-  });
-
-#if HAVE_SN
-  if (child_pid > 0) {
-    server.pids[child_pid] = sn;
-  }
-#endif  // HAVE_SN
 }
 
 // Splits line at first '=' and returns 1 if successful, and parts are not

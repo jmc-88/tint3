@@ -684,6 +684,10 @@ Panel* GetPanel(Window win) {
   return nullptr;
 }
 
+Clock* Panel::clock() {
+  return &clock_;
+}
+
 Taskbar* Panel::ClickTaskbar(int x, int y) {
   for (unsigned int i = 0; i < num_desktops_; i++) {
     if (taskbar_[i].IsPointInside(x, y)) {
