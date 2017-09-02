@@ -336,8 +336,10 @@ void EventButtonPress(XEvent* e) {
     return;
   }
 
-  if (wm_menu && !panel->HandlesClick(e)) {
-    ForwardClick(e);
+  if (!panel->HandlesClick(e)) {
+    if (wm_menu) {
+      ForwardClick(e);
+    }
     return;
   }
 
@@ -424,12 +426,14 @@ void EventButtonRelease(XEvent* e) {
     return;
   }
 
-  if (wm_menu && !panel->HandlesClick(e)) {
-    ForwardClick(e);
-    if (panel_layer == PanelLayer::kBottom) {
-      XLowerWindow(server.dsp, panel->main_win_);
+  if (!panel->HandlesClick(e)) {
+    if (wm_menu) {
+      ForwardClick(e);
+      if (panel_layer == PanelLayer::kBottom) {
+        XLowerWindow(server.dsp, panel->main_win_);
+      }
+      task_drag = nullptr;
     }
-    task_drag = nullptr;
     return;
   }
 
