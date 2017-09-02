@@ -33,7 +33,7 @@ extern MouseAction mouse_scroll_down;
 extern MouseAction mouse_tilt_left;
 extern MouseAction mouse_tilt_right;
 
-extern int wm_menu;
+extern bool wm_menu;
 extern int panel_dock;
 
 // panel mode

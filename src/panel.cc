@@ -52,7 +52,7 @@ MouseAction mouse_tilt_left;
 MouseAction mouse_tilt_right;
 
 PanelMode panel_mode;
-int wm_menu;
+bool wm_menu;
 int panel_dock;
 PanelLayer panel_layer;
 PanelHorizontalPosition panel_horizontal_position;
@@ -165,7 +165,7 @@ void DefaultPanel() {
   panel_strut_policy = PanelStrutPolicy::kFollowSize;
   panel_dock = 0;                     // default not in the dock
   panel_layer = PanelLayer::kBottom;  // default is bottom layer
-  wm_menu = 0;
+  wm_menu = false;
   max_tick_urgent = 14;
 
   // append full transparency background
