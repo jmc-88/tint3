@@ -496,6 +496,10 @@ bool Area::Resize() {
 void Area::OnChangeLayout() { /* defaults to a no-op */
 }
 
+bool Area::HandlesClick(XEvent* event) {
+  return IsPointInside(event->xbutton.x, event->xbutton.y);
+}
+
 bool Area::OnClick(XEvent* event) {
   if (event->type != ButtonPress && event->type != ButtonRelease) {
     util::log::Error() << "Unexpected X event: " << event->type << '\n';

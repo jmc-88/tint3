@@ -336,7 +336,7 @@ void EventButtonPress(XEvent* e) {
     return;
   }
 
-  if (wm_menu && !panel->HandlesClick(&e->xbutton)) {
+  if (wm_menu && !panel->HandlesClick(e)) {
     ForwardClick(e);
     return;
   }
@@ -424,7 +424,7 @@ void EventButtonRelease(XEvent* e) {
     return;
   }
 
-  if (wm_menu && !panel->HandlesClick(&e->xbutton)) {
+  if (wm_menu && !panel->HandlesClick(e)) {
     ForwardClick(e);
     if (panel_layer == PanelLayer::kBottom) {
       XLowerWindow(server.dsp, panel->main_win_);

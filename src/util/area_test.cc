@@ -1,5 +1,7 @@
 #include "catch.hpp"
 
+#include <X11/Xlib.h>
+
 #include "util/area.hh"
 
 // Area is an abstract class because it has a pure virtual destructor.
@@ -75,4 +77,48 @@ TEST_CASE("Area::InnermostAreaUnderPoint", "Lookup works correctly") {
   // Same test as the last one, we expect this to still return a pointer to the
   // parent, since child3 isn't displayed.
   REQUIRE(parent.InnermostAreaUnderPoint(100, 50) == &parent);
+}
+
+TEST_CASE("Area::HandlesClick") {
+  ConcreteArea area;
+  area.panel_x_ = 0;
+  area.width_ = 200;
+  area.panel_y_ = 0;
+  area.height_ = 100;
+
+  SECTION("Click is inside an on-screen Area") {
+    XEvent e;
+    e.xbutton.x = 50;
+    e.xbutton.y = 50;
+
+    area.on_screen_ = true;
+    REQUIRE(area.HandlesClick(&e));
+  }
+
+  SECTION("Click is outside an on-screen Area") {
+    XEvent e;
+    e.xbutton.x = -50;
+    e.xbutton.y = -50;
+
+    area.on_screen_ = true;
+    REQUIRE_FALSE(area.HandlesClick(&e));
+  }
+
+  SECTION("Click is inside an off-screen Area") {
+    XEvent e;
+    e.xbutton.x = 50;
+    e.xbutton.y = 50;
+
+    area.on_screen_ = false;
+    REQUIRE_FALSE(area.HandlesClick(&e));
+  }
+
+  SECTION("Click is outside an off-screen Area") {
+    XEvent e;
+    e.xbutton.x = -50;
+    e.xbutton.y = -50;
+
+    area.on_screen_ = false;
+    REQUIRE_FALSE(area.HandlesClick(&e));
+  }
 }

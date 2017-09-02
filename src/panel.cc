@@ -755,9 +755,14 @@ bool Panel::ClickPadding(int x, int y) {
 
 bool Panel::ClickClock(int x, int y) { return clock_.IsPointInside(x, y); }
 
-bool Panel::HandlesClick(XButtonEvent* e) {
-  Task* task = ClickTask(e->x, e->y);
+bool Panel::HandlesClick(XEvent* event) {
+  if (!Area::HandlesClick(event)) {
+    // don't even bother checking the rest if the click is outside the panel
+    return false;
+  }
 
+  XButtonEvent* e = &event->xbutton;
+  Task* task = ClickTask(e->x, e->y);
   if (task) {
     return ((e->button == 1) ||
             (e->button == 2 && mouse_middle != MouseAction::kNone) ||
@@ -767,14 +772,12 @@ bool Panel::HandlesClick(XButtonEvent* e) {
   }
 
   LauncherIcon* icon = ClickLauncherIcon(e->x, e->y);
-
   if (icon != nullptr) {
     return (e->button == 1);
   }
 
   // no launcher/task clicked --> check if taskbar clicked
   Taskbar* tskbar = ClickTaskbar(e->x, e->y);
-
   if (tskbar != nullptr && e->button == 1 &&
       panel_mode == PanelMode::kMultiDesktop) {
     return true;
