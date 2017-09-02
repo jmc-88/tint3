@@ -8,7 +8,7 @@
 // Subclass it here so that we can instantiate it for testing.
 class ConcreteArea : public Area {
  public:
-  ~ConcreteArea() {}
+  ~ConcreteArea() = default;
 };
 
 TEST_CASE("Area::InnermostAreaUnderPoint", "Lookup works correctly") {
