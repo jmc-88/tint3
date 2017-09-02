@@ -132,3 +132,31 @@ void Executor::set_interval(unsigned int interval) { interval_ = interval; }
 void Executor::set_markup(bool markup) { markup_ = markup; }
 
 void Executor::set_tooltip(std::string const& tooltip) { tooltip_ = tooltip; }
+
+bool Executor::HandlesClick(XEvent* event) {
+  if (!Area::HandlesClick(event)) {
+    return false;
+  }
+
+  int button = event->xbutton.button;
+  return ((button == 1 && !command_left_click_.empty()) ||
+          (button == 2 && !command_middle_click_.empty()) ||
+          (button == 3 && !command_right_click_.empty()) ||
+          (button == 4 && !command_up_wheel_.empty()) ||
+          (button == 5 && !command_down_wheel_.empty()));
+}
+
+bool Executor::OnClick(XEvent* event) {
+  if (!Area::HandlesClick(event)) {
+    return false;
+  }
+
+  int button = event->xbutton.button;
+  std::string const* commands[] = {
+      &command_left_click_, &command_middle_click_, &command_right_click_,
+      &command_up_wheel_,   &command_down_wheel_,
+  };
+
+  pid_t child_pid = util::ShellExec(*commands[button - 1]);
+  return (child_pid > 0);
+}

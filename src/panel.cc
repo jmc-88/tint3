@@ -787,6 +787,12 @@ bool Panel::HandlesClick(XEvent* event) {
     return true;
   }
 
+  for (auto& execp : executors) {
+    if (execp.HandlesClick(event)) {
+      return true;
+    }
+  }
+
   return false;
 }
 

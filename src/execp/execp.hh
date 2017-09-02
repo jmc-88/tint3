@@ -49,6 +49,9 @@ class Executor : public Area {
   void set_markup(bool continuous);
   void set_tooltip(std::string const& tooltip);
 
+  bool HandlesClick(XEvent* event) override;
+  bool OnClick(XEvent* event) override;
+
  private:
   Background background_;
   bool cache_icon_;

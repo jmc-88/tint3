@@ -455,6 +455,17 @@ void EventButtonRelease(XEvent* e) {
     return;
   }
 
+  for (auto& execp : executors) {
+    if (execp.HandlesClick(e)) {
+      execp.OnClick(e);
+      if (panel_layer == PanelLayer::kBottom) {
+        XLowerWindow(server.dsp, panel->main_win_);
+      }
+      task_drag = nullptr;
+      return;
+    }
+  }
+
   Taskbar* tskbar = panel->ClickTaskbar(e->xbutton.x, e->xbutton.y);
   if (!tskbar) {
     if (panel_layer == PanelLayer::kBottom) {
