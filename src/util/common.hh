@@ -51,7 +51,7 @@ ScopedDeleter<T> MakeScopedDeleter(T deleter) {
 
 // ShellExec executes a command through /bin/sh, invoking the provided callback
 // in the child process.
-template<typename Callback>
+template <typename Callback>
 pid_t ShellExec(std::string const& command, Callback callback) {
   if (command.empty()) {
     util::log::Error() << "Refusing to launch empty command\n";
@@ -80,8 +80,8 @@ pid_t ShellExec(std::string const& command, Callback callback) {
     execlp("/bin/sh", "sh", "-c", command.c_str(), nullptr);
 
     // In case execlp() fails and the process image is not replaced
-    util::log::Error() << "execlp(\"" << command << "\"): "
-                       << std::strerror(errno) << '\n';
+    util::log::Error() << "execlp(\"" << command
+                       << "\"): " << std::strerror(errno) << '\n';
     _exit(1);
   }
   return child_pid;

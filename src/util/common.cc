@@ -46,7 +46,7 @@ void GObjectUnrefDeleter::operator()(gpointer data) const {
 
 pid_t ShellExec(std::string const& command) {
   // Delegate to the template version of this function with a no-op callback
-  return ShellExec(command, []{});
+  return ShellExec(command, [] {});
 }
 
 namespace string {
