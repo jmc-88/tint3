@@ -437,7 +437,7 @@ void EventButtonRelease(XEvent* e) {
     return;
   }
 
-  if (panel->ClickClock(e->xbutton.x, e->xbutton.y)) {
+  if (panel->clock()->HandlesClick(e)) {
     panel->clock()->OnClick(e);
     if (panel_layer == PanelLayer::kBottom) {
       XLowerWindow(server.dsp, panel->main_win_);

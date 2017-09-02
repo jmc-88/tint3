@@ -136,7 +136,6 @@ class Panel : public Area {
   bool ClickLauncher(int x, int y);
   LauncherIcon* ClickLauncherIcon(int x, int y);
   bool ClickPadding(int x, int y);
-  bool ClickClock(int x, int y);
   bool HandlesClick(XEvent* event) override;
 
   void Render();

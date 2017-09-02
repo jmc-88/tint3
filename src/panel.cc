@@ -753,8 +753,6 @@ bool Panel::ClickPadding(int x, int y) {
   return false;
 }
 
-bool Panel::ClickClock(int x, int y) { return clock_.IsPointInside(x, y); }
-
 bool Panel::HandlesClick(XEvent* event) {
   if (!Area::HandlesClick(event)) {
     // don't even bother checking the rest if the click is outside the panel
