@@ -441,13 +441,10 @@ void EventButtonRelease(XEvent* e) {
       {5, mouse_scroll_down}, {6, mouse_tilt_left}, {7, mouse_tilt_right},
   };
 
-  MouseAction action = MouseAction::kNone;
+  MouseAction action = MouseAction::kToggleIconify;
   auto it = mouse_actions.find(e->xbutton.button);
-
   if (it != mouse_actions.end()) {
     action = it->second;
-  } else {
-    action = MouseAction::kToggleIconify;
   }
 
   if (panel->ClickClock(e->xbutton.x, e->xbutton.y)) {
