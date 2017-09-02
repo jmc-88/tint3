@@ -497,7 +497,6 @@ void EventButtonRelease(XEvent* e) {
 }
 
 void EventPropertyNotify(XEvent* e, Timer& timer, Tooltip* tooltip) {
-  Task* tsk;
   Window win = e->xproperty.window;
   Atom at = e->xproperty.atom;
 
@@ -625,7 +624,7 @@ void EventPropertyNotify(XEvent* e, Timer& timer, Tooltip* tooltip) {
       panel_refresh = true;
     }
   } else {
-    tsk = TaskGetTask(win);
+    auto tsk = TaskGetTask(win);
 
     if (!tsk) {
       if (at != server.atom("_NET_WM_STATE")) {
