@@ -112,6 +112,7 @@ void Executor::set_continuous(unsigned int continuous) {
 void Executor::set_font(std::string const& font) {
   font_description_ = pango_font_description_from_string(font.c_str());
 }
+
 void Executor::set_font_color(Color const& color) { font_color_ = color; }
 
 void Executor::set_has_icon(bool has_icon) { has_icon_ = has_icon; }
