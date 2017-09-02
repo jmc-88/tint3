@@ -783,10 +783,8 @@ bool Panel::HandlesClick(XEvent* event) {
     return true;
   }
 
-  if (ClickClock(e->x, e->y)) {
-    bool clock_lclick = (e->button == 1 && !clock_lclick_command.empty());
-    bool clock_rclick = (e->button == 3 && !clock_rclick_command.empty());
-    return (clock_lclick || clock_rclick);
+  if (clock_.HandlesClick(event)) {
+    return true;
   }
 
   return false;

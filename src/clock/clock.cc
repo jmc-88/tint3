@@ -246,6 +246,16 @@ bool Clock::Resize() {
   return false;
 }
 
+bool Clock::HandlesClick(XEvent* event) {
+  if (!Area::HandlesClick(event)) {
+    return false;
+  }
+
+  int button = event->xbutton.button;
+  return ((button == 1 && !clock_lclick_command.empty()) ||
+          (button == 3 && !clock_rclick_command.empty()));
+}
+
 bool Clock::OnClick(XEvent* event) {
   if (!Area::OnClick(event)) {
     return false;

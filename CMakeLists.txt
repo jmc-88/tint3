@@ -305,6 +305,11 @@ test_target(
   LINK_LIBRARIES tint3_common_lib testmain ${TINT3_LINK_LIBRARIES})
 
 test_target(
+  clock_clock_test
+  SOURCES src/clock/clock_test.cc
+  LINK_LIBRARIES tint3_common_lib testmain ${TINT3_LINK_LIBRARIES})
+
+test_target(
   clock_time_utils_test
   SOURCES src/clock/time_utils_test.cc
   LINK_LIBRARIES tint3_common_lib testmain ${TINT3_LINK_LIBRARIES})

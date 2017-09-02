@@ -18,6 +18,7 @@ class Clock : public Area {
   std::string GetTooltipText() override;
   bool Resize() override;
 
+  bool HandlesClick(XEvent* event) override;
   bool OnClick(XEvent* event) override;
 
   static void InitPanel(Panel* panel);
