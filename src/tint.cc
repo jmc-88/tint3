@@ -426,23 +426,22 @@ void EventButtonRelease(XEvent* e) {
     return;
   }
 
+  auto at_exit = util::MakeScopedDeleter([&] {
+    if (panel_layer == PanelLayer::kBottom) {
+      XLowerWindow(server.dsp, panel->main_win_);
+    }
+    task_drag = nullptr;
+  });
+
   if (!panel->HandlesClick(e)) {
     if (wm_menu) {
       ForwardClick(e);
-      if (panel_layer == PanelLayer::kBottom) {
-        XLowerWindow(server.dsp, panel->main_win_);
-      }
-      task_drag = nullptr;
     }
     return;
   }
 
   if (panel->clock()->HandlesClick(e)) {
     panel->clock()->OnClick(e);
-    if (panel_layer == PanelLayer::kBottom) {
-      XLowerWindow(server.dsp, panel->main_win_);
-    }
-    task_drag = nullptr;
     return;
   }
 
@@ -451,33 +450,23 @@ void EventButtonRelease(XEvent* e) {
     if (icon) {
       icon->OnClick(e);
     }
-    task_drag = nullptr;
     return;
   }
 
   for (auto& execp : executors) {
     if (execp.HandlesClick(e)) {
       execp.OnClick(e);
-      if (panel_layer == PanelLayer::kBottom) {
-        XLowerWindow(server.dsp, panel->main_win_);
-      }
-      task_drag = nullptr;
       return;
     }
   }
 
   Taskbar* tskbar = panel->ClickTaskbar(e->xbutton.x, e->xbutton.y);
   if (!tskbar) {
-    if (panel_layer == PanelLayer::kBottom) {
-      XLowerWindow(server.dsp, panel->main_win_);
-    }
-    task_drag = nullptr;
     return;
   }
 
   // drag and drop task
   if (task_dragged) {
-    task_drag = nullptr;
     task_dragged = false;
     return;
   }
@@ -504,11 +493,6 @@ void EventButtonRelease(XEvent* e) {
 
   // action on task
   WindowAction(panel->ClickTask(e->xbutton.x, e->xbutton.y), action);
-
-  // to keep window below
-  if (panel_layer == PanelLayer::kBottom) {
-    XLowerWindow(server.dsp, panel->main_win_);
-  }
 }
 
 void EventPropertyNotify(XEvent* e, Timer& timer, Tooltip* tooltip) {
