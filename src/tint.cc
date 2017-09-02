@@ -420,18 +420,15 @@ void EventButtonMotionNotify(XEvent* e) {
 
 void EventButtonRelease(XEvent* e) {
   Panel* panel = GetPanel(e->xany.window);
-
   if (!panel) {
     return;
   }
 
   if (wm_menu && !panel->HandlesClick(&e->xbutton)) {
     ForwardClick(e);
-
     if (panel_layer == PanelLayer::kBottom) {
       XLowerWindow(server.dsp, panel->main_win_);
     }
-
     task_drag = nullptr;
     return;
   }
@@ -449,34 +446,27 @@ void EventButtonRelease(XEvent* e) {
 
   if (panel->ClickClock(e->xbutton.x, e->xbutton.y)) {
     ClockAction(e->xbutton.button);
-
     if (panel_layer == PanelLayer::kBottom) {
       XLowerWindow(server.dsp, panel->main_win_);
     }
-
     task_drag = nullptr;
     return;
   }
 
   if (panel->ClickLauncher(e->xbutton.x, e->xbutton.y)) {
     LauncherIcon* icon = panel->ClickLauncherIcon(e->xbutton.x, e->xbutton.y);
-
     if (icon) {
       LauncherAction(icon, e);
     }
-
     task_drag = nullptr;
     return;
   }
 
   Taskbar* tskbar = panel->ClickTaskbar(e->xbutton.x, e->xbutton.y);
-
   if (!tskbar) {
-    // TODO: check better solution to keep window below
     if (panel_layer == PanelLayer::kBottom) {
       XLowerWindow(server.dsp, panel->main_win_);
     }
-
     task_drag = nullptr;
     return;
   }
