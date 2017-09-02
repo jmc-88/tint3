@@ -9,6 +9,7 @@
 #include <unistd.h>
 
 #include <cerrno>
+#include <cstddef>
 #include <cstring>
 #include <memory>
 #include <sstream>
@@ -102,7 +103,9 @@ class Builder {
     return (*this);
   }
 
-  operator std::string() const { return ss_.str(); }
+  Builder& operator<<(std::nullptr_t const& /*value*/);
+
+  operator std::string() const;
 };
 
 template <typename T>

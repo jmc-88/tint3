@@ -88,6 +88,20 @@ TEST_CASE("RegexMatch",
   }
 }
 
+TEST_CASE("StringRepresentation") {
+  SECTION("Pointers") {
+    REQUIRE(util::string::Representation(nullptr) == "");
+    REQUIRE(util::string::Representation(reinterpret_cast<void*>(0x1234)) ==
+            "0x1234");
+  }
+
+  SECTION("Numbers") {
+    REQUIRE(util::string::Representation(1234) == "1234");
+    REQUIRE(util::string::Representation(-1234) == "-1234");
+    REQUIRE(util::string::Representation(.1234) == "0.1234");
+  }
+}
+
 TEST_CASE("AdjustASB",
           "Adjustments are in agreement with http://colorizer.org/") {
   // A 2x2 bitmap.

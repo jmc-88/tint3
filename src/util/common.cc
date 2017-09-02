@@ -51,6 +51,12 @@ pid_t ShellExec(std::string const& command) {
 
 namespace string {
 
+Builder& Builder::operator<<(std::nullptr_t const& /*value*/) {
+  return (*this);
+}
+
+Builder::operator std::string() const { return ss_.str(); }
+
 std::string& Trim(std::string* str) {
   static char const* space_chars = " \f\n\r\t\v";
 
