@@ -103,7 +103,7 @@ TEST_CASE("HomeDirectory", "Returns the user's home path") {
   REQUIRE(util::fs::HomeDirectory() == home_from_environment);
 
   // When $HOME is empty or missing, getpwuid() should give us the same info.
-  environment::ScopedOverride unset_home{"HOME", ""};
+  auto unset_home = environment::MakeScopedOverride("HOME", "");
   REQUIRE(util::fs::HomeDirectory() == home_from_environment);
 }
 

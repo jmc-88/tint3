@@ -41,7 +41,8 @@ TEST_CASE("ScopedEnvironmentOverride",
     REQUIRE(std::strcmp(getenv("__BOGUS_NAME__"), "__BOGUS_VALUE__") == 0);
 
     {
-      environment::ScopedOverride new_value{"__BOGUS_NAME__", "__NEW_VALUE__"};
+      auto new_value =
+          environment::MakeScopedOverride("__BOGUS_NAME__", "__NEW_VALUE__");
       REQUIRE(std::strcmp(getenv("__BOGUS_NAME__"), "__NEW_VALUE__") == 0);
     }
 
@@ -53,7 +54,8 @@ TEST_CASE("ScopedEnvironmentOverride",
     REQUIRE(getenv("__BOGUS_NAME__") == nullptr);
 
     {
-      environment::ScopedOverride new_value{"__BOGUS_NAME__", "__NEW_VALUE__"};
+      auto new_value =
+          environment::MakeScopedOverride("__BOGUS_NAME__", "__NEW_VALUE__");
       REQUIRE(std::strcmp(getenv("__BOGUS_NAME__"), "__NEW_VALUE__") == 0);
     }
 

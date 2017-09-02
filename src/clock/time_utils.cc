@@ -6,7 +6,7 @@ struct tm ClockGetTimeForTimezone(std::string const& timezone, time_t timer) {
     return (*std::localtime(&timer));
   }
 
-  environment::ScopedOverride tz{"TZ", timezone};
+  auto tz = environment::MakeScopedOverride("TZ", timezone);
   return (*std::localtime(&timer));
 }
 

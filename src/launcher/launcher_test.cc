@@ -15,17 +15,17 @@ TEST_CASE("FindDesktopEntry") {
   }
 
   SECTION("XDG_DATA_HOME") {
-    environment::ScopedOverride data_home{"XDG_DATA_HOME",
-                                          "src/launcher/testdata"};
+    auto data_home = environment::MakeScopedOverride("XDG_DATA_HOME",
+                                                     "src/launcher/testdata");
     std::string resolved_path;
     REQUIRE(FindDesktopEntry("launcher_test.desktop", &resolved_path));
     REQUIRE(resolved_path == kTestEntryPath);
   }
 
   SECTION("XDG_DATA_DIRS") {
-    environment::ScopedOverride data_home{"XDG_DATA_DIRS",
-                                          "/tmp/bogus_path:"
-                                          "src/launcher/testdata"};
+    auto data_home = environment::MakeScopedOverride("XDG_DATA_DIRS",
+                                                     "/tmp/bogus_path:"
+                                                     "src/launcher/testdata");
     std::string resolved_path;
     REQUIRE(FindDesktopEntry("launcher_test.desktop", &resolved_path));
     REQUIRE(resolved_path == kTestEntryPath);
