@@ -8,4 +8,4 @@ github_project: tint3
 # Build settings
 markdown: kramdown
 permalink: pretty
-exclude: ["regenerate-docs.sh"]
+exclude: ["Gemfile", "regenerate-docs.sh"]
