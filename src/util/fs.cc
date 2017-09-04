@@ -1,3 +1,4 @@
+#include <libgen.h>
 #include <pwd.h>
 #include <unistd.h>
 
@@ -140,16 +141,18 @@ Path& Path::operator/=(std::string const& component) {
 
 Path::operator std::string() const { return path_; }
 
+std::string Path::BaseName() const {
+  char data[path_.length() + 1];
+  path_.copy(data, path_.length(), 0);
+  data[path_.length()] = '\0';
+  return basename(data);
+}
+
 Path Path::DirectoryName() const {
-  auto last_slash = path_.find_last_of('/');
-  if (last_slash == std::string::npos) {
-    return "";
-  }
-  auto parent = path_.substr(0, last_slash);
-  if (parent.empty()) {
-    return "/";
-  }
-  return parent;
+  char data[path_.length() + 1];
+  path_.copy(data, path_.length(), 0);
+  data[path_.length()] = '\0';
+  return dirname(data);
 }
 
 bool Path::operator==(std::string const& str) const { return path_ == str; }

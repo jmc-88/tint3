@@ -66,13 +66,24 @@ TEST_CASE("Path", "Represents a filesystem path string") {
 
   SECTION("get parent directory path") {
     util::fs::Path relative{"test"};
-    REQUIRE(relative.DirectoryName() == "");
+    REQUIRE(relative.DirectoryName() == ".");
 
     util::fs::Path is_root{"/"};
     REQUIRE(is_root.DirectoryName() == "/");
 
     util::fs::Path has_parent{"/path/to/somewhere"};
     REQUIRE(has_parent.DirectoryName() == "/path/to");
+  }
+
+  SECTION("base name") {
+    util::fs::Path relative{"test"};
+    REQUIRE(relative.BaseName() == "test");
+
+    util::fs::Path is_root{"/"};
+    REQUIRE(is_root.BaseName() == "/");
+
+    util::fs::Path has_parent{"/path/to/somewhere"};
+    REQUIRE(has_parent.BaseName() == "somewhere");
   }
 }
 
