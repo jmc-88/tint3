@@ -15,9 +15,9 @@ class Executor : public Area {
 
   void InitPanel(Panel* panel);
 
-  std::string GetTooltipText();
-  void DrawForeground(cairo_t* c);
-  bool Resize();
+  std::string GetTooltipText() override;
+  void DrawForeground(cairo_t* c) override;
+  bool Resize() override;
 
   void set_cache_icon(bool cache_icon);
   void set_centered(bool centered);
