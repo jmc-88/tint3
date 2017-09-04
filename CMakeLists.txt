@@ -63,6 +63,11 @@ if(ENABLE_SN)
     pkg_check_modules(SN REQUIRED libstartup-notification-1.0>=0.12)
     add_definitions(-DHAVE_SN -DSN_API_NOT_YET_FROZEN)
 endif()
+OPTION(ENABLE_CURL "Enable CURL for fetching remote resources" OFF)
+if(ENABLE_CURL)
+    pkg_check_modules(CURL REQUIRED libcurl>=7.50)
+    add_definitions(-DHAVE_CURL)
+endif()
 
 set(MANDIR share/man CACHE PATH "Directory for man pages")
 set(DATADIR share CACHE PATH "Directory for shared data")
@@ -161,7 +166,8 @@ link_directories(${X11_LIBRARY_DIRS}
                  ${GLIB2_LIBRARY_DIRS}
                  ${GOBJECT2_LIBRARY_DIRS}
                  ${IMLIB2_LIBRARY_DIRS}
-                 ${SN_LIBRARY_DIRS})
+                 ${SN_LIBRARY_DIRS}
+                 ${CURL_LIBRARY_DIRS})
 
 set(TINT3_LINK_LIBRARIES
     ${X11_LIBRARIES}
@@ -171,7 +177,8 @@ set(TINT3_LINK_LIBRARIES
     ${GLIB2_LIBRARIES}
     ${GOBJECT2_LIBRARIES}
     ${IMLIB2_LIBRARIES}
-    ${SN_LIBRARIES})
+    ${SN_LIBRARIES}
+    ${CURL_LIBRARIES})
 
 if(RT_LIBRARY)
     set(TINT3_LINK_LIBRARIES ${TINT3_LINK_LIBRARIES} ${RT_LIBRARY})
