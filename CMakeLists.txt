@@ -145,6 +145,7 @@ include_directories(${PROJECT_BINARY_DIR}
                     src/launcher
                     src/tooltip
                     src/util
+                    external_includes
                     ${X11_INCLUDE_DIRS}
                     ${PANGOCAIRO_INCLUDE_DIRS}
                     ${PANGO_INCLUDE_DIRS}
@@ -275,7 +276,6 @@ endif()
 
 include(TestTarget)
 enable_testing()
-include_directories(test)
 
 # List of testdata files to copy
 set(TESTDATA_SRCS
