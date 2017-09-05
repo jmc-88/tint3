@@ -32,6 +32,7 @@ have that installed.
 -   xauth (needed for running some tests)
 -   startup-notification (optional)
 -   libc++ (optional, recommended)
+-   libcurl (optional, recommended, needed for theme manager operations)
 -   pandoc (optional, recommended, needed for building documentation)
 
 ## Debian/Ubuntu systems
@@ -43,8 +44,11 @@ $ sudo apt-get install libcairo2-dev libpango1.0-dev libglib2.0-dev \
                        libimlib2-dev libxinerama-dev libx11-dev libxdamage-dev \
                        libxcomposite-dev libxrender-dev libxrandr-dev \
                        librsvg2-dev libstartup-notification0-dev libc++-dev \
-                       pandoc xvfb xauth
+                       libcurl4-openssl-dev pandoc xvfb xauth
 ```
+
+Note that the above includes `libcurl4-openssl-dev`, but any of
+`libcurl4-gnutls-dev`, `libcurl4-nss-dev`, or `libcurl4-openssl-dev` would do.
 
 You can now build a Debian package as follows:
 
