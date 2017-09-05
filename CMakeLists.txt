@@ -63,7 +63,7 @@ if(ENABLE_SN)
     pkg_check_modules(SN REQUIRED libstartup-notification-1.0>=0.12)
     add_definitions(-DHAVE_SN -DSN_API_NOT_YET_FROZEN)
 endif()
-OPTION(ENABLE_CURL "Enable CURL for fetching remote resources" OFF)
+OPTION(ENABLE_CURL "Enable CURL for fetching remote resources" ON)
 if(ENABLE_CURL)
     pkg_check_modules(CURL REQUIRED libcurl>=7.50)
     add_definitions(-DHAVE_CURL)
@@ -208,6 +208,7 @@ set(TINT3_SOURCES
     src/taskbar/taskbar.cc
     src/taskbar/taskbarbase.cc
     src/taskbar/taskbarname.cc
+    src/theme_manager.cc
     src/tooltip/tooltip.cc
     src/util/area.cc
     src/util/common.cc

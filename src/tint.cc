@@ -46,6 +46,7 @@
 #include "systray/systraybar.hh"
 #include "taskbar/task.hh"
 #include "taskbar/taskbar.hh"
+#include "theme_manager.hh"
 #include "tooltip/tooltip.hh"
 #include "util/common.hh"
 #include "util/fs.hh"
@@ -57,6 +58,8 @@
 #include "version.hh"
 
 namespace {
+
+const std::string kThemeManagerName = "t3";
 
 void PrintVersion() {
 #ifdef _TINT3_DEBUG
@@ -876,6 +879,12 @@ void DragAndDropDrop(XClientMessageEvent* e) {
 }
 
 int main(int argc, char* argv[]) {
+  // If invoked as a theme manager, simply delegate to theme_manager.cc.
+  util::fs::Path self = argv[0];
+  if (self.BaseName() == kThemeManagerName) {
+    return ThemeManager(argc, argv);
+  }
+
 start:
   std::string config_path;
   Init(argc, argv, &config_path);
