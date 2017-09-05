@@ -65,7 +65,7 @@ if(ENABLE_SN)
 endif()
 OPTION(ENABLE_CURL "Enable CURL for fetching remote resources" ON)
 if(ENABLE_CURL)
-    pkg_check_modules(CURL REQUIRED libcurl>=7.50)
+    pkg_check_modules(CURL REQUIRED libcurl>=7.30)
     add_definitions(-DHAVE_CURL)
 endif()
 
