@@ -5,7 +5,16 @@ url: "https://jmc-88.github.io"
 github_username: jmc-88
 github_project: tint3
 
+# Default front matter data
+defaults:
+  - scope:
+      path: ""
+    values:
+      image: /data/default-image.png
+
 # Build settings
 markdown: kramdown
 permalink: pretty
+plugins:
+  - jekyll-seo-tag
 exclude: ["regenerate-docs.sh"]
