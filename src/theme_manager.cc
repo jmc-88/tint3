@@ -16,6 +16,22 @@ namespace {
 const std::string kThemeRepositoryURL =
     "https://jmc-88.github.io/tint3-themes/repository.json";
 
+int PrintUsage(std::string const& argv0) {
+  util::log::Error() << "Usage: " << argv0 << u8R"EOF( <operation> [args...]
+
+Operation can be one of:
+  search, s        - searches for a theme in the remote repository
+  install, in      - installs a theme
+  uninstall, un    - uninstalls a theme
+  list-remote, rls - lists remotely available themes
+  list-local, ls   - lists locally installed themes
+
+The "list-*" operations accept no arguments. If provided, they are ignored.
+The remaining operations require a sequence of theme names as their arguments.
+)EOF";
+  return 1;
+}
+
 }  // namespace
 
 #ifdef HAVE_CURL
@@ -42,10 +58,77 @@ bool FetchURL(CURL* c, std::string const& url, std::string* result) {
 }
 
 }  // namespace curl
+
+class Repository {
+ public:
+  Repository() = delete;
+
+  static Repository FromJSON(std::string const& content) {
+    return Repository(content);
+  }
+
+  void for_each(void callback(std::string, std::string, unsigned int)) {
+    for (auto& author_entry : json::iterator_wrapper(repository_)) {
+      for (auto& theme_entry : json::iterator_wrapper(author_entry.value())) {
+        callback(author_entry.key(),    // author name
+                 theme_entry.key(),     // theme name
+                 theme_entry.value());  // theme version
+      }
+    }
+  }
+
+ private:
+  Repository(std::string const& content) { repository_ = json::parse(content); }
+
+  json repository_;
+};
+
+int Search() {
+  util::log::Error() << "Not implemented.\n";
+  return 1;
+}
+
+int Install() {
+  util::log::Error() << "Not implemented.\n";
+  return 1;
+}
+
+int Uninstall() {
+  util::log::Error() << "Not implemented.\n";
+  return 1;
+}
+
+int ListLocal() {
+  util::log::Error() << "Not implemented.\n";
+  return 1;
+}
+
+int ListRemote(CURL* c) {
+  std::string content;
+  if (!curl::FetchURL(c, kThemeRepositoryURL, &content)) {
+    util::log::Error() << "Failed fetching the remote JSON file!\n";
+    return 1;
+  }
+
+  auto repo = Repository::FromJSON(content);
+  repo.for_each(
+      [](std::string author, std::string theme, unsigned int version) {
+        std::cout << author << '/' << theme << " (v" << version << ")\n";
+      });
+  return 0;
+}
 #endif  // HAVE_CURL
 
+#ifdef HAVE_CURL
 int ThemeManager(int argc, char* argv[]) {
-  // TODO: actually do something instead of dumping the repository to stdout.
+  if (argc == 1) {
+    util::log::Error() << "Error: missing operation.\n";
+    return PrintUsage(argv[0]);
+  }
+
+  // TODO: CURL could be only initialized when a network operation is required;
+  // failure to initialize CURL shouldn't prevent "list-local" or "uninstall"
+  // from working.
   CURL* c = curl_easy_init();
   if (c == nullptr) {
     util::log::Error() << "Failed initializing CURL.\n";
@@ -53,11 +136,32 @@ int ThemeManager(int argc, char* argv[]) {
   }
   auto cleanup_curl = util::MakeScopedDeleter([=] { curl_easy_cleanup(c); });
 
-  std::string content;
-  if (!curl::FetchURL(c, kThemeRepositoryURL, &content)) {
-    util::log::Error() << "Failed fetching the remote JSON file!\n";
-    return 1;
+  std::vector<std::string> arguments{argv + 1, argv + argc};
+  for (auto& arg : arguments) {
+    if (arg == "search" || arg == "s") {
+      return Search();
+    }
+    if (arg == "install" || arg == "in") {
+      return Install();
+    }
+    if (arg == "uninstall" || arg == "un") {
+      return Uninstall();
+    }
+    if (arg == "list-local" || arg == "ls") {
+      return ListLocal();
+    }
+    if (arg == "list-remote" || arg == "rls") {
+      return ListRemote(c);
+    }
   }
-  std::cout << json::parse(content);
+
+  // actually unreachable, but will make compilers happy
   return 0;
 }
+#else   // HAVE_CURL
+int ThemeManager(int argc, char* argv[]) {
+  util::log::Error() << "Disabled: tint3's theme manager requires to be "
+                        "compiled with libcurl in order to work.\n";
+  return 1;
+}
+#endif  // HAVE_CURL
