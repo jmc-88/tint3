@@ -68,11 +68,9 @@ class Repository {
   }
 
   void for_each(void callback(std::string, std::string, unsigned int)) {
-    for (auto& author_entry : json::iterator_wrapper(repository_)) {
-      for (auto& theme_entry : json::iterator_wrapper(author_entry.value())) {
-        callback(author_entry.key(),    // author name
-                 theme_entry.key(),     // theme name
-                 theme_entry.value());  // theme version
+    for (auto& entry : repository_) {
+      for (auto& theme : entry["themes"]) {
+        callback(entry["author"], theme["name"], theme["version"]);
       }
     }
   }
