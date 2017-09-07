@@ -135,22 +135,20 @@ int ThemeManager(int argc, char* argv[]) {
   auto cleanup_curl = util::MakeScopedDeleter([=] { curl_easy_cleanup(c); });
 
   std::vector<std::string> arguments{argv + 1, argv + argc};
-  for (auto& arg : arguments) {
-    if (arg == "search" || arg == "s") {
-      return Search();
-    }
-    if (arg == "install" || arg == "in") {
-      return Install();
-    }
-    if (arg == "uninstall" || arg == "un") {
-      return Uninstall();
-    }
-    if (arg == "list-local" || arg == "ls") {
-      return ListLocal();
-    }
-    if (arg == "list-remote" || arg == "rls") {
-      return ListRemote(c);
-    }
+  if (arguments.front() == "search" || arguments.front() == "s") {
+    return Search();
+  }
+  if (arguments.front() == "install" || arguments.front() == "in") {
+    return Install();
+  }
+  if (arguments.front() == "uninstall" || arguments.front() == "un") {
+    return Uninstall();
+  }
+  if (arguments.front() == "list-local" || arguments.front() == "ls") {
+    return ListLocal();
+  }
+  if (arguments.front() == "list-remote" || arguments.front() == "rls") {
+    return ListRemote(c);
   }
 
   // actually unreachable, but will make compilers happy
