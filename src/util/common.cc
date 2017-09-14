@@ -32,6 +32,7 @@
 #include <cstdlib>
 #include <functional>
 #include <regex>
+#include <string>
 #include <tuple>
 
 #include "cxx_features.hh"
@@ -56,6 +57,46 @@ Builder& Builder::operator<<(std::nullptr_t const& /*value*/) {
 }
 
 Builder::operator std::string() const { return ss_.str(); }
+
+namespace {
+
+// Templated alias that matches the std::stoi() function family (but not
+// std::stof, which lacks the third parameter).
+template <typename T>
+using NumberConversion = T(std::string const&, std::size_t*, int);
+
+template <typename T>
+bool ToNumberImpl(std::string str, T* ptr, NumberConversion<T> conv) {
+  Trim(&str);
+  try {
+    std::size_t pos;
+    T res = conv(str, &pos, 10);
+    if (pos != str.length()) {
+      return false;
+    }
+    (*ptr) = res;
+    return true;
+  } catch (...) {
+    return false;
+  }
+}
+
+}  // namespace
+
+bool ToNumber(std::string const& str, int* ptr) {
+  return ToNumberImpl(str, ptr, std::stoi);
+}
+
+bool ToNumber(std::string const& str, long* ptr) {
+  return ToNumberImpl(str, ptr, std::stol);
+}
+
+bool ToNumber(std::string const& str, float* ptr) {
+  return ToNumberImpl(
+      str, ptr, +[](std::string const& str, std::size_t* pos, int /*base*/) {
+        return std::stof(str, pos);
+      });
+}
 
 std::string& Trim(std::string* str) {
   static char const* space_chars = " \f\n\r\t\v";

@@ -140,3 +140,29 @@ TEST_CASE("ShellExec") {
     REQUIRE(util::ShellExec("there is no such command") > 0);
   }
 }
+
+TEST_CASE("ToNumber") {
+  SECTION("int") {
+    int i;
+    REQUIRE(util::string::ToNumber("1234", &i));
+    REQUIRE(i == 1234);  // parsed and read correctly
+    REQUIRE_FALSE(util::string::ToNumber("5678abcd", &i));
+    REQUIRE(i == 1234);  // failed parsing, unchanged
+  }
+
+  SECTION("long") {
+    long l;
+    REQUIRE(util::string::ToNumber("1234", &l));
+    REQUIRE(l == 1234);  // parsed and read correctly
+    REQUIRE_FALSE(util::string::ToNumber("5678abcd", &l));
+    REQUIRE(l == 1234);  // failed parsing, unchanged
+  }
+
+  SECTION("float") {
+    float f;
+    REQUIRE(util::string::ToNumber("1.234", &f));
+    REQUIRE(f == 1.234f);  // parsed and read correctly
+    REQUIRE_FALSE(util::string::ToNumber("5.678abcd", &f));
+    REQUIRE(f == 1.234f);  // failed parsing, unchanged
+  }
+}

@@ -113,6 +113,10 @@ std::string Representation(T const& value) {
   return Builder() << value;
 }
 
+bool ToNumber(std::string const& str, int* ptr);
+bool ToNumber(std::string const& str, long* ptr);
+bool ToNumber(std::string const& str, float* ptr);
+
 std::string& Trim(std::string* str);
 std::vector<std::string> Split(std::string const& str, char sep);
 bool StartsWith(std::string const& str, std::string const& other);
