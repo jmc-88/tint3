@@ -517,7 +517,10 @@ IconTheme* LoadTheme(std::string const& name) {
       if (ParseThemeLine(line, key, value)) {
         if (key == "Size") {
           // value is like 24
-          current_dir->size = std::stoi(value);
+          if (!util::string::ToNumber(value, &current_dir->size)) {
+            util::log::Error() << "invalid number: \"" << value << "\"\n";
+            return false;
+          }
 
           if (current_dir->max_size == -1) {
             current_dir->max_size = current_dir->size;
@@ -528,13 +531,22 @@ IconTheme* LoadTheme(std::string const& name) {
           }
         } else if (key == "MaxSize") {
           // value is like 24
-          current_dir->max_size = std::stoi(value);
+          if (!util::string::ToNumber(value, &current_dir->max_size)) {
+            util::log::Error() << "invalid number: \"" << value << "\"\n";
+            return false;
+          }
         } else if (key == "MinSize") {
           // value is like 24
-          current_dir->min_size = std::stoi(value);
+          if (!util::string::ToNumber(value, &current_dir->min_size)) {
+            util::log::Error() << "invalid number: \"" << value << "\"\n";
+            return false;
+          }
         } else if (key == "Threshold") {
           // value is like 2
-          current_dir->threshold = std::stoi(value);
+          if (!util::string::ToNumber(value, &current_dir->threshold)) {
+            util::log::Error() << "invalid number: \"" << value << "\"\n";
+            return false;
+          }
         } else if (key == "Type") {
           // value is Fixed, Scalable or Threshold : default to scalable
           // for
