@@ -97,11 +97,10 @@ class ConfigReader : public config::Reader {
 TEST_CASE("GetMonitor", "Accessing named monitors works as expected") {
   test::ConfigReader reader;
   reader.server().SetMonitors({"0", "1", "2"});
-  REQUIRE(reader.GetMonitor("0") == 0);
-  REQUIRE(reader.GetMonitor("1") == 1);
-  REQUIRE(reader.GetMonitor("2") == 2);
+  REQUIRE(reader.GetMonitor("1") == 0);
+  REQUIRE(reader.GetMonitor("2") == 1);
+  REQUIRE(reader.GetMonitor("3") == 2);
   REQUIRE(reader.GetMonitor("all") == -1);
-  REQUIRE(reader.GetMonitor("3") == -1);
 }
 
 // Taken from: /sample/tint3rc
@@ -265,6 +264,23 @@ TEST_CASE("ConfigParserEmptyAssignment", "Doesn't choke on empty assignments") {
   FakeClock timer{0};
   CleanupClock(timer);  // TODO: decouple from config loading
   CleanupPanel();       // TODO: decouple from config loading
+}
+
+static constexpr char kInvalidInteger[] =
+    u8R"EOF(
+rounded = clearly not a number
+)EOF";
+
+TEST_CASE("ConfigParserInvalidInteger") {
+  test::ConfigReader reader;
+  config::Parser config_entry_parser{&reader, ""};
+  parser::Parser p{config::kLexer, &config_entry_parser};
+
+  REQUIRE(p.Parse(kInvalidInteger));
+
+  // No background is added due to an invalid integer passed
+  // as value for "rounded"
+  REQUIRE(backgrounds.size() == 1);
 }
 
 static constexpr char kHoverPressed[] =
