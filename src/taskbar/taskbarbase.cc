@@ -1,10 +1,10 @@
-#include <cstring>
+#include <algorithm>
 
 #include "server.hh"
 #include "taskbarbase.hh"
 
 TaskbarBase::TaskbarBase() {
-  std::memset(&state_pixmap_, 0, sizeof(state_pixmap_));
+  std::fill(state_pixmap_ + 0, state_pixmap_ + kTaskbarCount, None);
 }
 
 Pixmap TaskbarBase::state_pixmap(size_t i) const { return state_pixmap_[i]; }
@@ -15,10 +15,10 @@ TaskbarBase& TaskbarBase::set_state_pixmap(size_t i, Pixmap value) {
 }
 
 TaskbarBase& TaskbarBase::reset_state_pixmap(size_t i) {
-  if (state_pixmap_[i] != 0) {
+  if (state_pixmap_[i] != None) {
     XFreePixmap(server.dsp, state_pixmap_[i]);
   }
 
-  state_pixmap_[i] = 0;
+  state_pixmap_[i] = None;
   return (*this);
 }
