@@ -25,9 +25,9 @@ class Global_task : public Area {
  public:
   Global_task();
 
-  int text;
-  int icon;
-  int centered;
+  bool text;
+  bool icon;
+  bool centered;
 
   int icon_posy;
   int icon_size1;
@@ -42,11 +42,11 @@ class Global_task : public Area {
   // starting position for text ~ task_padding + task_border + icon_size
   double text_posx, text_height;
 
-  int font_shadow;
+  bool font_shadow;
   util::pango::FontDescriptionPtr font_desc;
   Color font[kTaskStateCount];
   int config_font_mask;
-  int tooltip_enabled;
+  bool tooltip_enabled;
 };
 
 // TODO: make this inherit from a common base class that exposes state_pixmap

@@ -404,6 +404,29 @@ bool ParseNumber(std::string const& str, T* ptr) {
   return true;
 }
 
+bool ParseBoolean(std::string str, bool* value) {
+  util::string::Trim(&str);
+  std::transform(str.begin(), str.end(), str.begin(), ::tolower);
+
+  if (str == "true" || str == "yes" || str == "on") {
+    (*value) = true;
+    return true;
+  }
+
+  if (str == "false" || str == "no" || str == "off") {
+    (*value) = false;
+    return true;
+  }
+
+  int i;
+  if (util::string::ToNumber(str, &i)) {
+    (*value) = (i != 0);
+    return true;
+  }
+
+  return false;
+}
+
 Color ParseColor(std::string const& value, double default_alpha = 0.5) {
   std::string value1, value2, value3;
   config::ExtractValues(value, &value1, &value2, &value3);
@@ -735,19 +758,11 @@ bool Reader::AddEntry_Panel(std::string const& key, std::string const& value) {
     return true;
   }
   if (key == "wm_menu") {
-    int on;
-    if (!ParseNumber(value, &on)) {
-      return false;
-    }
-    wm_menu = (on != 0);
+    ParseBoolean(value, &wm_menu);
     return true;
   }
   if (key == "panel_dock") {
-    int on;
-    if (!ParseNumber(value, &on)) {
-      return false;
-    }
-    panel_dock = (on != 0);
+    ParseBoolean(value, &panel_dock);
     return true;
   }
   if (key == "urgent_nb_of_blink") {
@@ -1008,11 +1023,7 @@ bool Reader::AddEntry_Taskbar(std::string const& key,
     return true;
   }
   if (key == "taskbar_name") {
-    int on;
-    if (!ParseNumber(value, &on)) {
-      return false;
-    }
-    taskbarname_enabled = (on != 0);
+    ParseBoolean(value, &taskbar_enabled);
     return true;
   }
   if (key == "taskbar_name_padding") {
@@ -1068,27 +1079,15 @@ bool Reader::AddEntry_Taskbar(std::string const& key,
 
 bool Reader::AddEntry_Task(std::string const& key, std::string const& value) {
   if (key == "task_text") {
-    int on;
-    if (!ParseNumber(value, &on)) {
-      return false;
-    }
-    panel_config.g_task.text = (on != 0);
+    ParseBoolean(value, &panel_config.g_task.text);
     return true;
   }
   if (key == "task_icon") {
-    int on;
-    if (!ParseNumber(value, &on)) {
-      return false;
-    }
-    panel_config.g_task.icon = (on != 0);
+    ParseBoolean(value, &panel_config.g_task.icon);
     return true;
   }
   if (key == "task_centered") {
-    int on;
-    if (!ParseNumber(value, &on)) {
-      return false;
-    }
-    panel_config.g_task.centered = (on != 0);
+    ParseBoolean(value, &panel_config.g_task.centered);
     return true;
   }
   if (key == "task_width") {
@@ -1182,11 +1181,7 @@ bool Reader::AddEntry_Task(std::string const& key, std::string const& value) {
   }
   // "tooltip" is deprecated but here for backwards compatibility
   if (key == "task_tooltip" || key == "tooltip") {
-    int on;
-    if (!ParseNumber(value, &on)) {
-      return false;
-    }
-    panel_config.g_task.tooltip_enabled = (on != 0);
+    ParseBoolean(value, &panel_config.g_task.tooltip_enabled);
     return true;
   }
 
@@ -1315,11 +1310,7 @@ bool Reader::AddEntry_Launcher(std::string const& key,
             ParseNumber(value3, &launcher_brightness));
   }
   if (key == "launcher_tooltip") {
-    int on;
-    if (!ParseNumber(value, &on)) {
-      return false;
-    }
-    launcher_tooltip_enabled = (on != 0);
+    ParseBoolean(value, &launcher_tooltip_enabled);
     return true;
   }
 
@@ -1411,11 +1402,9 @@ bool Reader::AddEntry_Executor(std::string const& key,
                                    "plugin initialized, ignoring\n";
       return true;
     }
-    int on;
-    if (!ParseNumber(value, &on)) {
-      return false;
-    }
-    executors.back().set_cache_icon(on != 0);
+    bool enabled;
+    ParseBoolean(value, &enabled);
+    executors.back().set_cache_icon(enabled);
     return true;
   }
   if (key == "execp_centered") {
@@ -1424,11 +1413,9 @@ bool Reader::AddEntry_Executor(std::string const& key,
                                    "plugin initialized, ignoring\n";
       return true;
     }
-    int on;
-    if (!ParseNumber(value, &on)) {
-      return false;
-    }
-    executors.back().set_centered(on != 0);
+    bool enabled;
+    ParseBoolean(value, &enabled);
+    executors.back().set_centered(enabled);
     return true;
   }
   if (key == "execp_command") {
@@ -1446,11 +1433,9 @@ bool Reader::AddEntry_Executor(std::string const& key,
                                    "plugin initialized, ignoring\n";
       return true;
     }
-    int on;
-    if (!ParseNumber(value, &on)) {
-      return false;
-    }
-    executors.back().set_continuous(on != 0);
+    bool enabled;
+    ParseBoolean(value, &enabled);
+    executors.back().set_continuous(enabled);
     return true;
   }
   if (key == "execp_dwheel_command") {
@@ -1486,11 +1471,9 @@ bool Reader::AddEntry_Executor(std::string const& key,
                                    "plugin initialized, ignoring\n";
       return true;
     }
-    int on;
-    if (!ParseNumber(value, &on)) {
-      return false;
-    }
-    executors.back().set_has_icon(on != 0);
+    bool enabled;
+    ParseBoolean(value, &enabled);
+    executors.back().set_has_icon(enabled);
     return true;
   }
   if (key == "execp_icon_h") {
@@ -1559,11 +1542,9 @@ bool Reader::AddEntry_Executor(std::string const& key,
                                    "plugin initialized, ignoring\n";
       return true;
     }
-    int on;
-    if (!ParseNumber(value, &on)) {
-      return false;
-    }
-    executors.back().set_markup(on != 0);
+    bool enabled;
+    ParseBoolean(value, &enabled);
+    executors.back().set_markup(enabled);
     return true;
   }
   if (key == "execp_mclick_command") {
@@ -1624,11 +1605,7 @@ bool Reader::AddEntry_Mouse(std::string const& key, std::string const& value) {
     return true;
   }
   if (key == "mouse_effects") {
-    int on;
-    if (!ParseNumber(value, &on)) {
-      return false;
-    }
-    panel_config.mouse_effects = (on != 0);
+    ParseBoolean(value, &panel_config.mouse_effects);
     return true;
   }
   if (key == "mouse_hover_icon_asb") {
@@ -1652,11 +1629,7 @@ bool Reader::AddEntry_Mouse(std::string const& key, std::string const& value) {
 bool Reader::AddEntry_Autohide(std::string const& key,
                                std::string const& value) {
   if (key == "autohide") {
-    int on;
-    if (!ParseNumber(value, &on)) {
-      return false;
-    }
-    panel_autohide = (on != 0);
+    ParseBoolean(value, &panel_autohide);
     return true;
   }
   if (key == "autohide_show_timeout") {
@@ -1700,11 +1673,7 @@ bool Reader::AddEntry_Autohide(std::string const& key,
 bool Reader::AddEntry_Legacy(std::string const& key, std::string const& value) {
   if (key == "systray") {
     if (!new_config_file_) {
-      int on;
-      if (!ParseNumber(value, &on)) {
-        return false;
-      }
-      systray_enabled = (on != 0);
+      ParseBoolean(value, &systray_enabled);
       if (systray_enabled) {
         panel_items_order.push_back('S');
       }
@@ -1714,11 +1683,7 @@ bool Reader::AddEntry_Legacy(std::string const& key, std::string const& value) {
   if (key == "battery") {
 #ifdef ENABLE_BATTERY
     if (!new_config_file_) {
-      int on;
-      if (!ParseNumber(value, &on)) {
-        return false;
-      }
-      battery_enabled = (on != 0);
+      ParseBoolean(value, &battery_enabled);
       if (battery_enabled) {
         panel_items_order.push_back('B');
       }

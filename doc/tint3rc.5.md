@@ -690,7 +690,12 @@ autohide_height = &lt;integer>
 
 ## &lt;boolean>
 
-Numerical value. **0** means **false**, **1** means **true**.
+Either a string value or a numerical value.
+
+If a string: "true", "yes" or "on" mean **true**; "false", "no" or "off" mean
+**false**.
+
+If a number: **0** means **false**, **non-zero** means **true**.
 
 ## &lt;color>
 

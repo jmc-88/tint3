@@ -297,6 +297,32 @@ TEST_CASE("ConfigParserEmptyAssignment", "Doesn't choke on empty assignments") {
   CleanupPanel();       // TODO: decouple from config loading
 }
 
+static constexpr char kBooleanValues[] =
+    u8R"EOF(
+task_centered = true
+task_text = yes
+task_icon = on
+wm_menu = false
+panel_dock = no
+taskbar_name = off
+)EOF";
+
+TEST_CASE("ConfigParserBooleanValues") {
+  test::ConfigReader reader;
+  config::Parser config_entry_parser{&reader, ""};
+  parser::Parser p{config::kLexer, &config_entry_parser};
+
+  REQUIRE(p.Parse(kBooleanValues));
+
+  REQUIRE(panel_config.g_task.centered);
+  REQUIRE(panel_config.g_task.text);
+  REQUIRE(panel_config.g_task.icon);
+
+  REQUIRE_FALSE(wm_menu);
+  REQUIRE_FALSE(panel_dock);
+  REQUIRE_FALSE(taskbar_enabled);
+}
+
 static constexpr char kInvalidInteger[] =
     u8R"EOF(
 rounded = clearly not a number

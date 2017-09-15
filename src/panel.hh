@@ -34,7 +34,7 @@ extern MouseAction mouse_tilt_left;
 extern MouseAction mouse_tilt_right;
 
 extern bool wm_menu;
-extern int panel_dock;
+extern bool panel_dock;
 
 // panel mode
 enum class PanelMode { kSingleDesktop, kMultiDesktop };

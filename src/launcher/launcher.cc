@@ -47,7 +47,7 @@
 
 bool launcher_enabled = false;
 int launcher_max_icon_size;
-int launcher_tooltip_enabled;
+bool launcher_tooltip_enabled;
 int launcher_alpha;
 int launcher_saturation;
 int launcher_brightness;

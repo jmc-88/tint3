@@ -53,7 +53,7 @@ MouseAction mouse_tilt_right;
 
 PanelMode panel_mode;
 bool wm_menu;
-int panel_dock;
+bool panel_dock;
 PanelLayer panel_layer;
 PanelHorizontalPosition panel_horizontal_position;
 PanelVerticalPosition panel_vertical_position;
