@@ -242,7 +242,6 @@ void InitPanel(Timer& timer) {
       p.monitor_ = i;
     }
 
-    p.set_panel_index(i);
     p.parent_ = &p;
     p.panel_ = &p;
     p.on_screen_ = true;
@@ -469,7 +468,7 @@ void Panel::SetItemsOrder() {
 
 #endif
 
-    if (item == 'S' && panel_index_ == 0) {
+    if (item == 'S' && this == &panels.front()) {
       // TODO : check systray is only on 1 panel
       // at the moment only on panels[0] allowed
       children_.push_back(&systray);
@@ -795,8 +794,6 @@ bool Panel::HandlesClick(XEvent* event) {
 }
 
 bool Panel::hidden() const { return hidden_; }
-
-void Panel::set_panel_index(unsigned int i) { panel_index_ = i; }
 
 #ifdef _TINT3_DEBUG
 

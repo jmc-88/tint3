@@ -157,10 +157,6 @@ class Panel : public Area {
   bool AutohideShow();
   bool AutohideHide();
 
-  // TODO: this should not exist. The only reason it's here is InitPanel() is
-  // not a member of this class.
-  void set_panel_index(unsigned int i);
-
 #ifdef _TINT3_DEBUG
 
   std::string GetFriendlyName() const override;
@@ -169,7 +165,6 @@ class Panel : public Area {
 
  private:
   bool hidden_;
-  unsigned int panel_index_;
 
   Clock clock_;
 };
