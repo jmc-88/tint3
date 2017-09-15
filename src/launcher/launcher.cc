@@ -483,34 +483,22 @@ IconTheme* LoadTheme(std::string const& name) {
       if (ParseThemeLine(line, key, value)) {
         if (key == "Inherits") {
           // value is like oxygen,wood,default
-          // TODO: remove these strdup/strtok calls
-          char* value_ptr = strdup(value.c_str());
-          char* token = strtok(value_ptr, ",\n");
-
-          while (token != nullptr) {
-            theme->list_inherits.push_back(token);
-            token = strtok(nullptr, ",\n");
-          }
-
-          std::free(value_ptr);
+          util::string::Trim(&value);
+          auto names = util::string::Split(value, ',');
+          std::copy(names.begin(), names.end(), theme->list_inherits.end());
         } else if (key == "Directories") {
           // value is like
           // 48x48/apps,48x48/mimetypes,32x32/apps,scalable/apps,scalable/mimetypes
-          // TODO: remove these strdup/strtok calls
-          char* value_ptr = strdup(value.c_str());
-          char* token = strtok(value_ptr, ",\n");
-
-          while (token != nullptr) {
+          util::string::Trim(&value);
+          auto names = util::string::Split(value, ',');
+          for (std::string const& name : names) {
             auto dir = new IconThemeDir();
-            dir->name = token;
+            dir->name = name;
             dir->max_size = dir->min_size = dir->size = -1;
             dir->type = ICON_DIR_TYPE_THRESHOLD;
             dir->threshold = 2;
             theme->list_directories.push_back(dir);
-            token = strtok(nullptr, ",\n");
           }
-
-          std::free(value_ptr);
         }
       }
     } else if (current_dir != nullptr) {
