@@ -1073,6 +1073,7 @@ bool Reader::AddEntry_Task(std::string const& key, std::string const& value) {
       return false;
     }
     panel_config.g_task.text = (on != 0);
+    return true;
   }
   if (key == "task_icon") {
     int on;
@@ -1080,6 +1081,7 @@ bool Reader::AddEntry_Task(std::string const& key, std::string const& value) {
       return false;
     }
     panel_config.g_task.icon = (on != 0);
+    return true;
   }
   if (key == "task_centered") {
     int on;
@@ -1087,6 +1089,7 @@ bool Reader::AddEntry_Task(std::string const& key, std::string const& value) {
       return false;
     }
     panel_config.g_task.centered = (on != 0);
+    return true;
   }
   if (key == "task_width") {
     // old parameter: just for backward compatibility

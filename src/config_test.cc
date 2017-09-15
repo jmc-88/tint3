@@ -1,7 +1,10 @@
 #include "catch.hpp"
 
 #include <initializer_list>
+#include <iostream>
 #include <set>
+#include <sstream>
+#include <streambuf>
 #include <string>
 
 #include "clock/clock.hh"  // TODO: decouple from config loading
@@ -52,6 +55,20 @@ TEST_CASE("ExtractValues",
 }
 
 namespace test {
+
+struct ostream_capture {
+  ostream_capture(std::ostream* os)
+      : os_{os}, old_buffer_{os->rdbuf(buffer_.rdbuf())} {}
+
+  ~ostream_capture() { os_->rdbuf(old_buffer_); }
+
+  std::string str() const { return buffer_.str(); }
+
+ private:
+  std::ostringstream buffer_;
+  std::ostream* os_;
+  std::streambuf* old_buffer_;
+};
 
 class MockServer : public Server {
  public:
@@ -231,7 +248,21 @@ TEST_CASE("ConfigParser", "Correctly loads a valid configuration file") {
   config::Parser config_entry_parser{&reader, ""};
   parser::Parser p{config::kLexer, &config_entry_parser};
 
+  test::ostream_capture error_output{&std::cerr};
   REQUIRE(p.Parse(kConfigFile));
+
+  // https://github.com/jmc-88/tint3/issues/32#issuecomment-329648594
+  // Regression in parsing these fields.
+  std::string error_contents = error_output.str();
+  REQUIRE(panel_config.g_task.icon == true);
+  REQUIRE(error_contents.find("invalid option \"task_icon\"") ==
+          std::string::npos);
+  REQUIRE(panel_config.g_task.text == true);
+  REQUIRE(error_contents.find("invalid option \"task_text\"") ==
+          std::string::npos);
+  REQUIRE(panel_config.g_task.centered == true);
+  REQUIRE(error_contents.find("invalid option \"task_centered\"") ==
+          std::string::npos);
 
   CleanupPanel();  // TODO: decouple from config loading
 }
