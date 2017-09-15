@@ -78,6 +78,7 @@ static constexpr int kAtomCount = (sizeof(kAtomList) / sizeof(kAtomList[0]));
 
 Server server;
 
+#ifdef _TINT3_DEBUG
 int ServerCatchError(Display* d, XErrorEvent* ev) {
   char error_text[1024 + 1] = {'\0'};
   XGetErrorText(d, ev->error_code, error_text, sizeof(error_text) - 1);
@@ -87,6 +88,13 @@ int ServerCatchError(Display* d, XErrorEvent* ev) {
                      << "): " << error_text << '\n';
   return 0;
 }
+#else  // _TINT3_DEBUG
+int ServerCatchError(Display*, XErrorEvent*) {
+  // https://github.com/jmc-88/tint3/issues/33
+  // Silence Xlib errors in Release builds.
+  return 0;
+}
+#endif  // _TINT3_DEBUG
 
 void Server::InitAtoms() {
   Atom atom_list[kAtomCount] = {None};
