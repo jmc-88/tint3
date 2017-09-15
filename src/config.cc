@@ -488,7 +488,7 @@ bool Reader::AddEntry_BackgroundBorder(std::string const& key,
   if (key == "rounded") {
     int roundness;
     if (!ParseNumber(value, &roundness)) {
-      return false;
+      return true;
     }
     // 'rounded' is the first parameter => alloc a new background
     Background bg;
@@ -499,7 +499,7 @@ bool Reader::AddEntry_BackgroundBorder(std::string const& key,
   if (key == "border_width") {
     int width;
     if (!ParseNumber(value, &width)) {
-      return false;
+      return true;
     }
     backgrounds.back().border().set_width(width);
     return true;
@@ -535,7 +535,7 @@ bool Reader::AddEntry_BackgroundBorder(std::string const& key,
   if (key == "gradient_id") {
     int id;
     if (!ParseNumber(value, &id)) {
-      return false;
+      return true;
     }
     backgrounds.back().set_gradient_id(id);
     return true;
@@ -543,7 +543,7 @@ bool Reader::AddEntry_BackgroundBorder(std::string const& key,
   if (key == "gradient_id_hover") {
     int id;
     if (!ParseNumber(value, &id)) {
-      return false;
+      return true;
     }
     backgrounds.back().set_gradient_id_hover(id);
     return true;
@@ -551,7 +551,7 @@ bool Reader::AddEntry_BackgroundBorder(std::string const& key,
   if (key == "gradient_id_pressed") {
     int id;
     if (!ParseNumber(value, &id)) {
-      return false;
+      return true;
     }
     backgrounds.back().set_gradient_id_pressed(id);
     return true;
@@ -592,7 +592,7 @@ bool Reader::AddEntry_Gradient(std::string const& key,
     std::string percentage_string{value, 0, first_space};
     int percentage;
     if (!ParseNumber(percentage_string, &percentage)) {
-      return false;
+      return true;
     }
     std::string color_spec{value, first_space + 1};
     if (!gradients.back().AddColorStop(percentage, ParseColor(color_spec))) {
@@ -619,7 +619,7 @@ bool Reader::AddEntry_Panel(std::string const& key, std::string const& value) {
 
     int width;
     if (!ParseNumber(value1.substr(0, b), &width)) {
-      return false;
+      return true;
     }
 
     panel_config.width_ = width;
@@ -639,7 +639,7 @@ bool Reader::AddEntry_Panel(std::string const& key, std::string const& value) {
 
       int height;
       if (!ParseNumber(value2.substr(0, b), &height)) {
-        return false;
+        return true;
       }
       panel_config.height_ = height;
     }
@@ -679,14 +679,14 @@ bool Reader::AddEntry_Panel(std::string const& key, std::string const& value) {
 
     int margin_x;
     if (!ParseNumber(value1, &margin_x)) {
-      return false;
+      return true;
     }
     panel_config.margin_x_ = margin_x;
 
     if (!value2.empty()) {
       int margin_y;
       if (!ParseNumber(value2, &margin_y)) {
-        return false;
+        return true;
       }
       panel_config.margin_y_ = margin_y;
     }
@@ -698,21 +698,21 @@ bool Reader::AddEntry_Panel(std::string const& key, std::string const& value) {
 
     int padding_x_lr;
     if (!ParseNumber(value1, &padding_x_lr)) {
-      return false;
+      return true;
     }
     panel_config.padding_x_lr_ = panel_config.padding_x_ = padding_x_lr;
 
     if (!value2.empty()) {
       int padding_y;
       if (!ParseNumber(value2, &padding_y)) {
-        return false;
+        return true;
       }
       panel_config.padding_y_ = padding_y;
     }
     if (!value3.empty()) {
       int padding_x;
       if (!ParseNumber(value3, &padding_x)) {
-        return false;
+        return true;
       }
       panel_config.padding_x_ = padding_x;
     }
@@ -744,7 +744,7 @@ bool Reader::AddEntry_Panel(std::string const& key, std::string const& value) {
   if (key == "font_shadow") {
     int shadow;
     if (!ParseNumber(value, &shadow)) {
-      return false;
+      return true;
     }
     panel_config.g_task.font_shadow = shadow;
     return true;
@@ -752,7 +752,7 @@ bool Reader::AddEntry_Panel(std::string const& key, std::string const& value) {
   if (key == "panel_background_id") {
     int id;
     if (!ParseNumber(value, &id)) {
-      return false;
+      return true;
     }
     panel_config.bg_ = GetBackgroundFromId(id);
     return true;
@@ -766,7 +766,8 @@ bool Reader::AddEntry_Panel(std::string const& key, std::string const& value) {
     return true;
   }
   if (key == "urgent_nb_of_blink") {
-    return ParseNumber(value, &max_tick_urgent);
+    ParseNumber(value, &max_tick_urgent);
+    return true;
   }
   if (key == "panel_layer") {
     if (value == "bottom") {
@@ -788,7 +789,7 @@ bool Reader::AddEntry_Battery(std::string const& key,
 #ifdef ENABLE_BATTERY
     int low_status;
     if (!ParseNumber(value, &low_status)) {
-      return false;
+      return true;
     }
     battery_low_status = 0;
     if (low_status >= 0 && low_status <= 100) {
@@ -829,18 +830,18 @@ bool Reader::AddEntry_Battery(std::string const& key,
     config::ExtractValues(value, &value1, &value2, &value3);
 
     if (!ParseNumber(value1, &panel_config.battery_.padding_x_lr_)) {
-      return false;
+      return true;
     }
     panel_config.battery_.padding_x_ = panel_config.battery_.padding_x_lr_;
 
     if (!value2.empty()) {
       if (!ParseNumber(value2, &panel_config.battery_.padding_y_)) {
-        return false;
+        return true;
       }
     }
     if (!value3.empty()) {
       if (!ParseNumber(value3, &panel_config.battery_.padding_x_)) {
-        return false;
+        return true;
       }
     }
 #endif  // ENABLE_BATTERY
@@ -850,7 +851,7 @@ bool Reader::AddEntry_Battery(std::string const& key,
 #ifdef ENABLE_BATTERY
     int id;
     if (!ParseNumber(value, &id)) {
-      return false;
+      return true;
     }
     panel_config.battery_.bg_ = GetBackgroundFromId(id);
 #endif  // ENABLE_BATTERY
@@ -859,7 +860,7 @@ bool Reader::AddEntry_Battery(std::string const& key,
   if (key == "battery_hide") {
 #ifdef ENABLE_BATTERY
     if (!ParseNumber(value, &percentage_hide)) {
-      return false;
+      return true;
     }
     if (percentage_hide == 0) {
       percentage_hide = 101;
@@ -918,18 +919,18 @@ bool Reader::AddEntry_Clock(std::string const& key, std::string const& value) {
     config::ExtractValues(value, &value1, &value2, &value3);
 
     if (!ParseNumber(value1, &panel_config.clock()->padding_x_lr_)) {
-      return false;
+      return true;
     }
     panel_config.clock()->padding_x_ = panel_config.clock()->padding_x_lr_;
 
     if (!value2.empty()) {
       if (!ParseNumber(value2, &panel_config.clock()->padding_y_)) {
-        return false;
+        return true;
       }
     }
     if (!value3.empty()) {
       if (!ParseNumber(value3, &panel_config.clock()->padding_x_)) {
-        return false;
+        return true;
       }
     }
     return true;
@@ -937,7 +938,7 @@ bool Reader::AddEntry_Clock(std::string const& key, std::string const& value) {
   if (key == "clock_background_id") {
     int id;
     if (!ParseNumber(value, &id)) {
-      return false;
+      return true;
     }
     panel_config.clock()->bg_ = GetBackgroundFromId(id);
     return true;
@@ -985,18 +986,18 @@ bool Reader::AddEntry_Taskbar(std::string const& key,
     config::ExtractValues(value, &value1, &value2, &value3);
 
     if (!ParseNumber(value1, &panel_config.g_taskbar.padding_x_lr_)) {
-      return false;
+      return true;
     }
     panel_config.g_taskbar.padding_x_ = panel_config.g_taskbar.padding_x_lr_;
 
     if (!value2.empty()) {
       if (!ParseNumber(value2, &panel_config.g_taskbar.padding_y_)) {
-        return false;
+        return true;
       }
     }
     if (!value3.empty()) {
       if (!ParseNumber(value3, &panel_config.g_taskbar.padding_x_)) {
-        return false;
+        return true;
       }
     }
     return true;
@@ -1004,7 +1005,7 @@ bool Reader::AddEntry_Taskbar(std::string const& key,
   if (key == "taskbar_background_id") {
     int id;
     if (!ParseNumber(value, &id)) {
-      return false;
+      return true;
     }
     panel_config.g_taskbar.background[kTaskbarNormal] = GetBackgroundFromId(id);
 
@@ -1017,7 +1018,7 @@ bool Reader::AddEntry_Taskbar(std::string const& key,
   if (key == "taskbar_active_background_id") {
     int id;
     if (!ParseNumber(value, &id)) {
-      return false;
+      return true;
     }
     panel_config.g_taskbar.background[kTaskbarActive] = GetBackgroundFromId(id);
     return true;
@@ -1031,7 +1032,7 @@ bool Reader::AddEntry_Taskbar(std::string const& key,
     config::ExtractValues(value, &value1, &value2, &value3);
 
     if (!ParseNumber(value, &panel_config.g_taskbar.bar_name_.padding_x_lr_)) {
-      return false;
+      return true;
     }
     panel_config.g_taskbar.bar_name_.padding_x_ =
         panel_config.g_taskbar.bar_name_.padding_x_lr_;
@@ -1040,7 +1041,7 @@ bool Reader::AddEntry_Taskbar(std::string const& key,
   if (key == "taskbar_name_background_id") {
     int id;
     if (!ParseNumber(value, &id)) {
-      return false;
+      return true;
     }
     panel_config.g_taskbar.background_name[kTaskbarNormal] =
         GetBackgroundFromId(id);
@@ -1055,7 +1056,7 @@ bool Reader::AddEntry_Taskbar(std::string const& key,
   if (key == "taskbar_name_active_background_id") {
     int id;
     if (!ParseNumber(value, &id)) {
-      return false;
+      return true;
     }
     panel_config.g_taskbar.background_name[kTaskbarActive] =
         GetBackgroundFromId(id);
@@ -1093,7 +1094,7 @@ bool Reader::AddEntry_Task(std::string const& key, std::string const& value) {
   if (key == "task_width") {
     // old parameter: just for backward compatibility
     if (!ParseNumber(value, &panel_config.g_task.maximum_width)) {
-      return false;
+      return true;
     }
     panel_config.g_task.maximum_height = 30;
     return true;
@@ -1103,13 +1104,13 @@ bool Reader::AddEntry_Task(std::string const& key, std::string const& value) {
     config::ExtractValues(value, &value1, &value2, &value3);
 
     if (!ParseNumber(value1, &panel_config.g_task.maximum_width)) {
-      return false;
+      return true;
     }
     panel_config.g_task.maximum_height = 30;
 
     if (!value2.empty()) {
       if (!ParseNumber(value2, &panel_config.g_task.maximum_height)) {
-        return false;
+        return true;
       }
     }
     return true;
@@ -1119,18 +1120,18 @@ bool Reader::AddEntry_Task(std::string const& key, std::string const& value) {
     config::ExtractValues(value, &value1, &value2, &value3);
 
     if (!ParseNumber(value1, &panel_config.g_task.padding_x_lr_)) {
-      return false;
+      return true;
     }
     panel_config.g_task.padding_x_ = panel_config.g_task.padding_x_lr_;
 
     if (!value2.empty()) {
       if (!ParseNumber(value2, &panel_config.g_task.padding_y_)) {
-        return false;
+        return true;
       }
     }
     if (!value3.empty()) {
       if (!ParseNumber(value3, &panel_config.g_task.padding_x_)) {
-        return false;
+        return true;
       }
     }
     return true;
@@ -1153,13 +1154,13 @@ bool Reader::AddEntry_Task(std::string const& key, std::string const& value) {
     std::string value1, value2, value3;
     config::ExtractValues(value, &value1, &value2, &value3);
     if (!ParseNumber(value1, &panel_config.g_task.alpha[status])) {
-      return false;
+      return true;
     }
     if (!ParseNumber(value2, &panel_config.g_task.saturation[status])) {
-      return false;
+      return true;
     }
     if (!ParseNumber(value3, &panel_config.g_task.brightness[status])) {
-      return false;
+      return true;
     }
     panel_config.g_task.config_asb_mask |= (1 << status);
     return true;
@@ -1169,7 +1170,7 @@ bool Reader::AddEntry_Task(std::string const& key, std::string const& value) {
     int status = GetTaskStatus(split[1]);
     int id;
     if (!ParseNumber(value, &id)) {
-      return false;
+      return true;
     }
     panel_config.g_task.background[status] = GetBackgroundFromId(id);
     panel_config.g_task.config_background_mask |= (1 << status);
@@ -1200,18 +1201,18 @@ bool Reader::AddEntry_Systray(std::string const& key,
     config::ExtractValues(value, &value1, &value2, &value3);
 
     if (!ParseNumber(value1, &systray.padding_x_lr_)) {
-      return false;
+      return true;
     }
     systray.padding_x_ = systray.padding_x_lr_;
 
     if (!value2.empty()) {
       if (!ParseNumber(value2, &systray.padding_y_)) {
-        return false;
+        return true;
       }
     }
     if (!value3.empty()) {
       if (!ParseNumber(value3, &systray.padding_x_)) {
-        return false;
+        return true;
       }
     }
     return true;
@@ -1219,7 +1220,7 @@ bool Reader::AddEntry_Systray(std::string const& key,
   if (key == "systray_background_id") {
     int id;
     if (!ParseNumber(value, &id)) {
-      return false;
+      return true;
     }
     systray.bg_ = GetBackgroundFromId(id);
     return true;
@@ -1237,14 +1238,20 @@ bool Reader::AddEntry_Systray(std::string const& key,
     return true;
   }
   if (key == "systray_icon_size") {
-    return ParseNumber(value, &systray_max_icon_size);
+    ParseNumber(value, &systray_max_icon_size);
+    return true;
   }
   if (key == "systray_icon_asb") {
     std::string value1, value2, value3;
     config::ExtractValues(value, &value1, &value2, &value3);
-    return (ParseNumber(value1, &systray.alpha) &&
-            ParseNumber(value2, &systray.saturation) &&
-            ParseNumber(value3, &systray.brightness));
+    if (!ParseNumber(value1, &systray.alpha)) {
+      return true;
+    }
+    if (!ParseNumber(value2, &systray.saturation)) {
+      return true;
+    }
+    ParseNumber(value3, &systray.brightness);
+    return true;
   }
 
   return false;
@@ -1276,13 +1283,14 @@ bool Reader::AddEntry_Launcher(std::string const& key,
   if (key == "launcher_background_id") {
     int id;
     if (!ParseNumber(value, &id)) {
-      return false;
+      return true;
     }
     panel_config.launcher_.bg_ = GetBackgroundFromId(id);
     return true;
   }
   if (key == "launcher_icon_size") {
-    return ParseNumber(value, &launcher_max_icon_size);
+    ParseNumber(value, &launcher_max_icon_size);
+    return true;
   }
   if (key == "launcher_item_app") {
     std::string expanded = ExpandWords(value);
@@ -1305,9 +1313,14 @@ bool Reader::AddEntry_Launcher(std::string const& key,
   if (key == "launcher_icon_asb") {
     std::string value1, value2, value3;
     config::ExtractValues(value, &value1, &value2, &value3);
-    return (ParseNumber(value1, &launcher_alpha) &&
-            ParseNumber(value2, &launcher_saturation) &&
-            ParseNumber(value3, &launcher_brightness));
+    if (!ParseNumber(value1, &launcher_alpha)) {
+      return true;
+    }
+    if (!ParseNumber(value2, &launcher_saturation)) {
+      return true;
+    }
+    ParseNumber(value3, &launcher_brightness);
+    return true;
   }
   if (key == "launcher_tooltip") {
     ParseBoolean(value, &launcher_tooltip_enabled);
@@ -1322,7 +1335,7 @@ bool Reader::AddEntry_Tooltip(std::string const& key,
   if (key == "tooltip_show_timeout") {
     float timeout;
     if (!ParseNumber(value, &timeout)) {
-      return false;
+      return true;
     }
     tooltip_config.show_timeout_msec = 1000 * timeout;
     return true;
@@ -1330,7 +1343,7 @@ bool Reader::AddEntry_Tooltip(std::string const& key,
   if (key == "tooltip_hide_timeout") {
     float timeout;
     if (!ParseNumber(value, &timeout)) {
-      return false;
+      return true;
     }
     tooltip_config.hide_timeout_msec = 1000 * timeout;
     return true;
@@ -1341,12 +1354,12 @@ bool Reader::AddEntry_Tooltip(std::string const& key,
 
     if (!value1.empty()) {
       if (!ParseNumber(value1, &tooltip_config.paddingx)) {
-        return false;
+        return true;
       }
     }
     if (!value2.empty()) {
       if (!ParseNumber(value2, &tooltip_config.paddingy)) {
-        return false;
+        return true;
       }
     }
     return true;
@@ -1354,7 +1367,7 @@ bool Reader::AddEntry_Tooltip(std::string const& key,
   if (key == "tooltip_background_id") {
     int id;
     if (!ParseNumber(value, &id)) {
-      return false;
+      return true;
     }
     tooltip_config.bg = GetBackgroundFromId(id);
     return true;
@@ -1391,7 +1404,7 @@ bool Reader::AddEntry_Executor(std::string const& key,
     }
     int id;
     if (!ParseNumber(value, &id)) {
-      return false;
+      return true;
     }
     executors.back().set_background(GetBackgroundFromId(id));
     return true;
@@ -1484,7 +1497,7 @@ bool Reader::AddEntry_Executor(std::string const& key,
     }
     int height;
     if (!ParseNumber(value, &height)) {
-      return false;
+      return true;
     }
     if (height < 0) {
       util::log::Error() << "negative " << key << " given, ignoring\n";
@@ -1501,7 +1514,7 @@ bool Reader::AddEntry_Executor(std::string const& key,
     }
     int width;
     if (!ParseNumber(value, &width)) {
-      return false;
+      return true;
     }
     if (width < 0) {
       util::log::Error() << "negative " << key << " given, ignoring\n";
@@ -1518,7 +1531,7 @@ bool Reader::AddEntry_Executor(std::string const& key,
     }
     int interval;
     if (!ParseNumber(value, &interval)) {
-      return false;
+      return true;
     }
     if (interval < 0) {
       util::log::Error() << "negative " << key << " given, ignoring\n";
@@ -1611,16 +1624,26 @@ bool Reader::AddEntry_Mouse(std::string const& key, std::string const& value) {
   if (key == "mouse_hover_icon_asb") {
     std::string value1, value2, value3;
     config::ExtractValues(value, &value1, &value2, &value3);
-    return (ParseNumber(value1, &panel_config.mouse_hover_alpha) &&
-            ParseNumber(value2, &panel_config.mouse_hover_saturation) &&
-            ParseNumber(value3, &panel_config.mouse_hover_brightness));
+    if (!ParseNumber(value1, &panel_config.mouse_hover_alpha)) {
+      return true;
+    }
+    if (!ParseNumber(value2, &panel_config.mouse_hover_saturation)) {
+      return true;
+    }
+    ParseNumber(value3, &panel_config.mouse_hover_brightness);
+    return true;
   }
   if (key == "mouse_pressed_icon_asb") {
     std::string value1, value2, value3;
     config::ExtractValues(value, &value1, &value2, &value3);
-    return (ParseNumber(value1, &panel_config.mouse_pressed_alpha) &&
-            ParseNumber(value2, &panel_config.mouse_pressed_saturation) &&
-            ParseNumber(value3, &panel_config.mouse_pressed_brightness));
+    if (!ParseNumber(value1, &panel_config.mouse_pressed_alpha)) {
+      return true;
+    }
+    if (!ParseNumber(value2, &panel_config.mouse_pressed_saturation)) {
+      return true;
+    }
+    ParseNumber(value3, &panel_config.mouse_pressed_brightness);
+    return true;
   }
 
   return false;
@@ -1635,7 +1658,7 @@ bool Reader::AddEntry_Autohide(std::string const& key,
   if (key == "autohide_show_timeout") {
     float timeout;
     if (!ParseNumber(value, &timeout)) {
-      return false;
+      return true;
     }
     panel_autohide_show_timeout = 1000 * timeout;
     return true;
@@ -1643,7 +1666,7 @@ bool Reader::AddEntry_Autohide(std::string const& key,
   if (key == "autohide_hide_timeout") {
     float timeout;
     if (!ParseNumber(value, &timeout)) {
-      return false;
+      return true;
     }
     panel_autohide_hide_timeout = 1000 * timeout;
     return true;
@@ -1661,7 +1684,7 @@ bool Reader::AddEntry_Autohide(std::string const& key,
   if (key == "autohide_height") {
     int height;
     if (!ParseNumber(value, &height)) {
-      return false;
+      return true;
     }
     panel_autohide_height = std::max(1, height);
     return true;
