@@ -329,6 +329,8 @@ rounded = clearly not a number
 )EOF";
 
 TEST_CASE("ConfigParserInvalidInteger") {
+  DefaultPanel();  // TODO: decouple from config loading
+
   test::ConfigReader reader;
   config::Parser config_entry_parser{&reader, ""};
   parser::Parser p{config::kLexer, &config_entry_parser};
@@ -338,6 +340,8 @@ TEST_CASE("ConfigParserInvalidInteger") {
   // No background is added due to an invalid integer passed
   // as value for "rounded"
   REQUIRE(backgrounds.size() == 1);
+
+  CleanupPanel();  // TODO: decouple from config loading
 }
 
 static constexpr char kHoverPressed[] =
