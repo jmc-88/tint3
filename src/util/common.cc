@@ -27,6 +27,8 @@
 
 #include <algorithm>
 #include <cctype>
+#include <cerrno>
+#include <climits>
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
@@ -60,42 +62,72 @@ Builder::operator std::string() const { return ss_.str(); }
 
 namespace {
 
-// Templated alias that matches the std::stoi() function family (but not
-// std::stof, which lacks the third parameter).
 template <typename T>
-using NumberConversion = T(std::string const&, std::size_t*, int);
+using NumberConversion = T(const char*, char**);
 
 template <typename T>
-bool ToNumberImpl(std::string str, T* ptr, NumberConversion<T> conv) {
-  Trim(&str);
-  try {
-    std::size_t pos;
-    T res = conv(str, &pos, 10);
-    if (pos != str.length()) {
+using NumberValidation = bool(T);
+
+template <typename T>
+bool ToNumberImpl(std::string const& value, T* ptr, NumberConversion<T> conv,
+                  NumberValidation<T> valid) {
+  const char* str = value.c_str();
+  char* str_end;
+  T res = conv(str, &str_end);
+
+  // reject not fully parsed strings
+  while (*str_end != '\0') {
+    if (!isspace(*str_end)) {
       return false;
     }
-    (*ptr) = res;
-    return true;
-  } catch (...) {
+  }
+
+  // reject out of range values
+  if (!valid(res)) {
     return false;
   }
+
+  (*ptr) = res;
+  return true;
 }
 
 }  // namespace
 
 bool ToNumber(std::string const& str, int* ptr) {
-  return ToNumberImpl(str, ptr, std::stoi);
+  return ToNumberImpl(str, ptr,
+                      +[](const char* str, char** str_end) {
+                        errno = 0;
+                        long res = std::strtol(str, str_end, 10);
+                        if (res < INT_MIN || res > INT_MAX) {
+                          errno = ERANGE;
+                          return INT_MAX;
+                        }
+                        return static_cast<int>(res);
+                      },
+                      +[](int) { return (errno == 0); });
 }
 
 bool ToNumber(std::string const& str, long* ptr) {
-  return ToNumberImpl(str, ptr, std::stol);
+  return ToNumberImpl(str, ptr,
+                      +[](const char* str, char** str_end) {
+                        errno = 0;
+                        return std::strtol(str, str_end, 10);
+                      },
+                      +[](long) { return (errno == 0); });
 }
 
 bool ToNumber(std::string const& str, float* ptr) {
-  return ToNumberImpl(
-      str, ptr, +[](std::string const& str, std::size_t* pos, int /*base*/) {
-        return std::stof(str, pos);
-      });
+  return ToNumberImpl(str, ptr,
+                      +[](const char* str, char** str_end) {
+                        errno = 0;
+                        return std::strtof(str, str_end);
+                      },
+                      +[](float f) {
+                        if (errno != 0) {
+                          return false;
+                        }
+                        return std::isfinite(f);
+                      });
 }
 
 std::string& Trim(std::string* str) {

@@ -144,6 +144,8 @@ TEST_CASE("ShellExec") {
 TEST_CASE("ToNumber") {
   SECTION("int") {
     int i;
+    REQUIRE(util::string::ToNumber("0", &i));
+    REQUIRE(i == 0);  // parsed and read correctly
     REQUIRE(util::string::ToNumber("1234", &i));
     REQUIRE(i == 1234);  // parsed and read correctly
     REQUIRE_FALSE(util::string::ToNumber("5678abcd", &i));
@@ -152,6 +154,8 @@ TEST_CASE("ToNumber") {
 
   SECTION("long") {
     long l;
+    REQUIRE(util::string::ToNumber("0", &l));
+    REQUIRE(l == 0);  // parsed and read correctly
     REQUIRE(util::string::ToNumber("1234", &l));
     REQUIRE(l == 1234);  // parsed and read correctly
     REQUIRE_FALSE(util::string::ToNumber("5678abcd", &l));
@@ -160,9 +164,19 @@ TEST_CASE("ToNumber") {
 
   SECTION("float") {
     float f;
+    REQUIRE(util::string::ToNumber("0", &f));
+    REQUIRE(f == 0);  // parsed and read correctly
     REQUIRE(util::string::ToNumber("1.234", &f));
     REQUIRE(f == 1.234f);  // parsed and read correctly
     REQUIRE_FALSE(util::string::ToNumber("5.678abcd", &f));
     REQUIRE(f == 1.234f);  // failed parsing, unchanged
+
+    // Out of range values are rejected and writing to the provided pointer
+    // is not attempted in such a case.
+    float* nptr = nullptr;
+    REQUIRE_FALSE(util::string::ToNumber("inf", nptr));
+    REQUIRE_FALSE(util::string::ToNumber("infinity", nptr));
+    REQUIRE_FALSE(util::string::ToNumber("nan", nptr));
+    REQUIRE_FALSE(util::string::ToNumber("nan(16)", nptr));
   }
 }
