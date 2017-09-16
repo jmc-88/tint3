@@ -1714,6 +1714,10 @@ bool Reader::AddEntry_Legacy(std::string const& key, std::string const& value) {
     return true;
 #endif  // ENABLE_BATTERY
   }
+  if (key == "primary_monitor_first") {
+    util::log::Error() << "Ignoring legacy option \"primary_monitor_first\".\n";
+    return true;
+  }
 
   return false;
 }

@@ -239,6 +239,9 @@ battery_font_color = #FFFFFF 74
 battery_padding = 1 0
 battery_background_id = 0
 
+# Ignored legacy options
+primary_monitor_first = 1
+
 # End of config)EOF";
 
 TEST_CASE("ConfigParser", "Correctly loads a valid configuration file") {
