@@ -146,6 +146,8 @@ TEST_CASE("ToNumber") {
     int i;
     REQUIRE(util::string::ToNumber("0", &i));
     REQUIRE(i == 0);  // parsed and read correctly
+    REQUIRE(util::string::ToNumber("900\n", &i));
+    REQUIRE(i == 900);  // parsed and read correctly
     REQUIRE(util::string::ToNumber("1234", &i));
     REQUIRE(i == 1234);  // parsed and read correctly
     REQUIRE_FALSE(util::string::ToNumber("5678abcd", &i));
@@ -156,6 +158,8 @@ TEST_CASE("ToNumber") {
     long l;
     REQUIRE(util::string::ToNumber("0", &l));
     REQUIRE(l == 0);  // parsed and read correctly
+    REQUIRE(util::string::ToNumber("900\n", &l));
+    REQUIRE(l == 900);  // parsed and read correctly
     REQUIRE(util::string::ToNumber("1234", &l));
     REQUIRE(l == 1234);  // parsed and read correctly
     REQUIRE_FALSE(util::string::ToNumber("5678abcd", &l));
@@ -166,6 +170,8 @@ TEST_CASE("ToNumber") {
     float f;
     REQUIRE(util::string::ToNumber("0", &f));
     REQUIRE(f == 0);  // parsed and read correctly
+    REQUIRE(util::string::ToNumber("900\n", &f));
+    REQUIRE(f == 900);  // parsed and read correctly
     REQUIRE(util::string::ToNumber("1.234", &f));
     REQUIRE(f == 1.234f);  // parsed and read correctly
     REQUIRE_FALSE(util::string::ToNumber("5.678abcd", &f));

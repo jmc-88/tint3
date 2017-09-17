@@ -76,7 +76,7 @@ bool ToNumberImpl(std::string const& value, T* ptr, NumberConversion<T> conv,
   T res = conv(str, &str_end);
 
   // reject not fully parsed strings
-  while (*str_end != '\0') {
+  for (; *str_end != '\0'; ++str_end) {
     if (!isspace(*str_end)) {
       return false;
     }
