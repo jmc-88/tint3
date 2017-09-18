@@ -83,9 +83,14 @@ int ServerCatchError(Display* d, XErrorEvent* ev) {
   char error_text[1024 + 1] = {'\0'};
   XGetErrorText(d, ev->error_code, error_text, sizeof(error_text) - 1);
 
-  util::log::Error() << " -> Xlib error ("
-                     << static_cast<unsigned int>(ev->error_code)
-                     << "): " << error_text << '\n';
+  util::log::Error() << " -> Xlib error: " << error_text << '\n';
+  util::log::Error()
+    << "XErrorEvent {\n"
+    << "  error_code:   " << static_cast<unsigned int>(ev->error_code) << "\n"
+    << "  request_code: " << static_cast<unsigned int>(ev->request_code) << "\n"
+    << "  minor_code:   " << static_cast<unsigned int>(ev->minor_code) << "\n"
+    << "  resourceid:   " << ev->resourceid << "\n"
+    << "}\n";
   return 0;
 }
 #else  // _TINT3_DEBUG
