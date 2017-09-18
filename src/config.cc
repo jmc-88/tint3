@@ -1024,7 +1024,7 @@ bool Reader::AddEntry_Taskbar(std::string const& key,
     return true;
   }
   if (key == "taskbar_name") {
-    ParseBoolean(value, &taskbar_enabled);
+    ParseBoolean(value, &taskbarname_enabled);
     return true;
   }
   if (key == "taskbar_name_padding") {

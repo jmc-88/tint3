@@ -307,6 +307,7 @@ task_text = yes
 task_icon = on
 wm_menu = false
 panel_dock = no
+panel_items = T       # taskbar_name shouldn't disable this
 taskbar_name = off
 )EOF";
 
@@ -323,7 +324,9 @@ TEST_CASE("ConfigParserBooleanValues") {
 
   REQUIRE_FALSE(wm_menu);
   REQUIRE_FALSE(panel_dock);
-  REQUIRE_FALSE(taskbar_enabled);
+
+  REQUIRE(taskbar_enabled);
+  REQUIRE_FALSE(taskbarname_enabled);
 }
 
 static constexpr char kInvalidInteger[] =
