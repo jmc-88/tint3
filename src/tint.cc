@@ -171,6 +171,10 @@ void InitX11() {
     std::exit(0);
   }
 
+#ifdef _TINT3_DEBUG
+  XSynchronize(server.dsp, True);
+#endif  // _TINT3_DEBUG
+
   server.InitX11();
   XSetErrorHandler(ServerCatchError);
 
