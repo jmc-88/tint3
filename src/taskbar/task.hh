@@ -53,6 +53,7 @@ class Global_task : public Area {
 class Task : public Area {
  public:
   explicit Task(Timer& timer);
+  ~Task();
 
   // TODO: group task with list of windows here
   Window win;

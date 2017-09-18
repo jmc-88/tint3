@@ -73,6 +73,14 @@ Global_task::Global_task() {
 
 Task::Task(Timer& timer) : timer_(timer) { set_has_mouse_effects(true); }
 
+Task::~Task() {
+  for (int k = 0; k < kTaskStateCount; ++k) {
+    if (state_pix[k] != None) {
+      XFreePixmap(server.dsp, state_pix[k]);
+    }
+  }
+}
+
 std::string Task::GetTooltipText() {
   return tooltip_enabled_ ? title_ : std::string();
 }
@@ -176,21 +184,7 @@ void RemoveTask(Task* tsk) {
     return;
   }
 
-  // free title and icon just for the first task
-  // even with task_on_all_desktop and with task_on_all_panel
-  tsk->SetTitle("");
-
-  for (int k = 0; k < kTaskStateCount; ++k) {
-    tsk->icon[k] = 0;
-    tsk->icon_hover[k] = 0;
-    tsk->icon_pressed[k] = 0;
-    if (tsk->state_pix[k] != None) {
-      XFreePixmap(server.dsp, tsk->state_pix[k]);
-    }
-  }
-
   auto it = win_to_task_map.find(tsk->win);
-
   if (it == win_to_task_map.end()) {
     return;
   }
@@ -199,22 +193,18 @@ void RemoveTask(Task* tsk) {
     tsk2->parent_->RemoveChild(tsk2);
 
     if (tsk2 == task_active) {
-      task_active = 0;
+      task_active = nullptr;
     }
-
     if (tsk2 == task_drag) {
-      task_drag = 0;
+      task_drag = nullptr;
     }
 
     auto it = std::find(urgent_list.begin(), urgent_list.end(), tsk2);
-
     if (it != urgent_list.end()) {
       tsk2->DelUrgent();
     }
-
     delete tsk2;
   }
-
   win_to_task_map.erase(it);
 }
 
