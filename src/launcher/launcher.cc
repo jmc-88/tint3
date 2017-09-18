@@ -1,21 +1,21 @@
 /**************************************************************************
-* Tint3 : launcher
-*
-* Copyright (C) 2010       (mrovi@interfete-web-club.com)
-*
-* This program is free software; you can redistribute it and/or
-* modify it under the terms of the GNU General Public License version 2
-* as published by the Free Software Foundation.
-*
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-* You should have received a copy of the GNU General Public License
-* along with this program; if not, write to the Free Software
-* Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
-*USA.
-**************************************************************************/
+ * Tint3 : launcher
+ *
+ * Copyright (C) 2010       (mrovi@interfete-web-club.com)
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License version 2
+ * as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+ *USA.
+ **************************************************************************/
 
 #include <cairo-xlib.h>
 #include <cairo.h>
@@ -30,6 +30,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <iterator>
 #include <list>
 #include <memory>
 #include <set>
@@ -436,11 +437,6 @@ IconTheme::~IconTheme() {
 
 // TODO Use UTF8 when parsing the file
 IconTheme* LoadTheme(std::string const& name) {
-  // Look for name/index.theme in $HOME/.icons, /usr/share/icons,
-  // /usr/share/pixmaps (stop at the first found)
-  // Parse index.theme -> list of IconThemeDir with attributes
-  // Return IconTheme*
-
   if (name.empty()) {
     return nullptr;
   }
@@ -485,7 +481,8 @@ IconTheme* LoadTheme(std::string const& name) {
           // value is like oxygen,wood,default
           util::string::Trim(&value);
           auto names = util::string::Split(value, ',');
-          std::copy(names.begin(), names.end(), theme->list_inherits.end());
+          std::copy(names.begin(), names.end(),
+                    std::back_inserter(theme->list_inherits));
         } else if (key == "Directories") {
           // value is like
           // 48x48/apps,48x48/mimetypes,32x32/apps,scalable/apps,scalable/mimetypes
@@ -756,7 +753,7 @@ void Launcher::LoadIcons() {
 }
 
 // Populates the list_themes list
-void Launcher::LoadThemes() {
+bool Launcher::LoadThemes() {
   // load the user theme, all the inherited themes recursively (DFS), and the
   // hicolor theme
   // avoid inheritance loops
@@ -769,6 +766,7 @@ void Launcher::LoadThemes() {
 
   std::list<std::string> queue{icon_theme_name};
   std::set<std::string> queued{icon_theme_name};
+  bool icon_theme_name_loaded = false;
 
   while (!queue.empty()) {
     if (queue.empty()) {
@@ -786,22 +784,26 @@ void Launcher::LoadThemes() {
 
     util::log::Error() << " '" << name << "',";
     auto theme = LoadTheme(name);
+    if (theme == nullptr) {
+      continue;
+    }
 
-    if (theme != nullptr) {
-      list_themes_.push_back(theme);
+    list_themes_.push_back(theme);
+    if (name == icon_theme_name) {
+      icon_theme_name_loaded = true;
+    }
 
-      auto position = queue.begin();
-
-      for (auto const& item : theme->list_inherits) {
-        if (queued.count(item) == 0) {
-          queue.insert(position++, item);
-          queued.insert(item);
-        }
+    auto position = queue.begin();
+    for (auto const& item : theme->list_inherits) {
+      if (queued.count(item) == 0) {
+        queue.insert(position++, item);
+        queued.insert(item);
       }
     }
   }
 
   util::log::Error() << '\n';
+  return icon_theme_name_loaded;
 }
 
 int DirectoryMatchesSize(IconThemeDir* dir, int size) {

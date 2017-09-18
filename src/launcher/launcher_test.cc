@@ -36,6 +36,18 @@ TEST_CASE("FindDesktopEntry") {
   }
 }
 
+TEST_CASE("Launcher::LoadThemes") {
+  auto data_home =
+      environment::MakeScopedOverride("HOME", "src/launcher/testdata");
+  icon_theme_name = "UnitTestTheme";
+
+  // Should successfully load:
+  //  src/launcher/testdata/.icons/UnitTestTheme/index.theme
+  Launcher l;
+  REQUIRE(l.LoadThemes());
+  l.CleanupTheme();
+}
+
 TEST_CASE("Launcher::GetIconSize") {
   SECTION("borders") {
     panel_horizontal = true;

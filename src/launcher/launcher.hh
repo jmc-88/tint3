@@ -80,7 +80,7 @@ class Launcher : public Area {
   void CleanupTheme();
 
   // Populates the list_themes list
-  void LoadThemes();
+  bool LoadThemes();
 
   // Populates the list_icons list
   void LoadIcons();

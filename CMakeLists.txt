@@ -287,6 +287,7 @@ enable_testing()
 # List of testdata files to copy
 set(TESTDATA_SRCS
     src/launcher/testdata/applications/launcher_test.desktop
+    src/launcher/testdata/.icons/UnitTestTheme/index.theme
     src/util/testdata/fs_test.txt)
 
 # Generated list of output paths in the build directory
