@@ -81,75 +81,6 @@ std::vector<util::Gradient> gradients;
 
 util::imlib2::Image default_icon;
 
-namespace {
-
-void UpdateStrut(Panel* p) {
-  if (panel_strut_policy == PanelStrutPolicy::kNone) {
-    XDeleteProperty(server.dsp, p->main_win_, server.atom("_NET_WM_STRUT"));
-    XDeleteProperty(server.dsp, p->main_win_,
-                    server.atom("_NET_WM_STRUT_PARTIAL"));
-    return;
-  }
-
-  // Reserved space
-  unsigned int d1, screen_width, screen_height;
-  Window d2;
-  int d3;
-  XGetGeometry(server.dsp, server.root_window(), &d2, &d3, &d3, &screen_width,
-               &screen_height, &d1, &d1);
-  Monitor monitor = server.monitor[p->monitor_];
-  long struts[12] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-
-  if (panel_horizontal) {
-    int height = p->height_ + p->margin_y_;
-
-    if (panel_strut_policy == PanelStrutPolicy::kMinimum ||
-        (panel_strut_policy == PanelStrutPolicy::kFollowSize && p->hidden())) {
-      height = p->hidden_height_;
-    }
-
-    if (panel_vertical_position == PanelVerticalPosition::kTop) {
-      struts[2] = height + monitor.y;
-      struts[8] = p->root_x_;
-      // p->width - 1 allowed full screen on monitor 2
-      struts[9] = p->root_x_ + p->width_ - 1;
-    } else {
-      struts[3] = height + screen_height - monitor.y - monitor.height;
-      struts[10] = p->root_x_;
-      // p->width - 1 allowed full screen on monitor 2
-      struts[11] = p->root_x_ + p->width_ - 1;
-    }
-  } else {
-    int width = p->width_ + p->margin_x_;
-
-    if (panel_strut_policy == PanelStrutPolicy::kMinimum ||
-        (panel_strut_policy == PanelStrutPolicy::kFollowSize && p->hidden())) {
-      width = p->hidden_width_;
-    }
-
-    if (panel_horizontal_position == PanelHorizontalPosition::kLeft) {
-      struts[0] = width + monitor.x;
-      struts[4] = p->root_y_;
-      // p->width - 1 allowed full screen on monitor 2
-      struts[5] = p->root_y_ + p->height_ - 1;
-    } else {
-      struts[1] = width + screen_width - monitor.x - monitor.width;
-      struts[6] = p->root_y_;
-      // p->width - 1 allowed full screen on monitor 2
-      struts[7] = p->root_y_ + p->height_ - 1;
-    }
-  }
-
-  // Old specification : fluxbox need _NET_WM_STRUT.
-  XChangeProperty(server.dsp, p->main_win_, server.atom("_NET_WM_STRUT"),
-                  XA_CARDINAL, 32, PropModeReplace, (unsigned char*)&struts, 4);
-  XChangeProperty(server.dsp, p->main_win_,
-                  server.atom("_NET_WM_STRUT_PARTIAL"), XA_CARDINAL, 32,
-                  PropModeReplace, (unsigned char*)&struts, 12);
-}
-
-}  // namespace
-
 void DefaultPanel() {
   panels.clear();
   default_icon.Free();
@@ -552,7 +483,7 @@ void Panel::SetProperties() {
   XChangeProperty(server.dsp, main_win_, server.atom("XdndAware"), XA_ATOM, 32,
                   PropModeReplace, (unsigned char*)&version, 1);
 
-  UpdateStrut(this);
+  UpdateNetWMStrut();
 
   // Fixed position and non-resizable window
   // Allow panel move and resize when tint3 reload config file
@@ -672,6 +603,71 @@ void Panel::UpdateTaskbarVisibility() {
   }
 
   panel_refresh = true;
+}
+
+void Panel::UpdateNetWMStrut() {
+  if (panel_strut_policy == PanelStrutPolicy::kNone) {
+    XDeleteProperty(server.dsp, main_win_, server.atom("_NET_WM_STRUT"));
+    XDeleteProperty(server.dsp, main_win_,
+                    server.atom("_NET_WM_STRUT_PARTIAL"));
+    return;
+  }
+
+  // Reserved space
+  unsigned int d1, screen_width, screen_height;
+  Window d2;
+  int d3;
+  XGetGeometry(server.dsp, server.root_window(), &d2, &d3, &d3, &screen_width,
+               &screen_height, &d1, &d1);
+  Monitor monitor = server.monitor[monitor_];
+  long struts[12] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+
+  if (panel_horizontal) {
+    int height = height_ + margin_y_;
+
+    if (panel_strut_policy == PanelStrutPolicy::kMinimum ||
+        (panel_strut_policy == PanelStrutPolicy::kFollowSize && hidden())) {
+      height = hidden_height_;
+    }
+
+    if (panel_vertical_position == PanelVerticalPosition::kTop) {
+      struts[2] = height + monitor.y;
+      struts[8] = root_x_;
+      // width - 1 allowed full screen on monitor 2
+      struts[9] = root_x_ + width_ - 1;
+    } else {
+      struts[3] = height + screen_height - monitor.y - monitor.height;
+      struts[10] = root_x_;
+      // width - 1 allowed full screen on monitor 2
+      struts[11] = root_x_ + width_ - 1;
+    }
+  } else {
+    int width = width_ + margin_x_;
+
+    if (panel_strut_policy == PanelStrutPolicy::kMinimum ||
+        (panel_strut_policy == PanelStrutPolicy::kFollowSize && hidden())) {
+      width = hidden_width_;
+    }
+
+    if (panel_horizontal_position == PanelHorizontalPosition::kLeft) {
+      struts[0] = width + monitor.x;
+      struts[4] = root_y_;
+      // width - 1 allowed full screen on monitor 2
+      struts[5] = root_y_ + height_ - 1;
+    } else {
+      struts[1] = width + screen_width - monitor.x - monitor.width;
+      struts[6] = root_y_;
+      // width - 1 allowed full screen on monitor 2
+      struts[7] = root_y_ + height_ - 1;
+    }
+  }
+
+  // Old specification : fluxbox need _NET_WM_STRUT.
+  XChangeProperty(server.dsp, main_win_, server.atom("_NET_WM_STRUT"),
+                  XA_CARDINAL, 32, PropModeReplace, (unsigned char*)&struts, 4);
+  XChangeProperty(server.dsp, main_win_,
+                  server.atom("_NET_WM_STRUT_PARTIAL"), XA_CARDINAL, 32,
+                  PropModeReplace, (unsigned char*)&struts, 12);
 }
 
 Panel* GetPanel(Window win) {
@@ -805,7 +801,7 @@ bool Panel::AutohideShow() {
   hidden_ = false;
 
   if (panel_strut_policy == PanelStrutPolicy::kFollowSize) {
-    UpdateStrut(this);
+    UpdateNetWMStrut();
   }
 
   XMapSubwindows(server.dsp, main_win_);  // systray windows
@@ -836,7 +832,7 @@ bool Panel::AutohideHide() {
   hidden_ = true;
 
   if (panel_strut_policy == PanelStrutPolicy::kFollowSize) {
-    UpdateStrut(this);
+    UpdateNetWMStrut();
   }
 
   XUnmapSubwindows(server.dsp, main_win_);  // systray windows

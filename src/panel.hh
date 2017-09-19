@@ -160,8 +160,9 @@ class Panel : public Area {
 
  private:
   bool hidden_;
-
   Clock clock_;
+
+  void UpdateNetWMStrut();
 };
 
 extern Panel panel_config;
