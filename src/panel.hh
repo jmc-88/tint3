@@ -77,6 +77,15 @@ extern std::vector<util::Gradient> gradients;
 
 extern util::imlib2::Image default_icon;
 
+class PanelConfig {
+ public:
+  PanelConfig() = default;
+
+  static PanelConfig Default();
+};
+
+extern PanelConfig new_panel_config;
+
 // tint3 use one panel per monitor and one taskbar per desktop.
 class Panel : public Area {
  public:
@@ -152,6 +161,8 @@ class Panel : public Area {
   bool AutohideShow();
   bool AutohideHide();
 
+  void UseConfig(PanelConfig const& cfg, unsigned int num_desktop);
+
 #ifdef _TINT3_DEBUG
 
   std::string GetFriendlyName() const override;
@@ -159,6 +170,8 @@ class Panel : public Area {
 #endif  // _TINT3_DEBUG
 
  private:
+  PanelConfig config_;
+
   bool hidden_;
   Clock clock_;
 

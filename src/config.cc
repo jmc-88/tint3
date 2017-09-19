@@ -327,6 +327,7 @@ Reader::Reader(Server* server) : server_(server), new_config_file_(false) {
   panel_config.mouse_pressed_saturation = 0;
   panel_config.mouse_pressed_brightness = -10;
 
+  new_panel_config = PanelConfig::Default();
   tooltip_config = TooltipConfig::Default();
 }
 

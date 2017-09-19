@@ -72,6 +72,7 @@ int max_tick_urgent;
 
 // panel's initial config
 Panel panel_config;
+PanelConfig new_panel_config;
 // panels (one panel per monitor)
 std::vector<Panel> panels;
 
@@ -80,6 +81,11 @@ std::vector<Executor> executors;
 std::vector<util::Gradient> gradients;
 
 util::imlib2::Image default_icon;
+
+PanelConfig PanelConfig::Default() {
+  PanelConfig cfg;
+  return cfg;
+}
 
 void DefaultPanel() {
   panels.clear();
@@ -168,6 +174,7 @@ void InitPanel(Timer& timer) {
 
   for (unsigned int i = 0; i < num_panels; ++i) {
     Panel& p = panels[i];
+    p.UseConfig(new_panel_config, i);
 
     if (panel_config.monitor_ == Panel::kAllMonitors) {
       p.monitor_ = i;
@@ -668,6 +675,10 @@ void Panel::UpdateNetWMStrut() {
   XChangeProperty(server.dsp, main_win_,
                   server.atom("_NET_WM_STRUT_PARTIAL"), XA_CARDINAL, 32,
                   PropModeReplace, (unsigned char*)&struts, 12);
+}
+
+void Panel::UseConfig(PanelConfig const& cfg, unsigned int /*num_desktop*/) {
+  config_ = cfg;
 }
 
 Panel* GetPanel(Window win) {
