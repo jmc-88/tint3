@@ -81,6 +81,14 @@ class PanelConfig {
  public:
   PanelConfig() = default;
 
+  bool mouse_effects;
+  int mouse_hover_alpha;
+  int mouse_hover_saturation;
+  int mouse_hover_brightness;
+  int mouse_pressed_alpha;
+  int mouse_pressed_saturation;
+  int mouse_pressed_brightness;
+
   static PanelConfig Default();
 };
 
@@ -123,15 +131,6 @@ class Panel : public Area {
   int hidden_width_, hidden_height_;
   Pixmap hidden_pixmap_;
   Interval::Id autohide_timeout_;
-
-  // mouse effects
-  bool mouse_effects;
-  int mouse_hover_alpha;
-  int mouse_hover_saturation;
-  int mouse_hover_brightness;
-  int mouse_pressed_alpha;
-  int mouse_pressed_saturation;
-  int mouse_pressed_brightness;
 
   Clock* clock();
 

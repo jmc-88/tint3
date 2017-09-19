@@ -542,7 +542,7 @@ Area* Area::MouseOver(Area* previous_area, bool button_pressed) {
   if (previous_area != nullptr && previous_area != this) {
     previous_area->MouseLeave();
   }
-  if (!panel_config.mouse_effects || !has_mouse_effects_) {
+  if (!new_panel_config.mouse_effects || !has_mouse_effects_) {
     return nullptr;
   }
   set_mouse_state(button_pressed ? MouseState::kMousePressed

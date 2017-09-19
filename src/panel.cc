@@ -84,6 +84,15 @@ util::imlib2::Image default_icon;
 
 PanelConfig PanelConfig::Default() {
   PanelConfig cfg;
+
+  cfg.mouse_effects = false;
+  cfg.mouse_hover_alpha = 100;
+  cfg.mouse_hover_saturation = 0;
+  cfg.mouse_hover_brightness = 10;
+  cfg.mouse_pressed_alpha = 100;
+  cfg.mouse_pressed_saturation = 0;
+  cfg.mouse_pressed_brightness = -10;
+
   return cfg;
 }
 

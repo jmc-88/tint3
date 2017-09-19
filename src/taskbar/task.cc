@@ -360,25 +360,25 @@ void GetIcon(Task* tsk) {
     tsk->icon[k] = adjusted_icon;
 
     auto adjusted_hover_icon = util::imlib2::Image::CloneExisting(orig_image);
-    if (panel_config.mouse_effects) {
+    if (new_panel_config.mouse_effects) {
       imlib_context_set_image(adjusted_hover_icon);
       DATA32* hover_data = imlib_image_get_data();
       AdjustASB(hover_data, tsk->icon_width, tsk->icon_height,
-                panel_config.mouse_hover_alpha,
-                panel_config.mouse_hover_saturation / 100.0f,
-                panel_config.mouse_hover_brightness / 100.0f);
+                new_panel_config.mouse_hover_alpha,
+                new_panel_config.mouse_hover_saturation / 100.0f,
+                new_panel_config.mouse_hover_brightness / 100.0f);
       imlib_image_put_back_data(hover_data);
     }
     tsk->icon_hover[k] = adjusted_hover_icon;
 
     auto adjusted_pressed_icon = util::imlib2::Image::CloneExisting(orig_image);
-    if (panel_config.mouse_effects) {
+    if (new_panel_config.mouse_effects) {
       imlib_context_set_image(adjusted_pressed_icon);
       DATA32* pressed_data = imlib_image_get_data();
       AdjustASB(pressed_data, tsk->icon_width, tsk->icon_height,
-                panel_config.mouse_pressed_alpha,
-                panel_config.mouse_pressed_saturation / 100.0f,
-                panel_config.mouse_pressed_brightness / 100.0f);
+                new_panel_config.mouse_pressed_alpha,
+                new_panel_config.mouse_pressed_saturation / 100.0f,
+                new_panel_config.mouse_pressed_brightness / 100.0f);
       imlib_image_put_back_data(pressed_data);
     }
     tsk->icon_pressed[k] = adjusted_hover_icon;

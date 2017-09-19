@@ -197,18 +197,18 @@ bool Launcher::Resize() {
         launcher_icon->icon_scaled_ =
             ScaleIcon(launcher_icon->icon_original_, icon_size);
         launcher_icon->icon_hover_ = launcher_icon->icon_scaled_;
-        if (panel_config.mouse_effects) {
+        if (new_panel_config.mouse_effects) {
           launcher_icon->icon_hover_.AdjustASB(
-              panel_config.mouse_hover_alpha,
-              panel_config.mouse_hover_saturation / 100.0f,
-              panel_config.mouse_hover_brightness / 100.0f);
+              new_panel_config.mouse_hover_alpha,
+              new_panel_config.mouse_hover_saturation / 100.0f,
+              new_panel_config.mouse_hover_brightness / 100.0f);
         }
         launcher_icon->icon_pressed_ = launcher_icon->icon_scaled_;
-        if (panel_config.mouse_effects) {
+        if (new_panel_config.mouse_effects) {
           launcher_icon->icon_pressed_.AdjustASB(
-              panel_config.mouse_pressed_alpha,
-              panel_config.mouse_pressed_saturation / 100.0f,
-              panel_config.mouse_pressed_brightness / 100.0f);
+              new_panel_config.mouse_pressed_alpha,
+              new_panel_config.mouse_pressed_saturation / 100.0f,
+              new_panel_config.mouse_pressed_brightness / 100.0f);
         }
         continue;
       }
@@ -333,7 +333,7 @@ std::string LauncherIcon::GetTooltipText() {
 
 void LauncherIcon::DrawForeground(cairo_t* c) {
   // Render
-  if (panel_config.mouse_effects) {
+  if (new_panel_config.mouse_effects) {
     if (mouse_state() == MouseState::kMouseOver) {
       imlib_context_set_image(icon_hover_);
     } else if (mouse_state() == MouseState::kMousePressed) {

@@ -319,14 +319,6 @@ void ExtractValues(std::string const& value, std::string* v1, std::string* v2,
 }
 
 Reader::Reader(Server* server) : server_(server), new_config_file_(false) {
-  panel_config.mouse_effects = false;
-  panel_config.mouse_hover_alpha = 100;
-  panel_config.mouse_hover_saturation = 0;
-  panel_config.mouse_hover_brightness = 10;
-  panel_config.mouse_pressed_alpha = 100;
-  panel_config.mouse_pressed_saturation = 0;
-  panel_config.mouse_pressed_brightness = -10;
-
   new_panel_config = PanelConfig::Default();
   tooltip_config = TooltipConfig::Default();
 }
@@ -1619,31 +1611,31 @@ bool Reader::AddEntry_Mouse(std::string const& key, std::string const& value) {
     return true;
   }
   if (key == "mouse_effects") {
-    ParseBoolean(value, &panel_config.mouse_effects);
+    ParseBoolean(value, &new_panel_config.mouse_effects);
     return true;
   }
   if (key == "mouse_hover_icon_asb") {
     std::string value1, value2, value3;
     config::ExtractValues(value, &value1, &value2, &value3);
-    if (!ParseNumber(value1, &panel_config.mouse_hover_alpha)) {
+    if (!ParseNumber(value1, &new_panel_config.mouse_hover_alpha)) {
       return true;
     }
-    if (!ParseNumber(value2, &panel_config.mouse_hover_saturation)) {
+    if (!ParseNumber(value2, &new_panel_config.mouse_hover_saturation)) {
       return true;
     }
-    ParseNumber(value3, &panel_config.mouse_hover_brightness);
+    ParseNumber(value3, &new_panel_config.mouse_hover_brightness);
     return true;
   }
   if (key == "mouse_pressed_icon_asb") {
     std::string value1, value2, value3;
     config::ExtractValues(value, &value1, &value2, &value3);
-    if (!ParseNumber(value1, &panel_config.mouse_pressed_alpha)) {
+    if (!ParseNumber(value1, &new_panel_config.mouse_pressed_alpha)) {
       return true;
     }
-    if (!ParseNumber(value2, &panel_config.mouse_pressed_saturation)) {
+    if (!ParseNumber(value2, &new_panel_config.mouse_pressed_saturation)) {
       return true;
     }
-    ParseNumber(value3, &panel_config.mouse_pressed_brightness);
+    ParseNumber(value3, &new_panel_config.mouse_pressed_brightness);
     return true;
   }
 
