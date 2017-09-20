@@ -91,6 +91,10 @@ class PanelConfig {
   int mouse_pressed_saturation;
   int mouse_pressed_brightness;
 
+  int padding_x_lr;
+  int padding_x;
+  int padding_y;
+
   unsigned int width;
   bool percent_x;
   unsigned int height;

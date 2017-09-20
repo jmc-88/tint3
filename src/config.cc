@@ -693,21 +693,21 @@ bool Reader::AddEntry_Panel(std::string const& key, std::string const& value) {
     if (!ParseNumber(value1, &padding_x_lr)) {
       return true;
     }
-    panel_config.padding_x_lr_ = panel_config.padding_x_ = padding_x_lr;
+    new_panel_config.padding_x_lr = new_panel_config.padding_x = padding_x_lr;
 
     if (!value2.empty()) {
       int padding_y;
       if (!ParseNumber(value2, &padding_y)) {
         return true;
       }
-      panel_config.padding_y_ = padding_y;
+      new_panel_config.padding_y = padding_y;
     }
     if (!value3.empty()) {
       int padding_x;
       if (!ParseNumber(value3, &padding_x)) {
         return true;
       }
-      panel_config.padding_x_ = padding_x;
+      new_panel_config.padding_x = padding_x;
     }
     return true;
   }

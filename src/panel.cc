@@ -95,6 +95,10 @@ PanelConfig PanelConfig::Default() {
   cfg.mouse_pressed_saturation = 0;
   cfg.mouse_pressed_brightness = -10;
 
+  cfg.padding_x_lr = 0;
+  cfg.padding_x = 0;
+  cfg.padding_y = 0;
+
   cfg.width = 100;
   cfg.percent_x = true;
   cfg.height = 40;
@@ -681,6 +685,10 @@ void Panel::UseConfig(PanelConfig const& cfg, unsigned int num_desktop) {
   if (cfg.monitor == Panel::kAllMonitors) {
     config_.monitor = num_desktop;
   }
+
+  padding_x_lr_ = cfg.padding_x_lr;
+  padding_x_ = cfg.padding_x;
+  padding_y_ = cfg.padding_y;
 
   width_ = cfg.width;
   height_ = cfg.height;
