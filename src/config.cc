@@ -813,7 +813,7 @@ bool Reader::AddEntry_Battery(std::string const& key,
   }
   if (key == "battery_font_color") {
 #ifdef ENABLE_BATTERY
-    panel_config.battery_.font = ParseColor(value);
+    new_panel_config.battery.font = ParseColor(value);
 #endif  // ENABLE_BATTERY
     return true;
   }
@@ -822,18 +822,19 @@ bool Reader::AddEntry_Battery(std::string const& key,
     std::string value1, value2, value3;
     config::ExtractValues(value, &value1, &value2, &value3);
 
-    if (!ParseNumber(value1, &panel_config.battery_.padding_x_lr_)) {
+    if (!ParseNumber(value1, &new_panel_config.battery.padding_x_lr_)) {
       return true;
     }
-    panel_config.battery_.padding_x_ = panel_config.battery_.padding_x_lr_;
+    new_panel_config.battery.padding_x_ =
+        new_panel_config.battery.padding_x_lr_;
 
     if (!value2.empty()) {
-      if (!ParseNumber(value2, &panel_config.battery_.padding_y_)) {
+      if (!ParseNumber(value2, &new_panel_config.battery.padding_y_)) {
         return true;
       }
     }
     if (!value3.empty()) {
-      if (!ParseNumber(value3, &panel_config.battery_.padding_x_)) {
+      if (!ParseNumber(value3, &new_panel_config.battery.padding_x_)) {
         return true;
       }
     }
@@ -846,7 +847,7 @@ bool Reader::AddEntry_Battery(std::string const& key,
     if (!ParseNumber(value, &id)) {
       return true;
     }
-    panel_config.battery_.bg_ = GetBackgroundFromId(id);
+    new_panel_config.battery.bg_ = GetBackgroundFromId(id);
 #endif  // ENABLE_BATTERY
     return true;
   }

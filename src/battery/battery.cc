@@ -91,19 +91,19 @@ bool UpdateBatteries() {
 
   for (Panel& panel : panels) {
     if (battery_state.percentage >= percentage_hide) {
-      if (panel.battery_.on_screen_) {
-        panel.battery_.Hide();
+      if (panel.battery()->on_screen_) {
+        panel.battery()->Hide();
         panel_refresh = true;
       }
     } else {
-      if (!panel.battery_.on_screen_) {
-        panel.battery_.Show();
+      if (!panel.battery()->on_screen_) {
+        panel.battery()->Show();
         panel_refresh = true;
       }
     }
 
-    if (panel.battery_.on_screen_ && !same_info) {
-      panel.battery_.need_resize_ = true;
+    if (panel.battery()->on_screen_ && !same_info) {
+      panel.battery()->need_resize_ = true;
       panel_refresh = true;
     }
   }
@@ -202,12 +202,12 @@ void Battery::InitPanel(Panel* panel, Timer* timer) {
     return;
   }
 
-  Battery& battery = panel->battery_;
-  battery.parent_ = panel;
-  battery.panel_ = panel;
-  battery.size_mode_ = SizeMode::kByContent;
-  battery.on_screen_ = true;
-  battery.need_resize_ = true;
+  Battery* battery = panel->battery();
+  battery->parent_ = panel;
+  battery->panel_ = panel;
+  battery->size_mode_ = SizeMode::kByContent;
+  battery->on_screen_ = true;
+  battery->need_resize_ = true;
 
   if (!battery_timeout) {
     battery_timeout =

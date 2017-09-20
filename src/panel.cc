@@ -693,6 +693,9 @@ void Panel::UseConfig(PanelConfig const& cfg, unsigned int num_desktop) {
   }
 
   bg_ = cfg.background;
+#ifdef ENABLE_BATTERY
+  battery_ = cfg.battery;
+#endif  // ENABLE_BATTERY
 
   padding_x_lr_ = cfg.padding_x_lr;
   padding_x_ = cfg.padding_x;
@@ -709,6 +712,10 @@ Panel* GetPanel(Window win) {
     }
   }
   return nullptr;
+}
+
+Battery* Panel::battery() {
+  return &battery_;
 }
 
 Clock* Panel::clock() {

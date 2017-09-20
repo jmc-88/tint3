@@ -82,6 +82,9 @@ class PanelConfig {
   PanelConfig() = default;
 
   Background background;
+#ifdef ENABLE_BATTERY
+  Battery battery;
+#endif  // ENABLE_BATTERY
 
   unsigned int monitor;
 
@@ -131,12 +134,6 @@ class Panel : public Area {
   std::vector<Taskbar> taskbars;
   unsigned int num_desktops_;
 
-// --------------------------------------------------
-// battery
-#ifdef ENABLE_BATTERY
-  Battery battery_;
-#endif
-
   Launcher launcher_;
 
   // autohide
@@ -144,6 +141,7 @@ class Panel : public Area {
   Pixmap hidden_pixmap_;
   Interval::Id autohide_timeout_;
 
+  Battery* battery();
   Clock* clock();
 
   Taskbar* ClickTaskbar(int x, int y);
@@ -185,6 +183,9 @@ class Panel : public Area {
   PanelConfig config_;
 
   bool hidden_;
+#ifdef ENABLE_BATTERY
+  Battery battery_;
+#endif  // ENABLE_BATTERY
   Clock clock_;
 
   void UpdateNetWMStrut();
