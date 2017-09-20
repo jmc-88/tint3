@@ -89,6 +89,11 @@ class PanelConfig {
   int mouse_pressed_saturation;
   int mouse_pressed_brightness;
 
+  unsigned int width;
+  bool percent_x;
+  unsigned int height;
+  bool percent_y;
+
   static PanelConfig Default();
 };
 
@@ -107,7 +112,6 @@ class Panel : public Area {
   // position relative to root window
   int root_x_, root_y_;
   int margin_x_, margin_y_;
-  int percent_x, percent_y;
   // location of the panel (monitor number)
   unsigned int monitor_;
 

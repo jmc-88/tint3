@@ -93,6 +93,11 @@ PanelConfig PanelConfig::Default() {
   cfg.mouse_pressed_saturation = 0;
   cfg.mouse_pressed_brightness = -10;
 
+  cfg.width = 100;
+  cfg.percent_x = true;
+  cfg.height = 40;
+  cfg.percent_y = false;
+
   return cfg;
 }
 
@@ -288,11 +293,11 @@ void Panel::InitSizeAndPosition() {
 
   // detect panel size
   if (panel_horizontal) {
-    if (percent_x) {
+    if (config_.percent_x) {
       width_ = (float)server.monitor[monitor_].width * width_ / 100;
     }
 
-    if (percent_y) {
+    if (config_.percent_y) {
       height_ = (float)server.monitor[monitor_].height * height_ / 100;
     }
 
@@ -308,13 +313,13 @@ void Panel::InitSizeAndPosition() {
   } else {
     int old_panel_height = height_;
 
-    if (percent_x) {
+    if (config_.percent_x) {
       height_ = (float)server.monitor[monitor_].height * width_ / 100;
     } else {
       height_ = width_;
     }
 
-    if (percent_y) {
+    if (config_.percent_y) {
       width_ = (float)server.monitor[monitor_].width * old_panel_height / 100;
     } else {
       width_ = old_panel_height;
@@ -688,6 +693,8 @@ void Panel::UpdateNetWMStrut() {
 
 void Panel::UseConfig(PanelConfig const& cfg, unsigned int /*num_desktop*/) {
   config_ = cfg;
+  width_ = cfg.width;
+  height_ = cfg.height;
 }
 
 Panel* GetPanel(Window win) {

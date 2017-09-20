@@ -608,18 +608,18 @@ bool Reader::AddEntry_Panel(std::string const& key, std::string const& value) {
     config::ExtractValues(value, &value1, &value2, &value3);
 
     size_t b = value1.find_first_of('%');
-    panel_config.percent_x = (b != std::string::npos);
+    new_panel_config.percent_x = (b != std::string::npos);
 
     int width;
     if (!ParseNumber(value1.substr(0, b), &width)) {
       return true;
     }
 
-    panel_config.width_ = width;
-    if (panel_config.width_ == 0) {
+    new_panel_config.width = width;
+    if (new_panel_config.width == 0) {
       // full width mode
-      panel_config.width_ = 100;
-      panel_config.percent_x = 1;
+      new_panel_config.width = 100;
+      new_panel_config.percent_x = true;
     }
 
     if (!value2.empty()) {
@@ -627,14 +627,14 @@ bool Reader::AddEntry_Panel(std::string const& key, std::string const& value) {
 
       if (b != std::string::npos) {
         b = (b - 1);  // don't parse the '%' character
-        panel_config.percent_y = 1;
+        new_panel_config.percent_y = true;
       }
 
       int height;
       if (!ParseNumber(value2.substr(0, b), &height)) {
         return true;
       }
-      panel_config.height_ = height;
+      new_panel_config.height = height;
     }
 
     return true;
