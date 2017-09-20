@@ -83,6 +83,9 @@ class PanelConfig {
 
   unsigned int monitor;
 
+  int margin_x;
+  int margin_y;
+
   bool mouse_effects;
   int mouse_hover_alpha;
   int mouse_hover_saturation;
@@ -117,7 +120,6 @@ class Panel : public Area {
 
   // position relative to root window
   int root_x_, root_y_;
-  int margin_x_, margin_y_;
 
   // --------------------------------------------------
   // task and taskbar parameter per panel

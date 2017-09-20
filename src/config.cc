@@ -674,14 +674,14 @@ bool Reader::AddEntry_Panel(std::string const& key, std::string const& value) {
     if (!ParseNumber(value1, &margin_x)) {
       return true;
     }
-    panel_config.margin_x_ = margin_x;
+    new_panel_config.margin_x = margin_x;
 
     if (!value2.empty()) {
       int margin_y;
       if (!ParseNumber(value2, &margin_y)) {
         return true;
       }
-      panel_config.margin_y_ = margin_y;
+      new_panel_config.margin_y = margin_y;
     }
     return true;
   }

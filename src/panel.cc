@@ -87,6 +87,9 @@ PanelConfig PanelConfig::Default() {
 
   cfg.monitor = 0;
 
+  cfg.margin_x = 0;
+  cfg.margin_y = 0;
+
   cfg.mouse_effects = false;
   cfg.mouse_hover_alpha = 100;
   cfg.mouse_hover_saturation = 0;
@@ -298,7 +301,7 @@ void Panel::InitSizeAndPosition() {
     if (config_.percent_x) {
       width_ = monitor().width * width_ / 100;
     }
-    width_ = std::max(width_, monitor().width - margin_x_);
+    width_ = std::max(width_, monitor().width - config_.margin_x);
 
     if (config_.percent_y) {
       height_ = monitor().height * height_ / 100;
@@ -316,7 +319,7 @@ void Panel::InitSizeAndPosition() {
     if (config_.percent_x) {
       height_ = monitor().height * width_ / 100.0;
     }
-    height_ = std::max(height_, monitor().height - margin_y_);
+    height_ = std::max(height_, monitor().height - config_.margin_y);
 
     width_ = old_panel_height;
     if (config_.percent_y) {
@@ -332,21 +335,21 @@ void Panel::InitSizeAndPosition() {
 
   // panel position determined here
   if (panel_horizontal_position == PanelHorizontalPosition::kLeft) {
-    root_x_ = monitor().x + margin_x_;
+    root_x_ = monitor().x + config_.margin_x;
   } else if (panel_horizontal_position == PanelHorizontalPosition::kRight) {
-    root_x_ = monitor().x + monitor().width - width_ - margin_x_;
+    root_x_ = monitor().x + monitor().width - width_ - config_.margin_x;
   } else {
     if (panel_horizontal) {
       root_x_ = monitor().x + (monitor().width - width_) / 2;
     } else {
-      root_x_ = monitor().x + margin_x_;
+      root_x_ = monitor().x + config_.margin_x;
     }
   }
 
   if (panel_vertical_position == PanelVerticalPosition::kTop) {
-    root_y_ = monitor().y + margin_y_;
+    root_y_ = monitor().y + config_.margin_y;
   } else if (panel_vertical_position == PanelVerticalPosition::kBottom) {
-    root_y_ = monitor().y + monitor().height - height_ - margin_y_;
+    root_y_ = monitor().y + monitor().height - height_ - config_.margin_y;
   } else {
     root_y_ = monitor().y + (monitor().height - height_) / 2;
   }
@@ -633,7 +636,7 @@ void Panel::UpdateNetWMStrut() {
   long struts[12] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
   if (panel_horizontal) {
-    int height = height_ + margin_y_;
+    int height = height_ + config_.margin_y;
 
     if (panel_strut_policy == PanelStrutPolicy::kMinimum ||
         (panel_strut_policy == PanelStrutPolicy::kFollowSize && hidden())) {
@@ -652,7 +655,7 @@ void Panel::UpdateNetWMStrut() {
       struts[11] = root_x_ + width_ - 1;
     }
   } else {
-    int width = width_ + margin_x_;
+    int width = width_ + config_.margin_x;
 
     if (panel_strut_policy == PanelStrutPolicy::kMinimum ||
         (panel_strut_policy == PanelStrutPolicy::kFollowSize && hidden())) {
