@@ -85,6 +85,9 @@ util::imlib2::Image default_icon;
 PanelConfig PanelConfig::Default() {
   PanelConfig cfg;
 
+  Color black_80pct{Color::Array{0, 0, 0}, .8};
+  cfg.background.set_fill_color(black_80pct);
+
   cfg.monitor = 0;
 
   cfg.margin_x = 0;
@@ -688,6 +691,8 @@ void Panel::UseConfig(PanelConfig const& cfg, unsigned int num_desktop) {
   if (cfg.monitor == Panel::kAllMonitors) {
     config_.monitor = num_desktop;
   }
+
+  bg_ = cfg.background;
 
   padding_x_lr_ = cfg.padding_x_lr;
   padding_x_ = cfg.padding_x;

@@ -747,7 +747,7 @@ bool Reader::AddEntry_Panel(std::string const& key, std::string const& value) {
     if (!ParseNumber(value, &id)) {
       return true;
     }
-    panel_config.bg_ = GetBackgroundFromId(id);
+    new_panel_config.background = GetBackgroundFromId(id);
     return true;
   }
   if (key == "wm_menu") {

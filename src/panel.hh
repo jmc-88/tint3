@@ -81,6 +81,8 @@ class PanelConfig {
  public:
   PanelConfig() = default;
 
+  Background background;
+
   unsigned int monitor;
 
   int margin_x;
