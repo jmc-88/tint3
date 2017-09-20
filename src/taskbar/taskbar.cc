@@ -273,7 +273,7 @@ void Taskbar::InitPanel(Panel* panel) {
               nullptr, &height);
 
   if (!panel->g_task.maximum_width && panel_horizontal) {
-    panel->g_task.maximum_width = server.monitor[panel->monitor_].width;
+    panel->g_task.maximum_width = panel->monitor().width;
   }
 
   panel->g_task.text_posx = panel->g_task.background[0].border().width() +

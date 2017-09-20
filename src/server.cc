@@ -237,6 +237,7 @@ void GetMonitors() {
         }
 
         Monitor current_monitor;
+        current_monitor.number = i;
         current_monitor.x = crtc_info->x;
         current_monitor.y = crtc_info->y;
         current_monitor.width = crtc_info->width;

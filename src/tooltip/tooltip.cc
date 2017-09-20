@@ -126,8 +126,8 @@ void Tooltip::GetExtents(std::string const& text, int* x, int* y, int* width,
   }
 
   // Limit the size of the tooltip
-  int max_width = server_->monitor[panel->monitor_].width;
-  int max_height = server_->monitor[panel->monitor_].height;
+  int max_width = panel->monitor().width;
+  int max_height = panel->monitor().height;
   if (panel_horizontal) {
     max_height -= panel->height_;
   } else {
@@ -152,10 +152,8 @@ void Tooltip::GetExtents(std::string const& text, int* x, int* y, int* width,
   (*y) = std::max(*y, min_y);
 
   // Don't escape the screen from the right or the bottom side
-  int max_x = server_->monitor[panel->monitor_].x +
-              server_->monitor[panel->monitor_].width - (*width);
-  int max_y = server_->monitor[panel->monitor_].y +
-              server_->monitor[panel->monitor_].height - (*height);
+  int max_x = panel->monitor().x + panel->monitor().width - (*width);
+  int max_y = panel->monitor().y + panel->monitor().height - (*height);
   (*x) = std::min(*x, max_x);
   (*y) = std::min(*y, max_y);
 }

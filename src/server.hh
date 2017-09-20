@@ -17,6 +17,7 @@
 #include "util/x11.hh"
 
 struct Monitor {
+  unsigned int number;
   int x;
   int y;
   unsigned int width;

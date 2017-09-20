@@ -600,7 +600,7 @@ bool Reader::AddEntry_Gradient(std::string const& key,
 
 bool Reader::AddEntry_Panel(std::string const& key, std::string const& value) {
   if (key == "panel_monitor") {
-    panel_config.monitor_ = GetMonitor(value);
+    new_panel_config.monitor = GetMonitor(value);
     return true;
   }
   if (key == "panel_size") {

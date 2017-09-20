@@ -784,7 +784,7 @@ void EventConfigureNotify(Window win, Timer& timer) {
 
   Panel* p = tsk->panel_;
 
-  if (p->monitor_ != util::window::GetMonitor(win)) {
+  if (p->monitor().number != util::window::GetMonitor(win)) {
     RemoveTask(tsk);
     tsk = AddTask(win, timer);
 

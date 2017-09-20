@@ -85,6 +85,8 @@ util::imlib2::Image default_icon;
 PanelConfig PanelConfig::Default() {
   PanelConfig cfg;
 
+  cfg.monitor = 0;
+
   cfg.mouse_effects = false;
   cfg.mouse_hover_alpha = 100;
   cfg.mouse_hover_saturation = 0;
@@ -156,12 +158,12 @@ void CleanupPanel() {
 }
 
 void InitPanel(Timer& timer) {
-  if (panel_config.monitor_ != Panel::kAllMonitors &&
-      panel_config.monitor_ > server.num_monitors - 1) {
+  if (new_panel_config.monitor != Panel::kAllMonitors &&
+      new_panel_config.monitor > server.num_monitors - 1) {
     // server.num_monitors minimum value is 1 (see get_monitors())
     util::log::Error() << "warning: monitor not found, "
                        << "defaulting to all monitors.\n";
-    panel_config.monitor_ = 0;
+    new_panel_config.monitor = 0;
   }
 
   InitSystray(timer);
@@ -174,7 +176,7 @@ void InitPanel(Timer& timer) {
 
   // number of panels (one monitor or 'all' monitors)
   unsigned int num_panels = server.num_monitors;
-  if (panel_config.monitor_ != Panel::kAllMonitors) {
+  if (new_panel_config.monitor != Panel::kAllMonitors) {
     num_panels = 1;
   }
 
@@ -189,10 +191,6 @@ void InitPanel(Timer& timer) {
   for (unsigned int i = 0; i < num_panels; ++i) {
     Panel& p = panels[i];
     p.UseConfig(new_panel_config, i);
-
-    if (panel_config.monitor_ == Panel::kAllMonitors) {
-      p.monitor_ = i;
-    }
 
     p.parent_ = &p;
     p.panel_ = &p;
@@ -294,15 +292,12 @@ void Panel::InitSizeAndPosition() {
   // detect panel size
   if (panel_horizontal) {
     if (config_.percent_x) {
-      width_ = (float)server.monitor[monitor_].width * width_ / 100;
+      width_ = monitor().width * width_ / 100;
     }
+    width_ = std::max(width_, monitor().width - margin_x_);
 
     if (config_.percent_y) {
-      height_ = (float)server.monitor[monitor_].height * height_ / 100;
-    }
-
-    if (width_ + margin_x_ > server.monitor[monitor_].width) {
-      width_ = server.monitor[monitor_].width - margin_x_;
+      height_ = monitor().height * height_ / 100;
     }
 
     if (bg_.border().rounded() > static_cast<int>(height_ / 2)) {
@@ -313,20 +308,15 @@ void Panel::InitSizeAndPosition() {
   } else {
     int old_panel_height = height_;
 
+    height_ = width_;
     if (config_.percent_x) {
-      height_ = (float)server.monitor[monitor_].height * width_ / 100;
-    } else {
-      height_ = width_;
+      height_ = monitor().height * width_ / 100.0;
     }
+    height_ = std::max(height_, monitor().height - margin_y_);
 
+    width_ = old_panel_height;
     if (config_.percent_y) {
-      width_ = (float)server.monitor[monitor_].width * old_panel_height / 100;
-    } else {
-      width_ = old_panel_height;
-    }
-
-    if (height_ + margin_y_ > server.monitor[monitor_].height) {
-      height_ = server.monitor[monitor_].height - margin_y_;
+      width_ = monitor().width * old_panel_height / 100.0;
     }
 
     if (bg_.border().rounded() > static_cast<int>(width_ / 2)) {
@@ -338,27 +328,23 @@ void Panel::InitSizeAndPosition() {
 
   // panel position determined here
   if (panel_horizontal_position == PanelHorizontalPosition::kLeft) {
-    root_x_ = server.monitor[monitor_].x + margin_x_;
+    root_x_ = monitor().x + margin_x_;
   } else if (panel_horizontal_position == PanelHorizontalPosition::kRight) {
-    root_x_ = server.monitor[monitor_].x + server.monitor[monitor_].width -
-              width_ - margin_x_;
+    root_x_ = monitor().x + monitor().width - width_ - margin_x_;
   } else {
     if (panel_horizontal) {
-      root_x_ = server.monitor[monitor_].x +
-                ((server.monitor[monitor_].width - width_) / 2);
+      root_x_ = monitor().x + (monitor().width - width_) / 2;
     } else {
-      root_x_ = server.monitor[monitor_].x + margin_x_;
+      root_x_ = monitor().x + margin_x_;
     }
   }
 
   if (panel_vertical_position == PanelVerticalPosition::kTop) {
-    root_y_ = server.monitor[monitor_].y + margin_y_;
+    root_y_ = monitor().y + margin_y_;
   } else if (panel_vertical_position == PanelVerticalPosition::kBottom) {
-    root_y_ = server.monitor[monitor_].y + server.monitor[monitor_].height -
-              height_ - margin_y_;
+    root_y_ = monitor().y + monitor().height - height_ - margin_y_;
   } else {
-    root_y_ = server.monitor[monitor_].y +
-              ((server.monitor[monitor_].height - height_) / 2);
+    root_y_ = monitor().y + (monitor().height - height_) / 2;
   }
 
   // autohide or strut_policy=minimum
@@ -640,7 +626,6 @@ void Panel::UpdateNetWMStrut() {
   int d3;
   XGetGeometry(server.dsp, server.root_window(), &d2, &d3, &d3, &screen_width,
                &screen_height, &d1, &d1);
-  Monitor monitor = server.monitor[monitor_];
   long struts[12] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
   if (panel_horizontal) {
@@ -652,12 +637,12 @@ void Panel::UpdateNetWMStrut() {
     }
 
     if (panel_vertical_position == PanelVerticalPosition::kTop) {
-      struts[2] = height + monitor.y;
+      struts[2] = height + monitor().y;
       struts[8] = root_x_;
       // width - 1 allowed full screen on monitor 2
       struts[9] = root_x_ + width_ - 1;
     } else {
-      struts[3] = height + screen_height - monitor.y - monitor.height;
+      struts[3] = height + screen_height - monitor().y - monitor().height;
       struts[10] = root_x_;
       // width - 1 allowed full screen on monitor 2
       struts[11] = root_x_ + width_ - 1;
@@ -671,12 +656,12 @@ void Panel::UpdateNetWMStrut() {
     }
 
     if (panel_horizontal_position == PanelHorizontalPosition::kLeft) {
-      struts[0] = width + monitor.x;
+      struts[0] = width + monitor().x;
       struts[4] = root_y_;
       // width - 1 allowed full screen on monitor 2
       struts[5] = root_y_ + height_ - 1;
     } else {
-      struts[1] = width + screen_width - monitor.x - monitor.width;
+      struts[1] = width + screen_width - monitor().x - monitor().width;
       struts[6] = root_y_;
       // width - 1 allowed full screen on monitor 2
       struts[7] = root_y_ + height_ - 1;
@@ -691,8 +676,12 @@ void Panel::UpdateNetWMStrut() {
                   PropModeReplace, (unsigned char*)&struts, 12);
 }
 
-void Panel::UseConfig(PanelConfig const& cfg, unsigned int /*num_desktop*/) {
+void Panel::UseConfig(PanelConfig const& cfg, unsigned int num_desktop) {
   config_ = cfg;
+  if (cfg.monitor == Panel::kAllMonitors) {
+    config_.monitor = num_desktop;
+  }
+
   width_ = cfg.width;
   height_ = cfg.height;
 }
@@ -814,6 +803,10 @@ bool Panel::HandlesClick(XEvent* event) {
   }
 
   return false;
+}
+
+Monitor const& Panel::monitor() const {
+  return server.monitor[config_.monitor];
 }
 
 bool Panel::hidden() const { return hidden_; }

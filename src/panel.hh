@@ -81,6 +81,8 @@ class PanelConfig {
  public:
   PanelConfig() = default;
 
+  unsigned int monitor;
+
   bool mouse_effects;
   int mouse_hover_alpha;
   int mouse_hover_saturation;
@@ -112,8 +114,6 @@ class Panel : public Area {
   // position relative to root window
   int root_x_, root_y_;
   int margin_x_, margin_y_;
-  // location of the panel (monitor number)
-  unsigned int monitor_;
 
   // --------------------------------------------------
   // task and taskbar parameter per panel
@@ -164,6 +164,7 @@ class Panel : public Area {
   bool AutohideShow();
   bool AutohideHide();
 
+  Monitor const& monitor() const;
   void UseConfig(PanelConfig const& cfg, unsigned int num_desktop);
 
 #ifdef _TINT3_DEBUG
