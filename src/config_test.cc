@@ -414,24 +414,24 @@ TEST_CASE("ConfigParserMouseEffects", "Mouse effects are correctly read") {
   parser::Parser p{config::kLexer, &config_entry_parser};
 
   // Before: defaults
-  REQUIRE(!panel_config.mouse_effects);
-  REQUIRE(panel_config.mouse_hover_alpha == 100);
-  REQUIRE(panel_config.mouse_hover_saturation == 0);
-  REQUIRE(panel_config.mouse_hover_brightness == 10);
-  REQUIRE(panel_config.mouse_pressed_alpha == 100);
-  REQUIRE(panel_config.mouse_pressed_saturation == 0);
-  REQUIRE(panel_config.mouse_pressed_brightness == -10);
+  REQUIRE(!new_panel_config.mouse_effects);
+  REQUIRE(new_panel_config.mouse_hover_alpha == 100);
+  REQUIRE(new_panel_config.mouse_hover_saturation == 0);
+  REQUIRE(new_panel_config.mouse_hover_brightness == 10);
+  REQUIRE(new_panel_config.mouse_pressed_alpha == 100);
+  REQUIRE(new_panel_config.mouse_pressed_saturation == 0);
+  REQUIRE(new_panel_config.mouse_pressed_brightness == -10);
 
   REQUIRE(p.Parse(kMouseEffects));
 
   // After: config values
-  REQUIRE(panel_config.mouse_effects);
-  REQUIRE(panel_config.mouse_hover_alpha == 100);
-  REQUIRE(panel_config.mouse_hover_saturation == 0);
-  REQUIRE(panel_config.mouse_hover_brightness == 25);
-  REQUIRE(panel_config.mouse_pressed_alpha == 100);
-  REQUIRE(panel_config.mouse_pressed_saturation == 0);
-  REQUIRE(panel_config.mouse_pressed_brightness == -25);
+  REQUIRE(new_panel_config.mouse_effects);
+  REQUIRE(new_panel_config.mouse_hover_alpha == 100);
+  REQUIRE(new_panel_config.mouse_hover_saturation == 0);
+  REQUIRE(new_panel_config.mouse_hover_brightness == 25);
+  REQUIRE(new_panel_config.mouse_pressed_alpha == 100);
+  REQUIRE(new_panel_config.mouse_pressed_saturation == 0);
+  REQUIRE(new_panel_config.mouse_pressed_brightness == -25);
 }
 
 static constexpr char kLauncherItemExpansion[] =

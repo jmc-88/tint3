@@ -5,6 +5,7 @@
 
 Monitor TestMonitor() {
   Monitor m;
+  m.number = 0;
   m.x = 0;
   m.y = 0;
   m.width = 1024;
@@ -17,9 +18,13 @@ TEST_CASE("InitSizeAndPosition") {
   server.monitor.push_back(TestMonitor());
 
   SECTION("size != 0") {
+    PanelConfig panel_config;
+    panel_config.monitor = 0;
+    panel_config.width = 0;
+    panel_config.height = 0;
+
     Panel p;
-    p.monitor_ = 0;
-    p.width_ = p.height_ = 0;
+    p.UseConfig(panel_config, 0);
 
     p.InitSizeAndPosition();
     REQUIRE(p.width_ != 0);
