@@ -33,7 +33,6 @@ extern MouseAction mouse_scroll_down;
 extern MouseAction mouse_tilt_left;
 extern MouseAction mouse_tilt_right;
 
-extern bool wm_menu;
 extern bool panel_dock;
 
 // panel layer
@@ -107,6 +106,8 @@ class PanelConfig {
   unsigned int height;
   bool percent_y;
 
+  bool wm_menu;
+
   static PanelConfig Default();
 };
 
@@ -172,6 +173,7 @@ class Panel : public Area {
   PanelLayer layer() const;
   TaskbarMode taskbar_mode() const;
   Monitor const& monitor() const;
+  bool window_manager_menu() const;
   void UseConfig(PanelConfig const& cfg, unsigned int num_desktop);
 
 #ifdef _TINT3_DEBUG

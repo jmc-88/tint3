@@ -51,7 +51,6 @@ MouseAction mouse_scroll_down;
 MouseAction mouse_tilt_left;
 MouseAction mouse_tilt_right;
 
-bool wm_menu;
 bool panel_dock;
 PanelHorizontalPosition panel_horizontal_position;
 PanelVerticalPosition panel_vertical_position;
@@ -111,6 +110,8 @@ PanelConfig PanelConfig::Default() {
   cfg.height = 40;
   cfg.percent_y = false;
 
+  cfg.wm_menu = false;
+
   return cfg;
 }
 
@@ -128,7 +129,6 @@ void DefaultPanel() {
   panel_autohide_height = 5;  // for vertical panels this is of course the width
   panel_strut_policy = PanelStrutPolicy::kFollowSize;
   panel_dock = 0;  // default not in the dock
-  wm_menu = false;
   max_tick_urgent = 14;
 
   // append full transparency background
@@ -831,6 +831,8 @@ TaskbarMode Panel::taskbar_mode() const { return config_.taskbar_mode; }
 Monitor const& Panel::monitor() const {
   return server.monitor[config_.monitor];
 }
+
+bool Panel::window_manager_menu() const { return config_.wm_menu; }
 
 bool Panel::hidden() const { return hidden_; }
 

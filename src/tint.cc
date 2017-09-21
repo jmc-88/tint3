@@ -363,7 +363,7 @@ void EventButtonPress(XEvent* e) {
   }
 
   if (!panel->HandlesClick(e)) {
-    if (wm_menu) {
+    if (panel->window_manager_menu()) {
       ForwardClick(e);
     }
     return;
@@ -460,7 +460,7 @@ void EventButtonRelease(XEvent* e) {
   });
 
   if (!panel->HandlesClick(e)) {
-    if (wm_menu) {
+    if (panel->window_manager_menu()) {
       ForwardClick(e);
     }
     return;

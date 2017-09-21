@@ -751,7 +751,7 @@ bool Reader::AddEntry_Panel(std::string const& key, std::string const& value) {
     return true;
   }
   if (key == "wm_menu") {
-    ParseBoolean(value, &wm_menu);
+    ParseBoolean(value, &new_panel_config.wm_menu);
     return true;
   }
   if (key == "panel_dock") {
