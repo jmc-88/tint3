@@ -127,7 +127,7 @@ void DefaultPanel() {
   panel_autohide_hide_timeout = 0;
   panel_autohide_height = 5;  // for vertical panels this is of course the width
   panel_strut_policy = PanelStrutPolicy::kFollowSize;
-  panel_dock = 0;                     // default not in the dock
+  panel_dock = 0;  // default not in the dock
   wm_menu = false;
   max_tick_urgent = 14;
 
@@ -681,9 +681,9 @@ void Panel::UpdateNetWMStrut() {
   // Old specification : fluxbox need _NET_WM_STRUT.
   XChangeProperty(server.dsp, main_win_, server.atom("_NET_WM_STRUT"),
                   XA_CARDINAL, 32, PropModeReplace, (unsigned char*)&struts, 4);
-  XChangeProperty(server.dsp, main_win_,
-                  server.atom("_NET_WM_STRUT_PARTIAL"), XA_CARDINAL, 32,
-                  PropModeReplace, (unsigned char*)&struts, 12);
+  XChangeProperty(server.dsp, main_win_, server.atom("_NET_WM_STRUT_PARTIAL"),
+                  XA_CARDINAL, 32, PropModeReplace, (unsigned char*)&struts,
+                  12);
 }
 
 void Panel::UseConfig(PanelConfig const& cfg, unsigned int num_desktop) {
@@ -714,13 +714,9 @@ Panel* GetPanel(Window win) {
   return nullptr;
 }
 
-Battery* Panel::battery() {
-  return &battery_;
-}
+Battery* Panel::battery() { return &battery_; }
 
-Clock* Panel::clock() {
-  return &clock_;
-}
+Clock* Panel::clock() { return &clock_; }
 
 Taskbar* Panel::ClickTaskbar(int x, int y) {
   for (unsigned int i = 0; i < num_desktops_; i++) {
