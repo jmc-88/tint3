@@ -64,15 +64,16 @@ Task* task_drag;
 bool taskbar_enabled;
 
 Taskbar& Taskbar::SetState(size_t state) {
-  bg_ = panels[0].g_taskbar.background[state];
+  Panel const& panel = panels[0];
+  bg_ = panel.g_taskbar.background[state];
   pix_ = state_pixmap(state);
 
   if (taskbarname_enabled) {
-    bar_name.bg_ = panels[0].g_taskbar.background_name[state];
+    bar_name.bg_ = panel.g_taskbar.background_name[state];
     bar_name.pix_ = bar_name.state_pixmap(state);
   }
 
-  if (panel_mode != PanelMode::kMultiDesktop) {
+  if (panel.taskbar_mode() != TaskbarMode::kMultiDesktop) {
     on_screen_ = (state != kTaskbarNormal);
   }
 
@@ -85,10 +86,11 @@ Taskbar& Taskbar::SetState(size_t state) {
       bar_name.need_redraw_ = true;
     }
 
-    auto& normal_bg = panels[0].g_taskbar.background[kTaskbarNormal];
-    auto& active_bg = panels[0].g_taskbar.background[kTaskbarActive];
+    auto& normal_bg = panel.g_taskbar.background[kTaskbarNormal];
+    auto& active_bg = panel.g_taskbar.background[kTaskbarActive];
 
-    if (panel_mode == PanelMode::kMultiDesktop && normal_bg != active_bg) {
+    if (panel.taskbar_mode() == TaskbarMode::kMultiDesktop &&
+        normal_bg != active_bg) {
       auto it = children_.begin();
 
       if (taskbarname_enabled) {

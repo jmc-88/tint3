@@ -969,9 +969,9 @@ bool Reader::AddEntry_Taskbar(std::string const& key,
                               std::string const& value) {
   if (key == "taskbar_mode") {
     if (value == "multi_desktop") {
-      panel_mode = PanelMode::kMultiDesktop;
+      new_panel_config.taskbar_mode = TaskbarMode::kMultiDesktop;
     } else {
-      panel_mode = PanelMode::kSingleDesktop;
+      new_panel_config.taskbar_mode = TaskbarMode::kSingleDesktop;
     }
     return true;
   }

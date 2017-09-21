@@ -410,7 +410,7 @@ void EventButtonMotionNotify(XEvent* e) {
     }
   } else {  // The event is on another taskbar than the task being dragged
     if (task_drag->desktop == kAllDesktops ||
-        panel_mode != PanelMode::kMultiDesktop) {
+        panel->taskbar_mode() != TaskbarMode::kMultiDesktop) {
       return;
     }
 
@@ -509,7 +509,7 @@ void EventButtonRelease(XEvent* e) {
   }
 
   // switch desktop
-  if (panel_mode == PanelMode::kMultiDesktop) {
+  if (panel->taskbar_mode() == TaskbarMode::kMultiDesktop) {
     if (tskbar->desktop != server.desktop() && action != MouseAction::kClose &&
         action != MouseAction::kDesktopLeft &&
         action != MouseAction::kDesktopRight) {

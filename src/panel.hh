@@ -36,17 +36,15 @@ extern MouseAction mouse_tilt_right;
 extern bool wm_menu;
 extern bool panel_dock;
 
-// panel mode
-enum class PanelMode { kSingleDesktop, kMultiDesktop };
-
-extern PanelMode panel_mode;
-
 // panel layer
 enum class PanelLayer { kBottom, kNormal, kTop };
 
 // panel position
 enum class PanelVerticalPosition { kTop, kBottom, kCenter };
 enum class PanelHorizontalPosition { kLeft, kRight, kCenter };
+
+// taskbar mode
+enum class TaskbarMode { kSingleDesktop, kMultiDesktop };
 
 extern PanelVerticalPosition panel_vertical_position;
 extern PanelHorizontalPosition panel_horizontal_position;
@@ -85,6 +83,7 @@ class PanelConfig {
 #endif  // ENABLE_BATTERY
 
   PanelLayer layer;
+  TaskbarMode taskbar_mode;
 
   unsigned int monitor;
 
@@ -171,6 +170,7 @@ class Panel : public Area {
   bool AutohideHide();
 
   PanelLayer layer() const;
+  TaskbarMode taskbar_mode() const;
   Monitor const& monitor() const;
   void UseConfig(PanelConfig const& cfg, unsigned int num_desktop);
 

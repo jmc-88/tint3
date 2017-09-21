@@ -51,7 +51,6 @@ MouseAction mouse_scroll_down;
 MouseAction mouse_tilt_left;
 MouseAction mouse_tilt_right;
 
-PanelMode panel_mode;
 bool wm_menu;
 bool panel_dock;
 PanelHorizontalPosition panel_horizontal_position;
@@ -88,6 +87,7 @@ PanelConfig PanelConfig::Default() {
   cfg.background.set_fill_color(black_80pct);
 
   cfg.layer = PanelLayer::kBottom;
+  cfg.taskbar_mode = TaskbarMode::kSingleDesktop;
 
   cfg.monitor = 0;
 
@@ -372,7 +372,7 @@ void Panel::InitSizeAndPosition() {
 bool Panel::Resize() {
   ResizeByLayout(0);
 
-  if (panel_mode != PanelMode::kMultiDesktop && taskbar_enabled) {
+  if (taskbar_mode() != TaskbarMode::kMultiDesktop && taskbar_enabled) {
     // propagate width/height on hidden taskbar
     int width = taskbars[server.desktop()].width_;
     int height = taskbars[server.desktop()].height_;
@@ -610,7 +610,7 @@ void Panel::UpdateTaskbarVisibility() {
   for (unsigned int j = 0; j < num_desktops_; j++) {
     Taskbar& tskbar = taskbars[j];
 
-    if (panel_mode != PanelMode::kMultiDesktop &&
+    if (taskbar_mode() != TaskbarMode::kMultiDesktop &&
         tskbar.desktop != server.desktop()) {
       // SINGLE_DESKTOP and not current desktop
       tskbar.on_screen_ = false;
@@ -807,7 +807,7 @@ bool Panel::HandlesClick(XEvent* event) {
   // no launcher/task clicked --> check if taskbar clicked
   Taskbar* tskbar = ClickTaskbar(e->x, e->y);
   if (tskbar != nullptr && e->button == 1 &&
-      panel_mode == PanelMode::kMultiDesktop) {
+      taskbar_mode() == TaskbarMode::kMultiDesktop) {
     return true;
   }
 
@@ -825,6 +825,8 @@ bool Panel::HandlesClick(XEvent* event) {
 }
 
 PanelLayer Panel::layer() const { return config_.layer; }
+
+TaskbarMode Panel::taskbar_mode() const { return config_.taskbar_mode; }
 
 Monitor const& Panel::monitor() const {
   return server.monitor[config_.monitor];
