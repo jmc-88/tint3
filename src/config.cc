@@ -764,11 +764,11 @@ bool Reader::AddEntry_Panel(std::string const& key, std::string const& value) {
   }
   if (key == "panel_layer") {
     if (value == "bottom") {
-      panel_layer = PanelLayer::kBottom;
+      new_panel_config.layer = PanelLayer::kBottom;
     } else if (value == "top") {
-      panel_layer = PanelLayer::kTop;
+      new_panel_config.layer = PanelLayer::kTop;
     } else {
-      panel_layer = PanelLayer::kNormal;
+      new_panel_config.layer = PanelLayer::kNormal;
     }
     return true;
   }

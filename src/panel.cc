@@ -54,7 +54,6 @@ MouseAction mouse_tilt_right;
 PanelMode panel_mode;
 bool wm_menu;
 bool panel_dock;
-PanelLayer panel_layer;
 PanelHorizontalPosition panel_horizontal_position;
 PanelVerticalPosition panel_vertical_position;
 bool panel_horizontal;
@@ -87,6 +86,8 @@ PanelConfig PanelConfig::Default() {
 
   Color black_80pct{Color::Array{0, 0, 0}, .8};
   cfg.background.set_fill_color(black_80pct);
+
+  cfg.layer = PanelLayer::kBottom;
 
   cfg.monitor = 0;
 
@@ -127,7 +128,6 @@ void DefaultPanel() {
   panel_autohide_height = 5;  // for vertical panels this is of course the width
   panel_strut_policy = PanelStrutPolicy::kFollowSize;
   panel_dock = 0;                     // default not in the dock
-  panel_layer = PanelLayer::kBottom;  // default is bottom layer
   wm_menu = false;
   max_tick_urgent = 14;
 
@@ -468,10 +468,10 @@ void Panel::SetProperties() {
   state[0] = server.atom("_NET_WM_STATE_SKIP_PAGER");
   state[1] = server.atom("_NET_WM_STATE_SKIP_TASKBAR");
   state[2] = server.atom("_NET_WM_STATE_STICKY");
-  state[3] = panel_layer == PanelLayer::kBottom
+  state[3] = layer() == PanelLayer::kBottom
                  ? server.atom("_NET_WM_STATE_BELOW")
                  : server.atom("_NET_WM_STATE_ABOVE");
-  int nb_atoms = panel_layer == PanelLayer::kNormal ? 3 : 4;
+  int nb_atoms = layer() == PanelLayer::kNormal ? 3 : 4;
   XChangeProperty(server.dsp, main_win_, server.atom("_NET_WM_STATE"), XA_ATOM,
                   32, PropModeReplace, (unsigned char*)state, nb_atoms);
 
@@ -827,6 +827,8 @@ bool Panel::HandlesClick(XEvent* event) {
 
   return false;
 }
+
+PanelLayer Panel::layer() const { return config_.layer; }
 
 Monitor const& Panel::monitor() const {
   return server.monitor[config_.monitor];

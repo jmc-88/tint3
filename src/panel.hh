@@ -44,8 +44,6 @@ extern PanelMode panel_mode;
 // panel layer
 enum class PanelLayer { kBottom, kNormal, kTop };
 
-extern PanelLayer panel_layer;
-
 // panel position
 enum class PanelVerticalPosition { kTop, kBottom, kCenter };
 enum class PanelHorizontalPosition { kLeft, kRight, kCenter };
@@ -85,6 +83,8 @@ class PanelConfig {
 #ifdef ENABLE_BATTERY
   Battery battery;
 #endif  // ENABLE_BATTERY
+
+  PanelLayer layer;
 
   unsigned int monitor;
 
@@ -170,6 +170,7 @@ class Panel : public Area {
   bool AutohideShow();
   bool AutohideHide();
 
+  PanelLayer layer() const;
   Monitor const& monitor() const;
   void UseConfig(PanelConfig const& cfg, unsigned int num_desktop);
 

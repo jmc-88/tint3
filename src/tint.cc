@@ -371,7 +371,7 @@ void EventButtonPress(XEvent* e) {
 
   task_drag = panel->ClickTask(e->xbutton.x, e->xbutton.y);
 
-  if (panel_layer == PanelLayer::kBottom) {
+  if (panel->layer() == PanelLayer::kBottom) {
     XLowerWindow(server.dsp, panel->main_win_);
   }
 }
@@ -453,7 +453,7 @@ void EventButtonRelease(XEvent* e) {
   }
 
   auto at_exit = util::MakeScopedDeleter([&] {
-    if (panel_layer == PanelLayer::kBottom) {
+    if (panel->layer() == PanelLayer::kBottom) {
       XLowerWindow(server.dsp, panel->main_win_);
     }
     task_drag = nullptr;
