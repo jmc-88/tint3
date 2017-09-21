@@ -755,7 +755,7 @@ bool Reader::AddEntry_Panel(std::string const& key, std::string const& value) {
     return true;
   }
   if (key == "panel_dock") {
-    ParseBoolean(value, &panel_dock);
+    ParseBoolean(value, &new_panel_config.dock);
     return true;
   }
   if (key == "urgent_nb_of_blink") {

@@ -33,8 +33,6 @@ extern MouseAction mouse_scroll_down;
 extern MouseAction mouse_tilt_left;
 extern MouseAction mouse_tilt_right;
 
-extern bool panel_dock;
-
 // panel layer
 enum class PanelLayer { kBottom, kNormal, kTop };
 
@@ -106,6 +104,7 @@ class PanelConfig {
   unsigned int height;
   bool percent_y;
 
+  bool dock;
   bool wm_menu;
 
   static PanelConfig Default();

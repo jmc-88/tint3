@@ -51,7 +51,6 @@ MouseAction mouse_scroll_down;
 MouseAction mouse_tilt_left;
 MouseAction mouse_tilt_right;
 
-bool panel_dock;
 PanelHorizontalPosition panel_horizontal_position;
 PanelVerticalPosition panel_vertical_position;
 bool panel_horizontal;
@@ -110,6 +109,7 @@ PanelConfig PanelConfig::Default() {
   cfg.height = 40;
   cfg.percent_y = false;
 
+  cfg.dock = false;
   cfg.wm_menu = false;
 
   return cfg;
@@ -128,7 +128,6 @@ void DefaultPanel() {
   panel_autohide_hide_timeout = 0;
   panel_autohide_height = 5;  // for vertical panels this is of course the width
   panel_strut_policy = PanelStrutPolicy::kFollowSize;
-  panel_dock = 0;  // default not in the dock
   max_tick_urgent = 14;
 
   // append full transparency background
@@ -478,7 +477,7 @@ void Panel::SetProperties() {
   // Unfocusable
   XWMHints wmhints;
 
-  if (panel_dock) {
+  if (config_.dock) {
     wmhints.icon_window = wmhints.window_group = main_win_;
     wmhints.flags = StateHint | IconWindowHint;
     wmhints.initial_state = WithdrawnState;

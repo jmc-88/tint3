@@ -323,7 +323,7 @@ TEST_CASE("ConfigParserBooleanValues") {
   REQUIRE(panel_config.g_task.icon);
 
   REQUIRE_FALSE(new_panel_config.wm_menu);
-  REQUIRE_FALSE(panel_dock);
+  REQUIRE_FALSE(new_panel_config.dock);
 
   REQUIRE(taskbar_enabled);
   REQUIRE_FALSE(taskbarname_enabled);
