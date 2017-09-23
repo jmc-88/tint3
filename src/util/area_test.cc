@@ -2,7 +2,11 @@
 
 #include <X11/Xlib.h>
 
+#include "panel.hh"
+#include "server.hh"
 #include "util/area.hh"
+#include "util/environment.hh"
+#include "util/timer.hh"
 
 // Area is an abstract class because it has a pure virtual destructor.
 // Subclass it here so that we can instantiate it for testing.
@@ -120,5 +124,57 @@ TEST_CASE("Area::HandlesClick") {
 
     area.on_screen_ = false;
     REQUIRE_FALSE(area.HandlesClick(&e));
+  }
+}
+
+class AreaTestFixture {
+ public:
+  AreaTestFixture() {
+    DefaultPanel();
+
+    server.dsp = XOpenDisplay(nullptr);
+    if (!server.dsp) {
+      FAIL("Couldn't connect to the X server on DISPLAY="
+           << environment::Get("DISPLAY"));
+    }
+    server.InitX11();
+    GetMonitors();
+
+    InitPanel(timer_);
+  }
+
+  ~AreaTestFixture() {
+    CleanupPanel();
+    server.Cleanup();
+  }
+
+ private:
+  Timer timer_;
+};
+
+TEST_CASE_METHOD(AreaTestFixture, "Draw") {
+  ConcreteArea area;
+  area.panel_x_ = 0;
+  area.panel_y_ = 0;
+  area.panel_ = &panels.at(0);
+
+  SECTION("zero width") {
+    area.width_ = 0;
+    area.height_ = 100;
+
+    Pixmap old_pixmap = area.pix_;
+    area.Draw();
+    // Pixmap is not changed: draw is not attempted on a zero-size area
+    REQUIRE(area.pix_ == old_pixmap);
+  }
+
+  SECTION("zero height") {
+    area.width_ = 100;
+    area.height_ = 0;
+
+    Pixmap old_pixmap = area.pix_;
+    area.Draw();
+    // Pixmap is not changed: draw is not attempted on a zero-size area
+    REQUIRE(area.pix_ == old_pixmap);
   }
 }

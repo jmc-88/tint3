@@ -387,6 +387,13 @@ void Area::Show() {
 }
 
 void Area::Draw() {
+  if (width_ == 0 || height_ == 0) {
+    // Don't attempt drawing on zero-sized areas.
+    // Xlib routines such as XCreatePixmap would fail with BadValue in such a
+    // case, and there's no point to waste time drawing a non-visible area.
+    return;
+  }
+
   if (pix_ != None) {
     XFreePixmap(server.dsp, pix_);
   }

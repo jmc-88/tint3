@@ -373,7 +373,8 @@ test_target(
 test_target(
   util_area_test
   SOURCES src/util/area_test.cc
-  LINK_LIBRARIES tint3_common_lib testmain ${TINT3_LINK_LIBRARIES})
+  LINK_LIBRARIES tint3_common_lib testmain ${TINT3_LINK_LIBRARIES}
+  USE_XVFB_RUN)
 
 test_target(
   util_bimap_test
