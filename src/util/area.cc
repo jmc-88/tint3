@@ -233,8 +233,8 @@ void Area::SizeByLayout(int pos, int level) {
 }
 
 void Area::Refresh() {
-  // don't draw and resize hidden objects
-  if (!on_screen_) {
+  // don't draw and resize invisible objects
+  if (!on_screen_ || width_ == 0 || height_ == 0) {
     return;
   }
 
@@ -248,10 +248,10 @@ void Area::Refresh() {
   if (pix_ == None) {
     util::log::Debug() << "Empty area at panel_x_ = " << panel_x_
                        << ", width = " << width_ << '\n';
+  } else {
+    XCopyArea(server.dsp, pix_, panel_->temp_pmap, server.gc, 0, 0, width_,
+              height_, panel_x_, panel_y_);
   }
-
-  XCopyArea(server.dsp, pix_, panel_->temp_pmap, server.gc, 0, 0, width_,
-            height_, panel_x_, panel_y_);
 
   // and then refresh child object
   for (auto& child : children_) {

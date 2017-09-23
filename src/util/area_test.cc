@@ -178,3 +178,33 @@ TEST_CASE_METHOD(AreaTestFixture, "Draw") {
     REQUIRE(area.pix_ == old_pixmap);
   }
 }
+
+// UndrawableArea is an Area that makes the test fail if a Draw() operation is
+// attempted on it.
+class UndrawableArea : public ConcreteArea {
+ public:
+  void Draw() override {
+    FAIL("this Area should never be drawn");
+  }
+};
+
+TEST_CASE_METHOD(AreaTestFixture, "Refresh") {
+  UndrawableArea area;
+  area.on_screen_ = true;
+  area.need_redraw_ = true;
+  area.panel_x_ = 0;
+  area.panel_y_ = 0;
+  area.panel_ = &panels.at(0);
+
+  SECTION("zero width") {
+    area.width_ = 0;
+    area.height_ = 100;
+    area.Refresh();  // doesn't trigger FAIL in UndrawableArea
+  }
+
+  SECTION("zero height") {
+    area.width_ = 100;
+    area.height_ = 0;
+    area.Refresh();  // doesn't trigger FAIL in UndrawableArea
+  }
+}
