@@ -39,11 +39,10 @@ class Taskbar : public TaskbarBase {
 #endif  // _TINT3_DEBUG
 };
 
-class Global_taskbar : public TaskbarBase {
+class Global_taskbar : public Taskbar {
  public:
   Global_taskbar();
 
-  Taskbarname bar_name_;
   std::vector<Background> background;
   std::vector<Background> background_name;
 };

@@ -426,13 +426,13 @@ bool Panel::Resize() {
 
   if (panel_mode != PanelMode::kMultiDesktop && taskbar_enabled) {
     // propagate width/height on hidden taskbar
-    int width = taskbar_[server.desktop()].width_;
-    int height = taskbar_[server.desktop()].height_;
+    int width = taskbars[server.desktop()].width_;
+    int height = taskbars[server.desktop()].height_;
 
     for (unsigned int i = 0; i < num_desktops_; ++i) {
-      taskbar_[i].width_ = width;
-      taskbar_[i].height_ = height;
-      taskbar_[i].need_resize_ = true;
+      taskbars[i].width_ = width;
+      taskbars[i].height_ = height;
+      taskbars[i].need_resize_ = true;
     }
   }
 
@@ -456,7 +456,7 @@ void Panel::SetItemsOrder() {
 
     if (item == 'T') {
       for (unsigned int j = 0; j < num_desktops_; j++) {
-        children_.push_back(&taskbar_[j]);
+        children_.push_back(&taskbars[j]);
       }
     }
 
@@ -636,7 +636,7 @@ void Panel::SetBackground() {
 
   // reset task/taskbar 'state_pix'
   for (unsigned int i = 0; i < num_desktops_; i++) {
-    auto& tskbar = taskbar_[i];
+    auto& tskbar = taskbars[i];
 
     for (int k = 0; k < kTaskbarCount; ++k) {
       tskbar.reset_state_pixmap(k);
@@ -660,7 +660,7 @@ void Panel::SetBackground() {
 
 void Panel::UpdateTaskbarVisibility() {
   for (unsigned int j = 0; j < num_desktops_; j++) {
-    Taskbar& tskbar = taskbar_[j];
+    Taskbar& tskbar = taskbars[j];
 
     if (panel_mode != PanelMode::kMultiDesktop &&
         tskbar.desktop != server.desktop()) {
@@ -689,8 +689,8 @@ Clock* Panel::clock() {
 
 Taskbar* Panel::ClickTaskbar(int x, int y) {
   for (unsigned int i = 0; i < num_desktops_; i++) {
-    if (taskbar_[i].IsPointInside(x, y)) {
-      return &taskbar_[i];
+    if (taskbars[i].IsPointInside(x, y)) {
+      return &taskbars[i];
     }
   }
   return nullptr;

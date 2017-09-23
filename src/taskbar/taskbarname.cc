@@ -56,15 +56,14 @@ void Taskbarname::InitPanel(Panel* panel) {
   auto it = desktop_names.begin();
 
   for (unsigned int j = 0; j < panel->num_desktops_; ++j) {
-    Taskbar& tskbar = panel->taskbar_[j];
-    tskbar.bar_name = panel->g_taskbar.bar_name_;
+    Taskbar& tskbar = panel->taskbars[j];
+    tskbar.bar_name = panel->g_taskbar.bar_name;
     tskbar.bar_name.parent_ = &tskbar;
     tskbar.bar_name.set_name(*it++);
 
+    tskbar.bar_name.bg_ = panel->g_taskbar.background_name[kTaskbarNormal];
     if (j == server.desktop()) {
       tskbar.bar_name.bg_ = panel->g_taskbar.background_name[kTaskbarActive];
-    } else {
-      tskbar.bar_name.bg_ = panel->g_taskbar.background_name[kTaskbarNormal];
     }
 
     // append the name at the beginning of taskbar
@@ -75,7 +74,7 @@ void Taskbarname::InitPanel(Panel* panel) {
 void Taskbarname::Cleanup() {
   for (Panel& panel : panels) {
     for (unsigned int j = 0; j < panel.num_desktops_; j++) {
-      Taskbar& tskbar = panel.taskbar_[j];
+      Taskbar& tskbar = panel.taskbars[j];
 
       tskbar.bar_name.FreeArea();
 

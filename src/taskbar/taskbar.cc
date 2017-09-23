@@ -122,17 +122,13 @@ void CleanupTaskbar() {
 
   for (Panel& panel : panels) {
     for (unsigned int j = 0; j < panel.num_desktops_; ++j) {
-      Taskbar* tskbar = &panel.taskbar_[j];
+      Taskbar* tskbar = &panel.taskbars[j];
       panel.children_.erase(
           std::remove(panel.children_.begin(), panel.children_.end(), tskbar),
           panel.children_.end());
       tskbar->FreeArea();
     }
-
-    if (panel.taskbar_ != nullptr) {
-      delete[] panel.taskbar_;
-      panel.taskbar_ = nullptr;
-    }
+    panel.taskbars.clear();
   }
 }
 
@@ -143,10 +139,10 @@ void InitTaskbar() {
 
 void Taskbar::InitPanel(Panel* panel) {
   // taskbar name
-  panel->g_taskbar.bar_name_.panel_ = panel;
-  panel->g_taskbar.bar_name_.size_mode_ = SizeMode::kByContent;
-  panel->g_taskbar.bar_name_.need_resize_ = true;
-  panel->g_taskbar.bar_name_.on_screen_ = true;
+  panel->g_taskbar.bar_name.panel_ = panel;
+  panel->g_taskbar.bar_name.size_mode_ = SizeMode::kByContent;
+  panel->g_taskbar.bar_name.need_resize_ = true;
+  panel->g_taskbar.bar_name.on_screen_ = true;
 
   // taskbar
   panel->g_taskbar.parent_ = panel;
@@ -160,14 +156,14 @@ void Taskbar::InitPanel(Panel* panel) {
     panel->g_taskbar.panel_y_ =
         b.width_for_side(BORDER_TOP) + panel->padding_y_;
     panel->g_taskbar.height_ = panel->height_ - (2 * panel->g_taskbar.panel_y_);
-    panel->g_taskbar.bar_name_.panel_y_ = panel->g_taskbar.panel_y_;
-    panel->g_taskbar.bar_name_.height_ = panel->g_taskbar.height_;
+    panel->g_taskbar.bar_name.panel_y_ = panel->g_taskbar.panel_y_;
+    panel->g_taskbar.bar_name.height_ = panel->g_taskbar.height_;
   } else {
     panel->g_taskbar.panel_x_ =
         b.width_for_side(BORDER_LEFT) + panel->padding_y_;
     panel->g_taskbar.width_ = panel->width_ - (2 * panel->g_taskbar.panel_x_);
-    panel->g_taskbar.bar_name_.panel_x_ = panel->g_taskbar.panel_x_;
-    panel->g_taskbar.bar_name_.width_ = panel->g_taskbar.width_;
+    panel->g_taskbar.bar_name.panel_x_ = panel->g_taskbar.panel_x_;
+    panel->g_taskbar.bar_name.width_ = panel->g_taskbar.width_;
   }
 
   // task
@@ -294,21 +290,17 @@ void Taskbar::InitPanel(Panel* panel) {
   }
 
   panel->num_desktops_ = server.num_desktops();
-  panel->taskbar_ = new Taskbar[panel->num_desktops_];
+  auto& taskbars = panel->taskbars;
+  taskbars.resize(panel->num_desktops_);
+  taskbars.shrink_to_fit();
+  std::fill(taskbars.begin(), taskbars.end(), panel->g_taskbar);
 
   for (unsigned int j = 0; j < panel->num_desktops_; j++) {
-    Taskbar* tskbar = &panel->taskbar_[j];
-
-    // TODO: nuke this from planet Earth ASAP - horrible hack to mimick the
-    // original memcpy() call
-    tskbar->CloneArea(panel->g_taskbar);
-
+    Taskbar* tskbar = &taskbars[j];
     tskbar->desktop = j;
-
+    tskbar->bg_ = panel->g_taskbar.background[kTaskbarNormal];
     if (j == server.desktop()) {
       tskbar->bg_ = panel->g_taskbar.background[kTaskbarActive];
-    } else {
-      tskbar->bg_ = panel->g_taskbar.background[kTaskbarNormal];
     }
   }
 

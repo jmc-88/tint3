@@ -99,12 +99,7 @@ class Panel : public Area {
   Global_taskbar g_taskbar;
   Global_task g_task;
 
-  // --------------------------------------------------
-  // taskbar point to the first taskbar in panel.area.list.
-  // number of tasbar == num_desktops. taskbar[i] is for desktop(i).
-  // taskbar[i] is used to loop over taskbar,
-  // while panel->area.list is used to loop over all panel's objects
-  Taskbar* taskbar_;
+  std::vector<Taskbar> taskbars;
   unsigned int num_desktops_;
 
 // --------------------------------------------------

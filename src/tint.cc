@@ -527,7 +527,7 @@ void EventPropertyNotify(XEvent* e, Timer& timer, Tooltip* tooltip) {
 
       for (Panel& panel : panels) {
         for (unsigned int i = 0; i < panel.num_desktops_; ++i) {
-          Taskbar& tskbar = panel.taskbar_[i];
+          Taskbar& tskbar = panel.taskbars[i];
           std::string name = (*it++);
 
           if (tskbar.bar_name.name() != name) {
@@ -572,12 +572,12 @@ void EventPropertyNotify(XEvent* e, Timer& timer, Tooltip* tooltip) {
                          << " to " << server.desktop() << '\n';
 
       for (Panel& panel : panels) {
-        panel.taskbar_[old_desktop].SetState(kTaskbarNormal);
-        panel.taskbar_[server.desktop()].SetState(kTaskbarActive);
+        panel.taskbars[old_desktop].SetState(kTaskbarNormal);
+        panel.taskbars[server.desktop()].SetState(kTaskbarActive);
         // check ALLDESKTOP task => resize taskbar
 
         if (server.num_desktops() > old_desktop) {
-          Taskbar& tskbar = panel.taskbar_[old_desktop];
+          Taskbar& tskbar = panel.taskbars[old_desktop];
           auto it = tskbar.children_.begin();
 
           if (taskbarname_enabled) {
@@ -595,7 +595,7 @@ void EventPropertyNotify(XEvent* e, Timer& timer, Tooltip* tooltip) {
           }
         }
 
-        Taskbar& tskbar = panel.taskbar_[server.desktop()];
+        Taskbar& tskbar = panel.taskbars[server.desktop()];
         auto it = tskbar.children_.begin();
 
         if (taskbarname_enabled) {

@@ -130,7 +130,7 @@ Task* AddTask(Window win, Timer& timer) {
       continue;
     }
 
-    Taskbar& tskbar = panels[monitor].taskbar_[j];
+    Taskbar& tskbar = panels[monitor].taskbars[j];
     new_tsk2 = new Task{timer};
 
     // TODO: nuke this from planet Earth ASAP - horrible hack to mimick the

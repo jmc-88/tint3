@@ -1031,11 +1031,11 @@ bool Reader::AddEntry_Taskbar(std::string const& key,
     std::string value1, value2, value3;
     config::ExtractValues(value, &value1, &value2, &value3);
 
-    if (!ParseNumber(value, &panel_config.g_taskbar.bar_name_.padding_x_lr_)) {
+    if (!ParseNumber(value, &panel_config.g_taskbar.bar_name.padding_x_lr_)) {
       return true;
     }
-    panel_config.g_taskbar.bar_name_.padding_x_ =
-        panel_config.g_taskbar.bar_name_.padding_x_lr_;
+    panel_config.g_taskbar.bar_name.padding_x_ =
+        panel_config.g_taskbar.bar_name.padding_x_lr_;
     return true;
   }
   if (key == "taskbar_name_background_id") {
