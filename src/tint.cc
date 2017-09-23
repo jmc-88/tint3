@@ -176,7 +176,12 @@ void InitX11() {
 #endif  // _TINT3_DEBUG
 
   server.InitX11();
-  XSetErrorHandler(ServerCatchError);
+
+#ifndef _TINT3_DEBUG
+  // https://github.com/jmc-88/tint3/issues/33
+  // Silence Xlib errors in Release builds.
+  XSetErrorHandler(+[](Display*, XErrorEvent*) { return 0; });
+#endif  // _TINT3_DEBUG
 
 #ifdef HAVE_SN
   // Initialize startup-notification

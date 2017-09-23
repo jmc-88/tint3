@@ -113,7 +113,6 @@ extern Server server;
 
 void SendEvent32(Window win, Atom at, long data1, long data2, long data3);
 int GetProperty32(Window win, Atom at, Atom type);
-int ServerCatchError(Display* d, XErrorEvent* ev);
 
 // detect monitors and desktops
 void GetMonitors();
