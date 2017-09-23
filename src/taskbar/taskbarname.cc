@@ -136,7 +136,7 @@ bool Taskbarname::Resize() {
   GetTextSize(taskbarname_font_desc, name(), MarkupTag::kNoMarkup,
               &name_width, &name_height);
 
-  if (panel_horizontal) {
+  if (panel_->horizontal()) {
     int new_size = name_width + (2 * (padding_x_lr_ + bg_.border().width()));
 
     if (new_size != static_cast<int>(width_)) {

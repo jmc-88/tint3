@@ -45,7 +45,6 @@ enum class TaskbarMode { kSingleDesktop, kMultiDesktop };
 
 extern PanelVerticalPosition panel_vertical_position;
 extern PanelHorizontalPosition panel_horizontal_position;
-extern bool panel_horizontal;
 extern bool panel_refresh;
 extern bool task_dragged;
 
@@ -105,6 +104,7 @@ class PanelConfig {
   bool percent_y;
 
   bool dock;
+  bool horizontal;
   bool wm_menu;
 
   static PanelConfig Default();
@@ -172,6 +172,7 @@ class Panel : public Area {
   PanelLayer layer() const;
   TaskbarMode taskbar_mode() const;
   Monitor const& monitor() const;
+  bool horizontal() const;
   bool window_manager_menu() const;
   void UseConfig(PanelConfig const& cfg, unsigned int num_desktop);
 

@@ -18,7 +18,7 @@ TEST_CASE("InitSizeAndPosition") {
   server.monitor.push_back(TestMonitor());
 
   SECTION("size != 0") {
-    PanelConfig panel_config;
+    PanelConfig panel_config = PanelConfig::Default();
     panel_config.monitor = 0;
     panel_config.width = 0;
     panel_config.height = 0;
@@ -40,16 +40,22 @@ TEST_CASE("SetItemsOrder_Executors") {
   executors.push_back(Executor{});
 
   SECTION("add only one") {
+    PanelConfig panel_config = PanelConfig::Default();
     panel_items_order = "E";
     Panel p;
+    p.panel_ = &p;  // TODO: this is silly, Area should not read from Panel
+    p.UseConfig(panel_config, 1);
     p.SetItemsOrder();
     REQUIRE(p.children_.size() == 1);
     REQUIRE(p.children_.at(0) == &executors.at(0));
   }
 
   SECTION("add only two") {
+    PanelConfig panel_config = PanelConfig::Default();
     panel_items_order = "EE";
     Panel p;
+    p.panel_ = &p;  // TODO: this is silly, Area should not read from Panel
+    p.UseConfig(panel_config, 1);
     p.SetItemsOrder();
     REQUIRE(p.children_.size() == 2);
     REQUIRE(p.children_.at(0) == &executors.at(0));
@@ -57,8 +63,11 @@ TEST_CASE("SetItemsOrder_Executors") {
   }
 
   SECTION("add all three") {
+    PanelConfig panel_config = PanelConfig::Default();
     panel_items_order = "EEE";
     Panel p;
+    p.panel_ = &p;  // TODO: this is silly, Area should not read from Panel
+    p.UseConfig(panel_config, 1);
     p.SetItemsOrder();
     REQUIRE(p.children_.size() == 3);
     REQUIRE(p.children_.at(0) == &executors.at(0));
@@ -67,8 +76,11 @@ TEST_CASE("SetItemsOrder_Executors") {
   }
 
   SECTION("add too many") {
+    PanelConfig panel_config = PanelConfig::Default();
     panel_items_order = "EEEE";
     Panel p;
+    p.panel_ = &p;  // TODO: this is silly, Area should not read from Panel
+    p.UseConfig(panel_config, 1);
     p.SetItemsOrder();
     REQUIRE(p.children_.size() == 3);
     REQUIRE(p.children_.at(0) == &executors.at(0));

@@ -135,7 +135,7 @@ void Area::InitRendering(int pos) {
   Border const& b = bg_.border();
   // initialize fixed position/size
   for (auto& child : children_) {
-    if (panel_horizontal) {
+    if (panel_->horizontal()) {
       child->panel_y_ = pos + b.width_for_side(BORDER_TOP) + padding_y_;
       child->height_ = height_ - b.width_for_side(BORDER_TOP) -
                        b.width_for_side(BORDER_BOTTOM) - (2 * padding_y_);
@@ -204,7 +204,7 @@ void Area::SizeByLayout(int pos, int level) {
       continue;
     }
 
-    if (panel_horizontal) {
+    if (panel_->horizontal()) {
       if (pos != child->panel_x_) {
         child->panel_x_ = pos;
         child->on_changed_ = true;
@@ -218,7 +218,7 @@ void Area::SizeByLayout(int pos, int level) {
 
     child->SizeByLayout(pos, level + 1);
 
-    if (panel_horizontal) {
+    if (panel_->horizontal()) {
       pos += child->width_ + padding_x_;
     } else {
       pos += child->height_ + padding_x_;
@@ -262,7 +262,7 @@ void Area::Refresh() {
 int Area::ResizeByLayout(int maximum_size) {
   int size, nb_by_content = 0, nb_by_layout = 0;
 
-  if (panel_horizontal) {
+  if (panel_->horizontal()) {
     // detect free size for kByLayout's Area
     size = width_ - (2 * (padding_x_lr_ + bg_.border().width()));
 
@@ -373,7 +373,7 @@ void Area::Hide() {
   on_screen_ = false;
   parent_->need_resize_ = true;
 
-  if (panel_horizontal) {
+  if (panel_->horizontal()) {
     width_ = 0;
   } else {
     height_ = 0;

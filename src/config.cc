@@ -731,7 +731,7 @@ bool Reader::AddEntry_Panel(std::string const& key, std::string const& value) {
       panel_horizontal_position = PanelHorizontalPosition::kCenter;
     }
 
-    panel_horizontal = (value3 != "vertical");
+    new_panel_config.horizontal = (value3 != "vertical");
     return true;
   }
   if (key == "font_shadow") {

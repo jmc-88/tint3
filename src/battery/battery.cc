@@ -329,7 +329,7 @@ bool Battery::Resize() {
   GetTextSize(bat2_font_desc, battery_time_, MarkupTag::kNoMarkup,
               &bat_time_width, &bat_time_height);
 
-  if (panel_horizontal) {
+  if (panel_->horizontal()) {
     int new_size = std::max(bat_percentage_width, bat_time_width) +
                    (2 * padding_x_lr_) + (2 * bg_.border().width());
 

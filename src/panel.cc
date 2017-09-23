@@ -53,7 +53,6 @@ MouseAction mouse_tilt_right;
 
 PanelHorizontalPosition panel_horizontal_position;
 PanelVerticalPosition panel_vertical_position;
-bool panel_horizontal;
 bool panel_refresh;
 bool task_dragged;
 
@@ -110,6 +109,7 @@ PanelConfig PanelConfig::Default() {
   cfg.percent_y = false;
 
   cfg.dock = false;
+  cfg.horizontal = true;
   cfg.wm_menu = false;
 
   return cfg;
@@ -119,7 +119,6 @@ void DefaultPanel() {
   panels.clear();
   default_icon.Free();
   task_dragged = false;
-  panel_horizontal = true;
   panel_vertical_position = PanelVerticalPosition::kBottom;
   panel_horizontal_position = PanelHorizontalPosition::kCenter;
   panel_items_order.clear();
@@ -299,7 +298,7 @@ void Panel::InitSizeAndPosition() {
   height_ = std::max(1U, height_);
 
   // detect panel size
-  if (panel_horizontal) {
+  if (config_.horizontal) {
     if (config_.percent_x) {
       width_ = monitor().width * width_ / 100;
     }
@@ -341,7 +340,7 @@ void Panel::InitSizeAndPosition() {
   } else if (panel_horizontal_position == PanelHorizontalPosition::kRight) {
     root_x_ = monitor().x + monitor().width - width_ - config_.margin_x;
   } else {
-    if (panel_horizontal) {
+    if (config_.horizontal) {
       root_x_ = monitor().x + (monitor().width - width_) / 2;
     } else {
       root_x_ = monitor().x + config_.margin_x;
@@ -357,9 +356,9 @@ void Panel::InitSizeAndPosition() {
   }
 
   // autohide or strut_policy=minimum
-  int diff = (panel_horizontal ? height_ : width_) - panel_autohide_height;
+  int diff = (config_.horizontal ? height_ : width_) - panel_autohide_height;
 
-  if (panel_horizontal) {
+  if (config_.horizontal) {
     hidden_width_ = width_;
     hidden_height_ = height_ - diff;
   } else {
@@ -530,10 +529,10 @@ void Panel::SetBackground() {
 
   int xoff = 0, yoff = 0;
 
-  if (panel_horizontal &&
+  if (config_.horizontal &&
       panel_vertical_position == PanelVerticalPosition::kBottom) {
     yoff = height_ - hidden_height_;
-  } else if (!panel_horizontal &&
+  } else if (!config_.horizontal &&
              panel_horizontal_position == PanelHorizontalPosition::kRight) {
     xoff = width_ - hidden_width_;
   }
@@ -637,7 +636,7 @@ void Panel::UpdateNetWMStrut() {
                &screen_height, &d1, &d1);
   long struts[12] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
-  if (panel_horizontal) {
+  if (config_.horizontal) {
     int height = height_ + config_.margin_y;
 
     if (panel_strut_policy == PanelStrutPolicy::kMinimum ||
@@ -770,7 +769,7 @@ LauncherIcon* Panel::ClickLauncherIcon(int x, int y) {
 }
 
 bool Panel::ClickPadding(int x, int y) {
-  if (panel_horizontal) {
+  if (config_.horizontal) {
     if (x < padding_x_lr_ || x > static_cast<int>(width_) - padding_x_lr_) {
       return true;
     }
@@ -833,6 +832,8 @@ Monitor const& Panel::monitor() const {
 
 bool Panel::window_manager_menu() const { return config_.wm_menu; }
 
+bool Panel::horizontal() const { return config_.horizontal; }
+
 bool Panel::hidden() const { return hidden_; }
 
 #ifdef _TINT3_DEBUG
@@ -850,7 +851,7 @@ bool Panel::AutohideShow() {
 
   XMapSubwindows(server.dsp, main_win_);  // systray windows
 
-  if (panel_horizontal) {
+  if (config_.horizontal) {
     if (panel_vertical_position == PanelVerticalPosition::kTop) {
       XResizeWindow(server.dsp, main_win_, width_, height_);
     } else {
@@ -880,9 +881,9 @@ bool Panel::AutohideHide() {
   }
 
   XUnmapSubwindows(server.dsp, main_win_);  // systray windows
-  int diff = (panel_horizontal ? height_ : width_) - panel_autohide_height;
+  int diff = (config_.horizontal ? height_ : width_) - panel_autohide_height;
 
-  if (panel_horizontal) {
+  if (config_.horizontal) {
     if (panel_vertical_position == PanelVerticalPosition::kTop) {
       XResizeWindow(server.dsp, main_win_, hidden_width_, hidden_height_);
     } else {

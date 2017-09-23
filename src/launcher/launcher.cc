@@ -96,7 +96,7 @@ void Launcher::InitPanel(Panel* panel) {
   // a default non-zero value in case the configuration doesn't specify any
   // dimensions, or we might end up having a division by zero.
   unsigned int short_side =
-      std::max(1U, panel_horizontal ? panel->height_ : panel->width_);
+      std::max(1U, panel->horizontal() ? panel->height_ : panel->width_);
   launcher.width_ = short_side;
   launcher.height_ = short_side;
 
@@ -152,7 +152,7 @@ int Launcher::GetIconSize() const {
   const int top_bottom_border =
       b.width_for_side(BORDER_TOP) + b.width_for_side(BORDER_BOTTOM);
 
-  int icon_size = panel_horizontal ? height_ : width_;
+  int icon_size = panel_->horizontal() ? height_ : width_;
   icon_size -= std::max(left_right_border, top_bottom_border);
   icon_size -= (2 * padding_y_);
 
@@ -245,7 +245,7 @@ bool Launcher::Resize() {
   Border const& b = bg_.border();
   size_t count = list_icons_.size();
 
-  if (panel_horizontal) {
+  if (panel_->horizontal()) {
     width_ = 0;
 
     if (count != 0) {
@@ -278,7 +278,7 @@ bool Launcher::Resize() {
   }
 
   int posx, posy, start;
-  if (panel_horizontal) {
+  if (panel_->horizontal()) {
     posy = start = b.width_for_side(BORDER_TOP) + padding_y_ + margin / 2;
     posx = b.width_for_side(BORDER_LEFT) + padding_x_lr_;
   } else {
@@ -292,7 +292,7 @@ bool Launcher::Resize() {
     launcher_icon->y_ = posy;
     launcher_icon->x_ = posx;
 
-    if (panel_horizontal) {
+    if (panel_->horizontal()) {
       if (i % icons_per_column) {
         posy += (icon_size + padding_x_);
       } else {

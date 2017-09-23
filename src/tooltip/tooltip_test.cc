@@ -28,12 +28,14 @@ class ConcreteArea : public Area {
   ConcreteArea() : Area() {
     // Set up a fake 500x50 horizontal panel that is horizontally centered and
     // vertically aligned to the bottom of a 1024x768 screen.
-    panel_horizontal = true;
+    PanelConfig panel_config = PanelConfig::Default();
+    panel_config.horizontal = true;
+    panel_config.width = 500;
+    panel_config.height = 50;
     panel_horizontal_position = PanelHorizontalPosition::kCenter;
     panel_vertical_position = PanelVerticalPosition::kBottom;
     panel_ = new Panel();
-    panel_->width_ = 500;
-    panel_->height_ = 50;
+    panel_->UseConfig(panel_config, 1);
     panel_->root_x_ = (kScreenWidth - panel_->width_) / 2;
     panel_->root_y_ = (kScreenHeight - panel_->height_);
     // Set the size of this Area.

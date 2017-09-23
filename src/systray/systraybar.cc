@@ -132,7 +132,7 @@ void Systraybar::DrawForeground(cairo_t* /* c */) {
 }
 
 bool Systraybar::Resize() {
-  if (panel_horizontal) {
+  if (panel_->horizontal()) {
     icon_size = height_;
   } else {
     icon_size = width_;
@@ -146,7 +146,7 @@ bool Systraybar::Resize() {
 
   size_t count = VisibleIcons();
 
-  if (panel_horizontal) {
+  if (panel_->horizontal()) {
     int height = height_ - 2 * bg_.border().width() - 2 * padding_y_;
     // here icons_per_column always higher than 0
     icons_per_column = (height + padding_x_) / (icon_size + padding_x_);
@@ -177,7 +177,7 @@ void Systraybar::OnChangeLayout() {
   // here, posx/posy are defined by rendering engine. so we can
   // calculate position of tray icon.
   int posx, posy, start;
-  if (panel_horizontal) {
+  if (panel_->horizontal()) {
     posy = start =
         (panel_border.width_for_side(BORDER_TOP) + panel_->padding_y_) +
         (systray_border.width_for_side(BORDER_TOP) + padding_y_) + margin_ / 2;
@@ -204,7 +204,7 @@ void Systraybar::OnChangeLayout() {
     traywin->width = icon_size;
     traywin->height = icon_size;
 
-    if (panel_horizontal) {
+    if (panel_->horizontal()) {
       if (i % icons_per_column) {
         posy += (icon_size + padding_x_);
       } else {

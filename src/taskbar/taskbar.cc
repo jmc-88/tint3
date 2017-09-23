@@ -154,7 +154,7 @@ void Taskbar::InitPanel(Panel* panel) {
   panel->g_taskbar.on_screen_ = true;
 
   Border const& b = panel->bg_.border();
-  if (panel_horizontal) {
+  if (panel->horizontal()) {
     panel->g_taskbar.panel_y_ =
         b.width_for_side(BORDER_TOP) + panel->padding_y_;
     panel->g_taskbar.height_ = panel->height_ - (2 * panel->g_taskbar.panel_y_);
@@ -239,7 +239,7 @@ void Taskbar::InitPanel(Panel* panel) {
         panel->g_task.background[kTaskActive];
   }
 
-  if (panel_horizontal) {
+  if (panel->horizontal()) {
     panel->g_task.panel_y_ =
         panel->g_taskbar.panel_y_ +
         panel->g_taskbar.background[kTaskbarNormal].border().width() +
@@ -274,7 +274,7 @@ void Taskbar::InitPanel(Panel* panel) {
   GetTextSize(panel->g_task.font_desc, "TAjpg", MarkupTag::kNoMarkup,
               nullptr, &height);
 
-  if (!panel->g_task.maximum_width && panel_horizontal) {
+  if (!panel->g_task.maximum_width && panel->horizontal()) {
     panel->g_task.maximum_width = panel->monitor().width;
   }
 
@@ -378,7 +378,7 @@ bool Taskbar::Resize() {
       (panel_->g_task.text_posx + panel_->g_task.bg_.border().width() +
        panel_->g_task.padding_x_);
 
-  if (panel_horizontal) {
+  if (panel_->horizontal()) {
     ResizeByLayout(panel_->g_task.maximum_width);
 
     int new_width = panel_->g_task.maximum_width;

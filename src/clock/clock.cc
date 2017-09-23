@@ -208,7 +208,7 @@ bool Clock::Resize() {
                 &date_height);
   }
 
-  if (panel_horizontal) {
+  if (panel_->horizontal()) {
     int new_size = std::max(time_width, date_width) + (2 * padding_x_lr_) +
                    (2 * bg_.border().width());
 

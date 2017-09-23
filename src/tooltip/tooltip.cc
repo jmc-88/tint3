@@ -109,7 +109,7 @@ void Tooltip::GetExtents(std::string const& text, int* x, int* y, int* width,
   (*height) = 2 * w + 2 * tooltip_config.paddingy + text_height;
 
   Panel const* panel = area_->panel_;
-  if (panel_horizontal) {
+  if (panel->horizontal()) {
     (*x) -= (*width) / 2;
     if (panel_vertical_position == PanelVerticalPosition::kBottom) {
       (*y) = panel->root_y_ - (*height);
@@ -128,7 +128,7 @@ void Tooltip::GetExtents(std::string const& text, int* x, int* y, int* width,
   // Limit the size of the tooltip
   int max_width = panel->monitor().width;
   int max_height = panel->monitor().height;
-  if (panel_horizontal) {
+  if (panel->horizontal()) {
     max_height -= panel->height_;
   } else {
     max_width -= panel->width_;
@@ -139,7 +139,7 @@ void Tooltip::GetExtents(std::string const& text, int* x, int* y, int* width,
   // Don't escape the screen from the left or the top side
   int min_x = 0;
   int min_y = 0;
-  if (panel_horizontal) {
+  if (panel->horizontal()) {
     if (panel_vertical_position == PanelVerticalPosition::kBottom) {
       min_y = panel->height_;
     }
