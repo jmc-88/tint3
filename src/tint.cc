@@ -120,7 +120,7 @@ void Init(int argc, char* argv[], std::string* config_path) {
 
   // Set signal handler
   signal_pending = 0;
-  auto signal_handler = [](int signal_number) -> void {
+  auto signal_handler = [](int signal_number) {
     signal_pending = signal_number;
   };
 
@@ -959,7 +959,7 @@ start:
 
   // Setup a handler for child termination
   pending_children = false;
-  SignalAction(SIGCHLD, [](int) -> void { pending_children = true; });
+  SignalAction(SIGCHLD, [](int) { pending_children = true; });
 
   // Pointer to the Area that was last activated by a mouse effect.
   Area* previous_mouse_over_area = nullptr;
@@ -973,7 +973,7 @@ start:
   }
 
   event_loop.RegisterHandler(
-      xfixes_event + XFixesSelectionNotify, [&](XEvent& e) -> void {
+      xfixes_event + XFixesSelectionNotify, [&](XEvent& e) {
         XFixesSelectionNotifyEvent* ev =
             reinterpret_cast<XFixesSelectionNotifyEvent*>(&e);
 
@@ -986,7 +986,7 @@ start:
         signal_pending = SIGUSR1;
       });
 
-  event_loop.RegisterHandler(ButtonPress, [&](XEvent& e) -> void {
+  event_loop.RegisterHandler(ButtonPress, [&](XEvent& e) {
     tooltip.Hide();
     EventButtonPress(&e);
 
@@ -1000,7 +1000,7 @@ start:
             ->MouseOver(previous_mouse_over_area, /*button_pressed=*/true);
   });
 
-  event_loop.RegisterHandler(ButtonRelease, [&](XEvent& e) -> void {
+  event_loop.RegisterHandler(ButtonRelease, [&](XEvent& e) {
     EventButtonRelease(&e);
 
     Panel* panel = GetPanel(e.xmotion.window);
@@ -1013,7 +1013,7 @@ start:
             ->MouseOver(previous_mouse_over_area, /*button_pressed=*/false);
   });
 
-  event_loop.RegisterHandler(MotionNotify, [&](XEvent& e) -> void {
+  event_loop.RegisterHandler(MotionNotify, [&](XEvent& e) {
     static constexpr unsigned int button_mask =
         Button1Mask | Button2Mask | Button3Mask | Button4Mask | Button5Mask;
     const bool button_pressed = (e.xmotion.state & button_mask) != 0;
@@ -1038,7 +1038,7 @@ start:
         area->MouseOver(previous_mouse_over_area, button_pressed);
   });
 
-  event_loop.RegisterHandler(LeaveNotify, [&](XEvent& e) -> void {
+  event_loop.RegisterHandler(LeaveNotify, [&](XEvent& e) {
     tooltip.Hide();
 
     if (previous_mouse_over_area != nullptr) {
@@ -1047,19 +1047,18 @@ start:
     }
   });
 
-  event_loop.RegisterHandler(Expose,
-                             [](XEvent& e) -> void { EventExpose(&e); });
+  event_loop.RegisterHandler(Expose, [](XEvent& e) { EventExpose(&e); });
 
-  event_loop.RegisterHandler(PropertyNotify, [&](XEvent& e) -> void {
+  event_loop.RegisterHandler(PropertyNotify, [&](XEvent& e) {
     EventPropertyNotify(&e, timer, &tooltip);
   });
 
-  event_loop.RegisterHandler(ConfigureNotify, [&timer](XEvent& e) -> void {
+  event_loop.RegisterHandler(ConfigureNotify, [&timer](XEvent& e) {
     EventConfigureNotify(e.xconfigure.window, timer);
   });
 
   if (systray_enabled) {
-    event_loop.RegisterHandler(ReparentNotify, [&](XEvent& e) -> void {
+    event_loop.RegisterHandler(ReparentNotify, [&](XEvent& e) {
       XReparentEvent* ev = reinterpret_cast<XReparentEvent*>(&e);
       TrayWindow* traywin = systray.FindTrayWindow(ev->window);
       if (traywin != nullptr) {
@@ -1068,21 +1067,19 @@ start:
       }
     });
 
-    event_loop.RegisterHandler(
-        {UnmapNotify, DestroyNotify},
-        [&](XEvent& e) -> void {
-          if (e.xany.window == tooltip.window()) {
-            return;
-          }
+    event_loop.RegisterHandler({UnmapNotify, DestroyNotify}, [&](XEvent& e) {
+      if (e.xany.window == tooltip.window()) {
+        return;
+      }
 
-          TrayWindow* traywin = systray.FindTrayWindow(e.xany.window);
-          if (traywin != nullptr && traywin->owned) {
-            systray.RemoveIcon(traywin, timer);
-          }
-        });
+      TrayWindow* traywin = systray.FindTrayWindow(e.xany.window);
+      if (traywin != nullptr && traywin->owned) {
+        systray.RemoveIcon(traywin, timer);
+      }
+    });
   }
 
-  event_loop.RegisterHandler(ClientMessage, [&](XEvent& e) -> void {
+  event_loop.RegisterHandler(ClientMessage, [&](XEvent& e) {
     if (systray_enabled &&
         e.xclient.message_type == server.atom("_NET_SYSTEM_TRAY_OPCODE") &&
         e.xclient.format == 32 && e.xclient.window == net_sel_win) {
@@ -1096,7 +1093,7 @@ start:
     }
   });
 
-  event_loop.RegisterHandler(SelectionNotify, [&](XEvent& e) -> void {
+  event_loop.RegisterHandler(SelectionNotify, [&](XEvent& e) {
     Atom target = e.xselection.target;
 
     if (e.xselection.property != None && !dnd_launcher_exec.empty()) {
@@ -1136,14 +1133,13 @@ start:
     }
   });
 
-  event_loop.RegisterHandler(
-      xdamage_event + XDamageNotify, [&](XEvent& e) -> void {
-        XDamageNotifyEvent* ev = reinterpret_cast<XDamageNotifyEvent*>(&e);
-        TrayWindow* traywin = systray.FindTrayWindow(ev->drawable);
-        if (traywin != nullptr) {
-          systray.RenderIcon(traywin, timer);
-        }
-      });
+  event_loop.RegisterHandler(xdamage_event + XDamageNotify, [&](XEvent& e) {
+    XDamageNotifyEvent* ev = reinterpret_cast<XDamageNotifyEvent*>(&e);
+    TrayWindow* traywin = systray.FindTrayWindow(ev->drawable);
+    if (traywin != nullptr) {
+      systray.RenderIcon(traywin, timer);
+    }
+  });
 
   if (event_loop.RunLoop()) {
     // Reinitialize tint3.
