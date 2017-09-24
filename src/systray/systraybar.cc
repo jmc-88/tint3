@@ -223,7 +223,7 @@ void Systraybar::OnChangeLayout() {
     // position and size the icon window
     XMoveResizeWindow(server.dsp, traywin->id, traywin->x, traywin->y,
                       icon_size, icon_size);
-    XResizeWindow(server.dsp, traywin->tray_id, icon_size, icon_size);
+    XResizeWindow(server.dsp, traywin->child_id, icon_size, icon_size);
   }
 }
 
@@ -353,12 +353,12 @@ int WindowErrorHandler(Display* d, XErrorEvent* e) {
 bool CompareTrayWindows(TrayWindow const* traywin_a,
                         TrayWindow const* traywin_b) {
   std::string name_a;
-  if (!util::x11::GetWMName(server.dsp, traywin_a->tray_id, &name_a)) {
+  if (!util::x11::GetWMName(server.dsp, traywin_a->child_id, &name_a)) {
     return true;
   }
 
   std::string name_b;
-  if (!util::x11::GetWMName(server.dsp, traywin_a->tray_id, &name_b)) {
+  if (!util::x11::GetWMName(server.dsp, traywin_a->child_id, &name_b)) {
     return true;
   }
 
@@ -476,7 +476,7 @@ bool Systraybar::AddIcon(Window id) {
 
   // show the window
   if (!traywin->hide) {
-    XMapWindow(server.dsp, traywin->tray_id);
+    XMapWindow(server.dsp, traywin->child_id);
   }
 
   if (!traywin->hide && !panel_->hidden()) {
@@ -491,7 +491,7 @@ bool Systraybar::AddIcon(Window id) {
 
 TrayWindow* Systraybar::FindTrayWindow(Window window_id) {
   for (TrayWindow* traywin : list_icons_) {
-    if (traywin->tray_id == window_id) {
+    if (traywin->child_id == window_id) {
       return traywin;
     }
   }
@@ -549,7 +549,7 @@ void SystrayRenderIconNow(TrayWindow* traywin, Timer& timer) {
   }
 
   Picture pict_image =
-      XRenderCreatePicture(server.dsp, traywin->tray_id, f, 0, 0);
+      XRenderCreatePicture(server.dsp, traywin->child_id, f, 0, 0);
   Picture pict_drawable = XRenderCreatePicture(
       server.dsp, tmp_pmap,
       XRenderFindVisualFormat(server.dsp, server.visual32), 0, 0);
@@ -633,13 +633,13 @@ void Systraybar::RenderIcon(TrayWindow* traywin, Timer& timer) {
     //          XCopyArea(server.dsp, panel->temp_pmap, pix, server.gc,
     //          traywin->x, traywin->y, traywin->width, traywin->height, 0, 0);
     //          XSetWindowBackgroundPixmap(server.dsp, traywin->id, pix);
-    XClearArea(server.dsp, traywin->tray_id, 0, 0, traywin->width,
+    XClearArea(server.dsp, traywin->child_id, 0, 0, traywin->width,
                traywin->height, True);
   }
 }
 
 void Systraybar::RemoveIconInternal(TrayWindow* traywin, Timer& timer) {
-  XSelectInput(server.dsp, traywin->tray_id, NoEventMask);
+  XSelectInput(server.dsp, traywin->child_id, NoEventMask);
 
   if (traywin->damage) {
     XDamageDestroy(server.dsp, traywin->damage);
@@ -651,10 +651,10 @@ void Systraybar::RemoveIconInternal(TrayWindow* traywin, Timer& timer) {
     util::x11::ScopedErrorHandler error_handler(WindowErrorHandler);
 
     if (!traywin->hide) {
-      XUnmapWindow(server.dsp, traywin->tray_id);
+      XUnmapWindow(server.dsp, traywin->child_id);
     }
 
-    XReparentWindow(server.dsp, traywin->tray_id, server.root_window(), 0, 0);
+    XReparentWindow(server.dsp, traywin->child_id, server.root_window(), 0, 0);
     XDestroyWindow(server.dsp, traywin->id);
     XSync(server.dsp, False);
   }

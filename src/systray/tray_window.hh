@@ -8,10 +8,10 @@
 
 class TrayWindow {
  public:
-  TrayWindow(Window parent_id, Window tray_id);
+  TrayWindow(Window parent_id, Window child_id);
 
   Window id;
-  Window tray_id;
+  Window child_id;
   int x, y;
   int width, height;
   // TODO: manage icon's show/hide
