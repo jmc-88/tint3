@@ -93,7 +93,7 @@ void InitSystray(Timer& timer) {
     systray.brightness = systray.saturation = 0;
   }
 
-  systray.list_icons.clear();
+  systray.RemoveAllIcons(timer);
 }
 
 bool Systraybar::should_refresh() const { return should_refresh_; }
@@ -198,7 +198,7 @@ void Systraybar::OnChangeLayout() {
 
   int i = 0;
 
-  for (auto& traywin : systray.list_icons) {
+  for (auto& traywin : list_icons_) {
     ++i;
 
     if (traywin->hide) {
@@ -235,7 +235,7 @@ void Systraybar::OnChangeLayout() {
 
 size_t Systraybar::VisibleIcons() const {
   size_t count = 0;
-  for (auto& traywin : list_icons) {
+  for (auto& traywin : list_icons_) {
     if (!traywin->hide) {
       ++count;
     }
@@ -332,12 +332,7 @@ void Systraybar::StartNet(Timer& timer) {
 }
 
 void Systraybar::StopNet(Timer& timer) {
-  // remove_icon change systray.list_icons
-  for (auto& icon : systray.list_icons) {
-    RemoveIconInternal(icon, timer);
-  }
-
-  list_icons.clear();
+  RemoveAllIcons(timer);
 
   if (net_sel_win != None) {
     XDestroyWindow(server.dsp, net_sel_win);
@@ -470,13 +465,13 @@ bool Systraybar::AddIcon(Window id) {
   }
 
   if (sort == 3) {
-    list_icons.push_front(traywin);
+    list_icons_.push_front(traywin);
   } else if (sort == 2) {
-    list_icons.push_back(traywin);
+    list_icons_.push_back(traywin);
   } else {
-    auto it = std::lower_bound(list_icons.begin(), list_icons.end(), traywin,
+    auto it = std::lower_bound(list_icons_.begin(), list_icons_.end(), traywin,
                                CompareTrayWindows);
-    list_icons.insert(it, traywin);
+    list_icons_.insert(it, traywin);
   }
 
   if (server.real_transparency || alpha != 100 || brightness != 0 ||
@@ -501,103 +496,20 @@ bool Systraybar::AddIcon(Window id) {
   return true;
 }
 
-void Systraybar::RemoveIconInternal(TrayWindow* traywin, Timer& timer) {
-  XSelectInput(server.dsp, traywin->tray_id, NoEventMask);
-
-  if (traywin->damage) {
-    XDamageDestroy(server.dsp, traywin->damage);
-  }
-
-  // reparent to root
-  {
-    error = false;
-    util::x11::ScopedErrorHandler error_handler(WindowErrorHandler);
-
-    if (!traywin->hide) {
-      XUnmapWindow(server.dsp, traywin->tray_id);
+TrayWindow* Systraybar::FindTrayWindow(Window window_id) {
+  for (TrayWindow* traywin : list_icons_) {
+    if (traywin->tray_id == window_id) {
+      return traywin;
     }
-
-    XReparentWindow(server.dsp, traywin->tray_id, server.root_window(), 0, 0);
-    XDestroyWindow(server.dsp, traywin->id);
-    XSync(server.dsp, False);
   }
-
-  if (traywin->render_timeout) {
-    timer.ClearInterval(traywin->render_timeout);
-  }
-
-  delete traywin;
+  return nullptr;
 }
 
-void Systraybar::RemoveIcon(TrayWindow* traywin, Timer& timer) {
-  RemoveIconInternal(traywin, timer);
-
-  // remove from our list
-  list_icons.erase(std::remove(list_icons.begin(), list_icons.end(), traywin),
-                   list_icons.end());
-
-  // check empty systray
-  if (VisibleIcons() == 0) {
-    Hide();
-  }
-
-  // changed in systray
-  need_resize_ = true;
-  panel_refresh = true;
-}
-
-void Systraybar::Clear(Timer& timer) {
-  for (auto& traywin : list_icons) {
-    RemoveIconInternal(traywin, timer);
-  }
-
-  list_icons.clear();
-
-  // check empty systray
-  if (VisibleIcons() == 0) {
-    Hide();
-  }
-
-  // changed in systray
-  need_resize_ = true;
-  panel_refresh = true;
-}
-
-#ifdef _TINT3_DEBUG
-
-std::string Systraybar::GetFriendlyName() const { return "Systraybar"; }
-
-#endif  // _TINT3_DEBUG
-
-void Systraybar::NetMessage(XClientMessageEvent* e) {
-  unsigned long opcode;
-  Window id;
-
-  opcode = e->data.l[1];
-
-  switch (opcode) {
-    case SYSTEM_TRAY_REQUEST_DOCK:
-      id = e->data.l[2];
-
-      if (id) {
-        systray.AddIcon(id);
-      }
-
-      break;
-
-    case SYSTEM_TRAY_BEGIN_MESSAGE:
-    case SYSTEM_TRAY_CANCEL_MESSAGE:
-      // we don't show baloons messages.
-      break;
-
-    default:
-      if (opcode == server.atom("_NET_SYSTEM_TRAY_MESSAGE_DATA")) {
-        util::log::Debug() << "message from dockapp: " << e->data.b << '\n';
-      } else {
-        util::log::Error() << "SYSTEM_TRAY: unknown message type\n";
-      }
-
-      break;
+void Systraybar::RefreshIcons(Timer& timer) {
+  for (auto& traywin : list_icons_) {
+    if (!traywin->hide) {
+      RenderIcon(traywin, timer);
+    }
   }
 }
 
@@ -613,7 +525,7 @@ void SystrayRenderIconNow(TrayWindow* traywin, Timer& timer) {
   if (traywin->width == 0 || traywin->height == 0) {
     // reschedule rendering since the geometry information has not yet been
     // processed (can happen on slow cpu)
-    SystrayRenderIcon(traywin, timer);
+    systray.RenderIcon(traywin, timer);
     return;
   }
 
@@ -705,7 +617,7 @@ void SystrayRenderIconNow(TrayWindow* traywin, Timer& timer) {
 
 }  // namespace
 
-void SystrayRenderIcon(TrayWindow* traywin, Timer& timer) {
+void Systraybar::RenderIcon(TrayWindow* traywin, Timer& timer) {
   if (server.real_transparency || systray.alpha != 100 ||
       systray.brightness != 0 || systray.saturation != 0) {
     // wine tray icons update whenever mouse is over them, so we limit the
@@ -733,10 +645,106 @@ void SystrayRenderIcon(TrayWindow* traywin, Timer& timer) {
   }
 }
 
-void RefreshSystrayIcon(Timer& timer) {
-  for (auto& traywin : systray.list_icons) {
+void Systraybar::RemoveIconInternal(TrayWindow* traywin, Timer& timer) {
+  XSelectInput(server.dsp, traywin->tray_id, NoEventMask);
+
+  if (traywin->damage) {
+    XDamageDestroy(server.dsp, traywin->damage);
+  }
+
+  // reparent to root
+  {
+    error = false;
+    util::x11::ScopedErrorHandler error_handler(WindowErrorHandler);
+
     if (!traywin->hide) {
-      SystrayRenderIcon(traywin, timer);
+      XUnmapWindow(server.dsp, traywin->tray_id);
     }
+
+    XReparentWindow(server.dsp, traywin->tray_id, server.root_window(), 0, 0);
+    XDestroyWindow(server.dsp, traywin->id);
+    XSync(server.dsp, False);
+  }
+
+  if (traywin->render_timeout) {
+    timer.ClearInterval(traywin->render_timeout);
+  }
+
+  delete traywin;
+}
+
+void Systraybar::RemoveIcon(TrayWindow* traywin, Timer& timer) {
+  RemoveIconInternal(traywin, timer);
+
+  // remove from our list
+  list_icons_.erase(
+      std::remove(list_icons_.begin(), list_icons_.end(), traywin),
+      list_icons_.end());
+
+  // check empty systray
+  if (VisibleIcons() == 0) {
+    Hide();
+  }
+
+  // changed in systray
+  need_resize_ = true;
+  panel_refresh = true;
+}
+
+void Systraybar::RemoveAllIcons(Timer& timer) {
+  for (auto& traywin : list_icons_) {
+    RemoveIconInternal(traywin, timer);
+  }
+  list_icons_.clear();
+}
+
+void Systraybar::Clear(Timer& timer) {
+  RemoveAllIcons(timer);
+
+  // check empty systray
+  if (VisibleIcons() == 0) {
+    Hide();
+  }
+
+  // changed in systray
+  need_resize_ = true;
+  panel_refresh = true;
+}
+
+#ifdef _TINT3_DEBUG
+
+std::string Systraybar::GetFriendlyName() const { return "Systraybar"; }
+
+#endif  // _TINT3_DEBUG
+
+void Systraybar::NetMessage(XClientMessageEvent* e) {
+  unsigned long opcode;
+  Window id;
+
+  opcode = e->data.l[1];
+
+  switch (opcode) {
+    case SYSTEM_TRAY_REQUEST_DOCK:
+      id = e->data.l[2];
+
+      if (id) {
+        systray.AddIcon(id);
+      }
+
+      break;
+
+    case SYSTEM_TRAY_BEGIN_MESSAGE:
+    case SYSTEM_TRAY_CANCEL_MESSAGE:
+      // we don't show baloons messages.
+      break;
+
+    default:
+      if (opcode == server.atom("_NET_SYSTEM_TRAY_MESSAGE_DATA")) {
+        util::log::Debug() << "message from dockapp: " << e->data.b << '\n';
+      } else {
+        util::log::Error() << "SYSTEM_TRAY: unknown message type\n";
+      }
+
+      break;
   }
 }

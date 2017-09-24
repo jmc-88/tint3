@@ -747,15 +747,14 @@ void EventConfigureNotify(Window win, Timer& timer) {
   }
 
   // 'win' is a tray icon
-  for (auto& traywin : systray.list_icons) {
-    if (traywin->tray_id == win) {
-      XMoveResizeWindow(server.dsp, traywin->id, traywin->x, traywin->y,
-                        traywin->width, traywin->height);
-      XResizeWindow(server.dsp, traywin->tray_id, traywin->width,
-                    traywin->height);
-      panel_refresh = true;
-      return;
-    }
+  TrayWindow* traywin = systray.FindTrayWindow(win);
+  if (traywin != nullptr) {
+    XMoveResizeWindow(server.dsp, traywin->id, traywin->x, traywin->y,
+                      traywin->width, traywin->height);
+    XResizeWindow(server.dsp, traywin->tray_id, traywin->width,
+                  traywin->height);
+    panel_refresh = true;
+    return;
   }
 
   // 'win' move in another monitor
@@ -1079,11 +1078,9 @@ start:
           return;
         }
 
-        for (auto& traywin : systray.list_icons) {
-          if (traywin->tray_id == e.xany.window) {
-            systray.RemoveIcon(traywin, timer);
-            return;
-          }
+        TrayWindow* traywin = systray.FindTrayWindow(e.xany.window);
+        if (traywin != nullptr) {
+          systray.RemoveIcon(traywin, timer);
         }
       });
 
@@ -1144,12 +1141,9 @@ start:
   event_loop.RegisterHandler(
       xdamage_event + XDamageNotify, [&](XEvent& e) -> void {
         XDamageNotifyEvent* ev = reinterpret_cast<XDamageNotifyEvent*>(&e);
-
-        for (auto& traywin : systray.list_icons) {
-          if (traywin->id == ev->drawable) {
-            SystrayRenderIcon(traywin, timer);
-            return;
-          }
+        TrayWindow* traywin = systray.FindTrayWindow(ev->drawable);
+        if (traywin != nullptr) {
+          systray.RenderIcon(traywin, timer);
         }
       });
 

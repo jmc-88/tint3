@@ -80,7 +80,7 @@ bool EventLoop::RunLoop() {
         XSetWindowBackgroundPixmap(server_->dsp, panel->main_win_,
                                    panel->temp_pmap);
         // force refresh of the icons
-        RefreshSystrayIcon(timer_);
+        systray.RefreshIcons(timer_);
       }
     }
 

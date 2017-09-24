@@ -19,7 +19,6 @@ class Systraybar : public Area {
   void RemoveIconInternal(TrayWindow* traywin, Timer& timer);
 
  public:
-  std::list<TrayWindow*> list_icons;
   int sort;
   int alpha, saturation, brightness;
   int icon_size, icons_per_column, icons_per_row, margin_;
@@ -35,7 +34,11 @@ class Systraybar : public Area {
 
   size_t VisibleIcons() const;
   bool AddIcon(Window id);
+  TrayWindow* FindTrayWindow(Window window_id);
+  void RefreshIcons(Timer& timer);
+  void RenderIcon(TrayWindow* traywin, Timer& timer);
   void RemoveIcon(TrayWindow* traywin, Timer& timer);
+  void RemoveAllIcons(Timer& timer);
   void Clear(Timer& timer);
 
   // systray protocol
@@ -52,6 +55,7 @@ class Systraybar : public Area {
 
  private:
   bool should_refresh_;
+  std::list<TrayWindow*> list_icons_;
 };
 
 // net_sel_win != None when protocol started
@@ -68,8 +72,5 @@ void CleanupSystray(Timer& timer);
 
 // initialize protocol and panel position
 void InitSystray(Timer& timer);
-
-void RefreshSystrayIcon(Timer& timer);
-void SystrayRenderIcon(TrayWindow* traywin, Timer& timer);
 
 #endif  // TINT3_SYSTRAYBAR_SYSTRAYBAR_HH
