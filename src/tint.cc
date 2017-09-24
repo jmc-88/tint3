@@ -748,7 +748,7 @@ void EventConfigureNotify(Window win, Timer& timer) {
 
   // 'win' is a tray icon
   TrayWindow* traywin = systray.FindTrayWindow(win);
-  if (traywin != nullptr) {
+  if (traywin != nullptr && traywin->owned) {
     XMoveResizeWindow(server.dsp, traywin->tray_id, traywin->x, traywin->y,
                       traywin->width, traywin->height);
     XResizeWindow(server.dsp, traywin->child_id, traywin->width,
@@ -1060,9 +1060,11 @@ start:
 
   if (systray_enabled) {
     event_loop.RegisterHandler(ReparentNotify, [&](XEvent& e) -> void {
-      if (e.xany.window == systray.panel_->main_win_) {
-        // FIXME: this should probably do something :)
-        return;
+      XReparentEvent* ev = reinterpret_cast<XReparentEvent*>(&e);
+      TrayWindow* traywin = systray.FindTrayWindow(ev->window);
+      if (traywin != nullptr) {
+        bool reparented_to_us = (ev->parent == systray.panel_->main_win_);
+        traywin->owned = reparented_to_us;
       }
     });
 
@@ -1074,7 +1076,7 @@ start:
           }
 
           TrayWindow* traywin = systray.FindTrayWindow(e.xany.window);
-          if (traywin != nullptr) {
+          if (traywin != nullptr && traywin->owned) {
             systray.RemoveIcon(traywin, timer);
           }
         });

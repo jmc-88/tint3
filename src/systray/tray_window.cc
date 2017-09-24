@@ -3,6 +3,7 @@
 TrayWindow::TrayWindow(Window tray_id, Window child_id)
     : tray_id(tray_id),
       child_id(child_id),
+      owned(false),
       x(0),
       y(0),
       width(0),

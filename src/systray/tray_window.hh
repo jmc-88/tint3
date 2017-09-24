@@ -12,6 +12,7 @@ class TrayWindow {
 
   Window tray_id;
   Window child_id;
+  bool owned;
   int x, y;
   int width, height;
   // TODO: manage icon's show/hide
