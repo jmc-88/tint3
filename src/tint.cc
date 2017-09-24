@@ -177,11 +177,25 @@ void InitX11() {
 
   server.InitX11();
 
-#ifndef _TINT3_DEBUG
-  // https://github.com/jmc-88/tint3/issues/33
-  // Silence Xlib errors in Release builds.
-  XSetErrorHandler(+[](Display*, XErrorEvent*) { return 0; });
-#endif  // _TINT3_DEBUG
+  XSetErrorHandler(+[](Display* d, XErrorEvent* e) {
+    // If WebKit is happy with 63 chars, I'm happy with 255.
+    //  https://github.com/adobe/webkit/blob/master/Source/WebKit2/PluginProcess/unix/PluginProcessMainUnix.cpp#L62
+    char message[256];
+    XGetErrorText(d, e->error_code, message, 255);
+
+    util::log::Debug() << " [!!] Xlib error: " << message << '\n';
+    util::log::Debug() << " XErrorEvent {\n"
+                       << "   serial: " << e->serial << '\n'
+                       << "   resourceid: " << e->resourceid << '\n'
+                       << "   error_code: "
+                       << static_cast<unsigned int>(e->error_code) << '\n'
+                       << "   request_code: "
+                       << static_cast<unsigned int>(e->request_code) << '\n'
+                       << "   minor_code: "
+                       << static_cast<unsigned int>(e->minor_code) << '\n'
+                       << " };\n";
+    return 0;
+  });
 
 #ifdef HAVE_SN
   // Initialize startup-notification
