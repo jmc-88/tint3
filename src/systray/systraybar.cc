@@ -448,7 +448,7 @@ bool Systraybar::AddIcon(Window id) {
     XSendEvent(server.dsp, id, False, 0xFFFFFF, &e);
   }
 
-  auto traywin = new TrayWindow(parent_window, id);
+  auto traywin = new TrayWindow(&server, parent_window, id);
   traywin->hide = false;
   traywin->depth = attr.depth;
   traywin->damage = 0;
@@ -639,47 +639,21 @@ void Systraybar::RenderIcon(TrayWindow* traywin, Timer& timer) {
 }
 
 void Systraybar::RemoveIconInternal(TrayWindow* traywin, Timer& timer) {
-  XSelectInput(server.dsp, traywin->child_id, NoEventMask);
-
-  if (traywin->damage) {
-    XDamageDestroy(server.dsp, traywin->damage);
-  }
-
-  // reparent to root
-  {
-    error = false;
-    util::x11::ScopedErrorHandler error_handler(WindowErrorHandler);
-
-    if (!traywin->hide) {
-      XUnmapWindow(server.dsp, traywin->child_id);
-    }
-
-    XReparentWindow(server.dsp, traywin->child_id, server.root_window(), 0, 0);
-    XDestroyWindow(server.dsp, traywin->tray_id);
-    XSync(server.dsp, False);
-  }
-
   if (traywin->render_timeout) {
     timer.ClearInterval(traywin->render_timeout);
   }
-
   delete traywin;
 }
 
 void Systraybar::RemoveIcon(TrayWindow* traywin, Timer& timer) {
-  RemoveIconInternal(traywin, timer);
-
-  // remove from our list
   list_icons_.erase(
       std::remove(list_icons_.begin(), list_icons_.end(), traywin),
       list_icons_.end());
+  RemoveIconInternal(traywin, timer);
 
-  // check empty systray
   if (VisibleIcons() == 0) {
     Hide();
   }
-
-  // changed in systray
   need_resize_ = true;
   panel_refresh = true;
 }

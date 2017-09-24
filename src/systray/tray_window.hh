@@ -6,9 +6,13 @@
 
 #include "util/timer.hh"
 
+// forward declaration
+class Server;
+
 class TrayWindow {
  public:
-  TrayWindow(Window tray_id, Window child_id);
+  TrayWindow(Server* server, Window tray_id, Window child_id);
+  ~TrayWindow();
 
   Window tray_id;
   Window child_id;
@@ -20,6 +24,9 @@ class TrayWindow {
   int depth;
   Damage damage;
   Interval::Id render_timeout;
+
+ private:
+  Server* server_;
 };
 
 #endif  // TINT3_SYSTRAYBAR_TRAY_WINDOW_HH
