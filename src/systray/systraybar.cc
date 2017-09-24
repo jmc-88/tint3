@@ -221,7 +221,7 @@ void Systraybar::OnChangeLayout() {
     }
 
     // position and size the icon window
-    XMoveResizeWindow(server.dsp, traywin->id, traywin->x, traywin->y,
+    XMoveResizeWindow(server.dsp, traywin->tray_id, traywin->x, traywin->y,
                       icon_size, icon_size);
     XResizeWindow(server.dsp, traywin->child_id, icon_size, icon_size);
   }
@@ -470,8 +470,8 @@ bool Systraybar::AddIcon(Window id) {
   if (server.real_transparency || alpha != 100 || brightness != 0 ||
       saturation != 0) {
     traywin->damage =
-        XDamageCreate(server.dsp, traywin->id, XDamageReportRawRectangles);
-    XCompositeRedirectWindow(server.dsp, traywin->id, CompositeRedirectManual);
+        XDamageCreate(server.dsp, traywin->tray_id, XDamageReportRawRectangles);
+    XCompositeRedirectWindow(server.dsp, traywin->tray_id, CompositeRedirectManual);
   }
 
   // show the window
@@ -480,7 +480,7 @@ bool Systraybar::AddIcon(Window id) {
   }
 
   if (!traywin->hide && !panel_->hidden()) {
-    XMapRaised(server.dsp, traywin->id);
+    XMapRaised(server.dsp, traywin->tray_id);
   }
 
   // changed in systray
@@ -655,7 +655,7 @@ void Systraybar::RemoveIconInternal(TrayWindow* traywin, Timer& timer) {
     }
 
     XReparentWindow(server.dsp, traywin->child_id, server.root_window(), 0, 0);
-    XDestroyWindow(server.dsp, traywin->id);
+    XDestroyWindow(server.dsp, traywin->tray_id);
     XSync(server.dsp, False);
   }
 

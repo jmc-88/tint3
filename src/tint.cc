@@ -749,7 +749,7 @@ void EventConfigureNotify(Window win, Timer& timer) {
   // 'win' is a tray icon
   TrayWindow* traywin = systray.FindTrayWindow(win);
   if (traywin != nullptr) {
-    XMoveResizeWindow(server.dsp, traywin->id, traywin->x, traywin->y,
+    XMoveResizeWindow(server.dsp, traywin->tray_id, traywin->x, traywin->y,
                       traywin->width, traywin->height);
     XResizeWindow(server.dsp, traywin->child_id, traywin->width,
                   traywin->height);

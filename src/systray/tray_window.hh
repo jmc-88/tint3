@@ -8,9 +8,9 @@
 
 class TrayWindow {
  public:
-  TrayWindow(Window parent_id, Window child_id);
+  TrayWindow(Window tray_id, Window child_id);
 
-  Window id;
+  Window tray_id;
   Window child_id;
   int x, y;
   int width, height;

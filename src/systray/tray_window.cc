@@ -1,7 +1,7 @@
 #include "systray/tray_window.hh"
 
-TrayWindow::TrayWindow(Window parent_id, Window child_id)
-    : id(parent_id),
+TrayWindow::TrayWindow(Window tray_id, Window child_id)
+    : tray_id(tray_id),
       child_id(child_id),
       x(0),
       y(0),
