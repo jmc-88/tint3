@@ -1058,31 +1058,27 @@ start:
     EventConfigureNotify(e.xconfigure.window, timer);
   });
 
-  event_loop.RegisterHandler(ReparentNotify, [&](XEvent& e) -> void {
-    if (!systray_enabled) {
-      return;
-    }
+  if (systray_enabled) {
+    event_loop.RegisterHandler(ReparentNotify, [&](XEvent& e) -> void {
+      if (e.xany.window == systray.panel_->main_win_) {
+        // FIXME: this should probably do something :)
+        return;
+      }
+    });
 
-    // reparented to us
-    if (e.xany.window == systray.panel_->main_win_) {
-      return;
-    }
+    event_loop.RegisterHandler(
+        {UnmapNotify, DestroyNotify},
+        [&](XEvent& e) -> void {
+          if (e.xany.window == tooltip.window()) {
+            return;
+          }
 
-    // FIXME: 'reparent to us' badly detected => disabled
-  });
-
-  event_loop.RegisterHandler(
-      {UnmapNotify, DestroyNotify},
-      [&](XEvent& e) -> void {
-        if (e.xany.window == tooltip.window() || !systray_enabled) {
-          return;
-        }
-
-        TrayWindow* traywin = systray.FindTrayWindow(e.xany.window);
-        if (traywin != nullptr) {
-          systray.RemoveIcon(traywin, timer);
-        }
-      });
+          TrayWindow* traywin = systray.FindTrayWindow(e.xany.window);
+          if (traywin != nullptr) {
+            systray.RemoveIcon(traywin, timer);
+          }
+        });
+  }
 
   event_loop.RegisterHandler(ClientMessage, [&](XEvent& e) -> void {
     if (systray_enabled &&
