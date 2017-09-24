@@ -116,17 +116,16 @@ void Systraybar::SetParentPanel(Panel* panel) {
 }
 
 void Systraybar::DrawForeground(cairo_t* /* c */) {
-  if (server.real_transparency || systray.alpha != 100 ||
-      systray.brightness != 0 || systray.saturation != 0) {
+  if (server.real_transparency || alpha != 100 || brightness != 0 ||
+      saturation != 0) {
     if (render_background) {
       XFreePixmap(server.dsp, render_background);
     }
 
-    render_background =
-        XCreatePixmap(server.dsp, server.root_window(), systray.width_,
-                      systray.height_, server.depth);
-    XCopyArea(server.dsp, systray.pix_, render_background, server.gc, 0, 0,
-              systray.width_, systray.height_, 0, 0);
+    render_background = XCreatePixmap(server.dsp, server.root_window(), width_,
+                                      height_, server.depth);
+    XCopyArea(server.dsp, pix_, render_background, server.gc, 0, 0, width_,
+              height_, 0, 0);
   }
 
   should_refresh_ = true;
@@ -145,7 +144,7 @@ bool Systraybar::Resize() {
     icon_size = systray_max_icon_size;
   }
 
-  size_t count = systray.VisibleIcons();
+  size_t count = VisibleIcons();
 
   if (panel_horizontal) {
     int height = height_ - 2 * bg_.border().width() - 2 * padding_y_;
@@ -154,9 +153,8 @@ bool Systraybar::Resize() {
     margin_ =
         height - (icons_per_column - 1) * (icon_size + padding_x_) - icon_size;
     icons_per_row = count / icons_per_column + (count % icons_per_column != 0);
-    systray.width_ = (2 * systray.bg_.border().width()) +
-                     (2 * systray.padding_x_lr_) + (icon_size * icons_per_row) +
-                     ((icons_per_row - 1) * systray.padding_x_);
+    width_ = (2 * bg_.border().width()) + (2 * padding_x_lr_) +
+             (icon_size * icons_per_row) + ((icons_per_row - 1) * padding_x_);
   } else {
     int width = width_ - 2 * bg_.border().width() - 2 * padding_y_;
     // here icons_per_row always higher than 0
@@ -164,10 +162,9 @@ bool Systraybar::Resize() {
     margin_ =
         width - (icons_per_row - 1) * (icon_size + padding_x_) - icon_size;
     icons_per_column = count / icons_per_row + (count % icons_per_row != 0);
-    systray.height_ = (2 * systray.bg_.border().width()) +
-                      (2 * systray.padding_x_lr_) +
-                      (icon_size * icons_per_column) +
-                      ((icons_per_column - 1) * systray.padding_x_);
+    height_ = (2 * bg_.border().width()) + (2 * padding_x_lr_) +
+              (icon_size * icons_per_column) +
+              ((icons_per_column - 1) * padding_x_);
   }
 
   return true;
@@ -175,25 +172,22 @@ bool Systraybar::Resize() {
 
 void Systraybar::OnChangeLayout() {
   Border const& panel_border = panel_->bg_.border();
-  Border const& systray_border = systray.bg_.border();
+  Border const& systray_border = bg_.border();
 
-  // here, systray.posx/posy are defined by rendering engine. so we can
+  // here, posx/posy are defined by rendering engine. so we can
   // calculate position of tray icon.
   int posx, posy, start;
   if (panel_horizontal) {
     posy = start =
         (panel_border.width_for_side(BORDER_TOP) + panel_->padding_y_) +
-        (systray_border.width_for_side(BORDER_TOP) + systray.padding_y_) +
-        margin_ / 2;
-    posx = systray.panel_x_ + systray_border.width_for_side(BORDER_TOP) +
-           systray.padding_x_lr_;
+        (systray_border.width_for_side(BORDER_TOP) + padding_y_) + margin_ / 2;
+    posx = panel_x_ + systray_border.width_for_side(BORDER_TOP) + padding_x_lr_;
   } else {
     posx = start =
         (panel_border.width_for_side(BORDER_LEFT) + panel_->padding_y_) +
-        (systray_border.width_for_side(BORDER_LEFT) + systray.padding_y_) +
-        margin_ / 2;
-    posy = systray.panel_y_ + systray_border.width_for_side(BORDER_LEFT) +
-           systray.padding_x_lr_;
+        (systray_border.width_for_side(BORDER_LEFT) + padding_y_) + margin_ / 2;
+    posy =
+        panel_y_ + systray_border.width_for_side(BORDER_LEFT) + padding_x_lr_;
   }
 
   int i = 0;
@@ -215,14 +209,14 @@ void Systraybar::OnChangeLayout() {
         posy += (icon_size + padding_x_);
       } else {
         posy = start;
-        posx += (icon_size + systray.padding_x_);
+        posx += (icon_size + padding_x_);
       }
     } else {
       if (i % icons_per_row) {
-        posx += (icon_size + systray.padding_x_);
+        posx += (icon_size + padding_x_);
       } else {
         posx = start;
-        posy += (icon_size + systray.padding_x_);
+        posy += (icon_size + padding_x_);
       }
     }
 
@@ -294,8 +288,7 @@ void Systraybar::StartNet(Timer& timer) {
 
   VisualID vid;
 
-  if (server.visual32 && (systray.alpha != 100 || systray.brightness != 0 ||
-                          systray.saturation != 0)) {
+  if (server.visual32 && (alpha != 100 || brightness != 0 || saturation != 0)) {
     vid = XVisualIDFromVisual(server.visual32);
   } else {
     vid = XVisualIDFromVisual(server.visual);
@@ -618,8 +611,8 @@ void SystrayRenderIconNow(TrayWindow* traywin, Timer& timer) {
 }  // namespace
 
 void Systraybar::RenderIcon(TrayWindow* traywin, Timer& timer) {
-  if (server.real_transparency || systray.alpha != 100 ||
-      systray.brightness != 0 || systray.saturation != 0) {
+  if (server.real_transparency || alpha != 100 || brightness != 0 ||
+      saturation != 0) {
     // wine tray icons update whenever mouse is over them, so we limit the
     // updates to 50 ms
     if (!traywin->render_timeout) {
@@ -728,7 +721,7 @@ void Systraybar::NetMessage(XClientMessageEvent* e) {
       id = e->data.l[2];
 
       if (id) {
-        systray.AddIcon(id);
+        AddIcon(id);
       }
 
       break;
