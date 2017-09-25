@@ -56,7 +56,6 @@ PanelVerticalPosition panel_vertical_position;
 bool panel_refresh;
 bool task_dragged;
 
-int panel_autohide_height;
 PanelStrutPolicy panel_strut_policy;
 std::string panel_items_order;
 
@@ -108,6 +107,7 @@ PanelConfig PanelConfig::Default() {
   cfg.autohide = false;
   cfg.autohide_show_timeout = 0;
   cfg.autohide_hide_timeout = 0;
+  cfg.autohide_size_px = 5;
 
   cfg.dock = false;
   cfg.horizontal = true;
@@ -123,7 +123,6 @@ void DefaultPanel() {
   panel_vertical_position = PanelVerticalPosition::kBottom;
   panel_horizontal_position = PanelHorizontalPosition::kCenter;
   panel_items_order.clear();
-  panel_autohide_height = 5;  // for vertical panels this is of course the width
   panel_strut_policy = PanelStrutPolicy::kFollowSize;
   max_tick_urgent = 14;
 
@@ -352,7 +351,7 @@ void Panel::InitSizeAndPosition() {
   }
 
   // autohide or strut_policy=minimum
-  int diff = (config_.horizontal ? height_ : width_) - panel_autohide_height;
+  int diff = (config_.horizontal ? height_ : width_) - config_.autohide_size_px;
 
   if (config_.horizontal) {
     hidden_width_ = width_;
@@ -879,7 +878,7 @@ bool Panel::AutohideHide() {
   }
 
   XUnmapSubwindows(server.dsp, main_win_);  // systray windows
-  int diff = (config_.horizontal ? height_ : width_) - panel_autohide_height;
+  int diff = (config_.horizontal ? height_ : width_) - config_.autohide_size_px;
 
   if (config_.horizontal) {
     if (panel_vertical_position == PanelVerticalPosition::kTop) {

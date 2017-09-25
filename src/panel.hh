@@ -49,8 +49,6 @@ extern bool panel_refresh;
 extern bool task_dragged;
 
 // panel autohide
-extern int
-    panel_autohide_height;  // for vertical panels this is of course the width
 extern std::string panel_items_order;
 
 // panel strut policy
@@ -103,6 +101,7 @@ class PanelConfig {
   bool autohide;
   int autohide_show_timeout;
   int autohide_hide_timeout;
+  int autohide_size_px;
 
   bool dock;
   bool horizontal;

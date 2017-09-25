@@ -1680,7 +1680,7 @@ bool Reader::AddEntry_Autohide(std::string const& key,
     if (!ParseNumber(value, &height)) {
       return true;
     }
-    panel_autohide_height = std::max(1, height);
+    new_panel_config.autohide_size_px = std::max(1, height);
     return true;
   }
 
