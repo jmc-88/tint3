@@ -41,7 +41,7 @@ TEST_CASE("SetItemsOrder_Executors") {
 
   SECTION("add only one") {
     PanelConfig panel_config = PanelConfig::Default();
-    panel_items_order = "E";
+    panel_config.items_order = "E";
     Panel p;
     p.panel_ = &p;  // TODO: this is silly, Area should not read from Panel
     p.UseConfig(panel_config, 1);
@@ -52,7 +52,7 @@ TEST_CASE("SetItemsOrder_Executors") {
 
   SECTION("add only two") {
     PanelConfig panel_config = PanelConfig::Default();
-    panel_items_order = "EE";
+    panel_config.items_order = "EE";
     Panel p;
     p.panel_ = &p;  // TODO: this is silly, Area should not read from Panel
     p.UseConfig(panel_config, 1);
@@ -64,7 +64,7 @@ TEST_CASE("SetItemsOrder_Executors") {
 
   SECTION("add all three") {
     PanelConfig panel_config = PanelConfig::Default();
-    panel_items_order = "EEE";
+    panel_config.items_order = "EEE";
     Panel p;
     p.panel_ = &p;  // TODO: this is silly, Area should not read from Panel
     p.UseConfig(panel_config, 1);
@@ -77,7 +77,7 @@ TEST_CASE("SetItemsOrder_Executors") {
 
   SECTION("add too many") {
     PanelConfig panel_config = PanelConfig::Default();
-    panel_items_order = "EEEE";
+    panel_config.items_order = "EEEE";
     Panel p;
     p.panel_ = &p;  // TODO: this is silly, Area should not read from Panel
     p.UseConfig(panel_config, 1);

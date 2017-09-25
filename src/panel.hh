@@ -46,9 +46,6 @@ enum class TaskbarMode { kSingleDesktop, kMultiDesktop };
 extern bool panel_refresh;
 extern bool task_dragged;
 
-// panel autohide
-extern std::string panel_items_order;
-
 // panel strut policy
 enum class PanelStrutPolicy { kMinimum, kFollowSize, kNone };
 
@@ -63,6 +60,8 @@ extern util::imlib2::Image default_icon;
 class PanelConfig {
  public:
   PanelConfig() = default;
+
+  std::string items_order;
 
   Background background;
 #ifdef ENABLE_BATTERY

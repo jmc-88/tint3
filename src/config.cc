@@ -380,7 +380,7 @@ bool Reader::LoadFromFile(std::string const& path) {
   // append Taskbar item
   if (!new_config_file_) {
     taskbar_enabled = true;
-    panel_items_order.insert(0, "T");
+    new_panel_config.items_order.insert(0, "T");
   }
 
   return true;
@@ -641,9 +641,9 @@ bool Reader::AddEntry_Panel(std::string const& key, std::string const& value) {
   }
   if (key == "panel_items") {
     new_config_file_ = true;
-    panel_items_order.assign(value);
+    new_panel_config.items_order.assign(value);
 
-    for (char item : panel_items_order) {
+    for (char item : new_panel_config.items_order) {
       if (item == 'L') {
         launcher_enabled = true;
       }
@@ -870,7 +870,7 @@ bool Reader::AddEntry_Clock(std::string const& key, std::string const& value) {
   if (key == "time1_format") {
     if (!new_config_file_) {
       clock_enabled = true;
-      panel_items_order.push_back('C');
+      new_panel_config.items_order.push_back('C');
     }
     if (!value.empty()) {
       time1_format = value;
@@ -1188,7 +1188,7 @@ bool Reader::AddEntry_Systray(std::string const& key,
   if (key == "systray_padding") {
     if (!new_config_file_ && !systray_enabled) {
       systray_enabled = true;
-      panel_items_order.push_back('S');
+      new_panel_config.items_order.push_back('S');
     }
 
     std::string value1, value2, value3;
@@ -1692,7 +1692,7 @@ bool Reader::AddEntry_Legacy(std::string const& key, std::string const& value) {
     if (!new_config_file_) {
       ParseBoolean(value, &systray_enabled);
       if (systray_enabled) {
-        panel_items_order.push_back('S');
+        new_panel_config.items_order.push_back('S');
       }
       return true;
     }
@@ -1702,7 +1702,7 @@ bool Reader::AddEntry_Legacy(std::string const& key, std::string const& value) {
     if (!new_config_file_) {
       ParseBoolean(value, &battery_enabled);
       if (battery_enabled) {
-        panel_items_order.push_back('B');
+        new_panel_config.items_order.push_back('B');
       }
     }
     return true;

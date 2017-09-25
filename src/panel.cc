@@ -54,8 +54,6 @@ MouseAction mouse_tilt_right;
 bool panel_refresh;
 bool task_dragged;
 
-std::string panel_items_order;
-
 int max_tick_urgent;
 
 // panel's initial config
@@ -72,6 +70,8 @@ util::imlib2::Image default_icon;
 
 PanelConfig PanelConfig::Default() {
   PanelConfig cfg;
+
+  cfg.items_order.clear();
 
   Color black_80pct{Color::Array{0, 0, 0}, .8};
   cfg.background.set_fill_color(black_80pct);
@@ -121,7 +121,6 @@ void DefaultPanel() {
   panels.clear();
   default_icon.Free();
   task_dragged = false;
-  panel_items_order.clear();
   max_tick_urgent = 14;
 
   // append full transparency background
@@ -203,9 +202,10 @@ void InitPanel(Timer& timer) {
     p.InitSizeAndPosition();
 
     // add children according to panel_items
-    util::log::Debug() << "Setting panel items: " << panel_items_order << '\n';
+    util::log::Debug() << "Setting panel items: "
+                       << new_panel_config.items_order << '\n';
 
-    for (char item : panel_items_order) {
+    for (char item : new_panel_config.items_order) {
       if (item == 'L') {
         Launcher::InitPanel(&p);
       }
@@ -388,7 +388,7 @@ void Panel::SetItemsOrder() {
   auto executor = executors.begin();
   children_.clear();
 
-  for (char item : panel_items_order) {
+  for (char item : config_.items_order) {
     if (item == 'L') {
       children_.push_back(&launcher_);
     }
