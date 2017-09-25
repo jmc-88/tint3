@@ -111,9 +111,9 @@ void Tooltip::GetExtents(std::string const& text, int* x, int* y, int* width,
   Panel const* panel = area_->panel_;
   if (panel->horizontal()) {
     (*x) -= (*width) / 2;
-    if (panel_vertical_position == PanelVerticalPosition::kBottom) {
+    if (panel->vertical_position() == PanelVerticalPosition::kBottom) {
       (*y) = panel->root_y_ - (*height);
-    } else if (panel_vertical_position == PanelVerticalPosition::kTop) {
+    } else if (panel->vertical_position() == PanelVerticalPosition::kTop) {
       (*y) = panel->root_y_ + panel->height_;
     }
   } else {
@@ -140,7 +140,7 @@ void Tooltip::GetExtents(std::string const& text, int* x, int* y, int* width,
   int min_x = 0;
   int min_y = 0;
   if (panel->horizontal()) {
-    if (panel_vertical_position == PanelVerticalPosition::kBottom) {
+    if (panel->vertical_position() == PanelVerticalPosition::kBottom) {
       min_y = panel->height_;
     }
   } else {

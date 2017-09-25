@@ -716,11 +716,11 @@ bool Reader::AddEntry_Panel(std::string const& key, std::string const& value) {
     config::ExtractValues(value, &value1, &value2, &value3);
 
     if (value1 == "top") {
-      panel_vertical_position = PanelVerticalPosition::kTop;
+      new_panel_config.vertical_position = PanelVerticalPosition::kTop;
     } else if (value1 == "bottom") {
-      panel_vertical_position = PanelVerticalPosition::kBottom;
+      new_panel_config.vertical_position = PanelVerticalPosition::kBottom;
     } else {
-      panel_vertical_position = PanelVerticalPosition::kCenter;
+      new_panel_config.vertical_position = PanelVerticalPosition::kCenter;
     }
 
     if (value2 == "left") {

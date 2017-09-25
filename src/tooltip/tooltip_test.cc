@@ -33,7 +33,7 @@ class ConcreteArea : public Area {
     panel_config.width = 500;
     panel_config.height = 50;
     panel_horizontal_position = PanelHorizontalPosition::kCenter;
-    panel_vertical_position = PanelVerticalPosition::kBottom;
+    panel_config.vertical_position = PanelVerticalPosition::kBottom;
     panel_ = new Panel();
     panel_->UseConfig(panel_config, 1);
     panel_->root_x_ = (kScreenWidth - panel_->width_) / 2;

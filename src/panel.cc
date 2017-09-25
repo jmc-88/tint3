@@ -52,7 +52,6 @@ MouseAction mouse_tilt_left;
 MouseAction mouse_tilt_right;
 
 PanelHorizontalPosition panel_horizontal_position;
-PanelVerticalPosition panel_vertical_position;
 bool panel_refresh;
 bool task_dragged;
 
@@ -107,7 +106,9 @@ PanelConfig PanelConfig::Default() {
   cfg.autohide_show_timeout = 0;
   cfg.autohide_hide_timeout = 0;
   cfg.autohide_size_px = 5;
+
   cfg.strut_policy = PanelStrutPolicy::kFollowSize;
+  cfg.vertical_position = PanelVerticalPosition::kBottom;
 
   cfg.dock = false;
   cfg.horizontal = true;
@@ -120,7 +121,6 @@ void DefaultPanel() {
   panels.clear();
   default_icon.Free();
   task_dragged = false;
-  panel_vertical_position = PanelVerticalPosition::kBottom;
   panel_horizontal_position = PanelHorizontalPosition::kCenter;
   panel_items_order.clear();
   max_tick_urgent = 14;
@@ -341,9 +341,9 @@ void Panel::InitSizeAndPosition() {
     }
   }
 
-  if (panel_vertical_position == PanelVerticalPosition::kTop) {
+  if (vertical_position() == PanelVerticalPosition::kTop) {
     root_y_ = monitor().y + config_.margin_y;
-  } else if (panel_vertical_position == PanelVerticalPosition::kBottom) {
+  } else if (vertical_position() == PanelVerticalPosition::kBottom) {
     root_y_ = monitor().y + monitor().height - height_ - config_.margin_y;
   } else {
     root_y_ = monitor().y + (monitor().height - height_) / 2;
@@ -524,7 +524,7 @@ void Panel::SetBackground() {
   int xoff = 0, yoff = 0;
 
   if (config_.horizontal &&
-      panel_vertical_position == PanelVerticalPosition::kBottom) {
+      vertical_position() == PanelVerticalPosition::kBottom) {
     yoff = height_ - hidden_height_;
   } else if (!config_.horizontal &&
              panel_horizontal_position == PanelHorizontalPosition::kRight) {
@@ -638,7 +638,7 @@ void Panel::UpdateNetWMStrut() {
       height = hidden_height_;
     }
 
-    if (panel_vertical_position == PanelVerticalPosition::kTop) {
+    if (vertical_position() == PanelVerticalPosition::kTop) {
       struts[2] = height + monitor().y;
       struts[8] = root_x_;
       // width - 1 allowed full screen on monitor 2
@@ -820,6 +820,10 @@ PanelLayer Panel::layer() const { return config_.layer; }
 
 TaskbarMode Panel::taskbar_mode() const { return config_.taskbar_mode; }
 
+PanelVerticalPosition Panel::vertical_position() const {
+  return config_.vertical_position;
+}
+
 Monitor const& Panel::monitor() const {
   return server.monitor[config_.monitor];
 }
@@ -848,7 +852,7 @@ bool Panel::AutohideShow() {
   XMapSubwindows(server.dsp, main_win_);  // systray windows
 
   if (config_.horizontal) {
-    if (panel_vertical_position == PanelVerticalPosition::kTop) {
+    if (vertical_position() == PanelVerticalPosition::kTop) {
       XResizeWindow(server.dsp, main_win_, width_, height_);
     } else {
       XMoveResizeWindow(server.dsp, main_win_, root_x_, root_y_, width_,
@@ -880,7 +884,7 @@ bool Panel::AutohideHide() {
   int diff = (config_.horizontal ? height_ : width_) - config_.autohide_size_px;
 
   if (config_.horizontal) {
-    if (panel_vertical_position == PanelVerticalPosition::kTop) {
+    if (vertical_position() == PanelVerticalPosition::kTop) {
       XResizeWindow(server.dsp, main_win_, hidden_width_, hidden_height_);
     } else {
       XMoveResizeWindow(server.dsp, main_win_, root_x_, root_y_ + diff,
