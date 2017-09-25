@@ -759,7 +759,7 @@ bool Reader::AddEntry_Panel(std::string const& key, std::string const& value) {
     return true;
   }
   if (key == "urgent_nb_of_blink") {
-    ParseNumber(value, &max_tick_urgent);
+    ParseNumber(value, &new_panel_config.max_urgent_blinks);
     return true;
   }
   if (key == "panel_layer") {

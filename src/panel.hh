@@ -49,8 +49,6 @@ extern bool task_dragged;
 // panel strut policy
 enum class PanelStrutPolicy { kMinimum, kFollowSize, kNone };
 
-extern int max_tick_urgent;
-
 extern std::vector<Background> backgrounds;
 extern std::vector<Executor> executors;
 extern std::vector<util::Gradient> gradients;
@@ -105,6 +103,7 @@ class PanelConfig {
   bool dock;
   bool horizontal;
   bool wm_menu;
+  int max_urgent_blinks;
 
   static PanelConfig Default();
 };
@@ -178,6 +177,7 @@ class Panel : public Area {
   Monitor const& monitor() const;
   bool horizontal() const;
   bool window_manager_menu() const;
+  int max_urgent_blinks() const;
   void UseConfig(PanelConfig const& cfg, unsigned int num_desktop);
 
 #ifdef _TINT3_DEBUG

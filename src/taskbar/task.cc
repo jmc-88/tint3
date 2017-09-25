@@ -654,7 +654,7 @@ void SetTaskRedraw(Task* tsk) {
 
 bool BlinkUrgent() {
   for (auto& t : urgent_list) {
-    if (t->urgent_tick < max_tick_urgent) {
+    if (t->urgent_tick < t->panel_->max_urgent_blinks()) {
       if (t->urgent_tick++ % 2) {
         t->SetState(kTaskUrgent);
       } else {

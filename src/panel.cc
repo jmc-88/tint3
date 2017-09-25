@@ -54,8 +54,6 @@ MouseAction mouse_tilt_right;
 bool panel_refresh;
 bool task_dragged;
 
-int max_tick_urgent;
-
 // panel's initial config
 Panel panel_config;
 PanelConfig new_panel_config;
@@ -113,6 +111,7 @@ PanelConfig PanelConfig::Default() {
   cfg.dock = false;
   cfg.horizontal = true;
   cfg.wm_menu = false;
+  cfg.max_urgent_blinks = 14;
 
   return cfg;
 }
@@ -121,7 +120,6 @@ void DefaultPanel() {
   panels.clear();
   default_icon.Free();
   task_dragged = false;
-  max_tick_urgent = 14;
 
   // append full transparency background
   backgrounds.clear();
@@ -836,6 +834,8 @@ bool Panel::window_manager_menu() const { return config_.wm_menu; }
 bool Panel::horizontal() const { return config_.horizontal; }
 
 bool Panel::hidden() const { return hidden_; }
+
+int Panel::max_urgent_blinks() const { return config_.max_urgent_blinks; }
 
 #ifdef _TINT3_DEBUG
 
