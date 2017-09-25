@@ -127,7 +127,7 @@ bool EventLoop::RunLoop() {
           if (e.type == EnterNotify) {
             panel->AutohideTriggerShow(timer_);
           } else if (e.type == LeaveNotify) {
-            AutohideTriggerHide(panel, timer_);
+            panel->AutohideTriggerHide(timer_);
           }
 
           auto XdndPosition = server_->atom("XdndPosition");

@@ -56,7 +56,6 @@ PanelVerticalPosition panel_vertical_position;
 bool panel_refresh;
 bool task_dragged;
 
-int panel_autohide_hide_timeout;
 int panel_autohide_height;
 PanelStrutPolicy panel_strut_policy;
 std::string panel_items_order;
@@ -108,6 +107,7 @@ PanelConfig PanelConfig::Default() {
 
   cfg.autohide = false;
   cfg.autohide_show_timeout = 0;
+  cfg.autohide_hide_timeout = 0;
 
   cfg.dock = false;
   cfg.horizontal = true;
@@ -123,7 +123,6 @@ void DefaultPanel() {
   panel_vertical_position = PanelVerticalPosition::kBottom;
   panel_horizontal_position = PanelHorizontalPosition::kCenter;
   panel_items_order.clear();
-  panel_autohide_hide_timeout = 0;
   panel_autohide_height = 5;  // for vertical panels this is of course the width
   panel_strut_policy = PanelStrutPolicy::kFollowSize;
   max_tick_urgent = 14;
@@ -280,10 +279,8 @@ void InitPanel(Timer& timer) {
     XMapWindow(server.dsp, p.main_win_);
 
     if (p.autohide()) {
-      timer.SetTimeout(std::chrono::milliseconds(panel_autohide_hide_timeout),
-                       [&p]() -> bool { return p.AutohideHide(); });
+      p.AutohideTriggerHide(timer);
     }
-
     p.UpdateTaskbarVisibility();
   }
 
@@ -910,23 +907,19 @@ void Panel::AutohideTriggerShow(Timer& timer) {
                        [this]() -> bool { return AutohideShow(); });
 }
 
-void AutohideTriggerHide(Panel* p, Timer& timer) {
-  if (!p) {
-    return;
-  }
-
+void Panel::AutohideTriggerHide(Timer& timer) {
   Window root, child;
   int xr, yr, xw, yw;
   unsigned int mask;
-
-  if (XQueryPointer(server.dsp, p->main_win_, &root, &child, &xr, &yr, &xw, &yw,
-                    &mask)) {
-    if (child) {
-      return;  // mouse over one of the system tray icons
+  if (XQueryPointer(server.dsp, main_win_, &root, &child, &xr, &yr, &xw, &yw,
+                    &mask) == True) {
+    if (child != None) {
+      // mouse over one of the system tray icons, don't hide the panel
+      return;
     }
   }
 
-  p->autohide_timeout_ =
-      timer.SetTimeout(std::chrono::milliseconds(panel_autohide_hide_timeout),
-                       [p]() -> bool { return p->AutohideHide(); });
+  autohide_timeout_ =
+      timer.SetTimeout(std::chrono::milliseconds(config_.autohide_hide_timeout),
+                       [this]() -> bool { return AutohideHide(); });
 }

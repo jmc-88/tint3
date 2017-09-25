@@ -1662,7 +1662,7 @@ bool Reader::AddEntry_Autohide(std::string const& key,
     if (!ParseNumber(value, &timeout)) {
       return true;
     }
-    panel_autohide_hide_timeout = 1000 * timeout;
+    new_panel_config.autohide_hide_timeout = 1000 * timeout;
     return true;
   }
   if (key == "strut_policy") {

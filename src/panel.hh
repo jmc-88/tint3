@@ -49,7 +49,6 @@ extern bool panel_refresh;
 extern bool task_dragged;
 
 // panel autohide
-extern int panel_autohide_hide_timeout;
 extern int
     panel_autohide_height;  // for vertical panels this is of course the width
 extern std::string panel_items_order;
@@ -103,6 +102,7 @@ class PanelConfig {
 
   bool autohide;
   int autohide_show_timeout;
+  int autohide_hide_timeout;
 
   bool dock;
   bool horizontal;
@@ -170,6 +170,7 @@ class Panel : public Area {
   bool autohide() const;
   bool AutohideShow();
   void AutohideTriggerShow(Timer& timer);
+  void AutohideTriggerHide(Timer& timer);
   bool AutohideHide();
 
   PanelLayer layer() const;
@@ -212,7 +213,5 @@ void InitPanel(Timer& timer);
 
 // detect wich panel
 Panel* GetPanel(Window win);
-
-void AutohideTriggerHide(Panel* p, Timer& timer);
 
 #endif  // TINT3_PANEL_HH
