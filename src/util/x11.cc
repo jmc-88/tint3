@@ -125,7 +125,7 @@ bool EventLoop::RunLoop() {
 
         if (panel != nullptr && panel->autohide()) {
           if (e.type == EnterNotify) {
-            AutohideTriggerShow(panel, timer_);
+            panel->AutohideTriggerShow(timer_);
           } else if (e.type == LeaveNotify) {
             AutohideTriggerHide(panel, timer_);
           }

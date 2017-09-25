@@ -56,7 +56,6 @@ PanelVerticalPosition panel_vertical_position;
 bool panel_refresh;
 bool task_dragged;
 
-int panel_autohide_show_timeout;
 int panel_autohide_hide_timeout;
 int panel_autohide_height;
 PanelStrutPolicy panel_strut_policy;
@@ -108,6 +107,8 @@ PanelConfig PanelConfig::Default() {
   cfg.percent_y = false;
 
   cfg.autohide = false;
+  cfg.autohide_show_timeout = 0;
+
   cfg.dock = false;
   cfg.horizontal = true;
   cfg.wm_menu = false;
@@ -122,7 +123,6 @@ void DefaultPanel() {
   panel_vertical_position = PanelVerticalPosition::kBottom;
   panel_horizontal_position = PanelHorizontalPosition::kCenter;
   panel_items_order.clear();
-  panel_autohide_show_timeout = 0;
   panel_autohide_hide_timeout = 0;
   panel_autohide_height = 5;  // for vertical panels this is of course the width
   panel_strut_policy = PanelStrutPolicy::kFollowSize;
@@ -904,14 +904,10 @@ bool Panel::AutohideHide() {
   return false;
 }
 
-void AutohideTriggerShow(Panel* p, Timer& timer) {
-  if (!p) {
-    return;
-  }
-
-  p->autohide_timeout_ =
-      timer.SetTimeout(std::chrono::milliseconds(panel_autohide_show_timeout),
-                       [p]() -> bool { return p->AutohideShow(); });
+void Panel::AutohideTriggerShow(Timer& timer) {
+  autohide_timeout_ =
+      timer.SetTimeout(std::chrono::milliseconds(config_.autohide_show_timeout),
+                       [this]() -> bool { return AutohideShow(); });
 }
 
 void AutohideTriggerHide(Panel* p, Timer& timer) {

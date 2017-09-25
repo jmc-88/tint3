@@ -49,7 +49,6 @@ extern bool panel_refresh;
 extern bool task_dragged;
 
 // panel autohide
-extern int panel_autohide_show_timeout;
 extern int panel_autohide_hide_timeout;
 extern int
     panel_autohide_height;  // for vertical panels this is of course the width
@@ -103,6 +102,8 @@ class PanelConfig {
   bool percent_y;
 
   bool autohide;
+  int autohide_show_timeout;
+
   bool dock;
   bool horizontal;
   bool wm_menu;
@@ -166,13 +167,14 @@ class Panel : public Area {
   void UpdateTaskbarVisibility();
 
   bool hidden() const;
+  bool autohide() const;
   bool AutohideShow();
+  void AutohideTriggerShow(Timer& timer);
   bool AutohideHide();
 
   PanelLayer layer() const;
   TaskbarMode taskbar_mode() const;
   Monitor const& monitor() const;
-  bool autohide() const;
   bool horizontal() const;
   bool window_manager_menu() const;
   void UseConfig(PanelConfig const& cfg, unsigned int num_desktop);
@@ -211,7 +213,6 @@ void InitPanel(Timer& timer);
 // detect wich panel
 Panel* GetPanel(Window win);
 
-void AutohideTriggerShow(Panel* p, Timer& timer);
 void AutohideTriggerHide(Panel* p, Timer& timer);
 
 #endif  // TINT3_PANEL_HH
