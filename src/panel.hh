@@ -24,8 +24,12 @@
 #include "battery/battery.hh"
 #endif
 
-// --------------------------------------------------
-// mouse events
+enum class PanelLayer { kBottom, kNormal, kTop };
+enum class PanelVerticalPosition { kTop, kBottom, kCenter };
+enum class PanelHorizontalPosition { kLeft, kRight, kCenter };
+enum class TaskbarMode { kSingleDesktop, kMultiDesktop };
+enum class PanelStrutPolicy { kMinimum, kFollowSize, kNone };
+
 extern MouseAction mouse_middle;
 extern MouseAction mouse_right;
 extern MouseAction mouse_scroll_up;
@@ -33,26 +37,12 @@ extern MouseAction mouse_scroll_down;
 extern MouseAction mouse_tilt_left;
 extern MouseAction mouse_tilt_right;
 
-// panel layer
-enum class PanelLayer { kBottom, kNormal, kTop };
-
-// panel position
-enum class PanelVerticalPosition { kTop, kBottom, kCenter };
-enum class PanelHorizontalPosition { kLeft, kRight, kCenter };
-
-// taskbar mode
-enum class TaskbarMode { kSingleDesktop, kMultiDesktop };
-
-extern bool panel_refresh;
-extern bool task_dragged;
-
-// panel strut policy
-enum class PanelStrutPolicy { kMinimum, kFollowSize, kNone };
-
 extern std::vector<Background> backgrounds;
 extern std::vector<Executor> executors;
 extern std::vector<util::Gradient> gradients;
 
+extern bool panel_refresh;
+extern bool task_dragged;
 extern util::imlib2::Image default_icon;
 
 class PanelConfig {
