@@ -51,7 +51,6 @@ MouseAction mouse_scroll_down;
 MouseAction mouse_tilt_left;
 MouseAction mouse_tilt_right;
 
-PanelHorizontalPosition panel_horizontal_position;
 bool panel_refresh;
 bool task_dragged;
 
@@ -108,6 +107,7 @@ PanelConfig PanelConfig::Default() {
   cfg.autohide_size_px = 5;
 
   cfg.strut_policy = PanelStrutPolicy::kFollowSize;
+  cfg.horizontal_position = PanelHorizontalPosition::kCenter;
   cfg.vertical_position = PanelVerticalPosition::kBottom;
 
   cfg.dock = false;
@@ -121,7 +121,6 @@ void DefaultPanel() {
   panels.clear();
   default_icon.Free();
   task_dragged = false;
-  panel_horizontal_position = PanelHorizontalPosition::kCenter;
   panel_items_order.clear();
   max_tick_urgent = 14;
 
@@ -329,9 +328,9 @@ void Panel::InitSizeAndPosition() {
   }
 
   // panel position determined here
-  if (panel_horizontal_position == PanelHorizontalPosition::kLeft) {
+  if (horizontal_position() == PanelHorizontalPosition::kLeft) {
     root_x_ = monitor().x + config_.margin_x;
-  } else if (panel_horizontal_position == PanelHorizontalPosition::kRight) {
+  } else if (horizontal_position() == PanelHorizontalPosition::kRight) {
     root_x_ = monitor().x + monitor().width - width_ - config_.margin_x;
   } else {
     if (config_.horizontal) {
@@ -527,7 +526,7 @@ void Panel::SetBackground() {
       vertical_position() == PanelVerticalPosition::kBottom) {
     yoff = height_ - hidden_height_;
   } else if (!config_.horizontal &&
-             panel_horizontal_position == PanelHorizontalPosition::kRight) {
+             horizontal_position() == PanelHorizontalPosition::kRight) {
     xoff = width_ - hidden_width_;
   }
 
@@ -657,7 +656,7 @@ void Panel::UpdateNetWMStrut() {
       width = hidden_width_;
     }
 
-    if (panel_horizontal_position == PanelHorizontalPosition::kLeft) {
+    if (horizontal_position() == PanelHorizontalPosition::kLeft) {
       struts[0] = width + monitor().x;
       struts[4] = root_y_;
       // width - 1 allowed full screen on monitor 2
@@ -820,6 +819,10 @@ PanelLayer Panel::layer() const { return config_.layer; }
 
 TaskbarMode Panel::taskbar_mode() const { return config_.taskbar_mode; }
 
+PanelHorizontalPosition Panel::horizontal_position() const {
+  return config_.horizontal_position;
+}
+
 PanelVerticalPosition Panel::vertical_position() const {
   return config_.vertical_position;
 }
@@ -859,7 +862,7 @@ bool Panel::AutohideShow() {
                         height_);
     }
   } else {
-    if (panel_horizontal_position == PanelHorizontalPosition::kLeft) {
+    if (horizontal_position() == PanelHorizontalPosition::kLeft) {
       XResizeWindow(server.dsp, main_win_, width_, height_);
     } else {
       XMoveResizeWindow(server.dsp, main_win_, root_x_, root_y_, width_,
@@ -891,7 +894,7 @@ bool Panel::AutohideHide() {
                         hidden_width_, hidden_height_);
     }
   } else {
-    if (panel_horizontal_position == PanelHorizontalPosition::kLeft) {
+    if (horizontal_position() == PanelHorizontalPosition::kLeft) {
       XResizeWindow(server.dsp, main_win_, hidden_width_, hidden_height_);
     } else {
       XMoveResizeWindow(server.dsp, main_win_, root_x_ + diff, root_y_,

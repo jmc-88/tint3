@@ -43,7 +43,6 @@ enum class PanelHorizontalPosition { kLeft, kRight, kCenter };
 // taskbar mode
 enum class TaskbarMode { kSingleDesktop, kMultiDesktop };
 
-extern PanelHorizontalPosition panel_horizontal_position;
 extern bool panel_refresh;
 extern bool task_dragged;
 
@@ -101,6 +100,7 @@ class PanelConfig {
   int autohide_size_px;
 
   PanelStrutPolicy strut_policy;
+  PanelHorizontalPosition horizontal_position;
   PanelVerticalPosition vertical_position;
 
   bool dock;
@@ -174,6 +174,7 @@ class Panel : public Area {
 
   PanelLayer layer() const;
   TaskbarMode taskbar_mode() const;
+  PanelHorizontalPosition horizontal_position() const;
   PanelVerticalPosition vertical_position() const;
   Monitor const& monitor() const;
   bool horizontal() const;

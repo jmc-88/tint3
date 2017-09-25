@@ -724,11 +724,11 @@ bool Reader::AddEntry_Panel(std::string const& key, std::string const& value) {
     }
 
     if (value2 == "left") {
-      panel_horizontal_position = PanelHorizontalPosition::kLeft;
+      new_panel_config.horizontal_position = PanelHorizontalPosition::kLeft;
     } else if (value2 == "right") {
-      panel_horizontal_position = PanelHorizontalPosition::kRight;
+      new_panel_config.horizontal_position = PanelHorizontalPosition::kRight;
     } else {
-      panel_horizontal_position = PanelHorizontalPosition::kCenter;
+      new_panel_config.horizontal_position = PanelHorizontalPosition::kCenter;
     }
 
     new_panel_config.horizontal = (value3 != "vertical");
