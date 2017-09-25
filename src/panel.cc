@@ -56,7 +56,6 @@ PanelVerticalPosition panel_vertical_position;
 bool panel_refresh;
 bool task_dragged;
 
-bool panel_autohide;
 int panel_autohide_show_timeout;
 int panel_autohide_hide_timeout;
 int panel_autohide_height;
@@ -108,6 +107,7 @@ PanelConfig PanelConfig::Default() {
   cfg.height = 40;
   cfg.percent_y = false;
 
+  cfg.autohide = false;
   cfg.dock = false;
   cfg.horizontal = true;
   cfg.wm_menu = false;
@@ -122,7 +122,6 @@ void DefaultPanel() {
   panel_vertical_position = PanelVerticalPosition::kBottom;
   panel_horizontal_position = PanelHorizontalPosition::kCenter;
   panel_items_order.clear();
-  panel_autohide = false;
   panel_autohide_show_timeout = 0;
   panel_autohide_hide_timeout = 0;
   panel_autohide_height = 5;  // for vertical panels this is of course the width
@@ -264,7 +263,7 @@ void InitPanel(Timer& timer) {
       event_mask |= PointerMotionMask | LeaveWindowMask;
     }
 
-    if (panel_autohide) {
+    if (p.autohide()) {
       event_mask |= LeaveWindowMask | EnterWindowMask;
     }
 
@@ -280,7 +279,7 @@ void InitPanel(Timer& timer) {
     p.SetBackground();
     XMapWindow(server.dsp, p.main_win_);
 
-    if (panel_autohide) {
+    if (p.autohide()) {
       timer.SetTimeout(std::chrono::milliseconds(panel_autohide_hide_timeout),
                        [&p]() -> bool { return p.AutohideHide(); });
     }
@@ -502,8 +501,8 @@ void Panel::SetProperties() {
 
   // Fixed position and non-resizable window
   // Allow panel move and resize when tint3 reload config file
-  int minwidth = panel_autohide ? hidden_width_ : width_;
-  int minheight = panel_autohide ? hidden_height_ : height_;
+  int minwidth = autohide() ? hidden_width_ : width_;
+  int minheight = autohide() ? hidden_height_ : height_;
   XSizeHints size_hints;
   size_hints.flags = PPosition | PMinSize | PMaxSize;
   size_hints.min_width = minwidth;
@@ -547,7 +546,7 @@ void Panel::SetBackground() {
     XTranslateCoordinates(server.dsp, main_win_, server.root_window(), 0, 0, &x,
                           &y, &dummy);
 
-    if (panel_autohide && hidden_) {
+    if (autohide() && hidden_) {
       x -= xoff;
       y -= yoff;
     }
@@ -564,7 +563,7 @@ void Panel::SetBackground() {
   cairo_destroy(c);
   cairo_surface_destroy(cs);
 
-  if (panel_autohide) {
+  if (autohide()) {
     if (hidden_pixmap_) {
       XFreePixmap(server.dsp, hidden_pixmap_);
     }
@@ -841,6 +840,8 @@ bool Panel::hidden() const { return hidden_; }
 std::string Panel::GetFriendlyName() const { return "Panel"; }
 
 #endif  // _TINT3_DEBUG
+
+bool Panel::autohide() const { return config_.autohide; }
 
 bool Panel::AutohideShow() {
   hidden_ = false;

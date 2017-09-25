@@ -123,7 +123,7 @@ bool EventLoop::RunLoop() {
 
         Panel* panel = GetPanel(e.xany.window);
 
-        if (panel != nullptr && panel_autohide) {
+        if (panel != nullptr && panel->autohide()) {
           if (e.type == EnterNotify) {
             AutohideTriggerShow(panel, timer_);
           } else if (e.type == LeaveNotify) {

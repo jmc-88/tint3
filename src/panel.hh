@@ -49,7 +49,6 @@ extern bool panel_refresh;
 extern bool task_dragged;
 
 // panel autohide
-extern bool panel_autohide;
 extern int panel_autohide_show_timeout;
 extern int panel_autohide_hide_timeout;
 extern int
@@ -103,6 +102,7 @@ class PanelConfig {
   unsigned int height;
   bool percent_y;
 
+  bool autohide;
   bool dock;
   bool horizontal;
   bool wm_menu;
@@ -172,6 +172,7 @@ class Panel : public Area {
   PanelLayer layer() const;
   TaskbarMode taskbar_mode() const;
   Monitor const& monitor() const;
+  bool autohide() const;
   bool horizontal() const;
   bool window_manager_menu() const;
   void UseConfig(PanelConfig const& cfg, unsigned int num_desktop);

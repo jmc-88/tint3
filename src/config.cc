@@ -1646,7 +1646,7 @@ bool Reader::AddEntry_Mouse(std::string const& key, std::string const& value) {
 bool Reader::AddEntry_Autohide(std::string const& key,
                                std::string const& value) {
   if (key == "autohide") {
-    ParseBoolean(value, &panel_autohide);
+    ParseBoolean(value, &new_panel_config.autohide);
     return true;
   }
   if (key == "autohide_show_timeout") {
