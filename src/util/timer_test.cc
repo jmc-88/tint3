@@ -2,6 +2,8 @@
 
 #include <chrono>
 #include <functional>
+#include <limits>
+
 #include "util/timer.hh"
 #include "util/timer_test_utils.hh"
 
@@ -114,7 +116,7 @@ TEST_CASE("Timer", "Test the Timer class") {
   SECTION("fails clearing a non-existing interval") {
     Interval::Id nulled_interval;
     REQUIRE(!timer.ClearInterval(nulled_interval));
-    Interval::Id no_such_interval{static_cast<uint64_t>(-1)};
+    Interval::Id no_such_interval{std::numeric_limits<uint64_t>::max()};
     REQUIRE(!timer.ClearInterval(no_such_interval));
   }
 

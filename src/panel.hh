@@ -4,6 +4,7 @@
 #include <X11/Xlib.h>
 #include <sys/time.h>
 
+#include <limits>
 #include <string>
 #include <vector>
 
@@ -103,7 +104,7 @@ extern PanelConfig new_panel_config;
 // tint3 use one panel per monitor and one taskbar per desktop.
 class Panel : public Area {
  public:
-  static constexpr unsigned int kAllMonitors = static_cast<unsigned int>(-1);
+  static constexpr auto kAllMonitors = std::numeric_limits<unsigned int>::max();
 
   // --------------------------------------------------
   // panel

@@ -33,6 +33,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <functional>
+#include <limits>
 #include <regex>
 #include <string>
 #include <tuple>
@@ -183,7 +184,7 @@ void ToLowerCase(std::string* str) {
 }  // namespace string
 }  // namespace util
 
-unsigned int const kAllDesktops = static_cast<unsigned int>(-1);
+const unsigned int kAllDesktops = std::numeric_limits<unsigned int>::max();
 
 bool SignalAction(int signal_number, void signal_handler(int), int flags) {
   struct sigaction sa;

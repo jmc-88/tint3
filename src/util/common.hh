@@ -144,7 +144,7 @@ enum class MouseAction {
   kPrevTask
 };
 
-extern unsigned int const kAllDesktops;
+extern const unsigned int kAllDesktops;
 
 bool SignalAction(int signal_number, void signal_handler(int), int flags = 0);
 

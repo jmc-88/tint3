@@ -1,5 +1,7 @@
 #include "catch.hpp"
 
+#include <limits>
+
 #include "util/color.hh"
 
 TEST_CASE("Color", "SetColorFromHexString") {
@@ -72,7 +74,7 @@ TEST_CASE("Border::set_mask") {
   REQUIRE(b.mask() == BORDER_ALL);
 
   // Filters out bits not in the BORDER_ALL mask
-  b.set_mask(static_cast<unsigned int>(-1));
+  b.set_mask(std::numeric_limits<unsigned int>::max());
   REQUIRE(b.mask() == BORDER_ALL);
 }
 
