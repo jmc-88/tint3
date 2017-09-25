@@ -54,8 +54,6 @@ extern std::string panel_items_order;
 // panel strut policy
 enum class PanelStrutPolicy { kMinimum, kFollowSize, kNone };
 
-extern PanelStrutPolicy panel_strut_policy;
-
 extern int max_tick_urgent;
 
 extern std::vector<Background> backgrounds;
@@ -102,6 +100,7 @@ class PanelConfig {
   int autohide_show_timeout;
   int autohide_hide_timeout;
   int autohide_size_px;
+  PanelStrutPolicy strut_policy;
 
   bool dock;
   bool horizontal;

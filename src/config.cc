@@ -1667,11 +1667,11 @@ bool Reader::AddEntry_Autohide(std::string const& key,
   }
   if (key == "strut_policy") {
     if (value == "follow_size") {
-      panel_strut_policy = PanelStrutPolicy::kFollowSize;
+      new_panel_config.strut_policy = PanelStrutPolicy::kFollowSize;
     } else if (value == "none") {
-      panel_strut_policy = PanelStrutPolicy::kNone;
+      new_panel_config.strut_policy = PanelStrutPolicy::kNone;
     } else {
-      panel_strut_policy = PanelStrutPolicy::kMinimum;
+      new_panel_config.strut_policy = PanelStrutPolicy::kMinimum;
     }
     return true;
   }

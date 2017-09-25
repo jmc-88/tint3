@@ -56,7 +56,6 @@ PanelVerticalPosition panel_vertical_position;
 bool panel_refresh;
 bool task_dragged;
 
-PanelStrutPolicy panel_strut_policy;
 std::string panel_items_order;
 
 int max_tick_urgent;
@@ -108,6 +107,7 @@ PanelConfig PanelConfig::Default() {
   cfg.autohide_show_timeout = 0;
   cfg.autohide_hide_timeout = 0;
   cfg.autohide_size_px = 5;
+  cfg.strut_policy = PanelStrutPolicy::kFollowSize;
 
   cfg.dock = false;
   cfg.horizontal = true;
@@ -123,7 +123,6 @@ void DefaultPanel() {
   panel_vertical_position = PanelVerticalPosition::kBottom;
   panel_horizontal_position = PanelHorizontalPosition::kCenter;
   panel_items_order.clear();
-  panel_strut_policy = PanelStrutPolicy::kFollowSize;
   max_tick_urgent = 14;
 
   // append full transparency background
@@ -616,7 +615,7 @@ void Panel::UpdateTaskbarVisibility() {
 }
 
 void Panel::UpdateNetWMStrut() {
-  if (panel_strut_policy == PanelStrutPolicy::kNone) {
+  if (config_.strut_policy == PanelStrutPolicy::kNone) {
     XDeleteProperty(server.dsp, main_win_, server.atom("_NET_WM_STRUT"));
     XDeleteProperty(server.dsp, main_win_,
                     server.atom("_NET_WM_STRUT_PARTIAL"));
@@ -634,8 +633,8 @@ void Panel::UpdateNetWMStrut() {
   if (config_.horizontal) {
     int height = height_ + config_.margin_y;
 
-    if (panel_strut_policy == PanelStrutPolicy::kMinimum ||
-        (panel_strut_policy == PanelStrutPolicy::kFollowSize && hidden())) {
+    if (config_.strut_policy == PanelStrutPolicy::kMinimum ||
+        (config_.strut_policy == PanelStrutPolicy::kFollowSize && hidden())) {
       height = hidden_height_;
     }
 
@@ -653,8 +652,8 @@ void Panel::UpdateNetWMStrut() {
   } else {
     int width = width_ + config_.margin_x;
 
-    if (panel_strut_policy == PanelStrutPolicy::kMinimum ||
-        (panel_strut_policy == PanelStrutPolicy::kFollowSize && hidden())) {
+    if (config_.strut_policy == PanelStrutPolicy::kMinimum ||
+        (config_.strut_policy == PanelStrutPolicy::kFollowSize && hidden())) {
       width = hidden_width_;
     }
 
@@ -842,7 +841,7 @@ bool Panel::autohide() const { return config_.autohide; }
 bool Panel::AutohideShow() {
   hidden_ = false;
 
-  if (panel_strut_policy == PanelStrutPolicy::kFollowSize) {
+  if (config_.strut_policy == PanelStrutPolicy::kFollowSize) {
     UpdateNetWMStrut();
   }
 
@@ -873,7 +872,7 @@ bool Panel::AutohideShow() {
 bool Panel::AutohideHide() {
   hidden_ = true;
 
-  if (panel_strut_policy == PanelStrutPolicy::kFollowSize) {
+  if (config_.strut_policy == PanelStrutPolicy::kFollowSize) {
     UpdateNetWMStrut();
   }
 
