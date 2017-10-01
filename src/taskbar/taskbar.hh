@@ -1,7 +1,7 @@
 #ifndef TINT3_TASKBAR_TASKBAR_HH
 #define TINT3_TASKBAR_TASKBAR_HH
 
-#include <map>
+#include <unordered_map>
 #include <vector>
 
 #include "task.hh"
@@ -9,7 +9,7 @@
 #include "taskbarname.hh"
 
 using TaskPtrArray = std::vector<Task*>;
-using WindowToTaskMap = std::map<Window, TaskPtrArray>;
+using WindowToTaskMap = std::unordered_map<Window, TaskPtrArray>;
 extern WindowToTaskMap win_to_task_map;
 
 extern Task* task_active;
