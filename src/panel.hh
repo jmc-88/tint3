@@ -34,8 +34,6 @@ extern MouseAction mouse_middle;
 extern MouseAction mouse_right;
 extern MouseAction mouse_scroll_up;
 extern MouseAction mouse_scroll_down;
-extern MouseAction mouse_tilt_left;
-extern MouseAction mouse_tilt_right;
 
 extern std::vector<Background> backgrounds;
 extern std::vector<Executor> executors;

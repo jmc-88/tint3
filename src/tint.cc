@@ -498,9 +498,10 @@ void EventButtonRelease(XEvent* e) {
   }
 
   static std::unordered_map<unsigned int, MouseAction> mouse_actions{
-      {2, mouse_middle},      {3, mouse_right},     {4, mouse_scroll_up},
-      {5, mouse_scroll_down}, {6, mouse_tilt_left}, {7, mouse_tilt_right},
-  };
+      {2, mouse_middle},
+      {3, mouse_right},
+      {4, mouse_scroll_up},
+      {5, mouse_scroll_down}};
 
   MouseAction action = MouseAction::kToggleIconify;
   auto it = mouse_actions.find(e->xbutton.button);

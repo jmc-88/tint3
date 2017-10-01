@@ -48,8 +48,6 @@ MouseAction mouse_middle;
 MouseAction mouse_right;
 MouseAction mouse_scroll_up;
 MouseAction mouse_scroll_down;
-MouseAction mouse_tilt_left;
-MouseAction mouse_tilt_right;
 
 bool panel_refresh;
 bool task_dragged;
