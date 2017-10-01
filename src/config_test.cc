@@ -530,7 +530,7 @@ TEST_CASE("ConfigParserNoNewlineAtEOF") {
   REQUIRE(p.Parse(kNoNewlineAtEOF));
 
   // Check that the mouse action was parsed correctly
-  REQUIRE(mouse_scroll_down == MouseAction::kIconify);
+  REQUIRE(new_panel_config.mouse_actions.scroll_down == MouseAction::kIconify);
 
   CleanupPanel();  // TODO: decouple from config loading
 }

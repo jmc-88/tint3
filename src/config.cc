@@ -1596,19 +1596,19 @@ bool Reader::AddEntry_Executor(std::string const& key,
 
 bool Reader::AddEntry_Mouse(std::string const& key, std::string const& value) {
   if (key == "mouse_middle") {
-    GetAction(value, &mouse_middle);
+    GetAction(value, &new_panel_config.mouse_actions.middle);
     return true;
   }
   if (key == "mouse_right") {
-    GetAction(value, &mouse_right);
+    GetAction(value, &new_panel_config.mouse_actions.right);
     return true;
   }
   if (key == "mouse_scroll_up") {
-    GetAction(value, &mouse_scroll_up);
+    GetAction(value, &new_panel_config.mouse_actions.scroll_up);
     return true;
   }
   if (key == "mouse_scroll_down") {
-    GetAction(value, &mouse_scroll_down);
+    GetAction(value, &new_panel_config.mouse_actions.scroll_down);
     return true;
   }
   if (key == "mouse_effects") {

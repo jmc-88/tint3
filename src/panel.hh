@@ -30,10 +30,12 @@ enum class PanelHorizontalPosition { kLeft, kRight, kCenter };
 enum class TaskbarMode { kSingleDesktop, kMultiDesktop };
 enum class PanelStrutPolicy { kMinimum, kFollowSize, kNone };
 
-extern MouseAction mouse_middle;
-extern MouseAction mouse_right;
-extern MouseAction mouse_scroll_up;
-extern MouseAction mouse_scroll_down;
+struct MouseActionConfig {
+  MouseAction middle;
+  MouseAction right;
+  MouseAction scroll_up;
+  MouseAction scroll_down;
+};
 
 extern std::vector<Background> backgrounds;
 extern std::vector<Executor> executors;
@@ -62,6 +64,7 @@ class PanelConfig {
   int margin_x;
   int margin_y;
 
+  MouseActionConfig mouse_actions;
   bool mouse_effects;
   int mouse_hover_alpha;
   int mouse_hover_saturation;
@@ -136,6 +139,8 @@ class Panel : public Area {
   bool ClickLauncher(int x, int y);
   LauncherIcon* ClickLauncherIcon(int x, int y);
   bool ClickPadding(int x, int y);
+
+  MouseAction FindMouseActionForEvent(XEvent* event);
   bool HandlesClick(XEvent* event) override;
 
   void Render();

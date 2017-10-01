@@ -497,16 +497,10 @@ void EventButtonRelease(XEvent* e) {
     return;
   }
 
-  static std::unordered_map<unsigned int, MouseAction> mouse_actions{
-      {2, mouse_middle},
-      {3, mouse_right},
-      {4, mouse_scroll_up},
-      {5, mouse_scroll_down}};
-
   MouseAction action = MouseAction::kToggleIconify;
-  auto it = mouse_actions.find(e->xbutton.button);
-  if (it != mouse_actions.end()) {
-    action = it->second;
+  MouseAction panel_action = panel->FindMouseActionForEvent(e);
+  if (panel_action != MouseAction::kNone) {
+    action = panel_action;
   }
 
   // switch desktop

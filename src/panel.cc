@@ -42,13 +42,6 @@ char kClassHintClass[] = "Tint3";
 
 }  // namespace
 
-// --------------------------------------------------
-// mouse events
-MouseAction mouse_middle;
-MouseAction mouse_right;
-MouseAction mouse_scroll_up;
-MouseAction mouse_scroll_down;
-
 bool panel_refresh;
 bool task_dragged;
 
@@ -76,6 +69,11 @@ PanelConfig PanelConfig::Default() {
   cfg.taskbar_mode = TaskbarMode::kSingleDesktop;
 
   cfg.monitor = 0;
+
+  cfg.mouse_actions.middle = MouseAction::kNone;
+  cfg.mouse_actions.right = MouseAction::kNone;
+  cfg.mouse_actions.scroll_up = MouseAction::kNone;
+  cfg.mouse_actions.scroll_down = MouseAction::kNone;
 
   cfg.margin_x = 0;
   cfg.margin_y = 0;
@@ -770,6 +768,22 @@ bool Panel::ClickPadding(int x, int y) {
   return false;
 }
 
+MouseAction Panel::FindMouseActionForEvent(XEvent* event) {
+  std::unordered_map<unsigned int, MouseAction> mouse_actions{
+      {2, config_.mouse_actions.middle},
+      {3, config_.mouse_actions.right},
+      {4, config_.mouse_actions.scroll_up},
+      {5, config_.mouse_actions.scroll_down}};
+
+  XButtonEvent* e = &event->xbutton;
+  auto it = mouse_actions.find(e->button);
+  if (it != mouse_actions.end()) {
+    return it->second;
+  }
+
+  return MouseAction::kNone;
+}
+
 bool Panel::HandlesClick(XEvent* event) {
   if (!Area::HandlesClick(event)) {
     // don't even bother checking the rest if the click is outside the panel
@@ -779,11 +793,8 @@ bool Panel::HandlesClick(XEvent* event) {
   XButtonEvent* e = &event->xbutton;
   Task* task = ClickTask(e->x, e->y);
   if (task) {
-    return ((e->button == 1) ||
-            (e->button == 2 && mouse_middle != MouseAction::kNone) ||
-            (e->button == 3 && mouse_right != MouseAction::kNone) ||
-            (e->button == 4 && mouse_scroll_up != MouseAction::kNone) ||
-            (e->button == 5 && mouse_scroll_down != MouseAction::kNone));
+    return (e->button == 1 ||
+            FindMouseActionForEvent(event) != MouseAction::kNone);
   }
 
   LauncherIcon* icon = ClickLauncherIcon(e->x, e->y);

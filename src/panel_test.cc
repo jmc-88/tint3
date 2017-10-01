@@ -1,5 +1,7 @@
 #include "catch.hpp"
 
+#include <X11/Xlib.h>
+
 #include "panel.hh"
 #include "server.hh"
 
@@ -86,5 +88,80 @@ TEST_CASE("SetItemsOrder_Executors") {
     REQUIRE(p.children_.at(0) == &executors.at(0));
     REQUIRE(p.children_.at(1) == &executors.at(1));
     REQUIRE(p.children_.at(2) == &executors.at(2));
+  }
+}
+
+TEST_CASE("HandlesClick_ClickTask") {
+  // Make sure we have no executors because that's (still) a global...
+  executors.clear();
+
+  PanelConfig panel_config = PanelConfig::Default();
+  Panel p;
+  p.panel_ = &p;  // TODO: this is silly, Area should not read from Panel
+  p.UseConfig(panel_config, 1);
+  p.SetItemsOrder();
+  p.num_desktops_ = 1;
+  p.on_screen_ = true;
+
+  p.taskbars.resize(1);
+  p.taskbars[0].panel_ = &p;
+  p.taskbars[0].on_screen_ = true;
+  p.taskbars[0].width_ = panel_config.width;
+  p.taskbars[0].height_ = panel_config.height;
+
+  Timer test_timer;
+  Task test_task{test_timer};
+  test_task.on_screen_ = true;
+  test_task.width_ = panel_config.width;
+  test_task.height_ = panel_config.height;
+  p.taskbars[0].AddChild(&test_task);
+  p.taskbars[0].Resize();
+
+  p.AddChild(&p.taskbars[0]);
+  p.Resize();
+
+  XEvent test_event;
+  test_event.xbutton.x = (test_task.width_ / 2);
+  test_event.xbutton.y = (test_task.height_ / 2);
+
+  SECTION("left click always handled") {
+    test_event.xbutton.button = 1;
+    REQUIRE(p.HandlesClick(&test_event));
+  }
+
+  SECTION("middle click") {
+    test_event.xbutton.button = 2;
+    REQUIRE(!p.HandlesClick(&test_event));
+
+    panel_config.mouse_actions.middle = MouseAction::kToggleIconify;
+    p.UseConfig(panel_config, 1);
+    REQUIRE(p.HandlesClick(&test_event));
+  }
+
+  SECTION("right click") {
+    test_event.xbutton.button = 3;
+    REQUIRE(!p.HandlesClick(&test_event));
+
+    panel_config.mouse_actions.right = MouseAction::kToggleIconify;
+    p.UseConfig(panel_config, 1);
+    REQUIRE(p.HandlesClick(&test_event));
+  }
+
+  SECTION("wheel up") {
+    test_event.xbutton.button = 4;
+    REQUIRE(!p.HandlesClick(&test_event));
+
+    panel_config.mouse_actions.scroll_up = MouseAction::kToggleIconify;
+    p.UseConfig(panel_config, 1);
+    REQUIRE(p.HandlesClick(&test_event));
+  }
+
+  SECTION("wheel down") {
+    test_event.xbutton.button = 5;
+    REQUIRE(!p.HandlesClick(&test_event));
+
+    panel_config.mouse_actions.scroll_down = MouseAction::kToggleIconify;
+    p.UseConfig(panel_config, 1);
+    REQUIRE(p.HandlesClick(&test_event));
   }
 }
