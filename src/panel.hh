@@ -31,10 +31,10 @@ enum class TaskbarMode { kSingleDesktop, kMultiDesktop };
 enum class PanelStrutPolicy { kMinimum, kFollowSize, kNone };
 
 struct MouseActionConfig {
-  MouseAction middle;
-  MouseAction right;
-  MouseAction scroll_up;
-  MouseAction scroll_down;
+  MouseAction middle = MouseAction::kNone;
+  MouseAction right = MouseAction::kNone;
+  MouseAction scroll_up = MouseAction::kNone;
+  MouseAction scroll_down = MouseAction::kNone;
 };
 
 extern std::vector<Background> backgrounds;
@@ -46,7 +46,7 @@ extern bool task_dragged;
 extern util::imlib2::Image default_icon;
 
 struct PanelConfig {
-  PanelConfig() = default;
+  PanelConfig();
 
   std::string items_order;
 
@@ -55,47 +55,46 @@ struct PanelConfig {
   Battery battery;
 #endif  // ENABLE_BATTERY
 
-  PanelLayer layer;
-  TaskbarMode taskbar_mode;
+  PanelLayer layer = PanelLayer::kBottom;
+  TaskbarMode taskbar_mode = TaskbarMode::kSingleDesktop;
 
-  unsigned int monitor;
+  unsigned int monitor = 0;
 
-  int margin_x;
-  int margin_y;
+  int margin_x = 0;
+  int margin_y = 0;
 
   MouseActionConfig mouse_actions;
-  bool mouse_effects;
-  int mouse_hover_alpha;
-  int mouse_hover_saturation;
-  int mouse_hover_brightness;
-  int mouse_pressed_alpha;
-  int mouse_pressed_saturation;
-  int mouse_pressed_brightness;
+  bool mouse_effects = false;
+  int mouse_hover_alpha = 100;
+  int mouse_hover_saturation = 0;
+  int mouse_hover_brightness = 10;
+  int mouse_pressed_alpha = 100;
+  int mouse_pressed_saturation = 0;
+  int mouse_pressed_brightness = -10;
 
-  int padding_x_lr;
-  int padding_x;
-  int padding_y;
+  int padding_x_lr = 0;
+  int padding_x = 0;
+  int padding_y = 0;
 
-  unsigned int width;
-  bool percent_x;
-  unsigned int height;
-  bool percent_y;
+  unsigned int width = 100;
+  bool percent_x = true;
+  unsigned int height = 40;
+  bool percent_y = false;
 
-  bool autohide;
-  int autohide_show_timeout;
-  int autohide_hide_timeout;
-  int autohide_size_px;
+  bool autohide = false;
+  int autohide_show_timeout = 0;
+  int autohide_hide_timeout = 0;
+  int autohide_size_px = 5;
 
-  PanelStrutPolicy strut_policy;
-  PanelHorizontalPosition horizontal_position;
-  PanelVerticalPosition vertical_position;
+  PanelStrutPolicy strut_policy = PanelStrutPolicy::kFollowSize;
+  PanelHorizontalPosition horizontal_position =
+      PanelHorizontalPosition::kCenter;
+  PanelVerticalPosition vertical_position = PanelVerticalPosition::kBottom;
 
-  bool dock;
-  bool horizontal;
-  bool wm_menu;
-  int max_urgent_blinks;
-
-  static PanelConfig Default();
+  bool dock = false;
+  bool horizontal = true;
+  bool wm_menu = false;
+  int max_urgent_blinks = 14;
 };
 
 extern PanelConfig new_panel_config;

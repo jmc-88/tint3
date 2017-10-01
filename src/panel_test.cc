@@ -20,7 +20,7 @@ TEST_CASE("InitSizeAndPosition") {
   server.monitor.push_back(TestMonitor());
 
   SECTION("size != 0") {
-    PanelConfig panel_config = PanelConfig::Default();
+    PanelConfig panel_config;
     panel_config.monitor = 0;
     panel_config.width = 0;
     panel_config.height = 0;
@@ -42,7 +42,7 @@ TEST_CASE("SetItemsOrder_Executors") {
   executors.push_back(Executor{});
 
   SECTION("add only one") {
-    PanelConfig panel_config = PanelConfig::Default();
+    PanelConfig panel_config;
     panel_config.items_order = "E";
     Panel p;
     p.panel_ = &p;  // TODO: this is silly, Area should not read from Panel
@@ -53,7 +53,7 @@ TEST_CASE("SetItemsOrder_Executors") {
   }
 
   SECTION("add only two") {
-    PanelConfig panel_config = PanelConfig::Default();
+    PanelConfig panel_config;
     panel_config.items_order = "EE";
     Panel p;
     p.panel_ = &p;  // TODO: this is silly, Area should not read from Panel
@@ -65,7 +65,7 @@ TEST_CASE("SetItemsOrder_Executors") {
   }
 
   SECTION("add all three") {
-    PanelConfig panel_config = PanelConfig::Default();
+    PanelConfig panel_config;
     panel_config.items_order = "EEE";
     Panel p;
     p.panel_ = &p;  // TODO: this is silly, Area should not read from Panel
@@ -78,7 +78,7 @@ TEST_CASE("SetItemsOrder_Executors") {
   }
 
   SECTION("add too many") {
-    PanelConfig panel_config = PanelConfig::Default();
+    PanelConfig panel_config;
     panel_config.items_order = "EEEE";
     Panel p;
     p.panel_ = &p;  // TODO: this is silly, Area should not read from Panel
@@ -95,7 +95,7 @@ TEST_CASE("HandlesClick_ClickTask") {
   // Make sure we have no executors because that's (still) a global...
   executors.clear();
 
-  PanelConfig panel_config = PanelConfig::Default();
+  PanelConfig panel_config;
   Panel p;
   p.panel_ = &p;  // TODO: this is silly, Area should not read from Panel
   p.UseConfig(panel_config, 1);

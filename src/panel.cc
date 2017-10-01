@@ -57,59 +57,9 @@ std::vector<util::Gradient> gradients;
 
 util::imlib2::Image default_icon;
 
-PanelConfig PanelConfig::Default() {
-  PanelConfig cfg;
-
-  cfg.items_order.clear();
-
+PanelConfig::PanelConfig() {
   Color black_80pct{Color::Array{0, 0, 0}, .8};
-  cfg.background.set_fill_color(black_80pct);
-
-  cfg.layer = PanelLayer::kBottom;
-  cfg.taskbar_mode = TaskbarMode::kSingleDesktop;
-
-  cfg.monitor = 0;
-
-  cfg.mouse_actions.middle = MouseAction::kNone;
-  cfg.mouse_actions.right = MouseAction::kNone;
-  cfg.mouse_actions.scroll_up = MouseAction::kNone;
-  cfg.mouse_actions.scroll_down = MouseAction::kNone;
-
-  cfg.margin_x = 0;
-  cfg.margin_y = 0;
-
-  cfg.mouse_effects = false;
-  cfg.mouse_hover_alpha = 100;
-  cfg.mouse_hover_saturation = 0;
-  cfg.mouse_hover_brightness = 10;
-  cfg.mouse_pressed_alpha = 100;
-  cfg.mouse_pressed_saturation = 0;
-  cfg.mouse_pressed_brightness = -10;
-
-  cfg.padding_x_lr = 0;
-  cfg.padding_x = 0;
-  cfg.padding_y = 0;
-
-  cfg.width = 100;
-  cfg.percent_x = true;
-  cfg.height = 40;
-  cfg.percent_y = false;
-
-  cfg.autohide = false;
-  cfg.autohide_show_timeout = 0;
-  cfg.autohide_hide_timeout = 0;
-  cfg.autohide_size_px = 5;
-
-  cfg.strut_policy = PanelStrutPolicy::kFollowSize;
-  cfg.horizontal_position = PanelHorizontalPosition::kCenter;
-  cfg.vertical_position = PanelVerticalPosition::kBottom;
-
-  cfg.dock = false;
-  cfg.horizontal = true;
-  cfg.wm_menu = false;
-  cfg.max_urgent_blinks = 14;
-
-  return cfg;
+  background.set_fill_color(black_80pct);
 }
 
 void DefaultPanel() {

@@ -50,7 +50,7 @@ TEST_CASE("Launcher::LoadThemes") {
 
 TEST_CASE("Launcher::GetIconSize") {
   SECTION("borders") {
-    PanelConfig panel_config = PanelConfig::Default();
+    PanelConfig panel_config;
     panel_config.horizontal = true;
 
     Panel p;
@@ -86,7 +86,7 @@ TEST_CASE("Launcher::GetIconSize") {
   SECTION("horizontal") {
     // Horizontal panel, no launcher_icon_size given: the computed icon size
     // should default to the panel height.
-    PanelConfig panel_config = PanelConfig::Default();
+    PanelConfig panel_config;
     panel_config.horizontal = true;
     panel_config.width = 200;
     panel_config.height = 50;
@@ -105,7 +105,7 @@ TEST_CASE("Launcher::GetIconSize") {
   SECTION("vertical") {
     // Vertical panel, no launcher_icon_size given: the computed icon size
     // should default to the panel width.
-    PanelConfig panel_config = PanelConfig::Default();
+    PanelConfig panel_config;
     panel_config.horizontal = false;
     panel_config.width = 50;
     panel_config.height = 200;
