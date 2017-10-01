@@ -258,8 +258,8 @@ void Taskbar::InitPanel(Panel* panel) {
     int half_height = static_cast<int>(panel->g_task.height_ / 2);
 
     if (panel->g_task.background[j].border().rounded() > half_height) {
-      static constexpr char* kState[] = {"_", "_active_", "_iconified_",
-                                         "_urgent_"};
+      static constexpr const char* kState[] = {"_", "_active_", "_iconified_",
+                                               "_urgent_"};
       util::log::Error() << "task" << kState[j] << "background_id "
                          << "has a too large rounded value. "
                          << "Please fix your tint3rc.\n";
