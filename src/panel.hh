@@ -4,7 +4,6 @@
 #include <X11/Xlib.h>
 #include <sys/time.h>
 
-#include <limits>
 #include <string>
 #include <vector>
 
@@ -104,7 +103,9 @@ extern PanelConfig new_panel_config;
 // tint3 use one panel per monitor and one taskbar per desktop.
 class Panel : public Area {
  public:
-  static constexpr auto kAllMonitors = std::numeric_limits<unsigned int>::max();
+  // For _NET_WM_DESKTOP: indicates the window should appear on all desktops.
+  // See: https://specifications.freedesktop.org/wm-spec/wm-spec-latest.html
+  static constexpr auto kAllMonitors = 0xFFFFFFFF;
 
   // --------------------------------------------------
   // panel
