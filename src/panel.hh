@@ -45,8 +45,7 @@ extern bool panel_refresh;
 extern bool task_dragged;
 extern util::imlib2::Image default_icon;
 
-class PanelConfig {
- public:
+struct PanelConfig {
   PanelConfig() = default;
 
   std::string items_order;
