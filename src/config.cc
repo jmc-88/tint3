@@ -320,7 +320,7 @@ void ExtractValues(std::string const& value, std::string* v1, std::string* v2,
 
 Reader::Reader(Server* server) : server_(server), new_config_file_(false) {
   new_panel_config = PanelConfig{};
-  tooltip_config = TooltipConfig::Default();
+  tooltip_config = TooltipConfig{};
 }
 
 bool Reader::LoadFromDefaults() {

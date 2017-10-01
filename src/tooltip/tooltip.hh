@@ -11,19 +11,14 @@
 #include "util/pango.hh"
 #include "util/timer.hh"
 
-class TooltipConfig {
- public:
-  TooltipConfig() = default;
-
+struct TooltipConfig {
   Background bg;
-  Color font_color;
+  Color font_color = Color{Color::Array{1.0, 1.0, 1.0}, 1.0};
   util::pango::FontDescriptionPtr font_desc;
-  int paddingx;
-  int paddingy;
-  unsigned int show_timeout_msec;
-  unsigned int hide_timeout_msec;
-
-  static TooltipConfig Default();
+  int paddingx = 0;
+  int paddingy = 0;
+  unsigned int show_timeout_msec = 0;
+  unsigned int hide_timeout_msec = 0;
 };
 
 extern TooltipConfig tooltip_config;

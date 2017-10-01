@@ -9,18 +9,6 @@
 
 TooltipConfig tooltip_config;
 
-TooltipConfig TooltipConfig::Default() {
-  TooltipConfig cfg;
-  cfg.show_timeout_msec = 0;
-  cfg.hide_timeout_msec = 0;
-  cfg.paddingx = 0;
-  cfg.paddingy = 0;
-  cfg.font_desc = nullptr;
-  cfg.bg = Background{};
-  cfg.font_color = Color{{{1.0, 1.0, 1.0}}, 1.0};
-  return cfg;
-}
-
 Tooltip::Tooltip(Server* server, Timer* timer)
     : server_(server),
       timer_(timer),
@@ -99,8 +87,8 @@ void Tooltip::Update(Area const* area, XEvent const* e,
 void Tooltip::GetExtents(std::string const& text, int* x, int* y, int* width,
                          int* height) {
   int text_width, text_height;
-  GetTextSize(font_desc_, text, MarkupTag::kNoMarkup,
-              &text_width, &text_height);
+  GetTextSize(font_desc_, text, MarkupTag::kNoMarkup, &text_width,
+              &text_height);
 
   // Find the base dimensions and positions
   Border b = tooltip_config.bg.border();

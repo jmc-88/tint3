@@ -52,7 +52,7 @@ class TooltipTestFixture {
       : fake_clock_(new FakeClock{0}),
         timer_(new Timer{[&] { return fake_clock_->Now(); }}),
         tooltip_(nullptr) {
-    tooltip_config = TooltipConfig::Default();
+    tooltip_config = TooltipConfig{};
     tooltip_config.font_desc = pango_font_description_from_string("sans 10");
     tooltip_config.hide_timeout_msec = kTooltipTimeoutMs;
     tooltip_config.show_timeout_msec = kTooltipTimeoutMs;
