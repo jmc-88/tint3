@@ -71,7 +71,12 @@ Global_task::Global_task() {
   }
 }
 
-Task::Task(Timer& timer) : timer_(timer) { set_has_mouse_effects(true); }
+Task::Task(Timer& timer) : timer_(timer) {
+  set_has_mouse_effects(true);
+  for (int k = 0; k < kTaskStateCount; ++k) {
+    state_pix[k] = None;
+  }
+}
 
 Task::~Task() {
   for (int k = 0; k < kTaskStateCount; ++k) {
