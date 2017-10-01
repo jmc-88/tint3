@@ -414,7 +414,7 @@ TEST_CASE("ConfigParserMouseEffects", "Mouse effects are correctly read") {
   parser::Parser p{config::kLexer, &config_entry_parser};
 
   // Before: defaults
-  REQUIRE(!new_panel_config.mouse_effects);
+  REQUIRE_FALSE(new_panel_config.mouse_effects);
   REQUIRE(new_panel_config.mouse_hover_alpha == 100);
   REQUIRE(new_panel_config.mouse_hover_saturation == 0);
   REQUIRE(new_panel_config.mouse_hover_brightness == 10);

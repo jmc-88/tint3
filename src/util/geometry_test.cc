@@ -28,16 +28,16 @@ TEST_CASE("Rect", "Come on, I can get at least this one right") {
     REQUIRE(r.Contains(inside));
 
     util::Rect outside_left{99, 100, 20, 20};
-    REQUIRE(!r.Contains(outside_left));
+    REQUIRE_FALSE(r.Contains(outside_left));
 
     util::Rect outside_top{100, 99, 20, 20};
-    REQUIRE(!r.Contains(outside_top));
+    REQUIRE_FALSE(r.Contains(outside_top));
 
     util::Rect outside_right{131, 100, 20, 20};
-    REQUIRE(!r.Contains(outside_right));
+    REQUIRE_FALSE(r.Contains(outside_right));
 
     util::Rect outside_bottom{100, 181, 20, 20};
-    REQUIRE(!r.Contains(outside_bottom));
+    REQUIRE_FALSE(r.Contains(outside_bottom));
   }
 
   SECTION("ExpandBy") {
@@ -58,7 +58,7 @@ TEST_CASE("Rect", "Come on, I can get at least this one right") {
     REQUIRE(r.bottom_right() == std::make_pair(130, 180));
 
     // Third iteration: can't shrink anymore, doesn't change dimensions
-    REQUIRE(!r.ShrinkBy(10));
+    REQUIRE_FALSE(r.ShrinkBy(10));
     REQUIRE(r.top_left() == std::make_pair(120, 120));
     REQUIRE(r.bottom_right() == std::make_pair(130, 180));
   }

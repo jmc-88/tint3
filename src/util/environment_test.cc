@@ -14,7 +14,7 @@ TEST_CASE("Get", "Reading from the environment is sane") {
 
 TEST_CASE("Set", "Writing to the environment works") {
   // Fails on invalid key.
-  REQUIRE(!environment::Set("", "__BOGUS_VALUE__"));
+  REQUIRE_FALSE(environment::Set("", "__BOGUS_VALUE__"));
 
   REQUIRE(getenv("__BOGUS_NAME__") == nullptr);
   REQUIRE(environment::Set("__BOGUS_NAME__", "__BOGUS_VALUE__"));
@@ -23,7 +23,7 @@ TEST_CASE("Set", "Writing to the environment works") {
 
 TEST_CASE("Unset", "Deleting from the environment works") {
   // Fails on invalid key.
-  REQUIRE(!environment::Unset(""));
+  REQUIRE_FALSE(environment::Unset(""));
 
   setenv("__BOGUS_NAME__", "__BOGUS_VALUE__", 1);
   REQUIRE(std::strcmp(getenv("__BOGUS_NAME__"), "__BOGUS_VALUE__") == 0);

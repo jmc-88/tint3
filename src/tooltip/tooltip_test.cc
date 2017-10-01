@@ -96,7 +96,7 @@ class TooltipTestFixture {
 };
 
 TEST_CASE_METHOD(TooltipTestFixture, "IsBound") {
-  REQUIRE(!tooltip()->IsBound());
+  REQUIRE_FALSE(tooltip()->IsBound());
 
   ConcreteArea area;
   tooltip()->Update(&area, nullptr, "test");
@@ -105,7 +105,7 @@ TEST_CASE_METHOD(TooltipTestFixture, "IsBound") {
 
 TEST_CASE_METHOD(TooltipTestFixture, "IsBoundTo") {
   ConcreteArea area;
-  REQUIRE(!tooltip()->IsBoundTo(&area));
+  REQUIRE_FALSE(tooltip()->IsBoundTo(&area));
 
   tooltip()->Update(&area, nullptr, "test");
   REQUIRE(tooltip()->IsBoundTo(&area));

@@ -97,7 +97,7 @@ TEST_CASE("DirectoryExists", "Checks for the existence of a directory") {
   // Obviously existing path.
   REQUIRE(util::fs::DirectoryExists("/"));
   // Obviously non-existing path.
-  REQUIRE(!util::fs::DirectoryExists("/road/to/nowhere"));
+  REQUIRE_FALSE(util::fs::DirectoryExists("/road/to/nowhere"));
 }
 
 TEST_CASE("FileExists", "Checks for the existence of a file") {
@@ -105,7 +105,7 @@ TEST_CASE("FileExists", "Checks for the existence of a file") {
   REQUIRE(util::fs::FileExists("src/util/testdata/fs_test.txt"));
   REQUIRE(util::fs::FileExists({"src", "util", "testdata", "fs_test.txt"}));
   // Obviously non-existing path.
-  REQUIRE(!util::fs::FileExists("/dev/troll"));
+  REQUIRE_FALSE(util::fs::FileExists("/dev/troll"));
 }
 
 TEST_CASE("HomeDirectory", "Returns the user's home path") {
@@ -137,8 +137,8 @@ class ReadFileCallback {
 TEST_CASE("ReadFile", "Reads the entire contents of a file into memory") {
   // Bad path case.
   ReadFileCallback read_file_callback_bad;
-  REQUIRE(!util::fs::ReadFile("/none", std::ref(read_file_callback_bad)));
-  REQUIRE(!read_file_callback_bad.invoked());
+  REQUIRE_FALSE(util::fs::ReadFile("/none", std::ref(read_file_callback_bad)));
+  REQUIRE_FALSE(read_file_callback_bad.invoked());
 
   // Good path case.
   ReadFileCallback read_file_callback_good;
@@ -170,8 +170,9 @@ class ReadFileByLineCallback : public ReadFileCallback {
 TEST_CASE("ReadFileByLine", "Reads the contents of a file line by line") {
   // Bad path case.
   ReadFileCallback read_file_callback_bad;
-  REQUIRE(!util::fs::ReadFileByLine("/none", std::ref(read_file_callback_bad)));
-  REQUIRE(!read_file_callback_bad.invoked());
+  REQUIRE_FALSE(
+      util::fs::ReadFileByLine("/none", std::ref(read_file_callback_bad)));
+  REQUIRE_FALSE(read_file_callback_bad.invoked());
 
   // Good path case.
   ReadFileByLineCallback read_file_callback_good;

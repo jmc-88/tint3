@@ -79,7 +79,7 @@ TEST_CASE("matchers::Whitespace", "Whitespace matcher is sane") {
     std::string output;
     // Since we're starting from position=0, there's no whitespace that matches
     // at that position, so we expect to fail here.
-    REQUIRE(!parser::matcher::Whitespace(test_string, &position, &output));
+    REQUIRE_FALSE(parser::matcher::Whitespace(test_string, &position, &output));
     REQUIRE(position == 0);
     REQUIRE(output.empty());
   }
@@ -99,7 +99,7 @@ TEST_CASE("matchers::Any", "Whitespace matcher is sane") {
     std::string test_string{"test"};
     unsigned int position = test_string.length();
     std::string output;
-    REQUIRE(!parser::matcher::Any(test_string, &position, &output));
+    REQUIRE_FALSE(parser::matcher::Any(test_string, &position, &output));
     REQUIRE(position == test_string.length());
     REQUIRE(output.empty());
   }

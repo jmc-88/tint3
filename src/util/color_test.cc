@@ -8,8 +8,8 @@ TEST_CASE("Color", "SetColorFromHexString") {
   Color c;
 
   SECTION("Malformed expressions get rejected") {
-    REQUIRE(!c.SetColorFromHexString("oh hai"));
-    REQUIRE(!c.SetColorFromHexString("ff007f"));
+    REQUIRE_FALSE(c.SetColorFromHexString("oh hai"));
+    REQUIRE_FALSE(c.SetColorFromHexString("ff007f"));
   }
 
   SECTION("Three-digit values are parsed correctly") {

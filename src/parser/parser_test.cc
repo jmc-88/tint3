@@ -109,14 +109,14 @@ TEST_CASE("Parser", "Parses valid contents and rejects invalid ones") {
 
   // invalid expressions
   simple_arithmetic_parser.Clear();
-  REQUIRE(!test_parser.Parse(""));
+  REQUIRE_FALSE(test_parser.Parse(""));
 
   simple_arithmetic_parser.Clear();
-  REQUIRE(!test_parser.Parse("()"));
+  REQUIRE_FALSE(test_parser.Parse("()"));
 
   simple_arithmetic_parser.Clear();
-  REQUIRE(!test_parser.Parse("1 + 2 * 3 ()"));
+  REQUIRE_FALSE(test_parser.Parse("1 + 2 * 3 ()"));
 
   simple_arithmetic_parser.Clear();
-  REQUIRE(!test_parser.Parse("5 - 3"));
+  REQUIRE_FALSE(test_parser.Parse("5 - 3"));
 }

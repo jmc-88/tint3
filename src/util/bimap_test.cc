@@ -25,12 +25,12 @@ TEST_CASE("erase", "Removal works as expected") {
   bimap.insert(2, "toast");
 
   REQUIRE(bimap.left.erase(1));
-  REQUIRE(!bimap.left.has(1));
-  REQUIRE(!bimap.right.has("test"));
+  REQUIRE_FALSE(bimap.left.has(1));
+  REQUIRE_FALSE(bimap.right.has("test"));
 
   REQUIRE(bimap.right.erase("toast"));
-  REQUIRE(!bimap.left.has(2));
-  REQUIRE(!bimap.right.has("toast"));
+  REQUIRE_FALSE(bimap.left.has(2));
+  REQUIRE_FALSE(bimap.right.has("toast"));
 
   REQUIRE(bimap.empty());
 }

@@ -58,15 +58,15 @@ TEST_CASE("StartsWith",
   REQUIRE(util::string::StartsWith("same", "same"));
 
   // corner case: right string longer
-  REQUIRE(!util::string::StartsWith("", "tautology"));
-  REQUIRE(!util::string::StartsWith("man", "mannequin"));
+  REQUIRE_FALSE(util::string::StartsWith("", "tautology"));
+  REQUIRE_FALSE(util::string::StartsWith("man", "mannequin"));
 }
 
 TEST_CASE("RegexMatch",
           "Matching a string by a regular expression should work") {
   SECTION("Character classes") {
     REQUIRE(util::string::RegexMatch("[0-9]", "0"));
-    REQUIRE(!util::string::RegexMatch("[0-9]", "Z"));
+    REQUIRE_FALSE(util::string::RegexMatch("[0-9]", "Z"));
   }
 
   SECTION("Any numer of occurrences (Kleene star)") {
@@ -76,7 +76,7 @@ TEST_CASE("RegexMatch",
   }
 
   SECTION("One or more occurrences (Kleene plus)") {
-    REQUIRE(!util::string::RegexMatch("test[0-9]+", "test"));
+    REQUIRE_FALSE(util::string::RegexMatch("test[0-9]+", "test"));
     REQUIRE(util::string::RegexMatch("test[0-9]+", "test0"));
     REQUIRE(util::string::RegexMatch("test[0-9]+", "test01"));
   }
@@ -84,7 +84,7 @@ TEST_CASE("RegexMatch",
   SECTION("At most one occurrence") {
     REQUIRE(util::string::RegexMatch("test[0-9]?", "test"));
     REQUIRE(util::string::RegexMatch("test[0-9]?", "test0"));
-    REQUIRE(!util::string::RegexMatch("test[0-9]?", "test01"));
+    REQUIRE_FALSE(util::string::RegexMatch("test[0-9]?", "test01"));
   }
 }
 
@@ -124,7 +124,7 @@ TEST_CASE("ScopedDeleter") {
   bool was_invoked = false;
   {
     auto _ = util::MakeScopedDeleter([&] { was_invoked = true; });
-    REQUIRE(!was_invoked);
+    REQUIRE_FALSE(was_invoked);
   }
   REQUIRE(was_invoked);
 }

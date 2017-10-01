@@ -32,7 +32,8 @@ TEST_CASE("FindDesktopEntry") {
   }
 
   SECTION("fail") {
-    REQUIRE(!FindDesktopEntry("obviously_wrong_desktop_file.desktop", nullptr));
+    REQUIRE_FALSE(
+        FindDesktopEntry("obviously_wrong_desktop_file.desktop", nullptr));
   }
 }
 

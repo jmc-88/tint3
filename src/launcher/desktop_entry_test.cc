@@ -92,7 +92,7 @@ TEST_CASE("InvalidGroupOrder", "Refuses entries with the wrong group order") {
 
   launcher::desktop_entry::DesktopEntry groups{
       desktop_entry_parser.GetDesktopEntry()};
-  REQUIRE(!launcher::desktop_entry::Validate(&groups));
+  REQUIRE_FALSE(launcher::desktop_entry::Validate(&groups));
 }
 
 static constexpr char kInvalidActionGroups[] =
@@ -199,16 +199,17 @@ TEST_CASE("ParseBooleanValue", "Only accepts 'true' and 'false'") {
   REQUIRE(value_boolean);
 
   REQUIRE(launcher::desktop_entry::ParseBooleanValue("false", &value_boolean));
-  REQUIRE(!value_boolean);
+  REQUIRE_FALSE(value_boolean);
 
   REQUIRE(launcher::desktop_entry::ParseBooleanValue("0", &value_boolean));
-  REQUIRE(!value_boolean);
+  REQUIRE_FALSE(value_boolean);
 
   REQUIRE(launcher::desktop_entry::ParseBooleanValue(" true ", &value_boolean));
   REQUIRE(value_boolean);
 
-  REQUIRE(!launcher::desktop_entry::ParseBooleanValue("", &value_boolean));
-  REQUIRE(!launcher::desktop_entry::ParseBooleanValue("yes", &value_boolean));
+  REQUIRE_FALSE(launcher::desktop_entry::ParseBooleanValue("", &value_boolean));
+  REQUIRE_FALSE(
+      launcher::desktop_entry::ParseBooleanValue("yes", &value_boolean));
 }
 
 TEST_CASE("ParseNumericValue", "Correctly parses strings containing floats") {
@@ -223,10 +224,11 @@ TEST_CASE("ParseNumericValue", "Correctly parses strings containing floats") {
   REQUIRE(launcher::desktop_entry::ParseNumericValue(" 1.1 ", &value_numeric));
   REQUIRE(value_numeric == 1.1f);
 
-  REQUIRE(!launcher::desktop_entry::ParseNumericValue("", &value_numeric));
-  REQUIRE(!launcher::desktop_entry::ParseNumericValue("pea", &value_numeric));
-  REQUIRE(!launcher::desktop_entry::ParseNumericValue("1.1 2.2 3.3",
-                                                      &value_numeric));
+  REQUIRE_FALSE(launcher::desktop_entry::ParseNumericValue("", &value_numeric));
+  REQUIRE_FALSE(
+      launcher::desktop_entry::ParseNumericValue("pea", &value_numeric));
+  REQUIRE_FALSE(launcher::desktop_entry::ParseNumericValue("1.1 2.2 3.3",
+                                                           &value_numeric));
 }
 
 TEST_CASE("ParseStringValue", "Correctly reads escape sequences") {
@@ -240,10 +242,10 @@ TEST_CASE("ParseStringValue", "Correctly reads escape sequences") {
   REQUIRE(value_string == "hey;\\some escape\tsequences\nhere\r");
 
   value_string = u8R"S(invalid escape sequence: \%)S";
-  REQUIRE(!launcher::desktop_entry::ParseStringValue(&value_string));
+  REQUIRE_FALSE(launcher::desktop_entry::ParseStringValue(&value_string));
 
   value_string = "control characters: \n";
-  REQUIRE(!launcher::desktop_entry::ParseStringValue(&value_string));
+  REQUIRE_FALSE(launcher::desktop_entry::ParseStringValue(&value_string));
 }
 
 TEST_CASE("ParseStringListValue", "Correctly reads string lists") {

@@ -131,7 +131,7 @@ TEST_CASE("HandlesClick_ClickTask") {
 
   SECTION("middle click") {
     test_event.xbutton.button = 2;
-    REQUIRE(!p.HandlesClick(&test_event));
+    REQUIRE_FALSE(p.HandlesClick(&test_event));
 
     panel_config.mouse_actions.middle = MouseAction::kToggleIconify;
     p.UseConfig(panel_config, 1);
@@ -140,7 +140,7 @@ TEST_CASE("HandlesClick_ClickTask") {
 
   SECTION("right click") {
     test_event.xbutton.button = 3;
-    REQUIRE(!p.HandlesClick(&test_event));
+    REQUIRE_FALSE(p.HandlesClick(&test_event));
 
     panel_config.mouse_actions.right = MouseAction::kToggleIconify;
     p.UseConfig(panel_config, 1);
@@ -149,7 +149,7 @@ TEST_CASE("HandlesClick_ClickTask") {
 
   SECTION("wheel up") {
     test_event.xbutton.button = 4;
-    REQUIRE(!p.HandlesClick(&test_event));
+    REQUIRE_FALSE(p.HandlesClick(&test_event));
 
     panel_config.mouse_actions.scroll_up = MouseAction::kToggleIconify;
     p.UseConfig(panel_config, 1);
@@ -158,7 +158,7 @@ TEST_CASE("HandlesClick_ClickTask") {
 
   SECTION("wheel down") {
     test_event.xbutton.button = 5;
-    REQUIRE(!p.HandlesClick(&test_event));
+    REQUIRE_FALSE(p.HandlesClick(&test_event));
 
     panel_config.mouse_actions.scroll_down = MouseAction::kToggleIconify;
     p.UseConfig(panel_config, 1);

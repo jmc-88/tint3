@@ -62,13 +62,13 @@ TEST_CASE("Interval", "Test the Interval class") {
 TEST_CASE("CompareIds", "Sanity of nullable ids comparisons") {
   CompareIds compare_fn;
   // Left-hand side is nulled-out: right-hand side always comes first.
-  REQUIRE(!compare_fn(Interval::Id{}, Interval::Id{0}));
+  REQUIRE_FALSE(compare_fn(Interval::Id{}, Interval::Id{0}));
   // Right-hand side is nulled-out: left-hand side always comes first.
   REQUIRE(compare_fn(Interval::Id{0}, Interval::Id{}));
   // Smaller left-hand side comes first.
   REQUIRE(compare_fn(Interval::Id{0}, Interval::Id{1}));
   // Smaller right-hand side comes first.
-  REQUIRE(!compare_fn(Interval::Id{1}, Interval::Id{0}));
+  REQUIRE_FALSE(compare_fn(Interval::Id{1}, Interval::Id{0}));
 }
 
 class ChronoTimerTestUtils {
@@ -115,9 +115,9 @@ TEST_CASE("Timer", "Test the Timer class") {
 
   SECTION("fails clearing a non-existing interval") {
     Interval::Id nulled_interval;
-    REQUIRE(!timer.ClearInterval(nulled_interval));
+    REQUIRE_FALSE(timer.ClearInterval(nulled_interval));
     Interval::Id no_such_interval{std::numeric_limits<uint64_t>::max()};
-    REQUIRE(!timer.ClearInterval(no_such_interval));
+    REQUIRE_FALSE(timer.ClearInterval(no_such_interval));
   }
 
   SECTION("correctly processes an interval (single)") {
