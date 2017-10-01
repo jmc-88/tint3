@@ -50,6 +50,40 @@ ScopedDeleter<T> MakeScopedDeleter(T deleter) {
   return deleter;
 }
 
+template <typename It_>
+class iterator_range {
+ public:
+  iterator_range() = delete;
+  iterator_range(iterator_range const&) = default;
+  iterator_range(iterator_range&) = default;
+
+  iterator_range(It_ begin, It_ end) : begin_{begin}, end_{end} {}
+
+  iterator_range& operator=(iterator_range other) {
+    std::swap(begin_, other.begin_);
+    std::swap(end_, other.end_);
+    return (*this);
+  }
+
+  It_ begin() const { return begin_; }
+
+  It_ end() const { return end_; }
+
+ private:
+  It_ begin_;
+  It_ end_;
+};
+
+template <typename It_>
+iterator_range<It_> make_iterator_range(It_ begin, It_ end) {
+  return iterator_range<It_>{begin, end};
+}
+
+template <typename T>
+iterator_range<typename T::iterator> range_skip_n(T& container, size_t offset) {
+  return make_iterator_range(container.begin() + offset, container.end());
+}
+
 // ShellExec executes a command through /bin/sh, invoking the provided callback
 // in the child process.
 template <typename Callback>

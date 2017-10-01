@@ -592,15 +592,8 @@ void EventPropertyNotify(XEvent* e, Timer& timer, Tooltip* tooltip) {
 
         if (server.num_desktops() > old_desktop) {
           Taskbar& tskbar = panel.taskbars[old_desktop];
-          auto it = tskbar.children_.begin();
-
-          if (taskbarname_enabled) {
-            ++it;
-          }
-
-          for (; it != tskbar.children_.end(); ++it) {
-            auto tsk = static_cast<Task*>(*it);
-
+          for (Area* child : tskbar.filtered_children()) {
+            auto tsk = static_cast<Task*>(child);
             if (tsk->desktop == kAllDesktops) {
               tsk->on_screen_ = false;
               tskbar.need_resize_ = true;
@@ -610,15 +603,8 @@ void EventPropertyNotify(XEvent* e, Timer& timer, Tooltip* tooltip) {
         }
 
         Taskbar& tskbar = panel.taskbars[server.desktop()];
-        auto it = tskbar.children_.begin();
-
-        if (taskbarname_enabled) {
-          ++it;
-        }
-
-        for (; it != tskbar.children_.end(); ++it) {
-          auto tsk = static_cast<Task*>(*it);
-
+        for (Area* child : tskbar.filtered_children()) {
+          auto tsk = static_cast<Task*>(child);
           if (tsk->desktop == kAllDesktops) {
             tsk->on_screen_ = true;
             tskbar.need_resize_ = true;
@@ -1076,16 +1062,18 @@ start:
       }
     });
 
-    event_loop.RegisterHandler({UnmapNotify, DestroyNotify}, [&](XEvent& e) {
-      if (e.xany.window == tooltip.window()) {
-        return;
-      }
+    event_loop.RegisterHandler({UnmapNotify, DestroyNotify},
+                               [&](XEvent& e) {
+                                 if (e.xany.window == tooltip.window()) {
+                                   return;
+                                 }
 
-      TrayWindow* traywin = systray.FindTrayWindow(e.xany.window);
-      if (traywin != nullptr) {
-        systray.RemoveIcon(traywin, timer);
-      }
-    });
+                                 TrayWindow* traywin =
+                                     systray.FindTrayWindow(e.xany.window);
+                                 if (traywin != nullptr) {
+                                   systray.RemoveIcon(traywin, timer);
+                                 }
+                               });
   }
 
   event_loop.RegisterHandler(ClientMessage, [&](XEvent& e) {

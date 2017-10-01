@@ -28,6 +28,7 @@ class Taskbar : public TaskbarBase {
   void OnChangeLayout() override;
   bool Resize() override;
 
+  util::iterator_range<std::vector<Area*>::iterator> filtered_children();
   bool RemoveChild(Area* child) override;
 
   static void InitPanel(Panel* panel);

@@ -30,6 +30,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <iterator>
 #include <vector>
 
 #include "panel.hh"
@@ -524,15 +525,8 @@ Task* FindActiveTask(Task* current_task, Task* active_task) {
   }
 
   Taskbar* tskbar = reinterpret_cast<Taskbar*>(current_task->parent_);
-  auto it = tskbar->children_.begin();
-
-  if (taskbarname_enabled) {
-    ++it;
-  }
-
-  for (; it != tskbar->children_.end(); ++it) {
-    auto tsk = static_cast<Task*>(*it);
-
+  for (Area* child : tskbar->filtered_children()) {
+    auto tsk = static_cast<Task*>(child);
     if (tsk->win == active_task->win) {
       return tsk;
     }
@@ -547,23 +541,18 @@ Task* NextTask(Task* tsk) {
   }
 
   auto tskbar = reinterpret_cast<Taskbar*>(tsk->parent_);
-  auto first = tskbar->children_.begin();
+  auto children = tskbar->filtered_children();
+  auto it = std::find(std::begin(children), std::end(children), tsk);
 
-  if (taskbarname_enabled) {
-    ++first;
-  }
-
-  auto it = std::find(first, tskbar->children_.end(), tsk);
-
-  if (it == tskbar->children_.end()) {
+  if (it == std::end(children)) {
     return nullptr;
   }
 
-  if (++it == tskbar->children_.end()) {
-    return static_cast<Task*>(*it);
+  if (++it == std::end(children)) {
+    return static_cast<Task*>(tskbar->children_.front());
   }
 
-  return static_cast<Task*>(*first);
+  return static_cast<Task*>(*it);
 }
 
 Task* PreviousTask(Task* tsk) {
@@ -572,19 +561,14 @@ Task* PreviousTask(Task* tsk) {
   }
 
   auto tskbar = reinterpret_cast<Taskbar*>(tsk->parent_);
-  auto first = tskbar->children_.begin();
+  auto children = tskbar->filtered_children();
+  auto it = std::find(std::begin(children), std::end(children), tsk);
 
-  if (taskbarname_enabled) {
-    ++first;
-  }
-
-  auto it = std::find(tskbar->children_.begin(), tskbar->children_.end(), tsk);
-
-  if (it == tskbar->children_.end()) {
+  if (it == std::end(children)) {
     return nullptr;
   }
 
-  if (it-- == first) {
+  if (--it == std::begin(children)) {
     return static_cast<Task*>(tskbar->children_.back());
   }
 

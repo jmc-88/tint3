@@ -1,5 +1,7 @@
 #include "catch.hpp"
 
+#include <iostream>
+
 #include <string>
 #include <vector>
 #include "util/common.hh"
@@ -184,5 +186,46 @@ TEST_CASE("ToNumber") {
     REQUIRE_FALSE(util::string::ToNumber("infinity", nptr));
     REQUIRE_FALSE(util::string::ToNumber("nan", nptr));
     REQUIRE_FALSE(util::string::ToNumber("nan(16)", nptr));
+  }
+}
+
+TEST_CASE("iterator_range") {
+  std::vector<int> container = {1, 2, 3, 4, 5};
+
+  SECTION("make_iterator_range") {
+    std::vector<int> result;
+    for (auto& x : util::make_iterator_range(container.begin() + 1,
+                                             container.end() - 1)) {
+      result.push_back(x);
+      std::cerr << x << '\n';
+    }
+
+    for (size_t i = 1; i < container.size() - 1; ++i) {
+      REQUIRE(result[i - 1] == container[i]);
+    }
+  }
+
+  SECTION("range_skip_n(0)") {
+    std::vector<int> result;
+    for (auto& x : util::range_skip_n(container, 0)) {
+      result.push_back(x);
+      std::cerr << x << '\n';
+    }
+
+    for (size_t i = 0; i < container.size(); ++i) {
+      REQUIRE(result[i] == container[i]);
+    }
+  }
+
+  SECTION("range_skip_n(2)") {
+    std::vector<int> result;
+    for (auto& x : util::range_skip_n(container, 2)) {
+      result.push_back(x);
+      std::cerr << x << '\n';
+    }
+
+    for (size_t i = 2; i < container.size(); ++i) {
+      REQUIRE(result[i - 2] == container[i]);
+    }
   }
 }

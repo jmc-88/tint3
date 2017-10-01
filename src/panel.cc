@@ -529,15 +529,9 @@ void Panel::SetBackground() {
     tskbar.pix_ = None;
     tskbar.bar_name.pix_ = None;
 
-    auto begin = tskbar.children_.begin();
-
-    if (taskbarname_enabled) {
-      ++begin;
-    }
-
-    std::for_each(begin, tskbar.children_.end(), [](Area* child) {
+    for (Area* child : tskbar.filtered_children()) {
       SetTaskRedraw(static_cast<Task*>(child));
-    });
+    };
   }
 }
 
@@ -666,15 +660,9 @@ Task* Panel::ClickTask(int x, int y) {
   Taskbar* tskbar = ClickTaskbar(x, y);
 
   if (tskbar != nullptr) {
-    auto begin = tskbar->children_.begin();
-
-    if (taskbarname_enabled) {
-      ++begin;
-    }
-
-    for (auto it = begin; it != tskbar->children_.end(); ++it) {
-      if ((*it)->IsPointInside(x, y)) {
-        return reinterpret_cast<Task*>(*it);
+    for (Area* child : tskbar->filtered_children()) {
+      if (child->IsPointInside(x, y)) {
+        return reinterpret_cast<Task*>(child);
       }
     }
   }

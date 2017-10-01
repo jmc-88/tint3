@@ -91,14 +91,8 @@ Taskbar& Taskbar::SetState(size_t state) {
 
     if (panel.taskbar_mode() == TaskbarMode::kMultiDesktop &&
         normal_bg != active_bg) {
-      auto it = children_.begin();
-
-      if (taskbarname_enabled) {
-        ++it;
-      }
-
-      for (; it != children_.end(); ++it) {
-        SetTaskRedraw(static_cast<Task*>(*it));
+      for (Area* child : filtered_children()) {
+        SetTaskRedraw(static_cast<Task*>(child));
       }
     }
   }
@@ -380,13 +374,10 @@ bool Taskbar::Resize() {
     ResizeByLayout(panel_->g_task.maximum_width);
 
     int new_width = panel_->g_task.maximum_width;
-    auto it = children_.begin();
+    auto children = filtered_children();
+    auto it = std::begin(filtered_children());
 
-    if (taskbarname_enabled) {
-      ++it;
-    }
-
-    if (it != children_.end()) {
+    if (it != std::end(children)) {
       new_width = (*it)->width_;
     }
 
@@ -398,6 +389,12 @@ bool Taskbar::Resize() {
   }
 
   return false;
+}
+
+util::iterator_range<std::vector<Area*>::iterator>
+Taskbar::filtered_children() {
+  size_t offset = taskbarname_enabled ? 1 : 0;
+  return util::range_skip_n(children_, offset);
 }
 
 bool Taskbar::RemoveChild(Area* child) {
