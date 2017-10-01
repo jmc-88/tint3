@@ -1087,7 +1087,7 @@ start:
       }
 
       TrayWindow* traywin = systray.FindTrayWindow(e.xany.window);
-      if (traywin != nullptr && traywin->owned) {
+      if (traywin != nullptr) {
         systray.RemoveIcon(traywin, timer);
       }
     });
