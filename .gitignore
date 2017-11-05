@@ -9,9 +9,10 @@
 # Don't include ctags in the repository
 /tags
 
-# Don't include IDE-specific files in the repository
+# Don't include IDE- or editor-specific files in the repository
 *.kdev4
 /.kdev4
+/_vimrc_local.vim
 
 # Don't include built packages
 *.deb
