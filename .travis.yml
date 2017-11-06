@@ -39,7 +39,7 @@ install:
 before_script:
   - mkdir "${TRAVIS_BUILD_DIR}/build"
   - cd "${TRAVIS_BUILD_DIR}/build"
-  - cmake "${TRAVIS_BUILD_DIR}" -DCMAKE_BUILD_TYPE=Debug -DCOVERALLS=ON -DCOVERALLS_UPLOAD=ON
+  - cmake "${TRAVIS_BUILD_DIR}" -DCMAKE_BUILD_TYPE=Debug -DCOVERALLS=ON
 
 script:
   # Verify tint3 builds and passes tests
@@ -51,7 +51,8 @@ script:
 
 after_success:
   # Upload coverage data to Coveralls
-  - coveralls --exclude test/ --gcov-options '\-lp'
+  - cd "${TRAVIS_BUILD_DIR}"
+  - coveralls --root ./ --exclude external_includes/ --exclude test/ --exclude build/ --gcov-options '\-lp'
 
 notifications:
   irc:
