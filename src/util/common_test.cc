@@ -1,7 +1,5 @@
 #include "catch.hpp"
 
-#include <iostream>
-
 #include <string>
 #include <vector>
 #include "util/common.hh"
@@ -197,7 +195,6 @@ TEST_CASE("iterator_range") {
     for (auto& x : util::make_iterator_range(container.begin() + 1,
                                              container.end() - 1)) {
       result.push_back(x);
-      std::cerr << x << '\n';
     }
 
     for (size_t i = 1; i < container.size() - 1; ++i) {
@@ -209,7 +206,6 @@ TEST_CASE("iterator_range") {
     std::vector<int> result;
     for (auto& x : util::range_skip_n(container, 0)) {
       result.push_back(x);
-      std::cerr << x << '\n';
     }
 
     for (size_t i = 0; i < container.size(); ++i) {
@@ -221,7 +217,6 @@ TEST_CASE("iterator_range") {
     std::vector<int> result;
     for (auto& x : util::range_skip_n(container, 2)) {
       result.push_back(x);
-      std::cerr << x << '\n';
     }
 
     for (size_t i = 2; i < container.size(); ++i) {
