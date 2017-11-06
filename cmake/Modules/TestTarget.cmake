@@ -11,16 +11,30 @@ endif()
 
 function(test_target target_name)
   set(options USE_XVFB_RUN)
-  set(multiValueArgs SOURCES DEPENDS LINK_LIBRARIES)
+  set(multiValueArgs SOURCES DEPENDS INCLUDE_DIRS LINK_LIBRARIES)
   cmake_parse_arguments(TEST_TARGET "${options}" "" "${multiValueArgs}" ${ARGN})
 
   add_executable(${target_name} ${TEST_TARGET_SOURCES})
   if(TEST_TARGET_USE_XVFB_RUN)
     add_test(
-      NAME ${target_name}
-      COMMAND "${CMAKE_SOURCE_DIR}/test/xvfb-run.sh" "${CMAKE_BINARY_DIR}/${target_name}")
+      NAME
+        ${target_name}
+      COMMAND
+        "${CMAKE_SOURCE_DIR}/test/xvfb-run.sh" $<TARGET_FILE:${target_name}>
+      WORKING_DIRECTORY
+        "${CMAKE_BINARY_DIR}")
   else()
-    add_test(NAME ${target_name} COMMAND ${target_name})
+    add_test(
+      NAME
+        ${target_name}
+      COMMAND
+        $<TARGET_FILE:${target_name}>
+      WORKING_DIRECTORY
+        "${CMAKE_BINARY_DIR}")
+  endif()
+
+  if(TEST_TARGET_INCLUDE_DIRS)
+    target_include_directories(${target_name} ${TEST_TARGET_INCLUDE_DIRS})
   endif()
 
   if(TEST_TARGET_LINK_LIBRARIES)
@@ -32,11 +46,16 @@ function(test_target target_name)
   endif()
 
   if(${TINT3_ENABLE_ASAN_FOR_TESTS})
-    # When using Clang, turn on AddressSanitizer by default for all
-    # the test targets.
-    set_target_properties(${target_name} PROPERTIES
-      LINK_FLAGS "-fsanitize=address -fno-omit-frame-pointer -fno-optimize-sibling-calls")
-    set_tests_properties(${target_name} PROPERTIES
-      ENVIRONMENT "LSAN_OPTIONS=${LSAN_OPTIONS};ASAN_OPTIONS=${ASAN_OPTIONS}")
+    # When requested, turn on AddressSanitizer for test targets.
+    set_target_properties(
+      ${target_name} PROPERTIES
+      LINK_FLAGS
+        "-fsanitize=address"
+        "-fno-omit-frame-pointer"
+        "-fno-optimize-sibling-calls")
+    set_tests_properties(
+      ${target_name} PROPERTIES
+      ENVIRONMENT
+        "LSAN_OPTIONS=${LSAN_OPTIONS};ASAN_OPTIONS=${ASAN_OPTIONS}")
   endif()
 endfunction(test_target)
