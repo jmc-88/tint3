@@ -60,8 +60,8 @@ after_success:
     --exclude build/generated/
     --exclude external_includes/
     --exclude test/
-    --exclude-pattern '_test\.cc$'        # looks like a no-op
-    --exclude-lines-pattern '_test\.cc$'  # this seems to work though
+    --exclude-pattern '_test\.cc$'
+    --exclude-lines-pattern '_test\.cc$'
     --gcov-options '\-lp'
 
 notifications:
