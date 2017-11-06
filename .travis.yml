@@ -52,14 +52,17 @@ script:
 after_success:
   # Upload coverage data to Coveralls
   - cd "${TRAVIS_BUILD_DIR}"
-  - |
-    coveralls --root ./
-              --build-root build/
-              --exclude build/CMakeFiles/
-              --exclude build/generated/
-              --exclude external_includes/
-              --exclude test/
-              --gcov-options '\-lp'
+  - |-
+    coveralls
+    --root ./
+    --build-root build/
+    --exclude build/CMakeFiles/
+    --exclude build/generated/
+    --exclude external_includes/
+    --exclude test/
+    --exclude-pattern '_test\.cc$'        # looks like a no-op
+    --exclude-lines-pattern '_test\.cc$'  # this seems to work though
+    --gcov-options '\-lp'
 
 notifications:
   irc:
