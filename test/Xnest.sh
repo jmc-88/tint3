@@ -1,5 +1,9 @@
 #!/bin/sh
 
+# Not quite the "unofficial BASH strict mode", but better than nothing.
+set -eu
+IFS="$(printf '\n\t')"
+
 # Simple test script to launch the locally-built tint3 and the Openbox window
 # manager in a nested X session.
 #

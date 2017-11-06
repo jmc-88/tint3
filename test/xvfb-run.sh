@@ -1,5 +1,9 @@
 #!/bin/sh
 
+# Not quite the "unofficial BASH strict mode", but better than nothing.
+set -eu
+IFS="$(printf '\n\t')"
+
 # Simple wrapper around Xvfb, used to run some test programs in a virtual X
 # server. Provides a minimal replacement for xvfb-run which isn't universally
 # available.
