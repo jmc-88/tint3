@@ -52,7 +52,7 @@ script:
 after_success:
   # Upload coverage data to Coveralls
   - cd "${TRAVIS_BUILD_DIR}"
-  - |-
+  - >-
     coveralls
     --root ./
     --build-root build/
