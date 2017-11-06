@@ -73,15 +73,6 @@ set(DATADIR share CACHE PATH "Directory for shared data")
 set(SYSCONFDIR /etc CACHE PATH "Directory for configuration files")
 set(DOCDIR share/doc/tint3 CACHE PATH "Directory for documentation files")
 
-option(COVERALLS "Turn on coveralls support" OFF)
-option(COVERALLS_UPLOAD "Upload the generated coveralls json" OFF)
-
-if (COVERALLS)
-  set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}
-                        "${CMAKE_SOURCE_DIR}/cmake/coveralls-cmake/cmake/")
-	include(Coveralls)
-endif()
-
 # {{{ configuration files
 #
 # This section inspired by:
@@ -146,10 +137,17 @@ include_directories(
 
 # {{{ coverage rules
 
+# Coveralls integration is disabled by default, to avoid accidental uploads of
+# coverage results from local runs. Only the CI server should upload them.
+option(COVERALLS "Turn on Coveralls support" OFF)
+
 if(COVERALLS)
-  set(COVERAGE_SRCS ${TINT3_SOURCES} src/tint.cc)
-  coveralls_turn_on_coverage()
-  coveralls_setup("${COVERAGE_SRCS}" ${COVERALLS_UPLOAD})
+  # This part adapted from the original at:
+  #   https://github.com/JoakimSoderberg/coveralls-cmake/blob/master/cmake/Coveralls.cmake
+  if(NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
+    message(FATAL_ERROR "Coveralls: code coverage results with an optimised build may be misleading! Use -DCMAKE_BUILD_TYPE=Debug.")
+  endif()
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O0 -fprofile-arcs -ftest-coverage")
 endif()
 
 # }}} coverage rules

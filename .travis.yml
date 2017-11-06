@@ -13,6 +13,9 @@ before_install:
   - if [ "$CXX" == "g++" ]; then sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test; fi
   - sudo apt-get update -qq
 
+  # cpp-coveralls
+  - pip install --user cpp-coveralls
+
 install:
   # g++ 4.9
   - if [ "$CXX" == "g++" ]; then sudo apt-get install -qq g++-4.9; fi
@@ -48,8 +51,7 @@ script:
 
 after_success:
   # Upload coverage data to Coveralls
-  - cd "${TRAVIS_BUILD_DIR}/build"
-  - cmake --build . --target coveralls
+  - coveralls --exclude test/ --gcov-options '\-lp'
 
 notifications:
   irc:
