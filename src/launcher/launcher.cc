@@ -22,10 +22,6 @@
 #include <signal.h>
 #include <unistd.h>
 
-#ifdef HAVE_SN
-#include <libsn/sn.h>
-#endif
-
 #include <algorithm>
 #include <cstdio>
 #include <cstdlib>
@@ -41,7 +37,7 @@
 #include "panel.hh"
 #include "server.hh"
 #include "startup_notification.hh"
-#include "taskbar.hh"
+#include "taskbar/taskbar.hh"
 #include "util/fs.hh"
 #include "util/log.hh"
 #include "util/xdg.hh"

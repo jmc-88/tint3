@@ -32,7 +32,7 @@
 
 #include "panel.hh"
 #include "server.hh"
-#include "taskbar.hh"
+#include "taskbar/taskbar.hh"
 #include "taskbar/taskbarname.hh"
 #include "util/common.hh"
 #include "util/window.hh"
@@ -133,8 +133,8 @@ bool Taskbarname::Resize() {
   need_redraw_ = true;
 
   int name_width, name_height;
-  GetTextSize(taskbarname_font_desc, name(), MarkupTag::kNoMarkup,
-              &name_width, &name_height);
+  GetTextSize(taskbarname_font_desc, name(), MarkupTag::kNoMarkup, &name_width,
+              &name_height);
 
   if (panel_->horizontal()) {
     int new_size = name_width + (2 * (padding_x_lr_ + bg_.border().width()));

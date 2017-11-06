@@ -9,11 +9,7 @@
 #include <unordered_map>
 #include <vector>
 
-#ifdef HAVE_SN
-#include <libsn/sn.h>
 #include "startup_notification.hh"
-#endif
-
 #include "util/x11.hh"
 
 struct Monitor {

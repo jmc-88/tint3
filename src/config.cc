@@ -42,11 +42,11 @@
 #include <string>
 #include <utility>
 
-#include "clock.hh"
+#include "clock/clock.hh"
 #include "config.hh"
 #include "launcher/launcher.hh"
 #include "panel.hh"
-#include "systraybar.hh"
+#include "systray/systraybar.hh"
 #include "taskbar/task.hh"
 #include "taskbar/taskbar.hh"
 #include "taskbar/taskbarname.hh"

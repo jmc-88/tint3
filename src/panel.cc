@@ -31,7 +31,7 @@
 #include "config.hh"
 #include "panel.hh"
 #include "server.hh"
-#include "tooltip.hh"
+#include "tooltip/tooltip.hh"
 #include "util/log.hh"
 #include "util/x11.hh"
 
