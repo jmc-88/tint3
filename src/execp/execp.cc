@@ -62,7 +62,13 @@ void Executor::DrawForeground(cairo_t* c) {
   pango_cairo_show_layout(c, layout.get());
 }
 
-std::string Executor::GetTooltipText() { return command_; }
+std::string Executor::GetTooltipText() {
+  if (has_tooltip_) {
+    return tooltip_;
+  }
+  // TODO: return last contents of stderr here
+  return {};
+}
 
 void Executor::set_cache_icon(bool cache_icon) { cache_icon_ = cache_icon; }
 
