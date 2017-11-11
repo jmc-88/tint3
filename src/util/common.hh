@@ -36,7 +36,7 @@ using GObjectPtr = std::unique_ptr<T, GObjectUnrefDeleter>;
 template <typename T>
 class ScopedDeleter {
  public:
-  ScopedDeleter(T deleter) : deleter_(deleter) {}
+  explicit ScopedDeleter(T deleter) : deleter_(deleter) {}
   ~ScopedDeleter() { deleter_(); }
 
  private:
@@ -47,7 +47,7 @@ class ScopedDeleter {
 // type from the argument it's passed.
 template <typename T>
 ScopedDeleter<T> MakeScopedDeleter(T deleter) {
-  return deleter;
+  return ScopedDeleter<T>{deleter};
 }
 
 template <typename It_>
