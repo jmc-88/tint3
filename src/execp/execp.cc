@@ -6,18 +6,7 @@
 #include "util/log.hh"
 #include "util/window.hh"
 
-Executor::Executor()
-    : Area(),
-      cache_icon_(),
-      centered_(),
-      continuous_(),
-      has_icon_(),
-      icon_height_(),
-      icon_width_(),
-      interval_(),
-      markup_() {
-  size_mode_ = SizeMode::kByContent;
-}
+Executor::Executor() { size_mode_ = SizeMode::kByContent; }
 
 void Executor::InitPanel(Panel* panel) {
   parent_ = panel;

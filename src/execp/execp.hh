@@ -54,22 +54,22 @@ class Executor : public Area {
 
  private:
   Background background_;
-  bool cache_icon_;
-  bool centered_;
+  bool cache_icon_ = false;
+  bool centered_ = false;
   std::string command_;
   std::string command_left_click_;
   std::string command_middle_click_;
   std::string command_right_click_;
   std::string command_up_wheel_;
   std::string command_down_wheel_;
-  bool continuous_;
+  bool continuous_ = false;
   util::pango::FontDescriptionPtr font_description_;
   Color font_color_;
-  bool has_icon_;
-  unsigned int icon_height_;
-  unsigned int icon_width_;
-  unsigned int interval_;
-  bool markup_;
+  bool has_icon_ = false;
+  unsigned int icon_height_ = 0;
+  unsigned int icon_width_ = 0;
+  unsigned int interval_ = 0;
+  bool markup_ = false;
   std::string tooltip_;
 };
 
