@@ -70,6 +70,7 @@ class Executor : public Area {
   unsigned int icon_width_ = 0;
   unsigned int interval_ = 0;
   bool markup_ = false;
+  bool has_tooltip_ = false;
   std::string tooltip_;
 };
 

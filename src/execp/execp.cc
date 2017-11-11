@@ -120,7 +120,10 @@ void Executor::set_interval(unsigned int interval) { interval_ = interval; }
 
 void Executor::set_markup(bool markup) { markup_ = markup; }
 
-void Executor::set_tooltip(std::string const& tooltip) { tooltip_ = tooltip; }
+void Executor::set_tooltip(std::string const& tooltip) {
+  tooltip_ = tooltip;
+  has_tooltip_ = true;
+}
 
 bool Executor::HandlesClick(XEvent* event) {
   if (!Area::HandlesClick(event)) {
