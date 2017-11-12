@@ -7,6 +7,7 @@
 #include <cstdint>
 #include <functional>
 #include <memory>
+#include <ostream>
 
 #include "util/bimap.hh"
 #include "util/nullable.hh"
@@ -45,6 +46,7 @@ class Interval {
 };
 
 bool operator<(Interval const& lhs, Interval const& rhs);
+std::ostream& operator<<(std::ostream& os, Interval const& interval);
 
 class CompareIds {
  public:

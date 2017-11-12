@@ -18,6 +18,7 @@
 
 #include <algorithm>
 #include <atomic>
+#include <iomanip>
 #include <list>
 #include <map>
 #include <utility>
@@ -66,6 +67,25 @@ void Interval::InvokeCallback() const { callback_(); }
 TimePoint Interval::GetTimePoint() const { return time_point_; }
 
 Duration Interval::GetRepeatInterval() const { return repeat_interval_; }
+
+std::ostream& operator<<(std::ostream& os, Interval const& interval) {
+  os << '[';
+
+  auto when = std::chrono::system_clock::to_time_t(
+      std::chrono::system_clock::now() +
+      std::chrono::duration_cast<std::chrono::system_clock::duration>(
+          interval.GetTimePoint() - std::chrono::steady_clock::now()));
+  os << std::put_time(std::localtime(&when), "%F %T");
+
+  auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(
+      interval.GetRepeatInterval());
+  if (ms.count() != 0) {
+    os << "; " << ms.count() << " ms";
+  }
+
+  os << ']';
+  return os;
+}
 
 bool operator<(Interval const& lhs, Interval const& rhs) {
   return lhs.GetTimePoint() < rhs.GetTimePoint();
