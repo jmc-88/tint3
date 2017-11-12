@@ -167,7 +167,7 @@ Color Background::fill_color_hover() const {
 }
 
 void Background::set_fill_color_hover(Color const& color) {
-  fill_color_hover_ = color;
+  fill_color_hover_ = Some(color);
 }
 
 Color Background::fill_color_pressed() const {
@@ -178,7 +178,7 @@ Color Background::fill_color_pressed() const {
 }
 
 void Background::set_fill_color_pressed(Color const& color) {
-  fill_color_pressed_ = color;
+  fill_color_pressed_ = Some(color);
 }
 
 Color Background::border_color_for(MouseState mouse_state) const {
@@ -205,7 +205,7 @@ Color Background::border_color_hover() const {
 }
 
 void Background::set_border_color_hover(Color const& color) {
-  border_color_hover_ = color;
+  border_color_hover_ = Some(color);
 }
 
 Color Background::border_color_pressed() const {
@@ -216,7 +216,7 @@ Color Background::border_color_pressed() const {
 }
 
 void Background::set_border_color_pressed(Color const& color) {
-  border_color_pressed_ = color;
+  border_color_pressed_ = Some(color);
 }
 
 int Background::gradient_id_for(MouseState mouse_state) const {

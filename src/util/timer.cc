@@ -183,14 +183,14 @@ void Timer::ProcessExpiredIntervals() {
 
 util::Nullable<Interval> Timer::GetNextInterval() const {
   if (timeouts_.empty() && intervals_.empty()) {
-    return util::Nullable<Interval>();
+    return {};
   }
   if (intervals_.empty()) {
-    return timeouts_.right.begin()->first;
+    return Some(timeouts_.right.begin()->first);
   }
   if (timeouts_.empty()) {
-    return intervals_.right.begin()->first;
+    return Some(intervals_.right.begin()->first);
   }
-  return std::min(timeouts_.right.begin()->first,
-                  intervals_.right.begin()->first);
+  return Some(std::min(timeouts_.right.begin()->first,
+                       intervals_.right.begin()->first));
 }

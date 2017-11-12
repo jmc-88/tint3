@@ -10,8 +10,8 @@ template <typename T>
 class Nullable {
  public:
   Nullable() : has_value_(false) {}
-  Nullable(T const& value) : has_value_(true), value_(value) {}
-  Nullable(T&& value) : has_value_(true), value_(std::move(value)) {}
+  explicit Nullable(T const& value) : has_value_(true), value_(value) {}
+  explicit Nullable(T&& value) : has_value_(true), value_(std::move(value)) {}
 
   operator bool() const { return has_value_; }
 
@@ -36,5 +36,15 @@ class Nullable {
 };
 
 }  // namespace util
+
+template <typename T>
+util::Nullable<T> Some(T const& value) {
+  return util::Nullable<T>(value);
+}
+
+template <typename T>
+util::Nullable<T> Some(T&& value) {
+  return util::Nullable<T>(value);
+}
 
 #endif  // TINT3_UTIL_NULLABLE_HH
