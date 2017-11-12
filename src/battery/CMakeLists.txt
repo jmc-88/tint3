@@ -18,6 +18,7 @@ target_link_libraries(
     log_lib
     panel_lib
     server_lib
+    subprocess_lib
     window_lib
     ${CAIRO_LIBRARIES}
     ${PANGOCAIRO_LIBRARIES}

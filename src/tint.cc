@@ -43,6 +43,7 @@
 #include "launcher/xsettings-client.hh"
 #include "panel.hh"
 #include "server.hh"
+#include "subprocess.hh"
 #include "systray/systraybar.hh"
 #include "taskbar/task.hh"
 #include "taskbar/taskbar.hh"
@@ -1110,7 +1111,7 @@ start:
                             dnd_target_window, CurrentTime);
         }
       } else if (target == dnd_atom) {
-        util::ShellExec(dnd::BuildCommand(dnd_launcher_exec, prop));
+        ShellExec(dnd::BuildCommand(dnd_launcher_exec, prop));
 
         // Reply OK.
         XClientMessageEvent m;

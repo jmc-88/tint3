@@ -129,18 +129,6 @@ TEST_CASE("ScopedDeleter") {
   REQUIRE(was_invoked);
 }
 
-TEST_CASE("ShellExec") {
-  SECTION("empty command") {
-    // doesn't make sense, should be refused
-    REQUIRE(util::ShellExec("") < 0);
-  }
-
-  SECTION("bogus command") {
-    // won't really do anything, but is a valid input, should fork() and exec*()
-    REQUIRE(util::ShellExec("there is no such command") > 0);
-  }
-}
-
 TEST_CASE("ToNumber") {
   SECTION("int") {
     int i;

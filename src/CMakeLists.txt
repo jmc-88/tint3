@@ -25,6 +25,7 @@ target_link_libraries(
     dnd_lib
     panel_lib
     server_lib
+    subprocess_lib
     startup_notification_lib
     theme_manager_lib
     ${X11_Xfixes_LIB})
@@ -195,6 +196,23 @@ test_target(
     testmain
     ${X11_X11_LIB}
   USE_XVFB_RUN)
+
+add_library(
+  subprocess_lib STATIC
+  subprocess.cc)
+
+target_link_libraries(
+  subprocess_lib
+  PRIVATE
+    log_lib)
+
+test_target(
+  subprocess_test
+  SOURCES
+    subprocess_test.cc
+  LINK_LIBRARIES
+    subprocess_lib
+    testmain)
 
 add_library(
   theme_manager_lib STATIC

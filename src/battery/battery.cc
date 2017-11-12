@@ -41,6 +41,7 @@
 #include "battery/battery_interface.hh"
 #include "panel.hh"
 #include "server.hh"
+#include "subprocess.hh"
 #include "util/common.hh"
 #include "util/fs.hh"
 #include "util/log.hh"
@@ -267,7 +268,7 @@ void UpdateBattery() {
   if (battery_low_status > battery_state.percentage &&
       battery_state.state == ChargeState::kDischarging &&
       !battery_low_cmd_send) {
-    util::ShellExec(battery_low_cmd);
+    ShellExec(battery_low_cmd);
     battery_low_cmd_send = true;
   }
 

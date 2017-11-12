@@ -34,6 +34,7 @@
 #include "clock/time_utils.hh"
 #include "panel.hh"
 #include "server.hh"
+#include "subprocess.hh"
 #include "util/common.hh"
 #include "util/timer.hh"
 #include "util/window.hh"
@@ -264,9 +265,9 @@ bool Clock::OnClick(XEvent* event) {
   int button = event->xbutton.button;
   pid_t child_pid = -1;
   if (button == 1) {
-    child_pid = util::ShellExec(clock_lclick_command);
+    child_pid = ShellExec(clock_lclick_command);
   } else if (button == 2) {
-    child_pid = util::ShellExec(clock_rclick_command);
+    child_pid = ShellExec(clock_rclick_command);
   }
   return (child_pid > 0);
 }

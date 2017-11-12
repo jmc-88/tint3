@@ -13,6 +13,7 @@ target_link_libraries(
     common_lib
     panel_lib
     server_lib
+    subprocess_lib
     time_utils_lib
     timer_lib
     window_lib

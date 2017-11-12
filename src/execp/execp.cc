@@ -2,6 +2,7 @@
 
 #include "execp/execp.hh"
 #include "panel.hh"
+#include "subprocess.hh"
 #include "util/common.hh"
 #include "util/log.hh"
 #include "util/window.hh"
@@ -155,6 +156,6 @@ bool Executor::OnClick(XEvent* event) {
       &command_up_wheel_,   &command_down_wheel_,
   };
 
-  pid_t child_pid = util::ShellExec(*commands[button - 1]);
+  pid_t child_pid = ShellExec(*commands[button - 1]);
   return (child_pid > 0);
 }

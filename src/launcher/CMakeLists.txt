@@ -16,6 +16,7 @@ target_link_libraries(
     panel_lib
     server_lib
     startup_notification_lib
+    subprocess_lib
     taskbar_lib
     xdg_lib
     ${CAIRO_LIBRARIES}

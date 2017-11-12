@@ -37,6 +37,7 @@
 #include "panel.hh"
 #include "server.hh"
 #include "startup_notification.hh"
+#include "subprocess.hh"
 #include "taskbar/taskbar.hh"
 #include "util/fs.hh"
 #include "util/log.hh"
@@ -360,7 +361,7 @@ bool LauncherIcon::OnClick(XEvent* event) {
   sn.set_name(icon_tooltip_);
   sn.Initiate(cmd_, event->xbutton.time);
 
-  pid_t child_pid = util::ShellExec(cmd_, [&sn] {
+  pid_t child_pid = ShellExec(cmd_, [&sn] {
     sn.IncrementRef();
     sn.SetupChildProcess();
   });
