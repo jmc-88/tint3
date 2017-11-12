@@ -361,10 +361,10 @@ bool LauncherIcon::OnClick(XEvent* event) {
   sn.set_name(icon_tooltip_);
   sn.Initiate(cmd_, event->xbutton.time);
 
-  pid_t child_pid = ShellExec(cmd_, [&sn] {
-    sn.IncrementRef();
-    sn.SetupChildProcess();
-  });
+  pid_t child_pid = ShellExec(cmd_, child_callback{[&sn] {
+                                sn.IncrementRef();
+                                sn.SetupChildProcess();
+                              }});
 
 #if HAVE_SN
   if (child_pid > 0) {

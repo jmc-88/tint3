@@ -60,14 +60,11 @@ Subprocess make_subprocess(std::string command, Args&&... args) {
 
 // ShellExec executes a command through /bin/sh, invoking the provided callback
 // in the child process.
-template <typename Callback>
-pid_t ShellExec(std::string const& command, Callback callback) {
-  auto sp = make_subprocess(command, child_callback{callback},
-                            session_leader{true}, shell{true});
+template <typename... Args>
+pid_t ShellExec(std::string const& command, Args&&... args) {
+  auto sp = make_subprocess(command, session_leader{true}, shell{true},
+                            std::forward<Args>(args)...);
   return sp.start();
 }
-
-// ShellExec executes a command through /bin/sh.
-pid_t ShellExec(std::string const& command);
 
 #endif  // TINT3_SUBPROCESS_HH

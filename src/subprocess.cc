@@ -65,8 +65,3 @@ int Subprocess::start() const {
   }
   return child_pid;
 }
-
-pid_t ShellExec(std::string const& command) {
-  // Delegate to the template version of this function with a no-op callback
-  return ShellExec(command, [] {});
-}
