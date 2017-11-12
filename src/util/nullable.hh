@@ -2,6 +2,7 @@
 #define TINT3_UTIL_NULLABLE_HH
 
 #include <algorithm>
+#include <ostream>
 #include <utility>
 
 namespace util {
@@ -45,6 +46,15 @@ util::Nullable<T> Some(T const& value) {
 template <typename T>
 util::Nullable<T> Some(T&& value) {
   return util::Nullable<T>(value);
+}
+
+template <typename T>
+std::ostream& operator<<(std::ostream& os, util::Nullable<T> const& nullable) {
+  if (nullable) {
+    return os << "Some(" << nullable.Unwrap() << ")";
+  } else {
+    return os << "None";
+  }
 }
 
 #endif  // TINT3_UTIL_NULLABLE_HH
