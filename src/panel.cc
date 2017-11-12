@@ -101,6 +101,8 @@ void CleanupPanel() {
 
   panels.clear();
   backgrounds.clear();
+  executors.clear();
+  gradients.clear();
 }
 
 void InitPanel(Timer& timer) {
