@@ -7,20 +7,18 @@ compiler:
   - gcc
 
 os: linux
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - g++-5
 
 before_install:
-  # g++ 4.9
-  - if [ "$CXX" == "g++" ]; then sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test; fi
-  - sudo apt-get update -qq
-
   # cpp-coveralls
   - pip install --user cpp-coveralls
 
 install:
-  # g++ 4.9
-  - if [ "$CXX" == "g++" ]; then sudo apt-get install -qq g++-4.9; fi
-  - if [ "$CXX" == "g++" ]; then export CXX="g++-4.9"; fi
-
   # Required libraries
   - sudo apt-get --assume-yes install libcairo2-dev libpango1.0-dev libglib2.0-dev libimlib2-dev libxinerama-dev libx11-dev libxdamage-dev libxcomposite-dev libxrender-dev libxrandr-dev librsvg2-dev libstartup-notification0-dev libcurl4-openssl-dev
 
