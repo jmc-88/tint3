@@ -62,7 +62,7 @@ if(ENABLE_SN)
   add_definitions(-DHAVE_SN -DSN_API_NOT_YET_FROZEN)
 endif()
 
-OPTION(ENABLE_CURL "Enable CURL for fetching remote resources" ON)
+option(ENABLE_CURL "Enable CURL for fetching remote resources" ON)
 if(ENABLE_CURL)
   find_package(CURL 7.30 REQUIRED)
   add_definitions(-DHAVE_CURL)
