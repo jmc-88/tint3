@@ -15,6 +15,9 @@ addons:
       - g++-5
 
 before_install:
+  # Use GCC 5 instead of the default
+  - export CC=gcc-5 CXX=g++-5
+
   # cpp-coveralls
   - pip install --user cpp-coveralls
 
