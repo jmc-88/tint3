@@ -5,7 +5,8 @@ add_library(
 target_link_libraries(
   execp_lib
   PRIVATE
-    environment_lib
+    common_lib
+    #environment_lib
     log_lib
     panel_lib
     subprocess_lib
