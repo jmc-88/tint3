@@ -68,6 +68,20 @@ if(ENABLE_CURL)
   add_definitions(-DHAVE_CURL)
 endif()
 
+# Prefer GNU gold if available and requested.
+option(ENABLE_GNU_GOLD "Enable the GNU gold linker if available" ON)
+if(ENABLE_GNU_GOLD)
+  execute_process(
+    COMMAND
+      ${CMAKE_CXX_COMPILER} -fuse-ld=gold -Wl,--version
+    OUTPUT_VARIABLE LD_VERSION
+    ERROR_QUIET)
+  if("${LD_VERSION}" MATCHES "GNU gold")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fuse-ld=gold")
+    set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -fuse-ld=gold")
+  endif()
+endif()
+
 set(MANDIR share/man CACHE PATH "Directory for man pages")
 set(DATADIR share CACHE PATH "Directory for shared data")
 set(SYSCONFDIR /etc CACHE PATH "Directory for configuration files")
