@@ -29,6 +29,18 @@ h1.title {
   padding: 0;
 }
 
+ul {
+  padding-bottom: 1em;
+}
+
+pre > code {
+  display: block;
+  margin: 1em 0 1em 2em;
+  border: none;
+  border-left: 1px solid black;
+  padding: .5em 0 .5em 1em;
+}
+
 #TOC:before {
   content: "TABLE OF CONTENTS";
   font-weight: bold;
@@ -44,14 +56,12 @@ h1.title {
   color: black;
 }
 
-ul {
-  padding-bottom: 1em;
+#TOC ul {
+  list-style-type: none;
+  padding: 0 0 0 1em;
 }
 
-pre > code {
-  display: block;
-  margin: 1em 0 1em 2em;
-  border: none;
-  border-left: 1px solid black;
-  padding: .5em 0 .5em 1em;
+#TOC > ul {
+  margin-top: 0;
+  padding: 0;
 }
