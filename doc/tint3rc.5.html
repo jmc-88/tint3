@@ -6,10 +6,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
   <title>TINT3RC(5) v0.3.0 | tint3 user manual</title>
   <style type="text/css">code{white-space: pre;}</style>
-  <!--[if lt IE 9]>
-    <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
-  <![endif]-->
   <link rel="stylesheet" href="/tint3/css/man.css">
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
 </head>
 <body>
 <header>
@@ -20,6 +20,7 @@
 <li><a href="#name">NAME</a></li>
 <li><a href="#description">DESCRIPTION</a></li>
 <li><a href="#configuration-entries">CONFIGURATION ENTRIES</a><ul>
+<li><a href="#directives">DIRECTIVES</a></li>
 <li><a href="#general">GENERAL</a></li>
 <li><a href="#backgrounds">BACKGROUNDS</a></li>
 <li><a href="#gradients">GRADIENTS</a></li>
@@ -47,8 +48,16 @@
 <h1 id="description">DESCRIPTION</h1>
 <p>A tint3 configuration file describes the look and the behaviour of the tint3 panel.</p>
 <h1 id="configuration-entries">CONFIGURATION ENTRIES</h1>
-<p>A tint3 configuration file consists of a series of key/value pairs, one pair on each line. Keys can contain alphanumeric characters and underscores (&quot;<strong>_</strong>&quot;), but cannot start with an underscore. Values can contain any character and are terminated by a newline. Keys and values are separated by a single equals sign (&quot;<strong>=</strong>&quot;), optionally surrounded by whitespace.</p>
+<p>A tint3 configuration file consists of a series of directives and key/value pairs, one pair on each line. Keys can contain alphanumeric characters and underscores (&quot;<strong>_</strong>&quot;), but cannot start with an underscore. Values can contain any character and are terminated by a newline. Keys and values are separated by a single equals sign (&quot;<strong>=</strong>&quot;), optionally surrounded by whitespace.</p>
 <p>As the configuration file is unstructured, some entries take the special meaning of a section marker. These are explicitly noted below.</p>
+<h2 id="directives">DIRECTIVES</h2>
+<dl>
+<dt><span class="citation" data-cites="import">@import</span> <em>path</em></dt>
+<dd><p>Imports the contents of another tint3 configuration file into the one currently being evaluated.</p>
+<p>If the file cannot be loaded, an error will be logged and the entry will be skipped.</p>
+<p>The given path name can be <em>relative</em> (to the logical path of the config file currently being evaluated), <em>absolute</em>, and it supports shell-like <em>expansion</em>.</p>
+</dd>
+</dl>
 <h2 id="general">GENERAL</h2>
 <dl>
 <dt>font_shadow = &lt;boolean&gt;</dt>
@@ -80,6 +89,16 @@
 </dd>
 <dt>background_color_pressed = &lt;color&gt;</dt>
 <dd><p>Color of this background in the mouse pressed state.</p>
+</dd>
+<dt>border_sides = <em>TRBL</em></dt>
+<dd><p>Sides on which the border should be drawn. Can be any combination of:</p>
+<ul>
+<li><strong>T</strong> (top)</li>
+<li><strong>R</strong> (right)</li>
+<li><strong>B</strong> (bottom)</li>
+<li><strong>L</strong> (left)</li>
+</ul>
+<p>If not given, defaults to all sides.</p>
 </dd>
 <dt>border_color = &lt;color&gt;</dt>
 <dd><p>Color of this background's border in the normal state.</p>
@@ -483,7 +502,9 @@
 </dl>
 <h1 id="format-of-values">FORMAT OF VALUES</h1>
 <h2 id="boolean">&lt;boolean&gt;</h2>
-<p>Numerical value. <strong>0</strong> means <strong>false</strong>, <strong>1</strong> means <strong>true</strong>.</p>
+<p>Either a string value or a numerical value.</p>
+<p>If a string: &quot;true&quot;, &quot;yes&quot; or &quot;on&quot; mean <strong>true</strong>; &quot;false&quot;, &quot;no&quot; or &quot;off&quot; mean <strong>false</strong>.</p>
+<p>If a number: <strong>0</strong> means <strong>false</strong>, <strong>non-zero</strong> means <strong>true</strong>.</p>
 <h2 id="color">&lt;color&gt;</h2>
 <p>RGBA color value. It's specified as a CSS-like hex color string, followed by an integer representing the opacity. As an example:</p>
 <pre><code>background_color = #ff0000 25</code></pre>
