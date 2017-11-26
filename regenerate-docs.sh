@@ -1,5 +1,7 @@
 #!/bin/sh
 
+_branch="v0.3.0"
+
 die() {
   echo >&2 "${@}"
   exit 1
@@ -10,7 +12,7 @@ regen() {
     die "regen: missing filename"
   fi
 
-  _source="$(git show "master:${1}")"
+  _source="$(git show "master@{${_branch}}:${1}")"
   if [ ${?} -ne 0 ]; then
     die "regen: \"git show\" failed"
   fi
@@ -28,3 +30,5 @@ regen() {
 for page in doc/tint3.1.md doc/tint3rc.5.md; do
   regen "${page}"
 done
+
+unset _branch
