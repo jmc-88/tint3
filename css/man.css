@@ -3,13 +3,30 @@
   font-size: 14px;
 }
 
+html {
+  margin: 0;
+  border: 0;
+  padding: 0;
+}
+
+body {
+  max-width: 960px;
+  margin: auto;
+  padding: 1em;
+}
+
 h1, h2, h3, h4, h5, h6 {
   font-weight: bold;
+}
+
+h1 {
+  padding-top: 1em;
 }
 
 h1.title {
   color: #999;
   font-weight: normal;
+  padding: 0;
 }
 
 #TOC:before {
@@ -25,6 +42,10 @@ h1.title {
 #TOC a:hover,
 #TOC a:focus {
   color: black;
+}
+
+ul {
+  padding-bottom: 1em;
 }
 
 pre > code {
