@@ -1,12 +1,18 @@
 # Ignore the lock file created by Bundler
 Gemfile.lock
 
-# Ignore the generated Jekyll site folder
+# Ignore the generated Jekyll data
+.jekyll-metadata
 /_site
 
 # Ignore build artifacts from master
 *.deb
 *.rpm
 /build
+/build-*
 /package-build
 /_CPack_Packages
+
+# Ignore IDE- or editor-specific files
+*.kdev4
+/_vimrc_local.vim
