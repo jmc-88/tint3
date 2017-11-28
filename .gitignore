@@ -1,5 +1,6 @@
-# Ignore the lock file created by Bundler
+# Ignore local assets created by Bundler
 Gemfile.lock
+/.bundle
 
 # Ignore the generated Jekyll data
 .jekyll-metadata
