@@ -19,13 +19,32 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 h1 {
-  padding-top: 1em;
+  margin-top: 1em;
 }
 
 h1.title {
   color: #999;
   font-weight: normal;
   padding: 0;
+}
+
+h1[id]:target,
+h2[id]:target,
+h3[id]:target,
+h4[id]:target,
+h5[id]:target,
+h6[id]:target {
+  background-color: rgba(255, 127, 127, .1);
+}
+
+h1[id]:target:before,
+h2[id]:target:before,
+h3[id]:target:before,
+h4[id]:target:before,
+h5[id]:target:before,
+h6[id]:target:before {
+  margin-right: .5em;
+  content: "\25b6";  /* black right-pointing triangle */
 }
 
 ul {
