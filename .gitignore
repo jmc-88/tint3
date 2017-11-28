@@ -20,4 +20,6 @@
 
 # Don't include gh-pages build artifacts
 /Gemfile.lock
+/.bundle
+/.jekyll-metadata
 /_site
