@@ -165,11 +165,9 @@ static void ErrorTrapPop(SnDisplay* display, Display* xdisplay) {
 #endif  // HAVE_SN
 
 void InitX11() {
-  server.dsp = XOpenDisplay(nullptr);
-
-  if (!server.dsp) {
+  if (!server.Connect()) {
     util::log::Error() << "Couldn't open display.\n";
-    std::exit(0);
+    std::exit(1);
   }
 
 #ifdef _TINT3_DEBUG
