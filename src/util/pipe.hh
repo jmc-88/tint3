@@ -17,6 +17,7 @@ class Pipe {
   };
 
   Pipe(Options opts = Options::kNone);
+  Pipe(Pipe const&) = delete;
   ~Pipe();
 
   bool IsAlive() const;
