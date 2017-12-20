@@ -9,11 +9,23 @@
 
 namespace util {
 
-Pipe::Pipe() : alive_(true) {
+Pipe::Pipe(Pipe::Options opts) : alive_{true} {
   if (pipe(pipe_fd_) != 0) {
     util::log::Error() << "Failed to create pipe: " << std::strerror(errno)
                        << '\n';
     alive_ = false;
+    return;
+  }
+
+  if (opts == Options::kNonBlocking) {
+    if (!SetFlag(ReadEnd(), O_NONBLOCK)) {
+      alive_ = false;
+      return;
+    }
+    if (!SetFlag(WriteEnd(), O_NONBLOCK)) {
+      alive_ = false;
+      return;
+    }
   }
 }
 
@@ -30,46 +42,22 @@ int Pipe::ReadEnd() const { return pipe_fd_[0]; }
 
 int Pipe::WriteEnd() const { return pipe_fd_[1]; }
 
-SelfPipe::SelfPipe() : Pipe(), alive_(true) {
-  if (!Pipe::IsAlive()) {
-    alive_ = false;
-    return;
-  }
-
-  int flags = -1;
-
-  flags = fcntl(ReadEnd(), F_GETFL);
+bool Pipe::SetFlag(int fd, int flag) const {
+  int flags = fcntl(ReadEnd(), F_GETFL);
   if (flags == -1) {
     util::log::Error() << "Failed to retrieve flags on read end of self pipe: "
                        << std::strerror(errno) << '\n';
-    alive_ = false;
-    return;
+    return false;
   }
-
   if (fcntl(ReadEnd(), F_SETFL, flags | O_NONBLOCK) == -1) {
     util::log::Error() << "Failed to flag read end of self pipe "
                        << "as non blocking: " << std::strerror(errno) << '\n';
-    alive_ = false;
-    return;
+    return false;
   }
-
-  flags = fcntl(WriteEnd(), F_GETFL);
-  if (flags == -1) {
-    util::log::Error() << "Failed to retrieve flags on write end of self pipe: "
-                       << std::strerror(errno) << '\n';
-    alive_ = false;
-    return;
-  }
-
-  if (fcntl(WriteEnd(), F_SETFL, flags | O_NONBLOCK) == -1) {
-    util::log::Error() << "Failed to flag write end of self pipe "
-                       << "as non blocking: " << std::strerror(errno) << '\n';
-    alive_ = false;
-    return;
-  }
+  return true;
 }
 
-bool SelfPipe::IsAlive() const { return alive_; }
+SelfPipe::SelfPipe() : Pipe{Pipe::Options::kNonBlocking} {}
 
 void SelfPipe::WriteOneByte() { write(WriteEnd(), "1", 1); }
 

@@ -11,7 +11,12 @@ namespace util {
 
 class Pipe {
  public:
-  Pipe();
+  enum class Options {
+    kNone,
+    kNonBlocking,
+  };
+
+  Pipe(Options opts = Options::kNone);
   ~Pipe();
 
   bool IsAlive() const;
@@ -23,20 +28,16 @@ class Pipe {
 
   bool alive_;
   int pipe_fd_[2];
+
+  bool SetFlag(int fd, int flag) const;
 };
 
 class SelfPipe : public Pipe {
  public:
   SelfPipe();
 
-  bool IsAlive() const;
   void WriteOneByte();
   void ReadPendingBytes();
-
- private:
-  friend class test::MockSelfPipe;
-
-  bool alive_;
 };
 
 }  // namespace util
