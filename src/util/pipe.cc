@@ -29,6 +29,17 @@ Pipe::Pipe(Pipe::Options opts) : alive_{true} {
   }
 }
 
+Pipe::Pipe(Pipe&& other) {
+  alive_ = other.alive_;
+  other.alive_ = false;
+
+  pipe_fd_[0] = other.pipe_fd_[0];
+  other.pipe_fd_[0] = -1;
+
+  pipe_fd_[1] = other.pipe_fd_[1];
+  other.pipe_fd_[1] = -1;
+}
+
 Pipe::~Pipe() {
   if (alive_) {
     close(pipe_fd_[0]);

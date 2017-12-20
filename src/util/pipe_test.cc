@@ -2,6 +2,7 @@
 
 #include <cstring>
 #include <string>
+#include <utility>
 
 #include <fcntl.h>
 #include <stdlib.h>
@@ -13,6 +14,32 @@
 #include "unix_features.hh"
 #include "util/log.hh"
 #include "util/pipe.hh"
+
+TEST_CASE("move constructor") {
+  util::Pipe p1;
+
+  int read_fd = p1.ReadEnd();
+  int write_fd = p1.WriteEnd();
+  REQUIRE(p1.IsAlive());
+  REQUIRE(read_fd != -1);
+  REQUIRE(write_fd != -1);
+
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wpessimizing-move"
+#endif  // __clang__
+  util::Pipe p2{std::move(p1)};
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif  // __clang__
+
+  REQUIRE(p2.IsAlive());
+  REQUIRE(p2.ReadEnd() == read_fd);
+  REQUIRE(p2.WriteEnd() == write_fd);
+  REQUIRE_FALSE(p1.IsAlive());
+  REQUIRE(p1.ReadEnd() == -1);
+  REQUIRE(p1.WriteEnd() == -1);
+}
 
 constexpr unsigned int kBufferSize = 1024;
 constexpr char kPipeName[] = "/tint3_pipe_test_shm";
