@@ -42,14 +42,12 @@ TEST_CASE("move constructor") {
 }
 
 TEST_CASE("non blocking") {
-  auto assert_nonblocking = [&](int fd) {
+  auto assert_nonblocking = [](int fd) {
     int flags = fcntl(fd, F_GETFL);
     if (flags == -1) {
       FAIL("fcntl(" << fd << ", F_GETFL): " << strerror(errno));
     }
     if ((flags & O_NONBLOCK) == 0) {
-      INFO("flags = " << flags);
-      INFO("O_NONBLOCK = " << O_NONBLOCK);
       FAIL("file descriptor " << fd << " is blocking");
     }
   };
