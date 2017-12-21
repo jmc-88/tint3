@@ -54,13 +54,13 @@ int Pipe::ReadEnd() const { return pipe_fd_[0]; }
 int Pipe::WriteEnd() const { return pipe_fd_[1]; }
 
 bool Pipe::SetFlag(int fd, int flag) const {
-  int flags = fcntl(ReadEnd(), F_GETFL);
+  int flags = fcntl(fd, F_GETFL);
   if (flags == -1) {
     util::log::Error() << "Failed to retrieve flags on read end of self pipe: "
                        << std::strerror(errno) << '\n';
     return false;
   }
-  if (fcntl(ReadEnd(), F_SETFL, flags | O_NONBLOCK) == -1) {
+  if (fcntl(fd, F_SETFL, flags | O_NONBLOCK) == -1) {
     util::log::Error() << "Failed to flag read end of self pipe "
                        << "as non blocking: " << std::strerror(errno) << '\n';
     return false;

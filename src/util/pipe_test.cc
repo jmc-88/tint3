@@ -41,6 +41,26 @@ TEST_CASE("move constructor") {
   REQUIRE(p1.WriteEnd() == -1);
 }
 
+TEST_CASE("non blocking") {
+  auto assert_nonblocking = [&](int fd) {
+    int flags = fcntl(fd, F_GETFL);
+    if (flags == -1) {
+      FAIL("fcntl(" << fd << ", F_GETFL): " << strerror(errno));
+    }
+    if ((flags & O_NONBLOCK) == 0) {
+      INFO("flags = " << flags);
+      INFO("O_NONBLOCK = " << O_NONBLOCK);
+      FAIL("file descriptor " << fd << " is blocking");
+    }
+  };
+
+  util::Pipe p{util::Pipe::Options::kNonBlocking};
+  INFO("ReadEnd: file descriptor " << p.ReadEnd());
+  assert_nonblocking(p.ReadEnd());
+  INFO("WriteEnd: file descriptor " << p.WriteEnd());
+  assert_nonblocking(p.WriteEnd());
+}
+
 constexpr unsigned int kBufferSize = 1024;
 constexpr char kPipeName[] = "/tint3_pipe_test_shm";
 constexpr char kTempTemplate[] = "/tmp/tint3_pipe_test.XXXXXX";
