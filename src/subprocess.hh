@@ -24,6 +24,9 @@ struct child_callback {
 
 class Subprocess {
  public:
+  Subprocess(Subprocess const& other) = delete;
+  Subprocess(Subprocess&& other) = default;
+
   void set_option(child_callback&& option);
   void set_option(session_leader&& option);
   void set_option(shell&& option);
