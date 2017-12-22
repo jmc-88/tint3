@@ -2,9 +2,24 @@
 #define TINT3_SUBPROCESS_HH
 
 #include <functional>
+#include <memory>
+#include <sstream>
 #include <string>
 
 #include <unistd.h>
+
+#include "util/pipe.hh"
+
+struct capture {
+  capture(bool capture) : value{capture} {}
+  bool value = true;
+};
+
+struct child_callback {
+  child_callback(std::function<void()> child_callback)
+      : value{child_callback} {}
+  std::function<void()> value;
+};
 
 struct session_leader {
   session_leader(bool session_leader) : value{session_leader} {}
@@ -16,22 +31,18 @@ struct shell {
   bool value = true;
 };
 
-struct child_callback {
-  child_callback(std::function<void()> child_callback)
-      : value{child_callback} {}
-  std::function<void()> value;
-};
-
 class Subprocess {
  public:
   Subprocess(Subprocess const& other) = delete;
   Subprocess(Subprocess&& other) = default;
 
+  void set_option(capture&& option);
   void set_option(child_callback&& option);
   void set_option(session_leader&& option);
   void set_option(shell&& option);
 
-  pid_t start() const;
+  pid_t start();
+  bool communicate(std::ostream* out_ss, std::ostream* err_ss) const;
 
  private:
   template <typename... Args>
@@ -50,10 +61,14 @@ class Subprocess {
     apply_options(rest...);
   }
 
+  bool capture_ = false;
   std::string command_;
   std::function<void()> child_callback_;
   bool shell_ = false;
   bool session_leader_ = false;
+
+  std::unique_ptr<util::Pipe> stdout_;
+  std::unique_ptr<util::Pipe> stderr_;
 };
 
 template <typename... Args>

@@ -48,6 +48,34 @@ TEST_CASE("make_subprocess") {
     REQUIRE(exit_status(child_pid) == 123);
   }
 
+  SECTION("capture (no callback)") {
+    auto sp = make_subprocess("printf stdout >&1; printf stderr >&2",
+                              capture{true}, shell{true});
+    pid_t child_pid = sp.start();
+    REQUIRE(child_pid != -1);
+    REQUIRE(exit_status(child_pid) == 0);
+
+    std::ostringstream stdout, stderr;
+    REQUIRE(sp.communicate(&stdout, &stderr));
+    REQUIRE(stdout.str() == "stdout");
+    REQUIRE(stderr.str() == "stderr");
+  }
+
+  SECTION("capture (with callback)") {
+    auto sp = make_subprocess(
+        "printf stdout >&1; printf stderr >&2; exit ${EXIT_STATUS}",
+        capture{true}, child_callback{[] { setenv("EXIT_STATUS", "123", 1); }},
+        shell{true});
+    pid_t child_pid = sp.start();
+    REQUIRE(child_pid != -1);
+    REQUIRE(exit_status(child_pid) == 123);
+
+    std::ostringstream stdout, stderr;
+    REQUIRE(sp.communicate(&stdout, &stderr));
+    REQUIRE(stdout.str() == "stdout");
+    REQUIRE(stderr.str() == "stderr");
+  }
+
   SECTION("shell") {
     auto sp = make_subprocess("[ true ] && echo \"Hooray! Todd episode!\"",
                               shell{true});

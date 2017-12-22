@@ -203,6 +203,8 @@ add_library(
 
 target_link_libraries(
   subprocess_lib
+  PUBLIC
+    pipe_lib
   PRIVATE
     log_lib)
 
