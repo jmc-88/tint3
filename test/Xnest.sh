@@ -25,12 +25,12 @@ _XNEST_PID=""
 _OPENBOX_PID=""
 _TINT3_PID=""
 
-if ! which Xnest >/dev/null 2>&1; then
+if ! command -v Xnest >/dev/null 2>&1; then
   echo " ✘  Xnest not found!" >&2
   exit 1
 fi
 
-if ! which openbox >/dev/null 2>&1; then
+if ! command -v openbox >/dev/null 2>&1; then
   echo " ✘  openbox not found!" >&2
   exit 1
 fi

@@ -28,17 +28,19 @@ _MCOOKIE_RANDOM_BYTES=1024
 
 # Base check: don't even bother doing anything else if xvfb-run is available on
 # the system, and just delegate to it.
-if which xvfb-run; then
+# This is only performed if `which` is available: the stock xvfb-run requires
+# it, but the proper dependency is missing in systems like Arch Linux.
+if command -v xvfb-run >/dev/null 2>&1 && command -v which >/dev/null 2>&1; then
   exec xvfb-run -a -s "${_XVFB_ARGS}" "${@}"
 fi
 
 # Otherwise, unleash the might of this script onto the world.
-if ! which Xvfb >/dev/null 2>&1; then
+if ! command -v Xvfb >/dev/null 2>&1; then
   echo " ✘  Xvfb not found!" >&2
   exit 1
 fi
 
-if ! which xauth >/dev/null 2>&1; then
+if ! command -v xauth >/dev/null 2>&1; then
   echo " ✘  xauth not found!" >&2
   exit 1
 fi
@@ -101,10 +103,10 @@ find_free_servernum() {
 }
 
 _mcookie_rand() {
-  if which openssl >/dev/null 2>&1; then
+  if command -v openssl >/dev/null 2>&1; then
     openssl rand ${_MCOOKIE_RANDOM_BYTES}
   else
-    if ! which head; then
+    if ! command -v head; then
       echo " ✘  Can't even find \"head\". Giving up." >&2
       exit 1
     fi
@@ -121,11 +123,11 @@ _mcookie_rand() {
 }
 
 _mcookie_md5() {
-  if which openssl >/dev/null 2>&1; then
+  if command -v openssl >/dev/null 2>&1; then
     openssl md5 -r | cut -f 1 -d ' '
-  elif which md5sum; then
+  elif command -v md5sum >/dev/null 2>&1; then
     md5sum | cut -f 1 -d ' '
-  elif which md5; then
+  elif command -v md5 >/dev/null 2>&1; then
     md5 -q
   else
     echo " ✘  No suitable MD5 utility was found." >&2
@@ -134,7 +136,7 @@ _mcookie_md5() {
 }
 
 _mcookie() {
-  if which mcookie >/dev/null 2>&1; then
+  if command -v mcookie >/dev/null 2>&1; then
     mcookie
   else
     _mcookie_rand | _mcookie_md5
