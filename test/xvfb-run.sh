@@ -62,8 +62,8 @@ fi
 kill_running_processes() {
   if [ -n "${_XVFB_PID}" ]; then
     echo " ⌛  Sending SIGTERM to Xvfb..."
-    kill "${_TINT3_PID}" 2>/dev/null
-    wait "${_TINT3_PID}"
+    kill "${_XVFB_PID}" 2>/dev/null
+    wait "${_XVFB_PID}"
   fi
 
   if [ -e "${_AUTHFILE}" ]; then
