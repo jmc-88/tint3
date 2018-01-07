@@ -1,3 +1,4 @@
+#include <functional>
 #include <iostream>
 #include <string>
 
@@ -67,7 +68,8 @@ class Repository {
     return Repository(content);
   }
 
-  void for_each(void callback(std::string, std::string, unsigned int)) {
+  void for_each(
+      std::function<void(std::string, std::string, unsigned int)> callback) {
     for (auto& entry : repository_) {
       for (auto& theme : entry["themes"]) {
         callback(entry["author"], theme["name"], theme["version"]);
