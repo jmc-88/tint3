@@ -23,7 +23,7 @@ class Gradient {
   friend class test::GradientHelper;
 
   Gradient();
-  Gradient(GradientKind kind);
+  explicit Gradient(GradientKind kind);
   Gradient(Gradient&&) = default;
 
   Gradient(Gradient const&) = delete;
