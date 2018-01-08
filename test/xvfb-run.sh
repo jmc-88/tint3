@@ -63,7 +63,7 @@ kill_running_processes() {
   if [ -n "${_XVFB_PID}" ]; then
     echo " ⌛  Sending SIGTERM to Xvfb..."
     kill "${_XVFB_PID}" 2>/dev/null
-    wait "${_XVFB_PID}"
+    wait "${_XVFB_PID}" || :
   fi
 
   if [ -e "${_AUTHFILE}" ]; then
@@ -158,12 +158,20 @@ if [ ${?} -ne 0 ]; then
   exit 1
 fi
 
-Xvfb ":${_SERVERNUM}" ${_XVFB_ARGS} > "${_XVFB_RUN_TMPDIR}/Xvfb.log" 2>&1 &
+trap : USR1
+(
+  IFS=' '  # to correctly split _XVFB_ARGS below
+  trap '' USR1
+
+  # shellcheck disable=SC2086
+  exec Xvfb ":${_SERVERNUM}" ${_XVFB_ARGS} -auth "${_AUTHFILE}" >"${_XVFB_RUN_TMPDIR}/Xvfb.log" 2>&1
+) &
 _XVFB_PID="${!}"
+
+wait || :
 
 if alive "${_XVFB_PID}"; then
   echo " ✔  Launched Xvfb as PID ${_XVFB_PID}."
-  sleep 1
 else
   echo " ✘  Launching Xvfb failed." >&2
   _XVFB_PID=
