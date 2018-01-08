@@ -38,7 +38,6 @@ class Gradient {
   bool operator==(Gradient const& other) const;
 
  private:
- public:
   GradientKind kind_ = GradientKind::kVertical;
   Color start_color_;
   Color end_color_;
