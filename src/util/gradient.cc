@@ -73,7 +73,7 @@ void Gradient::Draw(cairo_t* c, Rect const& r) {
   cairo_pattern_destroy(pat);
 }
 
-bool Gradient::operator==(Gradient const& other) {
+bool Gradient::operator==(Gradient const& other) const {
   return kind_ == other.kind_ && start_color_ == other.start_color_ &&
          end_color_ == other.end_color_ && color_stops_ == other.color_stops_;
 }

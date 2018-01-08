@@ -35,7 +35,7 @@ class Gradient {
 
   void Draw(cairo_t* c, util::Rect const& r);
 
-  bool operator==(Gradient const& other);
+  bool operator==(Gradient const& other) const;
 
  private:
  public:
