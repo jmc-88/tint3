@@ -6,8 +6,6 @@
 
 namespace util {
 
-Gradient::Gradient() : kind_(GradientKind::kVertical) {}
-
 Gradient::Gradient(GradientKind kind) : kind_(kind) {}
 
 void Gradient::set_start_color(Color color) { start_color_ = color; }

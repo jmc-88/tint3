@@ -22,7 +22,7 @@ class Gradient {
  public:
   friend class test::GradientHelper;
 
-  Gradient();
+  Gradient() = default;
   explicit Gradient(GradientKind kind);
   Gradient(Gradient&&) = default;
 
@@ -39,7 +39,7 @@ class Gradient {
 
  private:
  public:
-  GradientKind kind_;
+  GradientKind kind_ = GradientKind::kVertical;
   Color start_color_;
   Color end_color_;
   std::map<unsigned short, Color> color_stops_;
