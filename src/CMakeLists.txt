@@ -1,4 +1,3 @@
-add_subdirectory(battery)
 add_subdirectory(clock)
 add_subdirectory(dnd)
 add_subdirectory(execp)
@@ -8,6 +7,10 @@ add_subdirectory(launcher)
 add_subdirectory(taskbar)
 add_subdirectory(tooltip)
 add_subdirectory(util)
+
+if(ENABLE_BATTERY)
+  add_subdirectory(battery)
+endif()
 
 add_executable(
   tint3

@@ -22,7 +22,8 @@ target_link_libraries(
     area_lib
     common_lib
     pango_lib
-    timer_lib)
+    timer_lib
+    ${PANGOCAIRO_LIBRARIES})
 
 test_target(
   clock_test

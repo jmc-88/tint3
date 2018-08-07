@@ -22,7 +22,7 @@
 
 #ifdef ENABLE_BATTERY
 #include "battery/battery.hh"
-#endif
+#endif  // ENABLE_BATTERY
 
 enum class PanelLayer { kBottom, kNormal, kTop };
 enum class PanelVerticalPosition { kTop, kBottom, kCenter };
@@ -129,7 +129,10 @@ class Panel : public Area {
   Pixmap hidden_pixmap_;
   Interval::Id autohide_timeout_;
 
+#ifdef ENABLE_BATTERY
   Battery* battery();
+#endif // ENABLE_BATTERY
+
   Clock* clock();
 
   Taskbar* ClickTaskbar(int x, int y);
@@ -183,10 +186,11 @@ class Panel : public Area {
   PanelConfig config_;
 
   bool hidden_;
+  Clock clock_;
+
 #ifdef ENABLE_BATTERY
   Battery battery_;
 #endif  // ENABLE_BATTERY
-  Clock clock_;
 
   void UpdateNetWMStrut();
 };

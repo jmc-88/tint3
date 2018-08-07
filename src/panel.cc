@@ -645,7 +645,9 @@ Panel* GetPanel(Window win) {
   return nullptr;
 }
 
+#ifdef ENABLE_BATTERY
 Battery* Panel::battery() { return &battery_; }
+#endif  // ENABLE_BATTERY
 
 Clock* Panel::clock() { return &clock_; }
 

@@ -20,7 +20,8 @@ target_link_libraries(
     pango_lib
     server_lib
     timer_lib
-    ${CAIRO_LIBRARIES})
+    ${CAIRO_LIBRARIES}
+    ${PANGOCAIRO_LIBRARIES})
 
 test_target(
   tooltip_test
