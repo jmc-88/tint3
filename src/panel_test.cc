@@ -17,7 +17,8 @@ Monitor TestMonitor() {
 }
 
 TEST_CASE("InitSizeAndPosition") {
-  server.monitor.push_back(TestMonitor());
+  Monitor test_monitor = TestMonitor();
+  server.monitor.emplace_back(test_monitor);
 
   SECTION("size != 0") {
     PanelConfig panel_config;
@@ -31,6 +32,72 @@ TEST_CASE("InitSizeAndPosition") {
     p.InitSizeAndPosition();
     REQUIRE(p.width_ != 0);
     REQUIRE(p.height_ != 0);
+  }
+
+  SECTION("horizontal panel, absolute width") {
+    PanelConfig panel_config;
+    panel_config.monitor = 0;
+    panel_config.horizontal = true;
+    panel_config.width = 200;
+    panel_config.percent_x = false;
+    panel_config.height = 50;
+    panel_config.percent_y = false;
+
+    Panel p;
+    p.UseConfig(panel_config, 0);
+
+    p.InitSizeAndPosition();
+    REQUIRE(p.width_ == 200);
+  }
+
+  SECTION("horizontal, absolute width larger than monitor size") {
+    PanelConfig panel_config;
+    panel_config.monitor = 0;
+    panel_config.horizontal = true;
+    panel_config.width = 2 * test_monitor.width;
+    panel_config.percent_x = false;
+    panel_config.height = 50;
+    panel_config.percent_y = false;
+
+    Panel p;
+    p.UseConfig(panel_config, 0);
+
+    p.InitSizeAndPosition();
+    REQUIRE(p.width_ == test_monitor.width);
+    REQUIRE(p.height_ == panel_config.height);
+  }
+
+  SECTION("vertical panel, absolute height") {
+    PanelConfig panel_config;
+    panel_config.monitor = 0;
+    panel_config.horizontal = false;
+    panel_config.width = 200;
+    panel_config.percent_x = false;
+    panel_config.height = 50;
+    panel_config.percent_y = false;
+
+    Panel p;
+    p.UseConfig(panel_config, 0);
+
+    p.InitSizeAndPosition();
+    REQUIRE(p.height_ == 200);
+  }
+
+  SECTION("vertical, absolute height larger than monitor size") {
+    PanelConfig panel_config;
+    panel_config.monitor = 0;
+    panel_config.horizontal = false;
+    panel_config.width = 2 * test_monitor.width;
+    panel_config.percent_x = false;
+    panel_config.height = 50;
+    panel_config.percent_y = false;
+
+    Panel p;
+    p.UseConfig(panel_config, 0);
+
+    p.InitSizeAndPosition();
+    REQUIRE(p.width_ == panel_config.height);  // not wrong: naming just awful
+    REQUIRE(p.height_ == test_monitor.height);
   }
 }
 

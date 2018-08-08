@@ -241,7 +241,11 @@ void Panel::InitSizeAndPosition() {
     if (config_.percent_x) {
       width_ = monitor().width * width_ / 100;
     }
-    width_ = std::max(width_, monitor().width - config_.margin_x);
+
+    auto kMaxWidth = monitor().width - config_.margin_x;
+    if (width_ > kMaxWidth) {
+      width_ = kMaxWidth;
+    }
 
     if (config_.percent_y) {
       height_ = monitor().height * height_ / 100;
@@ -259,7 +263,11 @@ void Panel::InitSizeAndPosition() {
     if (config_.percent_x) {
       height_ = monitor().height * width_ / 100.0;
     }
-    height_ = std::max(height_, monitor().height - config_.margin_y);
+
+    auto kMaxHeight = monitor().height - config_.margin_y;
+    if (height_ > kMaxHeight) {
+      height_ = kMaxHeight;
+    }
 
     width_ = old_panel_height;
     if (config_.percent_y) {
