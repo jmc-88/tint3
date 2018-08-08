@@ -39,8 +39,9 @@ class Server {
   GC gc;
   Colormap colormap;
   Colormap colormap32;
+
+  SnDisplay* sn_dsp = nullptr;
 #ifdef HAVE_SN
-  SnDisplay* sn_dsp;
   std::unordered_map<pid_t, StartupNotification> pids;
 #endif  // HAVE_SN
 
