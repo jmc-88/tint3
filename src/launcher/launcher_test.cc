@@ -4,6 +4,17 @@
 #include "panel.hh"
 #include "util/environment.hh"
 
+Monitor TestMonitor() {
+  Monitor m;
+  m.number = 0;
+  m.x = 0;
+  m.y = 0;
+  m.width = 1024;
+  m.height = 768;
+  m.names = {"test"};
+  return m;
+}
+
 TEST_CASE("FindDesktopEntry") {
   constexpr char kTestEntryPath[] =
       "src/launcher/testdata/applications/launcher_test.desktop";
@@ -50,6 +61,8 @@ TEST_CASE("Launcher::LoadThemes") {
 }
 
 TEST_CASE("Launcher::GetIconSize") {
+  server.monitor.emplace_back(TestMonitor());
+
   SECTION("borders") {
     PanelConfig panel_config;
     panel_config.horizontal = true;
@@ -89,8 +102,8 @@ TEST_CASE("Launcher::GetIconSize") {
     // should default to the panel height.
     PanelConfig panel_config;
     panel_config.horizontal = true;
-    panel_config.width = 200;
-    panel_config.height = 50;
+    panel_config.width = AbsoluteSize(200);
+    panel_config.height = AbsoluteSize(50);
     launcher_max_icon_size = 0;
 
     Panel p;
@@ -108,8 +121,8 @@ TEST_CASE("Launcher::GetIconSize") {
     // should default to the panel width.
     PanelConfig panel_config;
     panel_config.horizontal = false;
-    panel_config.width = 50;
-    panel_config.height = 200;
+    panel_config.width = AbsoluteSize(50);
+    panel_config.height = AbsoluteSize(200);
     launcher_max_icon_size = 0;
 
     Panel p;

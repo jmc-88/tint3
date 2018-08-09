@@ -30,8 +30,8 @@ class ConcreteArea : public Area {
     // vertically aligned to the bottom of a 1024x768 screen.
     PanelConfig panel_config;
     panel_config.horizontal = true;
-    panel_config.width = 500;
-    panel_config.height = 50;
+    panel_config.width = AbsoluteSize(500);
+    panel_config.height = AbsoluteSize(50);
     panel_config.horizontal_position = PanelHorizontalPosition::kCenter;
     panel_config.vertical_position = PanelVerticalPosition::kBottom;
     panel_ = new Panel();

@@ -4,6 +4,7 @@
 #include <X11/Xlib.h>
 #include <sys/time.h>
 
+#include <functional>
 #include <string>
 #include <vector>
 
@@ -45,6 +46,10 @@ extern bool panel_refresh;
 extern bool task_dragged;
 extern util::imlib2::Image default_icon;
 
+using PanelSizer = std::function<unsigned int(unsigned int)>;
+PanelSizer AbsoluteSize(unsigned int size);
+PanelSizer PercentageSize(unsigned int size);
+
 struct PanelConfig {
   PanelConfig();
 
@@ -76,10 +81,8 @@ struct PanelConfig {
   int padding_x = 0;
   int padding_y = 0;
 
-  unsigned int width = 100;
-  bool percent_x = true;
-  unsigned int height = 40;
-  bool percent_y = false;
+  PanelSizer width = PercentageSize(100);
+  PanelSizer height = AbsoluteSize(40);
 
   bool autohide = false;
   int autohide_show_timeout = 0;

@@ -57,6 +57,16 @@ std::vector<util::Gradient> gradients;
 
 util::imlib2::Image default_icon;
 
+PanelSizer AbsoluteSize(unsigned int size) {
+  return [=](unsigned int /*screen_extent*/) { return size; };
+}
+
+PanelSizer PercentageSize(unsigned int size) {
+  return [=](unsigned int screen_extent) {
+    return screen_extent * (size / 100.0);
+  };
+}
+
 PanelConfig::PanelConfig() {
   Color black_80pct{Color::Array{0, 0, 0}, .8};
   background.set_fill_color(black_80pct);
@@ -232,23 +242,14 @@ void InitPanel(Timer& timer) {
 }
 
 void Panel::InitSizeAndPosition() {
-  // This should never be zero.
-  width_ = std::max(1U, width_);
-  height_ = std::max(1U, height_);
-
   // detect panel size
   if (config_.horizontal) {
-    if (config_.percent_x) {
-      width_ = monitor().width * width_ / 100;
-    }
+    width_ = config_.width(monitor().width);
+    height_ = config_.height(monitor().height);
 
     auto kMaxWidth = monitor().width - config_.margin_x;
     if (width_ > kMaxWidth) {
       width_ = kMaxWidth;
-    }
-
-    if (config_.percent_y) {
-      height_ = monitor().height * height_ / 100;
     }
 
     if (bg_.border().rounded() > static_cast<int>(height_ / 2)) {
@@ -257,21 +258,14 @@ void Panel::InitSizeAndPosition() {
       bg_.border().set_rounded(height_ / 2);
     }
   } else {
-    int old_panel_height = height_;
+    auto old_panel_height = config_.height;
 
-    height_ = width_;
-    if (config_.percent_x) {
-      height_ = monitor().height * width_ / 100.0;
-    }
+    width_ = old_panel_height(monitor().width);
+    height_ = config_.width(monitor().height);
 
     auto kMaxHeight = monitor().height - config_.margin_y;
     if (height_ > kMaxHeight) {
       height_ = kMaxHeight;
-    }
-
-    width_ = old_panel_height;
-    if (config_.percent_y) {
-      width_ = monitor().width * old_panel_height / 100.0;
     }
 
     if (bg_.border().rounded() > static_cast<int>(width_ / 2)) {
@@ -301,6 +295,10 @@ void Panel::InitSizeAndPosition() {
   } else {
     root_y_ = monitor().y + (monitor().height - height_) / 2;
   }
+
+  // These should never be zero.
+  width_ = std::max(1U, width_);
+  height_ = std::max(1U, height_);
 
   // autohide or strut_policy=minimum
   int diff = (config_.horizontal ? height_ : width_) - config_.autohide_size_px;
@@ -640,8 +638,8 @@ void Panel::UseConfig(PanelConfig const& cfg, unsigned int num_desktop) {
   padding_x_ = cfg.padding_x;
   padding_y_ = cfg.padding_y;
 
-  width_ = cfg.width;
-  height_ = cfg.height;
+  width_ = cfg.width(cfg.horizontal ? monitor().width : monitor().height);
+  height_ = cfg.height(cfg.horizontal ? monitor().height : monitor().width);
 }
 
 Panel* GetPanel(Window win) {

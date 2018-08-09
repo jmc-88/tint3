@@ -23,8 +23,8 @@ TEST_CASE("InitSizeAndPosition") {
   SECTION("size != 0") {
     PanelConfig panel_config;
     panel_config.monitor = 0;
-    panel_config.width = 0;
-    panel_config.height = 0;
+    panel_config.width = AbsoluteSize(0);
+    panel_config.height = AbsoluteSize(0);
 
     Panel p;
     p.UseConfig(panel_config, 0);
@@ -38,10 +38,8 @@ TEST_CASE("InitSizeAndPosition") {
     PanelConfig panel_config;
     panel_config.monitor = 0;
     panel_config.horizontal = true;
-    panel_config.width = 200;
-    panel_config.percent_x = false;
-    panel_config.height = 50;
-    panel_config.percent_y = false;
+    panel_config.width = AbsoluteSize(200);
+    panel_config.height = AbsoluteSize(50);
 
     Panel p;
     p.UseConfig(panel_config, 0);
@@ -51,30 +49,28 @@ TEST_CASE("InitSizeAndPosition") {
   }
 
   SECTION("horizontal, absolute width larger than monitor size") {
+    unsigned int test_height = 50;
+
     PanelConfig panel_config;
     panel_config.monitor = 0;
     panel_config.horizontal = true;
-    panel_config.width = 2 * test_monitor.width;
-    panel_config.percent_x = false;
-    panel_config.height = 50;
-    panel_config.percent_y = false;
+    panel_config.width = AbsoluteSize(2 * test_monitor.width);
+    panel_config.height = AbsoluteSize(test_height);
 
     Panel p;
     p.UseConfig(panel_config, 0);
 
     p.InitSizeAndPosition();
     REQUIRE(p.width_ == test_monitor.width);
-    REQUIRE(p.height_ == panel_config.height);
+    REQUIRE(p.height_ == test_height);
   }
 
   SECTION("vertical panel, absolute height") {
     PanelConfig panel_config;
     panel_config.monitor = 0;
     panel_config.horizontal = false;
-    panel_config.width = 200;
-    panel_config.percent_x = false;
-    panel_config.height = 50;
-    panel_config.percent_y = false;
+    panel_config.width = AbsoluteSize(200);
+    panel_config.height = AbsoluteSize(50);
 
     Panel p;
     p.UseConfig(panel_config, 0);
@@ -84,19 +80,19 @@ TEST_CASE("InitSizeAndPosition") {
   }
 
   SECTION("vertical, absolute height larger than monitor size") {
+    unsigned int test_height = 50;
+
     PanelConfig panel_config;
     panel_config.monitor = 0;
     panel_config.horizontal = false;
-    panel_config.width = 2 * test_monitor.width;
-    panel_config.percent_x = false;
-    panel_config.height = 50;
-    panel_config.percent_y = false;
+    panel_config.width = AbsoluteSize(2 * test_monitor.width);
+    panel_config.height = AbsoluteSize(test_height);
 
     Panel p;
     p.UseConfig(panel_config, 0);
 
     p.InitSizeAndPosition();
-    REQUIRE(p.width_ == panel_config.height);  // not wrong: naming just awful
+    REQUIRE(p.width_ == test_height);  // not wrong: naming just awful
     REQUIRE(p.height_ == test_monitor.height);
   }
 }
@@ -162,7 +158,11 @@ TEST_CASE("HandlesClick_ClickTask") {
   // Make sure we have no executors because that's (still) a global...
   executors.clear();
 
+  Monitor test_monitor = TestMonitor();
+
   PanelConfig panel_config;
+  panel_config.horizontal = true;
+
   Panel p;
   p.panel_ = &p;  // TODO: this is silly, Area should not read from Panel
   p.UseConfig(panel_config, 1);
@@ -173,14 +173,14 @@ TEST_CASE("HandlesClick_ClickTask") {
   p.taskbars.resize(1);
   p.taskbars[0].panel_ = &p;
   p.taskbars[0].on_screen_ = true;
-  p.taskbars[0].width_ = panel_config.width;
-  p.taskbars[0].height_ = panel_config.height;
+  p.taskbars[0].width_ = panel_config.width(test_monitor.width);
+  p.taskbars[0].height_ = panel_config.height(test_monitor.height);
 
   Timer test_timer;
   Task test_task{test_timer};
   test_task.on_screen_ = true;
-  test_task.width_ = panel_config.width;
-  test_task.height_ = panel_config.height;
+  test_task.width_ = panel_config.width(test_monitor.width);
+  test_task.height_ = panel_config.height(test_monitor.height);
   p.taskbars[0].AddChild(&test_task);
   p.taskbars[0].Resize();
 
