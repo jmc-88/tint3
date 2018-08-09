@@ -131,7 +131,7 @@ class Panel : public Area {
 
 #ifdef ENABLE_BATTERY
   Battery* battery();
-#endif // ENABLE_BATTERY
+#endif  // ENABLE_BATTERY
 
   Clock* clock();
 
