@@ -10,7 +10,7 @@
 #include <ostream>
 
 #include "util/bimap.hh"
-#include "util/nullable.hh"
+#include "absl/types/optional.h"
 
 using TimePoint = std::chrono::steady_clock::time_point;
 using Duration = std::chrono::nanoseconds;
@@ -23,7 +23,7 @@ class Interval {
   friend class CompareIntervals;
   friend bool operator<(Interval const& lhs, Interval const& rhs);
 
-  using Id = util::Nullable<uint64_t>;
+  using Id = absl::optional<uint64_t>;
   using Callback = std::function<bool()>;
 
   Interval();
@@ -106,7 +106,7 @@ class Timer {
   void ProcessExpiredIntervals();
 
   // Returns the next registered interval, if any, or a nulled-out object.
-  util::Nullable<Interval> GetNextInterval() const;
+  absl::optional<Interval> GetNextInterval() const;
 
  private:
   TimerCallback get_current_time_;

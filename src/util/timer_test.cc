@@ -21,7 +21,7 @@ TEST_CASE("Interval", "Test the Interval class") {
 
   SECTION("correctly invokes the registered callback_") {
     bool was_invoked = false;
-    Interval interval{Some(123UL), fake_clock.Now(),
+    Interval interval{123UL, fake_clock.Now(),
                       std::chrono::milliseconds(0), [&was_invoked]() -> bool {
                         was_invoked = true;
                         return true;
@@ -33,21 +33,21 @@ TEST_CASE("Interval", "Test the Interval class") {
   }
 
   SECTION("correctly initializes time_point_") {
-    Interval interval{Some(123UL), fake_clock.Now() + std::chrono::seconds(5),
+    Interval interval{123UL, fake_clock.Now() + std::chrono::seconds(5),
                       std::chrono::milliseconds(0), no_op_callback};
     REQUIRE(interval.GetTimePoint() == FakeClock::SecondsFromEpoch(15));
   }
 
   SECTION("correctly initializes repeat_interval_") {
     Duration _100ms = std::chrono::milliseconds(100);
-    Interval interval{Some(123UL), fake_clock.Now(), _100ms, no_op_callback};
+    Interval interval{123UL, fake_clock.Now(), _100ms, no_op_callback};
     REQUIRE(interval.GetRepeatInterval() == _100ms);
   }
 
   SECTION("correctly assigns to an interval") {
-    Interval first_interval{Some(1UL), fake_clock.Now(),
+    Interval first_interval{1UL, fake_clock.Now(),
                             std::chrono::milliseconds(0), no_op_callback};
-    Interval second_interval{Some(2UL), fake_clock.Now(),
+    Interval second_interval{2UL, fake_clock.Now(),
                              std::chrono::milliseconds(50), no_op_callback};
     REQUIRE(first_interval.GetRepeatInterval() !=
             second_interval.GetRepeatInterval());
@@ -174,7 +174,7 @@ TEST_CASE("Timer", "Test the Timer class") {
 
   SECTION("correctly returns the next registered interval") {
     // No registered intervals should result in a nulled-out object
-    REQUIRE(timer.GetNextInterval() == false);
+    REQUIRE_FALSE(timer.GetNextInterval().has_value());
 
     // Unordered insertion should still return the first interval
     timer.SetTimeout(std::chrono::milliseconds(250), no_op_callback);
@@ -183,7 +183,7 @@ TEST_CASE("Timer", "Test the Timer class") {
 
     auto next_timeout = timer.GetNextInterval();
     REQUIRE(next_timeout);
-    REQUIRE(next_timeout.Unwrap().GetTimePoint() ==
+    REQUIRE(next_timeout->GetTimePoint() ==
             TimePoint(std::chrono::milliseconds(175)));
 
     // The same applies to repeating intervals
@@ -191,7 +191,7 @@ TEST_CASE("Timer", "Test the Timer class") {
 
     auto next_interval = timer.GetNextInterval();
     REQUIRE(next_interval);
-    REQUIRE(next_interval.Unwrap().GetRepeatInterval() ==
+    REQUIRE(next_interval->GetRepeatInterval() ==
             Duration(std::chrono::milliseconds(100)));
   }
 }

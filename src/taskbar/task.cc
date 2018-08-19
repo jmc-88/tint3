@@ -686,7 +686,7 @@ void Task::DelUrgent() {
 
   if (urgent_list.empty()) {
     timer_.ClearInterval(urgent_timeout);
-    urgent_timeout.Clear();
+    urgent_timeout.reset();
   }
 }
 

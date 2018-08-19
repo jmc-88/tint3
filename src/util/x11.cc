@@ -96,7 +96,7 @@ bool EventLoop::RunLoop() {
 
     if (next_interval) {
       auto now = timer_.Now();
-      auto until = next_interval.Unwrap().GetTimePoint();
+      auto until = next_interval->GetTimePoint();
 
       Duration duration{until - now};
       next_timeval = ToTimeval(duration);

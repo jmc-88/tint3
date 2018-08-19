@@ -160,25 +160,19 @@ Color Background::fill_color() const { return fill_color_; }
 void Background::set_fill_color(Color const& color) { fill_color_ = color; }
 
 Color Background::fill_color_hover() const {
-  if (!fill_color_hover_) {
-    return fill_color_;
-  }
-  return fill_color_hover_.Unwrap();
+  return fill_color_hover_.value_or(fill_color_);
 }
 
 void Background::set_fill_color_hover(Color const& color) {
-  fill_color_hover_ = Some(color);
+  fill_color_hover_ = color;
 }
 
 Color Background::fill_color_pressed() const {
-  if (!fill_color_pressed_) {
-    return fill_color_;
-  }
-  return fill_color_pressed_.Unwrap();
+  return fill_color_pressed_.value_or(fill_color_);
 }
 
 void Background::set_fill_color_pressed(Color const& color) {
-  fill_color_pressed_ = Some(color);
+  fill_color_pressed_ = color;
 }
 
 Color Background::border_color_for(MouseState mouse_state) const {
@@ -198,25 +192,19 @@ Border& Background::border() { return border_; }
 void Background::set_border(Border const& border) { border_ = border; }
 
 Color Background::border_color_hover() const {
-  if (!border_color_hover_) {
-    return border_;
-  }
-  return border_color_hover_.Unwrap();
+  return border_color_hover_.value_or(border_);
 }
 
 void Background::set_border_color_hover(Color const& color) {
-  border_color_hover_ = Some(color);
+  border_color_hover_ = color;
 }
 
 Color Background::border_color_pressed() const {
-  if (!border_color_pressed_) {
-    return border_;
-  }
-  return border_color_pressed_.Unwrap();
+  return border_color_pressed_.value_or(border_);
 }
 
 void Background::set_border_color_pressed(Color const& color) {
-  border_color_pressed_ = Some(color);
+  border_color_pressed_ = color;
 }
 
 int Background::gradient_id_for(MouseState mouse_state) const {

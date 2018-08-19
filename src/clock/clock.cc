@@ -55,7 +55,7 @@ static Interval::Id clock_timeout;
 
 void DefaultClock() {
   clock_enabled = false;
-  clock_timeout.Clear();
+  clock_timeout.reset();
   time1_format.clear();
   time1_timezone.clear();
   time2_format.clear();

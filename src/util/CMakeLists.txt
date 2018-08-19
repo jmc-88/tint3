@@ -20,7 +20,7 @@ target_link_libraries(
     ${X11_Xrender_LIB}
   PUBLIC
     color_lib
-    nullable_lib
+    absl::optional
     ${CAIRO_LIBRARIES}
     ${X11_X11_LIB})
 
@@ -95,7 +95,7 @@ target_link_libraries(
     area_lib
   PUBLIC
     geometry_lib
-    nullable_lib)
+    absl::optional)
 
 test_target(
   color_test
@@ -227,14 +227,6 @@ add_library(
   log.cc)
 
 add_library(
-  nullable_lib INTERFACE)
-
-target_sources(
-  nullable_lib
-  INTERFACE
-    "${PROJECT_SOURCE_DIR}/src/util/nullable.hh")
-
-add_library(
   pango_lib STATIC
   pango.cc)
 
@@ -284,7 +276,7 @@ target_link_libraries(
     log_lib
   PUBLIC
     bimap_lib
-    nullable_lib)
+    absl::optional)
 
 test_target(
   timer_test

@@ -9,7 +9,7 @@
 #include <vector>
 
 #include "util/color.hh"
-#include "util/nullable.hh"
+#include "absl/types/optional.h"
 
 // way to calculate the size
 // kByLayout objects : taskbar and task

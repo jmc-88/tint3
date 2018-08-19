@@ -118,7 +118,7 @@ void DefaultBattery() {
   battery_enabled = false;
   percentage_hide = 101;
   battery_low_cmd_send = false;
-  battery_timeout.Clear();
+  battery_timeout.reset();
   bat1_font_desc = 0;
   bat2_font_desc = 0;
   battery_low_cmd.clear();

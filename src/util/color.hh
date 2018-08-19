@@ -5,7 +5,7 @@
 #include <ostream>
 
 #include "util/geometry.hh"
-#include "util/nullable.hh"
+#include "absl/types/optional.h"
 
 // forward declaration from area.hh
 enum class MouseState;
@@ -117,11 +117,11 @@ class Background {
 
  private:
   Color fill_color_;
-  util::Nullable<Color> fill_color_hover_;
-  util::Nullable<Color> fill_color_pressed_;
+  absl::optional<Color> fill_color_hover_;
+  absl::optional<Color> fill_color_pressed_;
   Border border_;
-  util::Nullable<Color> border_color_hover_;
-  util::Nullable<Color> border_color_pressed_;
+  absl::optional<Color> border_color_hover_;
+  absl::optional<Color> border_color_pressed_;
   int gradient_id_;
   int gradient_id_hover_;
   int gradient_id_pressed_;

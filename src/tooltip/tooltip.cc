@@ -47,7 +47,7 @@ void Tooltip::Show(Area const* area, XEvent const* e, std::string text) {
   }
   timeout_ = timer_->SetTimeout(
       std::chrono::milliseconds(tooltip_config.show_timeout_msec), [=] {
-        timeout_.Clear();
+        timeout_.reset();
         XMapWindow(server_->dsp, window_);
         Update(area, e, text);
         XFlush(server_->dsp);
@@ -215,7 +215,7 @@ void Tooltip::Hide() {
   timeout_ = timer_->SetTimeout(
       std::chrono::milliseconds(tooltip_config.hide_timeout_msec), [=] {
         area_ = nullptr;
-        timeout_.Clear();
+        timeout_.reset();
         XUnmapWindow(server_->dsp, window_);
         XFlush(server_->dsp);
         return false;

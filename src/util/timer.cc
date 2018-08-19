@@ -99,7 +99,7 @@ bool CompareIds::operator()(Interval::Id const& lhs,
   if (!lhs) {
     return false;
   }
-  return lhs.Unwrap() < rhs.Unwrap();
+  return lhs.value() < rhs.value();
 }
 
 bool CompareIntervals::operator()(Interval const& lhs,
@@ -201,16 +201,16 @@ void Timer::ProcessExpiredIntervals() {
   }
 }
 
-util::Nullable<Interval> Timer::GetNextInterval() const {
+absl::optional<Interval> Timer::GetNextInterval() const {
   if (timeouts_.empty() && intervals_.empty()) {
     return {};
   }
   if (intervals_.empty()) {
-    return Some(timeouts_.right.begin()->first);
+    return timeouts_.right.begin()->first;
   }
   if (timeouts_.empty()) {
-    return Some(intervals_.right.begin()->first);
+    return intervals_.right.begin()->first;
   }
-  return Some(std::min(timeouts_.right.begin()->first,
-                       intervals_.right.begin()->first));
+  return std::min(timeouts_.right.begin()->first,
+                  intervals_.right.begin()->first);
 }
