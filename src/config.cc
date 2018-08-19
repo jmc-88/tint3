@@ -43,6 +43,7 @@
 #include <utility>
 #include <vector>
 
+#include "absl/strings/ascii.h"
 #include "absl/strings/match.h"
 #include "absl/strings/str_split.h"
 
@@ -219,7 +220,7 @@ bool Parser::Import(parser::TokenList* tokens) {
   tokens->SkipOver(kNewLine);
 
   std::string path{parser::TokenList::JoinSkipped(skipped)};
-  util::string::Trim(&path);
+  absl::StripAsciiWhitespace(&path);
 
   if (path.empty()) {
     return false;
@@ -280,7 +281,7 @@ bool Parser::Assignment(parser::TokenList* tokens) {
   }
 
   std::string value{parser::TokenList::JoinSkipped(skipped)};
-  util::string::Trim(&value);
+  absl::StripAsciiWhitespace(&value);
 
   if (!AddKeyValue(key, value)) {
     return false;
@@ -307,18 +308,18 @@ void ExtractValues(std::string const& value, std::string* v1, std::string* v2,
   size_t second_space = std::string::npos;
 
   v1->assign(value, 0, first_space);
-  util::string::Trim(v1);
+  absl::StripAsciiWhitespace(v1);
 
   if (first_space != std::string::npos) {
     second_space = value.find_first_of(' ', first_space + 1);
 
     v2->assign(value, first_space + 1, second_space - first_space);
-    util::string::Trim(v2);
+    absl::StripAsciiWhitespace(v2);
   }
 
   if (second_space != std::string::npos) {
     v3->assign(value, second_space + 1, std::string::npos);
-    util::string::Trim(v3);
+    absl::StripAsciiWhitespace(v3);
   }
 }
 
@@ -402,7 +403,7 @@ bool ParseNumber(std::string const& str, T* ptr) {
 }
 
 bool ParseBoolean(std::string str, bool* value) {
-  util::string::Trim(&str);
+  absl::StripAsciiWhitespace(&str);
   std::transform(str.begin(), str.end(), str.begin(), ::tolower);
 
   if (str == "true" || str == "yes" || str == "on") {
@@ -1401,8 +1402,9 @@ bool Reader::AddEntry_Executor(std::string const& key,
   }
   if (key == "execp_background_id") {
     if (executors.empty()) {
-      util::log::Error() << key << " config entry without any previous execp "
-                                   "plugin initialized, ignoring\n";
+      util::log::Error() << key
+                         << " config entry without any previous execp "
+                            "plugin initialized, ignoring\n";
       return true;
     }
     int id;
@@ -1414,8 +1416,9 @@ bool Reader::AddEntry_Executor(std::string const& key,
   }
   if (key == "execp_cache_icon") {
     if (executors.empty()) {
-      util::log::Error() << key << " config entry without any previous execp "
-                                   "plugin initialized, ignoring\n";
+      util::log::Error() << key
+                         << " config entry without any previous execp "
+                            "plugin initialized, ignoring\n";
       return true;
     }
     bool enabled;
@@ -1425,8 +1428,9 @@ bool Reader::AddEntry_Executor(std::string const& key,
   }
   if (key == "execp_centered") {
     if (executors.empty()) {
-      util::log::Error() << key << " config entry without any previous execp "
-                                   "plugin initialized, ignoring\n";
+      util::log::Error() << key
+                         << " config entry without any previous execp "
+                            "plugin initialized, ignoring\n";
       return true;
     }
     bool enabled;
@@ -1436,8 +1440,9 @@ bool Reader::AddEntry_Executor(std::string const& key,
   }
   if (key == "execp_command") {
     if (executors.empty()) {
-      util::log::Error() << key << " config entry without any previous execp "
-                                   "plugin initialized, ignoring\n";
+      util::log::Error() << key
+                         << " config entry without any previous execp "
+                            "plugin initialized, ignoring\n";
       return true;
     }
     executors.back().set_command(value);
@@ -1445,8 +1450,9 @@ bool Reader::AddEntry_Executor(std::string const& key,
   }
   if (key == "execp_continuous") {
     if (executors.empty()) {
-      util::log::Error() << key << " config entry without any previous execp "
-                                   "plugin initialized, ignoring\n";
+      util::log::Error() << key
+                         << " config entry without any previous execp "
+                            "plugin initialized, ignoring\n";
       return true;
     }
     bool enabled;
@@ -1456,8 +1462,9 @@ bool Reader::AddEntry_Executor(std::string const& key,
   }
   if (key == "execp_dwheel_command") {
     if (executors.empty()) {
-      util::log::Error() << key << " config entry without any previous execp "
-                                   "plugin initialized, ignoring\n";
+      util::log::Error() << key
+                         << " config entry without any previous execp "
+                            "plugin initialized, ignoring\n";
       return true;
     }
     executors.back().set_command_down_wheel(value);
@@ -1465,8 +1472,9 @@ bool Reader::AddEntry_Executor(std::string const& key,
   }
   if (key == "execp_font") {
     if (executors.empty()) {
-      util::log::Error() << key << " config entry without any previous execp "
-                                   "plugin initialized, ignoring\n";
+      util::log::Error() << key
+                         << " config entry without any previous execp "
+                            "plugin initialized, ignoring\n";
       return true;
     }
     executors.back().set_font(value);
@@ -1474,8 +1482,9 @@ bool Reader::AddEntry_Executor(std::string const& key,
   }
   if (key == "execp_font_color") {
     if (executors.empty()) {
-      util::log::Error() << key << " config entry without any previous execp "
-                                   "plugin initialized, ignoring\n";
+      util::log::Error() << key
+                         << " config entry without any previous execp "
+                            "plugin initialized, ignoring\n";
       return true;
     }
     executors.back().set_font_color(ParseColor(value));
@@ -1483,8 +1492,9 @@ bool Reader::AddEntry_Executor(std::string const& key,
   }
   if (key == "execp_has_icon") {
     if (executors.empty()) {
-      util::log::Error() << key << " config entry without any previous execp "
-                                   "plugin initialized, ignoring\n";
+      util::log::Error() << key
+                         << " config entry without any previous execp "
+                            "plugin initialized, ignoring\n";
       return true;
     }
     bool enabled;
@@ -1494,8 +1504,9 @@ bool Reader::AddEntry_Executor(std::string const& key,
   }
   if (key == "execp_icon_h") {
     if (executors.empty()) {
-      util::log::Error() << key << " config entry without any previous execp "
-                                   "plugin initialized, ignoring\n";
+      util::log::Error() << key
+                         << " config entry without any previous execp "
+                            "plugin initialized, ignoring\n";
       return true;
     }
     int height;
@@ -1511,8 +1522,9 @@ bool Reader::AddEntry_Executor(std::string const& key,
   }
   if (key == "execp_icon_w") {
     if (executors.empty()) {
-      util::log::Error() << key << " config entry without any previous execp "
-                                   "plugin initialized, ignoring\n";
+      util::log::Error() << key
+                         << " config entry without any previous execp "
+                            "plugin initialized, ignoring\n";
       return true;
     }
     int width;
@@ -1528,8 +1540,9 @@ bool Reader::AddEntry_Executor(std::string const& key,
   }
   if (key == "execp_interval") {
     if (executors.empty()) {
-      util::log::Error() << key << " config entry without any previous execp "
-                                   "plugin initialized, ignoring\n";
+      util::log::Error() << key
+                         << " config entry without any previous execp "
+                            "plugin initialized, ignoring\n";
       return true;
     }
     int interval;
@@ -1545,8 +1558,9 @@ bool Reader::AddEntry_Executor(std::string const& key,
   }
   if (key == "execp_lclick_command") {
     if (executors.empty()) {
-      util::log::Error() << key << " config entry without any previous execp "
-                                   "plugin initialized, ignoring\n";
+      util::log::Error() << key
+                         << " config entry without any previous execp "
+                            "plugin initialized, ignoring\n";
       return true;
     }
     executors.back().set_command_left_click(value);
@@ -1554,8 +1568,9 @@ bool Reader::AddEntry_Executor(std::string const& key,
   }
   if (key == "execp_markup") {
     if (executors.empty()) {
-      util::log::Error() << key << " config entry without any previous execp "
-                                   "plugin initialized, ignoring\n";
+      util::log::Error() << key
+                         << " config entry without any previous execp "
+                            "plugin initialized, ignoring\n";
       return true;
     }
     bool enabled;
@@ -1565,8 +1580,9 @@ bool Reader::AddEntry_Executor(std::string const& key,
   }
   if (key == "execp_mclick_command") {
     if (executors.empty()) {
-      util::log::Error() << key << " config entry without any previous execp "
-                                   "plugin initialized, ignoring\n";
+      util::log::Error() << key
+                         << " config entry without any previous execp "
+                            "plugin initialized, ignoring\n";
       return true;
     }
     executors.back().set_command_middle_click(value);
@@ -1574,8 +1590,9 @@ bool Reader::AddEntry_Executor(std::string const& key,
   }
   if (key == "execp_rclick_command") {
     if (executors.empty()) {
-      util::log::Error() << key << " config entry without any previous execp "
-                                   "plugin initialized, ignoring\n";
+      util::log::Error() << key
+                         << " config entry without any previous execp "
+                            "plugin initialized, ignoring\n";
       return true;
     }
     executors.back().set_command_right_click(value);
@@ -1583,8 +1600,9 @@ bool Reader::AddEntry_Executor(std::string const& key,
   }
   if (key == "execp_tooltip") {
     if (executors.empty()) {
-      util::log::Error() << key << " config entry without any previous execp "
-                                   "plugin initialized, ignoring\n";
+      util::log::Error() << key
+                         << " config entry without any previous execp "
+                            "plugin initialized, ignoring\n";
       return true;
     }
     executors.back().set_tooltip(value);
@@ -1592,8 +1610,9 @@ bool Reader::AddEntry_Executor(std::string const& key,
   }
   if (key == "execp_uwheel_command") {
     if (executors.empty()) {
-      util::log::Error() << key << " config entry without any previous execp "
-                                   "plugin initialized, ignoring\n";
+      util::log::Error() << key
+                         << " config entry without any previous execp "
+                            "plugin initialized, ignoring\n";
       return true;
     }
     executors.back().set_command_up_wheel(value);

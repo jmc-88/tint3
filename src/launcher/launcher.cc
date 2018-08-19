@@ -32,6 +32,7 @@
 #include <set>
 #include <string>
 
+#include "absl/strings/ascii.h"
 #include "absl/strings/str_split.h"
 
 #include "launcher.hh"
@@ -466,7 +467,7 @@ IconTheme* LoadTheme(std::string const& name) {
 
   bool read = util::fs::ReadFileByLine(file_name, [&](std::string const& data) {
     std::string line(data);
-    util::string::Trim(&line);
+    absl::StripAsciiWhitespace(&line);
 
     if (line.empty()) {
       return true;
@@ -478,14 +479,14 @@ IconTheme* LoadTheme(std::string const& name) {
       if (ParseThemeLine(line, key, value)) {
         if (key == "Inherits") {
           // value is like oxygen,wood,default
-          util::string::Trim(&value);
+          absl::StripAsciiWhitespace(&value);
           std::vector<std::string> names = absl::StrSplit(value, ',');
           std::copy(names.begin(), names.end(),
                     std::back_inserter(theme->list_inherits));
         } else if (key == "Directories") {
           // value is like
           // 48x48/apps,48x48/mimetypes,32x32/apps,scalable/apps,scalable/mimetypes
-          util::string::Trim(&value);
+          absl::StripAsciiWhitespace(&value);
           for (auto name : absl::StrSplit(value, ',')) {
             auto dir = new IconThemeDir();
             dir->name = std::string(name);

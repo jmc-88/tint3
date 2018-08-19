@@ -4,6 +4,7 @@
 #include <sstream>
 #include <utility>
 
+#include "absl/strings/ascii.h"
 #include "absl/strings/match.h"
 
 #include "util/common.hh"
@@ -244,10 +245,10 @@ bool Parser::AddKeyValue(std::string key, std::string value,
           // Locale string which extends a previously non-localized entry
           std::string nonlocalized_value{
               current_group_.GetEntry<std::string>(key)};
-          current_group_.AddEntry(key,
-                                  Group::LocaleString{
-                                      {"", nonlocalized_value}, {locale, value},
-                                  });
+          current_group_.AddEntry(key, Group::LocaleString{
+                                           {"", nonlocalized_value},
+                                           {locale, value},
+                                       });
         } else if (!current_group_.IsEntry<Group::LocaleString>(key)) {
           // Locale string, new
           current_group_.AddEntry(key, Group::LocaleString{{locale, value}});
@@ -268,7 +269,7 @@ bool Parser::AddKeyValue(std::string key, std::string value,
 }
 
 bool ParseBooleanValue(std::string value_string, bool* value_boolean) {
-  util::string::Trim(&value_string);
+  absl::StripAsciiWhitespace(&value_string);
 
   // Also accept "0" and "1" for backwards compatibility:
   //  https://specifications.freedesktop.org/desktop-entry-spec/latest/apc.html
@@ -287,7 +288,8 @@ bool ParseBooleanValue(std::string value_string, bool* value_boolean) {
 }
 
 bool ParseNumericValue(std::string value_string, float* value_numeric) {
-  std::istringstream ss{util::string::Trim(&value_string)};
+  absl::StripAsciiWhitespace(&value_string);
+  std::istringstream ss{value_string};
 
   if (!(ss >> *value_numeric)) {
     // Couldn't parse the floating point number.
@@ -337,8 +339,8 @@ bool ParseStringValue(std::string* value_string) {
             (*it) = ';';
             break;
           default:
-            util::log::Error() << "Invalid escape sequence: \\" << (*it)
-                               << '\n';
+            util::log::Error()
+                << "Invalid escape sequence: \\" << (*it) << '\n';
             return false;
         }
       }
