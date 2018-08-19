@@ -23,21 +23,6 @@ TEST_CASE("StringTrim", "Removing trailing spaces from strings should work") {
   }
 }
 
-TEST_CASE("StartsWith",
-          "Checking if a string has a prefix works even in corner cases") {
-  // normal case: left string longer
-  REQUIRE(util::string::StartsWith("tautology", ""));
-  REQUIRE(util::string::StartsWith("left", "le"));
-
-  // corner case: same length
-  REQUIRE(util::string::StartsWith("", ""));
-  REQUIRE(util::string::StartsWith("same", "same"));
-
-  // corner case: right string longer
-  REQUIRE_FALSE(util::string::StartsWith("", "tautology"));
-  REQUIRE_FALSE(util::string::StartsWith("man", "mannequin"));
-}
-
 TEST_CASE("RegexMatch",
           "Matching a string by a regular expression should work") {
   SECTION("Character classes") {

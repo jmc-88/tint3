@@ -141,10 +141,6 @@ std::string& Trim(std::string* str) {
   return (*str);
 }
 
-bool StartsWith(std::string const& str, std::string const& other) {
-  return (str.compare(0, other.length(), other) == 0);
-}
-
 bool RegexMatch(std::string const& pattern, std::string const& string) {
   std::smatch matches;
   return std::regex_match(string, matches, std::regex(pattern));

@@ -4,6 +4,8 @@
 #include <sstream>
 #include <utility>
 
+#include "absl/strings/match.h"
+
 #include "util/common.hh"
 #include "util/log.hh"
 
@@ -429,7 +431,7 @@ bool Validate(DesktopEntry* entry) {
 
   while (it != entry->end()) {
     std::string group_name{it->GetName()};
-    if (!util::string::StartsWith(group_name, "Desktop Action ")) {
+    if (!absl::StartsWith(group_name, "Desktop Action ")) {
       util::log::Error() << "Invalid group name \"" << group_name << "\".\n";
       return false;
     }

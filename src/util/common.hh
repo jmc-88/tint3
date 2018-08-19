@@ -111,7 +111,6 @@ bool ToNumber(std::string const& str, long* ptr);
 bool ToNumber(std::string const& str, float* ptr);
 
 std::string& Trim(std::string* str);
-bool StartsWith(std::string const& str, std::string const& other);
 bool RegexMatch(std::string const& pattern, std::string const& string);
 
 void ToLowerCase(std::string* str);

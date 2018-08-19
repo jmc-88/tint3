@@ -43,6 +43,7 @@
 #include <utility>
 #include <vector>
 
+#include "absl/strings/match.h"
 #include "absl/strings/str_split.h"
 
 #include "clock/clock.hh"
@@ -236,7 +237,7 @@ bool Parser::Import(parser::TokenList* tokens) {
       util::log::Error() << "config: failed importing \"" << path
                          << "\", ignoring\n";
     }
-  } else if (!util::string::StartsWith(path, "/")) {
+  } else if (!absl::StartsWith(path, "/")) {
     util::log::Debug()
         << "config: import file \"" << path
         << "\" doesn't exist, attempting an import from a relative path\n";

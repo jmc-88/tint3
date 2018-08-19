@@ -47,6 +47,7 @@ target_link_libraries(
   PRIVATE
     common_lib
     log_lib
+    absl::strings
   PUBLIC
     parser_lib
     variant_lib)
