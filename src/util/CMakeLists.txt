@@ -74,6 +74,7 @@ target_link_libraries(
     ${X11_Xrender_LIB}
   PUBLIC
     log_lib
+    absl::strings
     ${GOBJECT2_LIBRARIES}
     ${IMLIB2_LIBRARIES})
 

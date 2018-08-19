@@ -38,6 +38,9 @@
 #include <string>
 #include <tuple>
 
+#include "absl/strings/numbers.h"
+#include "absl/strings/string_view.h"
+
 #include "cxx_features.hh"
 #include "server.hh"
 #include "util/common.hh"
@@ -59,71 +62,34 @@ Builder::operator std::string() const { return ss_.str(); }
 namespace {
 
 template <typename T>
-using NumberConversion = T(const char*, char**);
+using number_conversion = bool(absl::string_view, T*);
 
 template <typename T>
-using NumberValidation = bool(T);
+using number_validation = bool(T);
 
 template <typename T>
-bool ToNumberImpl(std::string const& value, T* ptr, NumberConversion<T> conv,
-                  NumberValidation<T> valid) {
-  const char* str = value.c_str();
-  char* str_end;
-  T res = conv(str, &str_end);
-
-  // reject not fully parsed strings
-  for (; *str_end != '\0'; ++str_end) {
-    if (!isspace(*str_end)) {
-      return false;
-    }
-  }
-
-  // reject out of range values
-  if (!valid(res)) {
-    return false;
-  }
-
+bool ToNumberImpl(absl::string_view value, T* ptr, number_conversion<T> convert,
+                  number_validation<T> validate) {
+  T res;
+  if (!convert(value, &res)) return false;
+  if (!validate(res)) return false;
   (*ptr) = res;
   return true;
 }
 
 }  // namespace
 
-bool ToNumber(std::string const& str, int* ptr) {
-  return ToNumberImpl(str, ptr,
-                      +[](const char* str, char** str_end) {
-                        errno = 0;
-                        long res = std::strtol(str, str_end, 10);
-                        if (res < INT_MIN || res > INT_MAX) {
-                          errno = ERANGE;
-                          return INT_MAX;
-                        }
-                        return static_cast<int>(res);
-                      },
-                      +[](int) { return (errno == 0); });
+bool ToNumber(absl::string_view str, int* ptr) {
+  return ToNumberImpl(str, ptr, absl::SimpleAtoi, +[](int) { return true; });
 }
 
-bool ToNumber(std::string const& str, long* ptr) {
-  return ToNumberImpl(str, ptr,
-                      +[](const char* str, char** str_end) {
-                        errno = 0;
-                        return std::strtol(str, str_end, 10);
-                      },
-                      +[](long) { return (errno == 0); });
+bool ToNumber(absl::string_view str, long* ptr) {
+  return ToNumberImpl(str, ptr, absl::SimpleAtoi, +[](long) { return true; });
 }
 
-bool ToNumber(std::string const& str, float* ptr) {
-  return ToNumberImpl(str, ptr,
-                      +[](const char* str, char** str_end) {
-                        errno = 0;
-                        return std::strtof(str, str_end);
-                      },
-                      +[](float f) {
-                        if (errno != 0) {
-                          return false;
-                        }
-                        return std::isfinite(f);
-                      });
+bool ToNumber(absl::string_view str, float* ptr) {
+  return ToNumberImpl(str, ptr, absl::SimpleAtof,
+                      +[](float f) { return std::isfinite(f); });
 }
 
 std::string& Trim(std::string* str) {

@@ -16,6 +16,8 @@
 #include <string>
 #include <vector>
 
+#include "absl/strings/string_view.h"
+
 #include "util/log.hh"
 
 // forward declaration
@@ -106,9 +108,9 @@ std::string Representation(T const& value) {
   return Builder() << value;
 }
 
-bool ToNumber(std::string const& str, int* ptr);
-bool ToNumber(std::string const& str, long* ptr);
-bool ToNumber(std::string const& str, float* ptr);
+bool ToNumber(absl::string_view str, int* ptr);
+bool ToNumber(absl::string_view str, long* ptr);
+bool ToNumber(absl::string_view str, float* ptr);
 
 std::string& Trim(std::string* str);
 bool RegexMatch(std::string const& pattern, std::string const& string);
