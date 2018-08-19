@@ -73,6 +73,7 @@ target_link_libraries(
     timer_lib
     window_lib
     xdg_lib
+    absl::strings
     ${CAIRO_LIBRARIES}
     ${IMLIB2_LIBRARIES}
     ${PANGO_LIBRARIES}

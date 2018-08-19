@@ -32,6 +32,8 @@
 #include <set>
 #include <string>
 
+#include "absl/strings/str_split.h"
+
 #include "launcher.hh"
 #include "launcher/desktop_entry.hh"
 #include "panel.hh"
@@ -477,17 +479,16 @@ IconTheme* LoadTheme(std::string const& name) {
         if (key == "Inherits") {
           // value is like oxygen,wood,default
           util::string::Trim(&value);
-          auto names = util::string::Split(value, ',');
+          std::vector<std::string> names = absl::StrSplit(value, ',');
           std::copy(names.begin(), names.end(),
                     std::back_inserter(theme->list_inherits));
         } else if (key == "Directories") {
           // value is like
           // 48x48/apps,48x48/mimetypes,32x32/apps,scalable/apps,scalable/mimetypes
           util::string::Trim(&value);
-          auto names = util::string::Split(value, ',');
-          for (std::string const& name : names) {
+          for (auto name : absl::StrSplit(value, ',')) {
             auto dir = new IconThemeDir();
-            dir->name = name;
+            dir->name = std::string(name);
             dir->max_size = dir->min_size = dir->size = -1;
             dir->type = ICON_DIR_TYPE_THRESHOLD;
             dir->threshold = 2;

@@ -10,6 +10,8 @@
 #include <ostream>
 #include <string>
 
+#include "absl/strings/string_view.h"
+
 namespace util {
 namespace fs {
 
@@ -56,14 +58,15 @@ class Path {
   friend std::ostream& operator<<(std::ostream& os, Path const& path);
 
   Path() = default;
-  Path(Path const& other);
-  Path(Path&& other);
+  Path(Path const& other) = default;
+  Path(Path&& other) = default;
+  Path(const char* path);
   Path(std::string const& path);
-  Path(char const* path);
+  Path(absl::string_view path);
 
   Path& operator=(Path other);
-  Path operator/(std::string const& component);
-  Path& operator/=(std::string const& component);
+  Path operator/(absl::string_view component);
+  Path& operator/=(absl::string_view component);
   operator std::string() const;
 
   // Returns the base name of the current path (the last component in the path).
@@ -78,7 +81,7 @@ class Path {
   // If the path doesn't contain any slash, '.' is returned.
   Path DirectoryName() const;
 
-  bool operator==(std::string const& str) const;
+  bool operator==(Path const& other) const;
 
  private:
   std::string path_;

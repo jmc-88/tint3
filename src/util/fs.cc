@@ -8,6 +8,10 @@
 #include <sstream>
 #include <utility>
 
+#include "absl/strings/str_cat.h"
+#include "absl/strings/str_split.h"
+#include "absl/strings/strip.h"
+
 #include "util/common.hh"
 #include "util/environment.hh"
 #include "util/fs.hh"
@@ -89,52 +93,36 @@ bool DirectoryContents::iterator::operator!=(
 
 namespace {
 
-std::string StripLeadingSlash(std::string path) {
-  // Remove the leading '/' if this is not a path to the filesystem root.
-  if (path.length() > 1 && path[0] == '/') {
-    return path.substr(1);
-  }
-
-  return path;
-}
-
-std::string StripTrailingSlash(std::string path) {
-  // Remove the trailing '/' if this is not a path to the filesystem root.
-  if (path.length() > 1 && path[path.length() - 1] == '/') {
-    return path.substr(0, path.length() - 1);
-  }
-
-  return path;
+absl::string_view StripTrailingSlash(absl::string_view path) {
+  if (path == "/") return path;
+  return absl::StripSuffix(path, "/");
 }
 
 }  // namespace
 
-Path::Path(Path const& other) : path_(other.path_) {}
-
-Path::Path(Path&& other) : path_(std::move(other.path_)) {}
-
-Path::Path(std::string const& path) : path_(StripTrailingSlash(path)) {}
-
-Path::Path(const char* path) : path_(StripTrailingSlash(path)) {}
+Path::Path(const char* path) : Path(absl::string_view(path)) {}
+Path::Path(std::string const& path) : Path(absl::string_view(path)) {}
+Path::Path(absl::string_view path) : path_{StripTrailingSlash(path)} {}
 
 Path& Path::operator=(Path other) {
   std::swap(path_, other.path_);
   return (*this);
 }
 
-Path Path::operator/(std::string const& component) {
+Path Path::operator/(absl::string_view component) {
   return Path{*this} /= component;
 }
 
-Path& Path::operator/=(std::string const& component) {
+Path& Path::operator/=(absl::string_view component) {
   if (!path_.empty() && path_.back() != '/') {
     path_.push_back('/');
   }
-  std::string stripped_component{StripTrailingSlash(component)};
+
+  absl::string_view stripped_component = StripTrailingSlash(component);
   if (path_.empty()) {
-    path_.append(stripped_component);
+    absl::StrAppend(&path_, stripped_component);
   } else {
-    path_.append(StripLeadingSlash(stripped_component));
+    absl::StrAppend(&path_, absl::StripPrefix(stripped_component, "/"));
   }
   return (*this);
 }
@@ -155,7 +143,7 @@ Path Path::DirectoryName() const {
   return dirname(data);
 }
 
-bool Path::operator==(std::string const& str) const { return path_ == str; }
+bool Path::operator==(Path const& other) const { return path_ == other.path_; }
 
 std::ostream& operator<<(std::ostream& os, Path const& path) {
   return os << path.path_;
@@ -191,10 +179,9 @@ bool CopyFile(std::string const& from_path, std::string const& to_path) {
 }
 
 bool CreateDirectory(std::string const& path, mode_t mode) {
-  auto components = util::string::Split(path, '/');
   Path partial_path{"/"};
 
-  for (std::string const& component : components) {
+  for (auto const& component : absl::StrSplit(path, '/')) {
     if (component.empty()) {
       continue;
     }
@@ -234,7 +221,7 @@ Path HomeDirectory() {
   std::string home = environment::Get("HOME");
 
   if (!home.empty()) {
-    return home;
+    return Path{home};
   }
 
   struct passwd* pwd = getpwuid(getuid());
@@ -244,8 +231,8 @@ Path HomeDirectory() {
   }
 
   // if we got here both getenv() and getpwuid() failed, so let's just return
-  // an empty string to indicate failure
-  return std::string();
+  // an empty Path to indicate failure
+  return {};
 }
 
 bool ReadFile(std::string const& path,

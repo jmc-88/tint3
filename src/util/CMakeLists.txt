@@ -133,7 +133,9 @@ target_link_libraries(
   fs_lib
   PRIVATE
     common_lib
-    environment_lib)
+    environment_lib
+  PUBLIC
+    absl::strings)
 
 test_target(
   fs_test
@@ -365,6 +367,7 @@ target_link_libraries(
     common_lib
     environment_lib
     log_lib
+    absl::strings
   PUBLIC
     fs_lib)
 

@@ -2,6 +2,9 @@
 #include <cstring>
 #include <functional>
 
+#include "absl/strings/str_split.h"
+#include "absl/strings/string_view.h"
+
 #include "util/common.hh"
 #include "util/environment.hh"
 #include "util/fs.hh"
@@ -10,15 +13,15 @@
 
 namespace {
 
-using StringTransformFn = std::function<std::string(std::string)>;
+using transform_fn = std::function<util::fs::Path(std::string)>;
 
-StringTransformFn DefaultValue(std::string value) {
-  return [value](std::string other) -> std::string {
-    return (!other.empty()) ? other : value;
+transform_fn DefaultValue(util::fs::Path value) {
+  return [value](absl::string_view other) {
+    return !other.empty() ? other : value;
   };
 }
 
-StringTransformFn GetDefaultDirectory(char const* relative_path) {
+transform_fn GetDefaultDirectory(absl::string_view relative_path) {
   return DefaultValue(util::fs::HomeDirectory() / relative_path);
 }
 
@@ -40,13 +43,14 @@ util::fs::Path DataHome() {
 
 std::vector<std::string> DataDirs() {
   static auto default_ = DefaultValue("/usr/local/share:/usr/share");
-  return util::string::Split(default_(environment::Get("XDG_DATA_DIRS")), ':');
+  auto path_components = default_(environment::Get("XDG_DATA_DIRS"));
+  return absl::StrSplit(std::string(path_components), ":");
 }
 
 std::vector<std::string> ConfigDirs() {
   static auto default_ = DefaultValue("/usr/local/etc/xdg:/etc/xdg");
-  return util::string::Split(default_(environment::Get("XDG_CONFIG_DIRS")),
-                             ':');
+  auto path_components = default_(environment::Get("XDG_CONFIG_DIRS"));
+  return absl::StrSplit(std::string(path_components), ":");
 }
 
 }  // namespace basedir

@@ -41,6 +41,9 @@
 #include <iostream>
 #include <string>
 #include <utility>
+#include <vector>
+
+#include "absl/strings/str_split.h"
 
 #include "clock/clock.hh"
 #include "config.hh"
@@ -1141,14 +1144,14 @@ bool Reader::AddEntry_Task(std::string const& key, std::string const& value) {
     return true;
   }
   if (util::string::RegexMatch("task.*_font_color", key)) {
-    auto split = util::string::Split(key, '_');
+    std::vector<std::string> split = absl::StrSplit(key, '_');
     int status = GetTaskStatus(split[1]);
     panel_config.g_task.font[status] = ParseColor(value, 1.0);
     panel_config.g_task.config_font_mask |= (1 << status);
     return true;
   }
   if (util::string::RegexMatch("task.*_icon_asb", key)) {
-    auto split = util::string::Split(key, '_');
+    std::vector<std::string> split = absl::StrSplit(key, '_');
     int status = GetTaskStatus(split[1]);
     std::string value1, value2, value3;
     config::ExtractValues(value, &value1, &value2, &value3);
@@ -1165,7 +1168,7 @@ bool Reader::AddEntry_Task(std::string const& key, std::string const& value) {
     return true;
   }
   if (util::string::RegexMatch("task.*_background_id", key)) {
-    auto split = util::string::Split(key, '_');
+    std::vector<std::string> split = absl::StrSplit(key, '_');
     int status = GetTaskStatus(split[1]);
     int id;
     if (!ParseNumber(value, &id)) {

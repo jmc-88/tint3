@@ -141,27 +141,6 @@ std::string& Trim(std::string* str) {
   return (*str);
 }
 
-std::vector<std::string> Split(std::string const& str, char sep) {
-  auto beg = str.cbegin();
-  auto end = std::find(beg, str.cend(), sep);
-
-  // If we never found the separator, return a vector with the string itself
-  // inside it. This is the same behavior as Python's str.split().
-  if (end == str.cend()) {
-    return {str};
-  }
-
-  std::vector<std::string> parts;
-  bool found = true;
-  do {
-    found = (end != str.cend());
-    parts.push_back(std::string{beg, end});
-    beg = (end != str.cend()) ? (end + 1) : end;
-    end = std::find(beg, str.cend(), sep);
-  } while (found);
-  return parts;
-}
-
 bool StartsWith(std::string const& str, std::string const& other) {
   return (str.compare(0, other.length(), other) == 0);
 }
