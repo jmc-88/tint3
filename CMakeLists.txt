@@ -220,6 +220,7 @@ endif()
 
 # }}} install rules
 
+add_subdirectory(abseil-cpp)
 add_subdirectory(doc)
 add_subdirectory(src)
 add_subdirectory(test)
