@@ -12,6 +12,7 @@
 # Don't include IDE- or editor-specific files in the repository
 *.kdev4
 /.kdev4
+/.vscode
 /_vimrc_local.vim
 
 # Don't include built packages
