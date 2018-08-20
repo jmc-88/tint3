@@ -300,22 +300,6 @@ target_link_libraries(
     timer_lib)
 
 add_library(
-  variant_lib INTERFACE)
-
-target_sources(
-  variant_lib
-  INTERFACE
-    "${PROJECT_SOURCE_DIR}/src/util/variant.hh")
-
-test_target(
-  variant_test
-  SOURCES
-    variant_test.cc
-  LINK_LIBRARIES
-    variant_lib
-    testmain)
-
-add_library(
   window_lib STATIC
   window.cc)
 

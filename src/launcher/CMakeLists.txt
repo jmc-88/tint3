@@ -50,7 +50,7 @@ target_link_libraries(
     absl::strings
   PUBLIC
     parser_lib
-    variant_lib)
+    absl::variant)
 
 test_target(
   desktop_entry_test

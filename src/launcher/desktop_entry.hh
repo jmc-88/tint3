@@ -5,7 +5,7 @@
 #include <unordered_map>
 #include <vector>
 
-#include "util/variant.hh"
+#include "absl/types/variant.h"
 
 #include "parser/parser.hh"
 
@@ -31,7 +31,7 @@ class Group {
   using LocaleString = std::unordered_map<std::string, std::string>;
 
   using Value =
-      util::variant::Value<std::string, StringList, LocaleString, bool, float>;
+      absl::variant<std::string, StringList, LocaleString, bool, float>;
 
   static const std::string kInvalidName;
 
@@ -47,12 +47,12 @@ class Group {
 
   template <typename T>
   bool IsEntry(std::string const& key) {
-    return HasEntry(key) && entries_.at(key).Is<T>();
+    return HasEntry(key) && absl::holds_alternative<T>(entries_.at(key));
   }
 
   template <typename T>
   T& GetEntry(std::string const& key) {
-    return entries_.at(key).Get<T>();
+    return absl::get<T>(entries_.at(key));
   }
 
   template <typename T>
