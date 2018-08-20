@@ -95,8 +95,6 @@ bool ToNumber(absl::string_view str, float* ptr);
 
 bool RegexMatch(std::string const& pattern, std::string const& string);
 
-void ToLowerCase(std::string* str);
-
 }  // namespace string
 }  // namespace util
 

@@ -30,6 +30,7 @@
 #include <cstdlib>
 #include <cstring>
 
+#include "absl/strings/ascii.h"
 #include "absl/time/time.h"
 
 #include "panel.hh"
@@ -364,8 +365,8 @@ bool CompareTrayWindows(TrayWindow const* traywin_a,
     return true;
   }
 
-  util::string::ToLowerCase(&name_a);
-  util::string::ToLowerCase(&name_b);
+  absl::AsciiStrToLower(&name_a);
+  absl::AsciiStrToLower(&name_b);
   return (systray.sort == /*descending=*/-1) ? (name_a > name_b)
                                              : (name_a < name_b);
 }

@@ -9,6 +9,7 @@ target_link_libraries(
     panel_lib
     server_lib
     x11_lib
+    absl::strings
     ${IMLIB2_LIBRARIES}
     ${X11_Xcomposite_LIB}
     ${X11_Xrender_LIB}

@@ -90,11 +90,6 @@ bool RegexMatch(std::string const& pattern, std::string const& string) {
   return std::regex_match(string, matches, std::regex(pattern));
 }
 
-void ToLowerCase(std::string* str) {
-  std::transform(str->begin(), str->end(), str->begin(),
-                 [](char c) -> char { return std::tolower(c); });
-}
-
 }  // namespace string
 }  // namespace util
 
