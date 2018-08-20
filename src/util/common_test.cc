@@ -2,6 +2,9 @@
 
 #include <string>
 #include <vector>
+
+#include "absl/base/attributes.h"
+
 #include "util/common.hh"
 
 TEST_CASE("RegexMatch",
@@ -62,10 +65,11 @@ TEST_CASE("AdjustASB",
   REQUIRE(image_data[3] == 0x0a212427);
 }
 
-TEST_CASE("ScopedDeleter") {
+TEST_CASE("ScopedCallback") {
   bool was_invoked = false;
   {
-    auto _ = util::MakeScopedDeleter([&] { was_invoked = true; });
+    ABSL_ATTRIBUTE_UNUSED auto _ =
+        util::MakeScopedCallback([&] { was_invoked = true; });
     REQUIRE_FALSE(was_invoked);
   }
   REQUIRE(was_invoked);

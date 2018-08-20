@@ -3,6 +3,8 @@
 #include <sstream>
 #include <string>
 
+#include "absl/base/attributes.h"
+
 #include "util/common.hh"
 #include "util/log.hh"
 
@@ -134,7 +136,8 @@ int ThemeManager(int argc, char* argv[]) {
     util::log::Error() << "Failed initializing CURL.\n";
     return 1;
   }
-  auto cleanup_curl = util::MakeScopedDeleter([=] { curl_easy_cleanup(c); });
+  ABSL_ATTRIBUTE_UNUSED auto cleanup_curl =
+      util::MakeScopedCallback([=] { curl_easy_cleanup(c); });
 
   std::vector<std::string> arguments{argv + 1, argv + argc};
   if (arguments.front() == "search" || arguments.front() == "s") {

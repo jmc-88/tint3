@@ -25,31 +25,27 @@ class Server;
 
 namespace util {
 
-class GObjectUnrefDeleter {
- public:
+struct GObjectUnrefDeleter {
   void operator()(gpointer data) const;
 };
 
 template <typename T>
 using GObjectPtr = std::unique_ptr<T, GObjectUnrefDeleter>;
 
-// ScopedDeleter is a class that receives a callable and invokes it when it
+// ScopedCallback is a class that receives a callable and invokes it when it
 // goes out of scope.
 template <typename T>
-class ScopedDeleter {
- public:
-  explicit ScopedDeleter(T deleter) : deleter_(deleter) {}
-  ~ScopedDeleter() { deleter_(); }
-
- private:
-  T deleter_;
+struct ScopedCallback {
+  explicit ScopedCallback(T callback) : callback_{callback} {}
+  ~ScopedCallback() { callback_(); }
+  T callback_;
 };
 
-// MakeScopedDeleter is a helper method to create a ScopedDeleter of the right
+// MakeScopedCallback is a helper method to create a ScopedCallback of the right
 // type from the argument it's passed.
 template <typename T>
-ScopedDeleter<T> MakeScopedDeleter(T deleter) {
-  return ScopedDeleter<T>{deleter};
+ScopedCallback<T> MakeScopedCallback(T callback) {
+  return ScopedCallback<T>{callback};
 }
 
 template <typename It_>
@@ -60,16 +56,14 @@ class iterator_range {
   iterator_range(iterator_range&) = default;
 
   iterator_range(It_ begin, It_ end) : begin_{begin}, end_{end} {}
+  It_ begin() const { return begin_; }
+  It_ end() const { return end_; }
 
   iterator_range& operator=(iterator_range other) {
     std::swap(begin_, other.begin_);
     std::swap(end_, other.end_);
     return (*this);
   }
-
-  It_ begin() const { return begin_; }
-
-  It_ end() const { return end_; }
 
  private:
   It_ begin_;

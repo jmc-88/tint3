@@ -37,6 +37,8 @@
 #include <iostream>
 #include <unordered_map>
 
+#include "absl/base/attributes.h"
+
 #include "config.hh"
 #include "dnd/dnd.hh"
 #include "launcher/launcher.hh"
@@ -453,7 +455,7 @@ void EventButtonRelease(XEvent* e) {
     return;
   }
 
-  auto at_exit = util::MakeScopedDeleter([&] {
+  ABSL_ATTRIBUTE_UNUSED auto at_exit = util::MakeScopedCallback([&] {
     if (panel->layer() == PanelLayer::kBottom) {
       XLowerWindow(server.dsp, panel->main_win_);
     }
@@ -895,7 +897,8 @@ start:
   InitX11();
 
   Timer timer;
-  auto cleanup = util::MakeScopedDeleter([&] { Cleanup(timer); });
+  ABSL_ATTRIBUTE_UNUSED auto cleanup =
+      util::MakeScopedCallback([&] { Cleanup(timer); });
 
   config::Reader config_reader{&server};
   bool config_read = false;

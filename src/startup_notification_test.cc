@@ -9,6 +9,8 @@
 #include <libsn/sn.h>
 #endif  // HAVE_SN
 
+#include "absl/base/attributes.h"
+
 #include "startup_notification.hh"
 #include "util/common.hh"
 #include "util/environment.hh"
@@ -40,7 +42,8 @@ void CloseDisplay(SnDisplay* SN_MAYBE_UNUSED(sn_dpy)) {
 
 TEST_CASE("StartupNotification") {
   SnDisplay* sn_dpy = GetDisplay();
-  auto sn_dpy_deleter = util::MakeScopedDeleter([=] { CloseDisplay(sn_dpy); });
+  ABSL_ATTRIBUTE_UNUSED auto sn_dpy_deleter =
+      util::MakeScopedCallback([=] { CloseDisplay(sn_dpy); });
 
   StartupNotification sn{sn_dpy, 0};
   sn.set_name("test");
