@@ -59,6 +59,7 @@ after_success:
     --build-root build/
     --exclude build/CMakeFiles/
     --exclude build/generated/
+    --exclude abseil-cpp/
     --exclude external_includes/
     --exclude test/
     --exclude-pattern '_test\.cc$'
