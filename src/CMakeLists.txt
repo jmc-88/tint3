@@ -176,6 +176,7 @@ target_link_libraries(
     startup_notification_lib
     window_lib
     x11_lib
+    absl::time
     ${X11_X11_LIB}
     ${X11_Xrandr_LIB}
     ${X11_Xrender_LIB}

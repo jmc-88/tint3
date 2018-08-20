@@ -29,6 +29,8 @@
 #include <iostream>
 #include <memory>
 
+#include "absl/time/clock.h"
+
 #include "config.hh"
 #include "server.hh"
 #include "util/common.hh"
@@ -308,7 +310,7 @@ void Server::InitDesktops() {
       break;
     }
 
-    sleep(1);
+    absl::SleepFor(absl::Seconds(1));
   }
 
   if (num_desktops_ == 0) {
