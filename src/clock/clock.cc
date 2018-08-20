@@ -30,10 +30,10 @@
 #include <ctime>
 #include <string>
 
+#include "absl/time/clock.h"
 #include "absl/time/time.h"
 
 #include "clock/clock.hh"
-#include "clock/time_utils.hh"
 #include "panel.hh"
 #include "server.hh"
 #include "subprocess.hh"
@@ -49,11 +49,32 @@ std::string time_tooltip_format;
 std::string time_tooltip_timezone;
 std::string clock_lclick_command;
 std::string clock_rclick_command;
-time_t time_clock;
+absl::Time time_clock;
 util::pango::FontDescriptionPtr time1_font_desc;
 util::pango::FontDescriptionPtr time2_font_desc;
 bool clock_enabled;
 static Interval::Id clock_timeout;
+
+namespace {
+
+absl::TimeZone LoadTimeZone(std::string const& timezone) {
+  if (timezone.empty()) return absl::LocalTimeZone();
+
+  absl::TimeZone tz;
+  if (absl::LoadTimeZone(timezone, &tz)) {
+    util::log::Error() << "Failed to load timezone \"" << timezone
+                       << "\". Falling back to local time.\n";
+    return absl::LocalTimeZone();
+  }
+  return tz;
+}
+
+std::string FormatTime(std::string const& format, std::string const& timezone,
+                       absl::Time time) {
+  return absl::FormatTime(format, time, ::LoadTimeZone(timezone));
+}
+
+}  // namespace
 
 void DefaultClock() {
   clock_enabled = false;
@@ -86,7 +107,7 @@ void CleanupClock(Timer& timer) {
 }
 
 bool UpdateClockSeconds() {
-  time(&time_clock);
+  time_clock = absl::Now();
 
   if (!time1_format.empty()) {
     for (Panel& p : panels) {
@@ -101,10 +122,11 @@ bool UpdateClockSeconds() {
 bool UpdateClockMinutes() {
   // remember old_time because after suspend/hibernate the clock should be
   // updated directly, and not on the next minute change
-  time_t old_time = time_clock;
-  time(&time_clock);
+  absl::Time old_time = time_clock;
+  time_clock = absl::Now();
 
-  if (time_clock % 60 == 0 || time_clock - old_time > 60) {
+  absl::Time::Breakdown bd = time_clock.In(::LoadTimeZone(time1_timezone));
+  if (bd.second == 0 || time_clock - old_time > absl::Seconds(60)) {
     if (!time1_format.empty()) {
       for (Panel& p : panels) {
         p.clock()->need_resize_ = true;
@@ -117,8 +139,7 @@ bool UpdateClockMinutes() {
 }
 
 std::string Clock::GetTooltipText() {
-  return FormatTime(time_tooltip_format,
-                    ClockGetTimeForTimezone(time_tooltip_timezone, time_clock));
+  return ::FormatTime(time_tooltip_format, time_tooltip_timezone, time_clock);
 }
 
 void InitClock(Timer& timer) {
@@ -199,14 +220,12 @@ bool Clock::Resize() {
   int time_width = 0, time_height = 0;
   int date_width = 0, date_height = 0;
 
-  time1_ = FormatTime(time1_format,
-                      ClockGetTimeForTimezone(time1_timezone, time_clock));
+  time1_ = ::FormatTime(time1_format, time1_timezone, time_clock);
   GetTextSize(time1_font_desc, time1_, MarkupTag::kNoMarkup, &time_width,
               &time_height);
 
   if (!time2_format.empty()) {
-    time2_ = FormatTime(time2_format,
-                        ClockGetTimeForTimezone(time2_timezone, time_clock));
+    time2_ = ::FormatTime(time2_format, time2_timezone, time_clock);
     GetTextSize(time2_font_desc, time2_, MarkupTag::kNoMarkup, &date_width,
                 &date_height);
   }

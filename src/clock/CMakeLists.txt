@@ -14,9 +14,9 @@ target_link_libraries(
     panel_lib
     server_lib
     subprocess_lib
-    time_utils_lib
     timer_lib
     window_lib
+    absl::time
     ${CAIRO_LIBRARIES}
   PUBLIC
     area_lib
@@ -35,21 +35,3 @@ test_target(
     clock_lib
     testmain
     ${X11_X11_LIB})
-
-add_library(
-  time_utils_lib STATIC
-  time_utils.cc)
-
-target_link_libraries(
-  time_utils_lib
-  PRIVATE
-    environment_lib)
-
-test_target(
-  time_utils_test
-  SOURCES
-    time_utils_test.cc
-  LINK_LIBRARIES
-    environment_lib
-    testmain
-    time_utils_lib)
