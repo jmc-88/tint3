@@ -66,7 +66,7 @@ void PrintVersion() {
 #ifdef _TINT3_DEBUG
   std::cout << "tint3 debug binary (built at " << GIT_BRANCH << "/"
             << GIT_COMMIT_HASH << ")\n";
-#else  // _TINT3_DEBUG
+#else   // _TINT3_DEBUG
   std::cout << "tint3 (v" << TINT3_RELEASE_VERSION << ")\n";
 #endif  // _TINT3_DEBUG
 }
@@ -1063,18 +1063,16 @@ start:
       }
     });
 
-    event_loop.RegisterHandler({UnmapNotify, DestroyNotify},
-                               [&](XEvent& e) {
-                                 if (e.xany.window == tooltip.window()) {
-                                   return;
-                                 }
+    event_loop.RegisterHandler({UnmapNotify, DestroyNotify}, [&](XEvent& e) {
+      if (e.xany.window == tooltip.window()) {
+        return;
+      }
 
-                                 TrayWindow* traywin =
-                                     systray.FindTrayWindow(e.xany.window);
-                                 if (traywin != nullptr) {
-                                   systray.RemoveIcon(traywin, timer);
-                                 }
-                               });
+      TrayWindow* traywin = systray.FindTrayWindow(e.xany.window);
+      if (traywin != nullptr) {
+        systray.RemoveIcon(traywin, timer);
+      }
+    });
   }
 
   event_loop.RegisterHandler(ClientMessage, [&](XEvent& e) {
