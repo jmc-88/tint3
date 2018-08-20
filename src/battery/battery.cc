@@ -37,6 +37,8 @@
 #include <memory>
 #include <string>
 
+#include "absl/time/time.h"
+
 #include "battery/battery.hh"
 #include "battery/battery_interface.hh"
 #include "panel.hh"
@@ -211,8 +213,7 @@ void Battery::InitPanel(Panel* panel, Timer* timer) {
   battery->need_resize_ = true;
 
   if (!battery_timeout) {
-    battery_timeout =
-        timer->SetInterval(std::chrono::seconds(10), UpdateBatteries);
+    battery_timeout = timer->SetInterval(absl::Seconds(10), UpdateBatteries);
     UpdateBatteries();
   }
 }

@@ -30,6 +30,8 @@
 #include <ctime>
 #include <string>
 
+#include "absl/time/time.h"
+
 #include "clock/clock.hh"
 #include "clock/time_utils.hh"
 #include "panel.hh"
@@ -130,7 +132,7 @@ void InitClock(Timer& timer) {
 
   auto& update_func =
       (has_seconds_format ? UpdateClockSeconds : UpdateClockMinutes);
-  clock_timeout = timer.SetInterval(std::chrono::seconds(1), update_func);
+  clock_timeout = timer.SetInterval(absl::Seconds(1), update_func);
   update_func();
 }
 

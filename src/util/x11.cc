@@ -92,18 +92,20 @@ bool EventLoop::RunLoop() {
     int max_fd_ = std::max(x11_file_descriptor_, self_pipe_.ReadEnd());
 
     auto next_interval = timer_.GetNextInterval();
-    std::unique_ptr<struct timeval> next_timeval;
+    struct timeval tv;
+    struct timeval* next_timeval = nullptr;
 
     if (next_interval) {
       auto now = timer_.Now();
       auto until = next_interval->GetTimePoint();
 
-      Duration duration{until - now};
-      next_timeval = ToTimeval(duration);
+      absl::Duration duration{until - now};
+      tv = absl::ToTimeval(duration);
+      next_timeval = &tv;
     }
 
     if (XPending(server_->dsp) ||
-        select(max_fd_ + 1, &fdset, 0, 0, next_timeval.get()) > 0) {
+        select(max_fd_ + 1, &fdset, 0, 0, next_timeval) > 0) {
       // Remove bytes written by WakeUp()
       if (FD_ISSET(self_pipe_.ReadEnd(), &fdset)) {
         self_pipe_.ReadPendingBytes();

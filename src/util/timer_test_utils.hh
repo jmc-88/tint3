@@ -1,7 +1,8 @@
 #ifndef TINT3_UTIL_TIMER_TEST_UTILS_HH
 #define TINT3_UTIL_TIMER_TEST_UTILS_HH
 
-#include <chrono>
+#include "absl/time/time.h"
+
 #include "util/timer.hh"
 
 class FakeClock : public Timer {
@@ -11,13 +12,11 @@ class FakeClock : public Timer {
 
   explicit FakeClock(unsigned int seconds_from_epoch);
 
-  TimePoint Now() const;
-  void AdvanceBy(std::chrono::milliseconds amount);
-
-  static TimePoint SecondsFromEpoch(unsigned int seconds);
+  absl::Time Now() const;
+  void AdvanceBy(absl::Duration amount);
 
  private:
-  TimePoint current_time_;
+  absl::Time current_time_;
 };
 
 #endif  // TINT3_UTIL_TIMER_TEST_UTILS_HH

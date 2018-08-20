@@ -865,7 +865,7 @@ bool Panel::AutohideHide() {
 
 void Panel::AutohideTriggerShow(Timer& timer) {
   autohide_timeout_ =
-      timer.SetTimeout(std::chrono::milliseconds(config_.autohide_show_timeout),
+      timer.SetTimeout(absl::Milliseconds(config_.autohide_show_timeout),
                        [this]() -> bool { return AutohideShow(); });
 }
 
@@ -882,6 +882,6 @@ void Panel::AutohideTriggerHide(Timer& timer) {
   }
 
   autohide_timeout_ =
-      timer.SetTimeout(std::chrono::milliseconds(config_.autohide_hide_timeout),
+      timer.SetTimeout(absl::Milliseconds(config_.autohide_hide_timeout),
                        [this]() -> bool { return AutohideHide(); });
 }

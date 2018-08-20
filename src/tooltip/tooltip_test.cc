@@ -2,8 +2,6 @@
 
 #include <X11/Xlib.h>
 
-#include <chrono>
-
 #include "panel.hh"
 #include "server.hh"
 #include "tooltip/tooltip.hh"
@@ -148,17 +146,17 @@ TEST_CASE_METHOD(TooltipTestFixture, "Show") {
   const int kClockStep = (kTooltipTimeoutMs * 0.4);
 
   // kTooltipTimeoutMs not elapsed yet: window not mapped.
-  fake_clock()->AdvanceBy(std::chrono::milliseconds(kClockStep));
+  fake_clock()->AdvanceBy(absl::Milliseconds(kClockStep));
   timer()->ProcessExpiredIntervals();
   REQUIRE(GetTooltipWindowAttributes().map_state == IsUnmapped);
 
   // kTooltipTimeoutMs not elapsed yet: window not mapped.
-  fake_clock()->AdvanceBy(std::chrono::milliseconds(kClockStep));
+  fake_clock()->AdvanceBy(absl::Milliseconds(kClockStep));
   timer()->ProcessExpiredIntervals();
   REQUIRE(GetTooltipWindowAttributes().map_state == IsUnmapped);
 
   // kTooltipTimeoutMs elapsed: window is mapped.
-  fake_clock()->AdvanceBy(std::chrono::milliseconds(kClockStep));
+  fake_clock()->AdvanceBy(absl::Milliseconds(kClockStep));
   timer()->ProcessExpiredIntervals();
   REQUIRE(GetTooltipWindowAttributes().map_state == IsViewable);
 }
@@ -167,7 +165,7 @@ TEST_CASE_METHOD(TooltipTestFixture, "Hide") {
   // Make window shown first.
   ConcreteArea area;
   tooltip()->Show(&area, nullptr, "test");
-  fake_clock()->AdvanceBy(std::chrono::milliseconds(kTooltipTimeoutMs));
+  fake_clock()->AdvanceBy(absl::Milliseconds(kTooltipTimeoutMs));
   timer()->ProcessExpiredIntervals();
   REQUIRE(GetTooltipWindowAttributes().map_state == IsViewable);
 
@@ -179,19 +177,19 @@ TEST_CASE_METHOD(TooltipTestFixture, "Hide") {
   const int kClockStep = (kTooltipTimeoutMs * 0.4);
 
   // kTooltipTimeoutMs not elapsed yet: window is mapped.
-  fake_clock()->AdvanceBy(std::chrono::milliseconds(kClockStep));
+  fake_clock()->AdvanceBy(absl::Milliseconds(kClockStep));
   timer()->ProcessExpiredIntervals();
 
   REQUIRE(GetTooltipWindowAttributes().map_state == IsViewable);
 
   // kTooltipTimeoutMs not elapsed yet: window is mapped.
-  fake_clock()->AdvanceBy(std::chrono::milliseconds(kClockStep));
+  fake_clock()->AdvanceBy(absl::Milliseconds(kClockStep));
   timer()->ProcessExpiredIntervals();
 
   REQUIRE(GetTooltipWindowAttributes().map_state == IsViewable);
 
   // kTooltipTimeoutMs elapsed: window is not mapped.
-  fake_clock()->AdvanceBy(std::chrono::milliseconds(kClockStep));
+  fake_clock()->AdvanceBy(absl::Milliseconds(kClockStep));
   timer()->ProcessExpiredIntervals();
 
   REQUIRE(GetTooltipWindowAttributes().map_state == IsUnmapped);
@@ -201,7 +199,7 @@ TEST_CASE_METHOD(TooltipTestFixture, "CancelTimeout") {
   // Make window shown first.
   ConcreteArea area;
   tooltip()->Show(&area, nullptr, "test");
-  fake_clock()->AdvanceBy(std::chrono::milliseconds(kTooltipTimeoutMs));
+  fake_clock()->AdvanceBy(absl::Milliseconds(kTooltipTimeoutMs));
   timer()->ProcessExpiredIntervals();
   REQUIRE(GetTooltipWindowAttributes().map_state == IsViewable);
 
@@ -209,7 +207,7 @@ TEST_CASE_METHOD(TooltipTestFixture, "CancelTimeout") {
   // Advance the time, but not enough for the hide timeout to happen.
   tooltip()->Hide();
   fake_clock()->AdvanceBy(
-      std::chrono::milliseconds(static_cast<int>(kTooltipTimeoutMs * .67)));
+      absl::Milliseconds(static_cast<int>(kTooltipTimeoutMs * .67)));
   timer()->ProcessExpiredIntervals();
   REQUIRE(GetTooltipWindowAttributes().map_state == IsViewable);
 
@@ -218,12 +216,12 @@ TEST_CASE_METHOD(TooltipTestFixture, "CancelTimeout") {
   // canceled by Show().
   tooltip()->Show(&area, nullptr, "test");
   fake_clock()->AdvanceBy(
-      std::chrono::milliseconds(static_cast<int>(kTooltipTimeoutMs * .34)));
+      absl::Milliseconds(static_cast<int>(kTooltipTimeoutMs * .34)));
   timer()->ProcessExpiredIntervals();
   REQUIRE(GetTooltipWindowAttributes().map_state == IsViewable);
 
   // Tooltip stays visible afterwards.
-  fake_clock()->AdvanceBy(std::chrono::milliseconds(kTooltipTimeoutMs));
+  fake_clock()->AdvanceBy(absl::Milliseconds(kTooltipTimeoutMs));
   timer()->ProcessExpiredIntervals();
   REQUIRE(GetTooltipWindowAttributes().map_state == IsViewable);
 }

@@ -279,7 +279,8 @@ target_link_libraries(
     log_lib
   PUBLIC
     bimap_lib
-    absl::optional)
+    absl::optional
+    absl::time)
 
 test_target(
   timer_test

@@ -30,6 +30,8 @@
 #include <cstdlib>
 #include <cstring>
 
+#include "absl/time/time.h"
+
 #include "panel.hh"
 #include "server.hh"
 #include "systray/systraybar.hh"
@@ -471,7 +473,8 @@ bool Systraybar::AddIcon(Window id) {
       saturation != 0) {
     traywin->damage =
         XDamageCreate(server.dsp, traywin->tray_id, XDamageReportRawRectangles);
-    XCompositeRedirectWindow(server.dsp, traywin->tray_id, CompositeRedirectManual);
+    XCompositeRedirectWindow(server.dsp, traywin->tray_id,
+                             CompositeRedirectManual);
   }
 
   // show the window
@@ -616,8 +619,8 @@ void Systraybar::RenderIcon(TrayWindow* traywin, Timer& timer) {
     // wine tray icons update whenever mouse is over them, so we limit the
     // updates to 50 ms
     if (!traywin->render_timeout) {
-      traywin->render_timeout = timer.SetTimeout(
-          std::chrono::milliseconds(50), [traywin, &timer]() -> bool {
+      traywin->render_timeout =
+          timer.SetTimeout(absl::Milliseconds(50), [traywin, &timer]() -> bool {
             SystrayRenderIconNow(traywin, timer);
             return true;
           });

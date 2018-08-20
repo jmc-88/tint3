@@ -23,6 +23,8 @@
 #include <map>
 #include <utility>
 
+#include "absl/time/clock.h"
+
 #include "util/log.hh"
 #include "util/timer.hh"
 
@@ -35,8 +37,8 @@ std::atomic<uint64_t> interval_id_counter;
 
 Interval::Interval() {}
 
-Interval::Interval(Interval::Id interval_id, TimePoint time_point,
-                   Duration repeat_interval, Callback callback)
+Interval::Interval(Interval::Id interval_id, absl::Time time_point,
+                   absl::Duration repeat_interval, Callback callback)
     : id_(interval_id),
       time_point_(time_point),
       repeat_interval_(repeat_interval),
@@ -64,24 +66,15 @@ Interval& Interval::operator=(Interval other) {
 
 void Interval::InvokeCallback() const { callback_(); }
 
-TimePoint Interval::GetTimePoint() const { return time_point_; }
+absl::Time Interval::GetTimePoint() const { return time_point_; }
 
-Duration Interval::GetRepeatInterval() const { return repeat_interval_; }
+absl::Duration Interval::GetRepeatInterval() const { return repeat_interval_; }
 
 std::ostream& operator<<(std::ostream& os, Interval const& interval) {
-  os << '[';
+  os << '[' << interval.GetTimePoint();
 
-  auto when = std::chrono::system_clock::to_time_t(
-      std::chrono::system_clock::now() +
-      std::chrono::duration_cast<std::chrono::system_clock::duration>(
-          interval.GetTimePoint() - std::chrono::steady_clock::now()));
-  os << std::put_time(std::localtime(&when), "%F %T");
-
-  auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(
-      interval.GetRepeatInterval());
-  if (ms.count() != 0) {
-    os << "; " << ms.count() << " ms";
-  }
+  auto ms = absl::ToInt64Milliseconds(interval.GetRepeatInterval());
+  if (ms != 0) os << "; " << ms << " ms";
 
   os << ']';
   return os;
@@ -113,39 +106,22 @@ bool CompareIntervals::operator()(Interval const& lhs,
   return CompareIds()(lhs.id_, rhs.id_);
 }
 
-std::unique_ptr<struct timeval> ToTimeval(Duration duration) {
-  std::chrono::microseconds const usec =
-      std::chrono::duration_cast<std::chrono::microseconds>(duration);
-  struct timeval* tv = nullptr;
-
-  if (usec != std::chrono::microseconds(0)) {
-    tv = new struct timeval;
-    tv->tv_sec =
-        std::chrono::duration_cast<std::chrono::seconds>(duration - usec)
-            .count();
-    tv->tv_usec = usec.count();
-  }
-
-  return std::unique_ptr<struct timeval>(tv);
-}
-
-Timer::Timer() : get_current_time_(std::chrono::steady_clock::now) {}
+Timer::Timer() : get_current_time_(absl::Now) {}
 
 Timer::Timer(TimerCallback get_current_time_callback)
     : get_current_time_(get_current_time_callback) {}
 
-TimePoint Timer::Now() const { return get_current_time_(); }
+absl::Time Timer::Now() const { return get_current_time_(); }
 
-Interval::Id Timer::SetTimeout(Duration timeout_interval,
+Interval::Id Timer::SetTimeout(absl::Duration timeout_interval,
                                Interval::Callback callback) {
   Interval::Id id{++interval_id_counter};
-  timeouts_.insert(
-      id, Interval{id, Now() + timeout_interval, std::chrono::milliseconds(0),
-                   std::move(callback)});
+  timeouts_.insert(id, Interval{id, Now() + timeout_interval,
+                                absl::Milliseconds(0), std::move(callback)});
   return id;
 }
 
-Interval::Id Timer::SetInterval(Duration repeat_interval,
+Interval::Id Timer::SetInterval(absl::Duration repeat_interval,
                                 Interval::Callback callback) {
   Interval::Id id{++interval_id_counter};
   intervals_.insert(id, Interval{id, Now() + repeat_interval, repeat_interval,
@@ -164,7 +140,7 @@ bool Timer::ClearInterval(Interval::Id interval_id) {
 }
 
 void Timer::ProcessExpiredIntervals() {
-  TimePoint now = get_current_time_();
+  absl::Time now = get_current_time_();
 
   while (true) {
     auto it = timeouts_.right.begin();

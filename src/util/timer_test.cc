@@ -1,6 +1,5 @@
 #include "catch.hpp"
 
-#include <chrono>
 #include <functional>
 #include <limits>
 
@@ -9,10 +8,10 @@
 
 TEST_CASE("FakeClock", "Test the fake clock has a sane implementation") {
   FakeClock fake_clock{0};
-  REQUIRE(fake_clock.Now() == FakeClock::SecondsFromEpoch(0));
+  REQUIRE(fake_clock.Now() == absl::FromUnixSeconds(0));
 
-  fake_clock.AdvanceBy(std::chrono::seconds(30));
-  REQUIRE(fake_clock.Now() == FakeClock::SecondsFromEpoch(30));
+  fake_clock.AdvanceBy(absl::Seconds(30));
+  REQUIRE(fake_clock.Now() == absl::FromUnixSeconds(30));
 }
 
 TEST_CASE("Interval", "Test the Interval class") {
@@ -21,8 +20,8 @@ TEST_CASE("Interval", "Test the Interval class") {
 
   SECTION("correctly invokes the registered callback_") {
     bool was_invoked = false;
-    Interval interval{123UL, fake_clock.Now(),
-                      std::chrono::milliseconds(0), [&was_invoked]() -> bool {
+    Interval interval{123UL, fake_clock.Now(), absl::Milliseconds(0),
+                      [&was_invoked]() -> bool {
                         was_invoked = true;
                         return true;
                       }};
@@ -33,29 +32,27 @@ TEST_CASE("Interval", "Test the Interval class") {
   }
 
   SECTION("correctly initializes time_point_") {
-    Interval interval{123UL, fake_clock.Now() + std::chrono::seconds(5),
-                      std::chrono::milliseconds(0), no_op_callback};
-    REQUIRE(interval.GetTimePoint() == FakeClock::SecondsFromEpoch(15));
+    Interval interval{123UL, fake_clock.Now() + absl::Seconds(5),
+                      absl::Milliseconds(0), no_op_callback};
+    REQUIRE(interval.GetTimePoint() == absl::FromUnixSeconds(15));
   }
 
   SECTION("correctly initializes repeat_interval_") {
-    Duration _100ms = std::chrono::milliseconds(100);
+    absl::Duration _100ms = absl::Milliseconds(100);
     Interval interval{123UL, fake_clock.Now(), _100ms, no_op_callback};
     REQUIRE(interval.GetRepeatInterval() == _100ms);
   }
 
   SECTION("correctly assigns to an interval") {
-    Interval first_interval{1UL, fake_clock.Now(),
-                            std::chrono::milliseconds(0), no_op_callback};
-    Interval second_interval{2UL, fake_clock.Now(),
-                             std::chrono::milliseconds(50), no_op_callback};
+    Interval first_interval{1UL, fake_clock.Now(), absl::Milliseconds(0),
+                            no_op_callback};
+    Interval second_interval{2UL, fake_clock.Now(), absl::Milliseconds(50),
+                             no_op_callback};
     REQUIRE(first_interval.GetRepeatInterval() !=
             second_interval.GetRepeatInterval());
     first_interval = second_interval;
-    REQUIRE(first_interval.GetRepeatInterval() ==
-            std::chrono::milliseconds(50));
-    REQUIRE(second_interval.GetRepeatInterval() ==
-            std::chrono::milliseconds(50));
+    REQUIRE(first_interval.GetRepeatInterval() == absl::Milliseconds(50));
+    REQUIRE(second_interval.GetRepeatInterval() == absl::Milliseconds(50));
   }
 }
 
@@ -94,7 +91,7 @@ TEST_CASE("Timer", "Test the Timer class") {
     REQUIRE(timeouts.empty());
 
     Interval::Id interval =
-        timer.SetTimeout(std::chrono::milliseconds(100), no_op_callback);
+        timer.SetTimeout(absl::Milliseconds(100), no_op_callback);
     REQUIRE(timeouts.size() == 1);
 
     REQUIRE(timer.ClearInterval(interval));
@@ -106,7 +103,7 @@ TEST_CASE("Timer", "Test the Timer class") {
     REQUIRE(intervals.empty());
 
     Interval::Id interval =
-        timer.SetInterval(std::chrono::milliseconds(100), no_op_callback);
+        timer.SetInterval(absl::Milliseconds(100), no_op_callback);
     REQUIRE(intervals.size() == 1);
 
     REQUIRE(timer.ClearInterval(interval));
@@ -122,18 +119,17 @@ TEST_CASE("Timer", "Test the Timer class") {
 
   SECTION("correctly processes an interval (single)") {
     unsigned int invocations_count = 0;
-    timer.SetTimeout(std::chrono::milliseconds(100),
-                     [&invocations_count]() -> bool {
-                       ++invocations_count;
-                       return true;
-                     });
+    timer.SetTimeout(absl::Milliseconds(100), [&invocations_count]() -> bool {
+      ++invocations_count;
+      return true;
+    });
 
     auto const& timeouts = ChronoTimerTestUtils::GetTimeouts(timer);
     timer.ProcessExpiredIntervals();
     REQUIRE(invocations_count == 0);
     REQUIRE(timeouts.size() == 1);
 
-    fake_clock.AdvanceBy(std::chrono::milliseconds(300));
+    fake_clock.AdvanceBy(absl::Milliseconds(300));
     timer.ProcessExpiredIntervals();
     REQUIRE(invocations_count == 1);
     REQUIRE(timeouts.empty());
@@ -141,11 +137,10 @@ TEST_CASE("Timer", "Test the Timer class") {
 
   SECTION("correctly processes an interval (repeating)") {
     unsigned int invocations_count = 0;
-    timer.SetInterval(std::chrono::milliseconds(250),
-                      [&invocations_count]() -> bool {
-                        ++invocations_count;
-                        return true;
-                      });
+    timer.SetInterval(absl::Milliseconds(250), [&invocations_count]() -> bool {
+      ++invocations_count;
+      return true;
+    });
 
     // time: 0 ms
     // next invocation: >= 250 ms
@@ -158,7 +153,7 @@ TEST_CASE("Timer", "Test the Timer class") {
     // time: skip to 600 ms
     // next invocation: >= 750 ms
     // 1 invocation, interval was not erased
-    fake_clock.AdvanceBy(std::chrono::milliseconds(600));
+    fake_clock.AdvanceBy(absl::Milliseconds(600));
     timer.ProcessExpiredIntervals();
     REQUIRE(invocations_count == 1);
     REQUIRE(intervals.size() == 1);
@@ -166,7 +161,7 @@ TEST_CASE("Timer", "Test the Timer class") {
     // time: skip to 900 ms
     // next invocation: >= 1000 ms
     // 2 invocations, interval was not erased
-    fake_clock.AdvanceBy(std::chrono::milliseconds(300));
+    fake_clock.AdvanceBy(absl::Milliseconds(300));
     timer.ProcessExpiredIntervals();
     REQUIRE(invocations_count == 2);
     REQUIRE(intervals.size() == 1);
@@ -177,21 +172,20 @@ TEST_CASE("Timer", "Test the Timer class") {
     REQUIRE_FALSE(timer.GetNextInterval().has_value());
 
     // Unordered insertion should still return the first interval
-    timer.SetTimeout(std::chrono::milliseconds(250), no_op_callback);
-    timer.SetTimeout(std::chrono::milliseconds(500), no_op_callback);
-    timer.SetTimeout(std::chrono::milliseconds(175), no_op_callback);
+    timer.SetTimeout(absl::Milliseconds(250), no_op_callback);
+    timer.SetTimeout(absl::Milliseconds(500), no_op_callback);
+    timer.SetTimeout(absl::Milliseconds(175), no_op_callback);
 
     auto next_timeout = timer.GetNextInterval();
-    REQUIRE(next_timeout);
+    REQUIRE(next_timeout.has_value());
     REQUIRE(next_timeout->GetTimePoint() ==
-            TimePoint(std::chrono::milliseconds(175)));
+            absl::FromUnixSeconds(0) + absl::Milliseconds(175));
 
     // The same applies to repeating intervals
-    timer.SetInterval(std::chrono::milliseconds(100), no_op_callback);
+    timer.SetInterval(absl::Milliseconds(100), no_op_callback);
 
     auto next_interval = timer.GetNextInterval();
-    REQUIRE(next_interval);
-    REQUIRE(next_interval->GetRepeatInterval() ==
-            Duration(std::chrono::milliseconds(100)));
+    REQUIRE(next_interval.has_value());
+    REQUIRE(next_interval->GetRepeatInterval() == absl::Milliseconds(100));
   }
 }

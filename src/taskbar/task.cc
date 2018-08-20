@@ -33,6 +33,8 @@
 #include <iterator>
 #include <vector>
 
+#include "absl/time/time.h"
+
 #include "panel.hh"
 #include "server.hh"
 #include "taskbar/task.hh"
@@ -674,7 +676,7 @@ void Task::AddUrgent() {
     urgent_list.push_front(tsk);
 
     if (!urgent_timeout) {
-      urgent_timeout = timer_.SetInterval(std::chrono::seconds(1), BlinkUrgent);
+      urgent_timeout = timer_.SetInterval(absl::Seconds(1), BlinkUrgent);
       BlinkUrgent();
     }
   }

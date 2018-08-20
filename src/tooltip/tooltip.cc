@@ -1,5 +1,7 @@
 #include <pango/pangocairo.h>
 
+#include "absl/time/time.h"
+
 #include "tooltip/tooltip.hh"
 
 #include "panel.hh"
@@ -46,7 +48,7 @@ void Tooltip::Show(Area const* area, XEvent const* e, std::string text) {
     timer_->ClearInterval(timeout_);
   }
   timeout_ = timer_->SetTimeout(
-      std::chrono::milliseconds(tooltip_config.show_timeout_msec), [=] {
+      absl::Milliseconds(tooltip_config.show_timeout_msec), [=] {
         timeout_.reset();
         XMapWindow(server_->dsp, window_);
         Update(area, e, text);
@@ -213,7 +215,7 @@ void Tooltip::Hide() {
     timer_->ClearInterval(timeout_);
   }
   timeout_ = timer_->SetTimeout(
-      std::chrono::milliseconds(tooltip_config.hide_timeout_msec), [=] {
+      absl::Milliseconds(tooltip_config.hide_timeout_msec), [=] {
         area_ = nullptr;
         timeout_.reset();
         XUnmapWindow(server_->dsp, window_);
