@@ -88,31 +88,17 @@ iterator_range<typename T::iterator> range_skip_n(T& container, size_t offset) {
 
 namespace string {
 
-class Builder {
-  std::ostringstream ss_;
-
- public:
-  template <typename T>
-  Builder& operator<<(T const& value) {
-    ss_ << value;
-    return (*this);
-  }
-
-  Builder& operator<<(std::nullptr_t const& /*value*/);
-
-  operator std::string() const;
-};
-
 template <typename T>
 std::string Representation(T const& value) {
-  return Builder() << value;
+  std::ostringstream ss;
+  ss << value;
+  return ss.str();
 }
 
 bool ToNumber(absl::string_view str, int* ptr);
 bool ToNumber(absl::string_view str, long* ptr);
 bool ToNumber(absl::string_view str, float* ptr);
 
-std::string& Trim(std::string* str);
 bool RegexMatch(std::string const& pattern, std::string const& string);
 
 void ToLowerCase(std::string* str);
@@ -148,5 +134,7 @@ void AdjustASB(DATA32* data, unsigned int w, unsigned int h, int alpha,
 void CreateHeuristicMask(DATA32* data, int w, int h);
 
 void RenderImage(Server* server, Drawable d, int x, int y, int w, int h);
+
+std::ostream& operator<<(std::ostream& os, std::nullptr_t);
 
 #endif  // TINT3_UTIL_COMMON_HH

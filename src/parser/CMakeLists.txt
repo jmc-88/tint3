@@ -4,6 +4,8 @@ add_library(
 
 target_link_libraries(
   parser_lib
+  PRIVATE
+    absl::strings
   PUBLIC
     common_lib
     lexer_lib)

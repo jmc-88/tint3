@@ -33,6 +33,7 @@
 #include <string>
 
 #include "absl/strings/ascii.h"
+#include "absl/strings/str_format.h"
 #include "absl/strings/str_split.h"
 
 #include "launcher.hh"
@@ -611,13 +612,11 @@ void ExpandExec(launcher::desktop_entry::Group* group,
       if (*c == 'i' && group->HasEntry("Icon")) {
         // TODO: this should really be a vector of args, otherwise we need to
         // introduce proper escaping too...
-        expanded.append(util::string::Builder()
-                        << "--icon '" << group->GetEntry<std::string>("Icon")
-                        << '\'');
+        absl::StrAppendFormat(&expanded, "--icon '%s'",
+                              group->GetEntry<std::string>("Icon"));
       } else if (*c == 'c' && group->HasEntry("Name")) {
-        expanded.append(util::string::Builder()
-                        << '\'' << group->GetEntry<std::string>("Name")
-                        << '\'');
+        absl::StrAppendFormat(&expanded, "'%s'",
+                              group->GetEntry<std::string>("Name"));
       } else if (*c == 'f' || *c == 'F') {
         // Ignore the expansions in this case, we have no files to pass to the
         // executable.

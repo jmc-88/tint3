@@ -1,5 +1,6 @@
 #include <functional>
 #include <iostream>
+#include <sstream>
 #include <string>
 
 #include "util/common.hh"
@@ -39,22 +40,21 @@ The remaining operations require a sequence of theme names as their arguments.
 namespace curl {
 
 size_t WriteCallback(char* ptr, size_t size, size_t nmemb, void* userdata) {
-  util::string::Builder& b =
-      *reinterpret_cast<util::string::Builder*>(userdata);
-  b << std::string{ptr, size * nmemb};
+  std::ostringstream& ss = *reinterpret_cast<std::ostringstream*>(userdata);
+  ss << std::string{ptr, size * nmemb};
   return size * nmemb;
 }
 
 bool FetchURL(CURL* c, std::string const& url, std::string* result) {
-  util::string::Builder b;
+  std::ostringstream ss;
   curl_easy_setopt(c, CURLOPT_URL, url.c_str());
   curl_easy_setopt(c, CURLOPT_WRITEFUNCTION, curl::WriteCallback);
-  curl_easy_setopt(c, CURLOPT_WRITEDATA, &b);
+  curl_easy_setopt(c, CURLOPT_WRITEDATA, &ss);
   CURLcode res = curl_easy_perform(c);
   if (res != CURLE_OK) {
     return false;
   }
-  result->assign(b);
+  result->assign(ss.str());
   return true;
 }
 

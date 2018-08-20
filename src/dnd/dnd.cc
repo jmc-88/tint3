@@ -1,4 +1,5 @@
 #include <cstring>
+#include <sstream>
 
 #include "dnd/dnd.hh"
 #include "server.hh"
@@ -55,7 +56,7 @@ std::string BuildCommand(std::string const& dnd_launcher_exec,
   const char* data = static_cast<const char*>(prop.data);
   unsigned int total = prop.nitems * prop.format / 8;
 
-  util::string::Builder cmd;
+  std::ostringstream cmd;
   cmd << dnd_launcher_exec << " \"";
   for (unsigned int i = 0; i < total; i++) {
     char c = data[i];
@@ -73,7 +74,7 @@ std::string BuildCommand(std::string const& dnd_launcher_exec,
     }
   }
   cmd << '"';
-  return cmd;
+  return cmd.str();
 }
 
 // This function takes a list of targets which can be converted to (atom_list,

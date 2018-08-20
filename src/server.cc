@@ -29,6 +29,7 @@
 #include <iostream>
 #include <memory>
 
+#include "absl/strings/str_cat.h"
 #include "absl/time/clock.h"
 
 #include "config.hh"
@@ -93,18 +94,15 @@ void Server::InitAtoms() {
     atoms_.insert(std::make_pair(kAtomList[i], atom_list[i]));
   }
 
-  std::string name;
-  Atom atom;
-
-  name.assign(util::string::Builder() << "_NET_WM_CM_S" << DefaultScreen(dsp));
-  atom = XInternAtom(dsp, name.c_str(), False);
+  std::string name = absl::StrCat("_NET_WM_CM_S", DefaultScreen(dsp));
+  Atom atom = XInternAtom(dsp, name.c_str(), False);
   atoms_.insert(std::make_pair("_NET_WM_CM_SCREEN", atom));
 
   if (atom == None) {
     util::log::Error() << "tint3: XInternAtom(\"" << name << "\") failed\n";
   }
 
-  name.assign(util::string::Builder() << "_XSETTINGS_S" << DefaultScreen(dsp));
+  name = absl::StrCat("_XSETTINGS_S", DefaultScreen(dsp));
   atom = XInternAtom(dsp, name.c_str(), False);
   atoms_.insert(std::make_pair("_XSETTINGS_SCREEN", atom));
 
@@ -112,8 +110,7 @@ void Server::InitAtoms() {
     util::log::Error() << "tint3: XInternAtom(\"" << name << "\") failed\n";
   }
 
-  name.assign(util::string::Builder() << "_NET_SYSTEM_TRAY_S"
-                                      << DefaultScreen(dsp));
+  name = absl::StrCat("_NET_SYSTEM_TRAY_S", DefaultScreen(dsp));
   atom = XInternAtom(dsp, name.c_str(), False);
   atoms_.insert(std::make_pair("_NET_SYSTEM_TRAY_SCREEN", atom));
 
@@ -233,8 +230,8 @@ void GetMonitors() {
         // of zero. For reference:
         //  https://cgit.freedesktop.org/xorg/proto/randrproto/tree/randrproto.txt?id=57d3ab1aa7daea9b351dd8bf41ad94522c786d79#n975
         if (crtc_info->width == 0 || crtc_info->height == 0) {
-          util::log::Debug() << "XRandR: skipping disabled output " << i
-                             << '\n';
+          util::log::Debug()
+              << "XRandR: skipping disabled output " << i << '\n';
           continue;
         }
 

@@ -19,6 +19,7 @@ target_link_libraries(
     subprocess_lib
     taskbar_lib
     xdg_lib
+    absl::str_format
     ${CAIRO_LIBRARIES}
   PUBLIC
     area_lib

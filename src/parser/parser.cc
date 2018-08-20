@@ -1,6 +1,9 @@
-#include "util/common.hh"
+#include "absl/strings/str_cat.h"
+#include "absl/strings/str_join.h"
 
 #include "parser/parser.hh"
+
+#include "util/common.hh"
 
 namespace parser {
 
@@ -52,11 +55,10 @@ bool TokenList::SkipUntil(Symbol symbol, std::vector<Token>* output) {
 }
 
 std::string TokenList::JoinSkipped(std::vector<Token> const& tokens) {
-  util::string::Builder sb;
-  for (Token const& token : tokens) {
-    sb << token.match;
-  }
-  return sb;
+  static auto token_formatter = [](std::string* out, Token const& t) {
+    absl::StrAppend(out, t.match);
+  };
+  return absl::StrJoin(tokens, "", token_formatter);
 }
 
 Parser::Parser(Lexer lexer, ParseCallback* entry_fn)

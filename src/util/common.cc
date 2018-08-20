@@ -52,13 +52,6 @@ void GObjectUnrefDeleter::operator()(gpointer data) const {
 }
 
 namespace string {
-
-Builder& Builder::operator<<(std::nullptr_t const& /*value*/) {
-  return (*this);
-}
-
-Builder::operator std::string() const { return ss_.str(); }
-
 namespace {
 
 template <typename T>
@@ -92,21 +85,6 @@ bool ToNumber(absl::string_view str, float* ptr) {
                       +[](float f) { return std::isfinite(f); });
 }
 
-std::string& Trim(std::string* str) {
-  static char const* space_chars = " \f\n\r\t\v";
-
-  auto first = str->find_first_not_of(space_chars);
-  if (first == std::string::npos) {
-    str->clear();
-    return (*str);
-  }
-
-  auto last = str->find_last_not_of(space_chars);
-  str->erase(0, first);
-  str->erase(last - first + 1, std::string::npos);
-  return (*str);
-}
-
 bool RegexMatch(std::string const& pattern, std::string const& string) {
   std::smatch matches;
   return std::regex_match(string, matches, std::regex(pattern));
@@ -121,6 +99,10 @@ void ToLowerCase(std::string* str) {
 }  // namespace util
 
 const unsigned int kAllDesktops = std::numeric_limits<unsigned int>::max();
+
+std::ostream& operator<<(std::ostream& os, std::nullptr_t) {
+  return os << "(nullptr)";
+}
 
 bool SignalAction(int signal_number, void signal_handler(int), int flags) {
   struct sigaction sa;

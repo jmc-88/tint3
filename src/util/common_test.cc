@@ -32,7 +32,7 @@ TEST_CASE("RegexMatch",
 
 TEST_CASE("StringRepresentation") {
   SECTION("Pointers") {
-    REQUIRE(util::string::Representation(nullptr) == "");
+    REQUIRE(util::string::Representation(nullptr) == "(nullptr)");
     REQUIRE(util::string::Representation(reinterpret_cast<void*>(0x1234)) ==
             "0x1234");
   }

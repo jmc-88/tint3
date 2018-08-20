@@ -45,6 +45,7 @@
 
 #include "absl/strings/ascii.h"
 #include "absl/strings/match.h"
+#include "absl/strings/str_join.h"
 #include "absl/strings/str_split.h"
 
 #include "clock/clock.hh"
@@ -137,18 +138,15 @@ bool IdentifierMatcher(std::string const& buffer, unsigned int* position,
 }
 
 std::string ExpandWords(std::string const& line) {
-  util::string::Builder sb;
+  std::vector<std::string> pieces;
   wordexp_t we;
   if (wordexp(line.c_str(), &we, WRDE_NOCMD | WRDE_UNDEF) == 0) {
     for (char** ptr = we.we_wordv; *ptr != nullptr; ++ptr) {
-      if (ptr != we.we_wordv) {
-        sb << ' ';
-      }
-      sb << (*ptr);
+      pieces.emplace_back(*ptr);
     }
     wordfree(&we);
   }
-  return sb;
+  return absl::StrJoin(pieces, " ");
 }
 
 }  // namespace
