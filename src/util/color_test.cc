@@ -2,6 +2,7 @@
 
 #include <limits>
 
+#include "behavior_control.hh"
 #include "util/color.hh"
 
 TEST_CASE("Color", "SetColorFromHexString") {
@@ -55,17 +56,10 @@ TEST_CASE("Border", "Copying") {
   Border b2{b1};
   REQUIRE(b2 == b1);
 
-#ifdef __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wpessimizing-move"
-#endif  // __clang__
-  Border b3{std::move(b1)};
+  FORCE_STD_MOVE(Border b3{std::move(b1)});
   // b1 was moved at this point, check against b2 which was guaranteed to be
   // equal to b1 by the above check
   REQUIRE(b3 == b2);
-#ifdef __clang__
-#pragma clang diagnostic pop
-#endif  // __clang__
 }
 
 TEST_CASE("Border::set_mask") {

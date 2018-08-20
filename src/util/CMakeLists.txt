@@ -101,6 +101,8 @@ test_target(
   color_test
   SOURCES
     color_test.cc
+  DEPENDS
+    behavior_control_lib
   LINK_LIBRARIES
     color_lib
     testmain)
@@ -139,6 +141,7 @@ test_target(
     fs_test.cc
   DEPENDS
     testdata
+    behavior_control_lib
   LINK_LIBRARIES
     environment_lib
     fs_lib
@@ -213,6 +216,8 @@ test_target(
   imlib2_test
   SOURCES
     imlib2_test.cc
+  DEPENDS
+    behavior_control_lib
   LINK_LIBRARIES
     imlib2_lib
     testmain)

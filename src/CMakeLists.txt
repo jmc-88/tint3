@@ -38,6 +38,14 @@ install(
   DESTINATION bin)
 
 add_library(
+  behavior_control_lib INTERFACE)
+
+target_sources(
+  behavior_control_lib
+  INTERFACE
+    "${PROJECT_SOURCE_DIR}/src/behavior_control.hh")
+
+add_library(
   config_lib STATIC
   config.cc)
 

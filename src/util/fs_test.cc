@@ -8,22 +8,16 @@
 #include <string>
 #include <utility>
 
+#include "behavior_control.hh"
 #include "util/environment.hh"
 #include "util/fs.hh"
 #include "util/fs_test_utils.hh"
 
 TEST_CASE("Path", "Represents a filesystem path string") {
   SECTION("move constructor") {
-#ifdef __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wpessimizing-move"
-#endif  // __clang__
     auto new_path = []() -> util::fs::Path { return "/move"; };
-    util::fs::Path moved_path{std::move(new_path())};
+    FORCE_STD_MOVE(util::fs::Path moved_path{std::move(new_path())});
     REQUIRE(moved_path == "/move");
-#ifdef __clang__
-#pragma clang diagnostic pop
-#endif  // __clang__
   }
 
   SECTION("assignment") {

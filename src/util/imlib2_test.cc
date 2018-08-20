@@ -3,6 +3,7 @@
 #include <random>
 #include <utility>
 
+#include "behavior_control.hh"
 #include "util/imlib2.hh"
 
 TEST_CASE("imlib2::Image::Image", "Construction/destruction") {
@@ -20,20 +21,14 @@ TEST_CASE("imlib2::Image::Image", "Construction/destruction") {
   REQUIRE(copy_of_empty_image != nullptr);
   REQUIRE(copy_of_empty_image != empty_image);
 
-#ifdef __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wpessimizing-move"
-#endif  // __clang__
   // Lambda that returns a temporary util::imlib2::Image object, to test the
   // move constructor also works.
   auto new_imlib2_image = []() -> util::imlib2::Image {
     return imlib_create_image(100, 100);
   };
-  util::imlib2::Image moved_image{std::move(new_imlib2_image())};
+  FORCE_STD_MOVE(
+      util::imlib2::Image moved_image{std::move(new_imlib2_image())});
   REQUIRE(moved_image != nullptr);
-#ifdef __clang__
-#pragma clang diagnostic pop
-#endif  // __clang__
 }
 
 TEST_CASE("imlib2::Image::operator=", "Assignment") {

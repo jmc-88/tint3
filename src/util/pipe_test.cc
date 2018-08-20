@@ -11,6 +11,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#include "behavior_control.hh"
 #include "unix_features.hh"
 #include "util/log.hh"
 #include "util/pipe.hh"
@@ -24,14 +25,7 @@ TEST_CASE("move constructor") {
   REQUIRE(read_fd != -1);
   REQUIRE(write_fd != -1);
 
-#ifdef __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wpessimizing-move"
-#endif  // __clang__
-  util::Pipe p2{std::move(p1)};
-#ifdef __clang__
-#pragma clang diagnostic pop
-#endif  // __clang__
+  FORCE_STD_MOVE(util::Pipe p2{std::move(p1)});
 
   REQUIRE(p2.IsAlive());
   REQUIRE(p2.ReadEnd() == read_fd);
