@@ -56,7 +56,9 @@ after_success:
     coveralls
     --root "${TRAVIS_BUILD_DIR}"
     --build-root "${TRAVIS_BUILD_DIR}/build"
-    --exclude build
+    --exclude build/abseil-cpp
+    --exclude build/generated
+    --exclude build/CMakeFiles
     --exclude abseil-cpp
     --exclude external_includes
     --exclude test
