@@ -11,6 +11,7 @@
 #include "clock/clock.hh"
 #include "execp/execp.hh"
 #include "launcher/launcher.hh"
+#include "server.hh"
 #include "systray/systraybar.hh"
 #include "taskbar/task.hh"
 #include "taskbar/taskbar.hh"
