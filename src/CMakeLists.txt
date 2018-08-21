@@ -116,7 +116,6 @@ target_link_libraries(
   PRIVATE
     config_lib
     log_lib
-    server_lib
     tooltip_lib
     x11_lib
     ${CAIRO_LIBRARIES}
@@ -129,6 +128,7 @@ target_link_libraries(
     gradient_lib
     imlib2_lib
     launcher_lib
+    server_lib
     systraybar_lib
     task_lib
     taskbar_lib
