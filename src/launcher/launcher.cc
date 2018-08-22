@@ -158,19 +158,14 @@ void CleanupLauncher() {
 void Launcher::CleanupTheme() {
   FreeArea();
 
-  for (auto const& launcher_icon : list_icons_) {
-    if (launcher_icon != nullptr) {
-      delete launcher_icon;
-    }
+  for (auto const& icon : list_icons_) {
+    if (icon) delete icon;
   }
+  list_icons_.clear();
 
   for (auto const& theme : list_themes_) {
-    if (theme != nullptr) {
-      delete theme;
-    }
+    if (theme) delete theme;
   }
-
-  list_icons_.clear();
   list_themes_.clear();
 }
 
