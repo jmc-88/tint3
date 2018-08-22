@@ -25,7 +25,7 @@ target_link_libraries(
     area_lib
     common_lib
     imlib2_lib
-    xsettings_client_lib)
+    ${XSETTINGS_CLIENT_LIBRARIES})
 
 test_target(
   launcher_test
@@ -61,28 +61,3 @@ test_target(
     desktop_entry_lib
     parser_lib
     testmain)
-
-add_library(
-  xsettings_client_lib STATIC
-  xsettings-client.cc)
-
-target_sources(
-  xsettings_client_lib
-  PRIVATE
-    xsettings-common.cc)
-
-target_include_directories(
-  xsettings_client_lib
-  PRIVATE
-    ${X11_X11_INCLUDE_DIRS})
-
-target_link_libraries(
-  xsettings_client_lib
-  PRIVATE
-    log_lib
-    panel_lib
-    server_lib
-    x11_lib
-  PUBLIC
-    server_lib
-    ${X11_X11_LIB})

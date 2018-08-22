@@ -21,6 +21,7 @@
 #include <cairo.h>
 #include <signal.h>
 #include <unistd.h>
+#include <xsettings-client.h>
 
 #include <algorithm>
 #include <cstdio>
@@ -60,6 +61,34 @@ namespace {
 
 const char kIconFallback[] = "application-x-executable";
 
+void XSettingsNotifyCallback(const char* name, XSettingsAction action,
+                             XSettingsSetting* setting, void* data) {
+  static std::string kIconThemeNameSetting = "Net/IconThemeName";
+
+  if (name == nullptr || setting == nullptr) return;
+
+  // Only watch for new settings values or their changes.
+  if (action != XSETTINGS_ACTION_NEW && action != XSETTINGS_ACTION_CHANGED)
+    return;
+
+  // If an unrelated setting changed, or it's of the wrong type, abort.
+  if (kIconThemeNameSetting != name || setting->type != XSETTINGS_TYPE_STRING)
+    return;
+
+  // Avoid refreshing everything if we have already loaded the same icon theme.
+  if (!icon_theme_name.empty() && icon_theme_name == setting->data.v_string)
+    return;
+
+  icon_theme_name = setting->data.v_string;
+  for (Panel& p : panels) {
+    Launcher& launcher = p.launcher_;
+    launcher.CleanupTheme();
+    launcher.LoadThemes();
+    launcher.LoadIcons();
+    launcher.need_resize_ = true;
+  }
+}
+
 }  // namespace
 
 bool LauncherReadDesktopFile(std::string const& path, DesktopEntry* entry);
@@ -81,7 +110,8 @@ void InitLauncher() {
   if (launcher_enabled) {
     // if XSETTINGS manager running, tint3 read the icon_theme_name.
     xsettings_client =
-        XSettingsClientNew(server, XSettingsNotifyCallback, nullptr, nullptr);
+        xsettings_client_new(server.dsp, server.root_window(),
+                             XSettingsNotifyCallback, nullptr, nullptr);
   }
 }
 
@@ -114,9 +144,7 @@ void Launcher::InitPanel(Panel* panel) {
 }
 
 void CleanupLauncher() {
-  if (xsettings_client) {
-    XSettingsClientDestroy(xsettings_client);
-  }
+  if (xsettings_client) xsettings_client_destroy(xsettings_client);
 
   for (Panel& p : panels) {
     p.launcher_.CleanupTheme();

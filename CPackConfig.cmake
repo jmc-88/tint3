@@ -42,7 +42,7 @@ set(CPACK_STRIP_FILES 1)
 set(CPACK_DEBIAN_PACKAGE_MAINTAINER "${CPACK_PACKAGE_VENDOR} <${CPACK_PACKAGE_CONTACT}>")
 set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE "${CPACK_SYSTEM_NAME}")
 set(CPACK_DEBIAN_PACKAGE_SECTION "x11")
-set(CPACK_DEBIAN_PACKAGE_DEPENDS "libc6, libcairo2, libpango1.0-0, libglib2.0-0, libimlib2, libxinerama1, libx11-6, libxdamage1, libxcomposite1, libxrender1, libxrandr2, librsvg2-2, libstartup-notification0, libc++1")
+set(CPACK_DEBIAN_PACKAGE_DEPENDS "libc6, libcairo2, libpango1.0-0, libglib2.0-0, libimlib2, libxinerama1, libx11-6, libxdamage1, libxcomposite1, libxrender1, libxrandr2, libxsettings-client0, libxsettings0, librsvg2-2, libstartup-notification0, libc++1")
 set(CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA "debian/conffiles")
 set(CPACK_DEBIAN_PACKAGE_DESCRIPTION "${CPACK_PACKAGE_DESCRIPTION_SUMMARY}
  tint3 is a simple panel/taskbar for X11. It provides features such as a
@@ -56,7 +56,7 @@ set(CPACK_DEBIAN_PACKAGE_DESCRIPTION "${CPACK_PACKAGE_DESCRIPTION_SUMMARY}
 set(CPACK_RPM_PACKAGE_ARCHITECTURE "${CPACK_SYSTEM_NAME}")
 set(CPACK_RPM_PACKAGE_RELEASE "1")
 set(CPACK_RPM_PACKAGE_LICENSE "GPLv2")
-set(CPACK_RPM_PACKAGE_REQUIRES "/bin/sh,libcairo.so.0,libpangocairo-1.0.so.0,,libpango-1.0.so.0,libgobject-2.0.so.0,libglib-2.0.so.0,libImlib2.so.1,libXinerama.so.1,libX11.so.6,libXdamage.so.1,libXcomposite.so.1,libXrender.so.1,libXrandr.so.2,librsvg-2.so.2,libstartup-notification-1.so.0,libc++.so.1")
+set(CPACK_RPM_PACKAGE_REQUIRES "/bin/sh,libcairo.so.0,libpangocairo-1.0.so.0,,libpango-1.0.so.0,libgobject-2.0.so.0,libglib-2.0.so.0,libImlib2.so.1,libXinerama.so.1,libX11.so.6,libXdamage.so.1,libXcomposite.so.1,libXrender.so.1,libXrandr.so.2,libXsettings-client.so.0,libXsettings.so,librsvg-2.so.2,libstartup-notification-1.so.0,libc++.so.1")
 
 # Source package config
 set(CPACK_SOURCE_GENERATOR "DEB;RPM")

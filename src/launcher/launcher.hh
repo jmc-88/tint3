@@ -1,10 +1,10 @@
 #ifndef TINT3_LAUNCHER_LAUNCHER_HH
 #define TINT3_LAUNCHER_LAUNCHER_HH
 
+#include <xsettings-client.h>
 #include <string>
 #include <vector>
 
-#include "launcher/xsettings-client.hh"
 #include "util/area.hh"
 #include "util/common.hh"
 #include "util/imlib2.hh"

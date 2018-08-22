@@ -27,6 +27,7 @@
 #include <X11/extensions/Xfixes.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <xsettings-client.h>
 
 #include <algorithm>
 #include <csignal>
@@ -42,7 +43,6 @@
 #include "config.hh"
 #include "dnd/dnd.hh"
 #include "launcher/launcher.hh"
-#include "launcher/xsettings-client.hh"
 #include "panel.hh"
 #include "server.hh"
 #include "subprocess.hh"
@@ -523,9 +523,7 @@ void EventPropertyNotify(XEvent* e, Timer& timer, Tooltip* tooltip) {
   Window win = e->xproperty.window;
   Atom at = e->xproperty.atom;
 
-  if (xsettings_client) {
-    XSettingsClientProcessEvent(xsettings_client, e);
-  }
+  if (xsettings_client) xsettings_client_process_event(xsettings_client, e);
 
   if (win == server.root_window()) {
     if (!server.got_root_win) {

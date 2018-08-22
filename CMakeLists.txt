@@ -36,6 +36,7 @@ pkg_check_modules(CAIRO REQUIRED cairo cairo-xlib)
 pkg_check_modules(GLIB2 REQUIRED glib-2.0)
 pkg_check_modules(GOBJECT2 REQUIRED gobject-2.0)
 pkg_check_modules(IMLIB2 REQUIRED imlib2>=1.4.2)
+pkg_check_modules(XSETTINGS_CLIENT REQUIRED libxsettings-client)
 
 find_package(
   X11 REQUIRED
