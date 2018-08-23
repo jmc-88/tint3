@@ -47,6 +47,7 @@
 #include "absl/strings/match.h"
 #include "absl/strings/str_join.h"
 #include "absl/strings/str_split.h"
+#include "absl/strings/string_view.h"
 
 #include "clock/clock.hh"
 #include "config.hh"
@@ -400,23 +401,28 @@ bool ParseNumber(std::string const& str, T* ptr) {
   return true;
 }
 
-bool ParseBoolean(std::string str, bool* value) {
-  absl::StripAsciiWhitespace(&str);
-  std::transform(str.begin(), str.end(), str.begin(), ::tolower);
+bool ParseBoolean(absl::string_view str, bool* value) {
+  std::string s = absl::AsciiStrToLower(absl::StripAsciiWhitespace(str));
+  if (absl::SimpleAtob(str, value)) {
+    return true;
+  }
 
-  if (str == "true" || str == "yes" || str == "on") {
+  // backwards compatibility: not covered by absl::SimpleAtob
+  if (s == "on") {
     (*value) = true;
     return true;
   }
 
-  if (str == "false" || str == "no" || str == "off") {
+  // backwards compatibility: not covered by absl::SimpleAtob
+  if (s == "off") {
     (*value) = false;
     return true;
   }
 
-  int i;
-  if (util::string::ToNumber(str, &i)) {
-    (*value) = (i != 0);
+  // backwards compatibility: absl::SimpleAtob only sees literal "1" as truthy
+  int n;
+  if (absl::SimpleAtoi(str, &n) && n != 0) {
+    (*value) = true;
     return true;
   }
 
@@ -1184,6 +1190,7 @@ bool Reader::AddEntry_Task(std::string const& key, std::string const& value) {
   }
   // "tooltip" is deprecated but here for backwards compatibility
   if (key == "task_tooltip" || key == "tooltip") {
+    util::log::Error() << key << ": " << value << '\n';
     ParseBoolean(value, &panel_config.g_task.tooltip_enabled);
     return true;
   }

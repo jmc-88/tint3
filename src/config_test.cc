@@ -300,34 +300,60 @@ TEST_CASE("ConfigParserEmptyAssignment", "Doesn't choke on empty assignments") {
   CleanupPanel();       // TODO: decouple from config loading
 }
 
-static constexpr char kBooleanValues[] =
+static constexpr char kBooleanValuesLowerCase[] =
     u8R"EOF(
 task_centered = true
 task_text = yes
 task_icon = on
-wm_menu = false
+# has extra spacing
+wm_menu =   false
 panel_dock = no
 # taskbar_name shouldn't disable panel_items
 panel_items = T
 taskbar_name = off
+# zero, means "false"
+font_shadow = 0
+# non-zero, means "true"
+tooltip = 10
+)EOF";
+
+static constexpr char kBooleanValuesUpperCase[] =
+    u8R"EOF(
+task_centered = TRUE
+task_text = YES
+task_icon = ON
+# has extra spacing
+wm_menu =   FALSE
+panel_dock = NO
+# taskbar_name shouldn't disable panel_items
+panel_items = T
+taskbar_name = OFF
+# zero, means "false"
+font_shadow = 0
+# non-zero, still means "true"
+tooltip = 10
 )EOF";
 
 TEST_CASE("ConfigParserBooleanValues") {
-  test::ConfigReader reader;
-  config::Parser config_entry_parser{&reader, ""};
-  parser::Parser p{config::kLexer, &config_entry_parser};
+  for (auto& input_value : {kBooleanValuesLowerCase, kBooleanValuesUpperCase}) {
+    test::ConfigReader reader;
+    config::Parser config_entry_parser{&reader, ""};
+    parser::Parser p{config::kLexer, &config_entry_parser};
 
-  REQUIRE(p.Parse(kBooleanValues));
+    REQUIRE(p.Parse(input_value));
 
-  REQUIRE(panel_config.g_task.centered);
-  REQUIRE(panel_config.g_task.text);
-  REQUIRE(panel_config.g_task.icon);
+    REQUIRE(panel_config.g_task.centered);
+    REQUIRE(panel_config.g_task.text);
+    REQUIRE(panel_config.g_task.icon);
+    REQUIRE(panel_config.g_task.tooltip_enabled);
 
-  REQUIRE_FALSE(new_panel_config.wm_menu);
-  REQUIRE_FALSE(new_panel_config.dock);
+    REQUIRE_FALSE(new_panel_config.wm_menu);
+    REQUIRE_FALSE(new_panel_config.dock);
+    REQUIRE_FALSE(panel_config.g_task.font_shadow);
 
-  REQUIRE(taskbar_enabled);
-  REQUIRE_FALSE(taskbarname_enabled);
+    REQUIRE(taskbar_enabled);
+    REQUIRE_FALSE(taskbarname_enabled);
+  }
 }
 
 static constexpr char kInvalidInteger[] =

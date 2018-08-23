@@ -699,8 +699,8 @@ autohide_height = &lt;integer>
 
 Either a string value or a numerical value.
 
-If a string: "true", "yes" or "on" mean **true**; "false", "no" or "off" mean
-**false**.
+If a string: "true", "t", "yes", "y" or "on" mean **true**; "false", "f", "no",
+"n" or "off" mean **false**.
 
 If a number: **0** means **false**, **non-zero** means **true**.
 
