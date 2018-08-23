@@ -18,6 +18,13 @@ Keys and values are separated by a single equals sign ("**=**"), optionally surr
 
 As the configuration file is unstructured, some entries take the special meaning of a section marker. These are explicitly noted below.
 
+## COMMENTS
+
+Comments are only allowed to start at the _beginning_ of a line (not counting
+whitespace), and are initiated by a leading **#** character.
+Comments are intended for human consumption and don't bear special meaning in
+the configuration file.
+
 ## DIRECTIVES
 
 @import *path*

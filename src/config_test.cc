@@ -307,7 +307,8 @@ task_text = yes
 task_icon = on
 wm_menu = false
 panel_dock = no
-panel_items = T       # taskbar_name shouldn't disable this
+# taskbar_name shouldn't disable panel_items
+panel_items = T
 taskbar_name = off
 )EOF";
 
