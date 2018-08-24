@@ -512,7 +512,7 @@ IconTheme* LoadTheme(std::string const& name) {
             auto dir = new IconThemeDir();
             dir->name = std::string(name);
             dir->max_size = dir->min_size = dir->size = -1;
-            dir->type = ICON_DIR_TYPE_THRESHOLD;
+            dir->type = IconType::kThreshold;
             dir->threshold = 2;
             theme->list_directories.push_back(dir);
           }
@@ -557,11 +557,11 @@ IconTheme* LoadTheme(std::string const& name) {
           // for
           // unknown Type.
           if (value == "Fixed") {
-            current_dir->type = ICON_DIR_TYPE_FIXED;
+            current_dir->type = IconType::kFixed;
           } else if (value == "Threshold") {
-            current_dir->type = ICON_DIR_TYPE_THRESHOLD;
+            current_dir->type = IconType::kThreshold;
           } else {
-            current_dir->type = ICON_DIR_TYPE_SCALABLE;
+            current_dir->type = IconType::kScalable;
           }
         } else if (key == "Context") {
           // usual values: Actions, Applications, Devices, FileSystems,
@@ -825,20 +825,20 @@ bool Launcher::LoadThemes() {
 }
 
 int DirectoryMatchesSize(IconThemeDir* dir, int size) {
-  if (dir->type == ICON_DIR_TYPE_FIXED) {
+  if (dir->type == IconType::kFixed) {
     return dir->size == size;
-  } else if (dir->type == ICON_DIR_TYPE_SCALABLE) {
+  } else if (dir->type == IconType::kScalable) {
     return dir->min_size <= size && size <= dir->max_size;
-  } else { /*if (dir->type == ICON_DIR_TYPE_THRESHOLD)*/
+  } else { /*if (dir->type == IconType::kThreshold)*/
     return dir->size - dir->threshold <= size &&
            size <= dir->size + dir->threshold;
   }
 }
 
 int DirectorySizeDistance(IconThemeDir* dir, int size) {
-  if (dir->type == ICON_DIR_TYPE_FIXED) {
+  if (dir->type == IconType::kFixed) {
     return abs(dir->size - size);
-  } else if (dir->type == ICON_DIR_TYPE_SCALABLE) {
+  } else if (dir->type == IconType::kScalable) {
     if (size < dir->min_size) {
       return dir->min_size - size;
     } else if (size > dir->max_size) {
@@ -846,7 +846,7 @@ int DirectorySizeDistance(IconThemeDir* dir, int size) {
     }
 
     return 0;
-  } else { /*if (dir->type == ICON_DIR_TYPE_THRESHOLD)*/
+  } else { /*if (dir->type == IconType::kThreshold)*/
     if (size < dir->size - dir->threshold) {
       return dir->min_size - size;
     } else if (size > dir->size + dir->threshold) {

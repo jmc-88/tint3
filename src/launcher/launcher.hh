@@ -44,15 +44,13 @@ struct DesktopEntry {
   std::string icon;
 };
 
-#define ICON_DIR_TYPE_SCALABLE 0
-#define ICON_DIR_TYPE_FIXED 1
-#define ICON_DIR_TYPE_THRESHOLD 2
+enum class IconType { kScalable, kFixed, kThreshold };
 
 struct IconThemeDir {
   std::string name;
   std::string context;
   int size;
-  int type;
+  IconType type;
   int max_size;
   int min_size;
   int threshold;
