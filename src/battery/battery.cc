@@ -37,6 +37,7 @@
 #include <memory>
 #include <string>
 
+#include "absl/strings/str_format.h"
 #include "absl/time/time.h"
 
 #include "battery/battery.hh"
@@ -308,19 +309,13 @@ void Battery::DrawForeground(cairo_t* c) {
 
 bool Battery::Resize() {
   need_redraw_ = true;
-
-  char buf_bat_percentage[10];
-  snprintf(buf_bat_percentage, sizeof(buf_bat_percentage), "%d%%",
-           battery_state.percentage);
-  battery_percentage_ = buf_bat_percentage;
+  battery_percentage_ = absl::StrFormat("%d%%", battery_state.percentage);
 
   if (battery_state.state == ChargeState::kFull) {
     battery_time_ = "Full";
   } else {
-    char buf_bat_time[20];
-    snprintf(buf_bat_time, sizeof(buf_bat_time), "%02d:%02d",
-             battery_state.time.hours, battery_state.time.minutes);
-    battery_time_ = buf_bat_time;
+    battery_time_ = absl::StrFormat("%02d:%02d", battery_state.time.hours,
+                                    battery_state.time.minutes);
   }
 
   int bat_percentage_width, bat_percentage_height;

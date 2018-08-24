@@ -20,6 +20,7 @@ target_link_libraries(
     server_lib
     subprocess_lib
     window_lib
+    absl::str_format
     ${CAIRO_LIBRARIES}
     ${PANGOCAIRO_LIBRARIES}
   PUBLIC
