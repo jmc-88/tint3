@@ -338,10 +338,7 @@ bool Launcher::Resize() {
   return true;
 }
 
-LauncherIcon::LauncherIcon()
-    : Area(), icon_size_(), is_app_desktop_(), x_(), y_() {
-  set_has_mouse_effects(true);
-}
+LauncherIcon::LauncherIcon() : Area() { set_has_mouse_effects(true); }
 
 // Here we override the default layout of the icons; normally Area layouts its
 // children
@@ -748,7 +745,7 @@ void Launcher::LoadIcons() {
         launcher_icon->bg_ = backgrounds.front();
         launcher_icon->on_screen_ = true;
 
-        launcher_icon->is_app_desktop_ = 1;
+        launcher_icon->is_app_desktop_ = true;
         launcher_icon->cmd_ = de.GetEntry<std::string>("Exec");
         launcher_icon->icon_name_ = de.HasEntry("Icon")
                                         ? de.GetEntry<std::string>("Icon")

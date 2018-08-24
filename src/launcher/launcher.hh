@@ -19,10 +19,10 @@ class LauncherIcon : public Area {
   std::string icon_name_;
   std::string icon_path_;
   std::string icon_tooltip_;
-  int icon_size_;
-  int is_app_desktop_;
-  int x_;
-  int y_;
+  int icon_size_ = 0;
+  bool is_app_desktop_ = false;
+  int x_ = 0;
+  int y_ = 0;
 
   LauncherIcon();
 
