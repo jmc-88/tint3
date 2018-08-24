@@ -1190,7 +1190,6 @@ bool Reader::AddEntry_Task(std::string const& key, std::string const& value) {
   }
   // "tooltip" is deprecated but here for backwards compatibility
   if (key == "task_tooltip" || key == "tooltip") {
-    util::log::Error() << key << ": " << value << '\n';
     ParseBoolean(value, &panel_config.g_task.tooltip_enabled);
     return true;
   }
