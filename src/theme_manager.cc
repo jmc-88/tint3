@@ -3,7 +3,10 @@
 #include <sstream>
 #include <string>
 
+#include "absl/algorithm/container.h"
 #include "absl/base/attributes.h"
+#include "absl/strings/match.h"
+#include "absl/types/span.h"
 
 #include "util/common.hh"
 #include "util/log.hh"
@@ -24,13 +27,15 @@ int PrintUsage(std::string const& argv0) {
   util::log::Error() << "Usage: " << argv0 << u8R"EOF( <operation> [args...]
 
 Operation can be one of:
-  search, s        - searches for a theme in the remote repository
+  search, s        - searches for matching remotely available themes
   install, in      - installs a theme
   uninstall, un    - uninstalls a theme
-  list-remote, rls - lists remotely available themes
   list-local, ls   - lists locally installed themes
 
-The "list-*" operations accept no arguments. If provided, they are ignored.
+The "list-local" operation expect no arguments. If provided, they are ignored.
+The "search" operation expects any number of arguments which will be used to
+match against remotely available themes. No arguments results in listing all
+available ones.
 The remaining operations require a sequence of theme names as their arguments.
 )EOF";
   return 1;
@@ -85,9 +90,29 @@ class Repository {
   json repository_;
 };
 
-int Search() {
-  util::log::Error() << "Not implemented.\n";
-  return 1;
+int Search(CURL* c, absl::Span<char* const> needles) {
+  std::string content;
+  if (!curl::FetchURL(c, kThemeRepositoryURL, &content)) {
+    util::log::Error() << "Failed fetching the remote JSON file!\n";
+    return 1;
+  }
+
+  auto match = [&](absl::string_view author, absl::string_view theme,
+                   unsigned int version) {
+    return absl::c_all_of(needles, [&](absl::string_view str) {
+      return absl::StrContains(author, str) || absl::StrContains(theme, str) ||
+             absl::StrContains(util::string::Representation(version), str);
+    });
+  };
+
+  auto repo = Repository::FromJSON(content);
+  repo.for_each(
+      [&](std::string author, std::string theme, unsigned int version) {
+        if (match(author, theme, version)) {
+          std::cout << author << '/' << theme << " (v" << version << ")\n";
+        }
+      });
+  return 0;
 }
 
 int Install() {
@@ -103,21 +128,6 @@ int Uninstall() {
 int ListLocal() {
   util::log::Error() << "Not implemented.\n";
   return 1;
-}
-
-int ListRemote(CURL* c) {
-  std::string content;
-  if (!curl::FetchURL(c, kThemeRepositoryURL, &content)) {
-    util::log::Error() << "Failed fetching the remote JSON file!\n";
-    return 1;
-  }
-
-  auto repo = Repository::FromJSON(content);
-  repo.for_each(
-      [](std::string author, std::string theme, unsigned int version) {
-        std::cout << author << '/' << theme << " (v" << version << ")\n";
-      });
-  return 0;
 }
 #endif  // HAVE_CURL
 
@@ -141,7 +151,7 @@ int ThemeManager(int argc, char* argv[]) {
 
   std::vector<std::string> arguments{argv + 1, argv + argc};
   if (arguments.front() == "search" || arguments.front() == "s") {
-    return Search();
+    return Search(c, absl::MakeConstSpan(argv + 2, argv + argc));
   }
   if (arguments.front() == "install" || arguments.front() == "in") {
     return Install();
@@ -151,9 +161,6 @@ int ThemeManager(int argc, char* argv[]) {
   }
   if (arguments.front() == "list-local" || arguments.front() == "ls") {
     return ListLocal();
-  }
-  if (arguments.front() == "list-remote" || arguments.front() == "rls") {
-    return ListRemote(c);
   }
 
   // actually unreachable, but will make compilers happy

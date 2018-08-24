@@ -238,7 +238,10 @@ target_link_libraries(
   theme_manager_lib
   PRIVATE
     common_lib
-    log_lib)
+    log_lib
+    absl::algorithm
+    absl::span
+    absl::strings)
 
 if(ENABLE_CURL)
   target_include_directories(
