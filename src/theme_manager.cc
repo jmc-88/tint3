@@ -112,6 +112,40 @@ class Repository {
     repository_ += {{"author", author_name}, {"themes", {theme_entry}}};
   }
 
+  template <typename Matcher, typename Confirmation>
+  bool remove_matching_themes(Matcher&& match,
+                              Confirmation&& confirm_deletion) {
+    bool found_any = false;
+
+    for (auto& entry : repository_) {
+      auto matching_theme = [&](json const& theme) {
+        bool is_matching =
+            match(entry["author"], theme["name"], theme["version"]);
+        found_any = (found_any || is_matching);
+
+        if (is_matching) {
+          return confirm_deletion(entry["author"], theme["name"],
+                                  theme["version"]);
+        }
+        return false;
+      };
+
+      auto& themes = entry["themes"];
+      themes.erase(std::remove_if(themes.begin(), themes.end(), matching_theme),
+                   themes.end());
+      if (themes.empty()) entry.erase("themes");
+    }
+
+    static constexpr auto has_no_themes = [](json const& entry) {
+      return entry.find("themes") == entry.end();
+    };
+    repository_.erase(
+        std::remove_if(repository_.begin(), repository_.end(), has_no_themes),
+        repository_.end());
+
+    return found_any;
+  }
+
   void for_each(
       std::function<void(std::string, std::string, unsigned int)> callback) {
     for (auto& entry : repository_) {
@@ -265,9 +299,65 @@ int Install(CURL* c, absl::Span<char* const> theme_queries) {
   return 0;
 }
 
-int Uninstall() {
-  util::log::Error() << "Not implemented.\n";
-  return 1;
+int Uninstall(CURL* c, absl::Span<char* const> theme_queries) {
+  if (theme_queries.empty()) {
+    util::log::Error() << "You must provide at least one theme name/author "
+                          "query in order to uninstall the matching themes.\n";
+    return 1;
+  }
+
+  auto local_repo_dir = util::xdg::basedir::DataHome() / "tint3" / "themes";
+  auto local_repo_path = local_repo_dir / "repository.json";
+  if (!util::fs::FileExists(local_repo_path)) {
+    std::cout << "No themes installed.\n";
+    return 0;
+  }
+
+  std::string local_repo_contents;
+  if (!util::fs::ReadFile(local_repo_path, &local_repo_contents)) {
+    util::log::Error() << "Failed reading \"" << local_repo_path << "\".\n";
+    return 1;
+  }
+
+  auto local_repo = Repository::FromJSON(local_repo_contents);
+  auto match = [&](std::string author, std::string theme,
+                   unsigned int version) {
+    auto single_query_matches =
+        std::bind(QueryMatches, author, theme, std::placeholders::_1);
+    return absl::c_any_of(theme_queries, single_query_matches);
+  };
+  auto confirm_deletion = [&](std::string author, std::string theme,
+                              unsigned int version) {
+    while (true) {
+      std::cout << "Do you really want to delete " << author << '/' << theme
+                << " (v" << version << ")? [y/n] ";
+      char c;
+      if (!(std::cin >> c)) {
+        util::log::Error() << "Failed reading from standard input, assuming "
+                              "'n'.\n";
+        return false;
+      }
+      if (absl::ascii_tolower(c) == 'y') return true;
+      if (absl::ascii_tolower(c) == 'n') return false;
+      util::log::Error() << "Unrecognized entry '" << c
+                         << "', please use 'y' or 'n'.\n";
+    }
+  };
+
+  bool found_any = local_repo.remove_matching_themes(match, confirm_deletion);
+  if (!found_any) {
+    util::log::Error() << "No themes matched the provided query.\n";
+    return 1;
+  }
+
+  if (!util::fs::WriteFile(local_repo_path, local_repo.dump())) {
+    util::log::Error()
+        << "Failed dumping the updated local theme repository to \""
+        << local_repo_path << "\".\n";
+    return 1;
+  }
+
+  return 0;
 }
 
 int ListLocal() {
@@ -321,7 +411,7 @@ int ThemeManager(int argc, char* argv[]) {
   } else if (arguments.front() == "install" || arguments.front() == "in") {
     return Install(c, absl::MakeConstSpan(argv + 2, argv + argc));
   } else if (arguments.front() == "uninstall" || arguments.front() == "un") {
-    return Uninstall();
+    return Uninstall(c, absl::MakeConstSpan(argv + 2, argv + argc));
   } else if (arguments.front() == "list-local" || arguments.front() == "ls") {
     return ListLocal();
   }
