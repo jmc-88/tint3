@@ -6,7 +6,13 @@
 
 # SYNOPSIS
 
-| **tint3** \[**-c** config-file]
+| **tint3** \[**-c** config-file] \[**-h** or **--help**] \[**-v** or **--version**]
+
+| **tint3** **theme** ... \
+|   \[**search** *queries*] \[**s** *queries*] \
+|   \[**install** *queries*] \[**in** *queries*] \
+|   \[**uninstall** *queries*] \[**un** *queries*] \
+|   \[**list-local**] \[**ls**]
 
 # DESCRIPTION
 
@@ -29,6 +35,38 @@ system tray, transparency and gradients.
     missing, tint3 will copy its default configuration file to that path.
 
     See **tint3rc(5)** for a description of the configuration file format.
+
+-h, --help
+
+:   Shows a brief help screen and exits immediately.
+
+-v, --version
+
+:   Shows the version info and exits immediately.
+
+theme *operation*
+
+:   Acts as a theme manager, performing the requested *operation*. This can
+    be any of:
+
+    - **search** or **s**: accepts any number of arguments, used to match against
+      *remotely* available themes based on their author name or theme name.
+      The resulting query joins these arguments through an AND operator.
+      All matching themes will be listed on the standard output.
+    - **install** or **in**: expects one or more arguments, used to match
+      against *locally* available themes based on their author name or theme
+      name, or alternatively their full `author_name/theme_name` identifier.
+      The resulting query joins these arguments through an OR operator.
+      All matching themes will be installed to the local repository.
+    - **uninstall** or **un**: expects one or more arguments, used to match
+      against *locally* available themes based on their author name or theme
+      name, or alternatively their full `author_name/theme_name` identifier.
+      The resulting query joins these arguments through an OR operator.
+      All matching themes, after receiving explicit confirmation from the user,
+      will be uninstalled from the local repository.
+    - **list-local** or **ls**: expects no arguments, and ignores them if any
+      are provided. All *locally* available themes will be listed on the
+      standard output.
 
 # FILES
 
