@@ -36,7 +36,7 @@ Operation can be one of:
   uninstall, un    - uninstalls a theme
   list-local, ls   - lists locally installed themes
 
-The "list-local" operation expect no arguments. If provided, they are ignored.
+The "list-local" operation expects no arguments. If given, they are ignored.
 The "search" operation expects any number of arguments which will be used to
 match against remotely available themes. No arguments results in listing all
 available ones.
