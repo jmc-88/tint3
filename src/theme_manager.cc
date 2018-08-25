@@ -48,10 +48,14 @@ Operation can be one of:
   list-local, ls   - lists locally installed themes
 
 The "list-local" operation expects no arguments. If given, they are ignored.
+
 The "search" operation expects any number of arguments which will be used to
 match against remotely available themes. No arguments results in listing all
 available ones.
-The remaining operations require a sequence of theme names as their arguments.
+
+The remaining operations require a sequence of queries as their arguments,
+which will match against the theme author name or theme name as substrings,
+or will match literally if given in the form "author_name/theme_name".
 )EOF";
   return 1;
 }
