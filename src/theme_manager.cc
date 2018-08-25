@@ -94,13 +94,25 @@ class Repository {
   json repository_;
 };
 
-int Search(CURL* c, absl::Span<char* const> needles) {
+template <typename Matcher, typename Callback>
+int ForEachMatchingRemoteTheme(CURL* c, Matcher&& match, Callback&& callback) {
   std::string content;
   if (!curl::FetchURL(c, kThemeRepositoryURL, &content)) {
     util::log::Error() << "Failed fetching the remote JSON file!\n";
     return 1;
   }
 
+  auto repo = Repository::FromJSON(content);
+  repo.for_each(
+      [&](std::string author, std::string theme, unsigned int version) {
+        if (match(author, theme, version)) {
+          callback(author, theme, version);
+        }
+      });
+  return 0;
+}
+
+int Search(CURL* c, absl::Span<char* const> needles) {
   auto match = [&](absl::string_view author, absl::string_view theme,
                    unsigned int version) {
     return absl::c_all_of(needles, [&](absl::string_view str) {
@@ -109,14 +121,13 @@ int Search(CURL* c, absl::Span<char* const> needles) {
     });
   };
 
-  auto repo = Repository::FromJSON(content);
-  repo.for_each(
-      [&](std::string author, std::string theme, unsigned int version) {
-        if (match(author, theme, version)) {
-          std::cout << author << '/' << theme << " (v" << version << ")\n";
-        }
-      });
-  return 0;
+  static auto print_theme_name = [](absl::string_view author,
+                                    absl::string_view theme,
+                                    unsigned int version) {
+    std::cout << author << '/' << theme << " (v" << version << ")\n";
+  };
+
+  return ForEachMatchingRemoteTheme(c, match, print_theme_name);
 }
 
 int Install() {
