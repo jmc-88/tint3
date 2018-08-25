@@ -241,7 +241,8 @@ target_link_libraries(
     log_lib
     absl::algorithm
     absl::span
-    absl::strings)
+    absl::strings
+    absl::str_format)
 
 if(ENABLE_CURL)
   target_include_directories(

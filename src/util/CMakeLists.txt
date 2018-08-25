@@ -145,6 +145,7 @@ test_target(
   DEPENDS
     testdata
     behavior_control_lib
+    absl::strings
   LINK_LIBRARIES
     environment_lib
     fs_lib

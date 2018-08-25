@@ -235,6 +235,13 @@ Path HomeDirectory() {
   return {};
 }
 
+bool ReadFile(std::string const& path, std::string* output) {
+  return ReadFile(path, [=](std::string const& contents) {
+    output->assign(contents);
+    return true;
+  });
+}
+
 bool ReadFile(std::string const& path,
               std::function<bool(std::string const&)> const& fn) {
   static constexpr std::streamsize kBufferSize = (1 << 10);  // 1 KiB

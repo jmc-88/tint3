@@ -6,10 +6,14 @@
 #include "absl/algorithm/container.h"
 #include "absl/base/attributes.h"
 #include "absl/strings/match.h"
+#include "absl/strings/str_format.h"
+#include "absl/strings/str_replace.h"
 #include "absl/types/span.h"
 
 #include "util/common.hh"
+#include "util/fs.hh"
 #include "util/log.hh"
+#include "util/xdg.hh"
 
 #ifdef HAVE_CURL
 #include <curl/curl.h>
@@ -126,8 +130,40 @@ int Uninstall() {
 }
 
 int ListLocal() {
-  util::log::Error() << "Not implemented.\n";
-  return 1;
+  auto local_repo_dir = util::xdg::basedir::DataHome() / "tint3" / "themes";
+  auto local_repo_path = local_repo_dir / "repository.json";
+  if (!util::fs::FileExists(local_repo_path)) {
+    std::cout << "No themes installed.\n";
+    return 0;
+  }
+
+  std::string local_repo_contents;
+  if (!util::fs::ReadFile(local_repo_path, &local_repo_contents)) {
+    util::log::Error() << "Failed reading \"" << local_repo_path << "\".\n";
+    return 1;
+  }
+
+  static constexpr auto normalize_path_component = [](absl::string_view str) {
+    return absl::StrReplaceAll(
+        str, {{" ", "_"}, {":", "_"}, {"/", "_"}, {"_", "__"}});
+  };
+
+  static constexpr auto format_file_name = [](absl::string_view author,
+                                              absl::string_view theme) {
+    return absl::StrFormat("%s_%s.tint3rc", normalize_path_component(author),
+                           normalize_path_component(theme));
+  };
+
+  auto repo = Repository::FromJSON(local_repo_contents);
+  repo.for_each(
+      [&](std::string author, std::string theme, unsigned int version) {
+        auto local_file_name = format_file_name(author, theme);
+        if (util::fs::FileExists(local_repo_dir / local_file_name)) {
+          std::cout << author << '/' << theme << " (v" << version << ")\n"
+                    << "  * " << local_file_name << "\n\n";
+        }
+      });
+  return 0;
 }
 #endif  // HAVE_CURL
 

@@ -8,6 +8,8 @@
 #include <string>
 #include <utility>
 
+#include "absl/strings/match.h"
+
 #include "behavior_control.hh"
 #include "util/environment.hh"
 #include "util/fs.hh"
@@ -139,6 +141,11 @@ TEST_CASE("ReadFile", "Reads the entire contents of a file into memory") {
   REQUIRE(util::fs::ReadFile("src/util/testdata/fs_test.txt",
                              std::ref(read_file_callback_good)));
   REQUIRE(read_file_callback_good.invoked());
+
+  // String output case.
+  std::string contents;
+  REQUIRE(util::fs::ReadFile("src/util/testdata/fs_test.txt", &contents));
+  REQUIRE(absl::StartsWith(contents, "Name:\tcat\n"));
 }
 
 class ReadFileByLineCallback : public ReadFileCallback {
