@@ -38,7 +38,8 @@ static const std::string kRepositoryThemeTemplateURL =
     absl::StrCat(kRepositoryRootURL, "/t/$author/$theme/tint3rc");
 
 int PrintUsage(std::string const& argv0) {
-  util::log::Error() << "Usage: " << argv0 << u8R"EOF( <operation> [args...]
+  util::log::Error() << "Usage: " << argv0
+                     << u8R"EOF( theme <operation> [args...]
 
 Operation can be one of:
   search, s        - searches for matching remotely available themes
@@ -53,6 +54,16 @@ available ones.
 The remaining operations require a sequence of theme names as their arguments.
 )EOF";
   return 1;
+}
+
+template <typename First>
+bool StrAnyOf(absl::string_view str, First&& arg) {
+  return str == arg;
+}
+
+template <typename First, typename... Other>
+bool StrAnyOf(absl::string_view str, First&& arg, Other&&... args) {
+  return str == arg || StrAnyOf(str, args...);
 }
 
 }  // namespace
@@ -389,7 +400,7 @@ int ListLocal() {
 
 #ifdef HAVE_CURL
 int ThemeManager(int argc, char* argv[]) {
-  if (argc == 1) {
+  if (argc == 2) {
     util::log::Error() << "Error: missing operation.\n";
     return PrintUsage(argv[0]);
   }
@@ -405,14 +416,20 @@ int ThemeManager(int argc, char* argv[]) {
   ABSL_ATTRIBUTE_UNUSED auto cleanup_curl =
       util::MakeScopedCallback([=] { curl_easy_cleanup(c); });
 
-  std::vector<std::string> arguments{argv + 1, argv + argc};
-  if (arguments.front() == "search" || arguments.front() == "s") {
-    return Search(c, absl::MakeConstSpan(argv + 2, argv + argc));
-  } else if (arguments.front() == "install" || arguments.front() == "in") {
-    return Install(c, absl::MakeConstSpan(argv + 2, argv + argc));
-  } else if (arguments.front() == "uninstall" || arguments.front() == "un") {
-    return Uninstall(absl::MakeConstSpan(argv + 2, argv + argc));
-  } else if (arguments.front() == "list-local" || arguments.front() == "ls") {
+  auto arguments = absl::MakeConstSpan(argv + 2, argv + argc);
+  if (StrAnyOf(arguments.front(), "help", "h")) {
+    PrintUsage(argv[0]);
+    return 0;
+  } else if (StrAnyOf(arguments.front(), "search", "s")) {
+    arguments.remove_prefix(1);
+    return Search(c, arguments);
+  } else if (StrAnyOf(arguments.front(), "install", "in")) {
+    arguments.remove_prefix(1);
+    return Install(c, arguments);
+  } else if (StrAnyOf(arguments.front(), "uninstall", "un")) {
+    arguments.remove_prefix(1);
+    return Uninstall(arguments);
+  } else if (StrAnyOf(arguments.front(), "list-local", "ls")) {
     return ListLocal();
   }
 

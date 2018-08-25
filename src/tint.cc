@@ -62,8 +62,6 @@
 
 namespace {
 
-const std::string kThemeManagerName = "t3";
-
 void PrintVersion() {
 #ifdef _TINT3_DEBUG
   std::cout << "tint3 debug binary (built at " << GIT_BRANCH << "/"
@@ -73,7 +71,14 @@ void PrintVersion() {
 #endif  // _TINT3_DEBUG
 }
 
-void PrintUsage() { util::log::Error() << "Usage: tint3 [-c] <config_file>\n"; }
+void PrintUsage() {
+  util::log::Error()
+      << u8R"EOF(Usage: tint3 [-c <config_file>] [-h, --help] [-v, --version]
+
+You can also use tint3 on the command line as a theme manager.
+Use `tint3 theme help` or `man 1 tint3` for usage information.
+)EOF";
+}
 
 }  // namespace
 
@@ -884,10 +889,8 @@ void DragAndDropDrop(XClientMessageEvent* e) {
 
 int main(int argc, char* argv[]) {
   // If invoked as a theme manager, simply delegate to theme_manager.cc.
-  util::fs::Path self = argv[0];
-  if (self.BaseName() == kThemeManagerName) {
+  if (argc > 1 && std::string(argv[1]) == "theme")
     return ThemeManager(argc, argv);
-  }
 
 start:
   std::string config_path;
