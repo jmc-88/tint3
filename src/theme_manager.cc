@@ -70,6 +70,30 @@ bool StrAnyOf(absl::string_view str, First&& arg, Other&&... args) {
   return str == arg || StrAnyOf(str, args...);
 }
 
+bool QueryMatches(absl::string_view author, absl::string_view theme,
+                  absl::string_view query) {
+  // simple substring query case
+  if (absl::StrContains(author, query) || absl::StrContains(theme, query))
+    return true;
+
+  // literal "author_name/theme_name" case
+  std::vector<std::string> pieces = absl::StrSplit(query, "/");
+  if (pieces.size() != 2) return false;
+
+  return author == pieces[0] && theme == pieces[1];
+}
+
+std::string NormalizePathComponent(absl::string_view str) {
+  return absl::StrReplaceAll(str,
+                             {{" ", "_"}, {":", "_"}, {"/", "_"}, {"_", "__"}});
+}
+
+std::string FormatLocalFileName(absl::string_view author,
+                                absl::string_view theme) {
+  return absl::StrFormat("%s_%s.tint3rc", NormalizePathComponent(author),
+                         NormalizePathComponent(theme));
+}
+
 }  // namespace
 
 #ifdef HAVE_CURL
@@ -95,6 +119,7 @@ bool FetchURL(CURL* c, std::string const& url, std::string* result) {
 }
 
 }  // namespace curl
+#endif  // HAVE_CURL
 
 class Repository {
  public:
@@ -178,6 +203,7 @@ class Repository {
   json repository_;
 };
 
+#ifdef HAVE_CURL
 template <typename Matcher, typename Callback>
 bool ForEachMatchingRemoteTheme(CURL* c, Matcher&& match, Callback&& callback) {
   std::string content;
@@ -196,30 +222,6 @@ bool ForEachMatchingRemoteTheme(CURL* c, Matcher&& match, Callback&& callback) {
         }
       });
   return found_any;
-}
-
-bool QueryMatches(absl::string_view author, absl::string_view theme,
-                  absl::string_view query) {
-  // simple substring query case
-  if (absl::StrContains(author, query) || absl::StrContains(theme, query))
-    return true;
-
-  // literal "author_name/theme_name" case
-  std::vector<std::string> pieces = absl::StrSplit(query, "/");
-  if (pieces.size() != 2) return false;
-
-  return author == pieces[0] && theme == pieces[1];
-}
-
-std::string NormalizePathComponent(absl::string_view str) {
-  return absl::StrReplaceAll(str,
-                             {{" ", "_"}, {":", "_"}, {"/", "_"}, {"_", "__"}});
-}
-
-std::string FormatLocalFileName(absl::string_view author,
-                                absl::string_view theme) {
-  return absl::StrFormat("%s_%s.tint3rc", NormalizePathComponent(author),
-                         NormalizePathComponent(theme));
 }
 
 int Search(absl::Span<char* const> needles) {
@@ -328,6 +330,19 @@ int Install(absl::Span<char* const> theme_queries) {
 
   return 0;
 }
+#else   // HAVE_CURL
+int Search(absl::Span<char* const> /*theme_queries*/) {
+  util::log::Error() << "tint3 was compiled without CURL: functionalities "
+                        "depending on remote assets cannot work.\n";
+  return 1;
+}
+
+int Install(absl::Span<char* const> /*theme_queries*/) {
+  util::log::Error() << "tint3 was compiled without CURL: functionalities "
+                        "depending on remote assets cannot work.\n";
+  return 1;
+}
+#endif  // HAVE_CURL
 
 int Uninstall(absl::Span<char* const> theme_queries) {
   if (theme_queries.empty()) {
@@ -415,9 +430,7 @@ int ListLocal() {
       });
   return 0;
 }
-#endif  // HAVE_CURL
 
-#ifdef HAVE_CURL
 int ThemeManager(int argc, char* argv[]) {
   if (argc == 2) {
     util::log::Error() << "Error: missing operation.\n";
@@ -445,10 +458,3 @@ int ThemeManager(int argc, char* argv[]) {
                      << "\".\n\n";
   return PrintUsage(argv[0]);
 }
-#else   // HAVE_CURL
-int ThemeManager(int argc, char* argv[]) {
-  util::log::Error() << "Disabled: tint3's theme manager requires to be "
-                        "compiled with libcurl in order to work.\n";
-  return 1;
-}
-#endif  // HAVE_CURL
