@@ -221,10 +221,9 @@ std::string FormatLocalFileName(absl::string_view author,
 int Search(CURL* c, absl::Span<char* const> needles) {
   auto match = [&](absl::string_view author, absl::string_view theme,
                    unsigned int version) {
-    return absl::c_all_of(needles, [&](absl::string_view str) {
-      return absl::StrContains(author, str) || absl::StrContains(theme, str) ||
-             absl::StrContains(util::string::Representation(version), str);
-    });
+    auto single_query_matches =
+        std::bind(QueryMatches, author, theme, std::placeholders::_1);
+    return absl::c_all_of(needles, single_query_matches);
   };
 
   static auto print_theme_name = [](absl::string_view author,
