@@ -188,19 +188,17 @@ int ThemeManager(int argc, char* argv[]) {
   std::vector<std::string> arguments{argv + 1, argv + argc};
   if (arguments.front() == "search" || arguments.front() == "s") {
     return Search(c, absl::MakeConstSpan(argv + 2, argv + argc));
-  }
-  if (arguments.front() == "install" || arguments.front() == "in") {
+  } else if (arguments.front() == "install" || arguments.front() == "in") {
     return Install();
-  }
-  if (arguments.front() == "uninstall" || arguments.front() == "un") {
+  } else if (arguments.front() == "uninstall" || arguments.front() == "un") {
     return Uninstall();
-  }
-  if (arguments.front() == "list-local" || arguments.front() == "ls") {
+  } else if (arguments.front() == "list-local" || arguments.front() == "ls") {
     return ListLocal();
   }
 
-  // actually unreachable, but will make compilers happy
-  return 0;
+  util::log::Error() << "Error: unknown operation \"" << arguments.front()
+                     << "\".\n\n";
+  return PrintUsage(argv[0]);
 }
 #else   // HAVE_CURL
 int ThemeManager(int argc, char* argv[]) {
