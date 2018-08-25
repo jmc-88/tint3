@@ -299,7 +299,7 @@ int Install(CURL* c, absl::Span<char* const> theme_queries) {
   return 0;
 }
 
-int Uninstall(CURL* c, absl::Span<char* const> theme_queries) {
+int Uninstall(absl::Span<char* const> theme_queries) {
   if (theme_queries.empty()) {
     util::log::Error() << "You must provide at least one theme name/author "
                           "query in order to uninstall the matching themes.\n";
@@ -411,7 +411,7 @@ int ThemeManager(int argc, char* argv[]) {
   } else if (arguments.front() == "install" || arguments.front() == "in") {
     return Install(c, absl::MakeConstSpan(argv + 2, argv + argc));
   } else if (arguments.front() == "uninstall" || arguments.front() == "un") {
-    return Uninstall(c, absl::MakeConstSpan(argv + 2, argv + argc));
+    return Uninstall(absl::MakeConstSpan(argv + 2, argv + argc));
   } else if (arguments.front() == "list-local" || arguments.front() == "ls") {
     return ListLocal();
   }
