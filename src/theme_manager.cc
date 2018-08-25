@@ -222,7 +222,15 @@ std::string FormatLocalFileName(absl::string_view author,
                          NormalizePathComponent(theme));
 }
 
-int Search(CURL* c, absl::Span<char* const> needles) {
+int Search(absl::Span<char* const> needles) {
+  CURL* c = curl_easy_init();
+  if (c == nullptr) {
+    util::log::Error() << "Failed initializing CURL.\n";
+    return 1;
+  }
+  ABSL_ATTRIBUTE_UNUSED auto cleanup_curl =
+      util::MakeScopedCallback([=] { curl_easy_cleanup(c); });
+
   auto match = [&](absl::string_view author, absl::string_view theme,
                    unsigned int version) {
     auto single_query_matches =
@@ -244,12 +252,20 @@ int Search(CURL* c, absl::Span<char* const> needles) {
   return 0;
 }
 
-int Install(CURL* c, absl::Span<char* const> theme_queries) {
+int Install(absl::Span<char* const> theme_queries) {
   if (theme_queries.empty()) {
     util::log::Error() << "You must provide at least one theme name/author "
                           "query in order to install the matching themes.\n";
     return 1;
   }
+
+  CURL* c = curl_easy_init();
+  if (c == nullptr) {
+    util::log::Error() << "Failed initializing CURL.\n";
+    return 1;
+  }
+  ABSL_ATTRIBUTE_UNUSED auto cleanup_curl =
+      util::MakeScopedCallback([=] { curl_easy_cleanup(c); });
 
   auto local_repo_dir = util::xdg::basedir::DataHome() / "tint3" / "themes";
   if (!util::fs::DirectoryExists(local_repo_dir) &&
@@ -408,27 +424,16 @@ int ThemeManager(int argc, char* argv[]) {
     return PrintUsage(argv[0]);
   }
 
-  // TODO: CURL could be only initialized when a network operation is
-  // required; failure to initialize CURL shouldn't prevent "list-local" or
-  // "uninstall" from working.
-  CURL* c = curl_easy_init();
-  if (c == nullptr) {
-    util::log::Error() << "Failed initializing CURL.\n";
-    return 1;
-  }
-  ABSL_ATTRIBUTE_UNUSED auto cleanup_curl =
-      util::MakeScopedCallback([=] { curl_easy_cleanup(c); });
-
   auto arguments = absl::MakeConstSpan(argv + 2, argv + argc);
   if (StrAnyOf(arguments.front(), "help", "h")) {
     PrintUsage(argv[0]);
     return 0;
   } else if (StrAnyOf(arguments.front(), "search", "s")) {
     arguments.remove_prefix(1);
-    return Search(c, arguments);
+    return Search(arguments);
   } else if (StrAnyOf(arguments.front(), "install", "in")) {
     arguments.remove_prefix(1);
-    return Install(c, arguments);
+    return Install(arguments);
   } else if (StrAnyOf(arguments.front(), "uninstall", "un")) {
     arguments.remove_prefix(1);
     return Uninstall(arguments);
