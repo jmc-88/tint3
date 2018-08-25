@@ -96,6 +96,7 @@ bool DirectoryExists(std::string const& path);
 bool FileExists(std::string const& path);
 bool FileExists(std::initializer_list<std::string> parts);
 Path HomeDirectory();
+bool WriteFile(std::string const& path, absl::string_view content);
 bool ReadFile(std::string const& path, std::string* output);
 bool ReadFile(std::string const& path,
               std::function<bool(std::string const&)> const& fn);

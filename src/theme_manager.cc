@@ -1,13 +1,17 @@
 #include <functional>
 #include <iostream>
+#include <ostream>
 #include <sstream>
 #include <string>
+#include <vector>
 
 #include "absl/algorithm/container.h"
 #include "absl/base/attributes.h"
 #include "absl/strings/match.h"
+#include "absl/strings/str_cat.h"
 #include "absl/strings/str_format.h"
 #include "absl/strings/str_replace.h"
+#include "absl/strings/str_split.h"
 #include "absl/types/span.h"
 
 #include "util/common.hh"
@@ -24,8 +28,14 @@ using nlohmann::json;
 
 namespace {
 
-const std::string kThemeRepositoryURL =
-    "https://jmc-88.github.io/tint3-themes/repository.json";
+static const std::string kRepositoryRootURL =
+    "https://jmc-88.github.io/tint3-themes";
+
+static const std::string kRepositoryFileURL =
+    absl::StrCat(kRepositoryRootURL, "/repository.json");
+
+static const std::string kRepositoryThemeTemplateURL =
+    absl::StrCat(kRepositoryRootURL, "/t/$author/$theme/tint3rc");
 
 int PrintUsage(std::string const& argv0) {
   util::log::Error() << "Usage: " << argv0 << u8R"EOF( <operation> [args...]
@@ -79,6 +89,29 @@ class Repository {
     return Repository(content);
   }
 
+  std::string dump() { return repository_.dump(2); }
+
+  void add_theme(std::string author_name, std::string theme_name,
+                 unsigned int theme_version) {
+    json theme_entry = {{"name", theme_name}, {"version", theme_version}};
+
+    for (auto& entry : repository_) {
+      if (entry["author"] != author_name) continue;
+      for (auto& theme : entry["themes"]) {
+        if (theme["name"] != theme_name) continue;
+        // Author and theme entry exist. Just update version tag.
+        theme["version"] = theme_version;
+        return;
+      }
+      // Author exists, theme does not. Add new theme entry.
+      entry["themes"] += theme_entry;
+      return;
+    }
+
+    // Author does not exist. Add new author entry and inner theme entry.
+    repository_ += {{"author", author_name}, {"themes", {theme_entry}}};
+  }
+
   void for_each(
       std::function<void(std::string, std::string, unsigned int)> callback) {
     for (auto& entry : repository_) {
@@ -89,27 +122,55 @@ class Repository {
   }
 
  private:
-  Repository(std::string const& content) { repository_ = json::parse(content); }
+  explicit Repository(std::string const& content) {
+    repository_ = json::parse(content);
+  }
 
   json repository_;
 };
 
 template <typename Matcher, typename Callback>
-int ForEachMatchingRemoteTheme(CURL* c, Matcher&& match, Callback&& callback) {
+bool ForEachMatchingRemoteTheme(CURL* c, Matcher&& match, Callback&& callback) {
   std::string content;
-  if (!curl::FetchURL(c, kThemeRepositoryURL, &content)) {
+  if (!curl::FetchURL(c, kRepositoryFileURL, &content)) {
     util::log::Error() << "Failed fetching the remote JSON file!\n";
-    return 1;
+    return false;
   }
 
   auto repo = Repository::FromJSON(content);
+  bool found_any = false;
   repo.for_each(
       [&](std::string author, std::string theme, unsigned int version) {
         if (match(author, theme, version)) {
+          found_any = true;
           callback(author, theme, version);
         }
       });
-  return 0;
+  return found_any;
+}
+
+bool QueryMatches(absl::string_view author, absl::string_view theme,
+                  absl::string_view query) {
+  // simple substring query case
+  if (absl::StrContains(author, query) || absl::StrContains(theme, query))
+    return true;
+
+  // literal "author_name/theme_name" case
+  std::vector<std::string> pieces = absl::StrSplit(query, "/");
+  if (pieces.size() != 2) return false;
+
+  return author == pieces[0] && theme == pieces[1];
+}
+
+std::string NormalizePathComponent(absl::string_view str) {
+  return absl::StrReplaceAll(str,
+                             {{" ", "_"}, {":", "_"}, {"/", "_"}, {"_", "__"}});
+}
+
+std::string FormatLocalFileName(absl::string_view author,
+                                absl::string_view theme) {
+  return absl::StrFormat("%s_%s.tint3rc", NormalizePathComponent(author),
+                         NormalizePathComponent(theme));
 }
 
 int Search(CURL* c, absl::Span<char* const> needles) {
@@ -127,12 +188,81 @@ int Search(CURL* c, absl::Span<char* const> needles) {
     std::cout << author << '/' << theme << " (v" << version << ")\n";
   };
 
-  return ForEachMatchingRemoteTheme(c, match, print_theme_name);
+  if (!ForEachMatchingRemoteTheme(c, match, print_theme_name)) {
+    util::log::Error() << "No remote themes matched your query.\n";
+    return 1;
+  }
+
+  return 0;
 }
 
-int Install() {
-  util::log::Error() << "Not implemented.\n";
-  return 1;
+int Install(CURL* c, absl::Span<char* const> theme_queries) {
+  if (theme_queries.empty()) {
+    util::log::Error() << "You must provide at least one theme name/author "
+                          "query in order to install the matching themes.\n";
+    return 1;
+  }
+
+  auto local_repo_dir = util::xdg::basedir::DataHome() / "tint3" / "themes";
+  if (!util::fs::DirectoryExists(local_repo_dir) &&
+      !util::fs::CreateDirectory(local_repo_dir)) {
+    util::log::Error() << "Couldn't create directory \"" << local_repo_dir
+                       << "\".\n";
+    return 1;
+  }
+
+  auto local_repo_path = local_repo_dir / "repository.json";
+  std::string local_repo_contents = "[]";
+  if (util::fs::FileExists(local_repo_path) &&
+      !util::fs::ReadFile(local_repo_path, &local_repo_contents)) {
+    util::log::Error() << "Failed reading \"" << local_repo_path << "\".\n";
+    return 1;
+  }
+
+  auto local_repo = Repository::FromJSON(local_repo_contents);
+  auto match = [&](absl::string_view author, absl::string_view theme,
+                   unsigned int version) {
+    auto single_query_matches =
+        std::bind(QueryMatches, author, theme, std::placeholders::_1);
+    return absl::c_any_of(theme_queries, single_query_matches);
+  };
+
+  auto install_theme = [&](absl::string_view author, absl::string_view theme,
+                           unsigned int version) {
+    auto remote_file_name = absl::StrReplaceAll(
+        kRepositoryThemeTemplateURL, {{"$author", author}, {"$theme", theme}});
+    std::string theme_content;
+    if (!curl::FetchURL(c, remote_file_name, &theme_content)) {
+      util::log::Error() << "Failed fetching the remote theme contents from \""
+                         << remote_file_name << "\"!\n";
+      return;
+    }
+
+    std::cout << "Installing " << author << '/' << theme << "...\n";
+
+    auto local_file_name = FormatLocalFileName(author, theme);
+    if (!util::fs::WriteFile(local_repo_dir / local_file_name, theme_content)) {
+      util::log::Error() << "Failed writing the theme contents locally to \""
+                         << local_file_name << "\"!\n";
+      return;
+    }
+
+    local_repo.add_theme(std::string(author), std::string(theme), version);
+  };
+
+  if (!ForEachMatchingRemoteTheme(c, match, install_theme)) {
+    util::log::Error() << "No remote themes matched your query.\n";
+    return 1;
+  }
+
+  if (!util::fs::WriteFile(local_repo_path, local_repo.dump())) {
+    util::log::Error()
+        << "Failed dumping the updated local theme repository to \""
+        << local_repo_path << "\".\n";
+    return 1;
+  }
+
+  return 0;
 }
 
 int Uninstall() {
@@ -154,21 +284,10 @@ int ListLocal() {
     return 1;
   }
 
-  static constexpr auto normalize_path_component = [](absl::string_view str) {
-    return absl::StrReplaceAll(
-        str, {{" ", "_"}, {":", "_"}, {"/", "_"}, {"_", "__"}});
-  };
-
-  static constexpr auto format_file_name = [](absl::string_view author,
-                                              absl::string_view theme) {
-    return absl::StrFormat("%s_%s.tint3rc", normalize_path_component(author),
-                           normalize_path_component(theme));
-  };
-
   auto repo = Repository::FromJSON(local_repo_contents);
   repo.for_each(
       [&](std::string author, std::string theme, unsigned int version) {
-        auto local_file_name = format_file_name(author, theme);
+        auto local_file_name = FormatLocalFileName(author, theme);
         if (util::fs::FileExists(local_repo_dir / local_file_name)) {
           std::cout << author << '/' << theme << " (v" << version << ")\n"
                     << "  * " << local_file_name << "\n\n";
@@ -185,9 +304,9 @@ int ThemeManager(int argc, char* argv[]) {
     return PrintUsage(argv[0]);
   }
 
-  // TODO: CURL could be only initialized when a network operation is required;
-  // failure to initialize CURL shouldn't prevent "list-local" or "uninstall"
-  // from working.
+  // TODO: CURL could be only initialized when a network operation is
+  // required; failure to initialize CURL shouldn't prevent "list-local" or
+  // "uninstall" from working.
   CURL* c = curl_easy_init();
   if (c == nullptr) {
     util::log::Error() << "Failed initializing CURL.\n";
@@ -200,7 +319,7 @@ int ThemeManager(int argc, char* argv[]) {
   if (arguments.front() == "search" || arguments.front() == "s") {
     return Search(c, absl::MakeConstSpan(argv + 2, argv + argc));
   } else if (arguments.front() == "install" || arguments.front() == "in") {
-    return Install();
+    return Install(c, absl::MakeConstSpan(argv + 2, argv + argc));
   } else if (arguments.front() == "uninstall" || arguments.front() == "un") {
     return Uninstall();
   } else if (arguments.front() == "list-local" || arguments.front() == "ls") {

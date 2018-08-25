@@ -235,6 +235,14 @@ Path HomeDirectory() {
   return {};
 }
 
+bool WriteFile(std::string const& path, absl::string_view content) {
+  std::ofstream os{path};
+  if (!os.good()) return false;
+
+  os << content;
+  return true;
+}
+
 bool ReadFile(std::string const& path, std::string* output) {
   return ReadFile(path, [=](std::string const& contents) {
     output->assign(contents);

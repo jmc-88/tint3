@@ -1,8 +1,10 @@
 #include "catch.hpp"
 
+#include <fcntl.h>
 #include <sys/types.h>
 #include <unistd.h>
 
+#include <cstdlib>
 #include <functional>
 #include <sstream>
 #include <string>
@@ -112,6 +114,24 @@ TEST_CASE("HomeDirectory", "Returns the user's home path") {
   // When $HOME is empty or missing, getpwuid() should give us the same info.
   auto unset_home = environment::MakeScopedOverride("HOME", "");
   REQUIRE(util::fs::HomeDirectory() == home_from_environment);
+}
+
+TEST_CASE("WriteFile") {
+  char* c_temp_path = tempnam("src/util/testdata", "fs_test_write_file");
+  if (!c_temp_path)
+    FAIL("couln't generate a temporary file name for this test case");
+  std::string temp_path = c_temp_path;
+  std::free(c_temp_path);
+
+  static const std::string test_content =
+      "Hello! I'm just testing WriteFile.\n";
+  REQUIRE(util::fs::WriteFile(temp_path, test_content));
+
+  std::string actual_content;
+  REQUIRE(util::fs::ReadFile(temp_path, &actual_content));
+  REQUIRE(actual_content == test_content);
+
+  unlink(temp_path.c_str());
 }
 
 class ReadFileCallback {
