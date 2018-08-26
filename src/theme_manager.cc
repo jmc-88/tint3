@@ -24,8 +24,7 @@
 #include <curl/curl.h>
 #endif  // HAVE_CURL
 
-#include "json.hpp"
-using nlohmann::json;
+#include "theme_manager.hh"
 
 namespace {
 
@@ -139,111 +138,56 @@ bool FetchURL(CURL* c, std::string const& url, std::string* result) {
 }  // namespace curl
 #endif  // HAVE_CURL
 
-struct ThemeInfo {
-  ThemeInfo(std::string author, std::string name, unsigned int version)
-      : author{author}, name{name}, version{version} {}
+ThemeInfo::ThemeInfo(std::string author, std::string name, unsigned int version)
+    : author{author}, name{name}, version{version} {}
 
-  std::string ToString() const {
-    return absl::StrFormat("%s/%s (v%d)", author, name, version);
-  }
+std::string ThemeInfo::ToString() const {
+  return absl::StrFormat("%s/%s (v%d)", author, name, version);
+}
 
-  bool operator==(ThemeInfo const& other) const {
-    return author == other.author && name == other.name &&
-           version == other.version;
-  }
+bool ThemeInfo::operator==(ThemeInfo const& other) const {
+  return author == other.author && name == other.name &&
+         version == other.version;
+}
 
-  bool operator<(ThemeInfo const& other) const {
-    return author < other.author || name < other.name ||
-           version < other.version;
-  }
-
-  const std::string author;
-  const std::string name;
-  const unsigned int version;
-};
+bool ThemeInfo::operator<(ThemeInfo const& other) const {
+  return author < other.author || name < other.name || version < other.version;
+}
 
 std::ostream& operator<<(std::ostream& os, ThemeInfo const& theme_info) {
   return os << theme_info.ToString();
 }
 
-class Repository {
- public:
-  Repository() = delete;
+Repository Repository::FromJSON(std::string const& content) {
+  return Repository(content);
+}
 
-  static Repository FromJSON(std::string const& content) {
-    return Repository(content);
-  }
+std::string Repository::Dump() const { return repository_.dump(2); }
 
-  std::string dump() { return repository_.dump(2); }
+void Repository::AddTheme(ThemeInfo const& theme_info) {
+  json theme_entry = {{"name", theme_info.name},
+                      {"version", theme_info.version}};
 
-  void add_theme(ThemeInfo const& theme_info) {
-    json theme_entry = {{"name", theme_info.name},
-                        {"version", theme_info.version}};
-
-    for (auto& entry : repository_) {
-      if (entry["author"] != theme_info.author) continue;
-      for (auto& theme : entry["themes"]) {
-        if (theme["name"] != theme_info.name) continue;
-        // Author and theme entry exist. Just update version tag.
-        theme["version"] = theme_info.version;
-        return;
-      }
-      // Author exists, theme does not. Add new theme entry.
-      entry["themes"] += theme_entry;
+  for (auto& entry : repository_) {
+    if (entry["author"] != theme_info.author) continue;
+    for (auto& theme : entry["themes"]) {
+      if (theme["name"] != theme_info.name) continue;
+      // Author and theme entry exist. Just update version tag.
+      theme["version"] = theme_info.version;
       return;
     }
-
-    // Author does not exist. Add new author entry and inner theme entry.
-    repository_ += {{"author", theme_info.author}, {"themes", {theme_entry}}};
+    // Author exists, theme does not. Add new theme entry.
+    entry["themes"] += theme_entry;
+    return;
   }
 
-  template <typename Matcher, typename Confirmation>
-  bool remove_matching_themes(Matcher&& match,
-                              Confirmation&& confirm_deletion) {
-    bool found_any = false;
+  // Author does not exist. Add new author entry and inner theme entry.
+  repository_ += {{"author", theme_info.author}, {"themes", {theme_entry}}};
+}
 
-    for (auto& entry : repository_) {
-      auto matching_theme = [&](json const& theme) {
-        ThemeInfo theme_info{entry["author"], theme["name"], theme["version"]};
-
-        if (!match(theme_info)) return false;
-
-        found_any = true;
-        return confirm_deletion(theme_info);
-      };
-
-      auto& themes = entry["themes"];
-      themes.erase(std::remove_if(themes.begin(), themes.end(), matching_theme),
-                   themes.end());
-      if (themes.empty()) entry.erase("themes");
-    }
-
-    static constexpr auto has_no_themes = [](json const& entry) {
-      return entry.find("themes") == entry.end();
-    };
-    repository_.erase(
-        std::remove_if(repository_.begin(), repository_.end(), has_no_themes),
-        repository_.end());
-
-    return found_any;
-  }
-
-  void for_each(std::function<void(ThemeInfo const&)> callback) {
-    for (auto& entry : repository_) {
-      for (auto& theme : entry["themes"]) {
-        ThemeInfo theme_info{entry["author"], theme["name"], theme["version"]};
-        callback(theme_info);
-      }
-    }
-  }
-
- private:
-  explicit Repository(std::string const& content) {
-    repository_ = json::parse(content);
-  }
-
-  json repository_;
-};
+Repository::Repository(std::string const& content) {
+  repository_ = json::parse(content);
+}
 
 #ifdef HAVE_CURL
 template <typename Matcher, typename Callback>
@@ -256,7 +200,7 @@ bool ForEachMatchingRemoteTheme(CURL* c, Matcher&& match, Callback&& callback) {
 
   auto repo = Repository::FromJSON(content);
   bool found_any = false;
-  repo.for_each([&](ThemeInfo const& theme_info) {
+  repo.ForEach([&](ThemeInfo const& theme_info) {
     if (match(theme_info)) {
       found_any = true;
       callback(theme_info);
@@ -353,7 +297,7 @@ int Install(absl::Span<char* const> theme_queries) {
       return;
     }
 
-    local_repo.add_theme(theme_info);
+    local_repo.AddTheme(theme_info);
   };
 
   if (!ForEachMatchingRemoteTheme(c, match, install_theme)) {
@@ -361,7 +305,7 @@ int Install(absl::Span<char* const> theme_queries) {
     return 1;
   }
 
-  if (!util::fs::WriteFile(local_repo_path, local_repo.dump())) {
+  if (!util::fs::WriteFile(local_repo_path, local_repo.Dump())) {
     util::log::Error()
         << "Failed dumping the updated local theme repository to \""
         << local_repo_path << "\".\n";
@@ -413,7 +357,7 @@ int SetTheme(absl::Span<char* const> theme_queries) {
   };
 
   std::set<ThemeInfo> matching_themes;
-  local_repo.for_each([&](ThemeInfo const& theme_info) {
+  local_repo.ForEach([&](ThemeInfo const& theme_info) {
     if (match(theme_info)) matching_themes.emplace(theme_info);
   });
 
@@ -505,13 +449,13 @@ int Uninstall(absl::Span<char* const> theme_queries) {
     return UserConfirmation(prompt);
   };
 
-  bool found_any = local_repo.remove_matching_themes(match, confirm_deletion);
+  bool found_any = local_repo.RemoveMatchingThemes(match, confirm_deletion);
   if (!found_any) {
     util::log::Error() << "No themes matched the provided query.\n";
     return 1;
   }
 
-  if (!util::fs::WriteFile(local_repo_path, local_repo.dump())) {
+  if (!util::fs::WriteFile(local_repo_path, local_repo.Dump())) {
     util::log::Error()
         << "Failed dumping the updated local theme repository to \""
         << local_repo_path << "\".\n";
@@ -536,7 +480,7 @@ int ListLocal() {
   }
 
   auto repo = Repository::FromJSON(local_repo_contents);
-  repo.for_each([&](ThemeInfo const& theme_info) {
+  repo.ForEach([&](ThemeInfo const& theme_info) {
     auto local_file_name =
         FormatLocalFileName(theme_info.author, theme_info.name);
     if (util::fs::FileExists(local_repo_dir / local_file_name)) {

@@ -257,3 +257,11 @@ if(ENABLE_CURL)
     PRIVATE
       ${CURL_LIBRARIES})
 endif()
+
+test_target(
+  theme_manager_test
+  SOURCES
+    theme_manager_test.cc
+  LINK_LIBRARIES
+    theme_manager_lib
+    testmain)
