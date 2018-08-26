@@ -94,6 +94,22 @@ std::string FormatLocalFileName(absl::string_view author,
                          NormalizePathComponent(theme));
 }
 
+bool UserConfirmation(absl::string_view prompt) {
+  while (true) {
+    std::cout << prompt << " [y/n] ";
+    char c;
+    if (!(std::cin >> c)) {
+      util::log::Error() << "Failed reading from standard input, assuming "
+                            "'n'.\n";
+      return false;
+    }
+    if (absl::ascii_tolower(c) == 'y') return true;
+    if (absl::ascii_tolower(c) == 'n') return false;
+    util::log::Error() << "Unrecognized entry '" << c
+                       << "', please use 'y' or 'n'.\n";
+  }
+}
+
 }  // namespace
 
 #ifdef HAVE_CURL
@@ -373,20 +389,9 @@ int Uninstall(absl::Span<char* const> theme_queries) {
   };
   auto confirm_deletion = [&](std::string author, std::string theme,
                               unsigned int version) {
-    while (true) {
-      std::cout << "Do you really want to delete " << author << '/' << theme
-                << " (v" << version << ")? [y/n] ";
-      char c;
-      if (!(std::cin >> c)) {
-        util::log::Error() << "Failed reading from standard input, assuming "
-                              "'n'.\n";
-        return false;
-      }
-      if (absl::ascii_tolower(c) == 'y') return true;
-      if (absl::ascii_tolower(c) == 'n') return false;
-      util::log::Error() << "Unrecognized entry '" << c
-                         << "', please use 'y' or 'n'.\n";
-    }
+    auto prompt = absl::StrFormat("Do you really want to delete %s/%s (v%d)?",
+                                  author, theme, version);
+    return UserConfirmation(prompt);
   };
 
   bool found_any = local_repo.remove_matching_themes(match, confirm_deletion);
