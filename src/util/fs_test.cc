@@ -6,6 +6,7 @@
 
 #include <cstdlib>
 #include <functional>
+#include <set>
 #include <sstream>
 #include <string>
 #include <utility>
@@ -241,4 +242,19 @@ TEST_CASE("SetSystemInterface") {
   auto fake_interface = util::fs::SetSystemInterface(original_interface);
   REQUIRE_FALSE(util::fs::FileExists("./bogus_path"));
   REQUIRE(fake_interface == &fake_fs);
+}
+
+TEST_CASE("DirectoryContents") {
+  // Update this if the content of src/util/testdata changes.
+  std::set<std::string> expected_set;
+  expected_set.emplace("");
+  expected_set.emplace(".");
+  expected_set.emplace("..");
+  expected_set.emplace("fs_test.txt");
+
+  std::set<std::string> actual_set;
+  for (auto& entry : util::fs::DirectoryContents("src/util/testdata"))
+    actual_set.emplace(entry);
+
+  REQUIRE(actual_set == expected_set);
 }
