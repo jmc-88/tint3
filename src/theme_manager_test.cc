@@ -9,14 +9,31 @@ TEST_CASE("ThemeInfo") {
   REQUIRE(theme_info.ToString() == "test_author/test_theme (v1)");
 }
 
-static const char kTestJsonContent[] =
-    u8R"EOF([{
-        "author": "the_dude",
-        "themes": [{
-            "name": "my_theme",
-            "version": 1
-        }]
-    }])EOF";
+// As formatted by: nlohmann::json::dump(2)
+static const char kEmptyRepositoryJson[] = "[]";
+
+// As formatted by: nlohmann::json::dump(2)
+static const char kOneAuthorNoThemesJson[] =
+    u8R"EOF([
+  {
+    "author": "test_author",
+    "themes": []
+  }
+])EOF";
+
+// As formatted by: nlohmann::json::dump(2)
+static const char kCompleteRepositoryJson[] =
+    u8R"EOF([
+  {
+    "author": "test_author",
+    "themes": [
+      {
+        "name": "test_theme",
+        "version": 1
+      }
+    ]
+  }
+])EOF";
 
 TEST_CASE("Repository") {
   static auto confirmation_always_true = [](ThemeInfo const&) { return true; };
@@ -28,10 +45,10 @@ TEST_CASE("Repository") {
 
   SECTION("FromJSON") {
     std::set<ThemeInfo> expected_set;
-    expected_set.emplace("the_dude", "my_theme", 1);
+    expected_set.emplace("test_author", "test_theme", 1);
 
     std::set<ThemeInfo> actual_set;
-    auto repo = Repository::FromJSON(kTestJsonContent);
+    auto repo = Repository::FromJSON(kCompleteRepositoryJson);
     repo.ForEach(
         [&](ThemeInfo const& theme_info) { actual_set.emplace(theme_info); });
 
@@ -39,19 +56,36 @@ TEST_CASE("Repository") {
   }
 
   SECTION("AddTheme") {
-    auto repo = Repository::FromJSON("[]");
-    REQUIRE(count_all_themes(repo) == 0);
-
-    repo.AddTheme(ThemeInfo{"test_author", "test_theme", 1});
-    repo.ForEach([&](ThemeInfo const& theme_info) {
+    // Starting from empty repo: creates new entry.
+    auto empty_repo = Repository::FromJSON(kEmptyRepositoryJson);
+    empty_repo.AddTheme(ThemeInfo{"test_author", "test_theme", 1});
+    empty_repo.ForEach([&](ThemeInfo const& theme_info) {
       REQUIRE(theme_info.author == "test_author");
       REQUIRE(theme_info.name == "test_theme");
       REQUIRE(theme_info.version == 1);
     });
+
+    // Starting from empty repo: creates new entry.
+    auto only_author_entry = Repository::FromJSON(kOneAuthorNoThemesJson);
+    only_author_entry.AddTheme(ThemeInfo{"test_author", "test_theme", 1});
+    only_author_entry.ForEach([&](ThemeInfo const& theme_info) {
+      REQUIRE(theme_info.author == "test_author");
+      REQUIRE(theme_info.name == "test_theme");
+      REQUIRE(theme_info.version == 1);
+    });
+
+    // Starting from complete repo: updates entry.
+    auto complete_repo = Repository::FromJSON(kOneAuthorNoThemesJson);
+    complete_repo.AddTheme(ThemeInfo{"test_author", "test_theme", 100});
+    complete_repo.ForEach([&](ThemeInfo const& theme_info) {
+      REQUIRE(theme_info.author == "test_author");
+      REQUIRE(theme_info.name == "test_theme");
+      REQUIRE(theme_info.version == 100);
+    });
   }
 
   SECTION("RemoveMatchingThemes") {
-    auto repo = Repository::FromJSON(kTestJsonContent);
+    auto repo = Repository::FromJSON(kCompleteRepositoryJson);
 
     // Before removal: one author entry is present.
     REQUIRE(count_all_themes(repo) == 1);
@@ -67,10 +101,15 @@ TEST_CASE("Repository") {
     // Matches with the only available them: repository gets emptied.
     repo.RemoveMatchingThemes(
         [](ThemeInfo const& theme_info) {
-          return theme_info.name == "my_theme";
+          return theme_info.name == "test_theme";
         },
         confirmation_always_true);
     REQUIRE(count_all_themes(repo) == 0);
+  }
+
+  SECTION("Dump") {
+    auto repo = Repository::FromJSON(kCompleteRepositoryJson);
+    REQUIRE(repo.Dump() == kCompleteRepositoryJson);
   }
 
   // Not tested here:
