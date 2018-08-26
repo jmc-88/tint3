@@ -204,13 +204,34 @@ TEST_CASE("ReadFileByLine", "Reads the contents of a file line by line") {
   REQUIRE(read_file_callback_good.found());
 }
 
+TEST_CASE("IsSymbolicLink") {
+  FakeFileSystemInterface fake_fs;
+  auto original_interface = util::fs::SetSystemInterface(&fake_fs);
+
+  struct stat regular_file;
+  regular_file.st_mode = S_IFREG;
+  fake_fs.stat_responses["regular_file"].emplace_back(regular_file);
+  REQUIRE_FALSE(util::fs::IsSymbolicLink("regular_file"));
+
+  struct stat symlink;
+  symlink.st_mode = S_IFLNK;
+  fake_fs.stat_responses["symbolic_link"].emplace_back(symlink);
+  REQUIRE(util::fs::IsSymbolicLink("symbolic_link"));
+
+  auto fake_interface = util::fs::SetSystemInterface(original_interface);
+}
+
 TEST_CASE("SetSystemInterface") {
   // First, the file should be reported as non existing, as expected.
   REQUIRE_FALSE(util::fs::FileExists("./bogus_path"));
 
   // Then, we override the system interface with a fake one, and test that the
   // same file is now reported as existing.
+  struct stat regular_file;
+  regular_file.st_mode = S_IFREG;
+
   FakeFileSystemInterface fake_fs;
+  fake_fs.stat_responses = {{"./bogus_path", {regular_file}}};
   auto original_interface = util::fs::SetSystemInterface(&fake_fs);
   REQUIRE(util::fs::FileExists("./bogus_path"));
 

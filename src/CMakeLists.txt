@@ -98,7 +98,8 @@ test_target(
     server_lib
     testmain
     timer_test_utils_lib
-    tooltip_lib)
+    tooltip_lib
+    absl::strings)
 
 add_library(
   panel_lib STATIC

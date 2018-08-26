@@ -23,6 +23,15 @@ bool SystemInterface::stat(std::string const& path, struct stat* buf) {
   return ::stat(path.c_str(), buf) == 0;
 }
 
+bool SystemInterface::symlink(std::string const& target,
+                              std::string const& linkpath) {
+  return ::symlink(target.c_str(), linkpath.c_str()) == 0;
+}
+
+bool SystemInterface::unlink(std::string const& path) {
+  return ::unlink(path.c_str()) == 0;
+}
+
 namespace {
 
 SystemInterface default_system_interface;
@@ -217,6 +226,14 @@ bool FileExists(std::initializer_list<std::string> parts) {
   return FileExists(BuildPath(parts));
 }
 
+bool IsSymbolicLink(std::string const& path) {
+  struct stat info;
+  if (!system_interface->stat(path, &info)) {
+    return false;
+  }
+  return S_ISLNK(info.st_mode);
+}
+
 Path HomeDirectory() {
   std::string home = environment::Get("HOME");
 
@@ -294,6 +311,12 @@ bool ReadFileByLine(std::string const& path,
 
   return true;
 }
+
+bool SymbolicLink(std::string const& target, std::string const& linkpath) {
+  return system_interface->symlink(target, linkpath);
+}
+
+bool Unlink(std::string const& path) { return system_interface->unlink(path); }
 
 }  // namespace fs
 }  // namespace util

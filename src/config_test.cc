@@ -7,6 +7,8 @@
 #include <streambuf>
 #include <string>
 
+#include "absl/strings/str_format.h"
+
 #include "clock/clock.hh"  // TODO: decouple from config loading
 #include "config.hh"
 #include "panel.hh"  // TODO: decouple from config loading
@@ -607,6 +609,13 @@ TEST_CASE("ConfigParserImportFiles") {
   SECTION("multiple imports") {
     FakeFileSystemInterface fake_fs;
     auto original_interface = util::fs::SetSystemInterface(&fake_fs);
+
+    struct stat regular_file;
+    regular_file.st_mode = S_IFREG;
+    fake_fs.stat_responses = {
+        {"/etc/tint3/absolute.tint3rc", {regular_file}},
+        {absl::StrFormat("%s/in_my_home.tint3rc", util::fs::HomeDirectory()),
+         {regular_file}}};
     REQUIRE(p.Parse(kImportFiles));
     util::fs::SetSystemInterface(original_interface);
 

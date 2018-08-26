@@ -18,6 +18,8 @@ namespace fs {
 class SystemInterface {
  public:
   virtual bool stat(std::string const& name, struct stat* buf);
+  virtual bool symlink(std::string const& target, std::string const& linkpath);
+  virtual bool unlink(std::string const& name);
 };
 
 // Replaces the current system interface with the new one, and returns a
@@ -95,6 +97,7 @@ bool CreateDirectory(std::string const& path, mode_t mode = 0700);
 bool DirectoryExists(std::string const& path);
 bool FileExists(std::string const& path);
 bool FileExists(std::initializer_list<std::string> parts);
+bool IsSymbolicLink(std::string const& path);
 Path HomeDirectory();
 bool WriteFile(std::string const& path, absl::string_view content);
 bool ReadFile(std::string const& path, std::string* output);
@@ -102,6 +105,8 @@ bool ReadFile(std::string const& path,
               std::function<bool(std::string const&)> const& fn);
 bool ReadFileByLine(std::string const& path,
                     std::function<bool(std::string const&)> const& fn);
+bool SymbolicLink(std::string const& target, std::string const& linkpath);
+bool Unlink(std::string const& path);
 
 }  // namespace fs
 }  // namespace util
