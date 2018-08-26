@@ -35,6 +35,9 @@ class Reader {
  public:
   Reader(Server* server);
 
+  static void GetDefaultPaths(util::fs::Path* user_config_dir,
+                              util::fs::Path* config_path);
+
   virtual bool LoadFromFile(std::string const& path);
   bool LoadFromDefaults();
 

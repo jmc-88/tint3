@@ -49,6 +49,13 @@ theme *operation*
 :   Acts as a theme manager, performing the requested *operation*. This can
     be any of:
 
+    - **set**: expects one or more arguments, used to match
+      against *locally* available themes based on their author name or theme
+      name, or alternatively their full `author_name/theme_name` identifier.
+      The resulting query joins these arguments through an OR operator.
+      The resulting query needs to match with exactly one theme, which will be
+      set as the one in use by unlinking *$XDG_CONFIG_HOME/tint3/tint3rc* and
+      symlinking it to the local file name of the matching theme.
     - **search** or **s**: accepts any number of arguments, used to match against
       *remotely* available themes based on their author name or theme name.
       The resulting query joins these arguments through an AND operator.

@@ -327,11 +327,17 @@ Reader::Reader(Server* server) : server_(server), new_config_file_(false) {
   tooltip_config = TooltipConfig{};
 }
 
+void Reader::GetDefaultPaths(util::fs::Path* user_config_dir,
+                             util::fs::Path* config_path) {
+  *user_config_dir = util::xdg::basedir::ConfigHome() / "tint3";
+  *config_path = *user_config_dir / "tint3rc";
+}
+
 bool Reader::LoadFromDefaults() {
   // follow XDG specification
   // check tint3rc in user directory
-  auto user_config_dir = util::xdg::basedir::ConfigHome() / "tint3";
-  auto config_path = user_config_dir / "tint3rc";
+  util::fs::Path user_config_dir, config_path;
+  GetDefaultPaths(&user_config_dir, &config_path);
 
   if (util::fs::FileExists(config_path)) {
     return LoadFromFile(config_path);

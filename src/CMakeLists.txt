@@ -238,6 +238,7 @@ add_library(
 target_link_libraries(
   theme_manager_lib
   PRIVATE
+    config_lib
     common_lib
     log_lib
     absl::algorithm

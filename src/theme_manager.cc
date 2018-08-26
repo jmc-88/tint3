@@ -14,6 +14,7 @@
 #include "absl/strings/str_split.h"
 #include "absl/types/span.h"
 
+#include "config.hh"
 #include "util/common.hh"
 #include "util/fs.hh"
 #include "util/log.hh"
@@ -42,6 +43,7 @@ int PrintUsage(std::string const& argv0) {
                      << u8R"EOF( theme <operation> [args...]
 
 Operation can be one of:
+  set              - sets the current theme
   search, s        - searches for matching remotely available themes
   install, in      - installs a theme
   uninstall, un    - uninstalls a theme
@@ -143,6 +145,16 @@ struct ThemeInfo {
 
   std::string ToString() const {
     return absl::StrFormat("%s/%s (v%d)", author, name, version);
+  }
+
+  bool operator==(ThemeInfo const& other) const {
+    return author == other.author && name == other.name &&
+           version == other.version;
+  }
+
+  bool operator<(ThemeInfo const& other) const {
+    return author < other.author || name < other.name ||
+           version < other.version;
   }
 
   const std::string author;
@@ -372,6 +384,94 @@ int Install(absl::Span<char* const> /*theme_queries*/) {
 }
 #endif  // HAVE_CURL
 
+int SetTheme(absl::Span<char* const> theme_queries) {
+  if (theme_queries.empty()) {
+    util::log::Error() << "You must provide at least one theme name/author "
+                          "query in order to set the matching theme.\n";
+    return 1;
+  }
+
+  auto local_repo_dir = util::xdg::basedir::DataHome() / "tint3" / "themes";
+  auto local_repo_path = local_repo_dir / "repository.json";
+  if (!util::fs::FileExists(local_repo_path)) {
+    std::cout << "No themes installed.\n";
+    return 0;
+  }
+
+  std::string local_repo_contents;
+  if (!util::fs::ReadFile(local_repo_path, &local_repo_contents)) {
+    util::log::Error() << "Failed reading \"" << local_repo_path << "\".\n";
+    return 1;
+  }
+
+  auto local_repo = Repository::FromJSON(local_repo_contents);
+  auto match = [&](ThemeInfo const& theme_info) {
+    auto single_query_matches =
+        std::bind(QueryMatches, theme_info.author, theme_info.name,
+                  std::placeholders::_1);
+    return absl::c_any_of(theme_queries, single_query_matches);
+  };
+
+  std::set<ThemeInfo> matching_themes;
+  local_repo.for_each([&](ThemeInfo const& theme_info) {
+    if (match(theme_info)) matching_themes.emplace(theme_info);
+  });
+
+  if (matching_themes.empty()) {
+    util::log::Error() << "No themes matched your query.\n";
+    return 1;
+  }
+
+  if (matching_themes.size() != 1) {
+    util::log::Error() << "More than one theme matched your query. Please use "
+                          "the literal `author_name/theme_name` format or a "
+                          "more restrictive partial query.\n";
+    return 1;
+  }
+
+  auto& theme_info = *matching_themes.begin();
+  std::cout << "Setting current theme to " << theme_info << "...\n";
+
+  util::fs::Path user_config_dir, config_path;
+  config::Reader::GetDefaultPaths(&user_config_dir, &config_path);
+
+  if (!util::fs::DirectoryExists(user_config_dir) &&
+      !util::fs::CreateDirectory(user_config_dir)) {
+    util::log::Error() << "Couldn't create directory \"" << user_config_dir
+                       << "\".\n";
+    return 1;
+  }
+
+  if (util::fs::FileExists(config_path)) {
+    if (!util::fs::IsSymbolicLink(config_path)) {
+      auto prompt = absl::StrFormat(
+          "Target \"%s\" exists, and is not a symbolic link. "
+          "Setting the theme now will result in its deletion. Proceed?",
+          config_path);
+      if (!UserConfirmation(prompt)) {
+        return 1;
+      }
+    }
+
+    if (!util::fs::Unlink(config_path)) {
+      util::log::Error() << "Couldn't unlink \"" << config_path << "\".\n";
+      return 1;
+    }
+  }
+
+  auto local_file_name =
+      FormatLocalFileName(theme_info.author, theme_info.name);
+  auto theme_file_name = local_repo_dir / local_file_name;
+
+  if (!util::fs::SymbolicLink(theme_file_name, config_path)) {
+    util::log::Error() << "Couldn't link \"" << config_path << "\" to \""
+                       << theme_file_name << "\".\n";
+    return 1;
+  }
+
+  return 0;
+}
+
 int Uninstall(absl::Span<char* const> theme_queries) {
   if (theme_queries.empty()) {
     util::log::Error() << "You must provide at least one theme name/author "
@@ -456,6 +556,9 @@ int ThemeManager(int argc, char* argv[]) {
   if (StrAnyOf(arguments.front(), "help", "h")) {
     PrintUsage(argv[0]);
     return 0;
+  } else if (StrAnyOf(arguments.front(), "set")) {
+    arguments.remove_prefix(1);
+    return SetTheme(arguments);
   } else if (StrAnyOf(arguments.front(), "search", "s")) {
     arguments.remove_prefix(1);
     return Search(arguments);
