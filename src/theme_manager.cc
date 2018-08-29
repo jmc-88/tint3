@@ -1,3 +1,6 @@
+#include <termios.h>
+#include <unistd.h>
+
 #include <functional>
 #include <iostream>
 #include <ostream>
@@ -95,13 +98,58 @@ std::string FormatLocalFileName(absl::string_view author,
                          NormalizePathComponent(theme));
 }
 
-bool UserConfirmation(absl::string_view prompt) {
+bool TermiosYesNoConfirmation(absl::string_view prompt, bool* result) {
+  struct termios original;
+  if (tcgetattr(STDIN_FILENO, &original) == -1) {
+    util::log::Error() << "tcgetattr(): " << std::strerror(errno) << '\n';
+    return false;
+  }
+
+  struct termios tweaked = original;
+  tweaked.c_lflag &= ~ICANON;
+  tweaked.c_lflag &= ~ECHO;
+  tweaked.c_cc[VMIN] = 1;
+  tweaked.c_cc[VTIME] = 0;
+  if (tcsetattr(STDIN_FILENO, TCSANOW, &tweaked) == -1) {
+    util::log::Error() << "tcsetattr(): " << std::strerror(errno) << '\n';
+    return false;
+  }
+
+  char c = '\0';
   while (true) {
     std::cout << prompt << " [y/n] " << std::flush;
+
+    if (read(STDIN_FILENO, &c, 1) == -1) {
+      util::log::Error() << "read(): " << std::strerror(errno) << '\n';
+      return false;
+    }
+
+    // ~ICANON and ~ECHO also have the effect of swallowing the enter key,
+    // so let's go to the newline to ensure we don't mess up the output
+    // formatting.
+    std::cout << '\n';
+
+    if (absl::ascii_tolower(c) == 'y') break;
+    if (absl::ascii_tolower(c) == 'n') break;
+    util::log::Error() << "Unrecognized entry '" << c
+                       << "', please use 'y' or 'n'.\n";
+  }
+
+  if (tcsetattr(STDIN_FILENO, TCSANOW, &original) == -1) {
+    util::log::Error() << "tcgetattr(): " << std::strerror(errno) << '\n';
+    return false;
+  }
+
+  *result = (c == 'y');
+  return true;
+}
+
+bool FallbackYesNoConfirmation(absl::string_view prompt, bool* result) {
+  while (true) {
+    std::cout << prompt << " [y/n] " << std::flush;
+
     char c;
     if (!(std::cin >> c)) {
-      util::log::Error() << "Failed reading from standard input, assuming "
-                            "'n'.\n";
       return false;
     }
     if (absl::ascii_tolower(c) == 'y') return true;
@@ -109,6 +157,15 @@ bool UserConfirmation(absl::string_view prompt) {
     util::log::Error() << "Unrecognized entry '" << c
                        << "', please use 'y' or 'n'.\n";
   }
+}
+
+bool UserConfirmation(absl::string_view prompt) {
+  bool result = false;
+  if (TermiosYesNoConfirmation(prompt, &result)) return result;
+  if (FallbackYesNoConfirmation(prompt, &result)) return result;
+
+  util::log::Error() << "Failed reading input, assuming 'n'.\n";
+  return false;
 }
 
 }  // namespace
