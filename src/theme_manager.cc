@@ -97,7 +97,7 @@ std::string FormatLocalFileName(absl::string_view author,
 
 bool UserConfirmation(absl::string_view prompt) {
   while (true) {
-    std::cout << prompt << " [y/n] ";
+    std::cout << prompt << " [y/n] " << std::flush;
     char c;
     if (!(std::cin >> c)) {
       util::log::Error() << "Failed reading from standard input, assuming "
