@@ -48,7 +48,7 @@ Operation can be one of:
   set              - sets the current theme
   search, s        - searches for matching remotely available themes
   install, in      - installs a theme
-  uninstall, un    - uninstalls a theme
+  uninstall, rm    - uninstalls a theme
   list-local, ls   - lists locally installed themes
 
 The "list-local" operation expects no arguments. If given, they are ignored.

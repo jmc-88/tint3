@@ -11,7 +11,7 @@
 | **tint3** **theme** ... \
 |   \[**search** *queries*] \[**s** *queries*] \
 |   \[**install** *queries*] \[**in** *queries*] \
-|   \[**uninstall** *queries*] \[**un** *queries*] \
+|   \[**uninstall** *queries*] \[**rm** *queries*] \
 |   \[**list-local**] \[**ls**]
 
 # DESCRIPTION
@@ -65,7 +65,7 @@ theme *operation*
       name, or alternatively their full `author_name/theme_name` identifier.
       The resulting query joins these arguments through an OR operator.
       All matching themes will be installed to the local repository.
-    - **uninstall** or **un**: expects one or more arguments, used to match
+    - **uninstall** or **rm**: expects one or more arguments, used to match
       against *locally* available themes based on their author name or theme
       name, or alternatively their full `author_name/theme_name` identifier.
       The resulting query joins these arguments through an OR operator.
