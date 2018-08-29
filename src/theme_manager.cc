@@ -62,12 +62,12 @@ or will match literally if given in the form "author_name/theme_name".
 }
 
 template <typename First>
-bool StrAnyOf(absl::string_view str, First&& arg) {
+constexpr bool StrAnyOf(absl::string_view str, First&& arg) {
   return str == arg;
 }
 
 template <typename First, typename... Other>
-bool StrAnyOf(absl::string_view str, First&& arg, Other&&... args) {
+constexpr bool StrAnyOf(absl::string_view str, First&& arg, Other&&... args) {
   return str == arg || StrAnyOf(str, args...);
 }
 
