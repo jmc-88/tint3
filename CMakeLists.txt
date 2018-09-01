@@ -29,20 +29,23 @@ if(HAS_LIBCXX)
 endif()
 
 include(FindPkgConfig)
-include(CheckLibraryExists)
 pkg_check_modules(PANGOCAIRO REQUIRED pangocairo)
 pkg_check_modules(PANGO REQUIRED pango)
 pkg_check_modules(CAIRO REQUIRED cairo cairo-xlib)
 pkg_check_modules(GLIB2 REQUIRED glib-2.0)
 pkg_check_modules(GOBJECT2 REQUIRED gobject-2.0)
 pkg_check_modules(IMLIB2 REQUIRED imlib2>=1.4.2)
-pkg_check_modules(XSETTINGS_CLIENT REQUIRED libxsettings-client)
+
+# Custom pkg-config wrapper because Arch Linux.
+# See comments in the module source for details.
+include(FindXsettingsClient)
 
 find_package(
   X11 REQUIRED
   COMPONENTS
     X11 Xcomposite Xdamage Xfixes Xinerama Xrender Xrandr>=1.3)
 
+include(CheckLibraryExists)
 string(REPLACE ";" " " FLAGS_REPLACED "${IMLIB2_LDFLAGS}")
 set(CMAKE_REQUIRED_FLAGS "${FLAGS_REPLACED}")
 check_library_exists("${IMLIB2_LIBRARIES}" "imlib_context_set_display" "${IMLIB2_LIBRARY_DIRS}" IMLIB_BUILT_WITH_X)
