@@ -118,12 +118,8 @@ TEST_CASE("HomeDirectory", "Returns the user's home path") {
 }
 
 TEST_CASE("WriteFile") {
-  char* c_temp_path = tempnam("src/util/testdata", "fs_test_write_file");
-  if (!c_temp_path)
-    FAIL("couln't generate a temporary file name for this test case");
-  std::string temp_path = c_temp_path;
-  std::free(c_temp_path);
-
+  static const std::string temp_path =
+      "src/util/testdata/fs_test_write_file.tmp";
   static const std::string test_content =
       "Hello! I'm just testing WriteFile.\n";
   REQUIRE(util::fs::WriteFile(temp_path, test_content));
