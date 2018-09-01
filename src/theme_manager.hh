@@ -45,7 +45,7 @@ class Repository {
       if (themes.empty()) entry.erase("themes");
     }
 
-    static constexpr auto has_no_themes = [](json const& entry) {
+    static auto has_no_themes = [](json const& entry) {
       return entry.find("themes") == entry.end();
     };
     repository_.erase(
