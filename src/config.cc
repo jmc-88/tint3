@@ -112,7 +112,7 @@ int GetTaskStatus(std::string const& status) {
 Background& GetBackgroundFromId(size_t id) {
   try {
     return backgrounds.at(id);
-  } catch (std::out_of_range) {
+  } catch (std::out_of_range const&) {
     return backgrounds.front();
   }
 }
