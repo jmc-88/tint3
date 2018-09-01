@@ -51,6 +51,9 @@ ScopedCallback<T> MakeScopedCallback(T callback) {
 template <typename It_>
 class iterator_range {
  public:
+  using iterator = It_;
+  using const_iterator = It_;
+
   iterator_range() = delete;
   iterator_range(iterator_range const&) = default;
   iterator_range(iterator_range&) = default;
