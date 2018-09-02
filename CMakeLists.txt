@@ -208,7 +208,7 @@ add_custom_target(
 install(FILES sample/tint3rc DESTINATION ${SYSCONFDIR}/xdg/tint3)
 install(FILES AUTHORS.md README.md DESTINATION ${DOCDIR})
 
-install(FILES data/tint3.desktop DESTINATION ${DATADIR}/applications/tint3)
+install(FILES data/tint3.desktop DESTINATION ${DATADIR}/applications)
 install(FILES data/default_icon.png DESTINATION ${DATADIR}/tint3)
 
 install(FILES data/logo/tint3.svg
