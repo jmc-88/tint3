@@ -566,7 +566,7 @@ int ThemeManager(int argc, char* argv[]) {
   } else if (StrAnyOf(arguments.front(), "install", "in")) {
     arguments.remove_prefix(1);
     return Install(arguments);
-  } else if (StrAnyOf(arguments.front(), "uninstall", "un")) {
+  } else if (StrAnyOf(arguments.front(), "uninstall", "rm")) {
     arguments.remove_prefix(1);
     return Uninstall(arguments);
   } else if (StrAnyOf(arguments.front(), "list-local", "ls")) {
