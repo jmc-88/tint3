@@ -99,6 +99,8 @@ std::string FormatLocalFileName(absl::string_view author,
 }
 
 bool TermiosYesNoConfirmation(absl::string_view prompt, bool* result) {
+  if (!isatty(STDIN_FILENO)) return false;
+
   struct termios original;
   if (tcgetattr(STDIN_FILENO, &original) == -1) {
     util::log::Error() << "tcgetattr(): " << std::strerror(errno) << '\n';
