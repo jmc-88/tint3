@@ -10,6 +10,7 @@
 /tags
 
 # Don't include IDE- or editor-specific files in the repository
+*~
 *.kdev4
 /.kdev4
 /.vscode
