@@ -61,7 +61,7 @@ if(LIBCXX_LIBRARIES)
     # TODO: the /usr prefix should not be hardcoded
 
     include(CheckCXXSourceRuns)
-    set(CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} -nostdinc++ -I/usr/include/c++/v1 -nodefaultlibs -lc -lm -lgcc -lgcc_s -lc++")
+    set(CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} -nostdinc++ -I/usr/include/c++/v1 -nodefaultlibs -lc -lm -lgcc -lgcc_s -lc++ -lc++abi")
     set(CMAKE_REQUIRED_QUIET TRUE)
     check_cxx_source_runs(
       "${__LIBCXX_COMPILE_TEST_SOURCE}"
@@ -75,7 +75,7 @@ if(LIBCXX_LIBRARIES)
       set(CMAKE_EXE_LINKER_FLAGS    "${CMAKE_EXE_LINKER_FLAGS} -nodefaultlibs")
       set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -nodefaultlibs")
       set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} -nodefaultlibs")
-      link_libraries(-lc -lm -lgcc -lgcc_s -lc++)
+      link_libraries(-lc -lm -lgcc -lgcc_s -lc++ -lc++abi)
     endif()
 
     unset(__LIBCXX_COMPILES)
