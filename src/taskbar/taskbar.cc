@@ -119,9 +119,7 @@ void CleanupTaskbar() {
   for (Panel& panel : panels) {
     for (unsigned int j = 0; j < panel.num_desktops_; ++j) {
       Taskbar* tskbar = &panel.taskbars[j];
-      panel.children_.erase(
-          std::remove(panel.children_.begin(), panel.children_.end(), tskbar),
-          panel.children_.end());
+      erase(panel.children_, tskbar);
       tskbar->FreeArea();
     }
     panel.taskbars.clear();

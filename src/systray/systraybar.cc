@@ -650,9 +650,7 @@ void Systraybar::RemoveIconInternal(TrayWindow* traywin, Timer& timer) {
 }
 
 void Systraybar::RemoveIcon(TrayWindow* traywin, Timer& timer) {
-  list_icons_.erase(
-      std::remove(list_icons_.begin(), list_icons_.end(), traywin),
-      list_icons_.end());
+  erase(list_icons_, traywin);
   RemoveIconInternal(traywin, timer);
 
   if (VisibleIcons() == 0) {

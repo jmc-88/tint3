@@ -683,8 +683,7 @@ void Task::AddUrgent() {
 }
 
 void Task::DelUrgent() {
-  urgent_list.erase(std::remove(urgent_list.begin(), urgent_list.end(), this),
-                    urgent_list.end());
+  erase(urgent_list, this);
 
   if (urgent_list.empty()) {
     timer_.ClearInterval(urgent_timeout);

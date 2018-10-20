@@ -239,12 +239,13 @@ target_link_libraries(
   theme_manager_lib
   PRIVATE
     config_lib
-    common_lib
     log_lib
     absl::algorithm
     absl::span
     absl::strings
-    absl::str_format)
+    absl::str_format
+  PUBLIC
+    common_lib)
 
 if(ENABLE_CURL)
   target_include_directories(

@@ -1,5 +1,7 @@
 #ifndef TINT3_THEME_MANAGER_HH
 
+#include <util/common.hh>
+
 #include "json.hpp"
 using nlohmann::json;
 
@@ -40,17 +42,14 @@ class Repository {
       };
 
       auto& themes = entry["themes"];
-      themes.erase(std::remove_if(themes.begin(), themes.end(), matching_theme),
-                   themes.end());
+      erase_if(themes, matching_theme);
       if (themes.empty()) entry.erase("themes");
     }
 
     static auto has_no_themes = [](json const& entry) {
       return entry.find("themes") == entry.end();
     };
-    repository_.erase(
-        std::remove_if(repository_.begin(), repository_.end(), has_no_themes),
-        repository_.end());
+    erase_if(repository_, has_no_themes);
 
     return found_any;
   }
