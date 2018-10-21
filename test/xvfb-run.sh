@@ -45,14 +45,12 @@ if ! command -v xauth >/dev/null 2>&1; then
   exit 1
 fi
 
-_XVFB_RUN_TMPDIR="$(mktemp -d "/tmp/xvfb-run.XXXXXX")"
-if [ ${?} -ne 0 ]; then
+if ! _XVFB_RUN_TMPDIR="$(mktemp -d "/tmp/xvfb-run.XXXXXX")"; then
   echo " ✘  Couldn't create the temporary directory." >&2
   exit 1
 fi
 
-_AUTHFILE="$(mktemp "${_XVFB_RUN_TMPDIR}/Xauthority.XXXXXX")"
-if [ ${?} -ne 0 ]; then
+if ! _AUTHFILE="$(mktemp "${_XVFB_RUN_TMPDIR}/Xauthority.XXXXXX")"; then
   echo " ✘  Couldn't create the temporary Xauthority file." >&2
   exit 1
 fi
@@ -95,7 +93,7 @@ alive() {
 find_free_servernum() {
   i=${_SERVERNUM}
   while [ -f "/tmp/.X${i}-lock" ]; do
-    i=$(($i+1))
+    i=$((i+1))
   done
 
   echo ${i}
@@ -144,16 +142,23 @@ _mcookie() {
 }
 
 _SERVERNUM="$(find_free_servernum)"
-_MCOOKIE="$(_mcookie)"
-if [ ${?} -ne 0 ]; then
+if ! _MCOOKIE="$(_mcookie)"; then
   echo " ✘  Fetching a magic cookie failed." >&2
   exit 1
 fi
+export _MCOOKIE
 
-XAUTHORITY="${_AUTHFILE}" xauth source - <<EOF 2>&1
-add :${_SERVERNUM} ${_XAUTH_PROTO} ${_MCOOKIE}
+_xauth() {
+  # ${1}: Xauthority file
+  # ${2}: display server number
+  # ${3}: Xauth protocol name
+  # ${4}: hex key as returned by _mcookie
+  XAUTHORITY="${1?}" xauth source - <<EOF 2>&1
+add :${2?} ${3?} ${4?}
 EOF
-if [ ${?} -ne 0 ]; then
+}
+
+if ! _xauth "${_AUTHFILE}" "${_SERVERNUM}" "${_XAUTH_PROTO}" "${_MCOOKIE}"; then
   echo " ✘  Modifying Xauthority failed." >&2
   exit 1
 fi
