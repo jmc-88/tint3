@@ -38,7 +38,7 @@ function(add_pandoc_man_page target_name)
         --output="${ADD_PANDOC_MAN_PAGE_OUTPUT}"
         "${CMAKE_CURRENT_SOURCE_DIR}/${ADD_PANDOC_MAN_PAGE_INPUT}"
       DEPENDS
-        "${ADD_PANDOC_MAN_PAGE_INPUT}")
+        "${CMAKE_CURRENT_SOURCE_DIR}/${ADD_PANDOC_MAN_PAGE_INPUT}")
 
     if(TINT3_ENABLE_GZIP_MAN_PAGES)
       set(MAN_PAGE_INSTALL_TARGET
@@ -47,7 +47,7 @@ function(add_pandoc_man_page target_name)
         OUTPUT
           "${CMAKE_CURRENT_BINARY_DIR}/${ADD_PANDOC_MAN_PAGE_OUTPUT}.gz"
         COMMAND 
-          ${GZIP_EXECUTABLE} -f -n -9 "${ADD_PANDOC_MAN_PAGE_OUTPUT}"
+          ${GZIP_EXECUTABLE} -k -f -n -9 "${ADD_PANDOC_MAN_PAGE_OUTPUT}"
         DEPENDS
           "${CMAKE_CURRENT_BINARY_DIR}/${ADD_PANDOC_MAN_PAGE_OUTPUT}")
     else()
