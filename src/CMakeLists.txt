@@ -165,8 +165,7 @@ target_include_directories(
     ${X11_X11_INCLUDE_DIRS}
     ${X11_Xinerama_INCLUDE_DIRS}
   PRIVATE
-    ${X11_Xrandr_INCLUDE_DIRS}
-    ${X11_Xrender_INCLUDE_DIRS})
+    ${X11_Xrandr_INCLUDE_DIRS})
 
 target_link_libraries(
   server_lib
@@ -181,7 +180,6 @@ target_link_libraries(
     absl::time
     ${X11_X11_LIB}
     ${X11_Xrandr_LIB}
-    ${X11_Xrender_LIB}
     ${X11_Xinerama_LIB})
 
 add_library(

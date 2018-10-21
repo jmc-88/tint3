@@ -1,4 +1,5 @@
 #include <X11/Xutil.h>
+#include <X11/extensions/Xrender.h>
 
 #include "panel.hh"
 #include "server.hh"
@@ -292,6 +293,28 @@ Window CreateWindow(Window parent, int x, int y, unsigned int width,
                     depth, window_class, visual, valuemask, attributes);
   SetWindowPID(window);
   return window;
+}
+
+Visual* GetTrueColorVisual(Display* display, int screen_number) {
+  XVisualInfo template_visual;
+  template_visual.screen = screen_number;
+  template_visual.depth = 32;
+  template_visual.c_class = TrueColor;
+
+  int num_visuals;
+  util::x11::ClientData<XVisualInfo> visual_info{XGetVisualInfo(
+      display, VisualScreenMask | VisualDepthMask | VisualClassMask,
+      &template_visual, &num_visuals)};
+  if (!visual_info) return nullptr;
+
+  XVisualInfo* xvi = &*visual_info;
+  for (int i = 0; i < num_visuals; i++) {
+    auto format = XRenderFindVisualFormat(display, xvi[i].visual);
+    if (format->type == PictTypeDirect && format->direct.alphaMask)
+      return xvi[i].visual;
+  }
+
+  return nullptr;
 }
 
 }  // namespace x11

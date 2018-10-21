@@ -97,6 +97,8 @@ Window CreateWindow(Window parent, int x, int y, unsigned int width,
                     unsigned int window_class, Visual* visual,
                     unsigned long valuemask, XSetWindowAttributes* attributes);
 
+Visual* GetTrueColorVisual(Display* display, int screen_number);
+
 }  // namespace x11
 }  // namespace util
 

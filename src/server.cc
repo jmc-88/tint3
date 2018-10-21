@@ -20,7 +20,6 @@
  **************************************************************************/
 
 #include <X11/extensions/Xrandr.h>
-#include <X11/extensions/Xrender.h>
 #include <unistd.h>
 
 #include <algorithm>
@@ -367,32 +366,10 @@ void Server::InitGC(Window win) {
 }
 
 void Server::InitVisual() {
-  // inspired by freedesktops fdclock ;)
-  XVisualInfo templ;
-  templ.screen = screen;
-  templ.depth = 32;
-  templ.c_class = TrueColor;
-
-  int nvi;
-  util::x11::ClientData<XVisualInfo> xvi(XGetVisualInfo(
-      dsp, VisualScreenMask | VisualDepthMask | VisualClassMask, &templ, &nvi));
-
-  Visual* xvi_visual = nullptr;
-
-  if (xvi != nullptr) {
-    for (int i = 0; i < nvi; i++) {
-      auto format = XRenderFindVisualFormat(dsp, xvi.get()[i].visual);
-
-      if (format->type == PictTypeDirect && format->direct.alphaMask) {
-        xvi_visual = xvi.get()[i].visual;
-        break;
-      }
-    }
-  }
-
   // check composite manager
   composite_manager = XGetSelectionOwner(dsp, atoms_["_NET_WM_CM_SCREEN"]);
 
+  Visual* xvi_visual = util::x11::GetTrueColorVisual(dsp, screen);
   if (xvi_visual) {
     visual32 = xvi_visual;
     colormap32 =

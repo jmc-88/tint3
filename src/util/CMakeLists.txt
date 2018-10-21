@@ -346,6 +346,8 @@ add_library(
 
 target_include_directories(
   x11_lib
+  PRIVATE
+    ${X11_Xrender_INCLUDE_DIRS}
   PUBLIC
     ${X11_X11_INCLUDE_DIRS})
 
@@ -355,6 +357,7 @@ target_link_libraries(
     log_lib
     panel_lib
     server_lib
+    ${X11_Xrender_LIB}
   PUBLIC
     pipe_lib
     timer_lib
