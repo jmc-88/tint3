@@ -33,12 +33,10 @@ class Server {
   unsigned int num_monitors = 0;
   std::vector<Monitor> monitor;
   Visual* visual = nullptr;
-  Visual* visual32 = nullptr;
   // root background
   Pixmap root_pmap = None;
   GC gc = None;
   util::x11::Colormap colormap;
-  util::x11::Colormap colormap32;
 
   SnDisplay* sn_dsp = nullptr;
 #ifdef HAVE_SN

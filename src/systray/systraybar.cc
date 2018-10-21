@@ -89,12 +89,14 @@ void InitSystray(Timer& timer) {
     return;
   }
 
-  if (!server.visual32 && (systray.alpha != 100 || systray.brightness != 0 ||
-                           systray.saturation != 0)) {
+  if (!server.real_transparency &&
+      (systray.alpha != 100 || systray.brightness != 0 ||
+       systray.saturation != 0)) {
     util::log::Error() << "No 32 bit visual for your X implementation. "
                           "'systray_asb = 100 0 0' will be forced.\n";
     systray.alpha = 100;
-    systray.brightness = systray.saturation = 0;
+    systray.brightness = 0;
+    systray.saturation = 0;
   }
 
   systray.RemoveAllIcons(timer);
@@ -290,14 +292,7 @@ void Systraybar::StartNet(Timer& timer) {
                   server.atom("_NET_SYSTEM_TRAY_ORIENTATION"), XA_CARDINAL, 32,
                   PropModeReplace, &orient, 1);
 
-  VisualID vid;
-
-  if (server.visual32 && (alpha != 100 || brightness != 0 || saturation != 0)) {
-    vid = XVisualIDFromVisual(server.visual32);
-  } else {
-    vid = XVisualIDFromVisual(server.visual);
-  }
-
+  VisualID vid = XVisualIDFromVisual(server.visual);
   XChangeProperty(server.dsp, net_sel_win,
                   server.atom("_NET_SYSTEM_TRAY_VISUAL"), XA_VISUALID, 32,
                   PropModeReplace, (unsigned char*)&vid, 1);
@@ -556,16 +551,16 @@ void SystrayRenderIconNow(TrayWindow* traywin, Timer& timer) {
   Picture pict_image =
       XRenderCreatePicture(server.dsp, traywin->child_id, f, 0, 0);
   Picture pict_drawable = XRenderCreatePicture(
-      server.dsp, tmp_pmap,
-      XRenderFindVisualFormat(server.dsp, server.visual32), 0, 0);
+      server.dsp, tmp_pmap, XRenderFindVisualFormat(server.dsp, server.visual),
+      0, 0);
   XRenderComposite(server.dsp, PictOpSrc, pict_image, None, pict_drawable, 0, 0,
                    0, 0, 0, 0, traywin->width, traywin->height);
   XRenderFreePicture(server.dsp, pict_image);
   XRenderFreePicture(server.dsp, pict_drawable);
   // end of the ugly hack and we can continue as before
 
-  imlib_context_set_visual(server.visual32);
-  imlib_context_set_colormap(server.colormap32);
+  imlib_context_set_visual(server.visual);
+  imlib_context_set_colormap(server.colormap);
   imlib_context_set_drawable(tmp_pmap);
   Imlib_Image image = imlib_create_image_from_drawable(0, 0, 0, traywin->width,
                                                        traywin->height, 1);

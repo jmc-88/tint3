@@ -120,7 +120,6 @@ void Server::InitAtoms() {
 
 void Server::Cleanup() {
   colormap = {};
-  colormap32 = {};
   monitor.clear();
 
   if (gc) {
@@ -370,12 +369,6 @@ void Server::InitVisual() {
   composite_manager = XGetSelectionOwner(dsp, atoms_["_NET_WM_CM_SCREEN"]);
 
   Visual* xvi_visual = util::x11::GetTrueColorVisual(dsp, screen);
-  if (xvi_visual) {
-    visual32 = xvi_visual;
-    colormap32 =
-        util::x11::Colormap::Create(dsp, root_window_, xvi_visual, AllocNone);
-  }
-
   if (xvi_visual && composite_manager != None) {
     XSetWindowAttributes attrs;
     attrs.event_mask = StructureNotifyMask;
