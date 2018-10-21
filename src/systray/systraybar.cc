@@ -559,10 +559,7 @@ void SystrayRenderIconNow(TrayWindow* traywin, Timer& timer) {
   imlib_context_set_drawable(tmp_pmap);
   Imlib_Image image = imlib_create_image_from_drawable(0, 0, 0, traywin->width,
                                                        traywin->height, 1);
-
-  if (image == nullptr) {
-    return;
-  }
+  if (!image) return;
 
   imlib_context_set_image(image);
   // if (traywin->depth == 24)

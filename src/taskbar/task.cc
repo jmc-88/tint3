@@ -409,13 +409,7 @@ void GetIcon(Task* tsk) {
 }
 
 void Task::DrawIcon(int text_width) {
-  if (icon[current_state] == 0) {
-    return;
-  }
-
-  // Find pos
-  int pos_x;
-
+  int pos_x = 0;
   if (panel_->g_task.centered) {
     if (panel_->g_task.text) {
       pos_x = (width_ - text_width - panel_->g_task.icon_size1) / 2;
@@ -426,16 +420,14 @@ void Task::DrawIcon(int text_width) {
     pos_x = panel_->g_task.padding_x_lr_ + bg_.border().width();
   }
 
-  // Render
   Imlib_Image image = nullptr;
-  if (mouse_state() == MouseState::kMouseOver) {
+  if (mouse_state() == MouseState::kMouseOver)
     image = icon_hover[current_state];
-  } else if (mouse_state() == MouseState::kMousePressed) {
+  else if (mouse_state() == MouseState::kMousePressed)
     image = icon_pressed[current_state];
-  } else {
+  else
     image = icon[current_state];
-  }
-  RenderImage(&server, pix_, image, pos_x, panel_->g_task.icon_posy);
+  if (image) RenderImage(&server, pix_, image, pos_x, panel_->g_task.icon_posy);
 }
 
 void Task::DrawForeground(cairo_t* c) {
