@@ -42,6 +42,25 @@ class ClientData : public std::unique_ptr<T, XFreeDeleter> {
       : std::unique_ptr<T, XFreeDeleter>(static_cast<T*>(data)) {}
 };
 
+class Colormap {
+ public:
+  Colormap() = default;
+  Colormap(Display* display, ::Colormap colormap);
+  Colormap(Colormap const& other) = default;
+  Colormap(Colormap&& other) = default;
+  ~Colormap();
+
+  Colormap& operator=(Colormap other);
+  operator ::Colormap() const;
+
+  static Colormap DefaultForScreen(Display* display, int screen_number);
+  static Colormap Create(Display* display, Window window, Visual* visual, int alloc);
+
+ private:
+  Display* display_ = nullptr;
+  ::Colormap colormap_ = None;
+};
+
 class EventLoop {
  public:
   using EventHandler = std::function<void(XEvent&)>;

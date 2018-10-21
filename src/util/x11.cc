@@ -6,6 +6,7 @@
 #include "util/x11.hh"
 
 #include <cstring>
+#include <utility>
 
 // For waitpid
 #include <sys/types.h>
@@ -28,6 +29,29 @@ ScopedErrorHandler::ScopedErrorHandler(XErrorHandler new_handler)
 ScopedErrorHandler::~ScopedErrorHandler() { XSetErrorHandler(old_handler_); }
 
 void XFreeDeleter::operator()(void* data) const { XFree(data); }
+
+Colormap::Colormap(Display* display, ::Colormap colormap)
+    : display_{display}, colormap_{colormap} {}
+Colormap::~Colormap() {
+  if (colormap_ != None) XFreeColormap(display_, colormap_);
+}
+
+Colormap& Colormap::operator=(Colormap other) {
+  std::swap(display_, other.display_);
+  std::swap(colormap_, other.colormap_);
+  return *this;
+}
+
+Colormap::operator ::Colormap() const { return colormap_; }
+
+Colormap Colormap::DefaultForScreen(Display* display, int screen_number) {
+  return {display, DefaultColormap(display, screen_number)};
+}
+
+Colormap Colormap::Create(Display* display, Window window, Visual* visual,
+                          int alloc) {
+  return {display, XCreateColormap(display, window, visual, alloc)};
+}
 
 EventLoop::EventLoop(Server const* const server, Timer& timer)
     : alive_(true),

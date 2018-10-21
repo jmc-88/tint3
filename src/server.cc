@@ -120,16 +120,8 @@ void Server::InitAtoms() {
 }
 
 void Server::Cleanup() {
-  if (colormap) {
-    XFreeColormap(dsp, colormap);
-    colormap = None;
-  }
-
-  if (colormap32) {
-    XFreeColormap(dsp, colormap32);
-    colormap32 = None;
-  }
-
+  colormap = {};
+  colormap32 = {};
   monitor.clear();
 
   if (gc) {
@@ -401,17 +393,10 @@ void Server::InitVisual() {
   // check composite manager
   composite_manager = XGetSelectionOwner(dsp, atoms_["_NET_WM_CM_SCREEN"]);
 
-  if (colormap) {
-    XFreeColormap(dsp, colormap);
-  }
-
-  if (colormap32) {
-    XFreeColormap(dsp, colormap32);
-  }
-
   if (xvi_visual) {
     visual32 = xvi_visual;
-    colormap32 = XCreateColormap(dsp, root_window_, xvi_visual, AllocNone);
+    colormap32 =
+        util::x11::Colormap::Create(dsp, root_window_, xvi_visual, AllocNone);
   }
 
   if (xvi_visual && composite_manager != None) {
@@ -422,14 +407,15 @@ void Server::InitVisual() {
     real_transparency = true;
     depth = 32;
     std::cout << "Real transparency: on, depth: " << depth << '\n';
-    colormap = XCreateColormap(dsp, root_window_, xvi_visual, AllocNone);
+    colormap =
+        util::x11::Colormap::Create(dsp, root_window_, xvi_visual, AllocNone);
     visual = xvi_visual;
   } else {
     // no composite manager -> fake transparency
     real_transparency = false;
     depth = DefaultDepth(dsp, screen);
     std::cout << "Real transparency: off, depth: " << depth << '\n';
-    colormap = DefaultColormap(dsp, screen);
+    colormap = util::x11::Colormap::DefaultForScreen(dsp, screen);
     visual = DefaultVisual(dsp, screen);
   }
 }
@@ -444,6 +430,9 @@ void Server::InitX11() {
 
 Window Server::root_window() const { return root_window_; }
 
-void Server::UpdateRootWindow() { root_window_ = RootWindow(dsp, screen); }
+void Server::UpdateRootWindow() {
+  root_window_ = RootWindow(dsp, screen);
+  XSelectInput(dsp, root_window_, PropertyChangeMask | StructureNotifyMask);
+}
 
 Atom Server::atom(std::string const& name) const { return atoms_.at(name); }

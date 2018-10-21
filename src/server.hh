@@ -5,6 +5,7 @@
 #include <X11/Xlib.h>
 #include <X11/extensions/Xinerama.h>
 
+#include <memory>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -23,22 +24,21 @@ struct Monitor {
 
 class Server {
  public:
-  Display* dsp;
-  Window composite_manager;
-  bool real_transparency;
-  unsigned int screen;
-  int depth;
-  // number of monitor (without monitor included into another one)
-  unsigned int num_monitors;
+  Display* dsp = nullptr;
+  Window composite_manager = None;
+  bool real_transparency = false;
+  unsigned int screen = 0;
+  int depth = 32;
+  // number of monitors (without monitors included into another one)
+  unsigned int num_monitors = 0;
   std::vector<Monitor> monitor;
-  bool got_root_win;
-  Visual* visual;
-  Visual* visual32;
+  Visual* visual = nullptr;
+  Visual* visual32 = nullptr;
   // root background
-  Pixmap root_pmap;
-  GC gc;
-  Colormap colormap;
-  Colormap colormap32;
+  Pixmap root_pmap = None;
+  GC gc = None;
+  util::x11::Colormap colormap;
+  util::x11::Colormap colormap32;
 
   SnDisplay* sn_dsp = nullptr;
 #ifdef HAVE_SN
@@ -101,10 +101,10 @@ class Server {
   }
 
  private:
-  Window root_window_;
+  Window root_window_ = None;
   std::unordered_map<std::string, Atom> atoms_;
-  unsigned int desktop_;
-  unsigned int num_desktops_;
+  unsigned int desktop_ = 0;
+  unsigned int num_desktops_ = 0;
 };
 
 extern Server server;

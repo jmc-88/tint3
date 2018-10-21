@@ -531,13 +531,8 @@ void EventPropertyNotify(XEvent* e, Timer& timer, Tooltip* tooltip) {
   if (xsettings_client) xsettings_client_process_event(xsettings_client, e);
 
   if (win == server.root_window()) {
-    if (!server.got_root_win) {
-      XSelectInput(server.dsp, server.root_window(),
-                   PropertyChangeMask | StructureNotifyMask);
-      server.got_root_win = true;
-    }
     // Change name of desktops
-    else if (at == server.atom("_NET_DESKTOP_NAMES")) {
+    if (at == server.atom("_NET_DESKTOP_NAMES")) {
       if (!taskbarname_enabled) {
         return;
       }
@@ -723,9 +718,7 @@ void EventPropertyNotify(XEvent* e, Timer& timer, Tooltip* tooltip) {
       }
     }
 
-    if (!server.got_root_win) {
-      server.UpdateRootWindow();
-    }
+    if (server.root_window() == None) server.UpdateRootWindow();
   }
 }
 
