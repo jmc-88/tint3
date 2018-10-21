@@ -374,19 +374,17 @@ void Server::InitVisual() {
     attrs.event_mask = StructureNotifyMask;
     XChangeWindowAttributes(dsp, composite_manager, CWEventMask, &attrs);
 
-    real_transparency = true;
     depth = 32;
-    std::cout << "Real transparency: on, depth: " << depth << '\n';
     colormap =
         util::x11::Colormap::Create(dsp, root_window_, xvi_visual, AllocNone);
     visual = xvi_visual;
+    std::cout << "Real transparency: on, depth: " << depth << '\n';
   } else {
     // no composite manager -> fake transparency
-    real_transparency = false;
     depth = DefaultDepth(dsp, screen);
-    std::cout << "Real transparency: off, depth: " << depth << '\n';
     colormap = util::x11::Colormap::DefaultForScreen(dsp, screen);
     visual = DefaultVisual(dsp, screen);
+    std::cout << "Real transparency: off, depth: " << depth << '\n';
   }
 }
 
@@ -404,5 +402,7 @@ void Server::UpdateRootWindow() {
   root_window_ = RootWindow(dsp, screen);
   XSelectInput(dsp, root_window_, PropertyChangeMask | StructureNotifyMask);
 }
+
+bool Server::real_transparency() const { return depth == 32; }
 
 Atom Server::atom(std::string const& name) const { return atoms_.at(name); }

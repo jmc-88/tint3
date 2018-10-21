@@ -26,7 +26,6 @@ class Server {
  public:
   Display* dsp = nullptr;
   Window composite_manager = None;
-  bool real_transparency = false;
   unsigned int screen = 0;
   int depth = 32;
   // number of monitors (without monitors included into another one)
@@ -60,6 +59,8 @@ class Server {
 
   Window root_window() const;
   void UpdateRootWindow();
+
+  bool real_transparency() const;
 
   Atom atom(std::string const& name) const;
 

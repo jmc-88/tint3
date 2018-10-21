@@ -153,7 +153,7 @@ void Tooltip::DrawBackground(cairo_t* c, int width, int height) {
   Border b = tooltip_config.bg.border();
   const int w = b.width();
 
-  if (server_->real_transparency) {
+  if (server_->real_transparency()) {
     ClearPixmap(window_, 0, 0, width, height);
     DrawRect(c, w, w, width - 2 * w, height - w, b.rounded() - w / 1.571);
     cairo_set_source_rgba(c, bc[0], bc[1], bc[2], bc.alpha());
@@ -173,7 +173,7 @@ void Tooltip::DrawBorder(cairo_t* c, int width, int height) {
   const int border_height =
       (b.width_for_side(BORDER_TOP) + b.width_for_side(BORDER_BOTTOM)) / 2.0;
 
-  if (server_->real_transparency) {
+  if (server_->real_transparency()) {
     DrawRectOnSides(c, b.width_for_side(BORDER_LEFT) / 2.0,
                     b.width_for_side(BORDER_TOP) / 2.0, width - border_width,
                     height - border_height, b.rounded(), b.mask());

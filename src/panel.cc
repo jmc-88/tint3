@@ -482,7 +482,7 @@ void Panel::SetBackground() {
     xoff = width_ - hidden_width_;
   }
 
-  if (server.real_transparency) {
+  if (server.real_transparency()) {
     ClearPixmap(pix_, 0, 0, width_, height_);
   } else {
     server.GetRootPixmap();

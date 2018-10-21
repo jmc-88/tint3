@@ -402,7 +402,7 @@ void Area::Draw() {
                        server.depth);
 
   // add layer of root pixmap (or clear pixmap if real_transparency==true)
-  if (server.real_transparency) {
+  if (server.real_transparency()) {
     ClearPixmap(pix_, 0, 0, width_, height_);
   }
 

@@ -366,7 +366,7 @@ void LauncherIcon::DrawForeground(cairo_t* c) {
     imlib_context_set_image(icon_scaled_);
   }
 
-  if (server.real_transparency) {
+  if (server.real_transparency()) {
     RenderImage(&server, pix_, 0, 0, imlib_image_get_width(),
                 imlib_image_get_height());
   } else {
