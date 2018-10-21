@@ -676,20 +676,13 @@ std::string Systraybar::GetFriendlyName() const { return "Systraybar"; }
 #endif  // _TINT3_DEBUG
 
 void Systraybar::NetMessage(XClientMessageEvent* e) {
-  unsigned long opcode;
-  Window id;
-
-  opcode = e->data.l[1];
-
+  unsigned long opcode = e->data.l[1];
   switch (opcode) {
-    case SYSTEM_TRAY_REQUEST_DOCK:
-      id = e->data.l[2];
-
-      if (id) {
-        AddIcon(id);
-      }
-
+    case SYSTEM_TRAY_REQUEST_DOCK: {
+      Window id = e->data.l[2];
+      if (id) AddIcon(id);
       break;
+    }
 
     case SYSTEM_TRAY_BEGIN_MESSAGE:
     case SYSTEM_TRAY_CANCEL_MESSAGE:
@@ -702,7 +695,6 @@ void Systraybar::NetMessage(XClientMessageEvent* e) {
       } else {
         util::log::Error() << "SYSTEM_TRAY: unknown message type\n";
       }
-
       break;
   }
 }
