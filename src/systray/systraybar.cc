@@ -584,8 +584,8 @@ void SystrayRenderIconNow(TrayWindow* traywin, Timer& timer) {
             traywin->x - systray.panel_x_, traywin->y - systray.panel_y_,
             traywin->width, traywin->height, traywin->x - systray.panel_x_,
             traywin->y - systray.panel_y_);
-  RenderImage(&server, systray.pix_, traywin->x - systray.panel_x_,
-              traywin->y - systray.panel_y_, traywin->width, traywin->height);
+  RenderImage(&server, systray.pix_, image, traywin->x - systray.panel_x_,
+              traywin->y - systray.panel_y_);
   XCopyArea(server.dsp, systray.pix_, panel->main_win_, server.gc,
             traywin->x - systray.panel_x_, traywin->y - systray.panel_y_,
             traywin->width, traywin->height, traywin->x, traywin->y);

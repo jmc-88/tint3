@@ -128,7 +128,8 @@ void AdjustASB(DATA32* data, unsigned int w, unsigned int h, int alpha,
                float saturation_adjustment, float brightness_adjustment);
 void CreateHeuristicMask(DATA32* data, int w, int h);
 
-void RenderImage(Server* server, Drawable d, int x, int y, int w, int h);
+void RenderImage(Server* server, Drawable drawable, Imlib_Image image, int x,
+                 int y);
 
 std::ostream& operator<<(std::ostream& os, std::nullptr_t);
 

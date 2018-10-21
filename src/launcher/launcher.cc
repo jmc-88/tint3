@@ -354,25 +354,19 @@ std::string LauncherIcon::GetTooltipText() {
 
 void LauncherIcon::DrawForeground(cairo_t* c) {
   // Render
+  Imlib_Image image = nullptr;
   if (new_panel_config.mouse_effects) {
     if (mouse_state() == MouseState::kMouseOver) {
-      imlib_context_set_image(icon_hover_);
+      image = icon_hover_;
     } else if (mouse_state() == MouseState::kMousePressed) {
-      imlib_context_set_image(icon_pressed_);
+      image = icon_pressed_;
     } else {
-      imlib_context_set_image(icon_scaled_);
+      image = icon_scaled_;
     }
   } else {
-    imlib_context_set_image(icon_scaled_);
+    image = icon_scaled_;
   }
-
-  if (server.real_transparency()) {
-    RenderImage(&server, pix_, 0, 0, imlib_image_get_width(),
-                imlib_image_get_height());
-  } else {
-    imlib_context_set_drawable(pix_);
-    imlib_render_image_on_drawable(0, 0);
-  }
+  RenderImage(&server, pix_, image, 0, 0);
 }
 
 bool LauncherIcon::OnClick(XEvent* event) {

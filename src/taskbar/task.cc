@@ -427,21 +427,15 @@ void Task::DrawIcon(int text_width) {
   }
 
   // Render
+  Imlib_Image image = nullptr;
   if (mouse_state() == MouseState::kMouseOver) {
-    imlib_context_set_image(icon_hover[current_state]);
+    image = icon_hover[current_state];
   } else if (mouse_state() == MouseState::kMousePressed) {
-    imlib_context_set_image(icon_pressed[current_state]);
+    image = icon_pressed[current_state];
   } else {
-    imlib_context_set_image(icon[current_state]);
+    image = icon[current_state];
   }
-
-  if (server.real_transparency()) {
-    RenderImage(&server, pix_, pos_x, panel_->g_task.icon_posy,
-                imlib_image_get_width(), imlib_image_get_height());
-  } else {
-    imlib_context_set_drawable(pix_);
-    imlib_render_image_on_drawable(pos_x, panel_->g_task.icon_posy);
-  }
+  RenderImage(&server, pix_, image, pos_x, panel_->g_task.icon_posy);
 }
 
 void Task::DrawForeground(cairo_t* c) {
