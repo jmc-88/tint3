@@ -23,6 +23,7 @@ class Systraybar : public Area {
   int alpha, saturation, brightness;
   int icon_size, icons_per_column, icons_per_row, margin_;
 
+  bool needs_true_color() const;
   bool should_refresh() const;
   void set_should_refresh(bool should_refresh);
 

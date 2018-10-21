@@ -89,9 +89,7 @@ void InitSystray(Timer& timer) {
     return;
   }
 
-  if (!server.real_transparency() &&
-      (systray.alpha != 100 || systray.brightness != 0 ||
-       systray.saturation != 0)) {
+  if (!server.real_transparency() && systray.needs_true_color()) {
     util::log::Error() << "No 32 bit visual for your X implementation. "
                           "'systray_asb = 100 0 0' will be forced.\n";
     systray.alpha = 100;
@@ -122,8 +120,7 @@ void Systraybar::SetParentPanel(Panel* panel) {
 }
 
 void Systraybar::DrawForeground(cairo_t* /* c */) {
-  if (server.real_transparency() || alpha != 100 || brightness != 0 ||
-      saturation != 0) {
+  if (server.real_transparency() || needs_true_color()) {
     if (render_background) {
       XFreePixmap(server.dsp, render_background);
     }
@@ -379,8 +376,7 @@ bool Systraybar::AddIcon(Window id) {
   XSetWindowAttributes set_attr;
   Visual* visual = server.visual;
 
-  if (attr.depth != server.depth || alpha != 100 || brightness != 0 ||
-      saturation != 0) {
+  if (attr.depth != server.depth || needs_true_color()) {
     visual = attr.visual;
     set_attr.colormap = attr.colormap;
     set_attr.background_pixel = 0;
@@ -466,8 +462,7 @@ bool Systraybar::AddIcon(Window id) {
     list_icons_.insert(it, traywin);
   }
 
-  if (server.real_transparency() || alpha != 100 || brightness != 0 ||
-      saturation != 0) {
+  if (server.real_transparency() || needs_true_color()) {
     traywin->damage =
         XDamageCreate(server.dsp, traywin->tray_id, XDamageReportRawRectangles);
     XCompositeRedirectWindow(server.dsp, traywin->tray_id,
@@ -579,8 +574,7 @@ void SystrayRenderIconNow(TrayWindow* traywin, Timer& timer) {
     CreateHeuristicMask(data, traywin->width, traywin->height);
   }
 
-  if (systray.alpha != 100 || systray.brightness != 0 ||
-      systray.saturation != 0) {
+  if (systray.needs_true_color()) {
     AdjustASB(data, traywin->width, traywin->height, systray.alpha,
               (float)systray.saturation / 100, (float)systray.brightness / 100);
   }
@@ -611,8 +605,7 @@ void SystrayRenderIconNow(TrayWindow* traywin, Timer& timer) {
 }  // namespace
 
 void Systraybar::RenderIcon(TrayWindow* traywin, Timer& timer) {
-  if (server.real_transparency() || alpha != 100 || brightness != 0 ||
-      saturation != 0) {
+  if (server.real_transparency() || needs_true_color()) {
     // wine tray icons update whenever mouse is over them, so we limit the
     // updates to 50 ms
     if (!traywin->render_timeout) {
@@ -712,4 +705,8 @@ void Systraybar::NetMessage(XClientMessageEvent* e) {
 
       break;
   }
+}
+
+bool Systraybar::needs_true_color() const {
+  return alpha != 100 || brightness != 0 || saturation != 0;
 }
