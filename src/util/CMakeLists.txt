@@ -54,6 +54,22 @@ test_target(
     testmain)
 
 add_library(
+  collection_lib INTERFACE)
+
+target_sources(
+  collection_lib
+  INTERFACE
+    "${PROJECT_SOURCE_DIR}/src/util/collection.hh")
+
+test_target(
+  collection_test
+  SOURCES
+    collection_test.cc
+  LINK_LIBRARIES
+    collection_lib
+    testmain)
+
+add_library(
   common_lib STATIC
   common.cc)
 

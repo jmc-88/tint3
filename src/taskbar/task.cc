@@ -40,6 +40,7 @@
 #include "taskbar/task.hh"
 #include "taskbar/taskbar.hh"
 #include "tooltip/tooltip.hh"
+#include "util/collection.hh"
 #include "util/common.hh"
 #include "util/log.hh"
 #include "util/timer.hh"

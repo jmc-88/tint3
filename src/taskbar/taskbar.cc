@@ -34,6 +34,7 @@
 #include "server.hh"
 #include "taskbar/task.hh"
 #include "taskbar/taskbar.hh"
+#include "util/collection.hh"
 #include "util/log.hh"
 #include "util/window.hh"
 

@@ -1,6 +1,6 @@
 #ifndef TINT3_THEME_MANAGER_HH
 
-#include <util/common.hh>
+#include "util/collection.hh"
 
 #include "json.hpp"
 using nlohmann::json;

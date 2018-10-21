@@ -11,6 +11,7 @@ target_include_directories(
 target_link_libraries(
   task_lib
   PRIVATE
+    collection_lib
     log_lib
     panel_lib
     server_lib
@@ -39,6 +40,7 @@ target_include_directories(
 target_link_libraries(
   taskbar_lib
   PRIVATE
+    collection_lib
     log_lib
     panel_lib
     server_lib

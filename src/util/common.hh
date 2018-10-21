@@ -8,11 +8,9 @@
 #include <signal.h>
 #include <unistd.h>
 
-#include <algorithm>
 #include <cerrno>
 #include <cstddef>
 #include <cstring>
-#include <iterator>
 #include <memory>
 #include <sstream>
 #include <string>
@@ -133,19 +131,5 @@ void CreateHeuristicMask(DATA32* data, int w, int h);
 void RenderImage(Server* server, Drawable d, int x, int y, int w, int h);
 
 std::ostream& operator<<(std::ostream& os, std::nullptr_t);
-
-template <typename T, typename V>
-typename T::iterator erase(T& container, V const& value) {
-  return container.erase(
-    std::remove(std::begin(container), std::end(container), value),
-    std::end(container));
-}
-
-template <typename T, typename P>
-typename T::iterator erase_if(T& container, P unary_predicate) {
-  return container.erase(
-    std::remove_if(std::begin(container), std::end(container), unary_predicate),
-    std::end(container));
-}
 
 #endif  // TINT3_UTIL_COMMON_HH

@@ -37,6 +37,7 @@
 #include "server.hh"
 #include "systray/systraybar.hh"
 #include "systray/tray_window.hh"
+#include "util/collection.hh"
 #include "util/log.hh"
 #include "util/x11.hh"
 

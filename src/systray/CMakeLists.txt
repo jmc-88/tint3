@@ -5,6 +5,7 @@ add_library(
 target_link_libraries(
   systraybar_lib
   PRIVATE
+    collection_lib
     log_lib
     panel_lib
     server_lib
