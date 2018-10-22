@@ -33,7 +33,6 @@ class Server {
   std::vector<Monitor> monitor;
   Visual* visual = nullptr;
   // root background
-  Pixmap root_pmap = None;
   GC gc = None;
   util::x11::Colormap colormap;
 

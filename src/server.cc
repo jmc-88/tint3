@@ -167,7 +167,7 @@ void Server::GetRootPixmap() {
     }
   }
 
-  root_pmap = ret;
+  Pixmap root_pmap = ret;
   if (root_pmap == None) {
     util::log::Error() << "tint3: pixmap background detection failed\n";
     return;

@@ -486,7 +486,7 @@ void Panel::SetBackground() {
     ClearPixmap(pix_, 0, 0, width_, height_);
   } else {
     server.GetRootPixmap();
-    // copy background (server.root_pmap) in panel.pix
+    // copy background in panel.pix
     Window dummy;
     int x, y;
     XTranslateCoordinates(server.dsp, main_win_, server.root_window(), 0, 0, &x,
