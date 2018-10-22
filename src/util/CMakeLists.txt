@@ -20,6 +20,7 @@ target_link_libraries(
     ${X11_Xrender_LIB}
   PUBLIC
     color_lib
+    x11_lib
     absl::optional
     ${CAIRO_LIBRARIES}
     ${X11_X11_LIB})

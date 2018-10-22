@@ -465,12 +465,8 @@ void Panel::SetProperties() {
 }
 
 void Panel::SetBackground() {
-  if (pix_ != None) {
-    XFreePixmap(server.dsp, pix_);
-  }
-
-  pix_ = XCreatePixmap(server.dsp, server.root_window(), width_, height_,
-                       server.depth);
+  pix_ = util::x11::Pixmap::Create(server.dsp, server.root_window(), width_,
+                                   height_, server.depth);
 
   int xoff = 0, yoff = 0;
 
@@ -534,8 +530,8 @@ void Panel::SetBackground() {
       tskbar.bar_name.reset_state_pixmap(k);
     }
 
-    tskbar.pix_ = None;
-    tskbar.bar_name.pix_ = None;
+    tskbar.pix_ = {};
+    tskbar.bar_name.pix_ = {};
 
     for (Area* child : tskbar.filtered_children()) {
       SetTaskRedraw(static_cast<Task*>(child));

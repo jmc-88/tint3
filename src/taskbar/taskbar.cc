@@ -407,11 +407,8 @@ bool Taskbar::RemoveChild(Area* child) {
 
 void Taskbar::OnChangeLayout() {
   // reset Pixmap when position/size changed
-  for (int k = 0; k < kTaskbarCount; ++k) {
-    reset_state_pixmap(k);
-  }
-
-  pix_ = None;
+  for (int k = 0; k < kTaskbarCount; ++k) reset_state_pixmap(k);
+  pix_ = {};
   need_redraw_ = true;
 }
 

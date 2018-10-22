@@ -23,6 +23,7 @@ target_link_libraries(
     common_lib
     pango_lib
     timer_lib
+    x11_lib
     ${IMLIB2_LIBRARIES}
     ${PANGOCAIRO_LIBRARIES}
     ${X11_X11_LIB})
@@ -61,7 +62,8 @@ target_link_libraries(
   PRIVATE
     server_lib
   PUBLIC
-    area_lib)
+    area_lib
+    x11_lib)
 
 add_library(
   taskbarname_lib STATIC

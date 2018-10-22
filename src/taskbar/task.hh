@@ -10,6 +10,7 @@
 #include "util/common.hh"
 #include "util/pango.hh"
 #include "util/timer.hh"
+#include "util/x11.hh"
 
 enum TaskState {
   kTaskNormal,
@@ -53,7 +54,6 @@ class Global_task : public Area {
 class Task : public Area {
  public:
   explicit Task(Timer& timer);
-  ~Task();
 
   // TODO: group task with list of windows here
   Window win;
@@ -62,7 +62,7 @@ class Task : public Area {
   util::imlib2::Image icon[kTaskStateCount];
   util::imlib2::Image icon_hover[kTaskStateCount];
   util::imlib2::Image icon_pressed[kTaskStateCount];
-  Pixmap state_pix[kTaskStateCount];
+  util::x11::Pixmap state_pix[kTaskStateCount];
   unsigned int icon_width;
   unsigned int icon_height;
   int urgent_tick;

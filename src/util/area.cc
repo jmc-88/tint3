@@ -40,7 +40,6 @@ Area::Area()
       panel_y_(0),
       width_(0),
       height_(0),
-      pix_(None),
       on_screen_(false),
       size_mode_(SizeMode::kByLayout),
       need_resize_(false),
@@ -394,12 +393,8 @@ void Area::Draw() {
     return;
   }
 
-  if (pix_ != None) {
-    XFreePixmap(server.dsp, pix_);
-  }
-
-  pix_ = XCreatePixmap(server.dsp, server.root_window(), width_, height_,
-                       server.depth);
+  pix_ = util::x11::Pixmap::Create(server.dsp, server.root_window(), width_,
+                                   height_, server.depth);
 
   // add layer of root pixmap (or clear pixmap if real_transparency==true)
   if (server.real_transparency()) {
@@ -480,11 +475,7 @@ void Area::FreeArea() {
   }
 
   children_.clear();
-
-  if (pix_ != None) {
-    XFreePixmap(server.dsp, pix_);
-    pix_ = None;
-  }
+  pix_ = {};
 }
 
 void Area::DrawForeground(cairo_t*) { /* defaults to a no-op */

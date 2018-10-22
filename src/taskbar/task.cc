@@ -75,20 +75,7 @@ Global_task::Global_task() {
   }
 }
 
-Task::Task(Timer& timer) : timer_(timer) {
-  set_has_mouse_effects(true);
-  for (int k = 0; k < kTaskStateCount; ++k) {
-    state_pix[k] = None;
-  }
-}
-
-Task::~Task() {
-  for (int k = 0; k < kTaskStateCount; ++k) {
-    if (state_pix[k] != None) {
-      XFreePixmap(server.dsp, state_pix[k]);
-    }
-  }
-}
+Task::Task(Timer& timer) : timer_(timer) { set_has_mouse_effects(true); }
 
 std::string Task::GetTooltipText() {
   return tooltip_enabled_ ? title_ : std::string();
@@ -119,7 +106,7 @@ Task* AddTask(Window win, Timer& timer) {
     new_tsk.icon[k] = 0;
     new_tsk.icon_hover[k] = 0;
     new_tsk.icon_pressed[k] = 0;
-    new_tsk.state_pix[k] = None;
+    new_tsk.state_pix[k] = {};
   }
 
   new_tsk.UpdateTitle();
@@ -165,7 +152,7 @@ Task* AddTask(Window win, Timer& timer) {
       new_tsk2->icon[k] = new_tsk.icon[k];
       new_tsk2->icon_hover[k] = new_tsk.icon_hover[k];
       new_tsk2->icon_pressed[k] = new_tsk.icon_pressed[k];
-      new_tsk2->state_pix[k] = None;
+      new_tsk2->state_pix[k] = {};
     }
 
     new_tsk2->icon_width = new_tsk.icon_width;
@@ -619,14 +606,8 @@ void Task::SetState(int state) {
 }
 
 void SetTaskRedraw(Task* tsk) {
-  for (int k = 0; k < kTaskStateCount; ++k) {
-    if (tsk->state_pix[k] != None) {
-      XFreePixmap(server.dsp, tsk->state_pix[k]);
-    }
-    tsk->state_pix[k] = None;
-  }
-
-  tsk->pix_ = None;
+  for (int k = 0; k < kTaskStateCount; ++k) tsk->state_pix[k] = {};
+  tsk->pix_ = {};
   tsk->need_redraw_ = true;
 }
 

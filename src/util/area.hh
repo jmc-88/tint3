@@ -8,8 +8,9 @@
 #include <string>
 #include <vector>
 
-#include "util/color.hh"
 #include "absl/types/optional.h"
+#include "util/color.hh"
+#include "util/x11.hh"
 
 // way to calculate the size
 // kByLayout objects : taskbar and task
@@ -33,7 +34,7 @@ class Area {
   // width and height including border
   unsigned int width_;
   unsigned int height_;
-  Pixmap pix_;
+  util::x11::Pixmap pix_;
 
   Background bg_;
   void set_background(Background const& background);

@@ -54,11 +54,31 @@ class Colormap {
   operator ::Colormap() const;
 
   static Colormap DefaultForScreen(Display* display, int screen_number);
-  static Colormap Create(Display* display, Window window, Visual* visual, int alloc);
+  static Colormap Create(Display* display, Window window, Visual* visual,
+                         int alloc);
 
  private:
   Display* display_ = nullptr;
   ::Colormap colormap_ = None;
+};
+
+class Pixmap {
+ public:
+  Pixmap() = default;
+  Pixmap(Display* display, ::Pixmap pixmap);
+  Pixmap(Pixmap const& other) = default;
+  Pixmap(Pixmap&& other) = default;
+  ~Pixmap();
+
+  Pixmap& operator=(Pixmap other);
+  operator ::Pixmap() const;
+
+  static Pixmap Create(Display* display, Window window, unsigned int width,
+                       unsigned int height, unsigned int depth);
+
+ private:
+  Display* display_ = nullptr;
+  ::Pixmap pixmap_ = None;
 };
 
 class EventLoop {

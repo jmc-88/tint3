@@ -33,6 +33,7 @@ void XFreeDeleter::operator()(void* data) const { XFree(data); }
 
 Colormap::Colormap(Display* display, ::Colormap colormap)
     : display_{display}, colormap_{colormap} {}
+
 Colormap::~Colormap() {
   if (colormap_ != None) XFreeColormap(display_, colormap_);
 }
@@ -52,6 +53,26 @@ Colormap Colormap::DefaultForScreen(Display* display, int screen_number) {
 Colormap Colormap::Create(Display* display, Window window, Visual* visual,
                           int alloc) {
   return {display, XCreateColormap(display, window, visual, alloc)};
+}
+
+Pixmap::Pixmap(Display* display, ::Pixmap pixmap)
+    : display_{display}, pixmap_{pixmap} {}
+
+Pixmap::~Pixmap() {
+  if (pixmap_ != None) XFreePixmap(display_, pixmap_);
+}
+
+Pixmap& Pixmap::operator=(Pixmap other) {
+  std::swap(display_, other.display_);
+  std::swap(pixmap_, other.pixmap_);
+  return *this;
+}
+
+Pixmap::operator ::Pixmap() const { return pixmap_; }
+
+Pixmap Pixmap::Create(Display* display, Window window, unsigned int width,
+                      unsigned int height, unsigned int depth) {
+  return {display, XCreatePixmap(display, window, width, height, depth)};
 }
 
 EventLoop::EventLoop(Server const* const server, Timer& timer)
