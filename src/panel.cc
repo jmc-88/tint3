@@ -465,9 +465,6 @@ void Panel::SetProperties() {
 }
 
 void Panel::SetBackground() {
-  pix_ = util::x11::Pixmap::Create(server.dsp, server.root_window(), width_,
-                                   height_, server.depth);
-
   int xoff = 0, yoff = 0;
 
   if (config_.horizontal &&
@@ -478,9 +475,9 @@ void Panel::SetBackground() {
     xoff = width_ - hidden_width_;
   }
 
-  if (server.real_transparency()) {
-    ClearPixmap(pix_, 0, 0, width_, height_);
-  } else {
+  pix_ = server.CreatePixmap(width_, height_);
+
+  if (!server.real_transparency()) {
     server.GetRootPixmap();
     // copy background in panel.pix
     Window dummy;

@@ -180,7 +180,9 @@ target_link_libraries(
     absl::time
     ${X11_X11_LIB}
     ${X11_Xrandr_LIB}
-    ${X11_Xinerama_LIB})
+    ${X11_Xinerama_LIB}
+  PRIVATE
+    area_lib)
 
 add_library(
   startup_notification_lib STATIC

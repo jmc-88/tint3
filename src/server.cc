@@ -33,6 +33,7 @@
 
 #include "config.hh"
 #include "server.hh"
+#include "util/area.hh"
 #include "util/common.hh"
 #include "util/log.hh"
 #include "util/window.hh"
@@ -394,6 +395,13 @@ void Server::InitX11() {
   UpdateRootWindow();
   UpdateCurrentDesktop();
   InitVisual();
+}
+
+util::x11::Pixmap Server::CreatePixmap(unsigned int width,
+                                       unsigned int height) const {
+  auto p = util::x11::Pixmap::Create(dsp, root_window(), width, height, depth);
+  if (real_transparency()) ClearPixmap(p, 0, 0, width, height);
+  return p;
 }
 
 Window Server::root_window() const { return root_window_; }

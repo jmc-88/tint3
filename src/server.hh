@@ -53,6 +53,8 @@ class Server {
   void InitVisual();
   void InitX11();
 
+  util::x11::Pixmap CreatePixmap(unsigned int width, unsigned int height) const;
+
   unsigned int desktop() const;
   unsigned int num_desktops() const;
 

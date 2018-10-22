@@ -393,14 +393,7 @@ void Area::Draw() {
     return;
   }
 
-  pix_ = util::x11::Pixmap::Create(server.dsp, server.root_window(), width_,
-                                   height_, server.depth);
-
-  // add layer of root pixmap (or clear pixmap if real_transparency==true)
-  if (server.real_transparency()) {
-    ClearPixmap(pix_, 0, 0, width_, height_);
-  }
-
+  pix_ = server.CreatePixmap(width_, height_);
   XCopyArea(server.dsp, panel_->temp_pmap, pix_, server.gc, panel_x_, panel_y_,
             width_, height_, 0, 0);
 
