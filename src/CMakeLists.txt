@@ -161,14 +161,16 @@ add_library(
 
 target_include_directories(
   server_lib
+  PRIVATE
+    ${X11_Xrandr_INCLUDE_DIRS}
   PUBLIC
     ${X11_X11_INCLUDE_DIRS}
-    ${X11_Xinerama_INCLUDE_DIRS}
-  PRIVATE
-    ${X11_Xrandr_INCLUDE_DIRS})
+    ${X11_Xinerama_INCLUDE_DIRS})
 
 target_link_libraries(
   server_lib
+  PRIVATE
+    area_lib
   PUBLIC
     config_lib
     common_lib
@@ -180,9 +182,7 @@ target_link_libraries(
     absl::time
     ${X11_X11_LIB}
     ${X11_Xrandr_LIB}
-    ${X11_Xinerama_LIB}
-  PRIVATE
-    area_lib)
+    ${X11_Xinerama_LIB})
 
 add_library(
   startup_notification_lib STATIC
@@ -218,10 +218,10 @@ add_library(
 
 target_link_libraries(
   subprocess_lib
-  PUBLIC
-    pipe_lib
   PRIVATE
-    log_lib)
+    log_lib
+  PUBLIC
+    pipe_lib)
 
 test_target(
   subprocess_test
