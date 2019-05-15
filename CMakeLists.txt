@@ -45,7 +45,7 @@ include(FindXsettingsClient)
 find_package(
   X11 REQUIRED
   COMPONENTS
-    X11 Xcomposite Xdamage Xfixes Xinerama Xrender Xrandr>=1.3)
+    Xcomposite Xdamage Xfixes Xinerama Xrender Xrandr)
 
 include(CheckLibraryExists)
 string(REPLACE ";" " " FLAGS_REPLACED "${IMLIB2_LDFLAGS}")
