@@ -92,7 +92,7 @@ if(ENABLE_GNU_GOLD)
 endif()
 
 option(FORCE_COLOR_DIAGNOSTICS "Always produce ANSI-colored output (GCC/Clang)." ON)
-if(${FORCE_COLOR_DIAGNOSTICS})
+if(FORCE_COLOR_DIAGNOSTICS)
   if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     add_compile_options(-fcolor-diagnostics)
   elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
