@@ -20,16 +20,19 @@ find_library(
   NAMES c++)
 
 if(LIBCXX_LIBRARIES)
-  set(__LIBCXX_COMPILE_TEST_SOURCE
-      "#include <iostream>
-      #include <string>
+  set(__LIBCXX_COMPILE_TEST_SOURCE [=[
+#include <iostream>
+#include <string>
 
-      int main() {
-        std::string s = \"test\";
-        std::cout << s << '\n';
-      }")
+int main() {
+  std::string s = "test";
+  std::cout << s << std::endl;
+}
+  ]=])
+
   set(__ORIGINAL_CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS}")
   set(__ORIGINAL_CMAKE_REQUIRED_QUIET "${CMAKE_REQUIRED_QUIET}")
+  set(__ORIGINAL_CMAKE_REQUIRED_LIBRARIES "${CMAKE_REQUIRED_LIBRARIES}")
 
   # This uses MATCHES instead of STREQUAL to accept both Clang and AppleClang.
   if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
@@ -38,7 +41,7 @@ if(LIBCXX_LIBRARIES)
     # simple test program.
 
     include(CheckCXXSourceRuns)
-    set(CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} -stdlib=libc++")
+    set(CMAKE_REQUIRED_FLAGS -stdlib=libc++)
     set(CMAKE_REQUIRED_QUIET TRUE)
     check_cxx_source_runs(
       "${__LIBCXX_COMPILE_TEST_SOURCE}"
@@ -61,7 +64,8 @@ if(LIBCXX_LIBRARIES)
     # TODO: the /usr prefix should not be hardcoded
 
     include(CheckCXXSourceRuns)
-    set(CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} -nostdinc++ -I/usr/include/c++/v1 -nodefaultlibs -lc -lm -lgcc -lgcc_s -lc++ -lc++abi")
+    set(CMAKE_REQUIRED_FLAGS -nostdinc++ -nodefaultlibs -I/usr/include/c++/v1)
+    set(CMAKE_REQUIRED_LIBRARIES c m gcc gcc_s c++ c++abi)
     set(CMAKE_REQUIRED_QUIET TRUE)
     check_cxx_source_runs(
       "${__LIBCXX_COMPILE_TEST_SOURCE}"
@@ -71,11 +75,12 @@ if(LIBCXX_LIBRARIES)
     unset(__LIBCXX_COMPILES)
 
     if(LIBCXX_FOUND AND TINT3_ENABLE_LIBCXX)
-      set(CMAKE_CXX_FLAGS           "${CMAKE_CXX_FLAGS} -nostdinc++ -I/usr/include/c++/v1")
+      set(CMAKE_CXX_FLAGS           "${CMAKE_CXX_FLAGS} -nostdinc++")
       set(CMAKE_EXE_LINKER_FLAGS    "${CMAKE_EXE_LINKER_FLAGS} -nodefaultlibs")
       set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -nodefaultlibs")
       set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} -nodefaultlibs")
-      link_libraries(-lc -lm -lgcc -lgcc_s -lc++ -lc++abi)
+      include_directories("/usr/include/c++/v1")
+      link_libraries(c m gcc gcc_s c++ c++abi)
     endif()
 
     unset(__LIBCXX_COMPILES)
@@ -85,9 +90,11 @@ if(LIBCXX_LIBRARIES)
 
   set(CMAKE_REQUIRED_QUIET "${__ORIGINAL_CMAKE_REQUIRED_QUIET}")
   set(CMAKE_REQUIRED_FLAGS "${__ORIGINAL_CMAKE_REQUIRED_FLAGS}")
+  set(CMAKE_REQUIRED_LIBRARIES "${__ORIGINAL_CMAKE_REQUIRED_LIBRARIES}")
 
   unset(__ORIGINAL_CMAKE_REQUIRED_QUIET)
   unset(__ORIGINAL_CMAKE_REQUIRED_FLAGS)
+  unset(__ORIGINAL_CMAKE_REQUIRED_LIBRARIES)
   unset(__LIBCXX_COMPILE_TEST_SOURCE)
 endif()
 
