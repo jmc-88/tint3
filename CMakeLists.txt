@@ -49,8 +49,11 @@ find_package(
 
 include(CheckLibraryExists)
 string(REPLACE ";" " " FLAGS_REPLACED "${IMLIB2_LDFLAGS}")
+set(__ORIGINAL_CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS}")
 set(CMAKE_REQUIRED_FLAGS "${FLAGS_REPLACED}")
 check_library_exists("${IMLIB2_LIBRARIES}" "imlib_context_set_display" "${IMLIB2_LIBRARY_DIRS}" IMLIB_BUILT_WITH_X)
+set(CMAKE_REQUIRED_FLAGS "${__ORIGINAL_CMAKE_REQUIRED_FLAGS}")
+unset(__ORIGINAL_CMAKE_REQUIRED_FLAGS)
 if(NOT IMLIB_BUILT_WITH_X)
   message(FATAL_ERROR "Imlib is not built with X11 support")
 endif()
