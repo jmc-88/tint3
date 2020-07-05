@@ -63,7 +63,7 @@ if(ENABLE_BATTERY)
   add_definitions(-DENABLE_BATTERY)
 endif()
 
-option(ENABLE_EXAMPLES "Install additional tint2rc examples" OFF)
+option(ENABLE_EXAMPLES "Install additional tint3rc examples" OFF)
 
 option(ENABLE_SN "Startup notification support" ON)
 if(ENABLE_SN)
