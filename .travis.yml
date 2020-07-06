@@ -1,5 +1,5 @@
 sudo: required
-dist: trusty
+dist: bionic
 
 language: cpp
 
@@ -9,33 +9,37 @@ compiler:
 os: linux
 addons:
   apt:
-    sources:
-      - ubuntu-toolchain-r-test
     packages:
-      - g++-5
+      # Required libraries
+      - libcairo2-dev
+      - libpango1.0-dev
+      - libglib2.0-dev
+      - libimlib2-dev
+      - libxinerama-dev
+      - libx11-dev
+      - libxdamage-dev
+      - libxcomposite-dev
+      - libxrender-dev
+      - libxrandr-dev
+      - libxsettings-client-dev
+      - libxsettings-dev
+      - librsvg2-dev
+      - libstartup-notification0-dev
+      - libcurl4-openssl-dev
+      # For more detailed AddressSanitizer reports
+      - binutils
+      # For running some tests
+      - xvfb
+      - xauth
+      # For Coveralls integration
+      - lcov
+      - curl
+      # For documentation build
+      - pandoc
 
 before_install:
-  # Use GCC 5 instead of the default
-  - export CC=gcc-5 CXX=g++-5
-
   # cpp-coveralls
   - pip install --user cpp-coveralls
-
-install:
-  # Required libraries
-  - sudo apt-get --assume-yes install libcairo2-dev libpango1.0-dev libglib2.0-dev libimlib2-dev libxinerama-dev libx11-dev libxdamage-dev libxcomposite-dev libxrender-dev libxrandr-dev libxsettings-client-dev libxsettings-dev librsvg2-dev libstartup-notification0-dev libcurl4-openssl-dev
-
-  # For more detailed AddressSanitizer reports
-  - sudo apt-get --assume-yes install binutils
-
-  # For running some tests
-  - sudo apt-get --assume-yes install xvfb xauth
-
-  # For Coveralls integration
-  - sudo apt-get --assume-yes install lcov curl
-
-  # For documentation build
-  - sudo apt-get --assume-yes install pandoc
 
 before_script:
   - mkdir "${TRAVIS_BUILD_DIR}/build"
