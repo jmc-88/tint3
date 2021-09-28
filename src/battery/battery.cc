@@ -201,9 +201,9 @@ void InitBattery() {
 #endif
 }
 
-void Battery::InitPanel(Panel* panel, Timer* timer) {
+std::function<void()> Battery::InitPanel(Panel* panel, Timer* timer) {
   if (!battery_enabled) {
-    return;
+    return [] {};
   }
 
   Battery* battery = panel->battery();
@@ -214,9 +214,13 @@ void Battery::InitPanel(Panel* panel, Timer* timer) {
   battery->need_resize_ = true;
 
   if (!battery_timeout) {
-    battery_timeout = timer->SetInterval(absl::Seconds(10), UpdateBatteries);
-    UpdateBatteries();
+    return [&, timer] {
+      battery_timeout = timer->SetInterval(absl::Seconds(10), UpdateBatteries);
+      UpdateBatteries();
+    };
   }
+
+  return [] {};
 }
 
 void UpdateBattery() {

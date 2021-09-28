@@ -5,6 +5,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
+#include <functional>
 #include <string>
 
 #include "util/area.hh"
@@ -25,7 +26,7 @@ class Battery : public Area {
   void DrawForeground(cairo_t*) override;
   bool Resize() override;
 
-  static void InitPanel(Panel* panel, Timer* timer);
+  static std::function<void()> InitPanel(Panel* panel, Timer* timer);
 
 #ifdef _TINT3_DEBUG
 

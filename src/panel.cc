@@ -146,6 +146,8 @@ void InitPanel(Timer& timer) {
                      << ", num_monitors used " << panels.size()
                      << ", num_desktops " << server.num_desktops() << '\n';
 
+  std::function<void()> maybe_update_batteries = [] {};
+
   for (unsigned int i = 0; i < num_panels; ++i) {
     Panel& p = panels[i];
     p.UseConfig(new_panel_config, i);
@@ -173,7 +175,7 @@ void InitPanel(Timer& timer) {
 #ifdef ENABLE_BATTERY
 
       if (item == 'B') {
-        Battery::InitPanel(&p, &timer);
+        maybe_update_batteries = Battery::InitPanel(&p, &timer);
       }
 
 #endif
@@ -237,6 +239,7 @@ void InitPanel(Timer& timer) {
     p.UpdateTaskbarVisibility();
   }
 
+  maybe_update_batteries();
   TaskRefreshTasklist(timer);
   ActiveTask();
 }
