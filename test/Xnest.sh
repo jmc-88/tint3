@@ -2,7 +2,8 @@
 
 # Not quite the "unofficial BASH strict mode", but better than nothing.
 set -eu
-IFS="$(printf '\n\t')"
+IFS="$(printf '\t\n.')"
+IFS="${IFS%?}"
 
 # Simple test script to launch the locally-built tint3 and the Openbox window
 # manager in a nested X session.
