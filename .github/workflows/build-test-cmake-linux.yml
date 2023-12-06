@@ -1,0 +1,52 @@
+name: Build and test with CMake on Linux
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+env:
+  BUILD_TYPE: Debug
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: recursive
+
+    - name: Install prerequisites
+      run: |
+        sudo apt update -qq
+        sudo apt install -y libcairo2-dev libpango1.0-dev libglib2.0-dev libimlib2-dev libxinerama-dev libx11-dev libxdamage-dev libxcomposite-dev libxrender-dev libxrandr-dev libxsettings-client-dev libxsettings-dev librsvg2-dev libstartup-notification0-dev libcurl4-openssl-dev binutils xvfb xauth lcov curl pandoc
+        pip install --user cpp-coveralls
+
+    - name: Configure CMake
+      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCOVERALLS=ON
+
+    - name: Build
+      run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
+
+    - name: Test
+      working-directory: ${{github.workspace}}/build
+      run: ctest -C ${{env.BUILD_TYPE}}
+
+    - name: Install
+      run: cmake --install ${{github.workspace}}/build
+
+    - name: Coveralls
+      run: |
+        coveralls \
+          --root ${{github.workspace}}/build \
+          --build-root ${{github.workspace}}/build \
+          --exclude build/abseil-cpp \
+          --exclude build/generated \
+          --exclude build/CMakeFiles \
+          --exclude abseil-cpp \
+          --exclude external_includes \
+          --exclude test \
+          --exclude-pattern '.*_test\.cc$' \
+          --exclude-lines-pattern '.*_test\.cc$' \
+          --gcov-options '\-lp'
